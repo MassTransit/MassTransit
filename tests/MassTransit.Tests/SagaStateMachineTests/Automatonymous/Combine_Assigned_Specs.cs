@@ -37,7 +37,7 @@
             var events = _machine.NextEvents(_instance.CurrentState);
 
             Assert.AreEqual(3, events.Count());
-            Assert.AreEqual(2, events.Count(e => !e.IsComposite));
+            Assert.AreEqual(2, events.Count(e => !_machine.IsCompositeEvent(e)));
         }
 
         [Test]

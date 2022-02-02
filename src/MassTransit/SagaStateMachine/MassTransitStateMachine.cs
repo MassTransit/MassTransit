@@ -23,8 +23,9 @@
         SagaStateMachine<TInstance>
         where TInstance : class, SagaStateMachineInstance
     {
+        readonly Dictionary<string, Dictionary<string, List<EventActivityBinder<TInstance>>>> _compositeBindings;
+        readonly HashSet<string> _compositeEvents;
         readonly Dictionary<string, StateMachineEvent<TInstance>> _eventCache;
-
         readonly Dictionary<Event, EventCorrelation> _eventCorrelations;
         readonly EventObservable<TInstance> _eventObservers;
         readonly State<TInstance> _final;
@@ -36,7 +37,6 @@
         Func<BehaviorContext<TInstance>, Task<bool>> _isCompleted;
         string _name;
         UnhandledEventCallback<TInstance> _unhandledEventCallback;
-        Dictionary<string, Dictionary<string, List<EventActivityBinder<TInstance>>>> _compositeBindings;
 
         protected MassTransitStateMachine()
         {
@@ -44,6 +44,7 @@
             _stateCache = new Dictionary<string, State<TInstance>>();
             _eventCache = new Dictionary<string, StateMachineEvent<TInstance>>();
             _compositeBindings = new Dictionary<string, Dictionary<string, List<EventActivityBinder<TInstance>>>>();
+            _compositeEvents = new HashSet<string>();
 
             _eventObservers = new EventObservable<TInstance>();
             _stateObservers = new StateObservable<TInstance>();
@@ -164,6 +165,11 @@
                 return result.Events;
 
             throw new UnknownStateException(_name, state.Name);
+        }
+
+        public bool IsCompositeEvent(Event @event)
+        {
+            return _compositeEvents.Contains(@event.Name);
         }
 
         public void Accept(StateMachineVisitor visitor)
@@ -625,7 +631,9 @@
             {
                 var eventProperty = propertyExpression.GetPropertyInfo();
 
-                var @event = new TriggerEvent(eventProperty.Name, true);
+                var @event = new TriggerEvent(eventProperty.Name);
+
+                _compositeEvents.Add(@event.Name);
 
                 ConfigurationHelpers.InitializeEvent(this, eventProperty, @event);
 
@@ -642,7 +650,8 @@
         {
             Event CreateEvent()
             {
-                var @event = new TriggerEvent(name, true);
+                var @event = new TriggerEvent(name);
+                _compositeEvents.Add(@event.Name);
 
                 _eventCache[name] = new StateMachineEvent<TInstance>(@event, false, events, accessor);
 
@@ -663,8 +672,9 @@
             if (events.Any(x => x == null))
                 throw new ArgumentException("One or more events specified has not yet been initialized");
 
-            var complete = new CompositeEventStatus(Enumerable.Range(0, events.Length)
-                .Aggregate(0, (current, x) => current | (1 << x)));
+            var complete = new CompositeEventStatus(Enumerable.Range(0, events.Length).Aggregate(0, (current, x) => current | (1 << x)));
+
+            _compositeEvents.Add(@event.Name);
 
             for (var i = 0; i < events.Length; i++)
             {
@@ -678,18 +688,18 @@
                         (options.HasFlag(CompositeEventOptions.IncludeFinal) || !Equals(state, Final));
                 }
 
-                var states = _stateCache.Values.Where(Filter).ToList();
+                List<State<TInstance>> states = _stateCache.Values.Where(Filter).ToList();
 
                 foreach (State<TInstance> state in states)
                 {
                     // Set the IsComposite flag just to make sure it is really set.
                     var currentEvent = state.Events.FirstOrDefault(x => Equals(x, @event));
                     if (currentEvent != null)
-                        currentEvent.IsComposite = true;
+                        _compositeEvents.Add(currentEvent.Name);
 
                     // Determine which event the composited event belongs to
-                    var boundToState = _stateCache.Values.FirstOrDefault(s => s.Events.Any(evt => evt.Name == events[i].Name));
-                    var bindingState = boundToState ?? state;
+                    State<TInstance> boundToState = _stateCache.Values.FirstOrDefault(s => s.Events.Any(evt => evt.Name == events[i].Name));
+                    State<TInstance> bindingState = boundToState ?? state;
 
                     if (!_compositeBindings.ContainsKey(@event.Name))
                         _compositeBindings[@event.Name] = new Dictionary<string, List<EventActivityBinder<TInstance>>>();
@@ -698,9 +708,7 @@
                         _compositeBindings[@event.Name][bindingState.Name] = new List<EventActivityBinder<TInstance>>();
 
                     if (_compositeBindings[@event.Name][bindingState.Name].All(x => x.Event.Name != events[i].Name))
-                    {
                         _compositeBindings[@event.Name][bindingState.Name].Add(When(events[i]).Execute(activity));
-                    }
                 }
             }
 
@@ -970,18 +978,19 @@
             foreach (IActivityBinder<TInstance> activity in eventActivities)
             {
                 activity.Bind(activityState);
-                if (!activity.Event.IsComposite || !_compositeBindings.ContainsKey(activity.Event.Name))
+                if (!_compositeEvents.Contains(activity.Event.Name) || !_compositeBindings.ContainsKey(activity.Event.Name))
                     continue;
 
-                foreach (var compositeBinding in _compositeBindings[activity.Event.Name])
+                foreach (KeyValuePair<string, List<EventActivityBinder<TInstance>>> compositeBinding in _compositeBindings[activity.Event.Name])
                 {
-                    var activitiesBinder = compositeBinding.Value.SelectMany(x => x.GetStateActivityBinders()).ToArray();
+                    IActivityBinder<TInstance>[] activitiesBinder = compositeBinding.Value.SelectMany(x => x.GetStateActivityBinders()).ToArray();
 
                     if (!activitiesBinder.Any())
                         continue;
 
                     BindActivitiesToState(GetState(compositeBinding.Key), activitiesBinder);
                 }
+
                 _compositeBindings.Remove(activity.Event.Name);
             }
         }
@@ -1543,7 +1552,8 @@
         /// <param name="propertyExpression">The request property on the state machine</param>
         /// <param name="requestIdExpression">The property where the requestId is stored</param>
         /// <param name="configureRequest">Allow the request settings to be specified inline</param>
-        protected void Request<TRequest, TResponse, TResponse2, TResponse3>(Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2, TResponse3>>> propertyExpression,
+        protected void Request<TRequest, TResponse, TResponse2, TResponse3>(
+            Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2, TResponse3>>> propertyExpression,
             Expression<Func<TInstance, Guid?>> requestIdExpression,
             Action<IRequestConfigurator> configureRequest = default)
             where TRequest : class
@@ -1570,7 +1580,8 @@
         /// <typeparam name="TResponse3"></typeparam>
         /// <param name="propertyExpression">The request property on the state machine</param>
         /// <param name="configureRequest">Allow the request settings to be specified inline</param>
-        protected void Request<TRequest, TResponse, TResponse2, TResponse3>(Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2, TResponse3>>> propertyExpression,
+        protected void Request<TRequest, TResponse, TResponse2, TResponse3>(
+            Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2, TResponse3>>> propertyExpression,
             Action<IRequestConfigurator> configureRequest = default)
             where TRequest : class
             where TResponse : class
@@ -1596,7 +1607,8 @@
         /// <param name="propertyExpression">The request property on the state machine</param>
         /// <param name="requestIdExpression">The property where the requestId is stored</param>
         /// <param name="settings">The request settings (which can be read from configuration, etc.)</param>
-        protected void Request<TRequest, TResponse, TResponse2, TResponse3>(Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2, TResponse3>>> propertyExpression,
+        protected void Request<TRequest, TResponse, TResponse2, TResponse3>(
+            Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2, TResponse3>>> propertyExpression,
             Expression<Func<TInstance, Guid?>> requestIdExpression, RequestSettings settings)
             where TRequest : class
             where TResponse : class
@@ -1643,7 +1655,8 @@
         /// <typeparam name="TResponse3"></typeparam>
         /// <param name="propertyExpression">The request property on the state machine</param>
         /// <param name="settings">The request settings (which can be read from configuration, etc.)</param>
-        protected void Request<TRequest, TResponse, TResponse2, TResponse3>(Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2, TResponse3>>> propertyExpression,
+        protected void Request<TRequest, TResponse, TResponse2, TResponse3>(
+            Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2, TResponse3>>> propertyExpression,
             RequestSettings settings)
             where TRequest : class
             where TResponse : class
@@ -1817,9 +1830,9 @@
 
         static EventRegistration GetEventRegistration(Event @event, Type messageType)
         {
-            var registrationType = messageType.HasInterface<CorrelatedBy<Guid>>() ?
-                typeof(CorrelatedEventRegistration<>).MakeGenericType(typeof(TInstance), messageType) :
-                typeof(UncorrelatedEventRegistration<>).MakeGenericType(typeof(TInstance), messageType);
+            var registrationType = messageType.HasInterface<CorrelatedBy<Guid>>()
+                ? typeof(CorrelatedEventRegistration<>).MakeGenericType(typeof(TInstance), messageType)
+                : typeof(UncorrelatedEventRegistration<>).MakeGenericType(typeof(TInstance), messageType);
 
             return (EventRegistration)Activator.CreateInstance(registrationType, @event);
         }

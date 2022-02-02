@@ -154,15 +154,15 @@
             return CommitActivities().DuringAny();
         }
 
-        public IStateMachineModifier<TInstance> Event(string name, out Event @event, bool isComposite = false)
+        public IStateMachineModifier<TInstance> Event(string name, out Event @event)
         {
-            return CommitActivities().Event(name, out @event, isComposite);
+            return CommitActivities().Event(name, out @event);
         }
 
-        public IStateMachineModifier<TInstance> Event<T>(string name, out Event<T> @event, bool isComposite = false)
+        public IStateMachineModifier<TInstance> Event<T>(string name, out Event<T> @event)
             where T : class
         {
-            return CommitActivities().Event(name, out @event, isComposite);
+            return CommitActivities().Event(name, out @event);
         }
 
         public IStateMachineModifier<TInstance> Event<TProperty, T>(Expression<Func<TProperty>> propertyExpression,

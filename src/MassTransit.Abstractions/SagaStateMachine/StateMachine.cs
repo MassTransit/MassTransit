@@ -61,6 +61,13 @@
         /// <param name="state">The state to query</param>
         /// <returns>An enumeration of valid events</returns>
         IEnumerable<Event> NextEvents(State state);
+
+        /// <summary>
+        /// Returns true if the event is or is used by a composite event
+        /// </summary>
+        /// <param name="event"></param>
+        /// <returns></returns>
+        bool IsCompositeEvent(Event @event);
     }
 
 

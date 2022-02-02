@@ -2,7 +2,6 @@
 {
     using System;
     using System.Threading.Tasks;
-    using MassTransit.Saga;
     using MassTransit.Testing;
     using NUnit.Framework;
     using TestFramework;
@@ -76,12 +75,6 @@
                 Event(() => First, x => x.CorrelateById(m => m.Message.CorrelationId));
                 Event(() => Second, x => x.CorrelateById(m => m.Message.CorrelationId));
 
-                CompositeEvent(
-                    () => Third,
-                    x => x.CompositeStatus,
-                    CompositeEventOptions.IncludeInitial,
-                    First, Second);
-
                 Initially(
                     When(First)
                         .Then(ctx =>
@@ -92,7 +85,15 @@
                         .Then(ctx =>
                         {
                             ctx.Instance.ReceivedSecond = true;
-                        }),
+                        }));
+
+                CompositeEvent(
+                    () => Third,
+                    x => x.CompositeStatus,
+                    CompositeEventOptions.IncludeInitial,
+                    First, Second);
+
+                Initially(
                     When(Third)
                         .Publish(ctx => new CompleteMessage(ctx.Instance.CorrelationId))
                 );

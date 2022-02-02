@@ -14,9 +14,9 @@
         IStateMachineModifier<TSaga> InstanceState(Expression<Func<TSaga, string>> instanceStateProperty);
         IStateMachineModifier<TSaga> InstanceState(Expression<Func<TSaga, int>> instanceStateProperty, params State[] states);
         IStateMachineModifier<TSaga> Name(string machineName);
-        IStateMachineModifier<TSaga> Event(string name, out Event @event, bool isComposite = false);
+        IStateMachineModifier<TSaga> Event(string name, out Event @event);
 
-        IStateMachineModifier<TSaga> Event<T>(string name, out Event<T> @event, bool isComposite = false)
+        IStateMachineModifier<TSaga> Event<T>(string name, out Event<T> @event)
             where T : class;
 
         IStateMachineModifier<TSaga> Event<TProperty, T>(Expression<Func<TProperty>> propertyExpression,

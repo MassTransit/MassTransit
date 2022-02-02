@@ -19,7 +19,9 @@
 
         public virtual void Accept(StateMachineVisitor visitor)
         {
-            visitor.Visit(this, x => { });
+            visitor.Visit(this, x =>
+            {
+            });
         }
 
         public virtual void Probe(ProbeContext context)
