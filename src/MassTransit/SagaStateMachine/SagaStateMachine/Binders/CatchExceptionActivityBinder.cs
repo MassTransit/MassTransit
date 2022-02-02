@@ -10,14 +10,15 @@ namespace MassTransit.SagaStateMachine
         where TException : Exception
     {
         readonly IActivityBinder<TInstance>[] _activities;
-        readonly Event _event;
         readonly StateMachine<TInstance> _machine;
+
+        public Event Event { get; }
 
         public CatchExceptionActivityBinder(StateMachine<TInstance> machine, Event @event)
         {
             _activities = Array.Empty<IActivityBinder<TInstance>>();
             _machine = machine;
-            _event = @event;
+            Event = @event;
         }
 
         CatchExceptionActivityBinder(StateMachine<TInstance> machine, Event @event,
@@ -29,7 +30,7 @@ namespace MassTransit.SagaStateMachine
             Array.Copy(appendActivity, 0, _activities, activities.Length, appendActivity.Length);
 
             _machine = machine;
-            _event = @event;
+            Event = @event;
         }
 
         public IEnumerable<IActivityBinder<TInstance>> GetStateActivityBinders()
@@ -39,26 +40,24 @@ namespace MassTransit.SagaStateMachine
 
         public StateMachine<TInstance> StateMachine => _machine;
 
-        public Event Event => _event;
-
         public ExceptionActivityBinder<TInstance, TException> Add(IStateMachineActivity<TInstance> activity)
         {
-            IActivityBinder<TInstance> activityBinder = new ExecuteActivityBinder<TInstance>(_event, activity);
+            IActivityBinder<TInstance> activityBinder = new ExecuteActivityBinder<TInstance>(Event, activity);
 
-            return new CatchExceptionActivityBinder<TInstance, TException>(_machine, _event, _activities, activityBinder);
+            return new CatchExceptionActivityBinder<TInstance, TException>(_machine, Event, _activities, activityBinder);
         }
 
         public ExceptionActivityBinder<TInstance, TException> Catch<T>(
             Func<ExceptionActivityBinder<TInstance, T>, ExceptionActivityBinder<TInstance, T>> activityCallback)
             where T : Exception
         {
-            ExceptionActivityBinder<TInstance, T> binder = new CatchExceptionActivityBinder<TInstance, T>(_machine, _event);
+            ExceptionActivityBinder<TInstance, T> binder = new CatchExceptionActivityBinder<TInstance, T>(_machine, Event);
 
             binder = activityCallback(binder);
 
-            IActivityBinder<TInstance> activityBinder = new CatchActivityBinder<TInstance, T>(_event, binder);
+            IActivityBinder<TInstance> activityBinder = new CatchActivityBinder<TInstance, T>(Event, binder);
 
-            return new CatchExceptionActivityBinder<TInstance, TException>(_machine, _event, _activities, activityBinder);
+            return new CatchExceptionActivityBinder<TInstance, TException>(_machine, Event, _activities, activityBinder);
         }
 
         public ExceptionActivityBinder<TInstance, TException> If(StateMachineExceptionCondition<TInstance, TException> condition,
@@ -80,9 +79,9 @@ namespace MassTransit.SagaStateMachine
             ExceptionActivityBinder<TInstance, TException> thenBinder = GetBinder(thenActivityCallback);
             ExceptionActivityBinder<TInstance, TException> elseBinder = GetBinder(elseActivityCallback);
 
-            var conditionBinder = new ConditionalExceptionActivityBinder<TInstance, TException>(_event, condition, thenBinder, elseBinder);
+            var conditionBinder = new ConditionalExceptionActivityBinder<TInstance, TException>(Event, condition, thenBinder, elseBinder);
 
-            return new CatchExceptionActivityBinder<TInstance, TException>(_machine, _event, _activities, conditionBinder);
+            return new CatchExceptionActivityBinder<TInstance, TException>(_machine, Event, _activities, conditionBinder);
         }
 
         public ExceptionActivityBinder<TInstance, TException> IfElseAsync(StateMachineAsyncExceptionCondition<TInstance, TException> condition,
@@ -92,16 +91,16 @@ namespace MassTransit.SagaStateMachine
             ExceptionActivityBinder<TInstance, TException> thenBinder = GetBinder(thenActivityCallback);
             ExceptionActivityBinder<TInstance, TException> elseBinder = GetBinder(elseActivityCallback);
 
-            var conditionBinder = new ConditionalExceptionActivityBinder<TInstance, TException>(_event, condition, thenBinder, elseBinder);
+            var conditionBinder = new ConditionalExceptionActivityBinder<TInstance, TException>(Event, condition, thenBinder, elseBinder);
 
-            return new CatchExceptionActivityBinder<TInstance, TException>(_machine, _event, _activities, conditionBinder);
+            return new CatchExceptionActivityBinder<TInstance, TException>(_machine, Event, _activities, conditionBinder);
         }
 
         ExceptionActivityBinder<TInstance, TException> GetBinder(
             Func<ExceptionActivityBinder<TInstance, TException>, ExceptionActivityBinder<TInstance, TException>> callback)
         {
             ExceptionActivityBinder<TInstance, TException> thenBinder = new CatchExceptionActivityBinder<TInstance, TException>(_machine,
-                _event);
+                Event);
             return callback(thenBinder);
         }
     }
@@ -114,14 +113,15 @@ namespace MassTransit.SagaStateMachine
         where TData : class
     {
         readonly IActivityBinder<TInstance>[] _activities;
-        readonly Event<TData> _event;
         readonly StateMachine<TInstance> _machine;
+
+        public Event<TData> Event { get; }
 
         public CatchExceptionActivityBinder(StateMachine<TInstance> machine, Event<TData> @event)
         {
             _activities = Array.Empty<IActivityBinder<TInstance>>();
             _machine = machine;
-            _event = @event;
+            Event = @event;
         }
 
         CatchExceptionActivityBinder(StateMachine<TInstance> machine, Event<TData> @event,
@@ -133,7 +133,7 @@ namespace MassTransit.SagaStateMachine
             Array.Copy(appendActivity, 0, _activities, activities.Length, appendActivity.Length);
 
             _machine = machine;
-            _event = @event;
+            Event = @event;
         }
 
         public IEnumerable<IActivityBinder<TInstance>> GetStateActivityBinders()
@@ -143,35 +143,33 @@ namespace MassTransit.SagaStateMachine
 
         public StateMachine<TInstance> StateMachine => _machine;
 
-        public Event<TData> Event => _event;
-
         public ExceptionActivityBinder<TInstance, TData, TException> Add(IStateMachineActivity<TInstance> activity)
         {
-            IActivityBinder<TInstance> activityBinder = new ExecuteActivityBinder<TInstance>(_event, activity);
+            IActivityBinder<TInstance> activityBinder = new ExecuteActivityBinder<TInstance>(Event, activity);
 
-            return new CatchExceptionActivityBinder<TInstance, TData, TException>(_machine, _event, _activities, activityBinder);
+            return new CatchExceptionActivityBinder<TInstance, TData, TException>(_machine, Event, _activities, activityBinder);
         }
 
         public ExceptionActivityBinder<TInstance, TData, TException> Add(IStateMachineActivity<TInstance, TData> activity)
         {
             var converterActivity = new DataConverterActivity<TInstance, TData>(activity);
 
-            IActivityBinder<TInstance> activityBinder = new ExecuteActivityBinder<TInstance>(_event, converterActivity);
+            IActivityBinder<TInstance> activityBinder = new ExecuteActivityBinder<TInstance>(Event, converterActivity);
 
-            return new CatchExceptionActivityBinder<TInstance, TData, TException>(_machine, _event, _activities, activityBinder);
+            return new CatchExceptionActivityBinder<TInstance, TData, TException>(_machine, Event, _activities, activityBinder);
         }
 
         public ExceptionActivityBinder<TInstance, TData, TException> Catch<T>(
             Func<ExceptionActivityBinder<TInstance, TData, T>, ExceptionActivityBinder<TInstance, TData, T>> activityCallback)
             where T : Exception
         {
-            ExceptionActivityBinder<TInstance, TData, T> binder = new CatchExceptionActivityBinder<TInstance, TData, T>(_machine, _event);
+            ExceptionActivityBinder<TInstance, TData, T> binder = new CatchExceptionActivityBinder<TInstance, TData, T>(_machine, Event);
 
             binder = activityCallback(binder);
 
-            IActivityBinder<TInstance> activityBinder = new CatchActivityBinder<TInstance, T>(_event, binder);
+            IActivityBinder<TInstance> activityBinder = new CatchActivityBinder<TInstance, T>(Event, binder);
 
-            return new CatchExceptionActivityBinder<TInstance, TData, TException>(_machine, _event, _activities, activityBinder);
+            return new CatchExceptionActivityBinder<TInstance, TData, TException>(_machine, Event, _activities, activityBinder);
         }
 
         public ExceptionActivityBinder<TInstance, TData, TException> If(StateMachineExceptionCondition<TInstance, TData, TException> condition,
@@ -197,10 +195,10 @@ namespace MassTransit.SagaStateMachine
             ExceptionActivityBinder<TInstance, TData, TException> thenBinder = GetBinder(thenActivityCallback);
             ExceptionActivityBinder<TInstance, TData, TException> elseBinder = GetBinder(elseActivityCallback);
 
-            var conditionBinder = new ConditionalExceptionActivityBinder<TInstance, TData, TException>(_event, condition, thenBinder,
+            var conditionBinder = new ConditionalExceptionActivityBinder<TInstance, TData, TException>(Event, condition, thenBinder,
                 elseBinder);
 
-            return new CatchExceptionActivityBinder<TInstance, TData, TException>(_machine, _event, _activities, conditionBinder);
+            return new CatchExceptionActivityBinder<TInstance, TData, TException>(_machine, Event, _activities, conditionBinder);
         }
 
         public ExceptionActivityBinder<TInstance, TData, TException> IfElseAsync(StateMachineAsyncExceptionCondition<TInstance, TData, TException> condition,
@@ -212,17 +210,17 @@ namespace MassTransit.SagaStateMachine
             ExceptionActivityBinder<TInstance, TData, TException> thenBinder = GetBinder(thenActivityCallback);
             ExceptionActivityBinder<TInstance, TData, TException> elseBinder = GetBinder(elseActivityCallback);
 
-            var conditionBinder = new ConditionalExceptionActivityBinder<TInstance, TData, TException>(_event, condition, thenBinder,
+            var conditionBinder = new ConditionalExceptionActivityBinder<TInstance, TData, TException>(Event, condition, thenBinder,
                 elseBinder);
 
-            return new CatchExceptionActivityBinder<TInstance, TData, TException>(_machine, _event, _activities, conditionBinder);
+            return new CatchExceptionActivityBinder<TInstance, TData, TException>(_machine, Event, _activities, conditionBinder);
         }
 
         ExceptionActivityBinder<TInstance, TData, TException> GetBinder(
             Func<ExceptionActivityBinder<TInstance, TData, TException>, ExceptionActivityBinder<TInstance, TData, TException>> callback)
         {
             ExceptionActivityBinder<TInstance, TData, TException> binder =
-                new CatchExceptionActivityBinder<TInstance, TData, TException>(_machine, _event);
+                new CatchExceptionActivityBinder<TInstance, TData, TException>(_machine, Event);
             return callback(binder);
         }
     }

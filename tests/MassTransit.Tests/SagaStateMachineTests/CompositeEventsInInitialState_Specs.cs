@@ -76,6 +76,12 @@
                 Event(() => First, x => x.CorrelateById(m => m.Message.CorrelationId));
                 Event(() => Second, x => x.CorrelateById(m => m.Message.CorrelationId));
 
+                CompositeEvent(
+                    () => Third,
+                    x => x.CompositeStatus,
+                    CompositeEventOptions.IncludeInitial,
+                    First, Second);
+
                 Initially(
                     When(First)
                         .Then(ctx =>
@@ -90,12 +96,6 @@
                     When(Third)
                         .Publish(ctx => new CompleteMessage(ctx.Instance.CorrelationId))
                 );
-
-                CompositeEvent(
-                    () => Third,
-                    x => x.CompositeStatus,
-                    CompositeEventOptions.IncludeInitial,
-                    First, Second);
             }
 
             public Event<FirstMessage> First { get; private set; }

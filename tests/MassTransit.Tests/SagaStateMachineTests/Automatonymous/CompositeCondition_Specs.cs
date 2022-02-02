@@ -60,8 +60,6 @@ SagaStateMachineInstance
         {
             public TestStateMachine()
             {
-                CompositeEvent(() => Third, x => x.CompositeStatus, First, Second);
-
                 Initially(
                     When(Start)
                         .TransitionTo(Waiting));
@@ -81,6 +79,8 @@ SagaStateMachineInstance
                             context.Instance.CalledAfterAll = false;
                         })
                     );
+
+                CompositeEvent(() => Third, x => x.CompositeStatus, First, Second);
 
                 During(Waiting,
                     When(Third, context => context.Instance.SecondFirst)

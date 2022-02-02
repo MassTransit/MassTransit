@@ -11,6 +11,11 @@
         /// <summary>
         /// Include the composite event in the initial state
         /// </summary>
-        IncludeInitial = 1
+        IncludeInitial = 1,
+
+        /// <summary>
+        /// Include the composite event in the final state
+        /// </summary>
+        IncludeFinal = 2
     }
 }

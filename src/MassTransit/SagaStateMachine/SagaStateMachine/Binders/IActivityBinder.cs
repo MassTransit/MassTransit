@@ -3,6 +3,8 @@ namespace MassTransit.SagaStateMachine
     public interface IActivityBinder<TSaga>
         where TSaga : class, ISaga
     {
+        Event Event { get; }
+
         /// <summary>
         /// Returns True if the event is a state transition event (enter/leave/afterLeave/beforeEnter)
         /// for the specified state.

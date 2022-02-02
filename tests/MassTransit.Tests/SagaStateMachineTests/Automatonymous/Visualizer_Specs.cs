@@ -187,6 +187,8 @@
         {
             public TestStateMachine()
             {
+                CompositeEvent(() => Third, x => x.CompositeStatus, First, Second);
+
                 Initially(
                     When(Start)
                         .TransitionTo(Waiting));
@@ -213,9 +215,6 @@
                         })
                         .Finalize()
                 );
-
-                CompositeEvent(() => Third, x => x.CompositeStatus, First, Second);
-
             }
 
             public State Waiting { get; private set; }

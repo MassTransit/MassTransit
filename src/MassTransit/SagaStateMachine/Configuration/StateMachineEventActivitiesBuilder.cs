@@ -119,29 +119,29 @@
             return CommitActivities().BeforeEnterAny(activityCallback);
         }
 
-        public IStateMachineModifier<TInstance> CompositeEvent(Event @event,
+        public IStateMachineModifier<TInstance> CompositeEvent(string name, out Event @event,
             Expression<Func<TInstance, CompositeEventStatus>> trackingPropertyExpression, params Event[] events)
         {
-            return CommitActivities().CompositeEvent(@event, trackingPropertyExpression, events);
+            return CommitActivities().CompositeEvent(name, out @event, trackingPropertyExpression, events);
         }
 
-        public IStateMachineModifier<TInstance> CompositeEvent(Event @event,
+        public IStateMachineModifier<TInstance> CompositeEvent(string name, out Event @event,
             Expression<Func<TInstance, CompositeEventStatus>> trackingPropertyExpression, CompositeEventOptions options,
             params Event[] events)
         {
-            return CommitActivities().CompositeEvent(@event, trackingPropertyExpression, options, events);
+            return CommitActivities().CompositeEvent(name, out @event, trackingPropertyExpression, options, events);
         }
 
-        public IStateMachineModifier<TInstance> CompositeEvent(Event @event, Expression<Func<TInstance, int>> trackingPropertyExpression,
+        public IStateMachineModifier<TInstance> CompositeEvent(string name, out Event @event, Expression<Func<TInstance, int>> trackingPropertyExpression,
             params Event[] events)
         {
-            return CommitActivities().CompositeEvent(@event, trackingPropertyExpression, events);
+            return CommitActivities().CompositeEvent(name, out @event, trackingPropertyExpression, events);
         }
 
-        public IStateMachineModifier<TInstance> CompositeEvent(Event @event, Expression<Func<TInstance, int>> trackingPropertyExpression,
+        public IStateMachineModifier<TInstance> CompositeEvent(string name, out Event @event, Expression<Func<TInstance, int>> trackingPropertyExpression,
             CompositeEventOptions options, params Event[] events)
         {
-            return CommitActivities().CompositeEvent(@event, trackingPropertyExpression, options, events);
+            return CommitActivities().CompositeEvent(name, out @event, trackingPropertyExpression, options, events);
         }
 
         public IStateMachineEventActivitiesBuilder<TInstance> During(params State[] states)
@@ -154,15 +154,15 @@
             return CommitActivities().DuringAny();
         }
 
-        public IStateMachineModifier<TInstance> Event(string name, out Event @event)
+        public IStateMachineModifier<TInstance> Event(string name, out Event @event, bool isComposite = false)
         {
-            return CommitActivities().Event(name, out @event);
+            return CommitActivities().Event(name, out @event, isComposite);
         }
 
-        public IStateMachineModifier<TInstance> Event<T>(string name, out Event<T> @event)
+        public IStateMachineModifier<TInstance> Event<T>(string name, out Event<T> @event, bool isComposite = false)
             where T : class
         {
-            return CommitActivities().Event(name, out @event);
+            return CommitActivities().Event(name, out @event, isComposite);
         }
 
         public IStateMachineModifier<TInstance> Event<TProperty, T>(Expression<Func<TProperty>> propertyExpression,

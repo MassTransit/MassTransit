@@ -11,8 +11,8 @@ namespace MassTransit.SagaStateMachine
     {
         readonly StateMachineAsyncExceptionCondition<TInstance, TException> _condition;
         readonly EventActivities<TInstance> _elseActivities;
-        readonly Event _event;
         readonly EventActivities<TInstance> _thenActivities;
+        public Event Event { get; }
 
         public ConditionalExceptionActivityBinder(Event @event, StateMachineExceptionCondition<TInstance, TException> condition,
             EventActivities<TInstance> thenActivities, EventActivities<TInstance> elseActivities)
@@ -26,13 +26,13 @@ namespace MassTransit.SagaStateMachine
             _thenActivities = thenActivities;
             _elseActivities = elseActivities;
             _condition = condition;
-            _event = @event;
+            Event = @event;
         }
 
         public bool IsStateTransitionEvent(State state)
         {
-            return Equals(_event, state.Enter) || Equals(_event, state.BeforeEnter)
-                   || Equals(_event, state.AfterLeave) || Equals(_event, state.Leave);
+            return Equals(Event, state.Enter) || Equals(Event, state.BeforeEnter)
+                   || Equals(Event, state.AfterLeave) || Equals(Event, state.Leave);
         }
 
         public void Bind(State<TInstance> state)
@@ -42,7 +42,7 @@ namespace MassTransit.SagaStateMachine
 
             var conditionActivity = new ConditionExceptionActivity<TInstance, TException>(_condition, thenBehavior, elseBehavior);
 
-            state.Bind(_event, conditionActivity);
+            state.Bind(Event, conditionActivity);
         }
 
         public void Bind(IBehaviorBuilder<TInstance> builder)
@@ -75,8 +75,8 @@ namespace MassTransit.SagaStateMachine
     {
         readonly StateMachineAsyncExceptionCondition<TInstance, TData, TException> _condition;
         readonly EventActivities<TInstance> _elseActivities;
-        readonly Event _event;
         readonly EventActivities<TInstance> _thenActivities;
+        public Event Event { get; }
 
         public ConditionalExceptionActivityBinder(Event @event, StateMachineExceptionCondition<TInstance, TData, TException> condition,
             EventActivities<TInstance> thenActivities, EventActivities<TInstance> elseActivities)
@@ -90,13 +90,13 @@ namespace MassTransit.SagaStateMachine
             _thenActivities = thenActivities;
             _elseActivities = elseActivities;
             _condition = condition;
-            _event = @event;
+            Event = @event;
         }
 
         public bool IsStateTransitionEvent(State state)
         {
-            return Equals(_event, state.Enter) || Equals(_event, state.BeforeEnter)
-                   || Equals(_event, state.AfterLeave) || Equals(_event, state.Leave);
+            return Equals(Event, state.Enter) || Equals(Event, state.BeforeEnter)
+                   || Equals(Event, state.AfterLeave) || Equals(Event, state.Leave);
         }
 
         public void Bind(State<TInstance> state)
@@ -106,7 +106,7 @@ namespace MassTransit.SagaStateMachine
 
             var conditionActivity = new ConditionExceptionActivity<TInstance, TData, TException>(_condition, thenBehavior, elseBehavior);
 
-            state.Bind(_event, conditionActivity);
+            state.Bind(Event, conditionActivity);
         }
 
         public void Bind(IBehaviorBuilder<TInstance> builder)

@@ -9,8 +9,8 @@ namespace MassTransit.SagaStateMachine
     {
         readonly StateMachineAsyncCondition<TSaga> _condition;
         readonly EventActivities<TSaga> _elseActivities;
-        readonly Event _event;
         readonly EventActivities<TSaga> _thenActivities;
+        public Event Event { get; }
 
         public ConditionalActivityBinder(Event @event, StateMachineCondition<TSaga> condition,
             EventActivities<TSaga> thenActivities, EventActivities<TSaga> elseActivities)
@@ -24,13 +24,13 @@ namespace MassTransit.SagaStateMachine
             _thenActivities = thenActivities;
             _elseActivities = elseActivities;
             _condition = condition;
-            _event = @event;
+            Event = @event;
         }
 
         public bool IsStateTransitionEvent(State state)
         {
-            return Equals(_event, state.Enter) || Equals(_event, state.BeforeEnter)
-                || Equals(_event, state.AfterLeave) || Equals(_event, state.Leave);
+            return Equals(Event, state.Enter) || Equals(Event, state.BeforeEnter)
+                || Equals(Event, state.AfterLeave) || Equals(Event, state.Leave);
         }
 
         public void Bind(State<TSaga> state)
@@ -40,7 +40,7 @@ namespace MassTransit.SagaStateMachine
 
             var conditionActivity = new ConditionActivity<TSaga>(_condition, thenBehavior, elseBehavior);
 
-            state.Bind(_event, conditionActivity);
+            state.Bind(Event, conditionActivity);
         }
 
         public void Bind(IBehaviorBuilder<TSaga> builder)
@@ -72,8 +72,8 @@ namespace MassTransit.SagaStateMachine
     {
         readonly StateMachineAsyncCondition<TSaga, TMessage> _condition;
         readonly EventActivities<TSaga> _elseActivities;
-        readonly Event _event;
         readonly EventActivities<TSaga> _thenActivities;
+        public Event Event { get; }
 
         public ConditionalActivityBinder(Event @event, StateMachineCondition<TSaga, TMessage> condition,
             EventActivities<TSaga> thenActivities, EventActivities<TSaga> elseActivities)
@@ -87,13 +87,13 @@ namespace MassTransit.SagaStateMachine
             _thenActivities = thenActivities;
             _elseActivities = elseActivities;
             _condition = condition;
-            _event = @event;
+            Event = @event;
         }
 
         public bool IsStateTransitionEvent(State state)
         {
-            return Equals(_event, state.Enter) || Equals(_event, state.BeforeEnter)
-                || Equals(_event, state.AfterLeave) || Equals(_event, state.Leave);
+            return Equals(Event, state.Enter) || Equals(Event, state.BeforeEnter)
+                || Equals(Event, state.AfterLeave) || Equals(Event, state.Leave);
         }
 
         public void Bind(State<TSaga> state)
@@ -103,7 +103,7 @@ namespace MassTransit.SagaStateMachine
 
             var conditionActivity = new ConditionActivity<TSaga, TMessage>(_condition, thenBehavior, elseBehavior);
 
-            state.Bind(_event, conditionActivity);
+            state.Bind(Event, conditionActivity);
         }
 
         public void Bind(IBehaviorBuilder<TSaga> builder)

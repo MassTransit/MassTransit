@@ -73,14 +73,15 @@ SagaStateMachineInstance
                     .Event("First", out First)
                     .Event("Second", out Second)
                     .Event("Third", out Third)
+                    .CompositeEvent("Third", out Third, b => b.CompositeStatus, First, Second)
                     .Initially()
                         .When(Start, b => b.TransitionTo(Waiting))
+
                     .During(Waiting)
                         .When(Third, b => b
                             .Then(context => context.Instance.Called = true)
                             .Finalize()
                         )
-                    .CompositeEvent(Third, b => b.CompositeStatus, First, Second)
                 );
         }
     }
@@ -167,16 +168,15 @@ SagaStateMachineInstance
                     .Event("Start", out Start)
                     .Event("First", out First)
                     .Event("Second", out Second)
-                    .Event("Third", out Third)
                     .InstanceState(b => b.CurrentState)
                     .Initially()
                         .When(Start, b => b.TransitionTo(Waiting))
+                    .CompositeEvent("Third", out Third, b => b.CompositeStatus, First, Second)
                     .During(Waiting)
                         .When(Third, b => b
                             .Then(context => context.Instance.Called = true)
                             .Finalize()
                         )
-                    .CompositeEvent(Third, b => b.CompositeStatus, First, Second)
                 );
         }
     }

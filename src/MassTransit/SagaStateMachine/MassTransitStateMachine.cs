@@ -36,12 +36,14 @@
         Func<BehaviorContext<TInstance>, Task<bool>> _isCompleted;
         string _name;
         UnhandledEventCallback<TInstance> _unhandledEventCallback;
+        Dictionary<string, Dictionary<string, List<EventActivityBinder<TInstance>>>> _compositeBindings;
 
         protected MassTransitStateMachine()
         {
             _registrations = new Lazy<ConfigurationHelpers.StateMachineRegistration[]>(() => ConfigurationHelpers.GetRegistrations(this));
             _stateCache = new Dictionary<string, State<TInstance>>();
             _eventCache = new Dictionary<string, StateMachineEvent<TInstance>>();
+            _compositeBindings = new Dictionary<string, Dictionary<string, List<EventActivityBinder<TInstance>>>>();
 
             _eventObservers = new EventObservable<TInstance>();
             _stateObservers = new StateObservable<TInstance>();
@@ -275,14 +277,14 @@
             DeclarePropertyBasedEvent(prop => DeclareTriggerEvent(prop.Name), propertyExpression.GetPropertyInfo());
         }
 
-        protected internal virtual Event Event(string name)
+        protected internal virtual Event Event(string name, bool isComposite = false)
         {
-            return DeclareTriggerEvent(name);
+            return DeclareTriggerEvent(name, isComposite);
         }
 
-        Event DeclareTriggerEvent(string name)
+        Event DeclareTriggerEvent(string name, bool isComposite = false)
         {
-            return DeclareEvent(_ => new TriggerEvent(name), name);
+            return DeclareEvent(_ => new TriggerEvent(name, isComposite), name);
         }
 
         /// <summary>
@@ -329,7 +331,7 @@
             ConfigurationHelpers.InitializeEvent(this, property, @event);
         }
 
-        TEvent DeclareEvent<TEvent>(Func<string, TEvent> ctor, string name)
+        internal TEvent DeclareEvent<TEvent>(Func<string, TEvent> ctor, string name)
             where TEvent : Event
         {
             var @event = ctor(name);
@@ -672,9 +674,8 @@
 
                 bool Filter(State<TInstance> state)
                 {
-                    return state.Events.Contains(@event) ||
-                        state.Events.Any(evt => events.Contains(evt)) ||
-                        options.HasFlag(CompositeEventOptions.IncludeInitial) && Equals(state, Initial);
+                    return (options.HasFlag(CompositeEventOptions.IncludeInitial) || !Equals(state, Initial)) &&
+                        (options.HasFlag(CompositeEventOptions.IncludeFinal) || !Equals(state, Final));
                 }
 
                 var states = _stateCache.Values.Where(Filter).ToList();
@@ -686,9 +687,20 @@
                     if (currentEvent != null)
                         currentEvent.IsComposite = true;
 
-                    During(state,
-                        When(events[i])
-                            .Execute(activity));
+                    // Determine which event the composited event belongs to
+                    var boundToState = _stateCache.Values.FirstOrDefault(s => s.Events.Any(evt => evt.Name == events[i].Name));
+                    var bindingState = boundToState ?? state;
+
+                    if (!_compositeBindings.ContainsKey(@event.Name))
+                        _compositeBindings[@event.Name] = new Dictionary<string, List<EventActivityBinder<TInstance>>>();
+
+                    if (!_compositeBindings[@event.Name].ContainsKey(bindingState.Name))
+                        _compositeBindings[@event.Name][bindingState.Name] = new List<EventActivityBinder<TInstance>>();
+
+                    if (_compositeBindings[@event.Name][bindingState.Name].All(x => x.Event.Name != events[i].Name))
+                    {
+                        _compositeBindings[@event.Name][bindingState.Name].Add(When(events[i]).Execute(activity));
+                    }
                 }
             }
 
@@ -956,7 +968,22 @@
             State<TInstance> activityState = GetState(state.Name);
 
             foreach (IActivityBinder<TInstance> activity in eventActivities)
+            {
                 activity.Bind(activityState);
+                if (!activity.Event.IsComposite || !_compositeBindings.ContainsKey(activity.Event.Name))
+                    continue;
+
+                foreach (var compositeBinding in _compositeBindings[activity.Event.Name])
+                {
+                    var activitiesBinder = compositeBinding.Value.SelectMany(x => x.GetStateActivityBinders()).ToArray();
+
+                    if (!activitiesBinder.Any())
+                        continue;
+
+                    BindActivitiesToState(GetState(compositeBinding.Key), activitiesBinder);
+                }
+                _compositeBindings.Remove(activity.Event.Name);
+            }
         }
 
         /// <summary>
@@ -1014,7 +1041,7 @@
         /// <returns></returns>
         protected internal EventActivityBinder<TInstance> When(Event @event)
         {
-            return new TriggerEventActivityBinder<TInstance>(this, @event);
+            return When(@event, null);
         }
 
         /// <summary>
@@ -1025,14 +1052,7 @@
         /// <returns></returns>
         protected internal EventActivityBinder<TInstance> When(Event @event, StateMachineCondition<TInstance> filter)
         {
-            var binder =  new TriggerEventActivityBinder<TInstance>(this, @event, filter);
-            if (@event.IsComposite)
-            {
-                var events = _eventCache[@event.Name].Events;
-                var accessor = _eventCache[@event.Name].Accessor;
-                CompositeEvent(@event, accessor, CompositeEventOptions.None, events);
-            }
-            return binder;
+            return new TriggerEventActivityBinder<TInstance>(this, @event, filter);
         }
 
         /// <summary>
@@ -1192,7 +1212,7 @@
         protected internal EventActivityBinder<TInstance, TMessage> When<TMessage>(Event<TMessage> @event)
             where TMessage : class
         {
-            return new DataEventActivityBinder<TInstance, TMessage>(this, @event);
+            return When(@event, null);
         }
 
         /// <summary>
@@ -1797,16 +1817,11 @@
 
         static EventRegistration GetEventRegistration(Event @event, Type messageType)
         {
-            if (messageType.HasInterface<CorrelatedBy<Guid>>())
-            {
-                var registrationType = typeof(CorrelatedEventRegistration<>).MakeGenericType(typeof(TInstance), messageType);
-                return (EventRegistration)Activator.CreateInstance(registrationType, @event);
-            }
-            else
-            {
-                var registrationType = typeof(UncorrelatedEventRegistration<>).MakeGenericType(typeof(TInstance), messageType);
-                return (EventRegistration)Activator.CreateInstance(registrationType, @event);
-            }
+            var registrationType = messageType.HasInterface<CorrelatedBy<Guid>>() ?
+                typeof(CorrelatedEventRegistration<>).MakeGenericType(typeof(TInstance), messageType) :
+                typeof(UncorrelatedEventRegistration<>).MakeGenericType(typeof(TInstance), messageType);
+
+            return (EventRegistration)Activator.CreateInstance(registrationType, @event);
         }
 
         StateMachine<TInstance> Modify(Action<IStateMachineModifier<TInstance>> modifier)

@@ -79,42 +79,46 @@
             return this;
         }
 
-        public IStateMachineModifier<TSaga> CompositeEvent(Event @event,
+        public IStateMachineModifier<TSaga> CompositeEvent(string name, out Event @event,
             Expression<Func<TSaga, CompositeEventStatus>> trackingPropertyExpression, params Event[] events)
         {
+            Event(name, out @event, true);
             _machine.CompositeEvent(@event, trackingPropertyExpression, events);
             return this;
         }
 
-        public IStateMachineModifier<TSaga> CompositeEvent(Event @event,
+        public IStateMachineModifier<TSaga> CompositeEvent(string name, out Event @event,
             Expression<Func<TSaga, CompositeEventStatus>> trackingPropertyExpression, CompositeEventOptions options,
             params Event[] events)
         {
+            Event(name, out @event, true);
             _machine.CompositeEvent(@event, trackingPropertyExpression, options, events);
             return this;
         }
 
-        public IStateMachineModifier<TSaga> CompositeEvent(Event @event, Expression<Func<TSaga, int>> trackingPropertyExpression,
+        public IStateMachineModifier<TSaga> CompositeEvent(string name, out Event @event, Expression<Func<TSaga, int>> trackingPropertyExpression,
             params Event[] events)
         {
+            Event(name, out @event, true);
             _machine.CompositeEvent(@event, trackingPropertyExpression, events);
             return this;
         }
 
-        public IStateMachineModifier<TSaga> CompositeEvent(Event @event, Expression<Func<TSaga, int>> trackingPropertyExpression,
+        public IStateMachineModifier<TSaga> CompositeEvent(string name, out Event @event, Expression<Func<TSaga, int>> trackingPropertyExpression,
             CompositeEventOptions options, params Event[] events)
         {
+            Event(name, out @event, true);
             _machine.CompositeEvent(@event, trackingPropertyExpression, options, events);
             return this;
         }
 
-        public IStateMachineModifier<TSaga> Event(string name, out Event @event)
+        public IStateMachineModifier<TSaga> Event(string name, out Event @event, bool isComposite = false)
         {
-            @event = _machine.Event(name);
+            @event = _machine.Event(name, isComposite);
             return this;
         }
 
-        public IStateMachineModifier<TSaga> Event<T>(string name, out Event<T> @event)
+        public IStateMachineModifier<TSaga> Event<T>(string name, out Event<T> @event, bool isComposite = false)
             where T : class
         {
             @event = _machine.Event<T>(name);

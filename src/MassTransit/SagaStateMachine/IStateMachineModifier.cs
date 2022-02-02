@@ -14,9 +14,9 @@
         IStateMachineModifier<TSaga> InstanceState(Expression<Func<TSaga, string>> instanceStateProperty);
         IStateMachineModifier<TSaga> InstanceState(Expression<Func<TSaga, int>> instanceStateProperty, params State[] states);
         IStateMachineModifier<TSaga> Name(string machineName);
-        IStateMachineModifier<TSaga> Event(string name, out Event @event);
+        IStateMachineModifier<TSaga> Event(string name, out Event @event, bool isComposite = false);
 
-        IStateMachineModifier<TSaga> Event<T>(string name, out Event<T> @event)
+        IStateMachineModifier<TSaga> Event<T>(string name, out Event<T> @event, bool isComposite = false)
             where T : class;
 
         IStateMachineModifier<TSaga> Event<TProperty, T>(Expression<Func<TProperty>> propertyExpression,
@@ -24,20 +24,20 @@
             where TProperty : class
             where T : class;
 
-        IStateMachineModifier<TSaga> CompositeEvent(Event @event,
+        IStateMachineModifier<TSaga> CompositeEvent(string name, out Event @event,
             Expression<Func<TSaga, CompositeEventStatus>> trackingPropertyExpression,
             params Event[] events);
 
-        IStateMachineModifier<TSaga> CompositeEvent(Event @event,
+        IStateMachineModifier<TSaga> CompositeEvent(string name, out Event @event,
             Expression<Func<TSaga, CompositeEventStatus>> trackingPropertyExpression,
             CompositeEventOptions options,
             params Event[] events);
 
-        IStateMachineModifier<TSaga> CompositeEvent(Event @event,
+        IStateMachineModifier<TSaga> CompositeEvent(string name, out Event @event,
             Expression<Func<TSaga, int>> trackingPropertyExpression,
             params Event[] events);
 
-        IStateMachineModifier<TSaga> CompositeEvent(Event @event,
+        IStateMachineModifier<TSaga> CompositeEvent(string name, out Event @event,
             Expression<Func<TSaga, int>> trackingPropertyExpression,
             CompositeEventOptions options,
             params Event[] events);
