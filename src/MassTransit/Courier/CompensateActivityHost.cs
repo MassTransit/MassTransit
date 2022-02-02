@@ -61,9 +61,6 @@ namespace MassTransit.Courier
             catch (Exception ex)
             {
                 await context.NotifyFaulted(timer.Elapsed, TypeCache<TActivity>.ShortName, ex).ConfigureAwait(false);
-
-                LogContext.Error?.Log(ex, "Activity {Activity} compensation faulted", TypeCache<TActivity>.ShortName);
-
                 throw;
             }
             finally
