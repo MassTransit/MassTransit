@@ -89,7 +89,7 @@
                 LogContext.Debug?.Log("Connected: {Host} (address: {RemoteAddress}, local: {LocalAddress})", description, connection.Endpoint,
                     connection.LocalPort);
 
-                var connectionContext = new RabbitMqConnectionContext(connection, _hostConfiguration, supervisor.Stopped);
+                var connectionContext = new RabbitMqConnectionContext(connection, _hostConfiguration, description, supervisor.Stopped);
 
                 connectionContext.GetOrAddPayload(() => _hostConfiguration.Settings);
 
