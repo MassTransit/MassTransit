@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.MartenIntegration.Tests
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Marten;
     using MassTransit.Saga;
@@ -9,6 +10,7 @@
     using Shouldly;
     using TestFramework;
     using Testing;
+    using Util;
 
 
     [TestFixture]
@@ -78,7 +80,6 @@
             var store = DocumentStore.For(x =>
             {
                 x.Connection(connectionString);
-                x.PLV8Enabled = false;
                 x.CreateDatabasesForTenants(c =>
                 {
                     c.ForTenant()
@@ -88,8 +89,11 @@
                         .ConnectionLimit(-1);
                 });
             });
-            store.Schema.ApplyAllConfiguredChangesToDatabase();
-            store.Schema.AssertDatabaseMatchesConfiguration();
+
+            using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            TaskUtil.Await(async () => await store.Schema.ApplyAllConfiguredChangesToDatabaseAsync(), cancellationTokenSource.Token);
+            TaskUtil.Await(async () => await store.Schema.AssertDatabaseMatchesConfigurationAsync(),cancellationTokenSource.Token);
+
             _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => MartenSagaRepository<SimpleSaga>.Create(store));
         }
 
