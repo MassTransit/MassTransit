@@ -34,7 +34,12 @@ namespace MassTransit
         /// <summary>
         /// Sets the maximum size of the queue in megabytes, which is the size of memory allocated for the queue
         /// </summary>
-        long? MaxSizeInMB { set; }
+        long? MaxSizeInMegabytes { set; }
+
+        /// <summary>
+        /// Set the maximum message size, in kilobytes
+        /// </summary>
+        long? MaxMessageSizeInKilobytes { set; }
 
         /// <summary>
         /// Sets the value indicating if this queue requires duplicate detection.

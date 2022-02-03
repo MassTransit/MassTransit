@@ -44,9 +44,14 @@
             set => _queueConfigurator.EnablePartitioning = value;
         }
 
-        public int MaxSizeInMegabytes
+        public long MaxSizeInMegabytes
         {
-            set => _queueConfigurator.MaxSizeInMB = value;
+            set => _queueConfigurator.MaxSizeInMegabytes = value;
+        }
+
+        public long MaxMessageSizeInKilobytes
+        {
+            set => _settings.QueueConfigurator.MaxMessageSizeInKilobytes = value;
         }
 
         public bool RequiresDuplicateDetection
