@@ -989,7 +989,7 @@
         }
 
         /// <summary>
-        /// Declares events and activities that are handled during any state exception Initial and Final
+        /// Declares events and activities that are handled during any state except the Initial and Final
         /// </summary>
         /// <param name="activities">The event and activities</param>
         protected internal void DuringAny(params EventActivities<TInstance>[] activities)
