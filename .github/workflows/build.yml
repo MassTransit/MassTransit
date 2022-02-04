@@ -578,6 +578,14 @@ jobs:
           version: ${{ needs.calc-version.outputs.version }}
           tag-commit: false
           nuget-key: ${{secrets.NUGET_API_KEY}}
+      - name: Build and Publish MassTransit Newtonsoft
+        # was: brandedoutcast/publish-nuget@v2.5.5
+        uses: drusellers/publish-nuget@master
+        with:
+          project-file-path: src/MassTransit.Newtonsoft/MassTransit.Newtonsoft.csproj
+          version: ${{ needs.calc-version.outputs.version }}
+          tag-commit: false
+          nuget-key: ${{secrets.NUGET_API_KEY}}
       - name: Build and Publish MassTransit.Analyzers
         uses: drusellers/publish-nuget@master
         with:
@@ -639,6 +647,13 @@ jobs:
         uses: drusellers/publish-nuget@master
         with:
           project-file-path: src/Persistence/MassTransit.DapperIntegration/MassTransit.DapperIntegration.csproj
+          version: ${{ needs.calc-version.outputs.version }}
+          tag-commit: false
+          nuget-key: ${{secrets.NUGET_API_KEY}}
+      - name: Build and Publish MassTransit.DynamoDb
+        uses: drusellers/publish-nuget@master
+        with:
+          project-file-path: src/Persistence/MassTransit.DynamoDbIntegration/MassTransit.DynamoDbIntegration.csproj
           version: ${{ needs.calc-version.outputs.version }}
           tag-commit: false
           nuget-key: ${{secrets.NUGET_API_KEY}}

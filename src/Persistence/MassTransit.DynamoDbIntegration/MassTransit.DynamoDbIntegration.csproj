@@ -7,10 +7,10 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <PackageId>MassTransit.DynamoDbIntegration</PackageId>
+    <PackageId>MassTransit.DynamoDb</PackageId>
     <Title>MassTransit.DynamoDb</Title>
-    <PackageTags>MassTransit;DynamoDb</PackageTags>
-    <Description>MassTransit DynamoDb</Description>
+    <PackageTags>MassTransit;DynamoDb;AWS;Amazon</PackageTags>
+    <Description>MassTransit DynamoDb persistence support; $(Description)</Description>
   </PropertyGroup>
 
   <ItemGroup>
