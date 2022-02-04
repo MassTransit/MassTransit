@@ -44,7 +44,7 @@ With HTTP, a connection is maintained by the client on which the response is sen
 
 ## Task
 
-The return type, `Task<T>`, is a C# language feature that represents a _future_. It's a reference type which means it is only accessible by reference. Since `Task<T>` is a future, is promises to deliver at some point:
+The return type, `Task<T>`, is a C# language feature that represents a _future_. It's a reference type which means it is only accessible by reference. Since `Task<T>` is a future, it promises to deliver at some point:
 
 - `T` _(completed)_
 - An exception _(faulted)_
