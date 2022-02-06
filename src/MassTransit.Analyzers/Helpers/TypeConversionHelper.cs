@@ -55,7 +55,6 @@ namespace MassTransit.Analyzers.Helpers
                 SpecialType.System_Byte, SpecialType.System_UInt16, SpecialType.System_Int32, SpecialType.System_UInt32,
                 SpecialType.System_Int64, SpecialType.System_UInt64);
 
-            // TODO TimeSpan
             _typeSymbols.Add(semanticModel, SpecialType.System_String, SpecialType.System_DateTime);
             _typeSymbols.Add(semanticModel, SpecialType.System_Int32, SpecialType.System_DateTime);
             _typeSymbols.Add(semanticModel, SpecialType.System_Int64, SpecialType.System_DateTime);
