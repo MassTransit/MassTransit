@@ -93,6 +93,20 @@ namespace MassTransit
             return Log;
         }
 
+        public static LogMessage<T1, T2> DefineMessage<T1, T2>(LogLevel logLevel, string formatString)
+        {
+            Action<ILogger, T1, T2, Exception> logAction = LoggerMessage.Define<T1, T2>(logLevel, default, formatString);
+
+            void Log(T1 arg1, T2 arg2, Exception exception)
+            {
+                var logContext = Current;
+                if (logContext != null)
+                    logAction(logContext.Messages.Logger, arg1, arg2, exception);
+            }
+
+            return Log;
+        }
+
         public static LogMessage<T1, T2, T3> Define<T1, T2, T3>(LogLevel logLevel, string formatString)
         {
             Action<ILogger, T1, T2, T3, Exception> logAction = LoggerMessage.Define<T1, T2, T3>(logLevel, default, formatString);
@@ -102,6 +116,20 @@ namespace MassTransit
                 var logContext = Current;
                 if (logContext != null)
                     logAction(logContext.Logger, arg1, arg2, arg3, exception);
+            }
+
+            return Log;
+        }
+
+        public static LogMessage<T1, T2, T3> DefineMessage<T1, T2, T3>(LogLevel logLevel, string formatString)
+        {
+            Action<ILogger, T1, T2, T3, Exception> logAction = LoggerMessage.Define<T1, T2, T3>(logLevel, default, formatString);
+
+            void Log(T1 arg1, T2 arg2, T3 arg3, Exception exception)
+            {
+                var logContext = Current;
+                if (logContext != null)
+                    logAction(logContext.Messages.Logger, arg1, arg2, arg3, exception);
             }
 
             return Log;
@@ -121,6 +149,20 @@ namespace MassTransit
             return Log;
         }
 
+        public static LogMessage<T1, T2, T3, T4> DefineMessage<T1, T2, T3, T4>(LogLevel logLevel, string formatString)
+        {
+            Action<ILogger, T1, T2, T3, T4, Exception> logAction = LoggerMessage.Define<T1, T2, T3, T4>(logLevel, default, formatString);
+
+            void Log(T1 arg1, T2 arg2, T3 arg3, T4 arg4, Exception exception)
+            {
+                var logContext = Current;
+                if (logContext != null)
+                    logAction(logContext.Messages.Logger, arg1, arg2, arg3, arg4, exception);
+            }
+
+            return Log;
+        }
+
         public static LogMessage<T1, T2, T3, T4, T5> Define<T1, T2, T3, T4, T5>(LogLevel logLevel, string formatString)
         {
             Action<ILogger, T1, T2, T3, T4, T5, Exception> logAction = LoggerMessage.Define<T1, T2, T3, T4, T5>(logLevel, default, formatString);
@@ -130,6 +172,20 @@ namespace MassTransit
                 var logContext = Current;
                 if (logContext != null)
                     logAction(logContext.Logger, arg1, arg2, arg3, arg4, arg5, exception);
+            }
+
+            return Log;
+        }
+
+        public static LogMessage<T1, T2, T3, T4, T5> DefineMessage<T1, T2, T3, T4, T5>(LogLevel logLevel, string formatString)
+        {
+            Action<ILogger, T1, T2, T3, T4, T5, Exception> logAction = LoggerMessage.Define<T1, T2, T3, T4, T5>(logLevel, default, formatString);
+
+            void Log(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, Exception exception)
+            {
+                var logContext = Current;
+                if (logContext != null)
+                    logAction(logContext.Messages.Logger, arg1, arg2, arg3, arg4, arg5, exception);
             }
 
             return Log;

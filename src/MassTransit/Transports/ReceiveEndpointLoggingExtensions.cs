@@ -8,25 +8,25 @@ namespace MassTransit.Transports
 
     public static class ReceiveEndpointLoggingExtensions
     {
-        static readonly LogMessage<Uri, Guid?, string, string, TimeSpan> _logConsumed = LogContext.Define<Uri, Guid?, string, string, TimeSpan>(LogLevel.Debug,
-            "RECEIVE {InputAddress} {MessageId} {MessageType} {ConsumerType}({Duration})");
+        static readonly LogMessage<Uri, Guid?, string, string, TimeSpan> _logConsumed = LogContext.DefineMessage<Uri, Guid?, string, string, TimeSpan>(
+            LogLevel.Debug, "RECEIVE {InputAddress} {MessageId} {MessageType} {ConsumerType}({Duration})");
 
         static readonly LogMessage<Uri, Guid?, string, string, TimeSpan> _logConsumeFault = LogContext.Define<Uri, Guid?, string, string, TimeSpan>(
             LogLevel.Error, "R-FAULT {InputAddress} {MessageId} {MessageType} {ConsumerType}({Duration})");
 
-        static readonly LogMessage<Uri, string, string, string> _logMoved = LogContext.Define<Uri, string, string, string>(LogLevel.Information,
+        static readonly LogMessage<Uri, string, string, string> _logMoved = LogContext.DefineMessage<Uri, string, string, string>(LogLevel.Information,
             "MOVE {InputAddress} {MessageId} {DestinationAddress} {Reason}");
 
         static readonly LogMessage<Uri, string, TimeSpan> _logReceiveFault = LogContext.Define<Uri, string, TimeSpan>(LogLevel.Error,
             "R-FAULT {InputAddress} {MessageId} {Duration}");
 
-        static readonly LogMessage<Uri, Guid?, string> _logSent = LogContext.Define<Uri, Guid?, string>(LogLevel.Debug,
+        static readonly LogMessage<Uri, Guid?, string> _logSent = LogContext.DefineMessage<Uri, Guid?, string>(LogLevel.Debug,
             "SEND {DestinationAddress} {MessageId} {MessageType}");
 
         static readonly LogMessage<Uri, Guid?, string> _logSendFault = LogContext.Define<Uri, Guid?, string>(LogLevel.Error,
             "S-FAULT {DestinationAddress} {MessageId} {MessageType}");
 
-        static readonly LogMessage<Uri, string> _logSkipped = LogContext.Define<Uri, string>(LogLevel.Debug,
+        static readonly LogMessage<Uri, string> _logSkipped = LogContext.DefineMessage<Uri, string>(LogLevel.Debug,
             "SKIP {InputAddress} {MessageId}");
 
         static readonly LogMessage<Uri, Guid?, string> _logRetry = LogContext.Define<Uri, Guid?, string>(LogLevel.Warning,
@@ -35,8 +35,8 @@ namespace MassTransit.Transports
         static readonly LogMessage<Uri, string> _logFault = LogContext.Define<Uri, string>(LogLevel.Error,
             "T-FAULT {InputAddress} {MessageId}");
 
-        static readonly LogMessage<Uri, Guid?, string, DateTime, Guid?> _logScheduled = LogContext.Define<Uri, Guid?, string, DateTime, Guid?>(LogLevel.Debug,
-            "SCHED {DestinationAddress} {MessageId} {MessageType} {DeliveryTime:G} {Token}");
+        static readonly LogMessage<Uri, Guid?, string, DateTime, Guid?> _logScheduled = LogContext.DefineMessage<Uri, Guid?, string, DateTime, Guid?>(
+            LogLevel.Debug, "SCHED {DestinationAddress} {MessageId} {MessageType} {DeliveryTime:G} {Token}");
 
         /// <summary>
         /// Log a skipped message that was moved to the dead-letter queue
