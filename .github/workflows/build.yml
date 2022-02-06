@@ -48,15 +48,15 @@ jobs:
         working-directory: ./
 
       - name: Test
-        run: dotnet test -c Release --no-build --filter Category!=Flaky
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --no-build --filter Category!=Flaky
         working-directory: tests/MassTransit.Tests
 
       - name: Test Abstractions
-        run: dotnet test -c Release --no-build --filter Category!=Flaky
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --no-build --filter Category!=Flaky
         working-directory: tests/MassTransit.Abstractions.Tests
 
       - name: Test Analyzers
-        run: dotnet test -c Release --no-build --filter Category!=Flaky
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --no-build --filter Category!=Flaky
         working-directory: tests/MassTransit.Analyzers.Tests
 
   test-containers:
@@ -80,7 +80,7 @@ jobs:
       #     report_title: Container Tests
       #     github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Test Containers
-        run: dotnet test -c Release --filter Category!=Flaky
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.Containers.Tests
   test-activemq:
     name: "Transports: ActiveMQ"
@@ -103,7 +103,7 @@ jobs:
           dotnet-version: '3.1.x'
 
       - name: Test ActiveMQ
-        run: dotnet test -c Release --filter Category!=Flaky
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.ActiveMqTransport.Tests
   test-grpc:
     name: "Transports: gRPC"
@@ -119,7 +119,7 @@ jobs:
           dotnet-version: '6.0.x'
 
       - name: Test gRPC
-        run: dotnet test -c Release --filter Category!=Flaky
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.GrpcTransport.Tests
   test-azure-service-bus:
     name: "Transports: Azure Service Bus"
@@ -138,7 +138,7 @@ jobs:
         env:
           MT_ASB_KEYVALUE: ${{ secrets.AZURE_SERVICEBUS }}
           MT_AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE }}
-        run: dotnet test -c Release --filter Category!=Flaky
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.Azure.ServiceBus.Core.Tests
   test-rabbitmq:
     name: "Transports: RabbitMQ"
@@ -161,7 +161,7 @@ jobs:
           dotnet-version: '3.1.x'
 
       - name: Test RabbitMQ
-        run: dotnet test -c Release --filter Category!=Flaky
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.RabbitMqTransport.Tests
   test-sqs:
     name: "Transports: SQS"
@@ -185,7 +185,7 @@ jobs:
           dotnet-version: '3.1.x'
 
       - name: Test SQS
-        run: dotnet test -c Release --filter Category!=Flaky
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.AmazonSqsTransport.Tests
   test-azure-table:
     name: "Storage: Azure Table"
@@ -204,7 +204,7 @@ jobs:
       - name: Test Azure Table
         env:
           MT_AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE }}
-        run: dotnet test -c Release --filter "Category!=Flaky&Category!=Integration"
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter "Category!=Flaky&Category!=Integration"
         working-directory: tests/MassTransit.Azure.Table.Tests
   test-cosmosdb:
     name: "Storage: CosmosDB"
@@ -224,7 +224,7 @@ jobs:
         env:
           MT_COSMOS_ENDPOINT: ${{ secrets.AZURE_COSMOSENDPOINT }}
           MT_COSMOS_KEY: ${{ secrets.AZURE_COSMOSKEY }}
-        run: dotnet test -c Release --filter "Category!=Flaky&Category!=Integration"
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter "Category!=Flaky&Category!=Integration"
         working-directory: tests/MassTransit.Azure.Cosmos.Tests
   test-dapper:
     name: "Storage: Dapper"
@@ -251,7 +251,7 @@ jobs:
           dotnet-version: '3.1.x'
 
       - name: Test Dapper
-        run: dotnet test -c Release --filter "Category!=Flaky&Category!=Integration"
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter "Category!=Flaky&Category!=Integration"
         working-directory: tests/MassTransit.DapperIntegration.Tests
   test-entity-framework:
     name: "Storage: EntityFramework"
@@ -290,15 +290,15 @@ jobs:
           dotnet-version: '6.0.x'
 
       - name: Test EntityFrameworkCore 3.1
-        run: dotnet test -c Release -f netcoreapp3.1 --filter "Category!=Flaky&Category!=Integration"
+        run: dotnet test -c Release --logger:"console;verbosity=normal" -f netcoreapp3.1 --filter "Category!=Flaky&Category!=Integration"
         working-directory: tests/MassTransit.EntityFrameworkCoreIntegration.Tests
 
       - name: Test EntityFrameworkCore 6.0
-        run: dotnet test -c Release -f net6.0 --filter "Category!=Flaky&Category!=Integration"
+        run: dotnet test -c Release --logger:"console;verbosity=normal" -f net6.0 --filter "Category!=Flaky&Category!=Integration"
         working-directory: tests/MassTransit.EntityFrameworkCoreIntegration.Tests
 
       - name: Test EntityFramework
-        run: dotnet test -c Release --filter "Category!=Flaky&Category!=Integration"
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter "Category!=Flaky&Category!=Integration"
         working-directory: tests/MassTransit.EntityFrameworkIntegration.Tests
   test-marten:
     name: "Storage: Marten"
@@ -322,7 +322,7 @@ jobs:
           dotnet-version: '3.1.x'
 
       - name: Test Marten
-        run: dotnet test -c Release --filter Category!=Flaky
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.MartenIntegration.Tests
   test-mongo:
     name: "Storage: MongoDB"
@@ -343,7 +343,7 @@ jobs:
           dotnet-version: '3.1.x'
 
       - name: Test MongoDB
-        run: dotnet test -c Release --filter Category!=Flaky
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.MongoDbIntegration.Tests
   test-nhibernate:
     name: "Storage: NHibernate"
@@ -359,7 +359,7 @@ jobs:
           dotnet-version: '3.1.x'
 
       - name: Test NHibernate
-        run: dotnet test -c Release --filter Category!=Flaky
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.NHibernateIntegration.Tests
   test-redis:
     name: "Storage: Redis"
@@ -381,7 +381,7 @@ jobs:
           dotnet-version: '3.1.x'
 
       - name: Test Redis
-        run: dotnet test -c Release --filter Category!=Flaky
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.RedisIntegration.Tests
   test-hangfire:
     name: "Scheduler: Hangfire"
@@ -397,7 +397,7 @@ jobs:
           dotnet-version: '3.1.x'
 
       - name: Test Hangfire
-        run: dotnet test -c Release --filter Category!=Flaky
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.HangfireIntegration.Tests
   test-quartz:
     name: "Scheduler: Quartz"
@@ -413,7 +413,7 @@ jobs:
           dotnet-version: '3.1.x'
 
       - name: Test Quartz
-        run: dotnet test -c Release --filter Category!=Flaky
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.QuartzIntegration.Tests
   test-eventhub:
     name: "Rider: EventHub"
@@ -429,7 +429,7 @@ jobs:
           dotnet-version: '3.1.x'
 
       - name: Test EventHub
-        run: dotnet test -c Release --filter Category!=Flaky
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         env:
           MT_EH_NAMESPACE: ${{ secrets.AZURE_EVENTHUB }}
           MT_AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE }}
@@ -482,7 +482,7 @@ jobs:
           dotnet-version: '3.1.x'
 
       - name: Test Kafka
-        run: dotnet test -c Release --filter Category!=Flaky
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.KafkaIntegration.Tests
 
   test-signalr:
@@ -499,7 +499,7 @@ jobs:
           dotnet-version: '3.1.x'
 
       - name: Test SignalR
-        run: dotnet test -c Release --filter Category!=Flaky
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.SignalR.Tests
         
   calc-version:
