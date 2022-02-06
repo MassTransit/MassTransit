@@ -166,7 +166,7 @@ namespace MassTransit.Configuration
             this.AddSingleton<IBusInstance>(provider => provider.GetRequiredService<IBusInstance<TBus>>());
             this.AddSingleton(provider =>
                 Bind<TBus>.Create<IReceiveEndpointConnector>(provider.GetRequiredService<IBusInstance<TBus>>()));
-            this.AddSingleton(provider => provider.GetRequiredService<IBusInstance<TBus>>().BusInstance);
+            this.AddSingleton(provider => provider.GetRequiredService<IBusInstance<TBus>>().Bus);
 
             Registrar.RegisterScopedClientFactory();
         }
