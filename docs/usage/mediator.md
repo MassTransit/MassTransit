@@ -14,7 +14,7 @@ Creating and configuring a mediator is similar to a bus, but uses the _CreateMed
 
 Once created, the mediator doesn't need to be started or stopped and can be used immediately. _IMediator_ combines several other interfaces into a single interface, including _IPublishEndpoint_, _ISendEndpoint_, and _IClientFactory_.
 
-<<< @/src/MassTransit/Mediator/IMediator.cs
+<<< @/src/MassTransit.Abstractions/Mediator/IMediator.cs
 
 MassTransit dispatches the command to the consumer asynchronously. Once the _Consume_ method completes, the _Send_ method will complete. If the consumer throws an exception, it will be propagated back to the caller.
 
