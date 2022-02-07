@@ -3,6 +3,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
     using System;
     using System.Collections.Concurrent;
     using System.Linq;
+    using Extensions;
     using MassTransit.Saga;
     using Metadata;
     using Microsoft.EntityFrameworkCore;
@@ -43,7 +44,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             if (TableNames.TryGetValue(type, out var result) && _enableSchemaCaching)
                 return result;
 
-            var entityType = context.Model.FindEntityType(type);
+            var entityType = context.Model.SafeFindEntityType(type);
 
             var schema = entityType.GetSchema();
             var tableName = entityType.GetTableName();
