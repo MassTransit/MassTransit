@@ -16,7 +16,7 @@ namespace RabbitMqConsoleListener
     using OrderSystem.Events;
     using MassTransit;
 
-    public class Program
+    public static class Program
     {
         public static async Task Main()
         {
@@ -34,7 +34,7 @@ namespace RabbitMqConsoleListener
                 });
             });
 
-            var source = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            using var source = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
             await busControl.StartAsync(source.Token);
             try
