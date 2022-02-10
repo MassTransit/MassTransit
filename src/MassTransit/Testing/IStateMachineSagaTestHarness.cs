@@ -11,6 +11,8 @@ namespace MassTransit.Testing
         where TStateMachine : SagaStateMachine<TInstance>
         where TInstance : class, SagaStateMachineInstance
     {
+        TStateMachine StateMachine { get; }
+
         /// <summary>
         /// Waits until a saga exists with the specified correlationId in the specified state
         /// </summary>

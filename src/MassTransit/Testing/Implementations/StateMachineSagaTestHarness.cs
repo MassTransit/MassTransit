@@ -13,13 +13,13 @@ namespace MassTransit.Testing.Implementations
         where TInstance : class, SagaStateMachineInstance
         where TStateMachine : SagaStateMachine<TInstance>
     {
-        readonly TStateMachine _stateMachine;
-
         public StateMachineSagaTestHarness(BusTestHarness testHarness, ISagaRepository<TInstance> repository, TStateMachine stateMachine, string queueName)
             : base(testHarness, repository, queueName)
         {
-            _stateMachine = stateMachine;
+            StateMachine = stateMachine;
         }
+
+        public TStateMachine StateMachine { get; }
 
         /// <summary>
         /// Waits until a saga exists with the specified correlationId in the specified state
@@ -30,7 +30,7 @@ namespace MassTransit.Testing.Implementations
         /// <returns></returns>
         public Task<Guid?> Exists(Guid correlationId, Func<TStateMachine, State> stateSelector, TimeSpan? timeout = default)
         {
-            var state = stateSelector(_stateMachine);
+            var state = stateSelector(StateMachine);
 
             return Exists(correlationId, state, timeout);
         }
@@ -49,7 +49,7 @@ namespace MassTransit.Testing.Implementations
 
             var giveUpAt = DateTime.Now + (timeout ?? TestTimeout);
 
-            ISagaQuery<TInstance> query = _stateMachine.CreateSagaQuery(x => x.CorrelationId == correlationId, state);
+            ISagaQuery<TInstance> query = StateMachine.CreateSagaQuery(x => x.CorrelationId == correlationId, state);
 
             while (DateTime.Now < giveUpAt)
             {
@@ -72,7 +72,7 @@ namespace MassTransit.Testing.Implementations
         /// <returns></returns>
         public Task<IList<Guid>> Exists(Expression<Func<TInstance, bool>> expression, Func<TStateMachine, State> stateSelector, TimeSpan? timeout = default)
         {
-            var state = stateSelector(_stateMachine);
+            var state = stateSelector(StateMachine);
 
             return Exists(expression, state, timeout);
         }
@@ -91,7 +91,7 @@ namespace MassTransit.Testing.Implementations
 
             var giveUpAt = DateTime.Now + (timeout ?? TestTimeout);
 
-            ISagaQuery<TInstance> query = _stateMachine.CreateSagaQuery(expression, state);
+            ISagaQuery<TInstance> query = StateMachine.CreateSagaQuery(expression, state);
 
             while (DateTime.Now < giveUpAt)
             {
@@ -107,14 +107,14 @@ namespace MassTransit.Testing.Implementations
 
         protected override void ConfigureReceiveEndpoint(IReceiveEndpointConfigurator configurator)
         {
-            configurator.StateMachineSaga(_stateMachine, TestRepository);
+            configurator.StateMachineSaga(StateMachine, TestRepository);
         }
 
         protected override void ConfigureNamedReceiveEndpoint(IBusFactoryConfigurator configurator, string queueName)
         {
             configurator.ReceiveEndpoint(queueName, x =>
             {
-                x.StateMachineSaga(_stateMachine, TestRepository);
+                x.StateMachineSaga(StateMachine, TestRepository);
             });
         }
     }

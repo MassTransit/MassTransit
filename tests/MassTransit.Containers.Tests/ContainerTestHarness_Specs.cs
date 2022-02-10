@@ -227,7 +227,7 @@ namespace MassTransit.Containers.Tests
 
             var correlationId = NewId.NextGuid();
 
-            await harness.Bus.Publish(new StartTest
+            await (await harness.GetSagaEndpoint<TestInstance>()).Send(new StartTest
             {
                 CorrelationId = correlationId,
                 TestKey = "Unique"
