@@ -57,6 +57,8 @@ namespace MassTransit.Logging
                 if (context.DestinationAddress != null)
                     activity.AddTag(DiagnosticHeaders.DestinationAddress, context.DestinationAddress.ToString());
 
+                activity.AddTag(DiagnosticHeaders.MessageTypes, string.Join(",", MessageTypeCache<T>.MessageTypeNames));
+
                 for (var i = 0; i < tags.Length; i++)
                 {
                     if (tags[i].Value != null)
