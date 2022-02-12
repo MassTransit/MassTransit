@@ -1,4 +1,5 @@
-﻿namespace MassTransit.GrpcTransport.Topology
+﻿#nullable enable
+namespace MassTransit.GrpcTransport.Topology
 {
     using System;
     using System.Collections.Generic;
@@ -40,7 +41,7 @@
                 configurator.Apply(builder);
         }
 
-        public override bool TryGetPublishAddress(Uri baseAddress, out Uri publishAddress)
+        public override bool TryGetPublishAddress(Uri baseAddress, out Uri? publishAddress)
         {
             var exchangeName = _messageTopology.EntityName;
 

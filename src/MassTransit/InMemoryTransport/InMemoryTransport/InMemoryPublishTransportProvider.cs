@@ -1,3 +1,4 @@
+#nullable enable
 namespace MassTransit.InMemoryTransport
 {
     using System;
@@ -17,7 +18,7 @@ namespace MassTransit.InMemoryTransport
             _context = context;
         }
 
-        public Task<ISendTransport> GetPublishTransport<T>(Uri publishAddress)
+        public Task<ISendTransport> GetPublishTransport<T>(Uri? publishAddress)
             where T : class
         {
             return _transportProvider.CreatePublishTransport<T>(_context, publishAddress);

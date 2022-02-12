@@ -34,7 +34,7 @@ namespace MassTransit.ActiveMqTransport.Topology
         {
             var messageTopology = new ActiveMqMessagePublishTopology<T>(this, _messageTopology.GetMessageTopology<T>());
 
-            var connector = new ImplementedMessageTypeConnector<T>(this, messageTopology);
+            var connector = new ImplementedMessageTypeConnector<T>(this);
 
             ImplementedMessageTypeCache<T>.EnumerateImplementedTypes(connector);
 
@@ -48,22 +48,17 @@ namespace MassTransit.ActiveMqTransport.Topology
             IImplementedMessageType
             where TMessage : class
         {
-            readonly ActiveMqMessagePublishTopology<TMessage> _messagePublishTopologyConfigurator;
             readonly IActiveMqPublishTopologyConfigurator _publishTopology;
 
-            public ImplementedMessageTypeConnector(IActiveMqPublishTopologyConfigurator publishTopology,
-                ActiveMqMessagePublishTopology<TMessage> messagePublishTopologyConfigurator)
+            public ImplementedMessageTypeConnector(IActiveMqPublishTopologyConfigurator publishTopology)
             {
                 _publishTopology = publishTopology;
-                _messagePublishTopologyConfigurator = messagePublishTopologyConfigurator;
             }
 
             public void ImplementsMessageType<T>(bool direct)
                 where T : class
             {
-                IActiveMqMessagePublishTopologyConfigurator<T> messageTopology = _publishTopology.GetMessageTopology<T>();
-
-                _messagePublishTopologyConfigurator.AddImplementedMessageConfigurator(messageTopology, direct);
+                _publishTopology.GetMessageTopology<T>();
             }
         }
     }

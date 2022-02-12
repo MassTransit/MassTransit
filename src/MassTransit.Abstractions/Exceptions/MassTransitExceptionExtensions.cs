@@ -13,7 +13,7 @@ namespace MassTransit
         /// <param name="results"></param>
         /// <param name="prefix">An optional prefix to override the default exception prefix</param>
         /// <exception cref="ConfigurationException"></exception>
-        public static IReadOnlyList<ValidationResult> ThrowIfContainsFailure(this IEnumerable<ValidationResult> results, string prefix = null)
+        public static IReadOnlyList<ValidationResult> ThrowIfContainsFailure(this IEnumerable<ValidationResult> results, string? prefix = null)
         {
             List<ValidationResult> resultList = results.ToList();
 

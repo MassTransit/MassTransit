@@ -1,4 +1,5 @@
-﻿namespace MassTransit.Configuration
+﻿#nullable enable
+namespace MassTransit.Configuration
 {
     using System;
     using AzureServiceBusTransport;
@@ -108,14 +109,14 @@
             _busConfiguration.HostConfiguration.Settings = settings;
         }
 
-        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<IServiceBusReceiveEndpointConfigurator> configureEndpoint = null)
+        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter? endpointNameFormatter,
+            Action<IServiceBusReceiveEndpointConfigurator>? configureEndpoint)
         {
             _hostConfiguration.ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
         }
 
-        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<IReceiveEndpointConfigurator> configureEndpoint = null)
+        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter? endpointNameFormatter,
+            Action<IReceiveEndpointConfigurator>? configureEndpoint)
         {
             _hostConfiguration.ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
         }

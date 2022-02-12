@@ -60,9 +60,12 @@ namespace MassTransit.Internals
         {
         }
 
-        public ReadWriteProperty(PropertyInfo property)
+        public ReadWriteProperty(PropertyInfo? property)
             : base(property)
         {
+            if (property == null)
+                throw new ArgumentNullException(nameof(property));
+
             SetProperty = GetSetMethod(Property);
         }
 
@@ -103,9 +106,12 @@ namespace MassTransit.Internals
         {
         }
 
-        public ReadWriteProperty(PropertyInfo property)
+        public ReadWriteProperty(PropertyInfo? property)
             : base(property)
         {
+            if (property == null)
+                throw new ArgumentNullException(nameof(property));
+
             SetProperty = GetSetMethod(Property);
         }
 

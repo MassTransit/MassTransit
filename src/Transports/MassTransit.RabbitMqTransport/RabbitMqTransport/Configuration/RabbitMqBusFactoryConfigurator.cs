@@ -1,4 +1,5 @@
-﻿namespace MassTransit.RabbitMqTransport.Configuration
+﻿#nullable enable
+namespace MassTransit.RabbitMqTransport.Configuration
 {
     using System;
     using System.Collections.Generic;
@@ -149,14 +150,14 @@
             _settings.QueueName = queueName;
         }
 
-        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<IRabbitMqReceiveEndpointConfigurator> configureEndpoint = null)
+        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter? endpointNameFormatter,
+            Action<IRabbitMqReceiveEndpointConfigurator>? configureEndpoint)
         {
             _hostConfiguration.ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
         }
 
-        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<IReceiveEndpointConfigurator> configureEndpoint = null)
+        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter? endpointNameFormatter,
+            Action<IReceiveEndpointConfigurator>? configureEndpoint)
         {
             _hostConfiguration.ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
         }

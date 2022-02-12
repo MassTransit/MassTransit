@@ -1,3 +1,4 @@
+#nullable enable
 namespace MassTransit.Context
 {
     using System;
@@ -22,7 +23,7 @@ namespace MassTransit.Context
             _options = options;
         }
 
-        public Task ScheduleRedelivery(TimeSpan delay, Action<ConsumeContext, SendContext> callback)
+        public Task ScheduleRedelivery(TimeSpan delay, Action<ConsumeContext, SendContext>? callback)
         {
             var schedulerContext = _context.GetPayload<MessageSchedulerContext>();
 

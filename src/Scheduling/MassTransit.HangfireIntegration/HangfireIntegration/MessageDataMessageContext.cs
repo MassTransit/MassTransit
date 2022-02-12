@@ -107,7 +107,7 @@ namespace MassTransit.HangfireIntegration
         public DateTime? ExpirationTime => _expirationTime ??= ConvertDateTime(_messageData.ExpirationTime);
         public DateTime? SentTime => default;
         public Headers Headers => _headers ??= GetHeaders();
-        public HostInfo? Host => _hostInfo ??= HostMetadataCache.Host;
+        public HostInfo Host => _hostInfo ??= HostMetadataCache.Host;
 
         Headers GetHeaders()
         {

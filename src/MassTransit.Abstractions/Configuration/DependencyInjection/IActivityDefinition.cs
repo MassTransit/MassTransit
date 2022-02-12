@@ -12,7 +12,7 @@ namespace MassTransit
         /// </summary>
         Type LogType { get; }
 
-        IEndpointDefinition CompensateEndpointDefinition { get; }
+        IEndpointDefinition? CompensateEndpointDefinition { get; }
 
         /// <summary>
         /// Return the endpoint name for the compensate activity

@@ -1,3 +1,4 @@
+#nullable enable
 namespace MassTransit.AmazonSqsTransport.Topology
 {
     using System;
@@ -12,16 +13,14 @@ namespace MassTransit.AmazonSqsTransport.Topology
         IAmazonSqsMessagePublishTopologyConfigurator<TMessage>
         where TMessage : class
     {
-        readonly IMessageTopology<TMessage> _messageTopology;
-        readonly IAmazonSqsPublishTopology _publishTopology;
         readonly AmazonSqsTopicConfigurator _amazonSqsTopic;
+        readonly IAmazonSqsPublishTopology _publishTopology;
 
         public AmazonSqsMessagePublishTopology(IAmazonSqsPublishTopology publishTopology, IMessageTopology<TMessage> messageTopology)
         {
             _publishTopology = publishTopology;
-            _messageTopology = messageTopology;
 
-            var topicName = _messageTopology.EntityName;
+            var topicName = messageTopology.EntityName;
 
             var temporary = MessageTypeCache<TMessage>.IsTemporaryMessageType;
 
@@ -52,7 +51,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
             return _amazonSqsTopic.GetEndpointAddress(hostAddress);
         }
 
-        public override bool TryGetPublishAddress(Uri baseAddress, out Uri publishAddress)
+        public override bool TryGetPublishAddress(Uri baseAddress, out Uri? publishAddress)
         {
             publishAddress = _amazonSqsTopic.GetEndpointAddress(baseAddress);
             return true;

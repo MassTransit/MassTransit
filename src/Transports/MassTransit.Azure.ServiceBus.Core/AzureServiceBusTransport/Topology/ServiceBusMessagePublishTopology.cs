@@ -1,3 +1,4 @@
+#nullable enable
 namespace MassTransit.AzureServiceBusTransport.Topology
 {
     using System;
@@ -14,22 +15,20 @@ namespace MassTransit.AzureServiceBusTransport.Topology
     {
         readonly Lazy<CreateTopicOptions> _createTopicOptions;
         readonly IList<IServiceBusMessagePublishTopology> _implementedMessageTypes;
-        readonly IMessageTopology<TMessage> _messageTopology;
         readonly IServiceBusPublishTopology _publishTopology;
         readonly ServiceBusTopicConfigurator _topicConfigurator;
 
         public ServiceBusMessagePublishTopology(IMessageTopology<TMessage> messageTopology, IServiceBusPublishTopology publishTopology)
         {
-            _messageTopology = messageTopology;
             _publishTopology = publishTopology;
-
-            _createTopicOptions = new Lazy<CreateTopicOptions>(() => _topicConfigurator.GetCreateTopicOptions());
 
             _topicConfigurator = new ServiceBusTopicConfigurator(messageTopology.EntityName, MessageTypeCache<TMessage>.IsTemporaryMessageType);
             _implementedMessageTypes = new List<IServiceBusMessagePublishTopology>();
+
+            _createTopicOptions = new Lazy<CreateTopicOptions>(() => _topicConfigurator.GetCreateTopicOptions());
         }
 
-        public override bool TryGetPublishAddress(Uri baseAddress, out Uri publishAddress)
+        public override bool TryGetPublishAddress(Uri baseAddress, out Uri? publishAddress)
         {
             publishAddress = new ServiceBusEndpointAddress(new Uri(baseAddress.GetLeftPart(UriPartial.Authority)), _topicConfigurator.FullPath);
             return true;

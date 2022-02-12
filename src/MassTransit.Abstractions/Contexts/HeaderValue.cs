@@ -66,7 +66,7 @@ namespace MassTransit
             return new HeaderValue(headerValue.Key, headerValue.Value);
         }
 
-        internal static bool IsValueStringValue(string key, object value, out HeaderValue<string> result)
+        internal static bool IsValueStringValue(string key, object? value, out HeaderValue<string> result)
         {
             switch (value)
             {
@@ -91,7 +91,7 @@ namespace MassTransit
             }
         }
 
-        internal static bool IsValueSimpleValue(string key, object value, out HeaderValue result)
+        internal static bool IsValueSimpleValue(string key, object? value, out HeaderValue result)
         {
             switch (value)
             {

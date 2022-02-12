@@ -26,6 +26,6 @@
         /// <param name="baseAddress">The host base address, used to build out the exchange address</param>
         /// <param name="publishAddress">The address where the publish endpoint should send the message</param>
         /// <returns>true if the address was available, otherwise false</returns>
-        bool TryGetPublishAddress(Uri baseAddress, out Uri publishAddress);
+        bool TryGetPublishAddress(Uri baseAddress, out Uri? publishAddress);
     }
 }

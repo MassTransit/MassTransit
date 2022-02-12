@@ -14,7 +14,7 @@ namespace MassTransit
         where TFuture : class, SagaStateMachine<FutureState>
     {
         int? _concurrentMessageLimit;
-        string _endpointName;
+        string? _endpointName;
 
         protected FutureDefinition()
         {
@@ -29,9 +29,9 @@ namespace MassTransit
             set => _endpointName = value;
         }
 
-        public IEndpointDefinition<TFuture> EndpointDefinition { get; set; }
+        public IEndpointDefinition<TFuture>? EndpointDefinition { get; set; }
 
-        IEndpointDefinition IFutureDefinition.EndpointDefinition => EndpointDefinition;
+        IEndpointDefinition? IFutureDefinition.EndpointDefinition => EndpointDefinition;
 
         /// <summary>
         /// Set the concurrent message limit for the saga, which limits how many saga instances are able to concurrently
@@ -57,7 +57,7 @@ namespace MassTransit
         {
             return string.IsNullOrWhiteSpace(_endpointName)
                 ? _endpointName = EndpointDefinition?.GetEndpointName(formatter) ?? formatter.Message<TFuture>()
-                : _endpointName;
+                : _endpointName!;
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace MassTransit
         /// Configure the saga endpoint
         /// </summary>
         /// <param name="configure"></param>
-        protected void Endpoint(Action<IEndpointRegistrationConfigurator> configure)
+        protected void Endpoint(Action<IEndpointRegistrationConfigurator>? configure = null)
         {
             var configurator = new EndpointRegistrationConfigurator<TFuture>();
 

@@ -9,7 +9,7 @@ namespace MassTransit.Configuration
             ConfigureConsumeTopology = true;
         }
 
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         public bool IsTemporary { get; set; }
 
@@ -19,6 +19,6 @@ namespace MassTransit.Configuration
 
         public bool ConfigureConsumeTopology { get; set; }
 
-        public string InstanceId { get; set; }
+        public string? InstanceId { get; set; }
     }
 }

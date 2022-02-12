@@ -10,7 +10,7 @@ namespace MassTransit
         where TMessage : class
     {
         readonly IEntityNameFormatter _entityNameFormatter;
-        string _entityName;
+        string? _entityName;
 
         public MessageEntityNameFormatter(IEntityNameFormatter entityNameFormatter)
         {

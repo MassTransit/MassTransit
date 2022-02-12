@@ -35,6 +35,6 @@
         {
         }
 
-        public Type MessageType { get; protected set; }
+        public Type? MessageType { get; protected set; }
     }
 }

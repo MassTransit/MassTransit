@@ -1,3 +1,4 @@
+#nullable enable
 namespace MassTransit.Serialization
 {
     using System;
@@ -9,6 +10,8 @@ namespace MassTransit.Serialization
     public class JsonMessageEnvelope :
         MessageEnvelope
     {
+        Dictionary<string, object?>? _headers;
+
         public JsonMessageEnvelope()
         {
         }
@@ -51,7 +54,7 @@ namespace MassTransit.Serialization
 
             SentTime = context.SentTime ?? DateTime.UtcNow;
 
-            Headers = new Dictionary<string, object>();
+            Headers = new Dictionary<string, object?>();
 
             foreach (KeyValuePair<string, object> header in context.Headers.GetAll())
                 Headers[header.Key] = header.Value;
@@ -97,7 +100,7 @@ namespace MassTransit.Serialization
 
             SentTime = context.SentTime ?? DateTime.UtcNow;
 
-            Headers = new Dictionary<string, object>();
+            Headers = new Dictionary<string, object?>();
 
             foreach (KeyValuePair<string, object> header in context.Headers.GetAll())
                 Headers[header.Key] = header.Value;
@@ -125,27 +128,33 @@ namespace MassTransit.Serialization
             SentTime = envelope.SentTime ?? DateTime.UtcNow;
 
             Headers = envelope.Headers != null
-                ? new Dictionary<string, object>(envelope.Headers, StringComparer.OrdinalIgnoreCase)
-                : new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+                ? new Dictionary<string, object?>(envelope.Headers, StringComparer.OrdinalIgnoreCase)
+                : new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
 
             Host = envelope.Host ?? HostMetadataCache.Host;
         }
 
-        public string MessageId { get; set; }
-        public string RequestId { get; set; }
-        public string CorrelationId { get; set; }
-        public string ConversationId { get; set; }
-        public string InitiatorId { get; set; }
-        public string SourceAddress { get; set; }
-        public string DestinationAddress { get; set; }
-        public string ResponseAddress { get; set; }
-        public string FaultAddress { get; set; }
-        public string[] MessageType { get; set; }
-        public object Message { get; set; }
+        public string? MessageId { get; set; }
+        public string? RequestId { get; set; }
+        public string? CorrelationId { get; set; }
+        public string? ConversationId { get; set; }
+        public string? InitiatorId { get; set; }
+        public string? SourceAddress { get; set; }
+        public string? DestinationAddress { get; set; }
+        public string? ResponseAddress { get; set; }
+        public string? FaultAddress { get; set; }
+        public string[]? MessageType { get; set; }
+        public object? Message { get; set; }
         public DateTime? ExpirationTime { get; set; }
         public DateTime? SentTime { get; set; }
-        public Dictionary<string, object> Headers { get; set; }
-        public HostInfo Host { get; set; }
+
+        public Dictionary<string, object?> Headers
+        {
+            get => _headers ??= new Dictionary<string, object?>();
+            set => _headers = value;
+        }
+
+        public HostInfo? Host { get; set; }
 
         public void Update(SendContext context)
         {

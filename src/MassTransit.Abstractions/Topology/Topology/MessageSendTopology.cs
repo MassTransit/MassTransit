@@ -48,7 +48,7 @@ namespace MassTransit.Topology
                 topology.Apply(builder);
         }
 
-        public bool TryGetConvention<TConvention>(out TConvention convention)
+        public bool TryGetConvention<TConvention>(out TConvention? convention)
             where TConvention : class, IMessageSendTopologyConvention<TMessage>
         {
             for (var i = 0; i < _conventions.Count; i++)

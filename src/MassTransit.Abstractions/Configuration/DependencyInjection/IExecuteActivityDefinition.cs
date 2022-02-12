@@ -17,7 +17,7 @@ namespace MassTransit
         /// </summary>
         Type ArgumentType { get; }
 
-        IEndpointDefinition ExecuteEndpointDefinition { get; }
+        IEndpointDefinition? ExecuteEndpointDefinition { get; }
 
         /// <summary>
         /// Return the endpoint name for the execute activity
@@ -36,7 +36,7 @@ namespace MassTransit
         /// <summary>
         /// Sets the endpoint definition, if available
         /// </summary>
-        new IEndpointDefinition<IExecuteActivity<TArguments>> ExecuteEndpointDefinition { set; }
+        new IEndpointDefinition<IExecuteActivity<TArguments>>? ExecuteEndpointDefinition { set; }
 
         /// <summary>
         /// Configure the execute activity

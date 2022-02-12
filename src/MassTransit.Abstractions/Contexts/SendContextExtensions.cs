@@ -60,13 +60,13 @@ namespace MassTransit
             headers.Set(MessageHeaders.FaultTimestamp, exceptionContext.ExceptionTimestamp.ToString("O"));
             headers.Set(MessageHeaders.FaultStackTrace, ExceptionUtil.GetStackTrace(exception));
 
-            if (exceptionContext.TryGetPayload(out ConsumerFaultContext info))
+            if (exceptionContext.TryGetPayload(out ConsumerFaultContext? info))
             {
-                headers.Set(MessageHeaders.FaultConsumerType, info.ConsumerType);
+                headers.Set(MessageHeaders.FaultConsumerType, info!.ConsumerType);
                 headers.Set(MessageHeaders.FaultMessageType, info.MessageType);
             }
 
-            if (exceptionContext.TryGetPayload(out RetryContext retryContext) && retryContext.RetryCount > 0)
+            if (exceptionContext.TryGetPayload(out RetryContext? retryContext) && retryContext!.RetryCount > 0)
                 headers.Set(MessageHeaders.FaultRetryCount, retryContext.RetryCount);
         }
 
@@ -90,13 +90,13 @@ namespace MassTransit
             adapter.Set(headers, MessageHeaders.FaultTimestamp, exceptionContext.ExceptionTimestamp);
             adapter.Set(headers, MessageHeaders.FaultStackTrace, ExceptionUtil.GetStackTrace(exception));
 
-            if (exceptionContext.TryGetPayload(out ConsumerFaultContext info))
+            if (exceptionContext.TryGetPayload(out ConsumerFaultContext? info))
             {
-                adapter.Set(headers, MessageHeaders.FaultConsumerType, info.ConsumerType);
+                adapter.Set(headers, MessageHeaders.FaultConsumerType, info!.ConsumerType);
                 adapter.Set(headers, MessageHeaders.FaultMessageType, info.MessageType);
             }
 
-            if (exceptionContext.TryGetPayload(out RetryContext retryContext) && retryContext.RetryCount > 0)
+            if (exceptionContext.TryGetPayload(out RetryContext? retryContext) && retryContext!.RetryCount > 0)
                 adapter.Set(headers, MessageHeaders.FaultRetryCount, retryContext.RetryCount);
         }
 

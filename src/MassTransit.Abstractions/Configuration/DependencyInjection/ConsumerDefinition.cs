@@ -14,7 +14,7 @@ namespace MassTransit
         where TConsumer : class, IConsumer
     {
         int? _concurrentMessageLimit;
-        string _endpointName;
+        string? _endpointName;
 
         protected ConsumerDefinition()
         {
@@ -30,9 +30,9 @@ namespace MassTransit
             set => _endpointName = value;
         }
 
-        public IEndpointDefinition<TConsumer> EndpointDefinition { get; set; }
+        public IEndpointDefinition<TConsumer>? EndpointDefinition { get; set; }
 
-        IEndpointDefinition IConsumerDefinition.EndpointDefinition => EndpointDefinition;
+        IEndpointDefinition? IConsumerDefinition.EndpointDefinition => EndpointDefinition;
 
         /// Set the concurrent message limit for the consumer, which limits how many consumers are able to concurrently
         /// consume messages.
@@ -56,14 +56,14 @@ namespace MassTransit
         {
             return string.IsNullOrWhiteSpace(_endpointName)
                 ? _endpointName = EndpointDefinition?.GetEndpointName(formatter) ?? formatter.Consumer<TConsumer>()
-                : _endpointName;
+                : _endpointName!;
         }
 
         /// <summary>
         /// Configure the consumer endpoint
         /// </summary>
         /// <param name="configure"></param>
-        protected void Endpoint(Action<IEndpointRegistrationConfigurator> configure)
+        protected void Endpoint(Action<IEndpointRegistrationConfigurator>? configure = null)
         {
             var configurator = new EndpointRegistrationConfigurator<TConsumer>();
 

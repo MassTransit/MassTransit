@@ -21,7 +21,7 @@ namespace MassTransit.Payloads
         /// <typeparam name="TPayload">The property type</typeparam>
         /// <param name="payload">The property value</param>
         /// <returns>True if the value was returned, otherwise false</returns>
-        bool TryGetPayload<TPayload>(out TPayload payload)
+        bool TryGetPayload<TPayload>(out TPayload? payload)
             where TPayload : class;
 
         /// <summary>

@@ -35,12 +35,12 @@
             return expression.GetMemberExpression().Member.Name;
         }
 
-        public static PropertyInfo GetPropertyInfo<T, TMember>(this Expression<Func<T, TMember>> expression)
+        public static PropertyInfo? GetPropertyInfo<T, TMember>(this Expression<Func<T, TMember>> expression)
         {
             return expression.GetMemberExpression().Member as PropertyInfo;
         }
 
-        public static PropertyInfo GetPropertyInfo<T>(this Expression<Func<T>> expression)
+        public static PropertyInfo? GetPropertyInfo<T>(this Expression<Func<T>> expression)
         {
             return expression.GetMemberExpression().Member as PropertyInfo;
         }
@@ -87,7 +87,7 @@
             if (body == null)
                 throw new ArgumentNullException(nameof(body));
 
-            MemberExpression memberExpression = null;
+            MemberExpression? memberExpression = null;
             if (body.NodeType == ExpressionType.Convert)
             {
                 var unaryExpression = (UnaryExpression)body;

@@ -1,3 +1,4 @@
+#nullable enable
 namespace MassTransit.Serialization
 {
     using System;
@@ -16,7 +17,7 @@ namespace MassTransit.Serialization
             _headers = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
         }
 
-        public void Set(string key, string value)
+        public void Set(string key, string? value)
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
@@ -27,7 +28,7 @@ namespace MassTransit.Serialization
                 _headers[key] = value;
         }
 
-        public void Set(string key, object value, bool overwrite = true)
+        public void Set(string key, object? value, bool overwrite = true)
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
@@ -39,7 +40,7 @@ namespace MassTransit.Serialization
                 else
                     _headers[key] = value;
             }
-            else if (!_headers.ContainsKey(key))
+            else if (!_headers.ContainsKey(key) && value != null)
                 _headers.Add(key, value);
         }
 
@@ -53,7 +54,7 @@ namespace MassTransit.Serialization
             return _headers;
         }
 
-        public T Get<T>(string key, T defaultValue)
+        public T? Get<T>(string key, T? defaultValue)
             where T : class
         {
             return SystemTextJsonMessageSerializer.Instance.GetValue(_headers, key, defaultValue);

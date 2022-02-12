@@ -49,8 +49,11 @@ namespace MassTransit.Internals
         {
         }
 
-        public ReadOnlyProperty(PropertyInfo property)
+        public ReadOnlyProperty(PropertyInfo? property)
         {
+            if (property == null)
+                throw new ArgumentNullException(nameof(property));
+
             Property = property;
             GetProperty = GetGetMethod(Property);
         }
@@ -81,8 +84,11 @@ namespace MassTransit.Internals
         {
         }
 
-        public ReadOnlyProperty(PropertyInfo property)
+        public ReadOnlyProperty(PropertyInfo? property)
         {
+            if (property == null)
+                throw new ArgumentNullException(nameof(property));
+
             Property = property;
             GetProperty = GetGetMethod(Property);
         }

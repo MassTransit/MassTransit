@@ -2,6 +2,7 @@
 namespace MassTransit.Serialization
 {
     using System;
+    using Metadata;
 
 
     public class EnvelopeMessageContext :
@@ -38,7 +39,7 @@ namespace MassTransit.Serialization
         public Uri? FaultAddress => _faultAddress ??= ConvertToUri(_envelope.FaultAddress);
         public DateTime? SentTime => _envelope.SentTime;
         public Headers Headers => _headers ??= GetHeaders();
-        public HostInfo Host => _envelope.Host;
+        public HostInfo Host => _envelope.Host ?? HostMetadataCache.Empty;
 
         Headers GetHeaders()
         {
@@ -47,7 +48,7 @@ namespace MassTransit.Serialization
                 : EmptyHeaders.Instance;
         }
 
-        static Guid? ConvertIdToGuid(string id)
+        static Guid? ConvertIdToGuid(string? id)
         {
             if (string.IsNullOrWhiteSpace(id))
                 return default;
@@ -58,7 +59,7 @@ namespace MassTransit.Serialization
             throw new FormatException("The Id was not a Guid: " + id);
         }
 
-        static Uri? ConvertToUri(string uri)
+        static Uri? ConvertToUri(string? uri)
         {
             return string.IsNullOrWhiteSpace(uri) ? null : new Uri(uri);
         }

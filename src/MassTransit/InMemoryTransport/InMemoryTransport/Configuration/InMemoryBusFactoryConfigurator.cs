@@ -1,3 +1,4 @@
+#nullable enable
 namespace MassTransit.InMemoryTransport.Configuration
 {
     using System;
@@ -41,12 +42,12 @@ namespace MassTransit.InMemoryTransport.Configuration
             configureTopology?.Invoke(configurator);
         }
 
-        public void Host(Action<IInMemoryHostConfigurator> configure = null)
+        public void Host(Action<IInMemoryHostConfigurator> configure)
         {
             configure?.Invoke(_hostConfiguration.Configurator);
         }
 
-        public void Host(Uri baseAddress, Action<IInMemoryHostConfigurator> configure = null)
+        public void Host(Uri baseAddress, Action<IInMemoryHostConfigurator> configure)
         {
             _hostConfiguration.BaseAddress = baseAddress;
 
@@ -55,14 +56,14 @@ namespace MassTransit.InMemoryTransport.Configuration
 
         public new IInMemoryPublishTopologyConfigurator PublishTopology => _busConfiguration.Topology.Publish;
 
-        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<IInMemoryReceiveEndpointConfigurator> configureEndpoint = null)
+        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter? endpointNameFormatter,
+            Action<IInMemoryReceiveEndpointConfigurator>? configureEndpoint = null)
         {
             _hostConfiguration.ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
         }
 
-        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<IReceiveEndpointConfigurator> configureEndpoint = null)
+        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter? endpointNameFormatter,
+            Action<IReceiveEndpointConfigurator>? configureEndpoint = null)
         {
             _hostConfiguration.ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
         }

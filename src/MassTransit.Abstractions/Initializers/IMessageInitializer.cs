@@ -48,7 +48,7 @@ namespace MassTransit.Initializers
         /// <param name="input">The input object</param>
         /// <param name="pipe"></param>
         /// <returns></returns>
-        Task<SendTuple<TMessage>> InitializeMessage(PipeContext context, object input, IPipe<SendContext<TMessage>> pipe = null);
+        Task<SendTuple<TMessage>> InitializeMessage(PipeContext context, object input, IPipe<SendContext<TMessage>>? pipe = null);
 
         /// <summary>
         /// Initialize the message using the input and send it to the endpoint.
@@ -58,7 +58,7 @@ namespace MassTransit.Initializers
         /// <param name="moreInputs">Additional objects used to initialize the message</param>
         /// <param name="pipe"></param>
         /// <returns></returns>
-        Task<SendTuple<TMessage>> InitializeMessage(PipeContext context, object input, object[] moreInputs, IPipe<SendContext<TMessage>> pipe = null);
+        Task<SendTuple<TMessage>> InitializeMessage(PipeContext context, object input, object[] moreInputs, IPipe<SendContext<TMessage>>? pipe = null);
 
         /// <summary>
         /// Initialize the message using the input and send it to the endpoint.

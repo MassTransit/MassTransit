@@ -1,3 +1,4 @@
+#nullable enable
 namespace MassTransit.RabbitMqTransport
 {
     using System;
@@ -19,7 +20,7 @@ namespace MassTransit.RabbitMqTransport
             _receiveEndpointContext = receiveEndpointContext;
         }
 
-        public Task<ISendTransport> GetPublishTransport<T>(Uri publishAddress)
+        public Task<ISendTransport> GetPublishTransport<T>(Uri? publishAddress)
             where T : class
         {
             return _connectionContextSupervisor.CreatePublishTransport<T>(_receiveEndpointContext, _supervisor);

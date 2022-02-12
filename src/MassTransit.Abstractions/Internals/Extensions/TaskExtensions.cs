@@ -60,7 +60,7 @@ namespace MassTransit.Internals
         }
 
         public static Task OrTimeout(this Task task, int ms = 0, int s = 0, int m = 0, int h = 0, int d = 0, CancellationToken cancellationToken = default,
-            [CallerMemberName] string memberName = null, [CallerFilePath] string filePath = null, [CallerLineNumber] int? lineNumber = null)
+            [CallerMemberName] string? memberName = null, [CallerFilePath] string? filePath = null, [CallerLineNumber] int? lineNumber = null)
         {
             var timeout = new TimeSpan(d, h, m, s, ms);
             if (timeout == TimeSpan.Zero)
@@ -70,12 +70,12 @@ namespace MassTransit.Internals
         }
 
         public static Task OrTimeout(this Task task, TimeSpan timeout, CancellationToken cancellationToken = default,
-            [CallerMemberName] string memberName = null, [CallerFilePath] string filePath = null, [CallerLineNumber] int? lineNumber = null)
+            [CallerMemberName] string? memberName = null, [CallerFilePath] string? filePath = null, [CallerLineNumber] int? lineNumber = null)
         {
             return OrTimeoutInternal(task, timeout, cancellationToken, memberName, filePath, lineNumber);
         }
 
-        static Task OrTimeoutInternal(this Task task, TimeSpan timeout, CancellationToken cancellationToken, string memberName, string filePath,
+        static Task OrTimeoutInternal(this Task task, TimeSpan timeout, CancellationToken cancellationToken, string? memberName, string? filePath,
             int? lineNumber)
         {
             if (task.IsCompleted)
@@ -112,7 +112,7 @@ namespace MassTransit.Internals
 
         public static Task<T> OrTimeout<T>(this Task<T> task, int ms = 0, int s = 0, int m = 0, int h = 0, int d = 0,
             CancellationToken cancellationToken = default,
-            [CallerMemberName] string memberName = null, [CallerFilePath] string filePath = null,
+            [CallerMemberName] string? memberName = null, [CallerFilePath] string? filePath = null,
             [CallerLineNumber] int? lineNumber = null)
         {
             var timeout = new TimeSpan(d, h, m, s, ms);
@@ -123,12 +123,12 @@ namespace MassTransit.Internals
         }
 
         public static Task<T> OrTimeout<T>(this Task<T> task, TimeSpan timeout, CancellationToken cancellationToken = default,
-            [CallerMemberName] string memberName = null, [CallerFilePath] string filePath = null, [CallerLineNumber] int? lineNumber = null)
+            [CallerMemberName] string? memberName = null, [CallerFilePath] string? filePath = null, [CallerLineNumber] int? lineNumber = null)
         {
             return OrTimeoutInternal(task, timeout, cancellationToken, memberName, filePath, lineNumber);
         }
 
-        static Task<T> OrTimeoutInternal<T>(this Task<T> task, TimeSpan timeout, CancellationToken cancellationToken, string memberName, string filePath,
+        static Task<T> OrTimeoutInternal<T>(this Task<T> task, TimeSpan timeout, CancellationToken cancellationToken, string? memberName, string? filePath,
             int? lineNumber)
         {
             if (task.IsCompleted)
@@ -163,7 +163,7 @@ namespace MassTransit.Internals
             return WaitAsync();
         }
 
-        static string FormatTimeoutMessage(string memberName, string filePath, int? lineNumber)
+        static string FormatTimeoutMessage(string? memberName, string? filePath, int? lineNumber)
         {
             return !string.IsNullOrEmpty(memberName)
                 ? $"Operation in {memberName} timed out at {filePath}:{lineNumber}"

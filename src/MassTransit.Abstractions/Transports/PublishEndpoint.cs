@@ -105,7 +105,7 @@ namespace MassTransit.Transports
             return PublishEndpointProvider.GetPublishSendEndpoint<T>();
         }
 
-        Task PublishInternal<T>(CancellationToken cancellationToken, T message, IPipe<PublishContext<T>> pipe = default)
+        Task PublishInternal<T>(CancellationToken cancellationToken, T message, IPipe<PublishContext<T>>? pipe = default)
             where T : class
         {
             Task<ISendEndpoint> sendEndpointTask = GetPublishSendEndpoint<T>();
@@ -113,7 +113,7 @@ namespace MassTransit.Transports
             {
                 var sendEndpoint = sendEndpointTask.Result;
 
-                return pipe.IsNotEmpty()
+                return pipe != null && pipe.IsNotEmpty()
                     ? sendEndpoint.Send(message, new PublishSendPipeAdapter<T>(pipe), cancellationToken)
                     : sendEndpoint.Send(message, cancellationToken);
             }
@@ -122,7 +122,7 @@ namespace MassTransit.Transports
             {
                 var sendEndpoint = await sendEndpointTask.ConfigureAwait(false);
 
-                if (pipe.IsNotEmpty())
+                if (pipe != null && pipe.IsNotEmpty())
                     await sendEndpoint.Send(message, new PublishSendPipeAdapter<T>(pipe), cancellationToken).ConfigureAwait(false);
                 else
                     await sendEndpoint.Send(message, cancellationToken).ConfigureAwait(false);
@@ -131,7 +131,7 @@ namespace MassTransit.Transports
             return PublishAsync();
         }
 
-        Task PublishInternal<T>(CancellationToken cancellationToken, object values, IPipe<PublishContext<T>> pipe = default)
+        Task PublishInternal<T>(CancellationToken cancellationToken, object values, IPipe<PublishContext<T>>? pipe = default)
             where T : class
         {
             Task<ISendEndpoint> sendEndpointTask = GetPublishSendEndpoint<T>();
@@ -139,7 +139,7 @@ namespace MassTransit.Transports
             {
                 var sendEndpoint = sendEndpointTask.Result;
 
-                return pipe.IsNotEmpty()
+                return pipe != null && pipe.IsNotEmpty()
                     ? sendEndpoint.Send(values, new PublishSendPipeAdapter<T>(pipe), cancellationToken)
                     : sendEndpoint.Send<T>(values, cancellationToken);
             }
@@ -148,7 +148,7 @@ namespace MassTransit.Transports
             {
                 var sendEndpoint = await sendEndpointTask.ConfigureAwait(false);
 
-                if (pipe.IsNotEmpty())
+                if (pipe != null && pipe.IsNotEmpty())
                     await sendEndpoint.Send(values, new PublishSendPipeAdapter<T>(pipe), cancellationToken).ConfigureAwait(false);
                 else
                     await sendEndpoint.Send<T>(values, cancellationToken).ConfigureAwait(false);

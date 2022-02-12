@@ -27,8 +27,8 @@ namespace MassTransit
             Fault = (Fault)info.GetValue("Fault", typeof(Fault));
         }
 
-        public string RequestType { get; private set; }
-        public Fault Fault { get; private set; }
+        public string? RequestType { get; private set; }
+        public Fault? Fault { get; private set; }
 
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {

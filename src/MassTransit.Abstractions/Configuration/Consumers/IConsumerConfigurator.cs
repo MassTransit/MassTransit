@@ -23,7 +23,7 @@
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="configure">The callback to configure the message pipeline</param>
-        void Message<T>(Action<IConsumerMessageConfigurator<T>> configure)
+        void Message<T>(Action<IConsumerMessageConfigurator<T>>? configure = null)
             where T : class;
 
         /// <summary>
@@ -32,7 +32,7 @@
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="configure">The callback to configure the message pipeline</param>
-        void ConsumerMessage<T>(Action<IConsumerMessageConfigurator<TConsumer, T>> configure)
+        void ConsumerMessage<T>(Action<IConsumerMessageConfigurator<TConsumer, T>>? configure = null)
             where T : class;
     }
 }

@@ -72,6 +72,11 @@ jobs:
         with:
           dotnet-version: '3.1.x'
 
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+
       # - name: Test Containers
       #   uses: zyborg/dotnet-tests-report@v1
       #   with:
@@ -101,6 +106,11 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '3.1.x'
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
 
       - name: Test ActiveMQ
         run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
@@ -134,6 +144,11 @@ jobs:
         with:
           dotnet-version: '3.1.x'
 
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+
       - name: Test Azure Service Bus
         env:
           MT_ASB_KEYVALUE: ${{ secrets.AZURE_SERVICEBUS }}
@@ -160,6 +175,11 @@ jobs:
         with:
           dotnet-version: '3.1.x'
 
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+
       - name: Test RabbitMQ
         run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.RabbitMqTransport.Tests
@@ -184,6 +204,11 @@ jobs:
         with:
           dotnet-version: '3.1.x'
 
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+
       - name: Test SQS
         run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.AmazonSqsTransport.Tests
@@ -200,6 +225,11 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '3.1.x'
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
 
       - name: Test Azure Table
         env:
@@ -219,6 +249,11 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '3.1.x'
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
 
       - name: Test CosmosDB
         env:
@@ -249,6 +284,11 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '3.1.x'
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
 
       - name: Test Dapper
         run: dotnet test -c Release --logger:"console;verbosity=normal" --filter "Category!=Flaky&Category!=Integration"
@@ -289,7 +329,7 @@ jobs:
         with:
           dotnet-version: '6.0.x'
 
-      - name: Test EntityFrameworkCore 3.1
+      - name: Test EntityFrameworkCore 6.0
         run: dotnet test -c Release --logger:"console;verbosity=normal" -f netcoreapp3.1 --filter "Category!=Flaky&Category!=Integration"
         working-directory: tests/MassTransit.EntityFrameworkCoreIntegration.Tests
 
@@ -321,6 +361,11 @@ jobs:
         with:
           dotnet-version: '3.1.x'
 
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+
       - name: Test Marten
         run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.MartenIntegration.Tests
@@ -342,6 +387,11 @@ jobs:
         with:
           dotnet-version: '3.1.x'
 
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+
       - name: Test MongoDB
         run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.MongoDbIntegration.Tests
@@ -357,6 +407,11 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '3.1.x'
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
 
       - name: Test NHibernate
         run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
@@ -380,6 +435,11 @@ jobs:
         with:
           dotnet-version: '3.1.x'
 
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+
       - name: Test Redis
         run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.RedisIntegration.Tests
@@ -395,6 +455,11 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '3.1.x'
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
 
       - name: Test Hangfire
         run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
@@ -412,6 +477,11 @@ jobs:
         with:
           dotnet-version: '3.1.x'
 
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+
       - name: Test Quartz
         run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.QuartzIntegration.Tests
@@ -427,6 +497,11 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '3.1.x'
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
 
       - name: Test EventHub
         run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
@@ -481,6 +556,11 @@ jobs:
         with:
           dotnet-version: '3.1.x'
 
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+
       - name: Test Kafka
         run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.KafkaIntegration.Tests
@@ -497,6 +577,11 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '3.1.x'
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
 
       - name: Test SignalR
         run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky

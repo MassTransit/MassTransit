@@ -19,11 +19,11 @@
         bool _isStopped;
         bool _isStopping;
 
-        TaskCompletionSource<bool> _setCompleted;
-        CancellationTokenSource _setCompletedCancel;
+        TaskCompletionSource<bool>? _setCompleted;
+        CancellationTokenSource? _setCompletedCancel;
 
-        TaskCompletionSource<bool> _setReady;
-        CancellationTokenSource _setReadyCancel;
+        TaskCompletionSource<bool>? _setReady;
+        CancellationTokenSource? _setReadyCancel;
 
         /// <summary>
         /// Creates the Agent
@@ -134,7 +134,7 @@
                     if (_setReady.Task.IsCompleted)
                         return;
 
-                    _setReadyCancel.Cancel();
+                    _setReadyCancel?.Cancel();
 
                     _setReady = null;
                     _setReadyCancel = null;
@@ -196,7 +196,7 @@
                     if (_setCompleted.Task.IsCompleted)
                         return;
 
-                    _setCompletedCancel.Cancel();
+                    _setCompletedCancel?.Cancel();
 
                     _setCompleted = null;
                     _setCompletedCancel = null;

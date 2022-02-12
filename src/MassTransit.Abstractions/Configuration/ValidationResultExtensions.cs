@@ -64,7 +64,7 @@ namespace MassTransit
         public class Result :
             ValidationResult
         {
-            public Result(ValidationResultDisposition disposition, string key, string value, string message)
+            public Result(ValidationResultDisposition disposition, string key, string? value, string message)
             {
                 Disposition = disposition;
                 Key = key;
@@ -88,7 +88,7 @@ namespace MassTransit
 
             public ValidationResultDisposition Disposition { get; }
             public string Key { get; }
-            public string Value { get; }
+            public string? Value { get; }
             public string Message { get; }
 
             public override string ToString()

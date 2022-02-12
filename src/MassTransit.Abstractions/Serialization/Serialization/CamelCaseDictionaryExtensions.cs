@@ -12,7 +12,7 @@ namespace MassTransit.Serialization
         /// <param name="key"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        public static bool TryGetValueCamelCase(this IDictionary<string, object> dictionary, string key, out object value)
+        public static bool TryGetValueCamelCase(this IDictionary<string, object>? dictionary, string key, out object? value)
         {
             if (dictionary != null && char.IsUpper(key[0]))
             {
@@ -34,7 +34,7 @@ namespace MassTransit.Serialization
         /// <param name="key"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        public static bool TryGetValueCamelCase(this IReadOnlyDictionary<string, object> dictionary, string key, out object value)
+        public static bool TryGetValueCamelCase(this IReadOnlyDictionary<string, object>? dictionary, string key, out object? value)
         {
             if (dictionary != null && char.IsUpper(key[0]))
             {

@@ -11,7 +11,7 @@ namespace MassTransit
         where TArguments : class
     {
         int? _concurrentMessageLimit;
-        string _executeEndpointName;
+        string? _executeEndpointName;
 
         protected ExecuteActivityDefinition()
         {
@@ -27,9 +27,9 @@ namespace MassTransit
             set => _executeEndpointName = value;
         }
 
-        public IEndpointDefinition<IExecuteActivity<TArguments>> ExecuteEndpointDefinition { get; set; }
+        public IEndpointDefinition<IExecuteActivity<TArguments>>? ExecuteEndpointDefinition { get; set; }
 
-        IEndpointDefinition IExecuteActivityDefinition.ExecuteEndpointDefinition => ExecuteEndpointDefinition;
+        IEndpointDefinition? IExecuteActivityDefinition.ExecuteEndpointDefinition => ExecuteEndpointDefinition;
 
         /// <summary>
         /// Specify a concurrency limit, which is applied to the entire consumer, saga, or activity, regardless of message type.
@@ -53,7 +53,7 @@ namespace MassTransit
         {
             return string.IsNullOrWhiteSpace(_executeEndpointName)
                 ? _executeEndpointName = ExecuteEndpointDefinition?.GetEndpointName(formatter) ?? formatter.ExecuteActivity<TActivity, TArguments>()
-                : _executeEndpointName;
+                : _executeEndpointName!;
         }
 
         Type IExecuteActivityDefinition.ActivityType => typeof(TActivity);
@@ -63,7 +63,7 @@ namespace MassTransit
         /// Configure the execute endpoint
         /// </summary>
         /// <param name="configure"></param>
-        protected void ExecuteEndpoint(Action<IEndpointRegistrationConfigurator> configure)
+        protected void ExecuteEndpoint(Action<IEndpointRegistrationConfigurator>? configure = null)
         {
             var configurator = new EndpointRegistrationConfigurator<IExecuteActivity<TArguments>> { ConfigureConsumeTopology = false };
 

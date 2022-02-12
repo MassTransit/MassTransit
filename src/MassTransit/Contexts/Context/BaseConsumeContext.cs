@@ -7,7 +7,6 @@ namespace MassTransit.Context
     using System.Threading.Tasks;
     using Events;
     using Metadata;
-    using RetryPolicies;
     using Transports;
 
 
@@ -305,7 +304,7 @@ namespace MassTransit.Context
                     context.Headers.Set(MessageHeaders.FaultRetryCount, retryContext.RetryCount);
 
                 var redeliveryCount = _context.Headers.Get<int>(MessageHeaders.RedeliveryCount);
-                if(redeliveryCount.HasValue)
+                if (redeliveryCount.HasValue)
                     context.Headers.Set(MessageHeaders.FaultRedeliveryCount, redeliveryCount);
 
                 return Task.CompletedTask;

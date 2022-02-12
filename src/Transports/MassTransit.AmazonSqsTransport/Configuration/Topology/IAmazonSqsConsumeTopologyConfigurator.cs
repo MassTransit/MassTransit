@@ -1,9 +1,5 @@
 ﻿namespace MassTransit
 {
-    using AmazonSqsTransport.Topology;
-    using Topology;
-
-
     public interface IAmazonSqsConsumeTopologyConfigurator :
         IConsumeTopologyConfigurator,
         IAmazonSqsConsumeTopology

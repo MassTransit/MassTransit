@@ -26,10 +26,10 @@ namespace MassTransit.Serialization
         public override Guid? ConversationId => SerializerContext.ConversationId;
         public override Guid? InitiatorId => SerializerContext.InitiatorId;
         public override DateTime? ExpirationTime => SerializerContext.ExpirationTime;
-        public override Uri SourceAddress => SerializerContext.SourceAddress;
-        public override Uri DestinationAddress => SerializerContext.DestinationAddress;
-        public override Uri ResponseAddress => SerializerContext.ResponseAddress;
-        public override Uri FaultAddress => SerializerContext.FaultAddress;
+        public override Uri? SourceAddress => SerializerContext.SourceAddress;
+        public override Uri? DestinationAddress => SerializerContext.DestinationAddress;
+        public override Uri? ResponseAddress => SerializerContext.ResponseAddress;
+        public override Uri? FaultAddress => SerializerContext.FaultAddress;
         public override DateTime? SentTime => SerializerContext.SentTime;
         public override Headers Headers => SerializerContext.Headers;
         public override HostInfo Host => SerializerContext.Host;

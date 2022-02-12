@@ -47,7 +47,7 @@ namespace MassTransit.Internals
             return FormatTypeName(sb, type, null);
         }
 
-        string FormatTypeName(StringBuilder sb, Type type, string scope)
+        string FormatTypeName(StringBuilder sb, Type type, string? scope)
         {
             if (type.IsGenericParameter)
                 return "";

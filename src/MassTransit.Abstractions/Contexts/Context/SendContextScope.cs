@@ -10,7 +10,7 @@
         SendContextProxy
     {
         readonly PipeContext _context;
-        IPayloadCache _payloadCache;
+        IPayloadCache? _payloadCache;
 
         public SendContextScope(SendContext context)
             : base(context)
@@ -38,7 +38,7 @@
                 while (Volatile.Read(ref _payloadCache) == null)
                     Interlocked.CompareExchange(ref _payloadCache, new ListPayloadCache(), null);
 
-                return _payloadCache;
+                return _payloadCache!;
             }
         }
 
@@ -47,7 +47,8 @@
             return payloadType.GetTypeInfo().IsInstanceOfType(this) || PayloadCache.HasPayloadType(payloadType) || _context.HasPayloadType(payloadType);
         }
 
-        public override bool TryGetPayload<T>(out T payload)
+        public override bool TryGetPayload<T>(out T? payload)
+            where T : class
         {
             if (this is T context)
             {
@@ -64,10 +65,10 @@
                 return context;
 
             if (PayloadCache.TryGetPayload<T>(out var payload))
-                return payload;
+                return payload!;
 
             if (_context.TryGetPayload(out payload))
-                return payload;
+                return payload!;
 
             return PayloadCache.GetOrAddPayload(payloadFactory);
         }
@@ -84,7 +85,7 @@
             {
                 T Add()
                 {
-                    return updateFactory(payload);
+                    return updateFactory(payload!);
                 }
 
                 return PayloadCache.AddOrUpdatePayload(Add, updateFactory);

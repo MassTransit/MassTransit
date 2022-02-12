@@ -6,7 +6,7 @@ namespace MassTransit.Transports
 
     public interface IPublishTransportProvider
     {
-        Task<ISendTransport> GetPublishTransport<T>(Uri publishAddress)
+        Task<ISendTransport> GetPublishTransport<T>(Uri? publishAddress)
             where T : class;
     }
 }

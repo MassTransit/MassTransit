@@ -19,13 +19,13 @@ namespace MassTransit.Serialization
             return Enumerable.Empty<KeyValuePair<string, object>>();
         }
 
-        public bool TryGetHeader(string key, out object value)
+        public bool TryGetHeader(string key, out object? value)
         {
             value = default;
             return false;
         }
 
-        public T Get<T>(string key, T defaultValue)
+        public T? Get<T>(string key, T? defaultValue)
             where T : class
         {
             return defaultValue;

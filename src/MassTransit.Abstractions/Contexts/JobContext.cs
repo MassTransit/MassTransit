@@ -16,7 +16,7 @@ namespace MassTransit
 
         TimeSpan ElapsedTime { get; }
 
-        Task NotifyCanceled(string reason = null);
+        Task NotifyCanceled(string? reason = null);
         Task NotifyStarted();
         Task NotifyCompleted();
         Task NotifyFaulted(Exception exception, TimeSpan? delay = default);

@@ -1,4 +1,5 @@
-﻿namespace MassTransit.InMemoryTransport
+﻿#nullable enable
+namespace MassTransit.InMemoryTransport
 {
     using System;
     using System.Collections.Generic;
@@ -33,7 +34,7 @@
                 configurator.Apply(builder);
         }
 
-        public override bool TryGetPublishAddress(Uri baseAddress, out Uri publishAddress)
+        public override bool TryGetPublishAddress(Uri baseAddress, out Uri? publishAddress)
         {
             var exchangeName = _messageTopology.EntityName;
 

@@ -25,7 +25,7 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        IRequestSendEndpoint<T> GetRequestEndpoint<T>(ConsumeContext consumeContext = default)
+        IRequestSendEndpoint<T> GetRequestEndpoint<T>(ConsumeContext? consumeContext = default)
             where T : class;
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        IRequestSendEndpoint<T> GetRequestEndpoint<T>(Uri destinationAddress, ConsumeContext consumeContext = default)
+        IRequestSendEndpoint<T> GetRequestEndpoint<T>(Uri destinationAddress, ConsumeContext? consumeContext = default)
             where T : class;
     }
 }

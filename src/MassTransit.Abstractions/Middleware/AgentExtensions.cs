@@ -15,7 +15,7 @@
         /// <returns></returns>
         public static Task Stop(this IAgent agent, CancellationToken cancellationToken = default)
         {
-            var stopContext = new DefaultStopContext(cancellationToken) { Reason = "Stopped" };
+            var stopContext = new DefaultStopContext(cancellationToken);
 
             return agent.Stop(stopContext);
         }
@@ -42,6 +42,7 @@
             public DefaultStopContext(CancellationToken cancellationToken)
                 : base(cancellationToken)
             {
+                Reason = "Stopped";
             }
 
             public string Reason { get; set; }

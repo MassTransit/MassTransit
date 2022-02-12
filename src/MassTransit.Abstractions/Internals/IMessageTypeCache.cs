@@ -30,7 +30,7 @@ namespace MassTransit.Internals
         /// <summary>
         /// Once checked, the reason why the message type is invalid
         /// </summary>
-        string InvalidMessageTypeReason { get; }
+        string? InvalidMessageTypeReason { get; }
 
         /// <summary>
         /// True if this message is not a public type

@@ -12,10 +12,10 @@ namespace MassTransit.Serialization
         BaseSerializerContext
     {
         readonly JsonSerializer _deserializer;
-        readonly object _message;
+        readonly object? _message;
 
         protected NewtonsoftSerializerContext(JsonSerializer deserializer, IObjectDeserializer objectDeserializer, MessageContext messageContext,
-            object message, string[] supportedMessageTypes)
+            object? message, string[] supportedMessageTypes)
             : base(objectDeserializer, messageContext, supportedMessageTypes)
         {
             _deserializer = deserializer;
@@ -66,7 +66,7 @@ namespace MassTransit.Serialization
             return dictionary.ToObject<Dictionary<string, object>>(_deserializer) ?? new CaseInsensitiveDictionary<object>();
         }
 
-        static JToken GetMessageToken(object message)
+        static JToken GetMessageToken(object? message)
         {
             return message is JToken element
                 ? element.Type == JTokenType.Null

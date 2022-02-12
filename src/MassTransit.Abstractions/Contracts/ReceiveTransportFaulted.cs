@@ -6,6 +6,6 @@
     public interface ReceiveTransportFaulted :
         ReceiveTransportEvent
     {
-        Exception Exception { get; }
+        Exception? Exception { get; }
     }
 }

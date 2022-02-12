@@ -15,15 +15,15 @@ namespace MassTransit
         /// </param>
         /// <param name="endpointNameFormatter"></param>
         /// <param name="configureEndpoint">The configuration callback</param>
-        HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<TEndpointConfigurator> configureEndpoint = null);
+        HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter? endpointNameFormatter = null,
+            Action<TEndpointConfigurator>? configureEndpoint = null);
 
         /// <summary>
         /// Adds a receive endpoint
         /// </summary>
         /// <param name="queueName">The queue name for the receive endpoint</param>
         /// <param name="configureEndpoint">The configuration callback</param>
-        HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<TEndpointConfigurator> configureEndpoint);
+        HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<TEndpointConfigurator>? configureEndpoint = null);
     }
 
 
@@ -38,14 +38,14 @@ namespace MassTransit
         /// </param>
         /// <param name="endpointNameFormatter"></param>
         /// <param name="configureEndpoint">The configuration callback</param>
-        HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<IReceiveEndpointConfigurator> configureEndpoint = null);
+        HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter? endpointNameFormatter = null,
+            Action<IReceiveEndpointConfigurator>? configureEndpoint = null);
 
         /// <summary>
         /// Adds a receive endpoint
         /// </summary>
         /// <param name="queueName">The queue name for the receive endpoint</param>
         /// <param name="configureEndpoint">The configuration callback</param>
-        HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint);
+        HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator>? configureEndpoint = null);
     }
 }

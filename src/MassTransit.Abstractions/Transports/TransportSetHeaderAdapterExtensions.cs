@@ -9,10 +9,10 @@ namespace MassTransit.Transports
         static readonly ITransportSetHeaderAdapter<object> _adapter = new DictionaryTransportSetHeaderAdapter(new StringHeaderValueConverter());
 
         public static void Set<TValueType>(this ITransportSetHeaderAdapter<TValueType> adapter, IDictionary<string, TValueType> dictionary, string key,
-            string value)
+            string? value)
         {
             if (!string.IsNullOrWhiteSpace(value))
-                adapter.Set(dictionary, new HeaderValue<string>(key, value));
+                adapter.Set(dictionary, new HeaderValue<string>(key, value!));
         }
 
         public static void Set<TValueType>(this ITransportSetHeaderAdapter<TValueType> adapter, IDictionary<string, TValueType> dictionary, string key,

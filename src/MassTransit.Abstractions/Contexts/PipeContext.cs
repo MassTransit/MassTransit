@@ -28,7 +28,7 @@ namespace MassTransit
         /// <typeparam name="T">The payload type</typeparam>
         /// <param name="payload">The payload</param>
         /// <returns></returns>
-        bool TryGetPayload<T>(out T payload)
+        bool TryGetPayload<T>(out T? payload)
             where T : class;
 
         /// <summary>
