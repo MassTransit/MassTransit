@@ -1,3 +1,4 @@
+#nullable enable
 namespace MassTransit.Configuration
 {
     using System;
@@ -14,7 +15,7 @@ namespace MassTransit.Configuration
         readonly ConnectHandle[] _handles;
         readonly IReadOnlyDictionary<Type, IConsumerMessageSpecification<TConsumer>> _messageTypes;
         readonly ConsumerConfigurationObservable _observers;
-        IConcurrencyLimiter _concurrencyLimiter;
+        IConcurrencyLimiter? _concurrencyLimiter;
 
         public ConsumerSpecification(IEnumerable<IConsumerMessageSpecification<TConsumer>> messageSpecifications)
         {
@@ -26,7 +27,7 @@ namespace MassTransit.Configuration
 
         public int? ConcurrentMessageLimit { get; set; }
 
-        public void Message<T>(Action<IConsumerMessageConfigurator<T>> configure)
+        public void Message<T>(Action<IConsumerMessageConfigurator<T>>? configure)
             where T : class
         {
             IConsumerMessageSpecification<TConsumer, T> specification = GetMessageSpecification<T>();
@@ -34,7 +35,7 @@ namespace MassTransit.Configuration
             configure?.Invoke(specification);
         }
 
-        public void ConsumerMessage<T>(Action<IConsumerMessageConfigurator<TConsumer, T>> configure)
+        public void ConsumerMessage<T>(Action<IConsumerMessageConfigurator<TConsumer, T>>? configure)
             where T : class
         {
             IConsumerMessageSpecification<TConsumer, T> specification = GetMessageSpecification<T>();

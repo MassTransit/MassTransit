@@ -1,3 +1,4 @@
+#nullable enable
 namespace MassTransit.Middleware
 {
     using System;
@@ -18,7 +19,7 @@ namespace MassTransit.Middleware
             _options = options;
         }
 
-        public async Task ScheduleRedelivery(TimeSpan delay, Action<ConsumeContext, SendContext> callback)
+        public async Task ScheduleRedelivery(TimeSpan delay, Action<ConsumeContext, SendContext>? callback)
         {
             IPipe<SendContext<TMessage>> pipe = Pipe.Execute<SendContext<TMessage>>(sendContext =>
             {

@@ -1,4 +1,5 @@
-﻿namespace MassTransit.Configuration
+﻿#nullable enable
+namespace MassTransit.Configuration
 {
     using System;
     using System.Collections.Generic;
@@ -13,6 +14,9 @@
 
         public InstanceConfigurator(object instance)
         {
+            if (instance == null)
+                throw new ArgumentNullException(nameof(instance));
+
             _instance = instance;
         }
 
@@ -23,10 +27,7 @@
 
         public IEnumerable<ValidationResult> Validate()
         {
-            if (_instance == null)
-                yield return this.Failure("The instance cannot be null. This should have come in the ctor.");
-
-            if (_instance != null && !_instance.GetType().HasInterface<IConsumer>())
+            if (!_instance.GetType().HasInterface<IConsumer>())
                 yield return this.Warning($"The instance of {TypeCache.GetShortName(_instance.GetType())} does not implement any consumer interfaces");
         }
     }
@@ -49,7 +50,7 @@
             _specification.ConnectConsumerConfigurationObserver(observer);
         }
 
-        public void Message<T>(Action<IConsumerMessageConfigurator<T>> configure)
+        public void Message<T>(Action<IConsumerMessageConfigurator<T>>? configure)
             where T : class
         {
             IConsumerMessageSpecification<TInstance, T> specification = _specification.GetMessageSpecification<T>();
@@ -57,7 +58,7 @@
             configure?.Invoke(specification);
         }
 
-        public void ConsumerMessage<T>(Action<IConsumerMessageConfigurator<TInstance, T>> configure)
+        public void ConsumerMessage<T>(Action<IConsumerMessageConfigurator<TInstance, T>>? configure)
             where T : class
         {
             IConsumerMessageSpecification<TInstance, T> specification = _specification.GetMessageSpecification<T>();
@@ -65,13 +66,13 @@
             configure?.Invoke(specification);
         }
 
-        public T Options<T>(Action<T> configure = null)
+        public T Options<T>(Action<T>? configure = null)
             where T : IOptions, new()
         {
             return _specification.Options(configure);
         }
 
-        public T Options<T>(T options, Action<T> configure = null)
+        public T Options<T>(T options, Action<T>? configure = null)
             where T : IOptions
         {
             return _specification.Options(options, configure);

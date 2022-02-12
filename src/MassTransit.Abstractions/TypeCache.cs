@@ -39,8 +39,9 @@ namespace MassTransit
         class CachedType<T> :
             CachedType
         {
-            string _shortName;
+            string? _shortName;
 
+            // ReSharper disable once UnusedMember.Local
             public CachedType()
             {
             }

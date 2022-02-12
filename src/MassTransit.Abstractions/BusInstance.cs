@@ -10,6 +10,7 @@ namespace MassTransit
     /// as a the base for the additional bus instance type.
     /// </summary>
     /// <typeparam name="TBus">The specific bus interface type for this bus instance</typeparam>
+    // ReSharper disable once UnusedTypeParameter
     public abstract class BusInstance<TBus> :
         IBusControl
         where TBus : class, IBus
@@ -142,13 +143,13 @@ namespace MassTransit
             return _busControl.ConnectEndpointConfigurationObserver(observer);
         }
 
-        public HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<IReceiveEndpointConfigurator> configureEndpoint = null)
+        public HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter? endpointNameFormatter,
+            Action<IReceiveEndpointConfigurator>? configureEndpoint = null)
         {
             return _busControl.ConnectReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
         }
 
-        public HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
+        public HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator>? configureEndpoint)
         {
             return _busControl.ConnectReceiveEndpoint(queueName, configureEndpoint);
         }

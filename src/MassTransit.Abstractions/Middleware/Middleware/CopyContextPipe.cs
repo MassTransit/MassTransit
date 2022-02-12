@@ -8,10 +8,10 @@ namespace MassTransit.Middleware
     public class CopyContextPipe :
         IPipe<SendContext>
     {
-        readonly Action<ConsumeContext, SendContext> _callback;
+        readonly Action<ConsumeContext, SendContext>? _callback;
         readonly ConsumeContext _context;
 
-        public CopyContextPipe(ConsumeContext context, Action<ConsumeContext, SendContext> callback = null)
+        public CopyContextPipe(ConsumeContext context, Action<ConsumeContext, SendContext>? callback = null)
         {
             _context = context;
             _callback = callback;

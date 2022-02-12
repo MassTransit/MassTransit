@@ -39,7 +39,7 @@ namespace MassTransit
         /// <summary>
         /// The property to group by
         /// </summary>
-        public object GroupKeyProvider { get; private set; }
+        public object? GroupKeyProvider { get; private set; }
 
         public void Configure(string name, IReceiveEndpointConfigurator configurator)
         {

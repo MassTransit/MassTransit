@@ -97,7 +97,7 @@ namespace MassTransit
         readonly Lazy<string[]> _messageTypeNames;
         readonly Lazy<Type[]> _messageTypes;
         readonly Lazy<List<PropertyInfo>> _properties;
-        string _invalidMessageTypeReason;
+        string? _invalidMessageTypeReason;
 
         MessageTypeCache()
         {
@@ -126,7 +126,7 @@ namespace MassTransit
         public static bool HasConsumerInterfaces => Cached.Metadata.Value.HasConsumerInterfaces;
         public static IEnumerable<PropertyInfo> Properties => Cached.Metadata.Value.Properties;
         public static bool IsValidMessageType => Cached.Metadata.Value.IsValidMessageType;
-        public static string InvalidMessageTypeReason => Cached.Metadata.Value.InvalidMessageTypeReason;
+        public static string? InvalidMessageTypeReason => Cached.Metadata.Value.InvalidMessageTypeReason;
         public static bool IsTemporaryMessageType => Cached.Metadata.Value.IsTemporaryMessageType;
         public static Type[] MessageTypes => Cached.Metadata.Value.MessageTypes;
         public static string[] MessageTypeNames => Cached.Metadata.Value.MessageTypeNames;
@@ -136,7 +136,7 @@ namespace MassTransit
         string IMessageTypeCache.DiagnosticAddress => _diagnosticAddress.Value;
         IEnumerable<PropertyInfo> IMessageTypeCache.Properties => _properties.Value;
         bool IMessageTypeCache.IsValidMessageType => _isValidMessageType.Value;
-        string IMessageTypeCache.InvalidMessageTypeReason => _invalidMessageTypeReason;
+        string? IMessageTypeCache.InvalidMessageTypeReason => _invalidMessageTypeReason;
         Type[] IMessageTypeCache.MessageTypes => _messageTypes.Value;
         bool IMessageTypeCache.HasConsumerInterfaces => _hasConsumerInterfaces.Value;
         bool IMessageTypeCache.HasSagaInterfaces => _hasSagaInterfaces.Value;

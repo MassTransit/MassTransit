@@ -1,4 +1,5 @@
-﻿namespace MassTransit.Initializers
+﻿#nullable enable
+namespace MassTransit.Initializers
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -11,7 +12,7 @@
     public static class MessageInitializer
     {
         static readonly IList<IInitializerConvention> _conventions;
-        static IInitializerConvention[] _conventionsArray;
+        static IInitializerConvention[]? _conventionsArray;
 
         static MessageInitializer()
         {
@@ -80,7 +81,7 @@
             return InitializeMessage(context, (TInput)input);
         }
 
-        public Task<SendTuple<TMessage>> InitializeMessage(PipeContext context, object input, IPipe<SendContext<TMessage>> pipe)
+        public Task<SendTuple<TMessage>> InitializeMessage(PipeContext context, object input, IPipe<SendContext<TMessage>>? pipe)
         {
             return PrepareSendTuple(Create(context), (TInput)input, pipe);
         }
@@ -90,18 +91,19 @@
             return PrepareSendTuple(Create(cancellationToken), (TInput)input, pipe);
         }
 
-        public async Task<SendTuple<TMessage>> InitializeMessage(PipeContext context, object input, object[] moreInputs, IPipe<SendContext<TMessage>> pipe)
+        public async Task<SendTuple<TMessage>> InitializeMessage(PipeContext context, object input, object?[] moreInputs, IPipe<SendContext<TMessage>>? pipe)
         {
             InitializeContext<TMessage> initializeContext = Create(context);
 
             for (var i = 0; i < moreInputs.Length; i++)
             {
-                if (moreInputs[i] == null)
-                    continue;
+                var moreInput = moreInputs[i];
+                if (moreInput != null)
+                {
+                    IMessageInitializer<TMessage> initializer = MessageInitializerCache<TMessage>.GetInitializer(moreInput.GetType());
 
-                IMessageInitializer<TMessage> initializer = MessageInitializerCache<TMessage>.GetInitializer(moreInputs[i].GetType());
-
-                initializeContext = await initializer.Initialize(initializeContext, moreInputs[i]).ConfigureAwait(false);
+                    initializeContext = await initializer.Initialize(initializeContext, moreInput).ConfigureAwait(false);
+                }
             }
 
             return await PrepareSendTuple(initializeContext, (TInput)input, pipe).ConfigureAwait(false);
@@ -125,7 +127,7 @@
             return messageContext;
         }
 
-        async Task<SendTuple<TMessage>> PrepareSendTuple(InitializeContext<TMessage> messageContext, TInput input, IPipe<SendContext<TMessage>> pipe = null)
+        async Task<SendTuple<TMessage>> PrepareSendTuple(InitializeContext<TMessage> messageContext, TInput input, IPipe<SendContext<TMessage>>? pipe = null)
         {
             InitializeContext<TMessage, TInput> inputContext = messageContext.CreateInputContext(input);
 
@@ -142,46 +144,27 @@
         {
             readonly InitializeContext<TMessage, TInput> _context;
             readonly IHeaderInitializer<TMessage, TInput>[] _initializers;
-            readonly IPipe<SendContext<TMessage>> _pipe;
-            readonly IPipe<SendContext> _sendPipe;
-
-            public InitializerSendContextPipe(IHeaderInitializer<TMessage, TInput>[] initializers, InitializeContext<TMessage, TInput> context)
-            {
-                _initializers = initializers;
-                _context = context;
-            }
+            readonly IPipe<SendContext<TMessage>>? _pipe;
 
             public InitializerSendContextPipe(IHeaderInitializer<TMessage, TInput>[] initializers, InitializeContext<TMessage, TInput> context,
-                IPipe<SendContext<TMessage>> pipe)
+                IPipe<SendContext<TMessage>>? pipe)
             {
                 _initializers = initializers;
                 _pipe = pipe;
                 _context = context;
             }
 
-            public InitializerSendContextPipe(IHeaderInitializer<TMessage, TInput>[] initializers, InitializeContext<TMessage, TInput> context,
-                IPipe<SendContext> pipe)
-            {
-                _initializers = initializers;
-                _sendPipe = pipe;
-                _context = context;
-            }
-
             void IProbeSite.Probe(ProbeContext context)
             {
                 _pipe?.Probe(context);
-                _sendPipe?.Probe(context);
             }
 
             public async Task Send(SendContext<TMessage> context)
             {
                 await Task.WhenAll(_initializers.Select(x => x.Apply(_context, context))).ConfigureAwait(false);
 
-                if (_pipe.IsNotEmpty())
+                if (_pipe != null && _pipe.IsNotEmpty())
                     await _pipe.Send(context).ConfigureAwait(false);
-
-                if (_sendPipe.IsNotEmpty())
-                    await _sendPipe.Send(context).ConfigureAwait(false);
             }
         }
     }

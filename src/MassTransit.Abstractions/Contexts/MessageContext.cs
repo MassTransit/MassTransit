@@ -48,22 +48,22 @@ namespace MassTransit
         /// <summary>
         /// The address of the message producer that sent the message
         /// </summary>
-        Uri SourceAddress { get; }
+        Uri? SourceAddress { get; }
 
         /// <summary>
         /// The destination address of the message
         /// </summary>
-        Uri DestinationAddress { get; }
+        Uri? DestinationAddress { get; }
 
         /// <summary>
         /// The response address to which responses to the request should be sent
         /// </summary>
-        Uri ResponseAddress { get; }
+        Uri? ResponseAddress { get; }
 
         /// <summary>
         /// The fault address to which fault events should be sent if the message consumer faults
         /// </summary>
-        Uri FaultAddress { get; }
+        Uri? FaultAddress { get; }
 
         /// <summary>
         /// When the message was originally sent

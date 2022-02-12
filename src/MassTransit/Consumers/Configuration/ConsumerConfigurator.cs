@@ -1,4 +1,5 @@
-﻿namespace MassTransit.Configuration
+﻿#nullable enable
+namespace MassTransit.Configuration
 {
     using System;
     using System.Collections.Generic;
@@ -32,25 +33,25 @@
             return _specification.ConnectConsumerConfigurationObserver(observer);
         }
 
-        public void Message<T>(Action<IConsumerMessageConfigurator<T>> configure)
+        public void Message<T>(Action<IConsumerMessageConfigurator<T>>? configure)
             where T : class
         {
             _specification.Message(configure);
         }
 
-        public void ConsumerMessage<T>(Action<IConsumerMessageConfigurator<TConsumer, T>> configure)
+        public void ConsumerMessage<T>(Action<IConsumerMessageConfigurator<TConsumer, T>>? configure)
             where T : class
         {
             _specification.ConsumerMessage(configure);
         }
 
-        public T Options<T>(Action<T> configure = null)
+        public T Options<T>(Action<T>? configure = null)
             where T : IOptions, new()
         {
             return _specification.Options(configure);
         }
 
-        public T Options<T>(T options, Action<T> configure = null)
+        public T Options<T>(T options, Action<T>? configure = null)
             where T : IOptions
         {
             return _specification.Options(options, configure);

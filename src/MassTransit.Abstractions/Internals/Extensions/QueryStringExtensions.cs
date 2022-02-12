@@ -7,7 +7,7 @@
 
     public static class QueryStringExtensions
     {
-        public static bool TryGetValueFromQueryString(this Uri uri, string key, out string value)
+        public static bool TryGetValueFromQueryString(this Uri uri, string key, out string? value)
         {
             var queryString = uri.Query;
             if (string.IsNullOrEmpty(queryString) || queryString.Length <= 1)
@@ -20,7 +20,7 @@
                 .Split('&')
                 .Select(x =>
                 {
-                    string[] values = x.Split('=');
+                    var values = x.Split('=');
                     if (values.Length == 2)
                     {
                         return new
@@ -116,10 +116,9 @@
         public static IEnumerable<(string, string)> SplitQueryString(this Uri address)
         {
             var query = address.Query?.TrimStart('?');
-            if (!string.IsNullOrWhiteSpace(query))
-                return query.Split('&').Select(x => x.Split('=')).Select(x => (x.First().ToLowerInvariant(), x.Skip(1).FirstOrDefault()));
-
-            return Enumerable.Empty<(string, string)>();
+            return string.IsNullOrWhiteSpace(query)
+                ? Array.Empty<(string, string)>()
+                : query!.Split('&').Select(x => x.Split('=')).Select(x => (x.First().ToLowerInvariant(), x.Skip(1).FirstOrDefault()));
         }
     }
 }

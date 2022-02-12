@@ -1,4 +1,5 @@
-﻿namespace MassTransit.JobService
+﻿#nullable enable
+namespace MassTransit.JobService
 {
     using System;
     using System.Diagnostics;
@@ -61,7 +62,7 @@
 
         public TimeSpan ElapsedTime => _stopwatch.Elapsed;
 
-        public Task NotifyCanceled(string reason = null)
+        public Task NotifyCanceled(string? reason = null)
         {
             LogContext.Debug?.Log("Job Canceled: {JobId} {AttemptId} ({RetryAttempt})", JobId, AttemptId, RetryAttempt);
 

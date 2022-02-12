@@ -6,6 +6,6 @@
     public interface ReceiveEndpointFaulted :
         ReceiveEndpointEvent
     {
-        Exception Exception { get; }
+        Exception? Exception { get; }
     }
 }

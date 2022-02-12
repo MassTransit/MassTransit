@@ -11,7 +11,7 @@ namespace MassTransit.Transports
     {
         readonly IDictionary<string, object> _headers;
 
-        public DictionaryHeaderProvider(IDictionary<string, object> headers = default)
+        public DictionaryHeaderProvider(IDictionary<string, object>? headers = default)
         {
             _headers = headers ?? new Dictionary<string, object>();
         }

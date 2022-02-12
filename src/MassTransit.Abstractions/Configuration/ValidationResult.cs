@@ -25,6 +25,6 @@ namespace MassTransit
         /// <summary>
         /// The value associated with the result
         /// </summary>
-        string Value { get; }
+        string? Value { get; }
     }
 }

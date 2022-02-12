@@ -25,9 +25,9 @@ namespace MassTransit
         static readonly INewIdFormatter HexFormatter = new HexFormatter();
         static readonly INewIdFormatter ParenFormatter = new DashedHexFormatter('(', ')');
 
-        static INewIdGenerator _generator;
-        static ITickProvider _tickProvider;
-        static IWorkerIdProvider _workerIdProvider;
+        static INewIdGenerator? _generator;
+        static ITickProvider? _tickProvider;
+        static IWorkerIdProvider? _workerIdProvider;
 
         readonly int _a;
         readonly int _b;
@@ -78,7 +78,7 @@ namespace MassTransit
 
         static IWorkerIdProvider WorkerIdProvider => _workerIdProvider ??= new BestPossibleWorkerIdProvider();
 
-        static IProcessIdProvider ProcessIdProvider { get; set; } = new CurrentProcessIdProvider();
+        static IProcessIdProvider? ProcessIdProvider { get; set; } = new CurrentProcessIdProvider();
 
         static ITickProvider TickProvider => _tickProvider ??= new DateTimeTickProvider();
 
@@ -92,14 +92,14 @@ namespace MassTransit
             }
         }
 
-        public int CompareTo(object obj)
+        public int CompareTo(object? obj)
         {
             if (obj == null)
                 return 1;
-            if (!(obj is NewId))
-                throw new ArgumentException("Argument must be a NewId");
+            if (obj is NewId id)
+                return CompareTo(id);
 
-            return CompareTo((NewId)obj);
+            throw new ArgumentException("Argument must be a NewId");
         }
 
         public int CompareTo(NewId other)
@@ -121,9 +121,9 @@ namespace MassTransit
             return other._a == _a && other._b == _b && other._c == _c && other._d == _d;
         }
 
-        public string ToString(string format, IFormatProvider formatProvider)
+        public string ToString(string? format, IFormatProvider? formatProvider)
         {
-            if (string.IsNullOrEmpty(format))
+            if (format == null || string.IsNullOrEmpty(format))
                 format = "D";
 
             var sequential = false;
@@ -283,12 +283,12 @@ namespace MassTransit
             return ToString("D", null);
         }
 
-        public string ToString(string format)
+        public string ToString(string? format)
         {
             return ToString(format, null);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (ReferenceEquals(null, obj))
                 return false;
@@ -339,7 +339,7 @@ namespace MassTransit
             _workerIdProvider = provider;
         }
 
-        public static void SetProcessIdProvider(IProcessIdProvider provider)
+        public static void SetProcessIdProvider(IProcessIdProvider? provider)
         {
             ProcessIdProvider = provider;
         }

@@ -7,7 +7,7 @@ namespace MassTransit.Payloads
     public class ListPayloadCache :
         IPayloadCache
     {
-        IList<object> _cache;
+        IList<object>? _cache;
 
         public ListPayloadCache()
         {
@@ -35,7 +35,7 @@ namespace MassTransit.Payloads
             return false;
         }
 
-        public bool TryGetPayload<TPayload>(out TPayload payload)
+        public bool TryGetPayload<TPayload>(out TPayload? payload)
             where TPayload : class
         {
             if (_cache == null)

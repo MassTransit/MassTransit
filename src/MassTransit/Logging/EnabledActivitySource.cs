@@ -66,7 +66,8 @@ namespace MassTransit.Logging
                 }
             }
 
-            context.Headers.Set(DiagnosticHeaders.ActivityId, activity.Id);
+            if (activity.Id != null)
+                context.Headers.Set(DiagnosticHeaders.ActivityId, activity.Id);
 
             IList<KeyValuePair<string, string?>>? baggage = null;
             foreach (KeyValuePair<string, string?> pair in activity.Baggage)

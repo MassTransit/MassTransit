@@ -1,7 +1,7 @@
+#nullable enable
 namespace MassTransit.ActiveMqTransport.Topology
 {
     using System;
-    using System.Collections.Generic;
     using Configuration;
     using MassTransit.Topology;
 
@@ -11,14 +11,10 @@ namespace MassTransit.ActiveMqTransport.Topology
         IActiveMqMessagePublishTopologyConfigurator<TMessage>
         where TMessage : class
     {
-        readonly IList<IActiveMqMessagePublishTopology> _implementedMessageTypes;
-        readonly IMessageTopology<TMessage> _messageTopology;
         readonly ActiveMqTopicConfigurator _topic;
 
         public ActiveMqMessagePublishTopology(IActiveMqPublishTopology publishTopology, IMessageTopology<TMessage> messageTopology)
         {
-            _messageTopology = messageTopology;
-
             var topicName = $"{publishTopology.VirtualTopicPrefix}{messageTopology.EntityName}";
 
             var temporary = MessageTypeCache<TMessage>.IsTemporaryMessageType;
@@ -27,8 +23,6 @@ namespace MassTransit.ActiveMqTransport.Topology
             var autoDelete = temporary;
 
             _topic = new ActiveMqTopicConfigurator(topicName, durable, autoDelete);
-
-            _implementedMessageTypes = new List<IActiveMqMessagePublishTopology>();
         }
 
         public Topic Topic => _topic;
@@ -43,7 +37,7 @@ namespace MassTransit.ActiveMqTransport.Topology
             set => _topic.AutoDelete = value;
         }
 
-        public override bool TryGetPublishAddress(Uri baseAddress, out Uri publishAddress)
+        public override bool TryGetPublishAddress(Uri baseAddress, out Uri? publishAddress)
         {
             publishAddress = _topic.GetEndpointAddress(baseAddress);
             return true;
@@ -70,39 +64,6 @@ namespace MassTransit.ActiveMqTransport.Topology
             Apply(builder);
 
             return builder.BuildBrokerTopology();
-        }
-
-        public void AddImplementedMessageConfigurator<T>(IActiveMqMessagePublishTopologyConfigurator<T> configurator, bool direct)
-            where T : class
-        {
-            var adapter = new ImplementedTypeAdapter<T>(configurator, direct);
-
-            _implementedMessageTypes.Add(adapter);
-        }
-
-
-        class ImplementedTypeAdapter<T> :
-            IActiveMqMessagePublishTopology
-            where T : class
-        {
-            readonly IActiveMqMessagePublishTopologyConfigurator<T> _configurator;
-            readonly bool _direct;
-
-            public ImplementedTypeAdapter(IActiveMqMessagePublishTopologyConfigurator<T> configurator, bool direct)
-            {
-                _configurator = configurator;
-                _direct = direct;
-            }
-
-            public void Apply(IPublishEndpointBrokerTopologyBuilder builder)
-            {
-                if (_direct)
-                {
-                    var implementedBuilder = builder.CreateImplementedBuilder();
-
-                    _configurator.Apply(implementedBuilder);
-                }
-            }
         }
     }
 }

@@ -1,3 +1,4 @@
+#nullable enable
 namespace MassTransit.DependencyInjection
 {
     using System;
@@ -38,14 +39,14 @@ namespace MassTransit.DependencyInjection
 
         public Uri ResponseAddress => _clientFactory.Context.ResponseAddress;
 
-        public IRequestSendEndpoint<T> GetRequestEndpoint<T>(ConsumeContext consumeContext = default)
+        public IRequestSendEndpoint<T> GetRequestEndpoint<T>(ConsumeContext? consumeContext = default)
             where T : class
         {
             IRequestSendEndpoint<T> endpoint = _clientFactory.Context.GetRequestEndpoint<T>(consumeContext);
             return new ScopedRequestSendEndpoint<TScope, T>(endpoint, _scope);
         }
 
-        public IRequestSendEndpoint<T> GetRequestEndpoint<T>(Uri destinationAddress, ConsumeContext consumeContext = default)
+        public IRequestSendEndpoint<T> GetRequestEndpoint<T>(Uri destinationAddress, ConsumeContext? consumeContext = default)
             where T : class
         {
             IRequestSendEndpoint<T> endpoint = _clientFactory.Context.GetRequestEndpoint<T>(destinationAddress, consumeContext);

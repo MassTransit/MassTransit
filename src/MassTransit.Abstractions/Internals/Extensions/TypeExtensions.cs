@@ -153,11 +153,10 @@ namespace MassTransit.Internals
         /// <param name="type">The type</param>
         /// <param name="underlyingType">The underlying type of the nullable</param>
         /// <returns>True if the type can be null</returns>
-        public static bool IsNullable(this Type type, out Type underlyingType)
+        public static bool IsNullable(this Type type, out Type? underlyingType)
         {
             var typeInfo = type.GetTypeInfo();
-            var isNullable = typeInfo.IsGenericType
-                && typeInfo.GetGenericTypeDefinition() == typeof(Nullable<>);
+            var isNullable = typeInfo.IsGenericType && typeInfo.GetGenericTypeDefinition() == typeof(Nullable<>);
 
             underlyingType = isNullable ? Nullable.GetUnderlyingType(type) : null;
             return isNullable;

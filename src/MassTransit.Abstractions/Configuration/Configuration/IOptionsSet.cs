@@ -12,7 +12,7 @@ namespace MassTransit.Configuration
         /// <param name="configure"></param>
         /// <typeparam name="T">The option type</typeparam>
         /// <returns></returns>
-        T Options<T>(Action<T> configure = null)
+        T Options<T>(Action<T>? configure = null)
             where T : IOptions, new();
 
         /// <summary>
@@ -22,7 +22,7 @@ namespace MassTransit.Configuration
         /// <param name="configure"></param>
         /// <typeparam name="T">The option type</typeparam>
         /// <returns></returns>
-        T Options<T>(T options, Action<T> configure = null)
+        T Options<T>(T options, Action<T>? configure = null)
             where T : IOptions;
 
         /// <summary>

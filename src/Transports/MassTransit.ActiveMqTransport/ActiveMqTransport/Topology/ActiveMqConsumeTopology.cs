@@ -1,3 +1,4 @@
+#nullable enable
 namespace MassTransit.ActiveMqTransport.Topology
 {
     using System;
@@ -10,14 +11,11 @@ namespace MassTransit.ActiveMqTransport.Topology
         ConsumeTopology,
         IActiveMqConsumeTopologyConfigurator
     {
-        readonly IMessageTopology _messageTopology;
         readonly IActiveMqPublishTopology _publishTopology;
         readonly IList<IActiveMqConsumeTopologySpecification> _specifications;
 
-        public ActiveMqConsumeTopology(IMessageTopology messageTopology, IActiveMqPublishTopology publishTopology,
-            IActiveMqConsumeTopology consumeTopology = default)
+        public ActiveMqConsumeTopology(IActiveMqPublishTopology publishTopology, IActiveMqConsumeTopology? consumeTopology = default)
         {
-            _messageTopology = messageTopology;
             _publishTopology = publishTopology;
 
             if (consumeTopology?.ConsumerEndpointQueueNameFormatter != null)
@@ -29,12 +27,12 @@ namespace MassTransit.ActiveMqTransport.Topology
             _specifications = new List<IActiveMqConsumeTopologySpecification>();
         }
 
-        public IActiveMqConsumerEndpointQueueNameFormatter ConsumerEndpointQueueNameFormatter { get; set; }
-        public IActiveMqTemporaryQueueNameFormatter TemporaryQueueNameFormatter { get; set; }
+        public IActiveMqConsumerEndpointQueueNameFormatter? ConsumerEndpointQueueNameFormatter { get; set; }
+        public IActiveMqTemporaryQueueNameFormatter? TemporaryQueueNameFormatter { get; set; }
 
         IActiveMqMessageConsumeTopology<T> IActiveMqConsumeTopology.GetMessageTopology<T>()
         {
-            return base.GetMessageTopology<T>() as IActiveMqMessageConsumeTopologyConfigurator<T>;
+            return (IActiveMqMessageConsumeTopologyConfigurator<T>)base.GetMessageTopology<T>();
         }
 
         public void AddSpecification(IActiveMqConsumeTopologySpecification specification)
@@ -47,7 +45,7 @@ namespace MassTransit.ActiveMqTransport.Topology
 
         IActiveMqMessageConsumeTopologyConfigurator<T> IActiveMqConsumeTopologyConfigurator.GetMessageTopology<T>()
         {
-            return base.GetMessageTopology<T>() as IActiveMqMessageConsumeTopologyConfigurator<T>;
+            return (IActiveMqMessageConsumeTopologyConfigurator<T>)base.GetMessageTopology<T>();
         }
 
         public void Apply(IReceiveEndpointBrokerTopologyBuilder builder)
@@ -58,7 +56,7 @@ namespace MassTransit.ActiveMqTransport.Topology
             ForEach<IActiveMqMessageConsumeTopologyConfigurator>(x => x.Apply(builder));
         }
 
-        public void Bind(string topicName, Action<IActiveMqTopicBindingConfigurator> configure = null)
+        public void Bind(string topicName, Action<IActiveMqTopicBindingConfigurator>? configure = null)
         {
             if (string.IsNullOrEmpty(_publishTopology.VirtualTopicPrefix) || topicName.StartsWith(_publishTopology.VirtualTopicPrefix))
             {

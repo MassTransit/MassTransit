@@ -3,7 +3,6 @@ namespace MassTransit.Util
     using System;
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
-    using Internals;
 
 
     public static class ExceptionUtil
@@ -31,12 +30,12 @@ namespace MassTransit.Util
             }
         }
 
-        public static string GetStackTrace(Exception exception)
+        public static string GetStackTrace(Exception? exception)
         {
             if (string.IsNullOrWhiteSpace(exception?.StackTrace))
                 return "";
 
-            return _cleanup.Replace(exception.StackTrace, "");
+            return _cleanup.Replace(exception!.StackTrace, "");
         }
 
         public static IDictionary<string, object> GetExceptionHeaderDictionary(Exception exception)
@@ -47,10 +46,10 @@ namespace MassTransit.Util
 
             return new Dictionary<string, object>
             {
-                {MessageHeaders.Reason, "fault"},
-                {MessageHeaders.FaultExceptionType, TypeCache.GetShortName(exception.GetType())},
-                {MessageHeaders.FaultMessage, exceptionMessage},
-                {MessageHeaders.FaultStackTrace, GetStackTrace(exception)}
+                { MessageHeaders.Reason, "fault" },
+                { MessageHeaders.FaultExceptionType, TypeCache.GetShortName(exception.GetType()) },
+                { MessageHeaders.FaultMessage, exceptionMessage },
+                { MessageHeaders.FaultStackTrace, GetStackTrace(exception) }
             };
         }
     }

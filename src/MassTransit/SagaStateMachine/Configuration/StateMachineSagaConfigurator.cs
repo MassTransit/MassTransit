@@ -1,4 +1,5 @@
-﻿namespace MassTransit.Configuration
+﻿#nullable enable
+namespace MassTransit.Configuration
 {
     using System;
     using System.Collections.Generic;
@@ -12,15 +13,13 @@
         readonly StateMachineConnector<TInstance> _connector;
         readonly ISagaRepository<TInstance> _repository;
         readonly ISagaSpecification<TInstance> _specification;
-        readonly SagaStateMachine<TInstance> _stateMachine;
 
         public StateMachineSagaConfigurator(SagaStateMachine<TInstance> stateMachine, ISagaRepository<TInstance> repository,
             ISagaConfigurationObserver observer)
         {
-            _stateMachine = stateMachine;
             _repository = repository;
 
-            _connector = new StateMachineConnector<TInstance>(_stateMachine);
+            _connector = new StateMachineConnector<TInstance>(stateMachine);
 
             _specification = _connector.CreateSagaSpecification<TInstance>();
 
@@ -29,12 +28,6 @@
 
         public IEnumerable<ValidationResult> Validate()
         {
-            if (_stateMachine == null)
-                yield return this.Failure("StateMachine", "must not be null");
-
-            if (_repository == null)
-                yield return this.Failure("Repository", "must not be null");
-
             foreach (var result in _specification.Validate())
                 yield return result;
         }
@@ -71,13 +64,13 @@
             return _specification.ConnectSagaConfigurationObserver(observer);
         }
 
-        public T Options<T>(Action<T> configure)
+        public T Options<T>(Action<T>? configure)
             where T : IOptions, new()
         {
             return _specification.Options(configure);
         }
 
-        public T Options<T>(T options, Action<T> configure)
+        public T Options<T>(T options, Action<T>? configure)
             where T : IOptions
         {
             return _specification.Options(options, configure);

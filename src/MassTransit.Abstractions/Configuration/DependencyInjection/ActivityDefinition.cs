@@ -12,7 +12,7 @@ namespace MassTransit
         where TLog : class
         where TArguments : class
     {
-        string _compensateEndpointName;
+        string? _compensateEndpointName;
 
         /// <summary>
         /// Specify the endpoint name (which may be a queue, or a subscription, depending upon the transport) on which the saga
@@ -24,9 +24,9 @@ namespace MassTransit
             set => _compensateEndpointName = value;
         }
 
-        public IEndpointDefinition<ICompensateActivity<TLog>> CompensateEndpointDefinition { get; set; }
+        public IEndpointDefinition<ICompensateActivity<TLog>>? CompensateEndpointDefinition { get; set; }
 
-        IEndpointDefinition IActivityDefinition.CompensateEndpointDefinition => CompensateEndpointDefinition;
+        IEndpointDefinition? IActivityDefinition.CompensateEndpointDefinition => CompensateEndpointDefinition;
 
         void IActivityDefinition<TActivity, TArguments, TLog>.Configure(IReceiveEndpointConfigurator endpointConfigurator,
             ICompensateActivityConfigurator<TActivity, TLog> compensateActivityConfigurator)
@@ -41,7 +41,7 @@ namespace MassTransit
         {
             return string.IsNullOrWhiteSpace(_compensateEndpointName)
                 ? _compensateEndpointName = CompensateEndpointDefinition?.GetEndpointName(formatter) ?? formatter.CompensateActivity<TActivity, TLog>()
-                : _compensateEndpointName;
+                : _compensateEndpointName!;
         }
 
         Type IActivityDefinition.LogType => typeof(TLog);
@@ -50,7 +50,7 @@ namespace MassTransit
         /// Configure the compensate endpoint
         /// </summary>
         /// <param name="configure"></param>
-        protected void CompensateEndpoint(Action<IEndpointRegistrationConfigurator> configure)
+        protected void CompensateEndpoint(Action<IEndpointRegistrationConfigurator>? configure = null)
         {
             var configurator = new EndpointRegistrationConfigurator<ICompensateActivity<TLog>> { ConfigureConsumeTopology = false };
 

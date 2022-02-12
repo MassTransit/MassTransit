@@ -40,6 +40,6 @@ namespace MassTransit
         {
         }
 
-        public IEnumerable<ValidationResult> Results { get; protected set; }
+        public IEnumerable<ValidationResult> Results { get; protected set; } = Array.Empty<ValidationResult>();
     }
 }

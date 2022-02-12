@@ -1,4 +1,5 @@
-﻿namespace MassTransit
+﻿#nullable enable
+namespace MassTransit
 {
     using System;
 

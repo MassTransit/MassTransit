@@ -1,3 +1,4 @@
+#nullable enable
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
@@ -17,7 +18,7 @@ namespace MassTransit.AzureServiceBusTransport
             _context = context;
         }
 
-        public Task<ISendTransport> GetPublishTransport<T>(Uri publishAddress)
+        public Task<ISendTransport> GetPublishTransport<T>(Uri? publishAddress)
             where T : class
         {
             return _connectionContextSupervisor.CreatePublishTransport<T>(_context, publishAddress);

@@ -41,7 +41,7 @@ namespace MassTransit.Middleware
         /// <param name="payload"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public virtual bool TryGetPayload<T>(out T payload)
+        public virtual bool TryGetPayload<T>(out T? payload)
             where T : class
         {
             if (this is T context)

@@ -1,4 +1,5 @@
-﻿namespace MassTransit.Clients
+﻿#nullable enable
+namespace MassTransit.Clients
 {
     using System;
 
@@ -35,7 +36,7 @@
 
         public Uri ResponseAddress => _bus.Address;
 
-        public IRequestSendEndpoint<T> GetRequestEndpoint<T>(ConsumeContext consumeContext = default)
+        public IRequestSendEndpoint<T> GetRequestEndpoint<T>(ConsumeContext? consumeContext = default)
             where T : class
         {
             return new PublishRequestSendEndpoint<T>(consumeContext != null
@@ -43,10 +44,10 @@
                 : _bus, consumeContext);
         }
 
-        public IRequestSendEndpoint<T> GetRequestEndpoint<T>(Uri destinationAddress, ConsumeContext consumeContext = default)
+        public IRequestSendEndpoint<T> GetRequestEndpoint<T>(Uri destinationAddress, ConsumeContext? consumeContext = default)
             where T : class
         {
-            return new SendRequestSendEndpoint<T>((ISendEndpointProvider)consumeContext ?? _bus, destinationAddress, consumeContext);
+            return new SendRequestSendEndpoint<T>(consumeContext as ISendEndpointProvider ?? _bus, destinationAddress, consumeContext);
         }
 
         public RequestTimeout DefaultTimeout { get; }

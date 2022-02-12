@@ -46,7 +46,7 @@ namespace MassTransit
             return _cache.GetOrAdd(type, _ => (Cached)Activator.CreateInstance(typeof(Cached<>).MakeGenericType(type))).UrnString;
         }
 
-        public void Deconstruct(out string name, out string ns, out string assemblyName)
+        public void Deconstruct(out string? name, out string? ns, out string? assemblyName)
         {
             name = null;
             ns = null;

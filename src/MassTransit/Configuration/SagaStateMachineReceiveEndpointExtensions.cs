@@ -1,4 +1,5 @@
-﻿namespace MassTransit
+﻿#nullable enable
+namespace MassTransit
 {
     using System;
     using Configuration;
@@ -16,9 +17,13 @@
         /// <param name="configure">Optionally configure the saga</param>
         /// <returns></returns>
         public static void StateMachineSaga<TInstance>(this IReceiveEndpointConfigurator configurator, SagaStateMachine<TInstance> stateMachine,
-            ISagaRepository<TInstance> repository, Action<ISagaConfigurator<TInstance>> configure = null)
+            ISagaRepository<TInstance> repository, Action<ISagaConfigurator<TInstance>>? configure = null)
             where TInstance : class, SagaStateMachineInstance
         {
+            if (stateMachine == null)
+                throw new ArgumentNullException(nameof(stateMachine));
+            if (repository == null)
+                throw new ArgumentNullException(nameof(repository));
             var stateMachineConfigurator = new StateMachineSagaConfigurator<TInstance>(stateMachine, repository, configurator);
 
             configure?.Invoke(stateMachineConfigurator);
@@ -27,7 +32,7 @@
         }
 
         public static ConnectHandle ConnectStateMachineSaga<TInstance>(this IConsumePipeConnector bus, SagaStateMachine<TInstance> stateMachine,
-            ISagaRepository<TInstance> repository, Action<ISagaConfigurator<TInstance>> configure = null)
+            ISagaRepository<TInstance> repository, Action<ISagaConfigurator<TInstance>>? configure = null)
             where TInstance : class, SagaStateMachineInstance
         {
             var connector = new StateMachineConnector<TInstance>(stateMachine);

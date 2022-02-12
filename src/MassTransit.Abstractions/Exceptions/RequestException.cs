@@ -39,6 +39,6 @@
             Response = response;
         }
 
-        public object Response { get; }
+        public object? Response { get; }
     }
 }

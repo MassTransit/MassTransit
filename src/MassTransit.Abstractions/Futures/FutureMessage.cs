@@ -17,9 +17,9 @@ namespace MassTransit
             SupportedMessageTypes = supportedMessageTypes;
         }
 
-        public IDictionary<string, object> Message { get; set; }
+        public IDictionary<string, object>? Message { get; set; }
 
-        public string[] SupportedMessageTypes { get; set; }
+        public string[]? SupportedMessageTypes { get; set; }
 
         public bool HasMessageType(Type messageType)
         {

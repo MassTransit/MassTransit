@@ -1,3 +1,4 @@
+#nullable enable
 namespace MassTransit
 {
     using System;
@@ -20,7 +21,7 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="configureTopology"></param>
-        void Publish<T>(Action<IGrpcMessagePublishTopologyConfigurator<T>> configureTopology)
+        void Publish<T>(Action<IGrpcMessagePublishTopologyConfigurator<T>>? configureTopology)
             where T : class;
 
         /// <summary>
@@ -28,7 +29,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="configure"></param>
         /// <returns></returns>
-        void Host(Action<IGrpcHostConfigurator> configure = null);
+        void Host(Action<IGrpcHostConfigurator>? configure = null);
 
         /// <summary>
         /// Configure the base address for the host
@@ -36,6 +37,6 @@ namespace MassTransit
         /// <param name="baseAddress">The base address for the in-memory host</param>
         /// <param name="configure"></param>
         /// <returns></returns>
-        void Host(Uri baseAddress, Action<IGrpcHostConfigurator> configure = null);
+        void Host(Uri baseAddress, Action<IGrpcHostConfigurator>? configure = null);
     }
 }

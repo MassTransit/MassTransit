@@ -11,8 +11,9 @@ namespace MassTransit
         /// <param name="connector">The host to connect</param>
         /// <param name="endpointNameFormatter"></param>
         /// <param name="configureEndpoint">The configuration callback</param>
-        public static HostReceiveEndpointHandle ConnectResponseEndpoint(this IReceiveConnector connector, IEndpointNameFormatter endpointNameFormatter = null,
-            Action<IReceiveEndpointConfigurator> configureEndpoint = null)
+        public static HostReceiveEndpointHandle ConnectResponseEndpoint(this IReceiveConnector connector,
+            IEndpointNameFormatter? endpointNameFormatter = null,
+            Action<IReceiveEndpointConfigurator>? configureEndpoint = null)
         {
             return connector.ConnectReceiveEndpoint(new ResponseEndpointDefinition(), endpointNameFormatter, configureEndpoint);
         }
@@ -22,8 +23,8 @@ namespace MassTransit
         /// </summary>
         /// <param name="connector">The host to connect</param>
         /// <param name="configureEndpoint">The configuration callback</param>
-        public static HostReceiveEndpointHandle ConnectReceiveEndpoint(this IReceiveConnector connector, Action<IReceiveEndpointConfigurator>
-            configureEndpoint = null)
+        public static HostReceiveEndpointHandle ConnectReceiveEndpoint(this IReceiveConnector connector,
+            Action<IReceiveEndpointConfigurator>? configureEndpoint = null)
         {
             return connector.ConnectReceiveEndpoint(new TemporaryEndpointDefinition(), null, configureEndpoint);
         }

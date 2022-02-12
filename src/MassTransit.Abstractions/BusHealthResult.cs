@@ -8,11 +8,11 @@ namespace MassTransit
     {
         public readonly IReadOnlyDictionary<string, EndpointHealthResult> Endpoints;
 
-        public readonly Exception Exception;
+        public readonly Exception? Exception;
 
         public readonly BusHealthStatus Status;
 
-        BusHealthResult(BusHealthStatus status, string description, Exception exception, IReadOnlyDictionary<string, EndpointHealthResult> endpoints)
+        BusHealthResult(BusHealthStatus status, string description, Exception? exception, IReadOnlyDictionary<string, EndpointHealthResult> endpoints)
         {
             Status = status;
             Description = description;

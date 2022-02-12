@@ -21,7 +21,7 @@ namespace MassTransit.Configuration
         /// <param name="configure"></param>
         /// <typeparam name="T">The option type</typeparam>
         /// <returns></returns>
-        public T Options<T>(Action<T> configure = null)
+        public T Options<T>(Action<T>? configure = null)
             where T : IOptions, new()
         {
             if (_options.TryGetValue(typeof(T), out var existingOptions))
@@ -51,7 +51,7 @@ namespace MassTransit.Configuration
         /// <param name="configure"></param>
         /// <typeparam name="T">The option type</typeparam>
         /// <returns></returns>
-        public T Options<T>(T options, Action<T> configure = null)
+        public T Options<T>(T options, Action<T>? configure = null)
             where T : IOptions
         {
             if (_options.TryGetValue(typeof(T), out var existingOptions))
@@ -85,7 +85,7 @@ namespace MassTransit.Configuration
                 throw new ArgumentException($"The options type did not match: {TypeCache<T>.ShortName}");
             }
 
-            options = default;
+            options = default!;
             return false;
         }
 

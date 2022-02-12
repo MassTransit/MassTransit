@@ -53,7 +53,7 @@ namespace MassTransit.Topology
                 topology.Apply(builder);
         }
 
-        public virtual bool TryGetPublishAddress(Uri baseAddress, out Uri publishAddress)
+        public virtual bool TryGetPublishAddress(Uri baseAddress, out Uri? publishAddress)
         {
             publishAddress = null;
             return false;

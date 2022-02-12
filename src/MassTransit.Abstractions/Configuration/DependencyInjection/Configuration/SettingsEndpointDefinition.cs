@@ -5,7 +5,7 @@ namespace MassTransit.Configuration
         where TSettings : class
     {
         readonly IEndpointSettings<IEndpointDefinition<TSettings>> _settings;
-        string _endpointName;
+        string? _endpointName;
 
         protected SettingsEndpointDefinition(IEndpointSettings<IEndpointDefinition<TSettings>> settings)
         {
@@ -18,7 +18,7 @@ namespace MassTransit.Configuration
             {
                 return string.IsNullOrWhiteSpace(_settings.Name)
                     ? FormatEndpointName(formatter)
-                    : _settings.Name;
+                    : _settings.Name!;
             }
 
             return _endpointName ??= string.IsNullOrWhiteSpace(_settings.InstanceId)

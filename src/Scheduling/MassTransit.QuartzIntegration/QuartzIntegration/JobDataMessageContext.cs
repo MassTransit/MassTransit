@@ -4,6 +4,7 @@ namespace MassTransit.QuartzIntegration
     using System.Collections;
     using System.Collections.Generic;
     using System.Globalization;
+    using Metadata;
     using Quartz;
     using Serialization;
 
@@ -127,7 +128,7 @@ namespace MassTransit.QuartzIntegration
         public Uri? FaultAddress => _faultAddress ??= _jobDataMap.TryGetValue(nameof(FaultAddress), out string value) ? ConvertToUri(value) : default;
         public DateTime? SentTime => _sentTime ??= _jobDataMap.TryGetValue(nameof(SentTime), out DateTime? value) ? value : default;
         public Headers Headers => _headers ??= GetHeaders();
-        public HostInfo? Host => _hostInfo ??= _jobDataMap.TryGetValue(nameof(Host), out HostInfo? value) ? value : null;
+        public HostInfo Host => _hostInfo ??= _jobDataMap.TryGetValue(nameof(Host), out HostInfo? value) ? value! : HostMetadataCache.Empty;
 
         Headers GetHeaders()
         {

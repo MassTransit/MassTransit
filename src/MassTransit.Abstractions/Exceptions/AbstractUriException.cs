@@ -34,6 +34,6 @@ namespace MassTransit
         {
         }
 
-        public Uri Uri { get; protected set; }
+        public Uri? Uri { get; protected set; }
     }
 }

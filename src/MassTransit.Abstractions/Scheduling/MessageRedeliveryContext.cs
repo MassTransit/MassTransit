@@ -15,6 +15,6 @@ namespace MassTransit
         /// <param name="delay">The minimum delay before the message will be redelivered to the queue</param>
         /// <param name="callback">Operation which perform during message redeliver to queue</param>
         /// <returns></returns>
-        Task ScheduleRedelivery(TimeSpan delay, Action<ConsumeContext, SendContext> callback = null);
+        Task ScheduleRedelivery(TimeSpan delay, Action<ConsumeContext, SendContext>? callback = null);
     }
 }

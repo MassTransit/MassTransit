@@ -15,8 +15,8 @@ namespace MassTransit
         /// </param>
         /// <param name="endpointNameFormatter"></param>
         /// <param name="configureEndpoint">The configuration callback</param>
-        void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<TEndpointConfigurator> configureEndpoint = null);
+        void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter? endpointNameFormatter = null,
+            Action<TEndpointConfigurator>? configureEndpoint = null);
 
         /// <summary>
         /// Adds a receive endpoint
@@ -38,8 +38,8 @@ namespace MassTransit
         /// </param>
         /// <param name="endpointNameFormatter"></param>
         /// <param name="configureEndpoint">The configuration callback</param>
-        void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<IReceiveEndpointConfigurator> configureEndpoint = null);
+        void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter? endpointNameFormatter = null,
+            Action<IReceiveEndpointConfigurator>? configureEndpoint = null);
 
         /// <summary>
         /// Adds a receive endpoint

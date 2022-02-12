@@ -8,11 +8,11 @@ namespace MassTransit
         SagaStateMachineInstance,
         ISagaVersion
     {
-        Dictionary<Guid, FutureMessage> _faults;
-        HashSet<Guid> _pending;
-        Dictionary<Guid, FutureMessage> _results;
-        HashSet<FutureSubscription> _subscriptions;
-        Dictionary<string, object> _variables;
+        Dictionary<Guid, FutureMessage>? _faults;
+        HashSet<Guid>? _pending;
+        Dictionary<Guid, FutureMessage>? _results;
+        HashSet<FutureSubscription>? _subscriptions;
+        Dictionary<string, object>? _variables;
 
         public int CurrentState { get; set; }
 
@@ -20,9 +20,9 @@ namespace MassTransit
         public DateTime? Completed { get; set; }
         public DateTime? Faulted { get; set; }
 
-        public Uri Location { get; set; }
+        public Uri? Location { get; set; }
 
-        public FutureMessage Command { get; set; }
+        public FutureMessage? Command { get; set; }
 
         public HashSet<Guid> Pending
         {
@@ -66,6 +66,7 @@ namespace MassTransit
 
                 return _variables;
             }
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             private set => _variables = value != null ? new Dictionary<string, object>(value, StringComparer.OrdinalIgnoreCase) : null;
         }
 
@@ -99,7 +100,7 @@ namespace MassTransit
             private set => _faults = value;
         }
 
-        public byte[] RowVersion { get; set; }
+        public byte[]? RowVersion { get; set; }
         public int Version { get; set; }
 
         public Guid CorrelationId { get; set; }

@@ -3,7 +3,7 @@ namespace MassTransit
     public interface IEndpointSettings<T>
         where T : class
     {
-        string Name { get; }
+        string? Name { get; }
 
         bool IsTemporary { get; }
 
@@ -13,6 +13,6 @@ namespace MassTransit
 
         bool ConfigureConsumeTopology { get; }
 
-        string InstanceId { get; set; }
+        string? InstanceId { get; set; }
     }
 }
