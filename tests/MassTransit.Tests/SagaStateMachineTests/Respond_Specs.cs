@@ -2,7 +2,6 @@
 {
     using System;
     using System.Threading.Tasks;
-    using MassTransit.Saga;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;
@@ -82,6 +81,7 @@
             public TestStateMachine()
             {
                 Event(() => Requested, x => x.OnMissingInstance(m => m.Fault()));
+
                 Initially(
                     When(Started)
                         .Respond(new StartupComplete())
@@ -89,7 +89,11 @@
 
                 DuringAny(
                     When(Requested)
-                        .Respond(context => new StatusReport(context.Instance.CorrelationId, context.Instance.CurrentState.Name)));
+                        .RespondAsync(x => x.Init<StatusReport>(new
+                        {
+                            x.Instance.CorrelationId,
+                            Status = x.Instance.CurrentState
+                        })));
             }
 
             public State Running { get; private set; }
@@ -125,12 +129,6 @@
         class StatusReport :
             CorrelatedBy<Guid>
         {
-            public StatusReport(Guid correlationId, string status)
-            {
-                CorrelationId = correlationId;
-                Status = status;
-            }
-
             public string Status { get; set; }
 
             public Guid CorrelationId { get; set; }
