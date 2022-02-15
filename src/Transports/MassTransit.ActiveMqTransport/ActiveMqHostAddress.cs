@@ -64,11 +64,9 @@ namespace MassTransit
                 Scheme = address.Scheme,
                 Host = address.Host,
                 Port = address.Port.HasValue
-                    ? address.Scheme.EndsWith("s", StringComparison.OrdinalIgnoreCase)
-                        ? address.Port.Value == 5671 ? -1 : address.Port.Value
-                        : address.Port.Value == 5672
-                            ? -1
-                            : address.Port.Value
+                    ? address.Port.Value == 61616
+                        ? -1
+                        : address.Port.Value
                     : -1,
                 Path = address.VirtualHost == "/"
                     ? "/"
