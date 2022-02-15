@@ -59,13 +59,7 @@
         public ServiceBusHostSettings Settings
         {
             get => _hostSettings;
-            set
-            {
-                _hostSettings = value ?? throw new ArgumentNullException(nameof(value));
-
-                if (_hostSettings.TokenCredential != null)
-                    SetNamespaceSeparatorToUnderscore();
-            }
+            set => _hostSettings = value ?? throw new ArgumentNullException(nameof(value));
         }
 
         public override IRetryPolicy ReceiveTransportRetryPolicy { get; }
