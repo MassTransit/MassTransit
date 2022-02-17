@@ -16,7 +16,7 @@
     /// is valid.
     /// </summary>
     public class RoutingSlipBuilder :
-        IItineraryBuilder,
+        IRoutingSlipBuilder,
         IRoutingSlipSendEndpointTarget
     {
         public static readonly IDictionary<string, object> NoArguments = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
@@ -105,7 +105,7 @@
             if (executeAddress == null)
                 throw new ArgumentNullException(nameof(executeAddress));
 
-            Activity activity = new ActivityImpl(name, executeAddress, NoArguments);
+            Activity activity = new RoutingSlipActivity(name, executeAddress, NoArguments);
             _itinerary.Add(activity);
         }
 
@@ -126,7 +126,7 @@
 
             IDictionary<string, object> argumentsDictionary = GetObjectAsDictionary(arguments);
 
-            Activity activity = new ActivityImpl(name, executeAddress, argumentsDictionary);
+            Activity activity = new RoutingSlipActivity(name, executeAddress, argumentsDictionary);
             _itinerary.Add(activity);
         }
 
@@ -145,7 +145,7 @@
             if (arguments == null)
                 throw new ArgumentNullException(nameof(arguments));
 
-            Activity activity = new ActivityImpl(name, executeAddress, arguments);
+            Activity activity = new RoutingSlipActivity(name, executeAddress, arguments);
             _itinerary.Add(activity);
         }
 
@@ -223,7 +223,7 @@
         /// <param name="events">The events to include in the subscription</param>
         public void AddSubscription(Uri address, RoutingSlipEvents events)
         {
-            _subscriptions.Add(new SubscriptionImpl(address, events, RoutingSlipEventContents.All));
+            _subscriptions.Add(new RoutingSlipSubscription(address, events, RoutingSlipEventContents.All));
         }
 
         /// <summary>
@@ -234,7 +234,7 @@
         /// <param name="contents">The contents of the routing slip event</param>
         public void AddSubscription(Uri address, RoutingSlipEvents events, RoutingSlipEventContents contents)
         {
-            _subscriptions.Add(new SubscriptionImpl(address, events, contents));
+            _subscriptions.Add(new RoutingSlipSubscription(address, events, contents));
         }
 
         /// <summary>
@@ -246,7 +246,7 @@
         /// <param name="activityName">Only send events for the specified activity</param>
         public void AddSubscription(Uri address, RoutingSlipEvents events, RoutingSlipEventContents contents, string activityName)
         {
-            _subscriptions.Add(new SubscriptionImpl(address, events, contents, activityName));
+            _subscriptions.Add(new RoutingSlipSubscription(address, events, contents, activityName));
         }
 
         /// <summary>
@@ -300,7 +300,7 @@
         void IRoutingSlipSendEndpointTarget.AddSubscription(Uri address, RoutingSlipEvents events, RoutingSlipEventContents contents, string activityName,
             MessageEnvelope message)
         {
-            _subscriptions.Add(new SubscriptionImpl(address, events, contents, activityName, message));
+            _subscriptions.Add(new RoutingSlipSubscription(address, events, contents, activityName, message));
         }
 
         /// <summary>
@@ -309,25 +309,25 @@
         /// <returns>The RoutingSlip</returns>
         public RoutingSlip Build()
         {
-            return new RoutingSlipImpl(TrackingNumber, _createTimestamp, _itinerary, _activityLogs, _compensateLogs, _activityExceptions,
+            return new RoutingSlipRoutingSlip(TrackingNumber, _createTimestamp, _itinerary, _activityLogs, _compensateLogs, _activityExceptions,
                 _variables, _subscriptions);
         }
 
         public void AddActivityLog(HostInfo host, string name, Guid activityTrackingNumber, DateTime timestamp, TimeSpan duration)
         {
-            _activityLogs.Add(new ActivityLogImpl(host, activityTrackingNumber, name, timestamp, duration));
+            _activityLogs.Add(new RoutingSlipActivityLog(host, activityTrackingNumber, name, timestamp, duration));
         }
 
         public void AddCompensateLog(Guid activityTrackingNumber, Uri compensateAddress, object logObject)
         {
             IDictionary<string, object> data = GetObjectAsDictionary(logObject);
 
-            _compensateLogs.Add(new CompensateLogImpl(activityTrackingNumber, compensateAddress, data));
+            _compensateLogs.Add(new RoutingSlipCompensateLog(activityTrackingNumber, compensateAddress, data));
         }
 
         public void AddCompensateLog(Guid activityTrackingNumber, Uri compensateAddress, IDictionary<string, object> data)
         {
-            _compensateLogs.Add(new CompensateLogImpl(activityTrackingNumber, compensateAddress, data));
+            _compensateLogs.Add(new RoutingSlipCompensateLog(activityTrackingNumber, compensateAddress, data));
         }
 
         /// <summary>
@@ -349,7 +349,7 @@
 
             var exceptionInfo = new FaultExceptionInfo(exception);
 
-            ActivityException activityException = new ActivityExceptionImpl(name, host, activityTrackingNumber, timestamp, elapsed,
+            ActivityException activityException = new RoutingSlipActivityException(name, host, activityTrackingNumber, timestamp, elapsed,
                 exceptionInfo);
             _activityExceptions.Add(activityException);
         }
@@ -371,7 +371,7 @@
             if (exceptionInfo == null)
                 throw new ArgumentNullException(nameof(exceptionInfo));
 
-            ActivityException activityException = new ActivityExceptionImpl(name, host, activityTrackingNumber, timestamp, elapsed, exceptionInfo);
+            ActivityException activityException = new RoutingSlipActivityException(name, host, activityTrackingNumber, timestamp, elapsed, exceptionInfo);
             _activityExceptions.Add(activityException);
         }
 

@@ -1,4 +1,4 @@
-﻿namespace MassTransit.Courier
+﻿namespace MassTransit
 {
     /// <summary>
     /// An Activity implements the execute and compensate methods for an activity

@@ -27,25 +27,25 @@ namespace MassTransit.Courier
             CreateTimestamp = routingSlip.CreateTimestamp;
 
             Itinerary = (routingSlip.Itinerary ?? Enumerable.Empty<Activity>())
-                .Select(x => (Activity)new ActivityImpl(x))
+                .Select(x => (Activity)new RoutingSlipActivity(x))
                 .ToList();
 
             ActivityLogs = (routingSlip.ActivityLogs ?? Enumerable.Empty<ActivityLog>())
-                .Select(x => (ActivityLog)new ActivityLogImpl(x))
+                .Select(x => (ActivityLog)new RoutingSlipActivityLog(x))
                 .ToList();
 
             CompensateLogs = (routingSlip.CompensateLogs ?? Enumerable.Empty<CompensateLog>())
-                .Select(x => (CompensateLog)new CompensateLogImpl(x))
+                .Select(x => (CompensateLog)new RoutingSlipCompensateLog(x))
                 .ToList();
 
             Variables = routingSlip.Variables ?? new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
             ActivityExceptions = (routingSlip.ActivityExceptions ?? Enumerable.Empty<ActivityException>())
-                .Select(x => (ActivityException)new ActivityExceptionImpl(x))
+                .Select(x => (ActivityException)new RoutingSlipActivityException(x))
                 .ToList();
 
             Subscriptions = (routingSlip.Subscriptions ?? Enumerable.Empty<Subscription>())
-                .Select(x => (Subscription)new SubscriptionImpl(x))
+                .Select(x => (Subscription)new RoutingSlipSubscription(x))
                 .ToList();
         }
 

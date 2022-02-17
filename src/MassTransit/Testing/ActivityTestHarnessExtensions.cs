@@ -2,7 +2,6 @@ namespace MassTransit.Testing
 {
     using System;
     using Courier;
-    using Courier.Factories;
 
 
     public static class ActivityTestHarnessExtensions

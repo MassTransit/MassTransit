@@ -9,13 +9,6 @@ namespace MassTransit
     public sealed class JobTypeStateMachine :
         MassTransitStateMachine<JobTypeSaga>
     {
-        static JobTypeStateMachine()
-        {
-            GlobalTopology.Send.UseCorrelationId<AllocateJobSlot>(x => x.JobTypeId);
-            GlobalTopology.Send.UseCorrelationId<JobSlotReleased>(x => x.JobTypeId);
-            GlobalTopology.Send.UseCorrelationId<SetConcurrentJobLimit>(x => x.JobTypeId);
-        }
-
         public JobTypeStateMachine(JobServiceOptions options)
         {
             Event(() => JobSlotRequested, x =>
