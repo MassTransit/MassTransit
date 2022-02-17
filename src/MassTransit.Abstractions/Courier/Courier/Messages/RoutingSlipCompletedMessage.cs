@@ -9,7 +9,9 @@ namespace MassTransit.Courier.Messages
     public class RoutingSlipCompletedMessage :
         RoutingSlipCompleted
     {
+    #pragma warning disable CS8618
         public RoutingSlipCompletedMessage()
+    #pragma warning restore CS8618
         {
         }
 

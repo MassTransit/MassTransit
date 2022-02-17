@@ -28,4 +28,8 @@
   <ItemGroup>
     <ProjectReference Include="..\MassTransit.Abstractions\MassTransit.Abstractions.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Courier\Messages" />
+  </ItemGroup>
 </Project>

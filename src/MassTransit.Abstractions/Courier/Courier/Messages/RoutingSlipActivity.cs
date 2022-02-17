@@ -2,26 +2,30 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Runtime.Serialization;
     using Contracts;
 
 
     [Serializable]
-    public class ActivityImpl :
+    public class RoutingSlipActivity :
         Activity
     {
-        public ActivityImpl()
+    #pragma warning disable CS8618
+        public RoutingSlipActivity()
+    #pragma warning restore CS8618
         {
         }
 
-        public ActivityImpl(string name, Uri address, IDictionary<string, object> arguments)
+        public RoutingSlipActivity(string name, Uri address, IDictionary<string, object> arguments)
         {
             Name = name;
             Address = address;
             Arguments = arguments;
         }
 
-        public ActivityImpl(Activity activity)
+        [SuppressMessage("ReSharper", "ConstantNullCoalescingCondition")]
+        public RoutingSlipActivity(Activity activity)
         {
             if (string.IsNullOrEmpty(activity.Name))
                 throw new SerializationException("An Activity Name is required");

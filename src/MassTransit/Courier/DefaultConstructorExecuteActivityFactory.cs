@@ -1,4 +1,4 @@
-namespace MassTransit.Courier.Factories
+namespace MassTransit.Courier
 {
     public static class DefaultConstructorExecuteActivityFactory<TActivity, TArguments>
         where TActivity : class, IExecuteActivity<TArguments>, new()

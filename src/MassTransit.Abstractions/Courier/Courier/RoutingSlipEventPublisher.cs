@@ -7,22 +7,18 @@ namespace MassTransit.Courier
     using Contracts;
     using Messages;
     using Metadata;
+    using Serialization;
 
 
     public class RoutingSlipEventPublisher :
         IRoutingSlipEventPublisher
     {
-        static IDictionary<string, object> _emptyObject;
-        readonly CourierContext _context;
+        static IDictionary<string, object>? _emptyObject;
+        readonly CourierContext? _context;
         readonly HostInfo _host;
         readonly IPublishEndpoint _publishEndpoint;
         readonly RoutingSlip _routingSlip;
         readonly ISendEndpointProvider _sendEndpointProvider;
-
-        static RoutingSlipEventPublisher()
-        {
-            RoutingSlipEventCorrelation.ConfigureCorrelationIds();
-        }
 
         public RoutingSlipEventPublisher(CourierContext context, RoutingSlip routingSlip)
         {
@@ -220,7 +216,7 @@ namespace MassTransit.Courier
             {
                 var activityName = _context?.ActivityName;
                 if (string.IsNullOrWhiteSpace(activityName) || string.IsNullOrWhiteSpace(subscription.ActivityName)
-                    || activityName.Equals(subscription.ActivityName, StringComparison.OrdinalIgnoreCase))
+                    || activityName!.Equals(subscription.ActivityName, StringComparison.OrdinalIgnoreCase))
                 {
                     var endpoint = await _sendEndpointProvider.GetSendEndpoint(subscription.Address).ConfigureAwait(false);
 
@@ -235,6 +231,32 @@ namespace MassTransit.Courier
                     else
                         await endpoint.Send(message).ConfigureAwait(false);
                 }
+            }
+        }
+
+
+        class MessageEnvelopeContextAdapter<T> :
+            IPipe<SendContext<T>>
+            where T : class
+        {
+            readonly SerializerContext _context;
+            readonly MessageEnvelope _envelope;
+
+            public MessageEnvelopeContextAdapter(SerializerContext context, MessageEnvelope envelope)
+            {
+                _context = context;
+                _envelope = envelope;
+            }
+
+            public Task Send(SendContext<T> context)
+            {
+                context.Serializer = _context.GetMessageSerializer(_envelope, context.Message);
+
+                return Task.CompletedTask;
+            }
+
+            public void Probe(ProbeContext context)
+            {
             }
         }
     }

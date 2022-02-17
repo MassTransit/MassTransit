@@ -3,19 +3,21 @@
     using System;
     using System.Runtime.Serialization;
     using Contracts;
-    using MassTransit.Serialization;
+    using Serialization;
 
 
     [Serializable]
-    public class SubscriptionImpl :
+    public class RoutingSlipSubscription :
         Subscription
     {
-        public SubscriptionImpl()
+    #pragma warning disable CS8618
+        public RoutingSlipSubscription()
+    #pragma warning restore CS8618
         {
         }
 
-        public SubscriptionImpl(Uri address, RoutingSlipEvents events, RoutingSlipEventContents include, string activityName = null,
-            MessageEnvelope message = null)
+        public RoutingSlipSubscription(Uri address, RoutingSlipEvents events, RoutingSlipEventContents include, string? activityName = null,
+            MessageEnvelope? message = null)
         {
             Include = include;
             ActivityName = activityName;
@@ -24,7 +26,7 @@
             Message = message;
         }
 
-        public SubscriptionImpl(Subscription subscription)
+        public RoutingSlipSubscription(Subscription subscription)
         {
             if (subscription.Address == null)
                 throw new SerializationException("A subscription address is required");
@@ -39,7 +41,7 @@
         public Uri Address { get; set; }
         public RoutingSlipEvents Events { get; set; }
         public RoutingSlipEventContents Include { get; set; }
-        public MessageEnvelope Message { get; set; }
-        public string ActivityName { get; set; }
+        public MessageEnvelope? Message { get; set; }
+        public string? ActivityName { get; set; }
     }
 }

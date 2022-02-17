@@ -6,14 +6,16 @@
 
 
     [Serializable]
-    public class ActivityLogImpl :
+    public class RoutingSlipActivityLog :
         ActivityLog
     {
-        public ActivityLogImpl()
+    #pragma warning disable CS8618
+        public RoutingSlipActivityLog()
+    #pragma warning restore CS8618
         {
         }
 
-        public ActivityLogImpl(HostInfo host, Guid executionId, string name, DateTime timestamp, TimeSpan duration)
+        public RoutingSlipActivityLog(HostInfo host, Guid executionId, string name, DateTime timestamp, TimeSpan duration)
         {
             ExecutionId = executionId;
             Name = name;
@@ -22,7 +24,7 @@
             Host = host;
         }
 
-        public ActivityLogImpl(ActivityLog activityLog)
+        public RoutingSlipActivityLog(ActivityLog activityLog)
         {
             if (string.IsNullOrEmpty(activityLog.Name))
                 throw new SerializationException("An ActivityLog Name is required");
@@ -33,7 +35,6 @@
             Duration = activityLog.Duration;
             Host = activityLog.Host;
         }
-
 
         public Guid ExecutionId { get; set; }
         public string Name { get; set; }

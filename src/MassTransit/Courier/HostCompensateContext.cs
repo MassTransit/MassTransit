@@ -15,7 +15,6 @@ namespace MassTransit.Courier
     {
         readonly ActivityLog _activityLog;
         readonly CompensateLog _compensateLog;
-        readonly TLog _data;
 
         public HostCompensateContext(ConsumeContext<RoutingSlip> context)
             : base(context)
@@ -32,11 +31,11 @@ namespace MassTransit.Courier
                     + _compensateLog.ExecutionId);
             }
 
-            _data = RoutingSlip.GetCompensateLogData<TLog>();
+            Log = RoutingSlip.GetCompensateLogData<TLog>();
         }
 
         public override string ActivityName => _activityLog.Name;
-        TLog CompensateContext<TLog>.Log => _data;
+        public TLog Log { get; }
 
         public CompensateActivityContext<TActivity, TLog> CreateActivityContext<TActivity>(TActivity activity)
             where TActivity : class, ICompensateActivity<TLog>

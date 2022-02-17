@@ -9,7 +9,9 @@ namespace MassTransit.Courier.Messages
     public class RoutingSlipActivityCompensatedMessage :
         RoutingSlipActivityCompensated
     {
+    #pragma warning disable CS8618
         public RoutingSlipActivityCompensatedMessage()
+    #pragma warning restore CS8618
         {
         }
 

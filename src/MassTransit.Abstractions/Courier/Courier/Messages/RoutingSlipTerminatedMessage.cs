@@ -1,4 +1,4 @@
-﻿namespace MassTransit.Courier.Messages
+namespace MassTransit.Courier.Messages
 {
     using System;
     using System.Collections.Generic;
@@ -7,26 +7,27 @@
 
 
     [Serializable]
-    public class RoutingSlipRevisedMessage :
-        RoutingSlipRevised
+    public class RoutingSlipTerminatedMessage :
+        RoutingSlipTerminated
     {
-        public RoutingSlipRevisedMessage()
+    #pragma warning disable CS8618
+        public RoutingSlipTerminatedMessage()
+    #pragma warning restore CS8618
         {
         }
 
-        public RoutingSlipRevisedMessage(HostInfo host, Guid trackingNumber, string activityName, Guid executionId, DateTime timestamp, TimeSpan duration,
-            IDictionary<string, object> variables,
-            IEnumerable<Activity> itinerary, IEnumerable<Activity> discardedItinerary)
+        public RoutingSlipTerminatedMessage(HostInfo host, Guid trackingNumber, string activityName, Guid executionId, DateTime timestamp, TimeSpan duration,
+            IDictionary<string, object> variables, IEnumerable<Activity> discardedItinerary)
         {
             Host = host;
-            ActivityName = activityName;
-            TrackingNumber = trackingNumber;
-            Timestamp = timestamp;
             Duration = duration;
-            ExecutionId = executionId;
+            Timestamp = timestamp;
+
+            TrackingNumber = trackingNumber;
+            ActivityName = activityName;
             Variables = variables;
-            Itinerary = itinerary.ToArray();
             DiscardedItinerary = discardedItinerary.ToArray();
+            ExecutionId = executionId;
         }
 
         public Guid TrackingNumber { get; set; }
@@ -38,9 +39,6 @@
         public HostInfo Host { get; set; }
 
         public IDictionary<string, object> Variables { get; set; }
-
-        public Activity[] Itinerary { get; set; }
-
         public Activity[] DiscardedItinerary { get; set; }
     }
 }

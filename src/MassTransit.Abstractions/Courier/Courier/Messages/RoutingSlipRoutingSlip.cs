@@ -7,14 +7,16 @@
 
 
     [Serializable]
-    public class RoutingSlipImpl :
+    public class RoutingSlipRoutingSlip :
         RoutingSlip
     {
-        public RoutingSlipImpl()
+    #pragma warning disable CS8618
+        public RoutingSlipRoutingSlip()
+    #pragma warning restore CS8618
         {
         }
 
-        public RoutingSlipImpl(Guid trackingNumber, DateTime createTimestamp, IEnumerable<Activity> activities,
+        public RoutingSlipRoutingSlip(Guid trackingNumber, DateTime createTimestamp, IEnumerable<Activity> activities,
             IEnumerable<ActivityLog> activityLogs, IEnumerable<CompensateLog> compensateLogs, IEnumerable<ActivityException> exceptions,
             IDictionary<string, object> variables, IEnumerable<Subscription> subscriptions)
         {
@@ -23,7 +25,7 @@
             Itinerary = activities.ToList();
             ActivityLogs = activityLogs.ToList();
             CompensateLogs = compensateLogs.ToList();
-            Variables = variables ?? new Dictionary<string, object>();
+            Variables = variables;
             ActivityExceptions = exceptions.ToList();
             Subscriptions = subscriptions.ToList();
         }

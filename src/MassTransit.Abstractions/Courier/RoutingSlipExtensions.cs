@@ -9,11 +9,6 @@
 
     public static class RoutingSlipExtensions
     {
-        static RoutingSlipExtensions()
-        {
-            MessageCorrelation.UseCorrelationId<RoutingSlip>(x => x.TrackingNumber);
-        }
-
         /// <summary>
         /// Returns true if there are no remaining activities to be executed
         /// </summary>
@@ -21,15 +16,15 @@
         /// <returns></returns>
         public static bool RanToCompletion(this RoutingSlip routingSlip)
         {
-            return routingSlip.Itinerary == null || routingSlip.Itinerary.Count == 0;
+            return routingSlip.Itinerary.Count == 0;
         }
 
-        public static Uri GetNextExecuteAddress(this RoutingSlip routingSlip)
+        public static Uri? GetNextExecuteAddress(this RoutingSlip routingSlip)
         {
             return routingSlip.Itinerary.Select(x => x.Address).First();
         }
 
-        public static Uri GetNextCompensateAddress(this RoutingSlip routingSlip)
+        public static Uri? GetNextCompensateAddress(this RoutingSlip routingSlip)
         {
             return routingSlip.CompensateLogs.Select(x => x.Address).Last();
         }
@@ -48,7 +43,9 @@
             }
             else
             {
-                var endpoint = await source.GetSendEndpoint(routingSlip.GetNextExecuteAddress()).ConfigureAwait(false);
+                var address = routingSlip.GetNextExecuteAddress() ?? throw new RoutingSlipException("Activity execute address was not specified.");
+
+                var endpoint = await source.GetSendEndpoint(address).ConfigureAwait(false);
 
                 await endpoint.Send(routingSlip).ConfigureAwait(false);
             }

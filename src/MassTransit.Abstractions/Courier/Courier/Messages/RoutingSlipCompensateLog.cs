@@ -2,26 +2,30 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Runtime.Serialization;
     using Contracts;
 
 
     [Serializable]
-    public class CompensateLogImpl :
+    public class RoutingSlipCompensateLog :
         CompensateLog
     {
-        public CompensateLogImpl()
+    #pragma warning disable CS8618
+        public RoutingSlipCompensateLog()
+    #pragma warning restore CS8618
         {
         }
 
-        public CompensateLogImpl(Guid executionId, Uri address, IDictionary<string, object> data)
+        public RoutingSlipCompensateLog(Guid executionId, Uri address, IDictionary<string, object> data)
         {
             ExecutionId = executionId;
             Address = address;
             Data = data;
         }
 
-        public CompensateLogImpl(CompensateLog compensateLog)
+        [SuppressMessage("ReSharper", "ConstantNullCoalescingCondition")]
+        public RoutingSlipCompensateLog(CompensateLog compensateLog)
         {
             if (compensateLog.Address == null)
                 throw new SerializationException("An CompensateLog CompensateAddress is required");

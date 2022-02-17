@@ -83,13 +83,6 @@
                 NewId.NextGuid(), DateTime.UtcNow));
         }
 
-        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
-        {
-            base.ConfigureInMemoryBus(configurator);
-
-            configurator.ConfigureRoutingSlipEventCorrelation();
-        }
-
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             base.ConfigureInMemoryReceiveEndpoint(configurator);

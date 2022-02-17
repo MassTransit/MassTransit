@@ -1,4 +1,4 @@
-namespace MassTransit.Courier.Factories
+namespace MassTransit.Courier
 {
     public static class DefaultConstructorCompensateActivityFactory<TActivity, TLog>
         where TActivity : class, ICompensateActivity<TLog>, new()

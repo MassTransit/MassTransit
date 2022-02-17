@@ -1,4 +1,4 @@
-﻿namespace MassTransit.Courier
+﻿namespace MassTransit
 {
     using System.Threading.Tasks;
 

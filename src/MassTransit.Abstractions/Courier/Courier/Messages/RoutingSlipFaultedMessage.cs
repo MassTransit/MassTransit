@@ -10,7 +10,9 @@ namespace MassTransit.Courier.Messages
     public class RoutingSlipFaultedMessage :
         RoutingSlipFaulted
     {
+    #pragma warning disable CS8618
         public RoutingSlipFaultedMessage()
+    #pragma warning restore CS8618
         {
         }
 
@@ -21,8 +23,8 @@ namespace MassTransit.Courier.Messages
             Timestamp = timestamp;
             Duration = duration;
 
-            Variables = variables;
             ActivityExceptions = activityExceptions.ToArray();
+            Variables = variables;
         }
 
         public RoutingSlipFaultedMessage(Guid trackingNumber, DateTime timestamp, TimeSpan duration, ActivityException activityException)
@@ -32,6 +34,7 @@ namespace MassTransit.Courier.Messages
 
             TrackingNumber = trackingNumber;
             ActivityExceptions = new[] { activityException };
+            Variables = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
         }
 
         public Guid TrackingNumber { get; set; }

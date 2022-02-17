@@ -3,7 +3,6 @@
     using System;
     using Configuration;
     using Courier;
-    using Courier.Factories;
 
 
     public static class CourierHostConfiguratorExtensions

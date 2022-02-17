@@ -2,7 +2,6 @@ namespace MassTransit.TestFramework
 {
     using System;
     using MassTransit.Courier;
-    using MassTransit.Courier.Factories;
     using Testing;
 
 

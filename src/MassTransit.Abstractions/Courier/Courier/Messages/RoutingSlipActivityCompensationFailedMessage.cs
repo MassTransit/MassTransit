@@ -9,13 +9,14 @@ namespace MassTransit.Courier.Messages
     public class RoutingSlipActivityCompensationFailedMessage :
         RoutingSlipActivityCompensationFailed
     {
+    #pragma warning disable CS8618
         public RoutingSlipActivityCompensationFailedMessage()
+    #pragma warning restore CS8618
         {
         }
 
         public RoutingSlipActivityCompensationFailedMessage(HostInfo host, Guid trackingNumber, string activityName, Guid executionId, DateTime timestamp,
-            TimeSpan duration,
-            ExceptionInfo exceptionInfo, IDictionary<string, object> variables, IDictionary<string, object> data)
+            TimeSpan duration, ExceptionInfo exceptionInfo, IDictionary<string, object> variables, IDictionary<string, object> data)
         {
             Host = host;
             Duration = duration;

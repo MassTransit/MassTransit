@@ -6,14 +6,17 @@
 
 
     [Serializable]
-    public class ActivityExceptionImpl :
+    public class RoutingSlipActivityException :
         ActivityException
     {
-        public ActivityExceptionImpl()
+    #pragma warning disable CS8618
+        public RoutingSlipActivityException()
+    #pragma warning restore CS8618
         {
         }
 
-        public ActivityExceptionImpl(string activityName, HostInfo host, Guid executionId, DateTime timestamp, TimeSpan elapsed, ExceptionInfo exceptionInfo)
+        public RoutingSlipActivityException(string activityName, HostInfo host, Guid executionId, DateTime timestamp, TimeSpan elapsed,
+            ExceptionInfo exceptionInfo)
         {
             ExecutionId = executionId;
 
@@ -24,7 +27,7 @@
             ExceptionInfo = exceptionInfo;
         }
 
-        public ActivityExceptionImpl(ActivityException activityException)
+        public RoutingSlipActivityException(ActivityException activityException)
         {
             if (string.IsNullOrEmpty(activityException.Name))
                 throw new SerializationException("An Activity Name is required");
