@@ -50,6 +50,8 @@ namespace MassTransit.Logging
                     activity.AddTag(DiagnosticHeaders.Messaging.ConversationId, conversationId);
                 if (context.CorrelationId.HasValue)
                     activity.AddTag(DiagnosticHeaders.CorrelationId, context.CorrelationId.Value.ToString("D"));
+                if (context.RequestId.HasValue)
+                    activity.AddTag(DiagnosticHeaders.RequestId, context.RequestId.Value.ToString("D"));
                 if (context.InitiatorId.HasValue)
                     activity.AddTag(DiagnosticHeaders.InitiatorId, context.InitiatorId.Value.ToString("D"));
                 if (context.SourceAddress != null)

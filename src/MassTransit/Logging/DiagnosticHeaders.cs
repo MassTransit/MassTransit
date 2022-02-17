@@ -11,6 +11,7 @@ namespace MassTransit.Logging
         public const string MessageId = "messaging.masstransit.message_id";
         public const string CorrelationId = "messaging.masstransit.correlation_id";
         public const string InitiatorId = "messaging.masstransit.initiator_id";
+        public const string RequestId = "messaging.masstransit.request_id";
         public const string SourceAddress = "messaging.masstransit.source_address";
         public const string DestinationAddress = "messaging.masstransit.destination_address";
         public const string InputAddress = "messaging.masstransit.input_address";
