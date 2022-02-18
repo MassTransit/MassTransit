@@ -31,7 +31,6 @@ namespace MassTransit.Configuration
             collection.AddSingleton(provider => Bind<IBus>.Create(CreateRegistrationContext(provider)));
             collection.AddSingleton(provider => provider.GetRequiredService<Bind<IBus, IBusRegistrationContext>>().Value);
 
-            collection.TryAddTransient<IRoutingSlipBuilder>(provider => new RoutingSlipBuilder(NewId.NextGuid()));
             collection.TryAdd(ServiceDescriptor.Singleton(typeof(IReceiveEndpointDispatcher<>), typeof(ReceiveEndpointDispatcher<>)));
             collection.AddSingleton<IReceiveEndpointDispatcherFactory>(provider =>
             {
