@@ -1,7 +1,6 @@
 ﻿namespace MassTransit
 {
-    using GrpcTransport.Contracts;
-    using GrpcTransport.Topology;
+    using Transports.Fabric;
 
 
     public interface IGrpcConsumeTopologyConfigurator :

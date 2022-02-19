@@ -1,7 +1,8 @@
 ﻿namespace MassTransit.GrpcTransport.Configuration
 {
     using System.Collections.Generic;
-    using Contracts;
+    using MassTransit.Configuration;
+    using Transports.Fabric;
 
 
     /// <summary>
@@ -26,7 +27,7 @@
             yield break;
         }
 
-        public void Apply(IGrpcConsumeTopologyBuilder builder)
+        public void Apply(IMessageFabricConsumeTopologyBuilder builder)
         {
             builder.ExchangeDeclare(_exchange, _exchangeType);
             builder.ExchangeBind(_exchange, builder.Exchange, _routingKey);

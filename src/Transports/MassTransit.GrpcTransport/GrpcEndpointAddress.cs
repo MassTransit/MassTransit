@@ -3,8 +3,8 @@ namespace MassTransit
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using GrpcTransport.Contracts;
     using Internals;
+    using Transports.Fabric;
 
 
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]

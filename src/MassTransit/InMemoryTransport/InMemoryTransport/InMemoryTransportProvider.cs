@@ -3,9 +3,9 @@ namespace MassTransit.InMemoryTransport
     using System;
     using System.Threading.Tasks;
     using Configuration;
-    using Fabric;
     using Middleware;
     using Transports;
+    using Transports.Fabric;
 
 
     public sealed class InMemoryTransportProvider :
@@ -13,7 +13,7 @@ namespace MassTransit.InMemoryTransport
         IInMemoryTransportProvider
     {
         readonly IInMemoryHostConfiguration _hostConfiguration;
-        readonly Lazy<IMessageFabric> _messageFabric;
+        readonly IMessageFabric<InMemoryTransportContext, InMemoryTransportMessage> _messageFabric;
         readonly IInMemoryTopologyConfiguration _topologyConfiguration;
 
         public InMemoryTransportProvider(IInMemoryHostConfiguration hostConfiguration, IInMemoryTopologyConfiguration topologyConfiguration)
@@ -21,12 +21,12 @@ namespace MassTransit.InMemoryTransport
             _hostConfiguration = hostConfiguration;
             _topologyConfiguration = topologyConfiguration;
 
-            _messageFabric = new Lazy<IMessageFabric>(() => new MessageFabric(hostConfiguration.TransportConcurrencyLimit));
+            _messageFabric = new MessageFabric<InMemoryTransportContext, InMemoryTransportMessage>();
 
             SetReady();
         }
 
-        public IMessageFabric MessageFabric => _messageFabric.Value;
+        public IMessageFabric<InMemoryTransportContext, InMemoryTransportMessage> MessageFabric => _messageFabric;
 
         public async Task<ISendTransport> CreateSendTransport(ReceiveEndpointContext receiveEndpointContext, Uri address)
         {
@@ -36,7 +36,7 @@ namespace MassTransit.InMemoryTransport
 
             TransportLogMessages.CreateSendTransport(address);
 
-            var exchange = _messageFabric.Value.GetExchange(endpointAddress.Name);
+            IMessageExchange<InMemoryTransportMessage> exchange = _messageFabric.GetExchange(this, endpointAddress.Name, endpointAddress.ExchangeType);
 
             var context = new ExchangeInMemorySendTransportContext(_hostConfiguration, receiveEndpointContext, exchange);
 
@@ -46,11 +46,6 @@ namespace MassTransit.InMemoryTransport
         public Uri NormalizeAddress(Uri address)
         {
             return new InMemoryEndpointAddress(_hostConfiguration.HostAddress, address);
-        }
-
-        public IInMemoryConsumeTopologyBuilder CreateConsumeTopologyBuilder()
-        {
-            return new InMemoryConsumeTopologyBuilder(_messageFabric.Value);
         }
 
         public Task<ISendTransport> CreatePublishTransport<T>(ReceiveEndpointContext receiveEndpointContext, Uri publishAddress)
@@ -65,22 +60,20 @@ namespace MassTransit.InMemoryTransport
 
         public void Probe(ProbeContext context)
         {
-            if (_messageFabric.IsValueCreated)
-                _messageFabric.Value.Probe(context);
+            _messageFabric.Probe(context);
         }
 
         protected override async Task StopAgent(StopContext context)
         {
             await base.StopAgent(context).ConfigureAwait(false);
 
-            if (_messageFabric.IsValueCreated)
-                await _messageFabric.Value.DisposeAsync().ConfigureAwait(false);
+            await _messageFabric.Stop(context).ConfigureAwait(false);
         }
 
         void ApplyTopologyToMessageFabric<T>(IInMemoryMessagePublishTopology<T> publishTopology)
             where T : class
         {
-            publishTopology.Apply(new PublishEndpointTopologyBuilder(_messageFabric.Value));
+            publishTopology.Apply(new MessageFabricPublishTopologyBuilder<InMemoryTransportContext, InMemoryTransportMessage>(this, _messageFabric));
         }
     }
 }

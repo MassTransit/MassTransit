@@ -3,8 +3,9 @@ namespace MassTransit.GrpcTransport.Topology
 {
     using System;
     using System.Collections.Generic;
-    using Contracts;
+    using MassTransit.Configuration;
     using MassTransit.Topology;
+    using Transports.Fabric;
 
 
     public class GrpcMessagePublishTopology<TMessage> :
@@ -23,7 +24,7 @@ namespace MassTransit.GrpcTransport.Topology
 
         public ExchangeType ExchangeType { get; set; }
 
-        public void Apply(IGrpcPublishTopologyBuilder builder)
+        public void Apply(IMessageFabricPublishTopologyBuilder builder)
         {
             var exchangeName = _messageTopology.EntityName;
 
@@ -71,7 +72,7 @@ namespace MassTransit.GrpcTransport.Topology
                 _direct = direct;
             }
 
-            public void Apply(IGrpcPublishTopologyBuilder builder)
+            public void Apply(IMessageFabricPublishTopologyBuilder builder)
             {
                 if (_direct)
                 {

@@ -4,6 +4,7 @@ namespace MassTransit.GrpcTransport
     using System.Threading.Tasks;
     using Fabric;
     using Transports;
+    using Transports.Fabric;
 
 
     public interface IGrpcTransportProvider :
@@ -12,7 +13,7 @@ namespace MassTransit.GrpcTransport
     {
         Uri HostAddress { get; }
         NodeContext HostNodeContext { get; }
-        IMessageFabric MessageFabric { get; }
+        IMessageFabric<NodeContext, GrpcTransportMessage> MessageFabric { get; }
 
         IGrpcHostNode HostNode { get; }
 

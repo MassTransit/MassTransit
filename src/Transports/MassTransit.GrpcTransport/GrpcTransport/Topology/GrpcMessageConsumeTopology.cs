@@ -3,7 +3,8 @@
     using System.Collections.Generic;
     using System.Linq;
     using Configuration;
-    using Contracts;
+    using MassTransit.Configuration;
+    using Transports.Fabric;
 
 
     public class GrpcMessageConsumeTopology<TMessage> :
@@ -23,7 +24,7 @@
             _specifications = new List<IGrpcConsumeTopologySpecification>();
         }
 
-        public void Apply(IGrpcConsumeTopologyBuilder builder)
+        public void Apply(IMessageFabricConsumeTopologyBuilder builder)
         {
             foreach (var specification in _specifications)
                 specification.Apply(builder);

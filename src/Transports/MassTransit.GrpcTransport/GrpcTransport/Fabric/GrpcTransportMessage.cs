@@ -6,7 +6,7 @@ namespace MassTransit.GrpcTransport.Fabric
     using System.Collections.Generic;
     using System.Linq;
     using Contracts;
-    using MassTransit.Serialization;
+    using Serialization;
 
 
     public class GrpcTransportMessage :

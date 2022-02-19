@@ -2,6 +2,7 @@ namespace MassTransit.GrpcTransport
 {
     using System.Collections.Generic;
     using Fabric;
+    using Transports.Fabric;
 
 
     public sealed class GrpcHostNode :
@@ -10,7 +11,7 @@ namespace MassTransit.GrpcTransport
     {
         readonly HostNodeTopology _hostTopology;
 
-        public GrpcHostNode(IMessageFabric messageFabric, NodeContext context)
+        public GrpcHostNode(IMessageFabric<NodeContext, GrpcTransportMessage> messageFabric, NodeContext context)
             : base(messageFabric, context)
         {
             _hostTopology = new HostNodeTopology();

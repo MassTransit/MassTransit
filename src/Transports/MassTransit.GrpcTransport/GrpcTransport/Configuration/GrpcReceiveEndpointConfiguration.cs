@@ -1,9 +1,9 @@
 ﻿namespace MassTransit.GrpcTransport.Configuration
 {
     using System;
-    using Contracts;
     using MassTransit.Configuration;
     using Transports;
+    using Transports.Fabric;
 
 
     public class GrpcReceiveEndpointConfiguration :

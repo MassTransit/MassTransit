@@ -13,6 +13,7 @@ namespace MassTransit.GrpcTransport
     using MassTransit.Middleware;
     using Topology;
     using Transports;
+    using Transports.Fabric;
 
 
     public sealed class GrpcTransportProvider :
@@ -23,7 +24,7 @@ namespace MassTransit.GrpcTransport
         readonly IList<IGrpcClient> _clients;
         readonly IGrpcHostConfiguration _hostConfiguration;
         readonly GrpcHostNode _hostNode;
-        readonly IMessageFabric _messageFabric;
+        readonly IMessageFabric<NodeContext, GrpcTransportMessage> _messageFabric;
         readonly NodeCollection _nodeCollection;
         readonly Server _server;
         readonly Lazy<Task> _startupTask;
@@ -34,7 +35,7 @@ namespace MassTransit.GrpcTransport
             _hostConfiguration = hostConfiguration;
             _topologyConfiguration = topologyConfiguration;
 
-            _messageFabric = new MessageFabric();
+            _messageFabric = new MessageFabric<NodeContext, GrpcTransportMessage>();
 
             _nodeCollection = new NodeCollection(this, _messageFabric);
             _clients = new List<IGrpcClient>();
@@ -72,7 +73,7 @@ namespace MassTransit.GrpcTransport
         public Uri HostAddress { get; }
         public NodeContext HostNodeContext { get; }
 
-        public IMessageFabric MessageFabric => _messageFabric;
+        public IMessageFabric<NodeContext, GrpcTransportMessage> MessageFabric => _messageFabric;
 
         public Task<ISendTransport> CreateSendTransport(ReceiveEndpointContext receiveEndpointContext, Uri address)
         {
@@ -99,7 +100,7 @@ namespace MassTransit.GrpcTransport
         {
             IGrpcMessagePublishTopologyConfigurator<T> publishTopology = _topologyConfiguration.Publish.GetMessageTopology<T>();
 
-            publishTopology.Apply(new GrpcPublishTopologyBuilder(HostNodeContext, _messageFabric));
+            publishTopology.Apply(new MessageFabricPublishTopologyBuilder<NodeContext, GrpcTransportMessage>(HostNodeContext, _messageFabric));
 
             return CreateSendTransport(receiveEndpointContext, publishAddress);
         }

@@ -1,6 +1,7 @@
 ﻿namespace MassTransit
 {
-    using InMemoryTransport.Configuration;
+    using Configuration;
+    using Transports.Fabric;
 
 
     public interface IInMemoryConsumeTopology :
@@ -13,6 +14,6 @@
         /// Apply the entire topology to the builder
         /// </summary>
         /// <param name="builder"></param>
-        void Apply(IInMemoryConsumeTopologyBuilder builder);
+        void Apply(IMessageFabricConsumeTopologyBuilder builder);
     }
 }

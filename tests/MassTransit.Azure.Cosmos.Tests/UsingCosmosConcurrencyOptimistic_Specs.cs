@@ -218,7 +218,7 @@
         {
             base.ConfigureInMemoryBus(configurator);
 
-            configurator.TransportConcurrencyLimit = 16;
+            configurator.ConcurrentMessageLimit = 16;
         }
     }
 }

@@ -1,8 +1,11 @@
 ﻿namespace MassTransit.InMemoryTransport.Configuration
 {
+    using MassTransit.Configuration;
+
+
     public interface IInMemoryConsumeTopologySpecification :
         ISpecification
     {
-        void Apply(IInMemoryConsumeTopologyBuilder builder);
+        void Apply(IMessageFabricConsumeTopologyBuilder builder);
     }
 }

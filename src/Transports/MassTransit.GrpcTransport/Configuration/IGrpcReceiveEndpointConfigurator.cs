@@ -1,6 +1,6 @@
 ﻿namespace MassTransit
 {
-    using GrpcTransport.Contracts;
+    using Transports.Fabric;
 
 
     public interface IGrpcReceiveEndpointConfigurator :

@@ -4,6 +4,7 @@ namespace MassTransit
     using System.Collections.Generic;
     using System.Diagnostics;
     using Internals;
+    using Transports.Fabric;
 
 
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
@@ -11,6 +12,7 @@ namespace MassTransit
     {
         const string BindQueueKey = "bind";
         const string QueueNameKey = "queue";
+        const string ExchangeTypeKey = "type";
 
         public readonly string Scheme;
         public readonly string Host;
@@ -19,6 +21,7 @@ namespace MassTransit
         public readonly string Name;
         public readonly bool BindToQueue;
         public readonly string QueueName;
+        public readonly ExchangeType ExchangeType;
 
         public InMemoryEndpointAddress(Uri hostAddress, Uri address)
         {
@@ -28,6 +31,7 @@ namespace MassTransit
 
             BindToQueue = false;
             QueueName = default;
+            ExchangeType = ExchangeType.FanOut;
 
             var scheme = address.Scheme.ToLowerInvariant();
             switch (scheme)
@@ -71,15 +75,21 @@ namespace MassTransit
                     case QueueNameKey when !string.IsNullOrWhiteSpace(value):
                         QueueName = Uri.UnescapeDataString(value);
                         break;
+
+                    case ExchangeTypeKey when Enum.TryParse<ExchangeType>(value, out var result):
+                        ExchangeType = result;
+                        break;
                 }
             }
         }
 
-        public InMemoryEndpointAddress(Uri hostAddress, string exchangeName, bool bindToQueue = false, string queueName = default)
+        public InMemoryEndpointAddress(Uri hostAddress, string exchangeName, bool bindToQueue = false, string queueName = default,
+            ExchangeType exchangeType = ExchangeType.FanOut)
         {
             ParseLeft(hostAddress, out Scheme, out Host, out VirtualHost);
 
             Name = exchangeName;
+            ExchangeType = exchangeType;
 
             BindToQueue = bindToQueue;
             QueueName = queueName;
@@ -117,6 +127,8 @@ namespace MassTransit
                 yield return $"{BindQueueKey}=true";
             if (!string.IsNullOrWhiteSpace(QueueName))
                 yield return $"{QueueNameKey}={Uri.EscapeDataString(QueueName)}";
+            if (ExchangeType != ExchangeType.FanOut)
+                yield return $"{ExchangeTypeKey}={ExchangeType}";
         }
     }
 }

@@ -69,10 +69,6 @@ namespace MassTransit.TestFramework
         [OneTimeSetUp]
         public async Task ContainerFixtureOneTimeSetup()
         {
-            _fixtureContext = TestExecutionContext.CurrentContext;
-
-            LoggerFactory.Current = _fixtureContext;
-
             var collection = _containerFactory.CreateServiceCollection()
                 .AddSingleton<ILoggerFactory>(provider => new TestOutputLoggerFactory(true))
                 .AddSingleton(typeof(ILogger<>), typeof(Logger<>))
@@ -104,6 +100,10 @@ namespace MassTransit.TestFramework
             });
         #pragma warning restore 4014
 
+            _fixtureContext = TestExecutionContext.CurrentContext;
+
+            LoggerFactory.Current = _fixtureContext;
+
             await InMemoryTestHarness.Start();
         }
 
@@ -112,9 +112,9 @@ namespace MassTransit.TestFramework
         {
             LoggerFactory.Current = _fixtureContext;
 
-            await InMemoryTestHarness.Stop().ConfigureAwait(false);
+            LogContext.Debug?.Log("Stopping test harness");
 
-            InMemoryTestHarness.Dispose();
+            await InMemoryTestHarness.Stop().ConfigureAwait(false);
 
             switch (ServiceProvider)
             {

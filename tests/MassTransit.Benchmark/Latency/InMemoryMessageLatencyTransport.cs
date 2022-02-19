@@ -30,7 +30,7 @@
         {
             _busControl = Bus.Factory.CreateUsingInMemory(x =>
             {
-                x.TransportConcurrencyLimit = _optionSet.TransportConcurrencyLimit;
+                x.ConcurrentMessageLimit = _optionSet.TransportConcurrencyLimit;
 
                 x.ReceiveEndpoint("latency_consumer", e =>
                 {

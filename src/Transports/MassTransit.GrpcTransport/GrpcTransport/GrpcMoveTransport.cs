@@ -5,13 +5,14 @@ namespace MassTransit.GrpcTransport
     using System.Threading.Tasks;
     using Contracts;
     using Fabric;
+    using Transports.Fabric;
 
 
     public class GrpcMoveTransport
     {
-        readonly IMessageExchange _exchange;
+        readonly IMessageExchange<GrpcTransportMessage> _exchange;
 
-        protected GrpcMoveTransport(IMessageExchange exchange)
+        protected GrpcMoveTransport(IMessageExchange<GrpcTransportMessage> exchange)
         {
             _exchange = exchange;
         }
@@ -23,14 +24,16 @@ namespace MassTransit.GrpcTransport
                 var message = new TransportMessage
                 {
                     MessageId = receivedMessage.Message.MessageId,
-                    Deliver = new Deliver(receivedMessage.Message.Deliver) {Exchange = new ExchangeDestination {Name = _exchange.Name}}
+                    Deliver = new Deliver(receivedMessage.Message.Deliver) { Exchange = new ExchangeDestination { Name = _exchange.Name } }
                 };
 
                 var transportMessage = new GrpcTransportMessage(message, receivedMessage.Host);
 
                 preSend(transportMessage, transportMessage.SendHeaders);
 
-                await _exchange.Send(transportMessage, CancellationToken.None).ConfigureAwait(false);
+                var deliveryContext = new GrpcDeliveryContext(transportMessage, CancellationToken.None);
+
+                await _exchange.Deliver(deliveryContext).ConfigureAwait(false);
             }
         }
     }

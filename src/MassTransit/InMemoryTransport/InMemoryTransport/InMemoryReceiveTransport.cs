@@ -3,9 +3,11 @@ namespace MassTransit.InMemoryTransport
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Fabric;
+    using Internals;
     using Middleware;
     using Transports;
+    using Transports.Fabric;
+    using Util;
 
 
     /// <summary>
@@ -38,15 +40,18 @@ namespace MassTransit.InMemoryTransport
 
         ReceiveTransportHandle IReceiveTransport.Start()
         {
-            var queue = _context.MessageFabric.GetQueue(_queueName);
+            _context.ConfigureTopology();
 
-            IDeadLetterTransport deadLetterTransport = new InMemoryMessageDeadLetterTransport(_context.MessageFabric.GetExchange($"{_queueName}_skipped"));
+            IMessageQueue<InMemoryTransportContext, InMemoryTransportMessage> queue =
+                _context.MessageFabric.GetQueue(_context.TransportContext, _queueName);
+
+            IDeadLetterTransport deadLetterTransport =
+                new InMemoryMessageDeadLetterTransport(_context.MessageFabric.GetExchange(_context.TransportContext, $"{_queueName}_skipped"));
             _context.AddOrUpdatePayload(() => deadLetterTransport, _ => deadLetterTransport);
 
-            IErrorTransport errorTransport = new InMemoryMessageErrorTransport(_context.MessageFabric.GetExchange($"{_queueName}_error"));
+            IErrorTransport errorTransport =
+                new InMemoryMessageErrorTransport(_context.MessageFabric.GetExchange(_context.TransportContext, $"{_queueName}_error"));
             _context.AddOrUpdatePayload(() => errorTransport, _ => errorTransport);
-
-            _context.ConfigureTopology();
 
             return new ReceiveTransportAgent(_context, queue);
         }
@@ -75,47 +80,55 @@ namespace MassTransit.InMemoryTransport
         class ReceiveTransportAgent :
             Agent,
             ReceiveTransportHandle,
-            IInMemoryQueueConsumer
+            IMessageReceiver<InMemoryTransportMessage>
         {
-            readonly ConnectHandle _consumerHandle;
             readonly InMemoryReceiveEndpointContext _context;
             readonly IReceivePipeDispatcher _dispatcher;
-            readonly IInMemoryQueue _queue;
+            readonly ChannelExecutor _executor;
+            readonly IMessageQueue<InMemoryTransportContext, InMemoryTransportMessage> _queue;
+            TopologyHandle _topologyHandle;
 
-            public ReceiveTransportAgent(InMemoryReceiveEndpointContext context, IInMemoryQueue queue)
+            public ReceiveTransportAgent(InMemoryReceiveEndpointContext context, IMessageQueue<InMemoryTransportContext, InMemoryTransportMessage> queue)
             {
                 _context = context;
                 _queue = queue;
 
                 _dispatcher = context.CreateReceivePipeDispatcher();
 
-                _consumerHandle = queue.ConnectConsumer(this);
+                _executor = new ChannelExecutor(context.ConcurrentMessageLimit ?? context.PrefetchCount, false);
 
                 Task.Run(() => Startup());
             }
 
-            public async Task Consume(InMemoryTransportMessage message, CancellationToken cancellationToken)
+            public Task Deliver(InMemoryTransportMessage message, CancellationToken cancellationToken)
             {
-                await Ready.ConfigureAwait(false);
-                if (IsStopped)
-                    return;
+                if (IsStopping)
+                    return Task.CompletedTask;
 
-                LogContext.Current = _context.LogContext;
+                return _executor.Push(async () =>
+                {
+                    LogContext.Current = _context.LogContext;
 
-                var context = new InMemoryReceiveContext(message, _context);
-                try
-                {
-                    await _dispatcher.Dispatch(context).ConfigureAwait(false);
-                }
-                catch (Exception exception)
-                {
-                    message.DeliveryCount++;
-                    context.LogTransportFaulted(exception);
-                }
-                finally
-                {
-                    context.Dispose();
-                }
+                    var context = new InMemoryReceiveContext(message, _context);
+                    try
+                    {
+                        await _dispatcher.Dispatch(context).ConfigureAwait(false);
+                    }
+                    catch (Exception exception)
+                    {
+                        message.DeliveryCount++;
+                        context.LogTransportFaulted(exception);
+                    }
+                    finally
+                    {
+                        context.Dispose();
+                    }
+                }, cancellationToken);
+            }
+
+            public void Probe(ProbeContext context)
+            {
+                context.CreateScope("inMemory");
             }
 
             async Task ReceiveTransportHandle.Stop(CancellationToken cancellationToken)
@@ -127,6 +140,10 @@ namespace MassTransit.InMemoryTransport
             {
                 try
                 {
+                    await _context.Dependencies.OrCanceled(Stopping).ConfigureAwait(false);
+
+                    _topologyHandle = _queue.ConnectMessageReceiver(_context.TransportContext, this);
+
                     await _context.TransportObservers.NotifyReady(_context.InputAddress).ConfigureAwait(false);
 
                     SetReady();
@@ -134,7 +151,6 @@ namespace MassTransit.InMemoryTransport
                 catch (Exception exception)
                 {
                     SetNotReady(exception);
-                    throw;
                 }
             }
 
@@ -142,14 +158,16 @@ namespace MassTransit.InMemoryTransport
             {
                 LogContext.SetCurrentIfNull(_context.LogContext);
 
+                _topologyHandle?.Disconnect();
+
+                await _executor.DisposeAsync().ConfigureAwait(false);
+
                 var metrics = _dispatcher.GetMetrics();
 
                 await _context.TransportObservers.NotifyCompleted(_context.InputAddress, metrics).ConfigureAwait(false);
 
                 LogContext.Debug?.Log("Consumer completed {InputAddress}: {DeliveryCount} received, {ConcurrentDeliveryCount} concurrent",
                     _context.InputAddress, metrics.DeliveryCount, metrics.ConcurrentDeliveryCount);
-
-                _consumerHandle.Disconnect();
 
                 await base.StopAgent(context).ConfigureAwait(false);
             }

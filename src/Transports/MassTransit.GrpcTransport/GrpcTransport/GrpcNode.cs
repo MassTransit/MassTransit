@@ -10,6 +10,7 @@ namespace MassTransit.GrpcTransport
     using Grpc.Core;
     using Internals;
     using MassTransit.Middleware;
+    using Transports.Fabric;
 
 
     public class GrpcNode :
@@ -17,11 +18,11 @@ namespace MassTransit.GrpcTransport
         IGrpcNode
     {
         readonly Channel<TransportMessage> _channel;
-        readonly IMessageFabric _messageFabric;
+        readonly IMessageFabric<NodeContext, GrpcTransportMessage> _messageFabric;
         readonly RemoteNodeTopology _remoteTopology;
         NodeContext _context;
 
-        public GrpcNode(IMessageFabric messageFabric, NodeContext context)
+        public GrpcNode(IMessageFabric<NodeContext, GrpcTransportMessage> messageFabric, NodeContext context)
         {
             _messageFabric = messageFabric;
             _context = context;
@@ -177,13 +178,13 @@ namespace MassTransit.GrpcTransport
                 {
                     var destination = message.Deliver.Exchange;
 
-                    var exchange = _messageFabric.GetExchange(_context, destination.Name);
+                    IMessageExchange<GrpcTransportMessage> exchange = _messageFabric.GetExchange(_context, destination.Name);
 
                     return exchange.Send(transportMessage, Stopping);
                 }
                 case Deliver.DestinationOneofCase.Queue:
                 {
-                    var queue = _messageFabric.GetQueue(_context, message.Deliver.Queue.Name);
+                    IMessageQueue<NodeContext, GrpcTransportMessage> queue = _messageFabric.GetQueue(_context, message.Deliver.Queue.Name);
 
                     return queue.Send(transportMessage, Stopping);
                 }
@@ -191,7 +192,7 @@ namespace MassTransit.GrpcTransport
                 {
                     var receiver = message.Deliver.Receiver;
 
-                    var queue = _messageFabric.GetQueue(_context, receiver.QueueName);
+                    IMessageQueue<NodeContext, GrpcTransportMessage> queue = _messageFabric.GetQueue(_context, receiver.QueueName);
 
                     message.Deliver.Receiver.ReceiverId = _remoteTopology.GetLocalConsumerId(receiver.QueueName, receiver.ReceiverId);
 

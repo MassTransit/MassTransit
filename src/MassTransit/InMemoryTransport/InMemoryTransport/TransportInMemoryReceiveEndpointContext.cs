@@ -2,9 +2,8 @@
 {
     using System;
     using Configuration;
-    using Context;
-    using Fabric;
     using Transports;
+    using Transports.Fabric;
 
 
     public class TransportInMemoryReceiveEndpointContext :
@@ -21,6 +20,9 @@
             _configuration = configuration;
         }
 
+        public IMessageFabric<InMemoryTransportContext, InMemoryTransportMessage> MessageFabric => _hostConfiguration.TransportProvider.MessageFabric;
+        public InMemoryTransportContext TransportContext => _hostConfiguration.TransportProvider;
+
         public override void AddConsumeAgent(IAgent agent)
         {
             throw new NotSupportedException();
@@ -31,17 +33,19 @@
             return exception;
         }
 
-        public IMessageFabric MessageFabric => _hostConfiguration.TransportProvider.MessageFabric;
-
         public void ConfigureTopology()
         {
-            var builder = new InMemoryConsumeTopologyBuilder(MessageFabric);
+            var builder = new MessageFabricConsumeTopologyBuilder<InMemoryTransportContext, InMemoryTransportMessage>(_hostConfiguration.TransportProvider,
+                MessageFabric);
 
-            var queueName = _configuration.InputAddress.GetEndpointName();
+            var name = _configuration.InputAddress.GetEndpointName();
 
-            builder.Queue = queueName;
-            builder.QueueDeclare(queueName, _configuration.Transport.GetConcurrentMessageLimit());
-            builder.Exchange = queueName;
+            builder.Exchange = name;
+            builder.ExchangeDeclare(name, ExchangeType.FanOut);
+
+            builder.Queue = name;
+            builder.QueueDeclare(name);
+
             builder.QueueBind(builder.Exchange, builder.Queue);
 
             _configuration.Topology.Consume.Apply(builder);

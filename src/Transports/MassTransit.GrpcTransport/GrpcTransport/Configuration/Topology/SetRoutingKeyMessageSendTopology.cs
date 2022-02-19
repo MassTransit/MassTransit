@@ -4,7 +4,6 @@
     using System.Threading.Tasks;
     using MassTransit.Configuration;
     using Middleware;
-    using Topology;
 
 
     public class SetRoutingKeyMessageSendTopology<T> :

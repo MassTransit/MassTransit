@@ -9,8 +9,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
 
     [TestFixture(typeof(DependencyInjectionTestFixtureContainerFactory))]
-    [TestFixture(typeof(LamarTestFixtureContainerFactory))]
-    [TestFixture(typeof(SimpleInjectorTestFixtureContainerFactory))]
     public class Common_ScopeSend<TContainer> :
         InMemoryContainerTestFixture<TContainer>
         where TContainer : ITestFixtureContainerFactory, new()

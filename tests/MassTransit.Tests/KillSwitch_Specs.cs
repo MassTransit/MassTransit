@@ -40,7 +40,7 @@ namespace MassTransit.Tests
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.ConcurrencyLimit = 20;
+            configurator.ConcurrentMessageLimit = 20;
             configurator.Consumer<BadConsumer>();
         }
 

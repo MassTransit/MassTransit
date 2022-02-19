@@ -2,6 +2,7 @@ namespace MassTransit.GrpcTransport
 {
     using System.Collections.Generic;
     using Fabric;
+    using Transports.Fabric;
 
 
     public interface IGrpcHostNode :

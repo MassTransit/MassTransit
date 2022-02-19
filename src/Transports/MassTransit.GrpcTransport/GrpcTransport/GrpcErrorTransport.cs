@@ -3,13 +3,14 @@ namespace MassTransit.GrpcTransport
     using System.Threading.Tasks;
     using Fabric;
     using Transports;
+    using Transports.Fabric;
 
 
     public class GrpcErrorTransport :
         GrpcMoveTransport,
         IErrorTransport
     {
-        public GrpcErrorTransport(IMessageExchange exchange)
+        public GrpcErrorTransport(IMessageExchange<GrpcTransportMessage> exchange)
             : base(exchange)
         {
         }

@@ -5,6 +5,7 @@
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class When_mandatory_is_specified_and_no_binding_exists :
         RabbitMqTestFixture
     {
@@ -15,7 +16,7 @@
         }
 
 
-        class NoBindingPlease
+        public class NoBindingPlease
         {
         }
     }

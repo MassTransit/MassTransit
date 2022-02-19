@@ -5,7 +5,6 @@ namespace MassTransit.Tests.Serialization
     using System.IO;
     using Context;
     using InMemoryTransport;
-    using InMemoryTransport.Fabric;
     using MassTransit.Serialization;
     using Messages;
     using Metadata;

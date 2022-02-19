@@ -1,11 +1,12 @@
+#nullable enable
 namespace MassTransit.InMemoryTransport
 {
-    using Fabric;
     using Transports;
 
 
     public sealed class InMemoryReceiveContext :
-        BaseReceiveContext
+        BaseReceiveContext,
+        RoutingKeyConsumeContext
     {
         readonly InMemoryTransportMessage _message;
 
@@ -20,5 +21,6 @@ namespace MassTransit.InMemoryTransport
         protected override IHeaderProvider HeaderProvider => new DictionaryHeaderProvider(_message.Headers);
 
         public override MessageBody Body { get; }
+        public string? RoutingKey => _message.RoutingKey;
     }
 }

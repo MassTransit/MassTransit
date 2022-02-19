@@ -3,7 +3,6 @@ namespace MassTransit.Tests.Serialization
     using System;
     using Context;
     using InMemoryTransport;
-    using InMemoryTransport.Fabric;
     using MassTransit.Serialization;
     using NUnit.Framework;
     using Shouldly;

@@ -1,6 +1,7 @@
 ﻿namespace MassTransit
 {
-    using InMemoryTransport.Configuration;
+    using Configuration;
+    using Transports.Fabric;
 
 
     public interface IInMemoryMessagePublishTopology<TMessage> :
@@ -8,15 +9,12 @@
         IInMemoryMessagePublishTopology
         where TMessage : class
     {
+        ExchangeType ExchangeType { get; }
     }
 
 
     public interface IInMemoryMessagePublishTopology
     {
-        /// <summary>
-        /// Apply the message topology to the builder, including any implemented types
-        /// </summary>
-        /// <param name="builder">The topology builder</param>
-        void Apply(IInMemoryPublishTopologyBuilder builder);
+        void Apply(IMessageFabricPublishTopologyBuilder builder);
     }
 }

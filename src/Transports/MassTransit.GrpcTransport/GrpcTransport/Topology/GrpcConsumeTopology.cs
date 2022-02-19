@@ -4,7 +4,8 @@ namespace MassTransit.GrpcTransport.Topology
     using System.Collections.Generic;
     using System.Linq;
     using Configuration;
-    using Contracts;
+    using MassTransit.Configuration;
+    using Transports.Fabric;
 
 
     public class GrpcConsumeTopology :
@@ -42,7 +43,7 @@ namespace MassTransit.GrpcTransport.Topology
             return GetMessageTopology<T>() as IGrpcMessageConsumeTopologyConfigurator<T>;
         }
 
-        public void Apply(IGrpcConsumeTopologyBuilder builder)
+        public void Apply(IMessageFabricConsumeTopologyBuilder builder)
         {
             foreach (var specification in _specifications)
                 specification.Apply(builder);

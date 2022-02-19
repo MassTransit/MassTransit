@@ -45,8 +45,6 @@ namespace MassTransit.TestFramework
 
         protected Uri InputQueueAddress => InMemoryTestHarness.InputQueueAddress;
 
-        protected IServiceProvider ServiceProvider { get; set; } = null;
-
         [SetUp]
         public Task SetupInMemoryTest()
         {
@@ -100,16 +98,6 @@ namespace MassTransit.TestFramework
             await InMemoryTestHarness.Stop().ConfigureAwait(false);
 
             InMemoryTestHarness.Dispose();
-
-            switch (ServiceProvider)
-            {
-                case IAsyncDisposable asyncDisposable:
-                    await asyncDisposable.DisposeAsync().ConfigureAwait(false);
-                    break;
-                case IDisposable disposable:
-                    disposable.Dispose();
-                    break;
-            }
         }
 
         protected virtual void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)

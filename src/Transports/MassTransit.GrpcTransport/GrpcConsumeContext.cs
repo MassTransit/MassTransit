@@ -1,7 +1,7 @@
 namespace MassTransit
 {
-    public interface GrpcConsumeContext
+    public interface GrpcConsumeContext :
+        RoutingKeyConsumeContext
     {
-        string RoutingKey { get; }
     }
 }

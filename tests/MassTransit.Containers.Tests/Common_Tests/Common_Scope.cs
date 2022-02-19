@@ -7,10 +7,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using TestFramework.Messages;
 
 
-    [TestFixture(typeof(AutofacTestFixtureContainerFactory))]
-    [TestFixture(typeof(LamarTestFixtureContainerFactory))]
-    [TestFixture(typeof(StructureMapTestFixtureContainerFactory))]
-    [TestFixture(typeof(CastleWindsorTestFixtureContainerFactory))]
     public class Resolving_a_scoped_interface_without_a_scope<TContainer> :
         InMemoryContainerTestFixture<TContainer>
         where TContainer : ITestFixtureContainerFactory, new()

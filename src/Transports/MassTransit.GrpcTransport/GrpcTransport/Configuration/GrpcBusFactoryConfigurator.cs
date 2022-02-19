@@ -79,10 +79,5 @@ namespace MassTransit.GrpcTransport.Configuration
         {
             _hostConfiguration.ReceiveEndpoint(queueName, configureEndpoint);
         }
-
-        public int TransportConcurrencyLimit
-        {
-            set => ConcurrentMessageLimit = value;
-        }
     }
 }

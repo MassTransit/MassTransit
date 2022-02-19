@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.GrpcTransport.Configuration
 {
     using System.Collections.Generic;
+    using MassTransit.Configuration;
 
 
     public class InvalidGrpcConsumeTopologySpecification :
@@ -20,7 +21,7 @@
             yield return this.Failure(_key, _message);
         }
 
-        public void Apply(IGrpcConsumeTopologyBuilder builder)
+        public void Apply(IMessageFabricConsumeTopologyBuilder builder)
         {
         }
     }
