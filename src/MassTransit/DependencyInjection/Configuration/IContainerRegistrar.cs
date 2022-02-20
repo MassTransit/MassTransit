@@ -26,6 +26,15 @@ namespace MassTransit.Configuration
             where T : class, IRegistration;
 
         /// <summary>
+        /// Adds a registration to the service collection
+        /// </summary>
+        /// <param name="value"></param>
+        /// <typeparam name="T">The registration type</typeparam>
+        /// <returns></returns>
+        void Add<T>(T value)
+            where T : class, IRegistration;
+
+        /// <summary>
         /// Returns registrations from the service collection, prior to container construction
         /// </summary>
         /// <typeparam name="T">The registration type</typeparam>

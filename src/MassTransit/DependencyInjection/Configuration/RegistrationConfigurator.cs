@@ -204,10 +204,7 @@ namespace MassTransit.Configuration
 
         public void SetSagaRepositoryProvider(ISagaRepositoryRegistrationProvider provider)
         {
-            if (provider == null)
-                throw new ArgumentNullException(nameof(provider));
-
-            _sagaRepositoryRegistrationProvider = provider;
+            _sagaRepositoryRegistrationProvider = provider ?? throw new ArgumentNullException(nameof(provider));
         }
 
         public IEnumerator<ServiceDescriptor> GetEnumerator()

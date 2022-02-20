@@ -11,37 +11,48 @@
         public static void UseHangfireScheduler(this IBusFactoryConfigurator configurator, IBusRegistrationContext context, string queueName = "hangfire",
             Action<BackgroundJobServerOptions>? configureServer = null)
         {
-            configurator.UseHangfireScheduler(new BusRegistrationContextComponentResolver(context, DefaultHangfireComponentResolver.Instance), queueName,
+            UseHangfireScheduler(configurator, new BusRegistrationContextComponentResolver(context, DefaultHangfireComponentResolver.Instance), queueName,
                 configureServer);
         }
 
         public static void UseHangfireScheduler(this IBusFactoryConfigurator configurator, string queueName = "hangfire",
             Action<BackgroundJobServerOptions>? configureServer = null)
         {
-            configurator.UseHangfireScheduler(DefaultHangfireComponentResolver.Instance, queueName, configureServer);
+            UseHangfireScheduler(configurator, DefaultHangfireComponentResolver.Instance, queueName, configureServer);
         }
 
         public static void UseHangfireScheduler(this IBusFactoryConfigurator configurator, IHangfireComponentResolver hangfireComponentResolver,
             string queueName = "hangfire",
             Action<BackgroundJobServerOptions>? configureServer = null)
         {
+            UseHangfireScheduler(configurator, options =>
+            {
+                options.QueueName = queueName;
+                options.ComponentResolver = hangfireComponentResolver;
+                options.ConfigureServer = configureServer;
+            });
+        }
+
+        public static void UseHangfireScheduler(this IBusFactoryConfigurator configurator, Action<HangfireSchedulerOptions>? configure)
+        {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
-            if (hangfireComponentResolver == null)
-                throw new ArgumentNullException(nameof(hangfireComponentResolver));
 
-            configurator.ReceiveEndpoint(queueName, e =>
+            var options = new HangfireSchedulerOptions();
+            configure?.Invoke(options);
+
+            configurator.ReceiveEndpoint(options.QueueName, e =>
             {
                 var partitioner = configurator.CreatePartitioner(Environment.ProcessorCount);
 
-                e.Consumer(() => new ScheduleMessageConsumer(hangfireComponentResolver), x =>
+                e.Consumer(() => new ScheduleMessageConsumer(options.ComponentResolver), x =>
                 {
                     x.Message<ScheduleMessage>(m => m.UsePartitioner(partitioner, p => p.Message.CorrelationId));
                     x.Message<CancelScheduledMessage>(m => m.UsePartitioner(partitioner, p => p.Message.TokenId));
                 });
-                e.Consumer(() => new ScheduleRecurringMessageConsumer(hangfireComponentResolver));
+                e.Consumer(() => new ScheduleRecurringMessageConsumer(options.ComponentResolver));
 
-                var observer = new SchedulerBusObserver(hangfireComponentResolver, e.InputAddress, configureServer);
+                var observer = new SchedulerBusObserver(options);
                 configurator.ConnectBusObserver(observer);
 
                 configurator.UseMessageScheduler(e.InputAddress);

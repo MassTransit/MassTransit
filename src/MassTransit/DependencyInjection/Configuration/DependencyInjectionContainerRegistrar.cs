@@ -79,6 +79,12 @@ namespace MassTransit.Configuration
             return value;
         }
 
+        public void Add<T>(T value)
+            where T : class, IRegistration
+        {
+            AddRegistration(value);
+        }
+
         public virtual IEnumerable<T> GetRegistrations<T>()
             where T : class, IRegistration
         {

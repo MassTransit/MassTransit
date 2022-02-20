@@ -27,5 +27,7 @@ namespace MassTransit.KafkaIntegration.Configuration
             else
                 configurator.TopicProducer<TKey, TValue>(_topic, c => _configure?.Invoke(context, c));
         }
+
+        public Type Type => typeof(KafkaProducerRegistrationConfigurator<TKey, TValue>);
     }
 }

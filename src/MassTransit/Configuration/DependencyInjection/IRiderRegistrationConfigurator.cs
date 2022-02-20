@@ -1,5 +1,6 @@
 namespace MassTransit
 {
+    using Configuration;
     using DependencyInjection;
     using Transports;
 
@@ -8,7 +9,7 @@ namespace MassTransit
         IRegistrationConfigurator
     {
         void AddRegistration<T>(T registration)
-            where T : class;
+            where T : class, IRegistration;
 
         /// <summary>
         /// Add the rider to the container, configured properly

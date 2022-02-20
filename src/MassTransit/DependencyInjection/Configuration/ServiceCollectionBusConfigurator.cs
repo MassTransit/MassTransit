@@ -16,8 +16,6 @@ namespace MassTransit.Configuration
         RegistrationConfigurator,
         IBusRegistrationConfigurator
     {
-        protected readonly HashSet<Type> RiderTypes;
-
         public ServiceCollectionBusConfigurator(IServiceCollection collection)
             : this(collection, new DependencyInjectionContainerRegistrar(collection))
         {
@@ -45,7 +43,6 @@ namespace MassTransit.Configuration
             : base(collection, registrar)
         {
             Collection = collection;
-            RiderTypes = new HashSet<Type>();
 
             AddMassTransitComponents(collection);
         }
@@ -77,7 +74,7 @@ namespace MassTransit.Configuration
 
         public virtual void AddRider(Action<IRiderRegistrationConfigurator> configure)
         {
-            var configurator = new ServiceCollectionRiderConfigurator(Collection, Registrar, RiderTypes);
+            var configurator = new ServiceCollectionRiderConfigurator(Collection, Registrar);
             configure?.Invoke(configurator);
         }
 
@@ -173,7 +170,7 @@ namespace MassTransit.Configuration
 
         public override void AddRider(Action<IRiderRegistrationConfigurator> configure)
         {
-            var configurator = new ServiceCollectionRiderConfigurator<TBus>(this, Registrar, RiderTypes);
+            var configurator = new ServiceCollectionRiderConfigurator<TBus>(this, Registrar);
             configure?.Invoke(configurator);
         }
 

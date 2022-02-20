@@ -2,24 +2,22 @@ namespace MassTransit.Configuration
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
+    using Microsoft.Extensions.DependencyInjection;
 
 
     public class RiderRegistrationContext :
         IRiderRegistrationContext
     {
         readonly IRegistrationContext _registration;
-        readonly IRegistrationCache<object> _registrations;
 
-        public RiderRegistrationContext(IRegistrationContext registration, IRegistrationCache<object> registrations)
+        public RiderRegistrationContext(IRegistrationContext registration)
         {
             _registration = registration;
-            _registrations = registrations;
         }
 
         public IEnumerable<T> GetRegistrations<T>()
         {
-            return _registrations.Values.OfType<T>();
+            return _registration.GetService<IEnumerable<T>>();
         }
 
         public object GetService(Type serviceType)

@@ -61,7 +61,7 @@ namespace MassTransit
 
             var registration = new KafkaProducerRegistrationConfigurator<TKey, T>(topicName, configure);
             configurator.TryAddScoped(provider => GetProducer<TKey, T>(topicName, provider));
-            configurator.AddRegistration(registration);
+            configurator.AddRegistration<IKafkaProducerRegistration>(registration);
         }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace MassTransit
 
             var registration = new KafkaProducerRegistrationConfigurator<TKey, T>(topicName, configure, producerConfig);
             configurator.TryAddScoped(provider => GetProducer<TKey, T>(topicName, provider));
-            configurator.AddRegistration(registration);
+            configurator.AddRegistration<IKafkaProducerRegistration>(registration);
         }
 
         /// <summary>
