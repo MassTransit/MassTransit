@@ -24,7 +24,7 @@
         protected HangfireInMemoryActivityTestFixture()
         {
             _queueName = "hangfire";
-            HangfireAddress = new Uri($"loopback://localhost/{_queueName}");
+            HangfireAddress = new Uri($"queue:{_queueName}");
         }
 
         protected Uri HangfireAddress { get; }
