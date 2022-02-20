@@ -4,7 +4,7 @@ namespace MassTransit.KafkaIntegration.Configuration
     using Confluent.Kafka;
 
 
-    public class KafkaProducerRegistrationConfigurator<TKey, TValue> :
+    public class KafkaProducerRegistration<TKey, TValue> :
         IKafkaProducerRegistration
         where TValue : class
     {
@@ -12,7 +12,7 @@ namespace MassTransit.KafkaIntegration.Configuration
         readonly ProducerConfig _producerConfig;
         readonly string _topic;
 
-        public KafkaProducerRegistrationConfigurator(string topic, Action<IRiderRegistrationContext, IKafkaProducerConfigurator<TKey, TValue>> configure,
+        public KafkaProducerRegistration(string topic, Action<IRiderRegistrationContext, IKafkaProducerConfigurator<TKey, TValue>> configure,
             ProducerConfig producerConfig = null)
         {
             _topic = topic;
@@ -27,5 +27,7 @@ namespace MassTransit.KafkaIntegration.Configuration
             else
                 configurator.TopicProducer<TKey, TValue>(_topic, c => _configure?.Invoke(context, c));
         }
+
+        public Type Type => typeof(KafkaProducerRegistration<TKey, TValue>);
     }
 }

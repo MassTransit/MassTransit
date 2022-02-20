@@ -1,6 +1,10 @@
 namespace MassTransit.KafkaIntegration.Configuration
 {
-    public interface IKafkaProducerRegistration
+    using MassTransit.Configuration;
+
+
+    public interface IKafkaProducerRegistration :
+        IRegistration
     {
         void Register(IKafkaFactoryConfigurator configurator, IRiderRegistrationContext context);
     }

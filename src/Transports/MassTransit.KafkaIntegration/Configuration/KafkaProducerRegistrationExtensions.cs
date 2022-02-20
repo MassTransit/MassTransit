@@ -59,9 +59,9 @@ namespace MassTransit
             if (string.IsNullOrWhiteSpace(topicName))
                 throw new ArgumentException(nameof(topicName));
 
-            var registration = new KafkaProducerRegistrationConfigurator<TKey, T>(topicName, configure);
+            var registration = new KafkaProducerRegistration<TKey, T>(topicName, configure);
             configurator.TryAddScoped(provider => GetProducer<TKey, T>(topicName, provider));
-            configurator.AddRegistration(registration);
+            configurator.Registrar.GetOrAdd<IKafkaProducerRegistration>(typeof(IKafkaProducerRegistration), _ => registration);
         }
 
         /// <summary>
@@ -84,9 +84,9 @@ namespace MassTransit
             if (producerConfig == null)
                 throw new ArgumentNullException(nameof(producerConfig));
 
-            var registration = new KafkaProducerRegistrationConfigurator<TKey, T>(topicName, configure, producerConfig);
+            var registration = new KafkaProducerRegistration<TKey, T>(topicName, configure, producerConfig);
             configurator.TryAddScoped(provider => GetProducer<TKey, T>(topicName, provider));
-            configurator.AddRegistration(registration);
+            configurator.Registrar.GetOrAdd<IKafkaProducerRegistration>(typeof(IKafkaProducerRegistration), _ => registration);
         }
 
         /// <summary>
