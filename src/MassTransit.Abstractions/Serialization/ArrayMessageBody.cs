@@ -1,4 +1,4 @@
-namespace MassTransit.Transports
+namespace MassTransit
 {
     using System;
     using System.IO;

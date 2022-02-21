@@ -1,4 +1,4 @@
-namespace MassTransit.Transports
+namespace MassTransit
 {
     using System;
     using System.IO;
@@ -9,9 +9,9 @@ namespace MassTransit.Transports
         MessageBody
     {
         readonly byte[] _bytes;
-        string _string;
+        string? _string;
 
-        public BytesMessageBody(byte[] bytes)
+        public BytesMessageBody(byte[]? bytes)
         {
             _bytes = bytes ?? Array.Empty<byte>();
         }

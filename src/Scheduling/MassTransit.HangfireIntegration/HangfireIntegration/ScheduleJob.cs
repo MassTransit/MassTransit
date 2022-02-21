@@ -99,7 +99,7 @@ namespace MassTransit.HangfireIntegration
             {
                 var deserializer = context.Serialization.GetMessageDeserializer(_contentType);
 
-                var body = new StringMessageBody(_body);
+                var body = deserializer.GetMessageBody(_body);
 
                 var serializerContext = deserializer.Deserialize(body, _messageContext, _destinationAddress);
 

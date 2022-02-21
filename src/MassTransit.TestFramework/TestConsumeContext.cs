@@ -6,7 +6,6 @@
     using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
-    using Context;
     using InMemoryTransport;
     using InMemoryTransport.Configuration;
     using Logging;

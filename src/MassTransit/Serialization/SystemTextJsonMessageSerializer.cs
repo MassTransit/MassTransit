@@ -87,6 +87,11 @@ namespace MassTransit.Serialization
             }
         }
 
+        public MessageBody GetMessageBody(string text)
+        {
+            return new StringMessageBody(text);
+        }
+
         public MessageBody GetMessageBody<T>(SendContext<T> context)
             where T : class
         {

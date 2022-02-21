@@ -60,7 +60,7 @@ namespace MassTransit.Serialization
 
         public string GetString()
         {
-            throw new SerializationException("Unable to serialize message, binary cannot be converted to string.");
+            return Convert.ToBase64String(GetBytes());
         }
     }
 }
