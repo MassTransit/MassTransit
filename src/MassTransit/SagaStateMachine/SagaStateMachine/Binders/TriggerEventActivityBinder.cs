@@ -3,6 +3,7 @@ namespace MassTransit.SagaStateMachine
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Configuration;
 
 
     public class TriggerEventActivityBinder<TInstance> :
@@ -12,7 +13,6 @@ namespace MassTransit.SagaStateMachine
         readonly IActivityBinder<TInstance>[] _activities;
         readonly StateMachineCondition<TInstance> _filter;
         readonly StateMachine<TInstance> _machine;
-        public Event Event { get; }
 
         public TriggerEventActivityBinder(StateMachine<TInstance> machine, Event @event, params IActivityBinder<TInstance>[] activities)
         {
@@ -43,6 +43,8 @@ namespace MassTransit.SagaStateMachine
             Array.Copy(appendActivity, 0, _activities, activities.Length, appendActivity.Length);
         }
 
+        public Event Event { get; }
+
         Event EventActivityBinder<TInstance>.Event => Event;
 
         EventActivityBinder<TInstance> EventActivityBinder<TInstance>.Add(IStateMachineActivity<TInstance> activity)
@@ -62,6 +64,24 @@ namespace MassTransit.SagaStateMachine
             IActivityBinder<TInstance> activityBinder = new CatchActivityBinder<TInstance, T>(Event, binder);
 
             return new TriggerEventActivityBinder<TInstance>(_machine, Event, _filter, _activities, activityBinder);
+        }
+
+        public EventActivityBinder<TInstance> Retry(Action<IRetryConfigurator> configure,
+            Func<EventActivityBinder<TInstance>, EventActivityBinder<TInstance>> activityCallback)
+        {
+            var configurator = new BehaviorContextRetryConfigurator();
+            configure(configurator);
+
+            if (configurator.PolicyFactory == null)
+                throw new ConfigurationException("A retry policy must be specified");
+
+            EventActivityBinder<TInstance> activityBinder = GetBinder(activityCallback);
+
+            var retryPolicy = configurator.GetRetryPolicy();
+
+            var binder = new RetryActivityBinder<TInstance>(Event, retryPolicy, activityBinder);
+
+            return new TriggerEventActivityBinder<TInstance>(_machine, Event, _filter, _activities, binder);
         }
 
         EventActivityBinder<TInstance> EventActivityBinder<TInstance>.If(StateMachineCondition<TInstance> condition,

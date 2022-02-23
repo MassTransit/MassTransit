@@ -3,6 +3,7 @@ namespace MassTransit.SagaStateMachine
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Configuration;
 
 
     public class DataEventActivityBinder<TInstance, TData> :
@@ -66,6 +67,24 @@ namespace MassTransit.SagaStateMachine
             IActivityBinder<TInstance> activityBinder = new CatchActivityBinder<TInstance, T>(_event, binder);
 
             return new DataEventActivityBinder<TInstance, TData>(_machine, _event, _filter, _activities, activityBinder);
+        }
+
+        public EventActivityBinder<TInstance, TData> Retry(Action<IRetryConfigurator> configure,
+            Func<EventActivityBinder<TInstance, TData>, EventActivityBinder<TInstance, TData>> activityCallback)
+        {
+            var configurator = new BehaviorContextRetryConfigurator();
+            configure(configurator);
+
+            if (configurator.PolicyFactory == null)
+                throw new ConfigurationException("A retry policy must be specified");
+
+            EventActivityBinder<TInstance, TData> activityBinder = GetBinder(activityCallback);
+
+            var retryPolicy = configurator.GetRetryPolicy();
+
+            var binder = new RetryActivityBinder<TInstance, TData>(_event, retryPolicy, activityBinder);
+
+            return new DataEventActivityBinder<TInstance, TData>(_machine, _event, _filter, _activities, binder);
         }
 
         EventActivityBinder<TInstance, TData> EventActivityBinder<TInstance, TData>.If(StateMachineCondition<TInstance, TData> condition,
