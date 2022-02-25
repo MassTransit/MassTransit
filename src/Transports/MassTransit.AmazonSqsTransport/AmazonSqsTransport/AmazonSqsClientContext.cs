@@ -225,7 +225,7 @@ namespace MassTransit.AmazonSqsTransport
         {
             var unsubscribeRequest = new UnsubscribeRequest { SubscriptionArn = subscriptionArn };
 
-            var response = await _snsClient.UnsubscribeAsync(unsubscribeRequest, _cancellationToken).ConfigureAwait(false);
+            var response = await _snsClient.UnsubscribeAsync(unsubscribeRequest, CancellationToken.None).ConfigureAwait(false);
 
             response.EnsureSuccessfulResponse();
         }
