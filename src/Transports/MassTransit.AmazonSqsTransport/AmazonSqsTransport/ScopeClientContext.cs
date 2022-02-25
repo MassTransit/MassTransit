@@ -24,59 +24,59 @@ namespace MassTransit.AmazonSqsTransport
 
         public override CancellationToken CancellationToken { get; }
 
-        ConnectionContext ClientContext.ConnectionContext => _context.ConnectionContext;
+        public ConnectionContext ConnectionContext => _context.ConnectionContext;
 
-        Task<TopicInfo> ClientContext.CreateTopic(Topology.Topic topic)
+        public Task<TopicInfo> CreateTopic(Topology.Topic topic)
         {
             return _context.CreateTopic(topic);
         }
 
-        Task<QueueInfo> ClientContext.CreateQueue(Queue queue)
+        public Task<QueueInfo> CreateQueue(Queue queue)
         {
             return _context.CreateQueue(queue);
         }
 
-        Task ClientContext.CreateQueueSubscription(Topology.Topic topic, Queue queue)
+        public Task CreateQueueSubscription(Topology.Topic topic, Queue queue)
         {
             return _context.CreateQueueSubscription(topic, queue);
         }
 
-        Task ClientContext.DeleteTopic(Topology.Topic topic)
+        public Task DeleteTopic(Topology.Topic topic)
         {
             return _context.DeleteTopic(topic);
         }
 
-        Task ClientContext.DeleteQueue(Queue queue)
+        public Task DeleteQueue(Queue queue)
         {
             return _context.DeleteQueue(queue);
         }
 
-        Task<PublishRequest> ClientContext.CreatePublishRequest(string topicName, string body)
+        public Task<PublishRequest> CreatePublishRequest(string topicName, string body)
         {
             return _context.CreatePublishRequest(topicName, body);
         }
 
-        Task ClientContext.Publish(PublishRequest request, CancellationToken cancellationToken)
+        public Task Publish(PublishRequest request, CancellationToken cancellationToken)
         {
             return _context.Publish(request, cancellationToken);
         }
 
-        Task ClientContext.SendMessage(string queueName, SendMessageBatchRequestEntry request, CancellationToken cancellationToken)
+        public Task SendMessage(string queueName, SendMessageBatchRequestEntry request, CancellationToken cancellationToken)
         {
             return _context.SendMessage(queueName, request, cancellationToken);
         }
 
-        Task ClientContext.DeleteMessage(string queueUrl, string receiptHandle, CancellationToken cancellationToken)
+        public Task DeleteMessage(string queueUrl, string receiptHandle, CancellationToken cancellationToken)
         {
             return _context.DeleteMessage(queueUrl, receiptHandle, cancellationToken);
         }
 
-        Task ClientContext.PurgeQueue(string queueName, CancellationToken cancellationToken)
+        public Task PurgeQueue(string queueName, CancellationToken cancellationToken)
         {
             return _context.PurgeQueue(queueName, cancellationToken);
         }
 
-        Task<IList<Message>> ClientContext.ReceiveMessages(string queueName, int messageLimit, int waitTime, CancellationToken cancellationToken)
+        public Task<IList<Message>> ReceiveMessages(string queueName, int messageLimit, int waitTime, CancellationToken cancellationToken)
         {
             return _context.ReceiveMessages(queueName, messageLimit, waitTime, cancellationToken);
         }

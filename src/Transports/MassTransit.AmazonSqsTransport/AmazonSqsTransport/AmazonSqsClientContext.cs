@@ -22,7 +22,6 @@ namespace MassTransit.AmazonSqsTransport
         IAsyncDisposable
     {
         readonly CancellationToken _cancellationToken;
-        readonly ConnectionContext _connectionContext;
         readonly QueueCache _queueCache;
         readonly IAmazonSimpleNotificationService _snsClient;
         readonly IAmazonSQS _sqsClient;
@@ -32,7 +31,8 @@ namespace MassTransit.AmazonSqsTransport
             CancellationToken cancellationToken)
             : base(connectionContext)
         {
-            _connectionContext = connectionContext;
+            ConnectionContext = connectionContext;
+
             _sqsClient = sqsClient;
             _snsClient = snsClient;
             _cancellationToken = cancellationToken;
@@ -41,9 +41,9 @@ namespace MassTransit.AmazonSqsTransport
             _topicCache = new TopicCache(snsClient, cancellationToken);
         }
 
-        CancellationToken PipeContext.CancellationToken => _cancellationToken;
+        public override CancellationToken CancellationToken => _cancellationToken;
 
-        ConnectionContext ClientContext.ConnectionContext => _connectionContext;
+        public ConnectionContext ConnectionContext { get; }
 
         public Task<TopicInfo> CreateTopic(Topology.Topic topic)
         {
@@ -55,7 +55,7 @@ namespace MassTransit.AmazonSqsTransport
             return _queueCache.Get(queue);
         }
 
-        async Task ClientContext.CreateQueueSubscription(Topology.Topic topic, Queue queue)
+        public async Task CreateQueueSubscription(Topology.Topic topic, Queue queue)
         {
             var topicInfo = await _topicCache.Get(topic).ConfigureAwait(false);
             var queueInfo = await _queueCache.Get(queue).ConfigureAwait(false);
@@ -72,7 +72,7 @@ namespace MassTransit.AmazonSqsTransport
                 Attributes = subscriptionAttributes
             };
 
-            var response = await _snsClient.SubscribeAsync(subscribeRequest, _cancellationToken).ConfigureAwait(false);
+            var response = await _snsClient.SubscribeAsync(subscribeRequest, CancellationToken).ConfigureAwait(false);
 
             response.EnsureSuccessfulResponse();
 
@@ -100,7 +100,7 @@ namespace MassTransit.AmazonSqsTransport
                 var jsonPolicy = policy.ToJson();
 
                 var setAttributes = new Dictionary<string, string> { { QueueAttributeName.Policy, jsonPolicy } };
-                var setAttributesResponse = await _sqsClient.SetQueueAttributesAsync(queueInfo.Url, setAttributes, _cancellationToken).ConfigureAwait(false);
+                var setAttributesResponse = await _sqsClient.SetQueueAttributesAsync(queueInfo.Url, setAttributes, CancellationToken).ConfigureAwait(false);
 
                 setAttributesResponse.EnsureSuccessfulResponse();
 
@@ -108,7 +108,7 @@ namespace MassTransit.AmazonSqsTransport
             }
         }
 
-        async Task ClientContext.DeleteTopic(Topology.Topic topic)
+        public async Task DeleteTopic(Topology.Topic topic)
         {
             var topicInfo = await _topicCache.Get(topic).ConfigureAwait(false);
 
@@ -121,7 +121,7 @@ namespace MassTransit.AmazonSqsTransport
             _topicCache.RemoveByName(topic.EntityName);
         }
 
-        async Task ClientContext.DeleteQueue(Queue queue)
+        public async Task DeleteQueue(Queue queue)
         {
             var queueInfo = await _queueCache.Get(queue).ConfigureAwait(false);
 
@@ -141,35 +141,35 @@ namespace MassTransit.AmazonSqsTransport
             _queueCache.RemoveByName(queue.EntityName);
         }
 
-        async Task<PublishRequest> ClientContext.CreatePublishRequest(string topicName, string body)
+        public async Task<PublishRequest> CreatePublishRequest(string topicName, string body)
         {
             var topicInfo = await _topicCache.GetByName(topicName).ConfigureAwait(false);
 
             return new PublishRequest(topicInfo.Arn, body);
         }
 
-        async Task ClientContext.Publish(PublishRequest request, CancellationToken cancellationToken)
+        public async Task Publish(PublishRequest request, CancellationToken cancellationToken)
         {
             var response = await _snsClient.PublishAsync(request, cancellationToken).ConfigureAwait(false);
 
             response.EnsureSuccessfulResponse();
         }
 
-        async Task ClientContext.SendMessage(string queueName, SendMessageBatchRequestEntry request, CancellationToken cancellationToken)
+        public async Task SendMessage(string queueName, SendMessageBatchRequestEntry request, CancellationToken cancellationToken)
         {
             var queueInfo = await _queueCache.GetByName(queueName).ConfigureAwait(false);
 
             await queueInfo.Send(request, cancellationToken).ConfigureAwait(false);
         }
 
-        async Task ClientContext.DeleteMessage(string queueName, string receiptHandle, CancellationToken cancellationToken)
+        public async Task DeleteMessage(string queueName, string receiptHandle, CancellationToken cancellationToken)
         {
             var queueInfo = await _queueCache.GetByName(queueName).ConfigureAwait(false);
 
             await queueInfo.Delete(receiptHandle, cancellationToken).ConfigureAwait(false);
         }
 
-        async Task ClientContext.PurgeQueue(string queueName, CancellationToken cancellationToken)
+        public async Task PurgeQueue(string queueName, CancellationToken cancellationToken)
         {
             var queueInfo = await _queueCache.GetByName(queueName).ConfigureAwait(false);
 
@@ -209,7 +209,7 @@ namespace MassTransit.AmazonSqsTransport
                 QueueUrl = queueUrl,
                 ReceiptHandle = receiptHandle,
                 VisibilityTimeout = seconds
-            }, _cancellationToken).ConfigureAwait(false);
+            }, CancellationToken).ConfigureAwait(false);
 
             response.EnsureSuccessfulResponse();
         }
@@ -225,7 +225,7 @@ namespace MassTransit.AmazonSqsTransport
         {
             var unsubscribeRequest = new UnsubscribeRequest { SubscriptionArn = subscriptionArn };
 
-            var response = await _snsClient.UnsubscribeAsync(unsubscribeRequest, _cancellationToken).ConfigureAwait(false);
+            var response = await _snsClient.UnsubscribeAsync(unsubscribeRequest, CancellationToken.None).ConfigureAwait(false);
 
             response.EnsureSuccessfulResponse();
         }
