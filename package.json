@@ -13,7 +13,7 @@
     "esm": "^3.2.25",
     "follow-redirects": "^1.14.7",
     "path-parse": "^1.0.7",
-    "prismjs": "^1.26.0",
+    "prismjs": "^1.27.0",
     "remove-markdown": "^0.3.0",
     "vue-tweet-embed": "^2.4.0"
   },
