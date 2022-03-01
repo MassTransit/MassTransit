@@ -56,7 +56,7 @@
             var context = CreateServiceBusReceiveEndpointContext();
 
             ClientPipeConfigurator.UseFilter(new ConfigureServiceBusTopologyFilter<ReceiveSettings>(_settings, context.BrokerTopology,
-                _settings.RemoveSubscriptions, _hostConfiguration.ConnectionContextSupervisor.Stopping));
+                _settings.RemoveSubscriptions, context));
 
             var errorTransport = CreateErrorTransport();
             var deadLetterTransport = CreateDeadLetterTransport();

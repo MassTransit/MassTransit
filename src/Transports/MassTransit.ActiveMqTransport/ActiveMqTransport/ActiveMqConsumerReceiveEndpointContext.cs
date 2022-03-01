@@ -30,6 +30,11 @@
 
         public ISessionContextSupervisor SessionContextSupervisor => _sessionContext.Supervisor;
 
+        public override void AddSendAgent(IAgent agent)
+        {
+            _sessionContext.Supervisor.AddSendAgent(agent);
+        }
+
         public override void AddConsumeAgent(IAgent agent)
         {
             _sessionContext.Supervisor.AddConsumeAgent(agent);

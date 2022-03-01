@@ -1,11 +1,8 @@
 ﻿namespace MassTransit.AzureServiceBusTransport.Middleware
 {
-    using System;
     using System.Linq;
-    using System.Threading;
     using System.Threading.Tasks;
     using Topology;
-    using Util;
 
 
     public class ConfigureServiceBusTopologyFilter<TSettings> :
@@ -14,17 +11,17 @@
         where TSettings : class
     {
         readonly BrokerTopology _brokerTopology;
+        readonly ServiceBusReceiveEndpointContext _context;
         readonly bool _removeSubscriptions;
         readonly TSettings _settings;
-        CancellationToken _cancellationToken;
 
         public ConfigureServiceBusTopologyFilter(TSettings settings, BrokerTopology brokerTopology, bool removeSubscriptions,
-            CancellationToken cancellationToken)
+            ServiceBusReceiveEndpointContext context = null)
         {
             _settings = settings;
             _brokerTopology = brokerTopology;
             _removeSubscriptions = removeSubscriptions;
-            _cancellationToken = cancellationToken;
+            _context = context;
         }
 
         public async Task Send(ClientContext context, IPipe<ClientContext> next)
@@ -56,27 +53,8 @@
 
                 context.GetOrAddPayload(() => _settings);
 
-                if (_removeSubscriptions)
-                {
-                    var logContext = LogContext.Current;
-                    if (logContext == null)
-                        throw new InvalidOperationException("The LogContext must be available");
-
-                    // ReSharper disable once MethodSupportsCancellation
-                    _cancellationToken.Register(() => TaskUtil.Await(async () =>
-                    {
-                        LogContext.SetCurrentIfNull(logContext);
-
-                        try
-                        {
-                            await RemoveSubscriptions(context.ConnectionContext).ConfigureAwait(false);
-                        }
-                        catch (Exception ex)
-                        {
-                            LogContext.Warning?.Log(ex, "Failed to remove one or more subscriptions from the endpoint.");
-                        }
-                    }));
-                }
+                if (_context != null && _removeSubscriptions)
+                    _context.AddSendAgent(new RemoveServiceBusTopologyAgent(context.ConnectionContext, _brokerTopology));
             }, () => new Context()).ConfigureAwait(false);
         }
 

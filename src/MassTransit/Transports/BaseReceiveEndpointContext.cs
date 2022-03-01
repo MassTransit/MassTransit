@@ -134,6 +134,7 @@ namespace MassTransit.Transports
             _publishEndpointProvider = new Lazy<IPublishEndpointProvider>(CreatePublishEndpointProvider);
         }
 
+        public abstract void AddSendAgent(IAgent agent);
         public abstract void AddConsumeAgent(IAgent agent);
 
         public virtual void Probe(ProbeContext context)

@@ -39,6 +39,11 @@ namespace MassTransit.KafkaIntegration
             return new KafkaConnectionException(message + _settings.Topic, exception);
         }
 
+        public override void AddSendAgent(IAgent agent)
+        {
+            _consumerContext.Supervisor.AddSendAgent(agent);
+        }
+
         public override void AddConsumeAgent(IAgent agent)
         {
             _consumerContext.Supervisor.AddConsumeAgent(agent);

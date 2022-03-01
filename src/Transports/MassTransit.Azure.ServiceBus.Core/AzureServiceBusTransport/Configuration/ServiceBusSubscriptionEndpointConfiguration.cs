@@ -59,7 +59,7 @@
             var context = CreateServiceBusReceiveEndpointContext();
 
             ClientPipeConfigurator.UseFilter(new ConfigureServiceBusTopologyFilter<SubscriptionSettings>(_settings, context.BrokerTopology,
-                _settings.RemoveSubscriptions, _hostConfiguration.ConnectionContextSupervisor.Stopping));
+                _settings.RemoveSubscriptions, context));
 
             CreateReceiveEndpoint(host, context);
         }

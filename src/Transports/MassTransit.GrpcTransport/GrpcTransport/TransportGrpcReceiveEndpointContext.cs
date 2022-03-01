@@ -23,6 +23,11 @@
 
         public IMessageFabric<NodeContext, GrpcTransportMessage> MessageFabric => _hostConfiguration.TransportProvider.MessageFabric;
 
+        public override void AddSendAgent(IAgent agent)
+        {
+            throw new NotSupportedException();
+        }
+
         public override void AddConsumeAgent(IAgent agent)
         {
             throw new NotSupportedException();
