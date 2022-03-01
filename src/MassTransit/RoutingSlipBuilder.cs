@@ -9,6 +9,7 @@
     using Courier.Messages;
     using Events;
     using Serialization;
+    using Util;
 
 
     /// <summary>
@@ -396,12 +397,7 @@
 
         public static IDictionary<string, object> GetObjectAsDictionary(object values)
         {
-            if (values == null)
-                return new Dictionary<string, object>();
-
-            var jsonElement = JsonSerializer.SerializeToElement(values, SystemTextJsonMessageSerializer.Options);
-
-            return jsonElement.Deserialize<IDictionary<string, object>>();
+            return ConvertObject.ToDictionary(values);
         }
     }
 }

@@ -3,7 +3,6 @@ namespace MassTransit.JobService
     using System;
     using System.Threading.Tasks;
     using Contracts.JobService;
-    using Util;
 
 
     /// <summary>

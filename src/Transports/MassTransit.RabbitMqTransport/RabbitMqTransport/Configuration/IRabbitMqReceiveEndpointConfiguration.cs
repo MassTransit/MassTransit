@@ -1,7 +1,6 @@
 namespace MassTransit.RabbitMqTransport.Configuration
 {
     using MassTransit.Configuration;
-    using Topology;
     using Transports;
 
 

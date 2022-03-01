@@ -86,7 +86,9 @@ namespace MassTransit.Serialization
         public override Dictionary<string, object> ToDictionary<T>(T? message)
             where T : class
         {
-            return ConvertObject.ToDictionary(message, _options);
+            return message == null
+                ? new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
+                : JsonSerializer.SerializeToElement(message, _options).Deserialize<Dictionary<string, object>>()!;
         }
 
         static JsonElement GetJsonElement(object message)

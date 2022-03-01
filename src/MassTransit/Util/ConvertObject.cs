@@ -2,24 +2,44 @@ namespace MassTransit.Util
 {
     using System;
     using System.Collections.Generic;
-    using System.Text.Json;
-    using Serialization;
+    using System.Globalization;
+    using System.Linq;
+    using System.Reflection;
 
 
     public static class ConvertObject
     {
         public static Dictionary<string, object> ToDictionary(object values)
         {
-            return values == null
-                ? new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
-                : JsonSerializer.SerializeToElement(values, SystemTextJsonMessageSerializer.Options).Deserialize<Dictionary<string, object>>();
+            if (values == null)
+                throw new ArgumentNullException(nameof(values));
+
+            var dictionary = new Dictionary<string, object>();
+
+            IEnumerable<PropertyInfo> properties = MessageTypeCache
+                .GetProperties(values.GetType())
+                .Where(x => x.CanRead);
+
+            foreach (var property in properties)
+                AddPropertyToDictionary(property, values, dictionary);
+
+            return dictionary;
         }
 
-        public static Dictionary<string, object> ToDictionary(object values, JsonSerializerOptions options)
+        static void AddPropertyToDictionary(PropertyInfo property, object source, IDictionary<string, object> dictionary)
         {
-            return values == null
-                ? new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
-                : JsonSerializer.SerializeToElement(values, options).Deserialize<Dictionary<string, object>>();
+            var value = property.GetValue(source);
+
+            var key = property.Name;
+            if (char.IsUpper(key[0]))
+            {
+                var chars = key.ToCharArray();
+                chars[0] = char.ToLower(chars[0], CultureInfo.InvariantCulture);
+
+                key = new string(chars);
+            }
+
+            dictionary.Add(key, value);
         }
     }
 }
