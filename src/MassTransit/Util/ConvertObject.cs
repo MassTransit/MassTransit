@@ -18,7 +18,7 @@ namespace MassTransit.Util
 
             IEnumerable<PropertyInfo> properties = MessageTypeCache
                 .GetProperties(values.GetType())
-                .Where(x => x.CanRead);
+                .Where(x => x.CanRead && x.GetMethod.IsPublic);
 
             foreach (var property in properties)
                 AddPropertyToDictionary(property, values, dictionary);
