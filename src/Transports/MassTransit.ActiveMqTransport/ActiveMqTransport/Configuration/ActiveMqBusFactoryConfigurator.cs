@@ -89,6 +89,8 @@ namespace MassTransit.ActiveMqTransport.Configuration
         public void EnableArtemisCompatibility()
         {
             SetConsumerEndpointQueueNameFormatter(new ArtemisConsumerEndpointQueueNameFormatter());
+
+            _hostConfiguration.IsArtemis = true;
         }
 
         public void SetTemporaryQueueNameFormatter(IActiveMqTemporaryQueueNameFormatter? formatter)

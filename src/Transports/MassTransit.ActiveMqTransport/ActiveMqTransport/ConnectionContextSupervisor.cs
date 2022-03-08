@@ -91,6 +91,7 @@
                 DestinationType = destinationType;
             }
 
+            public bool IsArtemis => _hostConfiguration.IsArtemis;
             public IPipe<SessionContext> ConfigureTopologyPipe { get; }
             public override string EntityName { get; }
             public DestinationType DestinationType { get; }
