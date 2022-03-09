@@ -2,7 +2,6 @@ namespace MassTransit.Context
 {
     using System;
     using System.Threading.Tasks;
-    using RetryPolicies;
 
 
     public class RetryCompensateContext<TLog> :
@@ -25,6 +24,11 @@ namespace MassTransit.Context
             {
                 RetryAttempt = retryContext.RetryAttempt;
                 RetryCount = retryContext.RetryCount;
+            }
+            else if (context.TryGetPayload<ConsumeRetryContext>(out var existingRetryContext))
+            {
+                RetryCount = existingRetryContext.RetryCount;
+                RetryAttempt = existingRetryContext.RetryAttempt;
             }
         }
 

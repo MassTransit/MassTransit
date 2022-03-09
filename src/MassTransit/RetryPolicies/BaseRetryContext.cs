@@ -13,9 +13,9 @@ namespace MassTransit.RetryPolicies
         {
             Context = context;
             Exception = exception;
-            RetryCount = retryCount;
             CancellationToken = cancellationToken;
 
+            RetryCount = retryCount;
             RetryAttempt = retryCount + 1;
         }
 

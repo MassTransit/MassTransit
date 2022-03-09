@@ -23,6 +23,11 @@
                 RetryAttempt = retryContext.RetryAttempt;
                 RetryCount = retryContext.RetryCount;
             }
+            else if (context.TryGetPayload<ConsumeRetryContext>(out var existingRetryContext))
+            {
+                RetryCount = existingRetryContext.RetryCount;
+                RetryAttempt = existingRetryContext.RetryAttempt;
+            }
 
             _pendingFaults = new PendingFaultCollection();
         }
