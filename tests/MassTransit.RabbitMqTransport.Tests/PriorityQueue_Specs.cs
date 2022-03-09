@@ -14,10 +14,12 @@
         [Test]
         public async Task Should_allow_priority_to_be_specified()
         {
-            await Bus.Request<PingMessage, PongMessage>(_endpointAddress, new PingMessage(), TestCancellationToken, TestTimeout, x =>
+            var response = await Bus.Request<PingMessage, PongMessage>(_endpointAddress, new PingMessage(), TestCancellationToken, TestTimeout, x =>
             {
                 x.SetPriority(2);
             });
+
+            Assert.That(response.Headers.Get<string>("Received-Priority"), Is.EqualTo("2"));
         }
 
         Uri _endpointAddress;
@@ -32,7 +34,13 @@
 
                 _endpointAddress = x.InputAddress;
 
-                x.Handler<PingMessage>(context => context.RespondAsync(new PongMessage(context.Message.CorrelationId)));
+                x.Handler<PingMessage>(context =>
+                {
+                    return context.RespondAsync(new PongMessage(context.Message.CorrelationId), sc =>
+                    {
+                        sc.Headers.Set("Received-Priority", context.GetPayload<RabbitMqBasicConsumeContext>().Properties.Priority.ToString());
+                    });
+                });
             });
         }
 
