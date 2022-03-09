@@ -11,7 +11,6 @@ namespace MassTransit.GrpcTransport
     using Grpc.Net.Client;
     using Internals;
     using MassTransit.Middleware;
-    using Topology;
     using Transports;
     using Transports.Fabric;
 
@@ -83,7 +82,7 @@ namespace MassTransit.GrpcTransport
 
             TransportLogMessages.CreateSendTransport(address);
 
-            var exchange = _messageFabric.GetExchange(HostNodeContext, endpointAddress.Name, endpointAddress.ExchangeType);
+            IMessageExchange<GrpcTransportMessage> exchange = _messageFabric.GetExchange(HostNodeContext, endpointAddress.Name, endpointAddress.ExchangeType);
 
             var transportContext = new ExchangeGrpcSendTransportContext(_hostConfiguration, receiveEndpointContext, exchange);
 
@@ -123,7 +122,6 @@ namespace MassTransit.GrpcTransport
             var clientNodeContext = new ClientNodeContext(address);
 
             var node = _nodeCollection.GetNode(clientNodeContext);
-
 
             return new GrpcClient(_hostConfiguration, _hostNode, client, node);
         }
