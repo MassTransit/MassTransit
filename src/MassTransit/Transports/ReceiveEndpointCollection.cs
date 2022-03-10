@@ -184,13 +184,13 @@
 
             public IReceiveEndpoint ReceiveEndpoint => _endpoint;
 
-            Task<ReceiveEndpointReady> HostReceiveEndpointHandle.Ready => _endpointHandle.Ready;
+            public Task<ReceiveEndpointReady> Ready => _endpointHandle.Ready;
 
-            public async Task StopAsync(CancellationToken cancellationToken)
+            public Task StopAsync(CancellationToken cancellationToken)
             {
-                await _endpoint.Stop(true, cancellationToken).ConfigureAwait(false);
-
                 _remove();
+
+                return _endpoint.Stop(true, cancellationToken);
             }
 
             public void Start(CancellationToken cancellationToken)
