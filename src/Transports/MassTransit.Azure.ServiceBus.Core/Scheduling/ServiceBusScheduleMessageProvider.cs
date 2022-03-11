@@ -19,6 +19,9 @@ namespace MassTransit.Scheduling
             CancellationToken cancellationToken)
             where T : class
         {
+            if (!MessageTypeCache<T>.IsValidMessageType)
+                throw new ArgumentException(MessageTypeCache<T>.InvalidMessageTypeReason, nameof(T));
+
             var scheduleMessagePipe = new ScheduleSendPipe<T>(pipe, scheduledTime);
 
             var endpoint = await _sendEndpointProvider.GetSendEndpoint(destinationAddress).ConfigureAwait(false);

@@ -8,9 +8,13 @@ namespace MassTransit.Scheduling
     public abstract class BaseScheduleMessageProvider :
         IScheduleMessageProvider
     {
-        async Task<ScheduledMessage<T>> IScheduleMessageProvider.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message,
+        public async Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message,
             IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
+            where T : class
         {
+            if (!MessageTypeCache<T>.IsValidMessageType)
+                throw new ArgumentException(MessageTypeCache<T>.InvalidMessageTypeReason, nameof(T));
+
             var scheduleMessagePipe = new ScheduleMessageContextPipe<T>(message, pipe);
 
             var tokenId = ScheduleTokenIdCache<T>.GetTokenId(message);
@@ -25,12 +29,12 @@ namespace MassTransit.Scheduling
                 command.Destination, message);
         }
 
-        Task IScheduleMessageProvider.CancelScheduledSend(Guid tokenId)
+        public Task CancelScheduledSend(Guid tokenId)
         {
             return CancelScheduledSend(tokenId, null);
         }
 
-        Task IScheduleMessageProvider.CancelScheduledSend(Uri destinationAddress, Guid tokenId)
+        public Task CancelScheduledSend(Uri destinationAddress, Guid tokenId)
         {
             return CancelScheduledSend(tokenId, destinationAddress);
         }
