@@ -2,8 +2,6 @@ namespace MassTransit
 {
     using System;
     using EntityFrameworkCoreIntegration;
-    using EntityFrameworkCoreIntegration.Saga;
-    using Saga;
 
 
     public static class EntityFrameworkCoreJobServiceConfigurationExtensions

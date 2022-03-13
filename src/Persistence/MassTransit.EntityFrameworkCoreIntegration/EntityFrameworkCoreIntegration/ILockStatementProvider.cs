@@ -5,7 +5,7 @@
 
     public interface ILockStatementProvider
     {
-        string GetRowLockStatement<TSaga>(DbContext context)
-            where TSaga : class, ISaga;
+        string GetRowLockStatement<T>(DbContext context)
+            where T : class;
     }
 }
