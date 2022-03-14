@@ -124,22 +124,6 @@ Features used:
 
 Clone the sample: [GitHub Repository](https://github.com/phatboyg/Demo-Registration)
 
-### Container
-
-MassTransit supports several dependency injection containers. Examples of how to setup and use MassTransit with those containers is provided via a sample application.
-
-> Only currently active containers are fully supported. Other containers are still supported, but considered legacy.
-
-Features used:
-- Autofac
-- Castle Windsor
-- StructureMap
-- Lamar
-- Simple Injector
-- Microsoft Extensions Dependency Injection
-
-Clone the sample: [GitHub Repository](https://github.com/MassTransit/Sample-Containers)
-
 ### Quartz
 
 Features used:

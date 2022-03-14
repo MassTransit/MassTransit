@@ -49,8 +49,11 @@ If this occurs, the unconsumed message is moved to a *_skipped* queue (prefixed 
 It may be necessary to use the broker management tools to remove an exchange binding or topic subscription that is no longer used by the receive endpoint to prevent further skipped messages.
 :::
 
-
 ### Consumer Factories
+
+::: tip 
+When using a container, these methods should _NOT_ be used.
+:::
 
 In the example shown above, the consumer had a default constructor so the default constructor consumer factory was used. There are several other consumer factories included, some of which are shown below. If you are using MassTransit with a container, MassTransit includes support for several containers and integrates with them to provide container scope for consumers. Refer to the [containers](/usage/containers) section for details.
 

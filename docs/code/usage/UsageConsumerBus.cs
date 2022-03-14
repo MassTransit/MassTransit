@@ -1,7 +1,7 @@
 namespace UsageConsumerBus
 {
-    using System;
     using System.Threading.Tasks;
+    using Microsoft.Extensions.DependencyInjection;
     using UsageConsumer;
     using MassTransit;
 
@@ -9,13 +9,17 @@ namespace UsageConsumerBus
     {
         public static async Task Main()
         {
-            var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
-            {
-                cfg.ReceiveEndpoint("order-service", e =>
+            await using var provider = new ServiceCollection()
+                .AddMassTransit(x =>
                 {
-                    e.Consumer<SubmitOrderConsumer>();
-                });
-            });
+                    x.AddConsumer<SubmitOrderConsumer>();
+
+                    x.UsingInMemory((context, cfg) =>
+                    {
+                        cfg.ConfigureEndpoints(context);
+                    });
+                })
+                .BuildServiceProvider();
         }
     }
 }

@@ -3,7 +3,6 @@ namespace ServiceBusReceiveEndpoint
     using System;
     using System.Threading.Tasks;
     using MassTransit;
-    using MassTransit.Azure.ServiceBus.Core;
     using Microsoft.Extensions.DependencyInjection;
 
     public class Program
@@ -27,7 +26,7 @@ namespace ServiceBusReceiveEndpoint
                         e.MaxConcurrentCalls = 100;
 
                         // default, but shown for example
-                        e.LockDuration = TimeSpan.FromMinutes(5); 
+                        e.LockDuration = TimeSpan.FromMinutes(5);
 
                         // lock will be renewed up to 30 minutes
                         e.MaxAutoRenewDuration = TimeSpan.FromMinutes(30);

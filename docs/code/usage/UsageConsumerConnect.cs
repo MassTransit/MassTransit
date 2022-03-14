@@ -5,12 +5,22 @@ namespace UsageConsumerConnect
     using System.Threading.Tasks;
     using UsageContracts;
     using MassTransit;
+    using Microsoft.Extensions.DependencyInjection;
 
     public class Program
     {
         public static async Task Main()
         {
-            var busControl = Bus.Factory.CreateUsingRabbitMq();
+            await using var provider = new ServiceCollection()
+                .AddMassTransit(x =>
+                {
+                    x.AddConsumer<OrderAcknowledgedConsumer>();
+
+                    x.UsingRabbitMq();
+                })
+                .BuildServiceProvider();
+
+            var busControl = provider.GetRequiredService<IBusControl>();
 
             var source = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
@@ -21,11 +31,11 @@ namespace UsageConsumerConnect
 
                 var endpoint = await busControl.GetSendEndpoint(new Uri("queue:order-service"));
 
-                await endpoint.Send<SubmitOrder>(new 
-                    {
-                        OrderId = InVar.Id,
-                        __ResponseAddress = busControl.Address
-                    });
+                await endpoint.Send<SubmitOrder>(new
+                {
+                    OrderId = InVar.Id,
+                    __ResponseAddress = busControl.Address
+                });
 
                 Console.WriteLine("Press enter to exit");
 
@@ -38,7 +48,7 @@ namespace UsageConsumerConnect
             {
                 await busControl.StopAsync();
             }
-        }            
+        }
     }
 
     class OrderAcknowledgedConsumer :

@@ -1,10 +1,8 @@
 namespace EventHubProducer
 {
-    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using MassTransit;
-    using MassTransit.Azure.ServiceBus.Core;
     using MassTransit.EventHubIntegration;
     using Microsoft.Extensions.DependencyInjection;
 
@@ -22,7 +20,7 @@ namespace EventHubProducer
 
                     cfg.ConfigureEndpoints(context);
                 });
-              
+
                 x.AddRider(rider =>
                 {
                     rider.UsingEventHub((context, k) =>

@@ -1,9 +1,7 @@
 namespace ServiceBusConsoleListener
 {
-    using System;
     using System.Threading.Tasks;
     using MassTransit;
-    using MassTransit.Azure.ServiceBus.Core;
     using Microsoft.Extensions.DependencyInjection;
 
     public class Program

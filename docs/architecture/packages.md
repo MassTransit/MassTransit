@@ -4,20 +4,9 @@ The officially supported MassTransit packages include:
 
 * [MassTransit](https://nuget.org/packages/MassTransit/)
 
-  [![alt MassTransit](https://ci.appveyor.com/api/projects/status/github/masstransit/masstransit?svg=true "MassTransit")](https://ci.appveyor.com/project/phatboyg/masstransit) [![alt MassTransit on NuGet](https://img.shields.io/nuget/v/MassTransit.svg "MassTransit on NuGet")](https://nuget.org/packages/MassTransit/) [![alt MassTransit Documentation](https://img.shields.io/badge/docs-latest-brightgreen.svg "MassTransit Documentation")](/)
-
-  Dependencies:
-  * [Automatonymous](https://nuget.org/packages/Automatonymous/)
-
-    [![alt Automatonymous](https://ci.appveyor.com/api/projects/status/github/masstransit/automatonymous?svg=true "Automatonymous")](https://ci.appveyor.com/project/phatboyg/automatonymous) [![alt Automatonymous on NuGet](https://img.shields.io/nuget/v/Automatonymous.svg "Automatonymous on NuGet")](https://nuget.org/packages/Automatonymous/) [![alt Automatonymous Documentation](https://img.shields.io/badge/docs-latest-brightgreen.svg "Automatonymous Documentation")](http://masstransit-project.com/Automatonymous/)
-
-  * [GreenPipes](https://nuget.org/packages/GreenPipes/)
-
-    [![alt GreenPipes](https://ci.appveyor.com/api/projects/status/github/masstransit/greenpipes?svg=true "GreenPipes")](https://ci.appveyor.com/project/phatboyg/greenpipes) [![alt GreenPipes on NuGet](https://img.shields.io/nuget/v/greenpipes.svg "GreenPipes on NuGet")](https://nuget.org/packages/GreenPipes/) [![alt GreenPipes Documentation](https://img.shields.io/badge/docs-latest-brightgreen.svg "GreenPipes Documentation")](http://masstransit-project.com/GreenPipes/)
-
-  * [NewId](https://nuget.org/packages/NewId/)
-
-    [![alt NewId](https://ci.appveyor.com/api/projects/status/github/phatboyg/NewId?svg=true "NewId")](https://ci.appveyor.com/project/phatboyg/NewId) [![alt NewId on NuGet](https://img.shields.io/nuget/v/NewId.svg "NewId on NuGet")](https://nuget.org/packages/NewId/)
+  [![master](https://github.com/MassTransit/MassTransit/actions/workflows/build.yml/badge.svg?branch=master&event=push)](https://github.com/MassTransit/MassTransit/actions/workflows/build.yml)
+  [![alt MassTransit on NuGet](https://img.shields.io/nuget/v/MassTransit.svg "MassTransit on NuGet")](https://nuget.org/packages/MassTransit/)
+  [![alt MassTransit Documentation](https://img.shields.io/badge/docs-latest-brightgreen.svg "MassTransit Documentation")](/)
 
 ### Transports
 
@@ -30,14 +19,6 @@ The officially supported MassTransit packages include:
 * **Riders**
   * [MassTransit.EventHub](https://nuget.org/packages/MassTransit.EventHub/)
   * [MassTransit.Kafka](https://nuget.org/packages/MassTransit.Kafka/)
-
-### Containers
-
-* [MassTransit.Autofac](https://nuget.org/packages/MassTransit.Autofac/)
-* [MassTransit.CastleWindsor](https://nuget.org/packages/MassTransit.CastleWindsor/)
-* [MassTransit.Extensions.DependencyInjection](https://nuget.org/packages/MassTransit.Extensions.DependencyInjection/)
-* [MassTransit.SimpleInjector](https://nuget.org/packages/MassTransit.SimpleInjector/)
-* [MassTransit.StructureMap](https://nuget.org/packages/MassTransit.StructureMap/)
 
 ### Saga Persistence
 
@@ -55,10 +36,6 @@ The officially supported MassTransit packages include:
 * [MassTransit.Hangfire](https://nuget.org/packages/MassTransit.Hangfire/)
 * [MassTransit.Quartz](https://nuget.org/packages/MassTransit.Quartz/)
 
-### ASP.NET Core
-
-* [MassTransit.AspNetCore](https://nuget.org/packages/MassTransit.AspNetCore/)
-
 ### Other
 
 * [MassTransit.Analyzers](https://nuget.org/packages/MassTransit.Analyzers/)
@@ -68,11 +45,4 @@ The officially supported MassTransit packages include:
 ### Interoperability
 
 * [MassTransit.Interop.NServiceBus](https://nuget.org/packages/MassTransit.Interop.NServiceBus/)
-
-### Topshelf
-
-* [Topshelf](https://nuget.org/packages/Topshelf/)
-
-  [![alt Topshelf](https://ci.appveyor.com/api/projects/status/github/topshelf/topshelf?svg=true "Topshelf")](https://ci.appveyor.com/project/phatboyg/Topshelf) [![alt Topshelf on NuGet](https://img.shields.io/nuget/v/Topshelf.svg "Topshelf on NuGet")](https://nuget.org/packages/Topshelf/)
-
 

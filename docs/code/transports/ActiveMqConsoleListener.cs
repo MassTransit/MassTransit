@@ -1,9 +1,7 @@
 namespace ActiveMqConsoleListener
 {
-    using System;
     using System.Threading.Tasks;
     using MassTransit;
-    using MassTransit.ActiveMqTransport;
     using Microsoft.Extensions.DependencyInjection;
 
     public class Program

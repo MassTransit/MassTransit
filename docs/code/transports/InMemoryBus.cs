@@ -1,6 +1,5 @@
 namespace InMemoryConsoleListener
 {
-    using System;
     using System.Threading.Tasks;
     using MassTransit;
     using Microsoft.Extensions.DependencyInjection;
@@ -14,8 +13,6 @@ namespace InMemoryConsoleListener
             {
                 x.UsingInMemory((context, cfg) =>
                 {
-                    cfg.TransportConcurrencyLimit = 100;
-
                     cfg.ConfigureEndpoints(context);
                 });
             });

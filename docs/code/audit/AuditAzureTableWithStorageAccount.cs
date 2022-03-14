@@ -15,10 +15,10 @@ namespace AuditAzureTableWithStorageAccount
 
             services.AddMassTransit(x =>
             {
-                x.AddBus(bus => Bus.Factory.CreateUsingInMemory(cfg =>
+                x.UsingInMemory((context, cfg) =>
                 {
                     cfg.UseAzureTableAuditStore(storageAccount, auditTableName);
-                }));
+                });
             });
         }
     }

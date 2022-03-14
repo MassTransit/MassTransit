@@ -1,9 +1,7 @@
 namespace MicrosoftContainerFormatterInline
 {
-    using System;
     using System.Threading.Tasks;
     using MassTransit;
-    using MassTransit.Definition;
     using Microsoft.Extensions.DependencyInjection;
 
     public class Program

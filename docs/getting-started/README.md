@@ -13,7 +13,7 @@ To create a service using MassTransit, create a worker via the Command Prompt.
 
 ```bash
 $ mkdir GettingStarted
-$ dotnet new mtworker -n GettingStarted
+$ dotnet new worker -n GettingStarted
 ```
 
 ## Using the InMemory Transport
@@ -22,7 +22,7 @@ Add MassTransit package to the console application:
 
 ```bash
 $ cd GettingStarted
-$ dotnet add package MassTransit.AspNetCore
+$ dotnet add package MassTransit
 ```
 
 At this point, the project should compile, but there is more work to be done. You can verify the project builds by executing:
@@ -53,7 +53,7 @@ info: GettingStarted.Worker[0]
 using MassTransit;
 ```
 
-```csharp {5-14}
+```csharp {5-19}
 public static IHostBuilder CreateHostBuilder(string[] args) =>
     Host.CreateDefaultBuilder(args)
         .ConfigureServices((hostContext, services) =>
@@ -62,12 +62,17 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
             {
                 x.AddConsumer<MessageConsumer>();
 
-                x.UsingInMemory((context,cfg) =>
+                x.UsingInMemory((context, cfg) =>
                 {
                     cfg.ConfigureEndpoints(context);
                 });
             });
-            services.AddMassTransitHostedService(true);
+
+            services.AddOptions<MassTransitHostOptions>()
+                .Configure(options =>
+                {
+                    options.WaitUntilStarted = true; 
+                });
             
             services.AddHostedService<Worker>();
         });
@@ -186,12 +191,17 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
             {
                 x.AddConsumer<MessageConsumer>();
 
-                x.UsingRabbitMq((context,cfg) =>
+                x.UsingRabbitMq((context, cfg) =>
                 {
                     cfg.ConfigureEndpoints(context);
                 });
             });
-            services.AddMassTransitHostedService();
+
+            services.AddOptions<MassTransitHostOptions>()
+                .Configure(options =>
+                {
+                    options.WaitUntilStarted = true; 
+                });
 
             services.AddHostedService<Worker>();
         });
@@ -248,7 +258,7 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
             {
                 x.AddConsumer<MessageConsumer>();
 
-                x.UsingAzureServiceBus((context,cfg) =>
+                x.UsingAzureServiceBus((context, cfg) =>
                 {
                     var connectionString = "your connection string";
                     cfg.Host(connectionString);
@@ -256,7 +266,12 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
                     cfg.ConfigureEndpoints(context);
                 });
             });
-            services.AddMassTransitHostedService();
+
+            services.AddOptions<MassTransitHostOptions>()
+                .Configure(options =>
+                {
+                    options.WaitUntilStarted = true; 
+                });
 
             services.AddHostedService<Worker>();
         });
@@ -299,11 +314,7 @@ The consumer is added, using `AddConsumer`. This adds the consumer to the contai
 
 The `ConfigureEndpoints` method is used to automatically configure the receive endpoints on the bus. In this case, a single receive endpoint will be created for the `MessageConsumer`.
 
-The `AddMassTransitHostedService(true)` adds a hosted service for MassTransit that is responsible for starting and stopping the bus. This is required, as the bus will not operate propertly if it is not started and stopped.
-
-::: warning IMPORTANT
-This hosted service should be configured _prior_ to any other hosted services that may use the bus.
-:::
+The `AddOptions` call is adding options to configure the MassTransit hosted service. In this case, we want the worker to start _after_ the bus has successfully started. By default, the hosted service StartAsync method does not wait until the bus is connected/healthy.
 
 Lastly, the `Worker` is updated to publish a message every second to the bus, which is subsequently consumed by the consumer.
 

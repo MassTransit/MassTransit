@@ -1,18 +1,14 @@
 namespace ContainerConsumers
 {
-    using System;
     using System.Threading.Tasks;
     using ContainerContracts;
-    using GreenPipes;
     using MassTransit;
-    using MassTransit.ConsumeConfigurators;
-    using MassTransit.Definition;
-    using Microsoft.Extensions.Logging;    
+    using Microsoft.Extensions.Logging;
 
     class SubmitOrderConsumer :
         IConsumer<SubmitOrder>
     {
-        ILogger<SubmitOrderConsumer> _logger;
+        readonly ILogger<SubmitOrderConsumer> _logger;
 
         public SubmitOrderConsumer(ILogger<SubmitOrderConsumer> logger)
         {

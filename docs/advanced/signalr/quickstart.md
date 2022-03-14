@@ -29,8 +29,6 @@ public void ConfigureServices(IServiceCollection services)
             cfg.ConfigureEndpoints(context);
         }));
     });
-
-    services.AddMassTransitHostedService();
 }
 ```
 

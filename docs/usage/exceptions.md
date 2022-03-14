@@ -53,19 +53,15 @@ public class SubmitOrderConsumer :
 With this consumer, an `ADOException` can be thrown, say there is a deadlock or the SQL server is unavailable. In this case, the operation should be retried before moving the message to the error queue. This can be configured on the receive endpoint or the consumer. Shown below is a retry policy which attempts to deliver the message to a consumer five times before throwing the exception back up the pipeline.
 
 ```cs
-using GreenPipes; // for call to Immediate
-
-var sessionFactory = CreateSessionFactory();
-
-var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
+services.AddMassTransit(x =>
 {
-    cfg.Host("rabbitmq://localhost/");
+    x.AddConsumer<SubmitOrderConsumer>();
 
-    cfg.ReceiveEndpoint("submit-order", e =>
+    x.UsingRabbitMq((context,cfg) =>
     {
-        e.UseMessageRetry(r => r.Immediate(5));
+        cfg.UseMessageRetry(r => r.Immediate(5));
 
-        e.Consumer(() => new SubmitOrderConsumer(sessionFactory));
+        cfg.ConfigureEndpoints(context);
     });
 });
 ```
@@ -73,8 +69,27 @@ var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
 The `UseMessageRetry` method is an extension method that configures a middleware filter, in this case the `RetryFilter`. There are a variety of retry policies available, which are detailed in the [section below](#retry-configuration).
 
 ::: tip 
-In this example, the <i>UseMessageRetry</i> is at the receive endpoint level. Additional retry filters can be added at the bus and consumer level, providing flexibility in how different consumers, messages, etc. are retried.
+In this example, the <i>UseMessageRetry</i> is at the bus level, and will be configured on every receive endpoint. Additional retry filters can be added at the bus and consumer level, providing flexibility in how different consumers, messages, etc. are retried.
 :::
+
+To configure retry on a manually configured receive endpoint:
+
+```cs
+services.AddMassTransit(x =>
+{
+    x.AddConsumer<SubmitOrderConsumer>();
+
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.ReceiveEndpoint("submit-order", e =>
+        {
+            e.UseMessageRetry(r => r.Immediate(5));
+
+            e.ConfigureConsumer<SubmitOrderConsumer>(context);
+        });
+    });
+});
+```
 
 MassTransit retry filters execute in memory and maintain a _lock_ on the message. As such, they should only be used to handle short, transient error conditions. Setting a retry interval of an hour would fall into the category of _bad things_. To retry messages after longer waits, look at the next section on redelivering messages.
 
@@ -121,22 +136,27 @@ e.UseMessageRetry(r =>
 You can also specify multiple retry policies for a single endpoint:
 
 ```cs
-Bus.Factory.CreateUsingInMemory(cfg =>
+services.AddMassTransit(x =>
 {
-    cfg.ReceiveEndpoint("input-queue", e =>
+    x.AddConsumer<SubmitOrderConsumer>();
+
+    x.UsingRabbitMq((context, cfg) =>
     {
-        e.UseMessageRetry(r => 
+        cfg.ReceiveEndpoint("submit-order", e =>
         {
-            r.Immediate(5);
-            r.Handle<DataException>(x => x.Message.Contains("SQL"));
-        });
-        e.Consumer<MyConsumer>(c => c.UseMessageRetry(r => 
+            e.UseMessageRetry(r => 
+            {
+                r.Immediate(5);
+                r.Handle<DataException>(x => x.Message.Contains("SQL"));
+            });
+
+            e.ConfigureConsumer<SubmitOrderConsumer>(context, c => c.UseMessageRetry(r => 
             {
                 r.Interval(10, TimeSpan.FromMilliseconds(200));
                 r.Ignore<ArgumentNullException>();
                 r.Ignore<DataException>(x => x.Message.Contains("SQL"));
-            });
-        );
+            }));
+        });
     });
 });
 ```
@@ -151,29 +171,28 @@ Some errors take a while to resolve, say a remote service is down or a SQL serve
 In some frameworks, message redelivery is also referred to as second-level retry.
 :::
 
-To add message redelivery, first, the bus must be configured with a message scheduler (see the [scheduling](/advanced/scheduling/scheduling-api) section for more details). With a scheduler configured, the above example that only used retry can be modified to add scheduled redelivery as shown below. Note, that due to the piped execution the order of the two calls is important.
+To use delayed redelivery, ensure the transport is properly configured. RabbitMQ required a delayed-exchange plug-in, and ActiveMQ (non-Artemis) requires the scheduler to be enabled via the XML configuration.
 
 ```cs
-var sessionFactory = CreateSessionFactory();
-
-var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
+services.AddMassTransit(x =>
 {
-    cfg.Host("rabbitmq://localhost/");
+    x.AddConsumer<SubmitOrderConsumer>();
 
-    cfg.UseMessageScheduler(new Uri("rabbitmq://localhost/quartz"));
-    // cfg.UseDelayedMessageScheduler(); // use this, if you are using delayed scheduler
-
-    cfg.ReceiveEndpoint("submit-order", e =>
+    x.UsingRabbitMq((context, cfg) =>
     {
-        e.UseScheduledRedelivery(r => r.Intervals(TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(15), TimeSpan.FromMinutes(30)));
-        // e.UseDelayedRedelivery(r => r.Intervals(TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(15), TimeSpan.FromMinutes(30))); // use this, if you are using delayed scheduler
-        e.UseMessageRetry(r => r.Immediate(5));
-        e.Consumer(() => new SubmitOrderConsumer(sessionFactory));
+        cfg.UseDelayedRedelivery(r => r.Intervals(TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(15), TimeSpan.FromMinutes(30)));
+        cfg.UseMessageRetry(r => r.Immediate(5));
+
+        cfg.ConfigureEndpoints(context);
     });
 });
 ```
 
 Now, if the initial 5 immediate retries fail (the database is really, really down), the message will retry an additional three times after 5, 15, and 30 minutes. This could mean a total of 15 retry attempts (on top of the initial 4 attempts prior to the retry/redelivery filters taking control).
+
+::: tip Scheduled Redelivery
+MassTransit also supports scheduled redelivery using the `UseScheduledRedelivery` configuration method. Scheduled redelivery requires the use of a message scheduler, which can be configured to use the message transport or Quartz.NET/Hangfire. The configuration is similar, just ensure the scheduler is properly configured.
+:::
 
 ## Outbox
 
@@ -182,14 +201,19 @@ If the consumer publishes events or sends messages (using `ConsumeContext`, whic
 To configure the outbox with redelivery and retry:
 
 ```cs
-    cfg.ReceiveEndpoint("submit-order", e =>
-    {
-        e.UseScheduledRedelivery(r => r.Intervals(TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(15), TimeSpan.FromMinutes(30)));
-        e.UseMessageRetry(r => r.Immediate(5));
-        e.UseInMemoryOutbox();
+services.AddMassTransit(x =>
+{
+    x.AddConsumer<SubmitOrderConsumer>();
 
-        e.Consumer(() => new SubmitOrderConsumer(sessionFactory));
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.UseDelayedRedelivery(r => r.Intervals(TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(15), TimeSpan.FromMinutes(30)));
+        cfg.UseMessageRetry(r => r.Immediate(5));
+        cfg.UseInMemoryOutbox();
+
+        cfg.ConfigureEndpoints(context);
     });
+});
 ```
 
 ### Configuring for a consumer or saga
@@ -198,16 +222,24 @@ If there are multiple consumers (or saga) on the same endpoint (which could pote
 
 To configure a specific consumer.
 
-```csharp
-    cfg.ReceiveEndpoint("submit-order", e =>
+```cs
+services.AddMassTransit(x =>
+{
+    x.AddConsumer<SubmitOrderConsumer>();
+
+    x.UsingRabbitMq((context, cfg) =>
     {
-        e.Consumer(() => new SubmitOrderConsumer(sessionFactory), c =>
+        cfg.ReceiveEndpoint("submit-order", e =>
         {
-            c.UseScheduledRedelivery(r => r.Intervals(TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(15), TimeSpan.FromMinutes(30)));
-            c.UseMessageRetry(r => r.Immediate(5));
-            c.UseInMemoryOutbox();
+            e.ConfigureConsumer<SubmitOrderConsumer>(context, c =>
+            {
+                c.UseDelayedRedelivery(r => r.Intervals(TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(15), TimeSpan.FromMinutes(30)));
+                c.UseMessageRetry(r => r.Immediate(5));
+                c.UseInMemoryOutbox();
+            });
         });
     });
+});
 ```
 
 Sagas are configured in the same way, using the saga configurator.

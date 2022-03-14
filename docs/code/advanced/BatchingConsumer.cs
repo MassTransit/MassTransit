@@ -1,10 +1,7 @@
 namespace BatchingConsumer
 {
-    using System;
     using System.Threading.Tasks;
     using MassTransit;
-    using MassTransit.ConsumeConfigurators;
-    using MassTransit.Definition;
 
     public interface OrderAudit
     {

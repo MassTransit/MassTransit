@@ -1,11 +1,6 @@
 namespace MultiBusThreeContainer
 {
-    using System;
-    using System.Threading.Tasks;
-    using ContainerContracts;
-    using ContainerConsumers;
     using MassTransit;
-    using MassTransit.MultiBus;
     using Microsoft.Extensions.DependencyInjection;
 
     public interface IThirdBus :
@@ -34,11 +29,9 @@ namespace MultiBusThreeContainer
             {
                 x.UsingRabbitMq((context, cfg) =>
                 {
-                    cfg.Host("third-host");  
+                    cfg.Host("third-host");
                 });
             });
-
-            services.AddMassTransitHostedService();
         }
     }
 

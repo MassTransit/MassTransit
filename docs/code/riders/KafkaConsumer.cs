@@ -1,12 +1,8 @@
 namespace KafkaConsumer
 {
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
-    using Confluent.Kafka;
-    using ContainerConsumers;
     using MassTransit;
-    using MassTransit.KafkaIntegration;
     using Microsoft.Extensions.DependencyInjection;
 
     public class Program

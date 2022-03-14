@@ -62,7 +62,7 @@ namespace MassTransit.Containers.Tests
 
             Assert.That(await harness.Consumed.Any<PingMessage>());
 
-            var consumerHarness = provider.GetRequiredService<IConsumerTestHarness<PingRequestConsumer>>();
+            var consumerHarness = harness.GetConsumerHarness<PingRequestConsumer>();
 
             Assert.That(await consumerHarness.Consumed.Any<PingMessage>());
         }
@@ -212,7 +212,7 @@ namespace MassTransit.Containers.Tests
 
             Assert.IsTrue(await harness.Consumed.Any<Start>(), "Message not received");
 
-            var sagaHarness = provider.GetRequiredService<ISagaStateMachineTestHarness<TestStateMachine, Instance>>();
+            ISagaStateMachineTestHarness<TestStateMachine, Instance> sagaHarness = harness.GetSagaStateMachineHarness<TestStateMachine, Instance>();
 
             Assert.That(await sagaHarness.Consumed.Any<Start>());
 
@@ -220,7 +220,7 @@ namespace MassTransit.Containers.Tests
 
             var machine = provider.GetRequiredService<TestStateMachine>();
 
-            var instance = sagaHarness.Created.ContainsInState(sagaId, machine, machine.Running);
+            var instance = sagaHarness.Created.ContainsInState(sagaId, sagaHarness.StateMachine, machine.Running);
             Assert.IsNotNull(instance, "Saga instance not found");
 
             Assert.IsTrue(await harness.Published.Any<Started>(), "Event not published");

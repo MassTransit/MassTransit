@@ -1,7 +1,6 @@
 namespace AmazonRabbitMqConsoleListener
 {
     using System;
-    using System.Security.Authentication;
     using System.Threading.Tasks;
     using MassTransit;
 

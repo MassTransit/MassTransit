@@ -1,6 +1,7 @@
 namespace UsageHandler
 {
     using System;
+    using Microsoft.Extensions.DependencyInjection;
     using System.Threading.Tasks;
     using UsageContracts;
     using MassTransit;
@@ -9,16 +10,21 @@ namespace UsageHandler
     {
         public static async Task Main()
         {
-            var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
-            {
-                cfg.ReceiveEndpoint("order-service", e =>
+            await using var provider = new ServiceCollection()
+                .AddMassTransit(x =>
                 {
-                    e.Handler<SubmitOrder>(async context =>
+                    x.UsingInMemory((context, cfg) =>
                     {
-                        await Console.Out.WriteLineAsync($"Submit Order Received: {context.Message.OrderId}");
+                        cfg.ReceiveEndpoint("order-service", e =>
+                        {
+                            e.Handler<SubmitOrder>(async context =>
+                            {
+                                await Console.Out.WriteLineAsync($"Submit Order Received: {context.Message.OrderId}");
+                            });
+                        });
                     });
-                });
-            });
+                })
+                .BuildServiceProvider();
         }
     }
 }

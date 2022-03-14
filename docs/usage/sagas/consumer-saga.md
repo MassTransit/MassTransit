@@ -116,7 +116,22 @@ public class OrderPaymentSaga :
 }
 ```
 
-The saga is configured on a receive endpoint using the `.Saga` method.
+If you're using a container, saga registration is fully supported. The example below configures the saga using an in-memory repository with an in-memory transport.
+
+```cs
+services.AddMassTransit(x =>
+{
+    x.AddSaga<OrderSaga>()
+        .InMemoryRepository();
+
+    x.UsingInMemory((context, cfg) =>
+    {
+        cfg.ConfigureEndpoints(context);
+    });
+});
+```
+
+If using the legacy configuration syntax, the saga can be configured on a receive endpoint using the `.Saga` method.
 
 ```cs
 var repository = new InMemorySagaRepository<OrderSaga>();
@@ -132,19 +147,5 @@ var busControl = Bus.Factory.CreateUsingInMemory(cfg =>
 
 ### Container Registration
 
-If you're using a container, saga registration is fully supported. The example below configures the saga using an in-memory repository with an in-memory transport.
-
-```cs
-services.AddMassTransit(x =>
-{
-    x.AddSaga<OrderSaga>()
-        .InMemoryRepository();
-
-    x.UsingInMemory((context, cfg) =>
-    {
-        cfg.ConfigureEndpoints(context);
-    });
-});
-```
 
 The configuration for the various supported saga persistence storage engines is detailed in the [persistence](persistence.md) documentation.

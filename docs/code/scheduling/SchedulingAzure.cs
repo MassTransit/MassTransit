@@ -1,8 +1,6 @@
 namespace SchedulingAzure
 {
-    using System;
     using MassTransit;
-    using MassTransit.Azure.ServiceBus.Core;
     using Microsoft.Extensions.DependencyInjection;
 
     public class Program
@@ -15,7 +13,7 @@ namespace SchedulingAzure
             {
                 x.AddServiceBusMessageScheduler();
 
-                x.UsingAzureServiceBus((context, cfg) => 
+                x.UsingAzureServiceBus((context, cfg) =>
                 {
                     cfg.UseServiceBusMessageScheduler();
 

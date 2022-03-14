@@ -1,10 +1,7 @@
 namespace EventHubConsumer
 {
-    using System;
     using System.Threading.Tasks;
     using MassTransit;
-    using MassTransit.Azure.ServiceBus.Core;
-    using MassTransit.EventHubIntegration;
     using Microsoft.Extensions.DependencyInjection;
 
     public class Program
@@ -21,7 +18,7 @@ namespace EventHubConsumer
 
                     cfg.ConfigureEndpoints(context);
                 });
-              
+
                 x.AddRider(rider =>
                 {
                     rider.AddConsumer<EventHubMessageConsumer>();

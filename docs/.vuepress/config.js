@@ -128,11 +128,7 @@ module.exports = {
             children: [
               ['/usage/containers/definitions', 'Definitions'],
               ['/usage/containers/msdi', 'Microsoft'],
-              '/usage/containers/multibus',
-              ['/usage/containers/autofac', 'Autofac'],
-              ['/usage/containers/castlewindsor', 'Castle Windsor'],
-              ['/usage/containers/simpleinjector', 'Simple Injector'],
-              ['/usage/containers/structuremap', 'StructureMap']
+              '/usage/containers/multibus'
             ]
           },
           ['/usage/testing', 'Testing'],

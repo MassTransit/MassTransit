@@ -3,7 +3,7 @@ namespace UsageMediatorRequest
     using System;
     using System.Threading.Tasks;
     using UsageContracts;
-    using UsageConsumer;
+    using Microsoft.Extensions.DependencyInjection;
     using UsageMediatorConsumer;
     using MassTransit;
     using MassTransit.Mediator;
@@ -12,11 +12,11 @@ namespace UsageMediatorRequest
     {
         public static async Task Main()
         {
-            IMediator mediator = Bus.Factory.CreateMediator(cfg =>
-            {
-                cfg.Consumer<SubmitOrderConsumer>();
-                cfg.Consumer<OrderStatusConsumer>();
-            });
+            await using var provider = new ServiceCollection()
+                .AddMediator(cfg => { })
+                .BuildServiceProvider();
+
+            var mediator = provider.GetRequiredService<IMediator>();
 
             Guid orderId = NewId.NextGuid();
 

@@ -1,6 +1,6 @@
 namespace UsageInstance
 {
-    using System;
+    using Microsoft.Extensions.DependencyInjection;
     using System.Threading.Tasks;
     using UsageConsumer;
     using MassTransit;
@@ -11,13 +11,18 @@ namespace UsageInstance
         {
             var submitOrderConsumer = new SubmitOrderConsumer();
 
-            var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
-            {
-                cfg.ReceiveEndpoint("order-service", e =>
+            await using var provider = new ServiceCollection()
+                .AddMassTransit(x =>
                 {
-                    e.Instance(submitOrderConsumer);
-                });
-            });
+                    x.UsingInMemory((context, cfg) =>
+                    {
+                        cfg.ReceiveEndpoint("order-service", e =>
+                        {
+                            e.Instance(submitOrderConsumer);
+                        });
+                    });
+                })
+                .BuildServiceProvider();
         }
     }
 }

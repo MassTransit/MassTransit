@@ -6,10 +6,10 @@ sidebarDepth: 2
 
 ## Introduction
 
-[Automatonymous][1] is a state machine library for .NET and provides a C# syntax to define a state machine, including states, events, and behaviors. MassTransit includes Automatonymous, and adds instance storage, event correlation, message binding, request and response support, and scheduling. Like MassTransit, Automatonymous is free, open-source, and Apache 2.0 licensed.
+Automatonymous is a state machine library for .NET and provides a C# syntax to define a state machine, including states, events, and behaviors. MassTransit includes Automatonymous, and adds instance storage, event correlation, message binding, request and response support, and scheduling.
 
-::: tip V6
-Automatonymous is now included by default with _MassTransit_. In previous versions, an additional package reference was required. If _MassTransit.Automatonymous_ was previously used, it must be removed as it is no longer compatible.
+::: tip V8
+Automatonymous is no longer a separate NuGet package and has been assimilated by _MassTransit_. In previous versions, an additional package reference was required. If _Automatonymous_ is referenced, that reference must be removed as it is no longer compatible.
 :::
 
 ### State Machine
@@ -234,18 +234,13 @@ public class OrderStateMachine :
 
 ### Configuration
 
-To add a state machine saga to a receive endpoint:
+To configure a saga state machine:
 
 ```cs
-var machine = new OrderStateMachine();
-var repository = new InMemorySagaRepository<OrderState>();
-
-var busControl = Bus.Factory.CreateUsingInMemory(cfg =>
-{    
-    cfg.ReceiveEndpoint("order", e =>
-    {
-        e.StateMachineSaga(machine, repository);
-    });
+services.AddMassTransit(x =>
+{
+    x.AddSagaStateMachine<OrderStateMachine, OrderState>()
+        .InMemorySagaRepository();
 });
 ```
 
@@ -1247,7 +1242,4 @@ public class OrderStateMachine :
 }
 ```
 
-
-
-[1]: https://github.com/MassTransit/Automatonymous
 [2]: https://github.com/MassTransit/Sample-ShoppingWeb
