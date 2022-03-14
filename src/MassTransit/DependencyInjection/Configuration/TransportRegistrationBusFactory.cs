@@ -4,7 +4,6 @@ namespace MassTransit.Configuration
     using System.Collections.Generic;
     using System.Linq;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Logging;
     using Transports;
 
 
@@ -26,15 +25,11 @@ namespace MassTransit.Configuration
             where T : TConfigurator, IBusFactory
             where TConfigurator : IBusFactoryConfigurator
         {
-            var loggerFactory = context.GetService<ILoggerFactory>();
-            if (loggerFactory != null)
-                LogContext.ConfigureCurrentLogContext(loggerFactory);
-            else if (LogContext.Current == null)
-                LogContext.ConfigureCurrentLogContext();
-
-            ConnectBusObservers(context, configurator);
+            LogContext.ConfigureCurrentLogContextIfNull(context);
 
             _hostConfiguration.LogContext = LogContext.Current;
+
+            ConnectBusObservers(context, configurator);
 
             configure?.Invoke(context, configurator);
 

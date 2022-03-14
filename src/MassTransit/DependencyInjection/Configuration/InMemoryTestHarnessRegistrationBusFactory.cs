@@ -1,8 +1,6 @@
 namespace MassTransit.Configuration
 {
     using System.Collections.Generic;
-    using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Logging;
     using Testing;
     using Testing.Implementations;
     using Transports;
@@ -24,9 +22,7 @@ namespace MassTransit.Configuration
 
             inMemoryTestHarness.OnConfigureInMemoryBus += configurator =>
             {
-                var loggerFactory = context.GetService<ILoggerFactory>();
-                if (loggerFactory != null)
-                    LogContext.ConfigureCurrentLogContext(loggerFactory);
+                LogContext.ConfigureCurrentLogContextIfNull(context);
             };
             inMemoryTestHarness.OnInMemoryBusConfigured += configurator =>
             {

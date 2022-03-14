@@ -8,7 +8,6 @@ namespace MassTransit.Configuration
     using Internals;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
-    using Microsoft.Extensions.Logging;
 
 
     /// <summary>
@@ -299,11 +298,7 @@ namespace MassTransit.Configuration
 
         protected static void ConfigureLogContext(IServiceProvider provider)
         {
-            var loggerFactory = provider.GetService<ILoggerFactory>();
-            if (loggerFactory != null)
-                LogContext.ConfigureCurrentLogContext(loggerFactory);
-            else if (LogContext.Current == null)
-                LogContext.ConfigureCurrentLogContext();
+            LogContext.ConfigureCurrentLogContextIfNull(provider);
         }
 
         static IClientFactory BusClientFactoryProvider(IServiceProvider provider, IBus bus)

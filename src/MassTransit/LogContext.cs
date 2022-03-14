@@ -4,6 +4,7 @@ namespace MassTransit
     using System.Diagnostics;
     using System.Threading;
     using Logging;
+    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
 
 
@@ -58,6 +59,23 @@ namespace MassTransit
             var current = Current ??= CreateDefaultLogContext();
 
             return current.CreateLogContext(categoryName);
+        }
+
+        /// <summary>
+        /// If <see cref="Current"/> is not null or the null logger, configure the current LogContext
+        /// using the specified service provider.
+        /// </summary>
+        /// <param name="provider"></param>
+        public static void ConfigureCurrentLogContextIfNull(IServiceProvider provider)
+        {
+            if (Current == null || Current.Logger is NullLogger)
+            {
+                var loggerFactory = provider.GetService<ILoggerFactory>();
+                if (loggerFactory != null)
+                    ConfigureCurrentLogContext(loggerFactory);
+                else if (Current == null)
+                    ConfigureCurrentLogContext();
+            }
         }
 
         public static void SetCurrentIfNull(ILogContext context)
