@@ -5,6 +5,7 @@
     using System.Reflection;
     using System.Text.Json;
     using System.Text.Json.Serialization;
+    using Batching;
     using Courier.Contracts;
     using Courier.Messages;
     using Events;
@@ -21,6 +22,7 @@
         static readonly IDictionary<Type, Type> _openTypeFactory = new Dictionary<Type, Type>
         {
             { typeof(Fault<>), typeof(FaultEvent<>) },
+            { typeof(Batch<>), typeof(MessageBatch<>) },
         };
 
         static SystemTextJsonConverterFactory()
