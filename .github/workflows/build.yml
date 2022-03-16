@@ -847,6 +847,13 @@ jobs:
           version: ${{ needs.calc-version.outputs.version }}
           tag-commit: false
           nuget-key: ${{secrets.NUGET_API_KEY}}
+      - name: Build and Publish MassTransit.Visualizer
+        uses: drusellers/publish-nuget@master
+        with:
+          project-file-path: src/MassTransit.StateMachineVisualizer/MassTransit.StateMachineVisualizer.csproj
+          version: ${{ needs.calc-version.outputs.version }}
+          tag-commit: false
+          nuget-key: ${{secrets.NUGET_API_KEY}}
       - name: Build and Publish MassTransit.WebJobs.EventHubsIntegration
         uses: drusellers/publish-nuget@master
         with:
