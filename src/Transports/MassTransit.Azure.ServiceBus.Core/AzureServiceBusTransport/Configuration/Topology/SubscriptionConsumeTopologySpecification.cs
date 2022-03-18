@@ -35,6 +35,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             var topic = builder.CreateTopic(_createTopicOptions);
 
             _createSubscriptionOptions.ForwardTo = builder.Queue.Queue.CreateQueueOptions.Name;
+            _createSubscriptionOptions.AutoDeleteOnIdle = builder.Queue.Queue.CreateQueueOptions.AutoDeleteOnIdle;
 
             builder.CreateQueueSubscription(topic, builder.Queue, _createSubscriptionOptions, _rule, _filter);
         }
