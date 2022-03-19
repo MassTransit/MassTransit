@@ -11,13 +11,21 @@ When upgrading from previous versions of MassTransit, there are a few initial st
 
 - Remove any references to packages that were not updated with v8. This includes:
   - `GreenPipes`
-  - `NewId` 
+  - `NewId`  (still available separately, do not use in a project referencing MassTransit)
   - `Automatonymous`
   - `Automatonymous.Visualizer` -> `MassTransit.StateMachineVisualizer`
   - `MassTransit.AspNetCore`
   - `MassTransit.Extensions.DependencyInjection`
   - Any of the third-party container assemblies.
 - Remove any `using` statements that for namespaces that no longer exist
+
+Some configuration interfaces have been removed/changed names:
+
+| Original | New |
+|--|--|
+|`IServiceCollectionBusConfigurator`|`IBusRegistrationConfigurator`|
+|`IServiceCollectionRiderConfigurator`|`IRiderRegistrationConfigurator`|
+|`IServiceCollectionMediatorConfigurator`|`IMediatorRegistrationConfigurator`|
 
 ### Serialization
 
@@ -46,32 +54,6 @@ services.Configure<MassTransitHostOptions>(options =>
 
 > In addition to the hosted service, .NET health checks are added as well, and may be included on health check endpoints.
 
-## Third-Party Container Support
-
-MassTransit is now using _Microsoft.Extensions.DependencyInjection.Abstractions_ as an integral configuration component. This means that all configuration (such as `AddMassTransit`, `AddMediator`) is built against `IServiceCollection`. Support for other containers is provided using each specific container's extensions to work with `IServiceCollection` and `IServiceProvider`.
-
-For example, using Autofac, the configuration might look something like what is shown below.
-
-```cs
-var collection = new ServiceCollection();
-
-collection.AddMassTransit(x =>
-{
-    x.AddConsumer<SubmitOrderConsumer>();
-
-    x.UsingRabbitMq((context, cfg) => 
-    {
-        cfg.ConfigureEndpoints(context);
-    });
-});
-var factory = new AutofacServiceProviderFactory();
-var container = factory.CreateBuilder(collection);
-
-return factory.CreateServiceProvider(container);
-```
-
-MassTransit would then be able to use `IServiceProvider` with Autofac to create scopes, resolve dependencies, etc.
-
 ### Observers
 
 Observers registered in the container will be connected to the bus automatically, including:
@@ -88,6 +70,10 @@ Observers registered in the container will be connected to the bus automatically
 The state machine interfaces, `BehaviorContext<T>` and `BehaviorContext<T, TData>` are now derived from `SagaConsumeContext<T>` and `SagaConsumeContext<T, TMessage>`. This significantly improves the usability of MassTransit features in state machine. No more calling `GetPayload<ConsumeContext>` or other methods to get access to the `ConsumeContext`! Seriously, this is awesome.
 
 As part of this change, the `.Data` and `.Instance` properties of `BehaviorContext` are superfluous, and have subsequently been marked as obsolete. They still work, and return `.Message` or `.Saga` respectively, but eventually the might be removed (not in the near future though).
+
+The previous `Automatonymous.Activity<T>` and `Automatonymous.Activity<T, TData>` interfaces have been renamed, and are now `IStateMachineActivity<TSaga>` and `IStateMachineActivity<TSaga, TMessage>` (both are now in the top-level `MassTransit` namespace).
+
+Specifying headers when using the `.Init<T>()` message initializer with `SendAsync`, `PublishAsync`, and other related methods now works as expected!
 
 The saga state machine test harness type `IStateMachineSagaTestHarness<TInstance, TStateMachine>` has been replaced with the properly named type `ISagaStateMachineTestHarness<TStateMachine, TInstance>`, which also has consistent generic argument ordering.
 
@@ -133,6 +119,62 @@ public async Task The_consumer_should_respond_to_the_request()
     Assert.That(await consumerHarness.Consumed.Any<SubmitOrder>());
 }
 ```
+
+::: tip
+When the _provider_ (which is an `IServiceProvider`) is disposed, it will dispose of the test harness, which will stop the bus.
+:::
+
+Additionally, the test harness can now be used with any transport. For example, to use RabbitMQ:
+
+```cs
+[Test]
+public async Task Should_use_broker()
+{
+    await using var provider = new ServiceCollection()
+        .AddMassTransitTestHarness(x =>
+        {
+            x.AddConsumer<SubmitOrderConsumer>();
+
+            x.UsingRabbitMq((context, cfg) =>
+            {
+                cfg.Host("some-broker-address", h =>
+                {
+                    h.Username("joe");
+                    h.Password("cool");
+                });
+
+                cfg.ConfigureEndpoints(context);
+            });
+        })
+        .BuildServiceProvider(true);
+}
+```
+
+### Third-Party Container Support
+
+MassTransit is now using _Microsoft.Extensions.DependencyInjection.Abstractions_ as an integral configuration component. This means that all configuration (such as `AddMassTransit`, `AddMediator`) is built against `IServiceCollection`. Support for other containers is provided using each specific container's extensions to work with `IServiceCollection` and `IServiceProvider`.
+
+For example, using Autofac, the configuration might look something like what is shown below.
+
+```cs
+var collection = new ServiceCollection();
+
+collection.AddMassTransit(x =>
+{
+    x.AddConsumer<SubmitOrderConsumer>();
+
+    x.UsingRabbitMq((context, cfg) => 
+    {
+        cfg.ConfigureEndpoints(context);
+    });
+});
+var factory = new AutofacServiceProviderFactory();
+var container = factory.CreateBuilder(collection);
+
+return factory.CreateServiceProvider(container);
+```
+
+MassTransit would then be able to use `IServiceProvider` with Autofac to create scopes, resolve dependencies, etc.
 
 ## Version 7
 
