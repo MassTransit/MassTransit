@@ -23,7 +23,7 @@ namespace MassTransit.Containers.Tests
                 })
                 .BuildServiceProvider(true);
 
-            var harness = provider.GetRequiredService<ITestHarness>();
+            var harness = provider.GetTestHarness();
 
             await harness.Start();
 
@@ -51,7 +51,7 @@ namespace MassTransit.Containers.Tests
                 })
                 .BuildServiceProvider(true);
 
-            var harness = provider.GetRequiredService<ITestHarness>();
+            var harness = provider.GetTestHarness();
 
             await harness.Start();
             var bus = harness.Bus;
@@ -83,7 +83,7 @@ namespace MassTransit.Containers.Tests
                 })
                 .BuildServiceProvider(true);
 
-            var harness = provider.GetRequiredService<ITestHarness>();
+            var harness = provider.GetTestHarness();
 
             await harness.Start();
 
@@ -202,7 +202,7 @@ namespace MassTransit.Containers.Tests
                 })
                 .BuildServiceProvider(true);
 
-            var harness = provider.GetRequiredService<ITestHarness>();
+            var harness = provider.GetTestHarness();
 
             await harness.Start();
 

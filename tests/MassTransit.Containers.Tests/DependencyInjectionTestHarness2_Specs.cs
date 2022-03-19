@@ -69,7 +69,7 @@ namespace MassTransit.Containers.Tests
                 })
                 .BuildServiceProvider(true);
 
-            var harness = provider.GetRequiredService<ITestHarness>();
+            var harness = provider.GetTestHarness();
 
             harness.TestInactivityTimeout = TimeSpan.FromSeconds(1);
 

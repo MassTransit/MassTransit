@@ -55,7 +55,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 })
                 .BuildServiceProvider(true);
 
-            var harness = provider.GetRequiredService<ITestHarness>();
+            var harness = provider.GetTestHarness();
 
             await harness.Start();
 
@@ -114,7 +114,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 })
                 .BuildServiceProvider(true);
 
-            var harness = provider.GetRequiredService<ITestHarness>();
+            var harness = provider.GetTestHarness();
 
             await harness.Start();
 
