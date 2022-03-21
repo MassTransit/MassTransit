@@ -1,57 +1,29 @@
-namespace OrderSystem.Events
+namespace RabbitMqConsoleListener;
+
+using System.Threading.Tasks;
+using MassTransit;
+using Microsoft.Extensions.Hosting;
+
+public static class Program
 {
-    using System;
-
-    public interface OrderSubmitted
+    public static async Task Main(string[] args)
     {
-        Guid OrderId { get; }
-    }
-}
-
-namespace RabbitMqConsoleListener
-{
-    using System;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using OrderSystem.Events;
-    using MassTransit;
-    using Microsoft.Extensions.Hosting;
-
-    public static class Program
-    {
-        public static async Task Main(string[] args)
-        {
-            await Host.CreateDefaultBuilder(args)
-                .ConfigureServices(services =>
+        await Host.CreateDefaultBuilder(args)
+            .ConfigureServices(services =>
+            {
+                services.AddMassTransit(x =>
                 {
-                    services.AddMassTransit(x =>
+                    x.UsingRabbitMq((context, cfg) =>
                     {
-                        x.UsingRabbitMq((context, cfg) =>
+                        cfg.Host("localhost", "/", h =>
                         {
-                            cfg.Host("localhost", "/", h =>
-                            {
-                                h.Username("guest");
-                                h.Password("guest");
-                            });
-
-                            cfg.ReceiveEndpoint("order-events-listener", e =>
-                            {
-                                e.Consumer<OrderSubmittedEventConsumer>();
-                            });
+                            h.Username("guest");
+                            h.Password("guest");
                         });
                     });
-                })
-                .Build()
-                .RunAsync();
-        }
-
-        class OrderSubmittedEventConsumer :
-            IConsumer<OrderSubmitted>
-        {
-            public async Task Consume(ConsumeContext<OrderSubmitted> context)
-            {
-                Console.WriteLine("Order Submitted: {0}", context.Message.OrderId);
-            }
-        }
+                });
+            })
+            .Build()
+            .RunAsync();
     }
 }

@@ -1,18 +1,20 @@
-namespace UsageInstance
+namespace UsageInstance;
+
+using System.Threading.Tasks;
+using UsageConsumer;
+using MassTransit;
+using Microsoft.Extensions.Hosting;
+
+public class Program
 {
-    using Microsoft.Extensions.DependencyInjection;
-    using System.Threading.Tasks;
-    using UsageConsumer;
-    using MassTransit;
-
-    public class Program
+    public static async Task Main(string[] args)
     {
-        public static async Task Main()
-        {
-            var submitOrderConsumer = new SubmitOrderConsumer();
+        var submitOrderConsumer = new SubmitOrderConsumer();
 
-            await using var provider = new ServiceCollection()
-                .AddMassTransit(x =>
+        await Host.CreateDefaultBuilder(args)
+            .ConfigureServices(services =>
+            {
+                services.AddMassTransit(x =>
                 {
                     x.UsingInMemory((context, cfg) =>
                     {
@@ -21,8 +23,9 @@ namespace UsageInstance
                             e.Instance(submitOrderConsumer);
                         });
                     });
-                })
-                .BuildServiceProvider();
-        }
+                });
+            })
+            .Build()
+            .RunAsync();
     }
 }

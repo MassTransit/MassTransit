@@ -1,26 +1,25 @@
-namespace ServiceBusConsoleListener
-{
-    using System.Threading.Tasks;
-    using MassTransit;
-    using Microsoft.Extensions.Hosting;
+namespace ServiceBusConsoleListener;
 
-    public class Program
+using System.Threading.Tasks;
+using MassTransit;
+using Microsoft.Extensions.Hosting;
+
+public class Program
+{
+    public static async Task Main(string[] args)
     {
-        public static async Task Main(string[] args)
-        {
-            await Host.CreateDefaultBuilder(args)
-                .ConfigureServices((hostContext, services) =>
+        await Host.CreateDefaultBuilder(args)
+            .ConfigureServices((hostContext, services) =>
+            {
+                services.AddMassTransit(x =>
                 {
-                    services.AddMassTransit(x =>
+                    x.UsingAzureServiceBus((context, cfg) =>
                     {
-                        x.UsingAzureServiceBus((context, cfg) =>
-                        {
-                            cfg.Host("connection-string");
-                        });
+                        cfg.Host("connection-string");
                     });
-                })
-                .Build()
-                .RunAsync();
-        }
+                });
+            })
+            .Build()
+            .RunAsync();
     }
 }

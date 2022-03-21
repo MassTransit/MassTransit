@@ -37,6 +37,17 @@ module.exports = {
         path: '/getting-started/',
         collapsable: false,
         children: [
+          {
+            title: 'Quick Starts',
+            path: '/quick-starts/',
+            collapsable: true,
+            children: [
+              '/quick-starts/in-memory',
+              '/quick-starts/rabbitmq',
+              '/quick-starts/azure-service-bus',
+              '/quick-starts/sqs'
+            ]
+          },
           '/getting-started/upgrade-v6',
           {
             title: 'Release Notes',
@@ -66,6 +77,7 @@ module.exports = {
         path: '/usage/',
         collapsable: false,
         children: [
+          '/usage/templates',
           '/usage/configuration',
           {
             title: 'Transports',
@@ -88,7 +100,8 @@ module.exports = {
               '/usage/riders/kafka',
               '/usage/riders/eventhub'
             ]
-          },{
+          },
+          {
             title: 'FaaS',
             path: '/usage/faas/',
             collapsable: true,
@@ -97,6 +110,7 @@ module.exports = {
               '/usage/faas/aws-lambda'
             ]
           },
+          '/usage/guidance',
           '/usage/mediator',
           '/usage/messages',
           '/usage/consumers',

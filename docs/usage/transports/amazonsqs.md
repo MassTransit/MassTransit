@@ -6,11 +6,19 @@ MassTransit combines Amazon SQS (Simple Queue Service) with SNS (Simple Notifica
 
 Configuring a receive endpoint will use the message topology to create and subscribe SNS topics to SQS queues so that published messages will be delivered to the receive endpoint queue.
 
-## Example 
+## Minimal Example 
 
 In the example below, the Amazon SQS settings are configured.
 
 <<< @/docs/code/transports/AmazonSqsConsoleListener.cs
+
+## Broker Topology
+
+With SQS/SNS, which supports topics and queues, messages are _sent_ or _published_ to SNS Topics and then routes those messages through subscriptions to the appropriate SQS Queues.
+
+When the bus is started, MassTransit will create SNS Topics and SQS Queues for the receive endpoint.
+
+## Configuration
 
 The configuration includes:
 
@@ -18,17 +26,21 @@ The configuration includes:
   - Region name: `us-east-2`
   - Access key and secret key used to access the resources
 
+## Additional Examples
+
 Any topic can be subscribed to a receive endpoint, as shown below. The topic attributes can also be configured, in case the topic needs to be created.
 
 <<< @/docs/code/transports/AmazonSqsReceiveEndpoint.cs
 
-## Scoping
+## Errata
+
+### Scoping
 
 Because there is only ever one "SQS/SNS" per AWS account it can be helpful to "Scope" your queues and topics.
 
 <<< @/docs/code/transports/AmazonSqsScopedConsoleListener.cs
 
-## Example IAM Policy
+### Example IAM Policy
 
 ```json
 {
@@ -43,11 +55,9 @@ Because there is only ever one "SQS/SNS" per AWS account it can be helpful to "S
                 "sqs:CreateQueue",
                 "sqs:DeleteMessage",
                 "sqs:SendMessage",
-                "sqs:SendMessageBatch",
                 "sqs:GetQueueUrl",
                 "sqs:GetQueueAttributes",
                 "sqs:ChangeMessageVisibility",
-                "sqs:ChangeMessageVisibilityBatch"
                 ],
             "Resource": "arn:aws:sqs:*:YOUR_ACCOUNT_ID:*"
         },{
@@ -66,7 +76,7 @@ Because there is only ever one "SQS/SNS" per AWS account it can be helpful to "S
             "Action": [
                 "sns:ListTopics"
             ],
-            "Resource": "arn:aws:sns:*:YOUR_ACCOUNT_ID:*"
+            "Resource": "*"
         }
     ]
 }
