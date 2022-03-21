@@ -1,19 +1,17 @@
-namespace UsageConsumer
-{
-    using System;
-    using System.Threading.Tasks;
-    using UsageContracts;
-    using MassTransit;
+namespace UsageConsumer;
 
-    class SubmitOrderConsumer :
-        IConsumer<SubmitOrder>
+using System.Threading.Tasks;
+using UsageContracts;
+using MassTransit;
+
+class SubmitOrderConsumer :
+    IConsumer<SubmitOrder>
+{
+    public async Task Consume(ConsumeContext<SubmitOrder> context)
     {
-        public async Task Consume(ConsumeContext<SubmitOrder> context)
+        await context.Publish<OrderSubmitted>(new
         {
-            await context.Publish<OrderSubmitted>(new
-            {
-                context.Message.OrderId
-            });
-        }
+            context.Message.OrderId
+        });
     }
 }

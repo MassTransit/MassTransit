@@ -1,16 +1,18 @@
-namespace UsageConsumerBus
-{
-    using System.Threading.Tasks;
-    using Microsoft.Extensions.DependencyInjection;
-    using UsageConsumer;
-    using MassTransit;
+namespace UsageConsumerBus;
 
-    public class Program
+using System.Threading.Tasks;
+using UsageConsumer;
+using MassTransit;
+using Microsoft.Extensions.Hosting;
+
+public class Program
+{
+    public static async Task Main(string[] args)
     {
-        public static async Task Main()
-        {
-            await using var provider = new ServiceCollection()
-                .AddMassTransit(x =>
+        await Host.CreateDefaultBuilder(args)
+            .ConfigureServices(services =>
+            {
+                services.AddMassTransit(x =>
                 {
                     x.AddConsumer<SubmitOrderConsumer>();
 
@@ -18,8 +20,9 @@ namespace UsageConsumerBus
                     {
                         cfg.ConfigureEndpoints(context);
                     });
-                })
-                .BuildServiceProvider();
-        }
+                });
+            })
+            .Build()
+            .RunAsync();
     }
 }

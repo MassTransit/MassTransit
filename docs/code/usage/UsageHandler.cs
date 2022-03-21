@@ -1,19 +1,21 @@
-namespace UsageHandler
-{
-    using System;
-    using Microsoft.Extensions.DependencyInjection;
-    using System.Threading.Tasks;
-    using UsageContracts;
-    using MassTransit;
+namespace UsageHandler;
 
-    public class Program
+using System;
+using System.Threading.Tasks;
+using UsageContracts;
+using MassTransit;
+using Microsoft.Extensions.Hosting;
+
+public class Program
+{
+    public static async Task Main(string[] args)
     {
-        public static async Task Main()
-        {
-            await using var provider = new ServiceCollection()
-                .AddMassTransit(x =>
+        await Host.CreateDefaultBuilder(args)
+            .ConfigureServices(services =>
+            {
+                services.AddMassTransit(x =>
                 {
-                    x.UsingInMemory((context, cfg) =>
+                    x.UsingInMemory((cxt, cfg) =>
                     {
                         cfg.ReceiveEndpoint("order-service", e =>
                         {
@@ -23,8 +25,9 @@ namespace UsageHandler
                             });
                         });
                     });
-                })
-                .BuildServiceProvider();
-        }
+                });
+            })
+            .Build()
+            .RunAsync();
     }
 }

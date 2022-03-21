@@ -1,30 +1,29 @@
-namespace AmazonSqsConsoleListener
-{
-    using System.Threading.Tasks;
-    using MassTransit;
-    using Microsoft.Extensions.Hosting;
+namespace AmazonSqsConsoleListener;
 
-    public class Program
+using System.Threading.Tasks;
+using MassTransit;
+using Microsoft.Extensions.Hosting;
+
+public class Program
+{
+    public static async Task Main(string[] args)
     {
-        public static async Task Main(string[] args)
-        {
-            await Host.CreateDefaultBuilder(args)
-                .ConfigureServices((hostContext, services) =>
+        await Host.CreateDefaultBuilder(args)
+            .ConfigureServices((hostContext, services) =>
+            {
+                services.AddMassTransit(x =>
                 {
-                    services.AddMassTransit(x =>
+                    x.UsingAmazonSqs((context, cfg) =>
                     {
-                        x.UsingAmazonSqs((context, cfg) =>
+                        cfg.Host("us-east-2", h =>
                         {
-                            cfg.Host("us-east-2", h =>
-                            {
-                                h.AccessKey("your-iam-access-key");
-                                h.SecretKey("your-iam-secret-key");
-                            });
+                            h.AccessKey("your-iam-access-key");
+                            h.SecretKey("your-iam-secret-key");
                         });
                     });
-                })
-                .Build()
-                .RunAsync();
-        }
+                });
+            })
+            .Build()
+            .RunAsync();
     }
 }

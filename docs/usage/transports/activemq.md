@@ -2,6 +2,14 @@
 
 > [MassTransit.ActiveMQ](https://nuget.org/packages/MassTransit.ActiveMQ/)
 
+## Topology
+
+tbd
+
+## Examples
+
+### Minimal
+
 In the example below, the ActiveMQ settings are configured.
 
 <<< @/docs/code/transports/ActiveMqConsoleListener.cs

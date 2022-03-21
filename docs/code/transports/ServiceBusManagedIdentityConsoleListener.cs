@@ -1,34 +1,33 @@
-namespace ServiceBusManagedIdentityConsoleListener
-{
-    using System;
-    using System.Threading.Tasks;
-    using Azure.Identity;
-    using MassTransit;
-    using MassTransit.AzureServiceBusTransport.Configuration;
-    using Microsoft.Extensions.Hosting;
+namespace ServiceBusManagedIdentityConsoleListener;
 
-    public class Program
+using System;
+using System.Threading.Tasks;
+using Azure.Identity;
+using MassTransit;
+using MassTransit.AzureServiceBusTransport.Configuration;
+using Microsoft.Extensions.Hosting;
+
+public class Program
+{
+    public static async Task Main(string[] args)
     {
-        public static async Task Main(string[] args)
-        {
-            await Host.CreateDefaultBuilder(args)
-                .ConfigureServices((hostContext, services) =>
+        await Host.CreateDefaultBuilder(args)
+            .ConfigureServices((hostContext, services) =>
+            {
+                services.AddMassTransit(x =>
                 {
-                    services.AddMassTransit(x =>
+                    x.UsingAzureServiceBus((context, cfg) =>
                     {
-                        x.UsingAzureServiceBus((context, cfg) =>
+                        var settings = new HostSettings
                         {
-                            var settings = new HostSettings
-                            {
-                                ServiceUri = new Uri("sb://your-service-bus-namespace.servicebus.windows.net"),
-                                TokenCredential = new DefaultAzureCredential() // From Azure.Identity.dll
-                            };
-                            cfg.Host(settings);
-                        });
+                            ServiceUri = new Uri("sb://your-service-bus-namespace.servicebus.windows.net"),
+                            TokenCredential = new DefaultAzureCredential() // From Azure.Identity.dll
+                        };
+                        cfg.Host(settings);
                     });
-                })
-                .Build()
-                .RunAsync();
-        }
+                });
+            })
+            .Build()
+            .RunAsync();
     }
 }
