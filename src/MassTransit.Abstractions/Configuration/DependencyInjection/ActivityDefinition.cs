@@ -2,7 +2,6 @@ namespace MassTransit
 {
     using System;
     using Configuration;
-    using Courier;
 
 
     public class ActivityDefinition<TActivity, TArguments, TLog> :

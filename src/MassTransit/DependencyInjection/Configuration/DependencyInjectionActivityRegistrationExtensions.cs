@@ -70,7 +70,7 @@ namespace MassTransit.Configuration
                     nameof(activityDefinitionType));
             }
 
-            var register = (IRegister)Activator.CreateInstance(typeof(ActivityDefinition<,,>)
+            var register = (IRegister)Activator.CreateInstance(typeof(ActivityDefinition<,,,>)
                 .MakeGenericType(typeof(TActivity), typeof(TArguments), typeof(TLog), activityDefinitionType));
 
             return register.Register(collection, registrar);
