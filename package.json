@@ -11,7 +11,8 @@
   },
   "dependencies": {
     "esm": "^3.2.25",
-    "follow-redirects": "^1.14.7",
+    "follow-redirects": "^1.14.8",
+    "markdown-it-html5-embed": "^1.0.0",
     "path-parse": "^1.0.7",
     "prismjs": "^1.26.0",
     "remove-markdown": "^0.3.0",
