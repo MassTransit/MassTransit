@@ -136,7 +136,7 @@ namespace Sample.AzureFunctions.ServiceBus
 
 ```
 
-::: NOTE
+::: tip
 Azure Functions using Azure Service Bus or Azure Event Hubs require the queue, subscription, topic, or event hub to exist prior to starting the function service. If the messaging entity does not exist, the function will not be bound, and messages or events will not be delivered. Service Bus messages sent or published by MassTransit running inside an Azure Function will, however, create the appropriate topics and/or queues as needed.
 :::
 
