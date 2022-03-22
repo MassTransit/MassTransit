@@ -1,4 +1,4 @@
-namespace AmazonSqsReceiveEndpoint
+namespace AmazonSqsScopedConsoleListener
 {
     using System.Threading.Tasks;
     using MassTransit;
@@ -19,21 +19,13 @@ namespace AmazonSqsReceiveEndpoint
                             {
                                 h.AccessKey("your-iam-access-key");
                                 h.SecretKey("your-iam-secret-key");
+
+                                // specify a scope for all topics
+                                h.Scope("dev", true);
                             });
 
-                            cfg.ReceiveEndpoint("input-queue", e =>
-                            {
-                                // disable the default topic binding
-                                e.ConfigureConsumeTopology = false;
-
-                                e.Subscribe("event-topic", s =>
-                                {
-                                    // set topic attributes
-                                    s.TopicAttributes["DisplayName"] = "Public Event Topic";
-                                    s.TopicSubscriptionAttributes["some-subscription-attribute"] = "some-attribute-value";
-                                    s.TopicTags.Add("environment", "development");
-                                });
-                            });
+                            // additionally include the queues
+                            cfg.ConfigureEndpoints(context, new DefaultEndpointNameFormatter("dev-", false));
                         });
                     });
                 })
