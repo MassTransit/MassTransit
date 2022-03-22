@@ -116,6 +116,19 @@ namespace MassTransit
             return collection;
         }
 
+        /// <summary>
+        /// In some situations, it may be necessary to Remove the MassTransitHostedService from the container, such as
+        /// when using older versions of the Azure Functions runtime.
+        /// </summary>
+        /// <param name="services"></param>
+        /// <returns></returns>
+        public static IServiceCollection RemoveMassTransitHostedService(this IServiceCollection services)
+        {
+            services.Remove(ServiceDescriptor.Singleton<IHostedService, MassTransitHostedService>());
+
+            return services;
+        }
+
         static void AddHostedService(IServiceCollection collection)
         {
             collection.AddOptions();

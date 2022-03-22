@@ -4,6 +4,7 @@ namespace MassTransit
     using Azure.Identity;
     using Azure.Messaging.ServiceBus;
     using Microsoft.ApplicationInsights.DependencyCollector;
+    using Microsoft.Azure.WebJobs.ServiceBus;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
@@ -41,7 +42,7 @@ namespace MassTransit
 
                     x.UsingAzureServiceBus((context, cfg) =>
                     {
-                        var options = context.GetRequiredService<IOptions<Microsoft.Azure.WebJobs.ServiceBus.ServiceBusOptions>>();
+                        var options = context.GetRequiredService<IOptions<ServiceBusOptions>>();
 
                         options.Value.AutoCompleteMessages = true;
 
@@ -62,6 +63,8 @@ namespace MassTransit
                         configureBus?.Invoke(context, cfg);
                     });
                 });
+
+            services.RemoveMassTransitHostedService();
 
             return services;
         }
