@@ -6,6 +6,8 @@ MassTransit combines Amazon SQS (Simple Queue Service) with SNS (Simple Notifica
 
 Configuring a receive endpoint will use the message topology to create and subscribe SNS topics to SQS queues so that published messages will be delivered to the receive endpoint queue.
 
+## Example 
+
 In the example below, the Amazon SQS settings are configured.
 
 <<< @/docs/code/transports/AmazonSqsConsoleListener.cs
@@ -20,15 +22,52 @@ Any topic can be subscribed to a receive endpoint, as shown below. The topic att
 
 <<< @/docs/code/transports/AmazonSqsReceiveEndpoint.cs
 
-Required AWS permissions:
-* _sqs:GetQueueAttributes_
-* _sqs:SetQueueAttributes_
-* _sqs:ReceiveMessage_
-* _sqs:CreateQueue_
-* _sqs:DeleteMessage_
-* _sqs:SendMessage_
-* _sns:GetTopicAttributes_
-* _sns:CreateTopic_
-* _sns:Publish_
-* _sns:Subscribe_
-* _sns:ListTopics_
+## Scoping
+
+Because there is only ever one "SQS/SNS" per AWS account it can be helpful to "Scope" your queues and topics.
+
+<<< @/docs/code/transports/AmazonSqsScopedConsoleListener.cs
+
+## Example IAM Policy
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "SqsAccess",
+            "Effect": "Allow",
+            "Action": [
+                "sqs:SetQueueAttributes",
+                "sqs:ReceiveMessage",
+                "sqs:CreateQueue",
+                "sqs:DeleteMessage",
+                "sqs:SendMessage",
+                "sqs:SendMessageBatch",
+                "sqs:GetQueueUrl",
+                "sqs:GetQueueAttributes",
+                "sqs:ChangeMessageVisibility",
+                "sqs:ChangeMessageVisibilityBatch"
+                ],
+            "Resource": "arn:aws:sqs:*:YOUR_ACCOUNT_ID:*"
+        },{
+            "Sid": "SnsAccess",
+            "Effect": "Allow",
+            "Action": [
+                "sns:GetTopicAttributes",
+                "sns:CreateTopic",
+                "sns:Publish",
+                "sns:Subscribe"
+            ],
+            "Resource": "arn:aws:sns:*:YOUR_ACCOUNT_ID:*"
+        },{
+            "Sid": "SnsListAccess",
+            "Effect": "Allow",
+            "Action": [
+                "sns:ListTopics"
+            ],
+            "Resource": "arn:aws:sns:*:YOUR_ACCOUNT_ID:*"
+        }
+    ]
+}
+```

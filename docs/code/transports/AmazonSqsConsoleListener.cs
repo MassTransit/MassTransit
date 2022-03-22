@@ -1,34 +1,30 @@
 namespace AmazonSqsConsoleListener
 {
-    using System;
     using System.Threading.Tasks;
     using MassTransit;
-    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
 
     public class Program
     {
-        public static async Task Main()
+        public static async Task Main(string[] args)
         {
-            var services = new ServiceCollection();
-            services.AddMassTransit(x =>
-            {
-                x.UsingAmazonSqs((context, cfg) =>
+            await Host.CreateDefaultBuilder(args)
+                .ConfigureServices((hostContext, services) =>
                 {
-                    cfg.Host("us-east-2", h =>
+                    services.AddMassTransit(x =>
                     {
-                        h.AccessKey("your-iam-access-key");
-                        h.SecretKey("your-iam-secret-key");
-
-                        // following are OPTIONAL
-
-                        // specify a scope for all queues
-                        h.Scope("dev");
-
-                        // scope topics as well
-                        h.EnableScopedTopics();
+                        x.UsingAmazonSqs((context, cfg) =>
+                        {
+                            cfg.Host("us-east-2", h =>
+                            {
+                                h.AccessKey("your-iam-access-key");
+                                h.SecretKey("your-iam-secret-key");
+                            });
+                        });
                     });
-                });
-            });
+                })
+                .Build()
+                .RunAsync();
         }
     }
 }
