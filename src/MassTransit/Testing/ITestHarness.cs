@@ -1,13 +1,15 @@
 namespace MassTransit.Testing
 {
     using System.Threading.Tasks;
-    using Courier;
+    using Microsoft.Extensions.DependencyInjection;
 
 
     public interface ITestHarness :
         IBaseTestHarness
     {
         IBus Bus { get; }
+
+        IServiceScope Scope { get; }
 
         IEndpointNameFormatter EndpointNameFormatter { get; }
 

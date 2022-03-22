@@ -6,7 +6,6 @@ namespace MassTransit.DependencyInjection.Testing
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Courier;
     using MassTransit.Testing;
     using MassTransit.Testing.Implementations;
     using Microsoft.Extensions.DependencyInjection;
@@ -91,6 +90,8 @@ namespace MassTransit.DependencyInjection.Testing
         public IReceivedMessageList Consumed => _consumed.Value.Messages;
         public IPublishedMessageList Published => _published.Value.Messages;
         public ISentMessageList Sent => _sent.Value.Messages;
+
+        public IServiceScope Scope => _scope.Value;
 
         public IEndpointNameFormatter EndpointNameFormatter => _provider.GetService<IEndpointNameFormatter>() ?? DefaultEndpointNameFormatter.Instance;
 

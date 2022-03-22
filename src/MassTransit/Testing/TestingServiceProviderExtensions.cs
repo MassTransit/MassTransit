@@ -10,5 +10,10 @@ namespace MassTransit.Testing
         {
             return provider.GetRequiredService<ITestHarness>();
         }
+
+        public static void AddTaskCompletionSource<T>(this IBusRegistrationConfigurator configurator)
+        {
+            configurator.AddSingleton(provider => provider.GetRequiredService<ITestHarness>().GetTask<T>());
+        }
     }
 }
