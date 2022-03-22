@@ -51,6 +51,8 @@ namespace MassTransit.Configuration
                 ConnectReceiveEndpointObservers(context, bus);
                 ConnectReceiveObservers(context, bus);
                 ConnectConsumeObservers(context, bus);
+                ConnectSendObservers(context, bus);
+                ConnectPublishObservers(context, bus);
 
                 _hostConfiguration.BusConfiguration.BusObservers.PostCreate(bus);
 
@@ -91,6 +93,18 @@ namespace MassTransit.Configuration
         {
             foreach (var observer in context.GetServices<IConsumeObserver>())
                 connector.ConnectConsumeObserver(observer);
+        }
+
+        static void ConnectSendObservers(IServiceProvider context, ISendObserverConnector connector)
+        {
+            foreach (var observer in context.GetServices<ISendObserver>())
+                connector.ConnectSendObserver(observer);
+        }
+
+        static void ConnectPublishObservers(IServiceProvider context, IPublishObserverConnector connector)
+        {
+            foreach (var observer in context.GetServices<IPublishObserver>())
+                connector.ConnectPublishObserver(observer);
         }
 
         protected virtual IBusInstance CreateBusInstance(IBusControl bus, IHost<TEndpointConfigurator> host, IHostConfiguration hostConfiguration,

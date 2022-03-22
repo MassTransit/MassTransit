@@ -164,7 +164,7 @@ namespace MassTransit.DependencyInjection.Testing
 
         public Task Start()
         {
-            _hostedServices = _provider.GetService<IEnumerable<IHostedService>>();
+            _hostedServices = _provider.GetServices<IHostedService>();
             if (_hostedServices == null)
                 throw new ConfigurationException("The MassTransit hosted service was not found.");
 
