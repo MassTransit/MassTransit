@@ -9,18 +9,11 @@ namespace MassTransit.QuartzIntegration
         IConsumer<CancelScheduledMessage>,
         IConsumer<CancelScheduledRecurringMessage>
     {
-        readonly Task<IScheduler> _schedulerTask;
-        IScheduler? _scheduler;
+        readonly ISchedulerFactory _schedulerFactory;
 
-        public CancelScheduledMessageConsumer(IScheduler scheduler)
+        public CancelScheduledMessageConsumer(ISchedulerFactory schedulerFactory)
         {
-            _scheduler = scheduler;
-            _schedulerTask = Task.FromResult(scheduler);
-        }
-
-        public CancelScheduledMessageConsumer(Task<IScheduler> schedulerTask)
-        {
-            _schedulerTask = schedulerTask;
+            _schedulerFactory = schedulerFactory;
         }
 
         public async Task Consume(ConsumeContext<CancelScheduledMessage> context)
@@ -29,7 +22,7 @@ namespace MassTransit.QuartzIntegration
 
             var jobKey = new JobKey(correlationId);
 
-            var scheduler = _scheduler ??= await _schedulerTask.ConfigureAwait(false);
+            var scheduler = await _schedulerFactory.GetScheduler(context.CancellationToken).ConfigureAwait(false);
 
             var deletedJob = await scheduler.DeleteJob(jobKey, context.CancellationToken).ConfigureAwait(false);
 
@@ -48,7 +41,7 @@ namespace MassTransit.QuartzIntegration
             if (!scheduleId.StartsWith(prependedValue))
                 scheduleId = string.Concat(prependedValue, scheduleId);
 
-            var scheduler = _scheduler ??= await _schedulerTask.ConfigureAwait(false);
+            var scheduler = await _schedulerFactory.GetScheduler(context.CancellationToken).ConfigureAwait(false);
 
             var unscheduledJob = await scheduler.UnscheduleJob(new TriggerKey(scheduleId, context.Message.ScheduleGroup), context.CancellationToken)
                 .ConfigureAwait(false);

@@ -16,18 +16,11 @@ namespace MassTransit.QuartzIntegration
         IConsumer<ScheduleMessage>,
         IConsumer<ScheduleRecurringMessage>
     {
-        readonly Task<IScheduler> _schedulerTask;
-        IScheduler? _scheduler;
+        readonly ISchedulerFactory _schedulerFactory;
 
-        public ScheduleMessageConsumer(IScheduler scheduler)
+        public ScheduleMessageConsumer(ISchedulerFactory schedulerFactory)
         {
-            _scheduler = scheduler;
-            _schedulerTask = Task.FromResult(scheduler);
-        }
-
-        public ScheduleMessageConsumer(Task<IScheduler> schedulerTask)
-        {
-            _schedulerTask = schedulerTask;
+            _schedulerFactory = schedulerFactory;
         }
 
         public async Task Consume(ConsumeContext<ScheduleMessage> context)
@@ -50,7 +43,7 @@ namespace MassTransit.QuartzIntegration
                 .WithIdentity(triggerKey)
                 .Build();
 
-            var scheduler = _scheduler ??= await _schedulerTask.ConfigureAwait(false);
+            var scheduler = await _schedulerFactory.GetScheduler(context.CancellationToken).ConfigureAwait(false);
 
             if (await scheduler.CheckExists(trigger.Key, context.CancellationToken).ConfigureAwait(false))
                 await scheduler.UnscheduleJob(trigger.Key, context.CancellationToken).ConfigureAwait(false);
@@ -73,7 +66,7 @@ namespace MassTransit.QuartzIntegration
 
             var trigger = CreateTrigger(context.Message.Schedule, jobDetail, triggerKey);
 
-            var scheduler = _scheduler ??= await _schedulerTask.ConfigureAwait(false);
+            var scheduler = await _schedulerFactory.GetScheduler(context.CancellationToken).ConfigureAwait(false);
 
             if (await scheduler.CheckExists(triggerKey, context.CancellationToken).ConfigureAwait(false))
                 await scheduler.UnscheduleJob(triggerKey, context.CancellationToken).ConfigureAwait(false);

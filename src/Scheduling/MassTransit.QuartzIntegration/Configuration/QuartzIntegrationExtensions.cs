@@ -2,11 +2,9 @@
 {
     using System;
     using System.Collections.Specialized;
-    using System.Threading.Tasks;
     using Microsoft.Extensions.DependencyInjection;
     using Quartz;
     using Quartz.Impl;
-    using Quartz.Spi;
     using QuartzIntegration;
     using Scheduling;
     using Util;
@@ -14,6 +12,7 @@
 
     public static class QuartzIntegrationExtensions
     {
+        [Obsolete("Use the new .AddQuartzConsumers() method, combined with AddQuartz(), to configure the Quartz scheduler")]
         public static Uri UseInMemoryScheduler(this IBusFactoryConfigurator configurator, IBusRegistrationContext context, string queueName = "quartz")
         {
             if (configurator == null)
@@ -22,8 +21,11 @@
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
 
-            return configurator.UseInMemoryScheduler(context.GetService<ISchedulerFactory>() ?? new StdSchedulerFactory(), context.GetService<IJobFactory>(),
-                queueName);
+            return configurator.UseInMemoryScheduler(options =>
+            {
+                options.SchedulerFactory = context.GetService<ISchedulerFactory>() ?? new StdSchedulerFactory();
+                options.QueueName = queueName;
+            });
         }
 
         public static Uri UseInMemoryScheduler(this IBusFactoryConfigurator configurator, string queueName = "quartz")
@@ -36,38 +38,20 @@
             return configurator.UseInMemoryScheduler(schedulerFactory, queueName);
         }
 
+        public static Uri UseInMemoryScheduler(this IBusFactoryConfigurator configurator, out ISchedulerFactory schedulerFactory, string queueName = "quartz")
+        {
+            schedulerFactory = new StdSchedulerFactory(GetDefaultConfiguration());
+
+            return UseInMemoryScheduler(configurator, schedulerFactory, queueName);
+        }
+
         public static Uri UseInMemoryScheduler(this IBusFactoryConfigurator configurator, ISchedulerFactory schedulerFactory, string queueName = "quartz")
         {
-            return UseInMemoryScheduler(configurator, schedulerFactory, out _, queueName);
-        }
-
-        public static Uri UseInMemoryScheduler(this IBusFactoryConfigurator configurator, ISchedulerFactory schedulerFactory, IJobFactory jobFactory,
-            string queueName = "quartz")
-        {
-            return UseInMemoryScheduler(configurator, schedulerFactory, jobFactory, out _, queueName);
-        }
-
-        public static Uri UseInMemoryScheduler(this IBusFactoryConfigurator configurator, out Task<IScheduler> schedulerTask, string queueName = "quartz")
-        {
-            var schedulerFactory = new StdSchedulerFactory(GetDefaultConfiguration());
-
-            return UseInMemoryScheduler(configurator, schedulerFactory, out schedulerTask, queueName);
-        }
-
-        public static Uri UseInMemoryScheduler(this IBusFactoryConfigurator configurator, ISchedulerFactory schedulerFactory,
-            out Task<IScheduler> schedulerTask, string queueName = "quartz")
-        {
-            return UseInMemoryScheduler(configurator, schedulerFactory, null, out schedulerTask, queueName);
-        }
-
-        public static Uri UseInMemoryScheduler(this IBusFactoryConfigurator configurator, ISchedulerFactory schedulerFactory, IJobFactory? jobFactory,
-            out Task<IScheduler> schedulerTask, string queueName = "quartz")
-        {
-            return configurator.UseInMemoryScheduler(out schedulerTask, options =>
+            return configurator.UseInMemoryScheduler(options =>
             {
                 options.SchedulerFactory = schedulerFactory;
+                options.JobFactoryFactory = bus => new MassTransitJobFactory(bus);
                 options.QueueName = queueName;
-                options.JobFactory = jobFactory;
             });
         }
 
@@ -84,12 +68,6 @@
 
         public static Uri UseInMemoryScheduler(this IBusFactoryConfigurator configurator, Action<QuartzSchedulerOptions>? configure)
         {
-            return configurator.UseInMemoryScheduler(out _, configure);
-        }
-
-        public static Uri UseInMemoryScheduler(this IBusFactoryConfigurator configurator, out Task<IScheduler> schedulerTask,
-            Action<QuartzSchedulerOptions>? configure)
-        {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
@@ -103,16 +81,14 @@
 
             var observer = new SchedulerBusObserver(options);
 
-            schedulerTask = observer.Scheduler;
-
             configurator.ReceiveEndpoint(options.QueueName, e =>
             {
                 var partitioner = configurator.CreatePartitioner(Environment.ProcessorCount);
 
-                e.Consumer(() => new ScheduleMessageConsumer(observer.Scheduler), x =>
+                e.Consumer(() => new ScheduleMessageConsumer(options.SchedulerFactory), x =>
                     x.Message<ScheduleMessage>(m => m.UsePartitioner(partitioner, p => p.Message.CorrelationId)));
 
-                e.Consumer(() => new CancelScheduledMessageConsumer(observer.Scheduler), x =>
+                e.Consumer(() => new CancelScheduledMessageConsumer(options.SchedulerFactory), x =>
                     x.Message<CancelScheduledMessage>(m => m.UsePartitioner(partitioner, p => p.Message.TokenId)));
 
                 configurator.UseMessageScheduler(e.InputAddress);

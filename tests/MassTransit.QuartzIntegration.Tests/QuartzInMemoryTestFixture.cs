@@ -12,13 +12,12 @@
         InMemoryTestFixture
     {
         readonly Lazy<IMessageScheduler> _messageScheduler;
-        Task<IScheduler> _schedulerTask;
-        TimeSpan _testOffset;
+        QuartzTimeAdjustment _adjustment;
+        ISchedulerFactory _schedulerFactory;
 
         public QuartzInMemoryTestFixture()
         {
             QuartzAddress = new Uri("loopback://localhost/quartz");
-            _testOffset = TimeSpan.Zero;
 
             _messageScheduler = new Lazy<IMessageScheduler>(() =>
                 new MessageScheduler(new EndpointScheduleMessageProvider(() => GetSendEndpoint(QuartzAddress)), Bus.Topology));
@@ -32,46 +31,28 @@
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.UseInMemoryScheduler(out _schedulerTask);
+            configurator.UseInMemoryScheduler(out _schedulerFactory);
+
+            _adjustment = new QuartzTimeAdjustment(_schedulerFactory);
 
             base.ConfigureInMemoryBus(configurator);
         }
 
-        protected async Task AdvanceTime(TimeSpan duration)
+        protected Task AdvanceTime(TimeSpan duration)
         {
-            var scheduler = await _schedulerTask.ConfigureAwait(false);
-
-            await scheduler.Standby().ConfigureAwait(false);
-
-            _testOffset += duration;
-
-            await scheduler.Start().ConfigureAwait(false);
+            return _adjustment.AdvanceTime(duration);
         }
 
         [OneTimeSetUp]
         public async Task Setup_quartz_service()
         {
             QuartzEndpoint = await GetSendEndpoint(QuartzAddress);
-
-            SystemTime.UtcNow = GetUtcNow;
-            SystemTime.Now = GetNow;
         }
 
         [OneTimeTearDown]
         public void Take_it_down()
         {
-            SystemTime.UtcNow = () => DateTimeOffset.UtcNow;
-            SystemTime.Now = () => DateTimeOffset.Now;
-        }
-
-        DateTimeOffset GetUtcNow()
-        {
-            return DateTimeOffset.UtcNow + _testOffset;
-        }
-
-        DateTimeOffset GetNow()
-        {
-            return DateTimeOffset.Now + _testOffset;
+            _adjustment?.Dispose();
         }
     }
 }
