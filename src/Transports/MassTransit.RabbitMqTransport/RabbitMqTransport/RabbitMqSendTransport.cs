@@ -210,6 +210,10 @@
 
                             break;
 
+                        case Guid value:
+                            dictionary[header.Key] = value.ToString("D");
+                            break;
+
                         case string value when header.Key == "CC" || header.Key == "BCC":
                             dictionary[header.Key] = new[] { value };
                             break;
@@ -235,7 +239,6 @@
                                 dictionary[header.Key] = header.Value;
                             else
                                 dictionary[header.Key] = formatValue.ToString();
-
                             break;
                     }
                 }
