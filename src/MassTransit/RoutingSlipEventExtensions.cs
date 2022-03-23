@@ -6,6 +6,18 @@ namespace MassTransit
 
     public static class RoutingSlipEventExtensions
     {
+        public static T? GetVariable<T>(this ConsumeContext<RoutingSlip> context, string key, T? defaultValue = null)
+            where T : class
+        {
+            return context.SerializerContext.GetValue(context.Message.Variables, key, defaultValue);
+        }
+
+        public static T? GetVariable<T>(this ConsumeContext<RoutingSlip> context, string key, T? defaultValue = null)
+            where T : struct
+        {
+            return context.SerializerContext.GetValue(context.Message.Variables, key, defaultValue);
+        }
+
         public static T? GetResult<T>(this ConsumeContext<RoutingSlipActivityCompensated> context, string key, T? defaultValue = null)
             where T : class
         {
