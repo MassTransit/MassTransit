@@ -11,6 +11,7 @@ namespace MassTransit.GrpcTransport
     using Grpc.Net.Client;
     using Internals;
     using MassTransit.Middleware;
+    using Metadata;
     using Transports;
     using Transports.Fabric;
 
@@ -111,11 +112,13 @@ namespace MassTransit.GrpcTransport
 
         IGrpcClient GetClient(Uri address)
         {
-            var channel = GrpcChannel.ForAddress(address.GetLeftPart(UriPartial.Authority), new GrpcChannelOptions
-            {
-                Credentials = ChannelCredentials.Insecure,
-                MaxReceiveMessageSize = MaxMessageLengthBytes
-            });
+            var channel = HostMetadataCache.IsNetFramework
+                ? (ChannelBase)new Channel(address.Host, address.Port, ChannelCredentials.Insecure)
+                : GrpcChannel.ForAddress(address.GetLeftPart(UriPartial.Authority), new GrpcChannelOptions
+                {
+                    Credentials = ChannelCredentials.Insecure,
+                    MaxReceiveMessageSize = MaxMessageLengthBytes,
+                });
 
             var client = new TransportService.TransportServiceClient(channel);
 
