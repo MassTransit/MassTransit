@@ -111,11 +111,20 @@ namespace MassTransit.GrpcTransport
 
         IGrpcClient GetClient(Uri address)
         {
-            var channel = GrpcChannel.ForAddress(address.GetLeftPart(UriPartial.Authority), new GrpcChannelOptions
+            ChannelBase channel;
+            bool isOldFramework = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework");
+            if (!isOldFramework)
             {
-                Credentials = ChannelCredentials.Insecure,
-                MaxReceiveMessageSize = MaxMessageLengthBytes
-            });
+                channel = GrpcChannel.ForAddress(address.GetLeftPart(UriPartial.Authority), new GrpcChannelOptions
+                {
+                    Credentials = ChannelCredentials.Insecure,
+                    MaxReceiveMessageSize = MaxMessageLengthBytes,
+                });
+            }
+            else
+            {
+                channel = new Channel(address.Host, address.Port, ChannelCredentials.Insecure);
+            }
 
             var client = new TransportService.TransportServiceClient(channel);
 
