@@ -2,13 +2,19 @@
 
 > [MassTransit.Azure.ServiceBus.Core](https://nuget.org/packages/MassTransit.Azure.ServiceBus.Core/)
 
+MassTransit fully supports Azure Service Bus, including many of the advanced features and capabilities.
+
 ::: warning WARNING
 The Azure Service Bus transport only supports **Standard** and **Premium** tiers of the Microsoft Azure Service Bus service. Premium tier is recommended for production environments.
 :::
 
+## Broker Topology
+
+With Azure Service Bus (ASB), which supports topics and queues, messages are _sent_ or _published_ to topics and ASB routes those messages through topics to the appropriate queues.
+
 ## Examples
 
-### Standard
+### Minimal
 
 To configure Azure Service Bus, use the connection string (from the Azure portal) to configure the host as shown below.
 

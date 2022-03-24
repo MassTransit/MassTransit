@@ -15,38 +15,34 @@ namespace RabbitMqConsoleListener
     using System.Threading.Tasks;
     using OrderSystem.Events;
     using MassTransit;
+    using Microsoft.Extensions.Hosting;
 
     public static class Program
     {
-        public static async Task Main()
+        public static async Task Main(string[] args)
         {
-            var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
-            {
-                cfg.Host("localhost", "/", h =>
+            await Host.CreateDefaultBuilder(args)
+                .ConfigureServices(services =>
                 {
-                    h.Username("guest");
-                    h.Password("guest");
-                });
+                    services.AddMassTransit(x =>
+                    {
+                        x.UsingRabbitMq((context, cfg) =>
+                        {
+                            cfg.Host("localhost", "/", h =>
+                            {
+                                h.Username("guest");
+                                h.Password("guest");
+                            });
 
-                cfg.ReceiveEndpoint("order-events-listener", e =>
-                {
-                    e.Consumer<OrderSubmittedEventConsumer>();
-                });
-            });
-
-            using var source = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-
-            await busControl.StartAsync(source.Token);
-            try
-            {
-                Console.WriteLine("Press enter to exit");
-
-                await Task.Run(() => Console.ReadLine());
-            }
-            finally
-            {
-                await busControl.StopAsync();
-            }
+                            cfg.ReceiveEndpoint("order-events-listener", e =>
+                            {
+                                e.Consumer<OrderSubmittedEventConsumer>();
+                            });
+                        });
+                    });
+                })
+                .Build()
+                .RunAsync();
         }
 
         class OrderSubmittedEventConsumer :

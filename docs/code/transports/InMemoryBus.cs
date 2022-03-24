@@ -3,19 +3,25 @@ namespace InMemoryConsoleListener
     using System.Threading.Tasks;
     using MassTransit;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
 
     public class Program
     {
-        public static async Task Main()
+        public static async Task Main(string[] args)
         {
-            var services = new ServiceCollection();
-            services.AddMassTransit(x =>
-            {
-                x.UsingInMemory((context, cfg) =>
+            await Host.CreateDefaultBuilder(args)
+                .ConfigureServices(services =>
                 {
-                    cfg.ConfigureEndpoints(context);
-                });
-            });
+                    services.AddMassTransit(x =>
+                    {
+                        x.UsingInMemory((context, cfg) =>
+                        {
+                            cfg.ConfigureEndpoints(context);
+                        });
+                    });
+                })
+                .Build()
+                .RunAsync();
         }
     }
 }

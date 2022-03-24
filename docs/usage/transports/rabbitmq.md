@@ -14,6 +14,10 @@ To get started with RabbitMQ, refer to the [configuration](/usage/configuration)
 
 With RabbitMQ, which supports exchanges and queues, messages are _sent_ or _published_ to exchanges and RabbitMQ routes those messages through exchanges to the appropriate queues.
 
+## Examples
+
+### Minimal
+
 In the example below, which configures a receive endpoint, consumer, and message type, the bus is configured to use RabbitMQ.
 
 <<< @/docs/code/transports/RabbitMqConsoleListener.cs
