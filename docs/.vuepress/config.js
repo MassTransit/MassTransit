@@ -88,6 +88,14 @@ module.exports = {
               '/usage/riders/kafka',
               '/usage/riders/eventhub'
             ]
+          },{
+            title: 'FaaS',
+            path: '/usage/faas/',
+            collapsable: true,
+            children: [
+              '/usage/faas/azure-functions',
+              '/usage/faas/aws-lambda'
+            ]
           },
           '/usage/mediator',
           '/usage/messages',

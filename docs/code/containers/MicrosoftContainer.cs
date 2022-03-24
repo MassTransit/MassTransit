@@ -1,42 +1,28 @@
 namespace MicrosoftContainer
 {
-    using System;
-    using System.Threading;
     using System.Threading.Tasks;
     using ContainerConsumers;
     using MassTransit;
-    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
 
     public class Program
     {
-        public static async Task Main()
+        public static async Task Main(string[] args)
         {
-            var services = new ServiceCollection();
+            await Host.CreateDefaultBuilder(args)
+                .ConfigureServices(services =>
+                {
+                    services.AddMassTransit(x =>
+                    {
+                        x.AddConsumer<SubmitOrderConsumer>(typeof(SubmitOrderConsumerDefinition));
 
-            services.AddMassTransit(x =>
-            {
-                x.AddConsumer<SubmitOrderConsumer>(typeof(SubmitOrderConsumerDefinition));
+                        x.SetKebabCaseEndpointNameFormatter();
 
-                x.SetKebabCaseEndpointNameFormatter();
-
-                x.UsingRabbitMq((context, cfg) => cfg.ConfigureEndpoints(context));
-            });
-
-            var provider = services.BuildServiceProvider();
-
-            var busControl = provider.GetRequiredService<IBusControl>();
-
-            await busControl.StartAsync(new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
-            try
-            {
-                Console.WriteLine("Press enter to exit");
-
-                await Task.Run(() => Console.ReadLine());
-            }
-            finally
-            {
-                await busControl.StopAsync();
-            }
+                        x.UsingRabbitMq((context, cfg) => cfg.ConfigureEndpoints(context));
+                    });
+                })
+                .Build()
+                .RunAsync();
         }
     }
 }
