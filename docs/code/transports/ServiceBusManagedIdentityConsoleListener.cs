@@ -1,7 +1,10 @@
-namespace ServiceBusConsoleListener
+namespace ServiceBusManagedIdentityConsoleListener
 {
+    using System;
     using System.Threading.Tasks;
+    using Azure.Identity;
     using MassTransit;
+    using MassTransit.AzureServiceBusTransport.Configuration;
     using Microsoft.Extensions.Hosting;
 
     public class Program
@@ -15,7 +18,12 @@ namespace ServiceBusConsoleListener
                     {
                         x.UsingAzureServiceBus((context, cfg) =>
                         {
-                            cfg.Host("connection-string");
+                            var settings = new HostSettings
+                            {
+                                ServiceUri = new Uri("sb://your-service-bus-namespace.servicebus.windows.net"),
+                                TokenCredential = new DefaultAzureCredential() // From Azure.Identity.dll
+                            };
+                            cfg.Host(settings);
                         });
                     });
                 })

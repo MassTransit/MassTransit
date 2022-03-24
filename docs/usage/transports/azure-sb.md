@@ -4,60 +4,34 @@
 
 The Azure Service Bus transport only supports Standard and Premium tiers of the Microsoft Azure Service Bus service. Premium tier is recommended for production environments.
 
+## Examples
+
+### Standard
+
 To configure Azure Service Bus, use the connection string (from the Azure portal) to configure the host as shown below.
 
 <<< @/docs/code/transports/ServiceBusConsoleListener.cs
 
-Additional host properties include:
-
-| Property                |  Description 
-|-------------------------|------------------
-| TokenCredential       | Use a specific token-based credential, such as a managed identity token, to access the namespace.  You can use the [DefaultAzureCredential](https://docs.microsoft.com/en-us/dotnet/api/azure.identity.defaultazurecredential?view=azure-dotnet) to automatically apply any one of several credential types.
-| TransportType         | Change the transport type from the default (AMQP) to use WebSockets
+### Example with Azure Managed Identity
 
 The following example shows how to configure Azure Service Bus using an Azure Managed Identity:
 
-```csharp
-namespace ServiceBusConsoleListener
-{
-    using System;
-    using System.Threading.Tasks;
-    using Azure.Identity;
-    using MassTransit;
-    using MassTransit.Azure.ServiceBus.Core.Configurators;
-    using Microsoft.Extensions.DependencyInjection;
-
-    public class Program
-    {
-        public static async Task Main()
-        {
-            var services = new ServiceCollection();
-            services.AddMassTransit(x =>
-            {
-                x.UsingAzureServiceBus((context, cfg) =>
-                {
-                    var settings = new HostSettings
-                    {
-                        ServiceUri = new Uri("sb://your-service-bus-namespace.servicebus.windows.net"),
-                        TokenCredential = new DefaultAzureCredential() // From Azure.Identity.dll
-                    };
-                    cfg.Host(settings);
-                });
-            });
-        }
-    }
-}
-
-```
+<<< @/docs/code/transports/ServiceBusManagedIdentityConsoleListener.cs
 
 During local development, in the case of Visual Studio, you can configure the account to use under Options -> Azure Service Authentication. Note that your Azure Active Directory user needs explicit access to the resource and have the 'Azure Service Bus Data Owner' role assigned.
+
+## Options
 
 Azure Service Bus queues includes an extensive set a properties that can be configured. All of these are optional, MassTransit uses sensible defaults, but the control is there when needed.
 
 <<< @/docs/code/transports/ServiceBusReceiveEndpoint.cs
 
+### Host Properties
+
 | Property                | Type   | Description 
 |-------------------------|--------|------------------
+| TokenCredential       | Use a specific token-based credential, such as a managed identity token, to access the namespace.  You can use the [DefaultAzureCredential](https://docs.microsoft.com/en-us/dotnet/api/azure.identity.defaultazurecredential?view=azure-dotnet) to automatically apply any one of several credential types.
+| TransportType         | Change the transport type from the default (AMQP) to use WebSockets
 | PrefetchCount         | int | The number of unacknowledged messages that can be processed concurrently (default based on CPU count)
 | MaxConcurrentCalls         | int | How many concurrent messages to dispatch (transport-throttled)
 | LockDuration        | TimeSpan   | How long to hold message locks (max is 5 minutes)
@@ -66,7 +40,7 @@ Azure Service Bus queues includes an extensive set a properties that can be conf
 | MaxDeliveryCount        | int   | How many times the transport will redeliver the message on negative acknowledgment. This is different from retry, this is the transport redelivering the message to a receive endpoint before moving it to the dead letter queue.
 
 
-### Azure Functions
+## Azure Functions
 
 Azure Functions is a consumption-based compute solution that only runs code when there is work to be done. MassTransit supports Azure Service Bus and Azure Event Hubs when running as an Azure Function.
 
