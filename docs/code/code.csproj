@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MassTransit.Grpc" Version="8.0.0" />
     <PackageReference Include="MassTransit.Quartz" Version="8.0.0-develop.395" />
     <PackageReference Include="MassTransit.RabbitMQ" Version="8.0.0-develop.395" />
     <PackageReference Include="MassTransit.Kafka" Version="8.0.0-develop.395" />
