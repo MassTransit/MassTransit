@@ -124,7 +124,9 @@ namespace MassTransit
         /// <returns></returns>
         public static IServiceCollection RemoveMassTransitHostedService(this IServiceCollection services)
         {
-            services.Remove(ServiceDescriptor.Singleton<IHostedService, MassTransitHostedService>());
+            var descriptor = services.FirstOrDefault(x => x.ServiceType == typeof(IHostedService) && x.ImplementationType == typeof(MassTransitHostedService));
+            if (descriptor != null)
+                services.Remove(descriptor);
 
             return services;
         }
