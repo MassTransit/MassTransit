@@ -153,7 +153,7 @@ To test locally, a settings files must be created. Connections strings for the v
     "AzureWebJobsStorage": "",
     "AzureWebJobsServiceBus": "",
     "AzureWebJobsEventHub": "",
-    "FUNCTIONS_EXTENSION_VERSION": "~3",
+    "FUNCTIONS_EXTENSION_VERSION": "~4",
     "APPINSIGHTS_INSTRUMENTATIONKEY": "",
     "APPLICATIONINSIGHTS_CONNECTION_STRING": "InstrumentationKey="
   }
