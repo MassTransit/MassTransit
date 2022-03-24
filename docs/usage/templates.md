@@ -21,7 +21,60 @@ MassTransit Routing Slip Execute Activity  mtexecactivity  [C#]      MassTransit
 MassTransit State Machine Saga             mtstatemachine  [C#]      MassTransit/StateMachine
 MassTransit Worker                         mtworker        [C#]      MassTransit/Worker
 ```
+### MassTransit Consumer Saga
+
+```
+dotnet new mtsaga
+```
+
+Creates a Saga and SagaDefinition in `~/Sagas`, along with a few messages in the `~/Contracts` folder that will
+work the saga.
 
 ### MassTransit Docker
 
-Creates a simple docker file
+```
+dotnet new docker
+```
+
+Creates a `Dockefile` and a `docker-compose.yml` in the project, configured for RabbitMQ.
+
+### MassTransit Message Consumer
+
+```
+dotnet new mtconsumer
+```
+
+Creates a Consumer and ConsumerDefinition in `~/Consumers` and an example message in `~/Contracts`.
+
+### MassTransit Routing Slip Activity
+
+```
+dotnet new mtactivity
+```
+
+Creates an Activity, ActivityArguments, and ActivityLog in `~/Activities`
+
+### MassTransit Routing Slip Execute Activity
+
+```
+dotnet new mtexecactivity
+```
+
+Creates an Activity, ActivityArguments in `~/Activities`
+
+### MassTransit State Machine Saga
+
+```
+dotnet new mtstatemachine
+```
+
+Creates a StateMachine Saga in `~/StateMachines` and an example event in `~/Contracts`
+
+### MassTransit Worker
+
+```
+dotnet new mtworker -n <YOUR NAME>
+```
+
+Creates a dotnet project that is configured as a MassTransit Worker. Includes project references and an example
+`Program.cs`
