@@ -29,6 +29,12 @@ namespace MassTransit.Transports
 
                 if (endpointName.Contains("_bus_"))
                     endpointName = "bus";
+                else if(endpointName.Contains("_endpoint_"))
+                    endpointName = "endpoint";
+                else if(endpointName.Contains("_signalr_"))
+                    endpointName = "signalr";
+                else if(endpointName.StartsWith("Instance_"))
+                    endpointName = "instance";
 
                 return $"{endpointName} send";
             });

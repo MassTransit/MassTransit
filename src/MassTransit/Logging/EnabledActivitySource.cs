@@ -6,7 +6,6 @@ namespace MassTransit.Logging
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Threading.Tasks;
-    using Courier;
     using Courier.Contracts;
     using Transports;
 
@@ -32,6 +31,7 @@ namespace MassTransit.Logging
                 return null;
 
             activity.AddTag(DiagnosticHeaders.Messaging.Destination, _name.Substring(0, _name.Length - 5));
+            activity.AddTag(DiagnosticHeaders.Messaging.Operation, "send");
 
             var conversationId = context.ConversationId?.ToString("D");
 
