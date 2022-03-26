@@ -23,7 +23,7 @@ namespace MassTransit.Courier
 
         public async Task Send(ConsumeContext<RoutingSlip> context, IPipe<ConsumeContext<RoutingSlip>> next)
         {
-            StartedActivity? activity = LogContext.IfEnabled(OperationName.Courier.Execute)?.StartExecuteActivity<TActivity, TArguments>(context);
+            StartedActivity? activity = LogContext.Current?.StartExecuteActivity<TActivity, TArguments>(context);
 
             var timer = Stopwatch.StartNew();
             try

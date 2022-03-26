@@ -34,7 +34,7 @@ namespace MassTransit.GrpcTransport
 
             await pipe.Send(context).ConfigureAwait(false);
 
-            StartedActivity? activity = LogContext.IfEnabled(_context.ActivityName)?.StartSendActivity(context);
+            StartedActivity? activity = LogContext.Current?.StartSendActivity(_context, context);
             try
             {
                 if (_context.SendObservers.Count > 0)

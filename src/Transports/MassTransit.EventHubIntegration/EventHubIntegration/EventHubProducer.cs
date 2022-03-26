@@ -137,7 +137,7 @@ namespace MassTransit.EventHubIntegration
                     PartitionKey = sendContext.PartitionKey
                 };
 
-                StartedActivity? activity = LogContext.IfEnabled(_context.ActivityName)?.StartSendActivity(sendContext,
+                StartedActivity? activity = LogContext.Current?.StartSendActivity(_context, sendContext,
                     (nameof(sendContext.PartitionId), options.PartitionId), (nameof(sendContext.PartitionKey), options.PartitionKey));
                 try
                 {
@@ -233,7 +233,7 @@ namespace MassTransit.EventHubIntegration
                     PartitionKey = sendContext.PartitionKey
                 };
 
-                StartedActivity? activity = LogContext.IfEnabled(_context.ActivityName)?.StartSendActivity(sendContext,
+                StartedActivity? activity = LogContext.Current?.StartSendActivity(_context, sendContext,
                     (nameof(EventHubMessageSendContext<T>.PartitionId), options.PartitionId),
                     (nameof(EventHubMessageSendContext<T>.PartitionKey), options.PartitionKey));
                 try

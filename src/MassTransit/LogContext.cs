@@ -218,16 +218,10 @@ namespace MassTransit
             return new BusLogContext(loggerFactory, source);
         }
 
-        public static EnabledActivitySource? IfEnabled(string name)
-        {
-            return Current?.IfEnabled(name);
-        }
-
 
         static class Cached
         {
-            internal static readonly Lazy<ActivitySource> Source =
-                new Lazy<ActivitySource>(() => new ActivitySource(DiagnosticHeaders.DefaultListenerName));
+            internal static readonly Lazy<ActivitySource> Source = new Lazy<ActivitySource>(() => new ActivitySource(DiagnosticHeaders.DefaultListenerName));
         }
     }
 }

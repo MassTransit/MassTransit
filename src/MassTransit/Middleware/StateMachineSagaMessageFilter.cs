@@ -51,12 +51,16 @@ namespace MassTransit.Middleware
         {
             BehaviorContext<TSaga, TMessage> behaviorContext = new BehaviorContextProxy<TSaga, TMessage>(_machine, context, context, _event);
 
-            EnabledActivitySource? activitySource = LogContext.IfEnabled(_activityName);
-            StartedActivity? activity = activitySource.HasValue
-                ? await activitySource.Value.StartSagaStateMachineActivity(behaviorContext).ConfigureAwait(false)
-                : null;
+            StartedActivity? activity = LogContext.Current?.StartSagaStateMachineActivity(behaviorContext);
             try
             {
+                if (activity != null)
+                {
+                    State<TSaga> beginState = await behaviorContext.StateMachine.Accessor.Get(behaviorContext).ConfigureAwait(false);
+                    if (beginState != null)
+                        activity?.AddTag(DiagnosticHeaders.BeginState, beginState.Name);
+                }
+
                 await _machine.RaiseEvent(behaviorContext).ConfigureAwait(false);
 
                 if (await _machine.IsCompleted(behaviorContext).ConfigureAwait(false))

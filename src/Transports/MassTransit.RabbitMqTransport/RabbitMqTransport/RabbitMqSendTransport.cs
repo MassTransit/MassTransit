@@ -100,7 +100,7 @@
                     activityName = "reply-to send";
                 }
 
-                StartedActivity? activity = LogContext.IfEnabled(activityName)?.StartSendActivity(context);
+                StartedActivity? activity = LogContext.Current?.StartSendActivity(_context, context);
                 try
                 {
                     if (_context.SendObservers.Count > 0)

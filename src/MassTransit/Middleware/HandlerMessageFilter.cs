@@ -38,7 +38,7 @@ namespace MassTransit.Middleware
         [DebuggerNonUserCode]
         async Task IFilter<ConsumeContext<TMessage>>.Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)
         {
-            StartedActivity? activity = LogContext.IfEnabled(OperationName.Consumer.Handle)?.StartHandlerActivity(context);
+            StartedActivity? activity = LogContext.Current?.StartHandlerActivity(context);
 
             var timer = Stopwatch.StartNew();
             try

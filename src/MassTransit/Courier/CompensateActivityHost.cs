@@ -21,7 +21,7 @@ namespace MassTransit.Courier
 
         public async Task Send(ConsumeContext<RoutingSlip> context, IPipe<ConsumeContext<RoutingSlip>> next)
         {
-            StartedActivity? activity = LogContext.IfEnabled(OperationName.Courier.Compensate)?.StartCompensateActivity<TActivity, TLog>(context);
+            StartedActivity? activity = LogContext.Current?.StartCompensateActivity<TActivity, TLog>(context);
 
             var timer = Stopwatch.StartNew();
             try
