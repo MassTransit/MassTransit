@@ -13,15 +13,10 @@ namespace MassTransit.HangfireIntegration
         readonly IRecurringJobManager _recurringJobManager;
         readonly ITimeZoneResolver _timeZoneResolver;
 
-        ScheduleRecurringMessageConsumer(IRecurringJobManager recurringJobManager, ITimeZoneResolver timeZoneResolver)
+        public ScheduleRecurringMessageConsumer(IRecurringJobManager recurringJobManager, ITimeZoneResolver timeZoneResolver)
         {
             _recurringJobManager = recurringJobManager;
             _timeZoneResolver = timeZoneResolver;
-        }
-
-        public ScheduleRecurringMessageConsumer(IHangfireComponentResolver hangfireComponentResolver)
-            : this(hangfireComponentResolver.RecurringJobManager, hangfireComponentResolver.TimeZoneResolver)
-        {
         }
 
         public async Task Consume(ConsumeContext<CancelScheduledRecurringMessage> context)

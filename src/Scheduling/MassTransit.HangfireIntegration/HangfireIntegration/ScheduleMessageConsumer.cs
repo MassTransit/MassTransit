@@ -15,12 +15,7 @@ namespace MassTransit.HangfireIntegration
         readonly IBackgroundJobClient _backgroundJobClient;
         readonly JobStorage _jobStorage;
 
-        public ScheduleMessageConsumer(IHangfireComponentResolver hangfireComponentResolver)
-            : this(hangfireComponentResolver.BackgroundJobClient, hangfireComponentResolver.JobStorage)
-        {
-        }
-
-        ScheduleMessageConsumer(IBackgroundJobClient backgroundJobClient, JobStorage jobStorage)
+        public ScheduleMessageConsumer(IBackgroundJobClient backgroundJobClient, JobStorage jobStorage)
         {
             _backgroundJobClient = backgroundJobClient;
             _jobStorage = jobStorage;
