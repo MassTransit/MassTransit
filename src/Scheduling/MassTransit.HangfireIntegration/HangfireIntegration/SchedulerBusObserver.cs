@@ -12,7 +12,6 @@ namespace MassTransit.HangfireIntegration
     class SchedulerBusObserver :
         IBusObserver
     {
-        public const string DefaultQueueName = "mt-message-queue";
         readonly HangfireSchedulerOptions _options;
         readonly Uri _schedulerEndpointAddress;
         BackgroundJobServer? _server;
@@ -48,7 +47,7 @@ namespace MassTransit.HangfireIntegration
             _options.ConfigureServer?.Invoke(backgroundJobServerOptions);
 
             backgroundJobServerOptions.Activator = new MassTransitJobActivator(bus);
-            backgroundJobServerOptions.Queues = new[] { DefaultQueueName };
+            backgroundJobServerOptions.Queues = new[] { HangfireEndpointOptions.DefaultQueueName };
 
             _server = new BackgroundJobServer(
                 backgroundJobServerOptions,

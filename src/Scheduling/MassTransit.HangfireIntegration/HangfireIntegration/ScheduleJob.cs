@@ -7,10 +7,9 @@ namespace MassTransit.HangfireIntegration
     using Hangfire;
     using Hangfire.Server;
     using Serialization;
-    using Transports;
 
 
-    [Queue(SchedulerBusObserver.DefaultQueueName)]
+    [Queue(HangfireEndpointOptions.DefaultQueueName)]
     class ScheduleJob
     {
         readonly IBus _bus;

@@ -8,6 +8,7 @@
 
     public static class HangfireIntegrationExtensions
     {
+        [Obsolete("Use the new .AddHangfireConsumers() method, combined with AddHangfire(), to configure the Quartz scheduler")]
         public static void UseHangfireScheduler(this IBusFactoryConfigurator configurator, IBusRegistrationContext context, string queueName = "hangfire",
             Action<BackgroundJobServerOptions>? configureServer = null)
         {
@@ -45,12 +46,13 @@
             {
                 var partitioner = configurator.CreatePartitioner(Environment.ProcessorCount);
 
-                e.Consumer(() => new ScheduleMessageConsumer(options.ComponentResolver), x =>
+                e.Consumer(() => new ScheduleMessageConsumer(options.ComponentResolver.BackgroundJobClient, options.ComponentResolver.JobStorage), x =>
                 {
                     x.Message<ScheduleMessage>(m => m.UsePartitioner(partitioner, p => p.Message.CorrelationId));
                     x.Message<CancelScheduledMessage>(m => m.UsePartitioner(partitioner, p => p.Message.TokenId));
                 });
-                e.Consumer(() => new ScheduleRecurringMessageConsumer(options.ComponentResolver));
+                e.Consumer(() =>
+                    new ScheduleRecurringMessageConsumer(options.ComponentResolver.RecurringJobManager, options.ComponentResolver.TimeZoneResolver));
 
                 var observer = new SchedulerBusObserver(options);
                 configurator.ConnectBusObserver(observer);
