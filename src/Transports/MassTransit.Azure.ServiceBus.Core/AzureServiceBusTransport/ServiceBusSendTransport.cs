@@ -164,7 +164,7 @@
                 {
                     await clientContext.CancelScheduledSend(sequenceNumber).ConfigureAwait(false);
 
-                    LogContext.Debug?.Log("CANCEL {DestinationAddress} {TokenId}", clientContext.EntityPath, tokenId, sequenceNumber);
+                    LogContext.Debug?.Log("CANCEL {DestinationAddress} {TokenId}", clientContext.EntityPath, tokenId);
                 }
                 catch (ServiceBusException exception) when (exception.Reason == ServiceBusFailureReason.MessageNotFound)
                 {

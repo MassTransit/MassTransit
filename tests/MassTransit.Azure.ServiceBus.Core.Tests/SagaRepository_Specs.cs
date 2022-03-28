@@ -5,9 +5,7 @@
         using System;
         using System.Threading.Tasks;
         using AzureServiceBusTransport;
-        using MassTransit.Saga;
         using NUnit.Framework;
-        using Util;
 
 
         public class JobState :
@@ -23,7 +21,7 @@
                 JobId = context.Message.JobId;
                 JobStatus = JobStatus.Created;
 
-                context.Respond(new JobCreated {JobId = JobId});
+                context.Respond(new JobCreated { JobId = JobId });
                 return Task.CompletedTask;
             }
 
@@ -35,7 +33,7 @@
                     throw new InvalidOperationException("The job was not created and cannot be started");
 
                 JobStatus = JobStatus.Running;
-                context.Respond(new JobStarted {JobId = JobId});
+                context.Respond(new JobStarted { JobId = JobId });
 
                 return Task.CompletedTask;
             }

@@ -4,11 +4,8 @@
     {
         using System;
         using System.Threading.Tasks;
-        using Context;
-        using Logging;
-        using MassTransit.Saga;
-        using MassTransit.Testing;
         using NUnit.Framework;
+        using Testing;
 
 
         [TestFixture]
@@ -150,7 +147,7 @@
 
                 Schedule(() => CartTimeout, x => x.CartTimeoutTokenId, x =>
                 {
-                    x.Delay = TimeSpan.FromSeconds(30);
+                    x.Delay = TimeSpan.FromSeconds(10);
                     x.Received = p => p.CorrelateBy(state => state.MemberNumber, context => context.Message.MemberNumber);
                 });
 
