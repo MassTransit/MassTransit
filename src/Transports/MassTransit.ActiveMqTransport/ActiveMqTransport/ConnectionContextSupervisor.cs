@@ -94,6 +94,7 @@
             public bool IsArtemis => _hostConfiguration.IsArtemis;
             public IPipe<SessionContext> ConfigureTopologyPipe { get; }
             public override string EntityName { get; }
+            public override string ActivitySystem => "activemq";
             public DestinationType DestinationType { get; }
             public ISessionContextSupervisor SessionContextSupervisor { get; }
 

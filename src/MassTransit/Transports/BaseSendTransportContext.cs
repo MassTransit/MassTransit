@@ -49,6 +49,7 @@ namespace MassTransit.Transports
 
         public string ActivityName => _activityName.Value;
         public string ActivityDestination => _destination.Value;
+        public abstract string ActivitySystem { get; }
 
         public SendObservable SendObservers { get; }
 

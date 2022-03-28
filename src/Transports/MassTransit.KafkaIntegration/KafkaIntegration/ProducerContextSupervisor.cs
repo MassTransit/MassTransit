@@ -74,6 +74,7 @@ namespace MassTransit.KafkaIntegration
             }
 
             public override string EntityName => TopicAddress.Topic;
+            public override string ActivitySystem => "kafka";
         }
     }
 }

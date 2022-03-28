@@ -35,6 +35,7 @@ namespace MassTransit.Logging
             public const string DestinationKind = "messaging.destination_kind";
             public const string TransportMessageId = "messaging.message_id";
             public const string Operation = "messaging.operation";
+            public const string System = "messaging.system";
 
 
             public static class RabbitMq

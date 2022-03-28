@@ -73,6 +73,7 @@ namespace MassTransit.EventHubIntegration
             }
 
             public override string EntityName => EndpointAddress.EventHubName;
+            public override string ActivitySystem => "event-hub";
         }
     }
 }

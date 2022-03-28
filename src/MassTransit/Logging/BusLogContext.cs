@@ -81,6 +81,7 @@ namespace MassTransit.Logging
             if (activity == null)
                 return null;
 
+            activity.AddTag(DiagnosticHeaders.Messaging.System, transportContext.ActivitySystem);
             activity.AddTag(DiagnosticHeaders.Messaging.Destination, transportContext.ActivityDestination);
             activity.AddTag(DiagnosticHeaders.Messaging.Operation, "send");
 

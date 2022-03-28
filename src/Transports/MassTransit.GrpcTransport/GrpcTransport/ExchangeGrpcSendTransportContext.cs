@@ -19,5 +19,6 @@ namespace MassTransit.GrpcTransport
 
         public IMessageExchange<GrpcTransportMessage> Exchange { get; }
         public override string EntityName => Exchange.Name;
+        public override string ActivitySystem => "grpc";
     }
 }
