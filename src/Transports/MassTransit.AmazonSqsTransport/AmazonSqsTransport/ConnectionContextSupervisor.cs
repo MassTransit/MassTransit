@@ -119,6 +119,7 @@
 
             public IPipe<ClientContext> ConfigureTopologyPipe { get; }
             public override string EntityName { get; }
+            public override string TransportName => "sqs";
             public IClientContextSupervisor ClientContextSupervisor { get; }
             public ITransportSetHeaderAdapter<MessageAttributeValue> SqsSetHeaderAdapter { get; }
             public ITransportSetHeaderAdapter<Amazon.SimpleNotificationService.Model.MessageAttributeValue> SnsSetHeaderAdapter { get; }

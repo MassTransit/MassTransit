@@ -16,6 +16,7 @@ namespace MassTransit.Transports
 
         string ActivityName { get; }
         string ActivityDestination { get; }
+        string TransportName { get; }
 
         SendObservable SendObservers { get; }
 

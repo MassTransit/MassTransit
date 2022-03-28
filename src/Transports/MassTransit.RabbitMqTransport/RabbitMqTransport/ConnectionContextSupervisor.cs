@@ -127,6 +127,7 @@
             }
 
             public override string EntityName => Exchange;
+            public override string TransportName => "rabbitmq";
         }
     }
 }

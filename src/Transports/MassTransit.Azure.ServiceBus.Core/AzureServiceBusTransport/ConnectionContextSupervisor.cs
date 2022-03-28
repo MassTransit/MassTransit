@@ -116,6 +116,7 @@ namespace MassTransit.AzureServiceBusTransport
             }
 
             public override string EntityName { get; }
+            public override string TransportName => "servic-bus";
 
             public Uri Address { get; }
 

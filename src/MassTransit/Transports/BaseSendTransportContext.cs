@@ -45,6 +45,8 @@ namespace MassTransit.Transports
 
         public abstract string EntityName { get; }
 
+        public abstract string TransportName { get; }
+
         public ILogContext LogContext => _hostConfiguration.SendLogContext ?? throw new InvalidOperationException("SendLogContext should not be null");
 
         public string ActivityName => _activityName.Value;
