@@ -41,7 +41,7 @@ namespace MassTransit
             Port = port;
             VirtualHost = virtualHost;
 
-            if (port.HasValue && port.Value == 0)
+            if (port <= 0)
                 Port = 61616;
         }
 
@@ -50,7 +50,7 @@ namespace MassTransit
             scheme = address.Scheme;
             host = address.Host;
 
-            port = address.IsDefaultPort
+            port = address.IsDefaultPort || address.Port <= 0
                 ? 61616
                 : address.Port;
 

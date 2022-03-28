@@ -57,18 +57,13 @@ namespace MassTransit
             BindExchanges = default;
 
             var scheme = address.Scheme.ToLowerInvariant();
-            if (scheme.EndsWith("s"))
-                Port = 5671;
-
             switch (scheme)
             {
-                case "rabbitmqs":
+                case RabbitMqHostAddress.RabbitMqSslSchema:
                 case "amqps":
-                case "rabbitmq":
+                case RabbitMqHostAddress.RabbitMqSchema:
                 case "amqp":
-                    Scheme = address.Scheme;
-                    Host = address.Host;
-                    Port = !address.IsDefaultPort ? address.Port : scheme.EndsWith("s") ? 5671 : 5672;
+                    ParseLeft(address, out Scheme, out Host, out Port, out VirtualHost);
 
                     address.ParseHostPathAndEntityName(out VirtualHost, out Name);
                     break;
@@ -191,11 +186,11 @@ namespace MassTransit
 
         public Uri ToShortAddress()
         {
-            StringBuilder builder = new StringBuilder();
+            var builder = new StringBuilder();
             builder.Append(BindToQueue ? "queue:" : "exchange:");
             builder.Append(Name);
 
-            string query = string.Join("&", GetQueryStringOptions().Where(x => x != $"{BindQueueKey}=true"));
+            var query = string.Join("&", GetQueryStringOptions().Where(x => x != $"{BindQueueKey}=true"));
             if (!string.IsNullOrWhiteSpace(query))
                 builder.Append('?').Append(query);
 

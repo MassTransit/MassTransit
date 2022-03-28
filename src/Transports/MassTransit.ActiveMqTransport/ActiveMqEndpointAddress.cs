@@ -3,7 +3,6 @@ namespace MassTransit
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using ActiveMqTransport;
     using ActiveMqTransport.Topology;
     using Initializers;
     using Initializers.TypeConverters;
@@ -50,17 +49,10 @@ namespace MassTransit
             Type = AddressType.Queue;
 
             var scheme = address.Scheme.ToLowerInvariant();
-            if (scheme.EndsWith("s"))
-                Port = 5671;
-
             switch (scheme)
             {
                 case ActiveMqHostAddress.ActiveMqScheme:
-                    Scheme = address.Scheme;
-                    Host = address.Host;
-                    Port = address.IsDefaultPort
-                        ? 61616
-                        : address.Port;
+                    ParseLeft(hostAddress, out Scheme, out Host, out Port, out VirtualHost);
 
                     address.ParseHostPathAndEntityName(out VirtualHost, out Name);
                     break;
@@ -138,11 +130,9 @@ namespace MassTransit
                 Scheme = address.Scheme,
                 Host = address.Host,
                 Port = address.Port.HasValue
-                    ? address.Scheme.EndsWith("s", StringComparison.OrdinalIgnoreCase)
-                        ? address.Port.Value == 5671 ? -1 : address.Port.Value
-                        : address.Port.Value == 5672
-                            ? -1
-                            : address.Port.Value
+                    ? address.Port.Value == 61616
+                        ? -1
+                        : address.Port.Value
                     : -1,
                 Path = address.VirtualHost == "/"
                     ? $"/{address.Name}"
