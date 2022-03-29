@@ -57,6 +57,11 @@ namespace MassTransit.ActiveMqTransport.Configuration
         {
             var factory = new NMSConnectionFactory(BrokerAddress);
 
+            var connectionFactory = factory.ConnectionFactory;
+
+            if (connectionFactory is Apache.NMS.ActiveMQ.ConnectionFactory nms)
+                nms.CompressionPolicy = new CompatibleCompressionPolicy();
+
             return factory.ConnectionFactory.CreateConnection(Username, Password);
         }
 
