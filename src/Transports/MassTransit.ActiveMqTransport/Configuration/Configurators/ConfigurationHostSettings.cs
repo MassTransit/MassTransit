@@ -4,7 +4,9 @@ namespace MassTransit.ActiveMqTransport.Configurators
     using System.Collections.Generic;
     using System.Linq;
     using Apache.NMS;
+    using Apache.NMS.ActiveMQ;
 
+    using MassTransit.ActiveMqTransport.Configuration;
 
     public class ConfigurationHostSettings :
         ActiveMqHostSettings
@@ -56,6 +58,10 @@ namespace MassTransit.ActiveMqTransport.Configurators
         public IConnection CreateConnection()
         {
             var factory = new NMSConnectionFactory(BrokerAddress);
+            var connectionFactory = factory.ConnectionFactory;
+
+            if (connectionFactory is ConnectionFactory nms)
+                nms.CompressionPolicy = new CompatibleCompressionPolicy();
 
             return factory.ConnectionFactory.CreateConnection(Username, Password);
         }

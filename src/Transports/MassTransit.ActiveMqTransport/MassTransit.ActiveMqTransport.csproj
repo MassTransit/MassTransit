@@ -11,8 +11,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Apache.NMS.ActiveMQ.NetStd" Version="1.8.0" />
+    <PackageReference Include="Apache.NMS.ActiveMQ" Version="1.8.0" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+    <PackageReference Include="SharpZipLib" Version="1.3.3" />
   </ItemGroup>
 
   <ItemGroup>
