@@ -2,7 +2,6 @@ namespace MassTransit.Configuration
 {
     using System;
     using DependencyInjection.Registration;
-    using Futures;
     using Internals;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -33,7 +32,7 @@ namespace MassTransit.Configuration
             where T : class, SagaStateMachine<FutureState>
             where TDefinition : class, IFutureDefinition<T>
         {
-            return new FutureDefinition<T, TDefinition>().Register(collection, registrar);
+            return new FutureDefinitionRegistrar<T, TDefinition>().Register(collection, registrar);
         }
 
         public static IFutureRegistration RegisterFuture<T>(this IServiceCollection collection, Type futureDefinitionType)
@@ -54,20 +53,20 @@ namespace MassTransit.Configuration
                     nameof(futureDefinitionType));
             }
 
-            var register = (IRegister)Activator.CreateInstance(typeof(FutureDefinition<,>).MakeGenericType(typeof(T), futureDefinitionType));
+            var register = (IFutureRegistrar)Activator.CreateInstance(typeof(FutureDefinitionRegistrar<,>).MakeGenericType(typeof(T), futureDefinitionType));
 
             return register.Register(collection, registrar);
         }
 
 
-        interface IRegister
+        interface IFutureRegistrar
         {
             IFutureRegistration Register(IServiceCollection collection, IContainerRegistrar registrar);
         }
 
 
-        class Future<TFuture> :
-            IRegister
+        class FutureRegistrar<TFuture> :
+            IFutureRegistrar
             where TFuture : class, SagaStateMachine<FutureState>
         {
             public virtual IFutureRegistration Register(IServiceCollection collection, IContainerRegistrar registrar)
@@ -79,8 +78,8 @@ namespace MassTransit.Configuration
         }
 
 
-        class FutureDefinition<TFuture, TDefinition> :
-            Future<TFuture>
+        class FutureDefinitionRegistrar<TFuture, TDefinition> :
+            FutureRegistrar<TFuture>
             where TDefinition : class, IFutureDefinition<TFuture>
             where TFuture : class, SagaStateMachine<FutureState>
         {

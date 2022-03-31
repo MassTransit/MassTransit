@@ -20,7 +20,7 @@ namespace MassTransit.Configuration
             where T : class, SagaStateMachine<TSaga>
             where TSaga : class, SagaStateMachineInstance
         {
-            return new Saga<T, TSaga>().Register(collection, registrar);
+            return new SagaRegistrar<T, TSaga>().Register(collection, registrar);
         }
 
         public static ISagaRegistration RegisterSaga<T, TSaga, TDefinition>(this IServiceCollection collection)
@@ -36,7 +36,7 @@ namespace MassTransit.Configuration
             where TSaga : class, SagaStateMachineInstance
             where TDefinition : class, ISagaDefinition<TSaga>
         {
-            return new SagaDefinition<T, TSaga, TDefinition>().Register(collection, registrar);
+            return new SagaDefinitionRegistrar<T, TSaga, TDefinition>().Register(collection, registrar);
         }
 
         public static ISagaRegistration RegisterSagaStateMachine<T, TSaga>(this IServiceCollection collection, Type sagaDefinitionType)
@@ -60,20 +60,21 @@ namespace MassTransit.Configuration
                     nameof(sagaDefinitionType));
             }
 
-            var register = (IRegister)Activator.CreateInstance(typeof(SagaDefinition<,,>).MakeGenericType(typeof(T), typeof(TSaga), sagaDefinitionType));
+            var register = (ISagaRegistrar)Activator.CreateInstance(
+                typeof(SagaDefinitionRegistrar<,,>).MakeGenericType(typeof(T), typeof(TSaga), sagaDefinitionType));
 
             return register.Register(collection, registrar);
         }
 
 
-        interface IRegister
+        interface ISagaRegistrar
         {
             ISagaRegistration Register(IServiceCollection collection, IContainerRegistrar registrar);
         }
 
 
-        class Saga<TStateMachine, TSaga> :
-            IRegister
+        class SagaRegistrar<TStateMachine, TSaga> :
+            ISagaRegistrar
             where TStateMachine : class, SagaStateMachine<TSaga>
             where TSaga : class, SagaStateMachineInstance
         {
@@ -87,8 +88,8 @@ namespace MassTransit.Configuration
         }
 
 
-        class SagaDefinition<TStateMachine, TSaga, TDefinition> :
-            Saga<TStateMachine, TSaga>
+        class SagaDefinitionRegistrar<TStateMachine, TSaga, TDefinition> :
+            SagaRegistrar<TStateMachine, TSaga>
             where TStateMachine : class, SagaStateMachine<TSaga>
             where TSaga : class, SagaStateMachineInstance
             where TDefinition : class, ISagaDefinition<TSaga>

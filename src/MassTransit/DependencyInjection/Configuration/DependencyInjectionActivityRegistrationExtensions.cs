@@ -1,7 +1,6 @@
 namespace MassTransit.Configuration
 {
     using System;
-    using Courier;
     using DependencyInjection;
     using DependencyInjection.Registration;
     using Internals;
@@ -24,7 +23,7 @@ namespace MassTransit.Configuration
             where TArguments : class
             where TLog : class
         {
-            return new Activity<TActivity, TArguments, TLog>().Register(collection, registrar);
+            return new ActivityRegistrar<TActivity, TArguments, TLog>().Register(collection, registrar);
         }
 
         public static IActivityRegistration RegisterActivity<TActivity, TArguments, TLog, TDefinition>(this IServiceCollection collection)
@@ -43,7 +42,7 @@ namespace MassTransit.Configuration
             where TLog : class
             where TDefinition : class, IActivityDefinition<TActivity, TArguments, TLog>
         {
-            return new ActivityDefinition<TActivity, TArguments, TLog, TDefinition>().Register(collection, registrar);
+            return new ActivityDefinitionRegistrar<TActivity, TArguments, TLog, TDefinition>().Register(collection, registrar);
         }
 
         public static IActivityRegistration RegisterActivity<TActivity, TArguments, TLog>(this IServiceCollection collection, Type activityDefinitionType)
@@ -70,21 +69,21 @@ namespace MassTransit.Configuration
                     nameof(activityDefinitionType));
             }
 
-            var register = (IRegister)Activator.CreateInstance(typeof(ActivityDefinition<,,,>)
+            var register = (IActivityRegistrar)Activator.CreateInstance(typeof(ActivityDefinitionRegistrar<,,,>)
                 .MakeGenericType(typeof(TActivity), typeof(TArguments), typeof(TLog), activityDefinitionType));
 
             return register.Register(collection, registrar);
         }
 
 
-        interface IRegister
+        interface IActivityRegistrar
         {
             IActivityRegistration Register(IServiceCollection collection, IContainerRegistrar registrar);
         }
 
 
-        class Activity<TActivity, TArguments, TLog> :
-            IRegister
+        class ActivityRegistrar<TActivity, TArguments, TLog> :
+            IActivityRegistrar
             where TActivity : class, IActivity<TArguments, TLog>
             where TArguments : class
             where TLog : class
@@ -104,8 +103,8 @@ namespace MassTransit.Configuration
         }
 
 
-        class ActivityDefinition<TActivity, TArguments, TLog, TDefinition> :
-            Activity<TActivity, TArguments, TLog>
+        class ActivityDefinitionRegistrar<TActivity, TArguments, TLog, TDefinition> :
+            ActivityRegistrar<TActivity, TArguments, TLog>
             where TDefinition : class, IActivityDefinition<TActivity, TArguments, TLog>
             where TActivity : class, IActivity<TArguments, TLog>
             where TArguments : class
