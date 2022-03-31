@@ -102,7 +102,7 @@ export default {
   margin 0px auto
   display block
   .hero
-    text-alight: left
+    text-align: left
     display: flex
     img
       max-width: 100%
