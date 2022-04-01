@@ -5,7 +5,7 @@
 MassTransit fully supports Azure Service Bus, including many of the advanced features and capabilities.
 
 ::: warning WARNING
-The Azure Service Bus transport only supports **Standard** and **Premium** tiers of the Microsoft Azure Service Bus service. Premium tier is recommended for production environments.
+The Azure Service Bus transport only supports **Standard** and **Premium** tiers of the Microsoft Azure Service Bus service. Premium tier is recommended for production environments. See [Performance](#performance) section below.
 :::
 
 ## Minimal Example
@@ -46,6 +46,6 @@ The following example shows how to configure Azure Service Bus using an Azure Ma
 
 During local development, in the case of Visual Studio, you can configure the account to use under Options -> Azure Service Authentication. Note that your Azure Active Directory user needs explicit access to the resource and have the 'Azure Service Bus Data Owner' role assigned.
 
+## Performance
 
-
-
+We **really** recommend that you use the Premium subscription levels for production workloads. We have performed our own testing using [MassTransit Benchmark](https://github.com/MassTransit/MassTransit-Benchmark) on a P4 instance. It is also critical that your application is in the same DC as the ASB instance. From a home test using a 1Gb fiber connection we could not get over 600/second. When running in the same DC as the ASB we were able to acheive 6k/second. This test was done with one instance writing to ASB and another instance reading from ASB, as adding consumption over the same AMQP connection killed throughput.
