@@ -5,6 +5,7 @@ namespace MassTransit.Logging
     {
         public const string DefaultListenerName = "MassTransit";
 
+        public const string DiagnosticId = "Diagnostic-Id";
         public const string ActivityId = "MT-Activity-Id";
         public const string ActivityCorrelationContext = "MT-Activity-Correlation-Context";
 

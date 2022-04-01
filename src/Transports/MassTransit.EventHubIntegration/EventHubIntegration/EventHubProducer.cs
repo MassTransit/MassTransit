@@ -148,6 +148,14 @@ namespace MassTransit.EventHubIntegration
 
                     eventData.Properties.Set(sendContext.Headers);
 
+                    if (sendContext.MessageId.HasValue)
+                        eventData.MessageId = sendContext.MessageId.Value.ToString("N");
+
+                    if (sendContext.CorrelationId.HasValue)
+                        eventData.CorrelationId = sendContext.CorrelationId.Value.ToString("N");
+
+                    eventData.ContentType = sendContext.ContentType.ToString();
+
                     await context.Produce(new[] { eventData }, options, sendContext.CancellationToken).ConfigureAwait(false);
 
                     activity?.Update(sendContext);

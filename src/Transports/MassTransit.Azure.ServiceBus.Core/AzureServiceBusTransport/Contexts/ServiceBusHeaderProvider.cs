@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using Azure.Messaging.ServiceBus;
+    using Logging;
     using Transports;
 
 
@@ -34,8 +35,15 @@
 
         public bool TryGetHeader(string key, out object value)
         {
-            if (_message.ApplicationProperties != null && _message.ApplicationProperties.TryGetValue(key, out value))
-                return true;
+            if (_message.ApplicationProperties != null)
+            {
+                if (_message.ApplicationProperties.TryGetValue(key, out value))
+                    return true;
+
+                if (DiagnosticHeaders.ActivityId.Equals(key, StringComparison.OrdinalIgnoreCase)
+                    && _message.ApplicationProperties.TryGetValue(DiagnosticHeaders.DiagnosticId, out value))
+                    return true;
+            }
 
             if (nameof(_message.MessageId).Equals(key, StringComparison.OrdinalIgnoreCase))
             {
