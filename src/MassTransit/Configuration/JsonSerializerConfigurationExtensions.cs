@@ -57,7 +57,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Configure the options for the default System.Text.Json serializer
+        /// Configure the global shared options for the default System.Text.Json serializer
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="configure"></param>
@@ -65,7 +65,7 @@ namespace MassTransit
             Func<JsonSerializerOptions, JsonSerializerOptions> configure = null)
         {
             if (configure != null)
-                SystemTextJsonMessageSerializer.Options = configure(SystemTextJsonMessageSerializer.Options);
+                SystemTextJsonMessageSerializer.Options = configure(new JsonSerializerOptions(SystemTextJsonMessageSerializer.Options));
         }
     }
 }
