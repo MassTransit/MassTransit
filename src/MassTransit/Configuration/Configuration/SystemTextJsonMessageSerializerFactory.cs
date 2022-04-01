@@ -2,6 +2,7 @@ namespace MassTransit.Configuration
 {
     using System;
     using System.Net.Mime;
+    using System.Text.Json;
     using Serialization;
 
 
@@ -13,6 +14,11 @@ namespace MassTransit.Configuration
         public SystemTextJsonMessageSerializerFactory()
         {
             _serializer = new Lazy<SystemTextJsonMessageSerializer>(() => new SystemTextJsonMessageSerializer());
+        }
+
+        public SystemTextJsonMessageSerializerFactory(JsonSerializerOptions options)
+        {
+            _serializer = new Lazy<SystemTextJsonMessageSerializer>(() => new SystemTextJsonMessageSerializer(contentType: null, options));
         }
 
         public ContentType ContentType => SystemTextJsonMessageSerializer.JsonContentType;

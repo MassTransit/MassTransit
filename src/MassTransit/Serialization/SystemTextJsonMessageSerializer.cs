@@ -20,6 +20,9 @@ namespace MassTransit.Serialization
     {
         public static readonly ContentType JsonContentType = new ContentType("application/vnd.masstransit+json");
 
+        public static JsonSerializerOptions DefaultOptions { get; }
+
+        [Obsolete("This only exists for backwards compatibility")]
         public static JsonSerializerOptions Options;
 
         public static readonly SystemTextJsonMessageSerializer Instance = new SystemTextJsonMessageSerializer();
@@ -28,7 +31,7 @@ namespace MassTransit.Serialization
         {
             GlobalTopology.MarkMessageTypeNotConsumable(typeof(JsonElement));
 
-            Options = new JsonSerializerOptions
+            var options = new JsonSerializerOptions
             {
                 AllowTrailingCommas = true,
                 PropertyNameCaseInsensitive = true,
@@ -38,16 +41,38 @@ namespace MassTransit.Serialization
                 Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
             };
 
-            Options.Converters.Add(new SystemTextJsonMessageDataConverter());
-            Options.Converters.Add(new SystemTextJsonConverterFactory());
+            options.Converters.Add(new SystemTextJsonMessageDataConverter());
+            options.Converters.Add(new SystemTextJsonConverterFactory());
+
+            // Seal the options - preventing further modifications
+            JsonSerializer.Serialize(true, options);
+
+            DefaultOptions = options;
+
+            #pragma warning disable CS0618
+            Options = DefaultOptions;
+            #pragma warning restore CS0618
         }
+
+        readonly JsonSerializerOptions? _options;
 
         public SystemTextJsonMessageSerializer(ContentType? contentType = null)
         {
             ContentType = contentType ?? JsonContentType;
         }
 
+        public SystemTextJsonMessageSerializer(ContentType? contentType, JsonSerializerOptions? options = null)
+            : this(contentType)
+        {
+            _options = options;
+        }
+
         public ContentType ContentType { get; }
+
+        public JsonSerializerOptions SerializerOptions
+            #pragma warning disable CS0618
+            => _options ?? Options;
+            #pragma warning restore CS0618
 
         public void Probe(ProbeContext context)
         {
@@ -65,7 +90,7 @@ namespace MassTransit.Serialization
         {
             try
             {
-                var envelope = JsonSerializer.Deserialize<MessageEnvelope>(body.GetBytes(), Options);
+                var envelope = JsonSerializer.Deserialize<MessageEnvelope>(body.GetBytes(), SerializerOptions);
                 if (envelope == null)
                     throw new SerializationException("Message envelope not found");
 
@@ -73,7 +98,7 @@ namespace MassTransit.Serialization
 
                 var messageTypes = envelope.MessageType ?? Array.Empty<string>();
 
-                var serializerContext = new SystemTextJsonSerializerContext(this, Options, ContentType, messageContext, messageTypes, envelope);
+                var serializerContext = new SystemTextJsonSerializerContext(this, SerializerOptions, ContentType, messageContext, messageTypes, envelope);
 
                 return serializerContext;
             }
@@ -95,7 +120,7 @@ namespace MassTransit.Serialization
         public MessageBody GetMessageBody<T>(SendContext<T> context)
             where T : class
         {
-            return new SystemTextJsonMessageBody<T>(context, Options);
+            return new SystemTextJsonMessageBody<T>(context, SerializerOptions);
         }
 
         public T? DeserializeObject<T>(object? value, T? defaultValue = default)
@@ -110,16 +135,16 @@ namespace MassTransit.Serialization
                 case string text:
                     if (TypeConverterCache.TryGetTypeConverter(out ITypeConverter<T, string>? typeConverter) && typeConverter.TryConvert(text, out var result))
                         return result;
-                    return GetObject<T>(JsonSerializer.Deserialize<JsonElement>(text));
+                    return GetObject<T>(JsonSerializer.Deserialize<JsonElement>(text), SerializerOptions);
                 case JsonElement jsonElement:
-                    return GetObject<T>(jsonElement);
+                    return GetObject<T>(jsonElement, SerializerOptions);
             }
 
-            var element = JsonSerializer.SerializeToElement(value, Options);
+            var element = JsonSerializer.SerializeToElement(value, SerializerOptions);
 
             return element.ValueKind == JsonValueKind.Null
                 ? defaultValue
-                : GetObject<T>(element);
+                : GetObject<T>(element, SerializerOptions);
         }
 
         public T? DeserializeObject<T>(object? value, T? defaultValue = null)
@@ -134,30 +159,30 @@ namespace MassTransit.Serialization
                 case string text:
                     if (TypeConverterCache.TryGetTypeConverter(out ITypeConverter<T, string>? typeConverter) && typeConverter.TryConvert(text, out var result))
                         return result;
-                    return JsonSerializer.Deserialize<T>(text, Options);
+                    return JsonSerializer.Deserialize<T>(text, SerializerOptions);
                 case JsonElement jsonElement:
-                    return jsonElement.Deserialize<T>(Options);
+                    return jsonElement.Deserialize<T>(SerializerOptions);
             }
 
-            var element = JsonSerializer.SerializeToElement(value, Options);
+            var element = JsonSerializer.SerializeToElement(value, SerializerOptions);
 
             return element.ValueKind == JsonValueKind.Null
                 ? defaultValue
-                : element.Deserialize<T>(Options);
+                : element.Deserialize<T>(SerializerOptions);
         }
 
-        static T? GetObject<T>(JsonElement jsonElement)
+        static T? GetObject<T>(JsonElement jsonElement, JsonSerializerOptions options)
             where T : class
         {
             if (typeof(T).GetTypeInfo().IsInterface && MessageTypeCache<T>.IsValidMessageType)
             {
                 var messageType = TypeMetadataCache<T>.ImplementationType;
 
-                if (jsonElement.Deserialize(messageType, Options) is T obj)
+                if (jsonElement.Deserialize(messageType, options) is T obj)
                     return obj;
             }
 
-            return jsonElement.Deserialize<T>(Options);
+            return jsonElement.Deserialize<T>(options);
         }
     }
 }
