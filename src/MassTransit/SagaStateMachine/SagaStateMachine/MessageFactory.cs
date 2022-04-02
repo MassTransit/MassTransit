@@ -116,14 +116,14 @@ namespace MassTransit.SagaStateMachine
 
             async Task<SendTuple<T>> Factory(BehaviorContext<TSaga, TMessage> context)
             {
-                SendTuple<T> result = await factory(context).ConfigureAwait(false);
-                if (result.Pipe.IsNotEmpty())
+                (var message, IPipe<SendContext<T>> sendPipe) = await factory(context).ConfigureAwait(false);
+                if (sendPipe.IsNotEmpty())
                 {
-                    IPipe<SendContext<T>> pipe = result.Pipe.AddCallback(callback);
-                    return new SendTuple<T>(result.Message, pipe);
+                    IPipe<SendContext<T>> pipe = sendPipe.AddCallback(callback);
+                    return new SendTuple<T>(message, pipe);
                 }
 
-                return new SendTuple<T>(result.Message, Pipe.Execute(callback));
+                return new SendTuple<T>(message, Pipe.Execute(callback));
             }
 
             return new ContextMessageFactory<BehaviorContext<TSaga, TMessage>, T>(Factory);
@@ -754,14 +754,14 @@ namespace MassTransit.SagaStateMachine
 
             async Task<SendTuple<T>> Factory(BehaviorExceptionContext<TSaga, TException> context)
             {
-                SendTuple<T> result = await factory(context).ConfigureAwait(false);
-                if (result.Pipe.IsNotEmpty())
+                (var message, IPipe<SendContext<T>> sendPipe) = await factory(context).ConfigureAwait(false);
+                if (sendPipe.IsNotEmpty())
                 {
-                    IPipe<SendContext<T>> pipe = result.Pipe.AddCallback(callback);
-                    return new SendTuple<T>(result.Message, pipe);
+                    IPipe<SendContext<T>> pipe = sendPipe.AddCallback(callback);
+                    return new SendTuple<T>(message, pipe);
                 }
 
-                return new SendTuple<T>(result.Message, Pipe.Execute(callback));
+                return new SendTuple<T>(message, Pipe.Execute(callback));
             }
 
             return new ContextMessageFactory<BehaviorExceptionContext<TSaga, TException>, T>(Factory);
@@ -777,14 +777,14 @@ namespace MassTransit.SagaStateMachine
 
             async Task<SendTuple<T>> Factory(BehaviorExceptionContext<TSaga, TException> context)
             {
-                SendTuple<T> result = await factory(context).ConfigureAwait(false);
-                if (result.Pipe.IsNotEmpty())
+                (var message, IPipe<SendContext<T>> sendPipe) = await factory(context).ConfigureAwait(false);
+                if (sendPipe.IsNotEmpty())
                 {
-                    IPipe<SendContext<T>> pipe = result.Pipe.AddCallback(ctx => callback(context, ctx));
-                    return new SendTuple<T>(result.Message, pipe);
+                    IPipe<SendContext<T>> pipe = sendPipe.AddCallback(ctx => callback(context, ctx));
+                    return new SendTuple<T>(message, pipe);
                 }
 
-                return new SendTuple<T>(result.Message, Pipe.Execute<SendContext<T>>(ctx => callback(context, ctx)));
+                return new SendTuple<T>(message, Pipe.Execute<SendContext<T>>(ctx => callback(context, ctx)));
             }
 
             return new ContextMessageFactory<BehaviorExceptionContext<TSaga, TException>, T>(Factory);
