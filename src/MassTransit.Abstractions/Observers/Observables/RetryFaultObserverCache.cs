@@ -26,7 +26,8 @@
         {
             var converterType = typeof(RetryFaultObserver<>).MakeGenericType(type);
 
-            return (IRetryFaultObserver)Activator.CreateInstance(converterType);
+            return Activator.CreateInstance(converterType) as IRetryFaultObserver
+                ?? throw new InvalidOperationException("Failed to create Retry Fault Observer");
         }
 
 

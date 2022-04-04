@@ -59,21 +59,21 @@
             _response = _response1 as Response ?? _response2 ?? throw new ArgumentException("At least one response must have completed");
         }
 
-        public bool Is(out Response<T1>? result)
+        public bool Is([NotNullWhen(true)] out Response<T1>? result)
         {
             result = _response1;
 
             return result != default;
         }
 
-        public bool Is(out Response<T2>? result)
+        public bool Is([NotNullWhen(true)] out Response<T2>? result)
         {
             result = _response2;
 
             return result != default;
         }
 
-        public bool Is<T>(out Response<T>? result)
+        public bool Is<T>([NotNullWhen(true)] out Response<T>? result)
             where T : class
         {
             if (_response1 is Response<T> response1)
@@ -168,28 +168,28 @@
                 ?? throw new ArgumentException("At least one response must have completed");
         }
 
-        public bool Is(out Response<T1>? result)
+        public bool Is([NotNullWhen(true)] out Response<T1>? result)
         {
             result = _response1;
 
             return result != default;
         }
 
-        public bool Is(out Response<T2>? result)
+        public bool Is([NotNullWhen(true)] out Response<T2>? result)
         {
             result = _response2;
 
             return result != default;
         }
 
-        public bool Is(out Response<T3>? result)
+        public bool Is([NotNullWhen(true)] out Response<T3>? result)
         {
             result = _response3;
 
             return result != default;
         }
 
-        public bool Is<T>(out Response<T>? result)
+        public bool Is<T>([NotNullWhen(true)] out Response<T>? result)
             where T : class
         {
             if (_response1 is Response<T> response1)

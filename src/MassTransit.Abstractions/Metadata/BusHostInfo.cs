@@ -20,7 +20,7 @@ namespace MassTransit.Metadata
             OperatingSystemVersion = Environment.OSVersion.ToString();
             var entryAssembly = System.Reflection.Assembly.GetEntryAssembly() ?? System.Reflection.Assembly.GetCallingAssembly();
             MachineName = Environment.MachineName;
-            MassTransitVersion = typeof(HostInfo).GetTypeInfo().Assembly.GetName().Version.ToString();
+            MassTransitVersion = typeof(HostInfo).GetTypeInfo().Assembly.GetName().Version?.ToString();
 
             try
             {
@@ -38,7 +38,7 @@ namespace MassTransit.Metadata
 
             var assemblyName = entryAssembly.GetName();
             Assembly = assemblyName.Name;
-            AssemblyVersion = assemblyName.Version.ToString();
+            AssemblyVersion = assemblyName.Version?.ToString() ?? "Unknown";
         }
 
         public string? MachineName { get; set; }
@@ -56,11 +56,7 @@ namespace MassTransit.Metadata
             if (attribute != null)
                 return attribute.Version;
 
-            var assemblyLocation = assembly.Location;
-            if (assemblyLocation != null)
-                return FileVersionInfo.GetVersionInfo(assemblyLocation).FileVersion;
-
-            return "Unknown";
+            return FileVersionInfo.GetVersionInfo(assembly.Location).FileVersion ?? "Unknown";
         }
 
         static string GetAssemblyInformationalVersion(Assembly assembly)

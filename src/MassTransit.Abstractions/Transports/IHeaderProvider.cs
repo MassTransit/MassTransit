@@ -10,6 +10,6 @@ namespace MassTransit.Transports
     {
         IEnumerable<KeyValuePair<string, object>> GetAll();
 
-        bool TryGetHeader(string key, out object value);
+        bool TryGetHeader(string key, [NotNullWhen(true)] out object? value);
     }
 }

@@ -13,7 +13,8 @@ namespace MassTransit
     {
         static CachedType GetOrAdd(Type type)
         {
-            return Cached.Instance.GetOrAdd(type, _ => (CachedType)Activator.CreateInstance(typeof(CachedType<>).MakeGenericType(type)));
+            return Cached.Instance.GetOrAdd(type, _ => Activator.CreateInstance(typeof(CachedType<>).MakeGenericType(type)) as CachedType
+                ?? throw new InvalidOperationException("Failed to create cached message type"));
         }
 
         public static IEnumerable<PropertyInfo> GetProperties(Type type)

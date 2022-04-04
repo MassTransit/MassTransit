@@ -25,9 +25,12 @@ namespace MassTransit
             }
             catch (RequestException exception)
             {
-                var dispatchInfo = ExceptionDispatchInfo.Capture(exception.InnerException);
+                if (exception.InnerException != null)
+                {
+                    var dispatchInfo = ExceptionDispatchInfo.Capture(exception.InnerException);
 
-                dispatchInfo.Throw();
+                    dispatchInfo.Throw();
+                }
 
                 throw;
             }

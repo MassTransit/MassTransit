@@ -97,7 +97,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 InVar.Timestamp
             });
 
-            await using var ms = new MemoryStream(4000);
+            using var ms = new MemoryStream(4000);
             NewtonsoftXmlMessageSerializer.Serialize(ms, message, typeof(RawContract));
 
             var body = ms.ToArray();

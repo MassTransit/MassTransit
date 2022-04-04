@@ -30,7 +30,7 @@
             if (subscriptionName.Length > 50)
             {
                 string hashed;
-                using (var hasher = new SHA1Managed())
+                using (var hasher = SHA1.Create())
                 {
                     var buffer = Encoding.UTF8.GetBytes(subscriptionName);
                     var hash = hasher.ComputeHash(buffer);

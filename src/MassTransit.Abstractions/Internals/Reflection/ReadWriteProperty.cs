@@ -25,6 +25,8 @@ namespace MassTransit.Internals
         {
             if (property.DeclaringType == null)
                 throw new ArgumentException("DeclaringType is null", nameof(property));
+            if (!property.CanWrite || property.SetMethod == null)
+                return (_, __) => throw new InvalidOperationException("No SetMethod available on " + property.Name);
 
             var instance = Expression.Parameter(typeof(object), "instance");
             var value = Expression.Parameter(typeof(object), "value");
@@ -76,8 +78,8 @@ namespace MassTransit.Internals
 
         static Action<T, object> GetSetMethod(PropertyInfo property)
         {
-            if (!property.CanWrite)
-                return (_, __) => throw new InvalidOperationException("No setter available on " + property.Name);
+            if (!property.CanWrite || property.SetMethod == null)
+                return (_, __) => throw new InvalidOperationException("No SetMethod available on " + property.Name);
 
             var instance = Expression.Parameter(typeof(T), "instance");
             var value = Expression.Parameter(typeof(object), "value");
@@ -122,8 +124,8 @@ namespace MassTransit.Internals
 
         static Action<T, TProperty> GetSetMethod(PropertyInfo property)
         {
-            if (!property.CanWrite)
-                return (_, __) => throw new InvalidOperationException("No setter available on " + property.Name);
+            if (!property.CanWrite || property.SetMethod == null)
+                return (_, __) => throw new InvalidOperationException("No SetMethod available on " + property.Name);
 
             var instance = Expression.Parameter(typeof(T), "instance");
             var value = Expression.Parameter(typeof(TProperty), "value");

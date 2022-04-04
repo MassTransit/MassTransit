@@ -38,7 +38,7 @@ namespace MassTransit.Transports.Fabric
 
         public async Task Deliver(DeliveryContext<T> context)
         {
-            if (_sinks.TryGetValue(context.RoutingKey ?? "", out Connectable<IMessageSink<T>> forKey))
+            if (_sinks.TryGetValue(context.RoutingKey ?? "", out Connectable<IMessageSink<T>>? forKey))
             {
                 await forKey.ForEachAsync(async sink =>
                 {

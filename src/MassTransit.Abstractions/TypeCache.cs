@@ -10,7 +10,8 @@ namespace MassTransit
     {
         static CachedType GetOrAdd(Type type)
         {
-            return Cached.Instance.GetOrAdd(type, _ => (CachedType)Activator.CreateInstance(typeof(CachedType<>).MakeGenericType(type)));
+            return Cached.Instance.GetOrAdd(type, _ => Activator.CreateInstance(typeof(CachedType<>).MakeGenericType(type)) as CachedType
+                ?? throw new InvalidOperationException("Failed to create cached type"));
         }
 
         internal static void GetOrAdd<T>(Type type, ITypeCache<T> typeCache)

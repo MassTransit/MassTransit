@@ -22,9 +22,13 @@ on:
 
 jobs:
   compile:
-    name: Compile and Unit Tests
+    name: Build
     timeout-minutes: 10
-    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 2
+      matrix: 
+        os: ['ubuntu-latest', 'windows-latest']
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Check out code
         uses: actions/checkout@v2
@@ -47,28 +51,25 @@ jobs:
         run: dotnet build -c Release --no-restore
         working-directory: ./
 
-      - name: Test
-        run: dotnet test -c Release --logger:"console;verbosity=normal" --no-build --filter Category!=Flaky
-        working-directory: tests/MassTransit.Tests
-
-      - name: Test Abstractions
-        run: dotnet test -c Release --logger:"console;verbosity=normal" --no-build --filter Category!=Flaky
-        working-directory: tests/MassTransit.Abstractions.Tests
-
       - name: Test Analyzers
         run: dotnet test -c Release --logger:"console;verbosity=normal" --no-build --filter Category!=Flaky
         working-directory: tests/MassTransit.Analyzers.Tests
 
-  test-containers:
-    name: Container Tests
+  test-ubuntu:
+    name: Unit Tests
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    strategy:
+      max-parallel: 2
+      matrix: 
+        framework: ['netcoreapp3.1', 'net6.0']
     steps:
       - name: Check out code
         uses: actions/checkout@v2
 
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
+        if: matrix.framework == 'netcoreapp3.1'
         with:
           dotnet-version: '3.1.x'
 
@@ -77,16 +78,62 @@ jobs:
         with:
           dotnet-version: '6.0.x'
 
-      # - name: Test Containers
-      #   uses: zyborg/dotnet-tests-report@v1
-      #   with:
-      #     project_path: tests/MassTransit.Containers.Tests
-      #     report_name: container_tests
-      #     report_title: Container Tests
-      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Unit Tests
+        run: dotnet test -c Release -f ${{ matrix.framework }} --logger:"console;verbosity=normal" --filter Category!=Flaky
+        working-directory: tests/MassTransit.Tests
+
+      - name: Test Abstractions
+        run: dotnet test -c Release -f ${{ matrix.framework }} --logger:"console;verbosity=normal" --filter Category!=Flaky
+        working-directory: tests/MassTransit.Abstractions.Tests
+
+  test-windows:
+    name: Unit Tests
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Unit Tests
+        run: dotnet test -c Release -f net461 --logger:"console;verbosity=normal" --filter Category!=Flaky
+        working-directory: tests/MassTransit.Tests
+
+      - name: Test Abstractions
+        run: dotnet test -c Release -f net461 --logger:"console;verbosity=normal" --filter Category!=Flaky
+        working-directory: tests/MassTransit.Abstractions.Tests
+
+  test-containers:
+    name: Container Tests
+    runs-on: windows-latest
+    timeout-minutes: 10
+    strategy:
+      max-parallel: 3
+      matrix: 
+        framework: ['netcoreapp3.1', 'net6.0', 'net461']
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install .NET Core SDK 3.1
+        uses: actions/setup-dotnet@v1
+        if: matrix.framework == 'netcoreapp3.1'
+        with:
+          dotnet-version: '3.1.x'
+
+      - name: Install .NET Core SDK 6.0
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+
       - name: Test Containers
-        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
+        run: dotnet test -c Release -f ${{ matrix.framework }} --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.Containers.Tests
+
   test-activemq:
     name: "Transports: ActiveMQ"
     timeout-minutes: 10
@@ -97,15 +144,9 @@ jobs:
         ports:
           - "61616:61616"
           - "8161:8161"
-        #options: --health-cmd "rabbitmqctl node_health_check" --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
       - name: Check out code
         uses: actions/checkout@v2
-
-      - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: '3.1.x'
 
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
@@ -115,6 +156,7 @@ jobs:
       - name: Test ActiveMQ
         run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.ActiveMqTransport.Tests
+
   test-grpc:
     name: "Transports: gRPC"
     timeout-minutes: 10
@@ -138,11 +180,6 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v2
-
-      - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: '3.1.x'
 
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
@@ -173,11 +210,6 @@ jobs:
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '3.1.x'
-
-      - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v1
-        with:
           dotnet-version: '6.0.x'
 
       - name: Test RabbitMQ
@@ -202,11 +234,6 @@ jobs:
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '3.1.x'
-
-      - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v1
-        with:
           dotnet-version: '6.0.x'
 
       - name: Test SQS
@@ -220,11 +247,6 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v2
-
-      - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: '3.1.x'
 
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
@@ -244,11 +266,6 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v2
-
-      - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: '3.1.x'
 
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
@@ -279,11 +296,6 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v2
-
-      - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: '3.1.x'
 
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
@@ -359,11 +371,6 @@ jobs:
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '3.1.x'
-
-      - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v1
-        with:
           dotnet-version: '6.0.x'
 
       - name: Test Marten
@@ -385,11 +392,6 @@ jobs:
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '3.1.x'
-
-      - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v1
-        with:
           dotnet-version: '6.0.x'
 
       - name: Test MongoDB
@@ -402,11 +404,6 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v2
-
-      - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: '3.1.x'
 
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
@@ -433,11 +430,6 @@ jobs:
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '3.1.x'
-
-      - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v1
-        with:
           dotnet-version: '6.0.x'
 
       - name: Test Redis
@@ -450,11 +442,6 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v2
-
-      - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: '3.1.x'
 
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
@@ -475,11 +462,6 @@ jobs:
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '3.1.x'
-
-      - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v1
-        with:
           dotnet-version: '6.0.x'
 
       - name: Test Quartz
@@ -492,11 +474,6 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v2
-
-      - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: '3.1.x'
 
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
@@ -554,11 +531,6 @@ jobs:
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '3.1.x'
-
-      - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v1
-        with:
           dotnet-version: '6.0.x'
 
       - name: Test Kafka
@@ -576,11 +548,6 @@ jobs:
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '3.1.x'
-
-      - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v1
-        with:
           dotnet-version: '6.0.x'
 
       - name: Test SignalR
@@ -592,6 +559,8 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - compile
+      - test-ubuntu
+      - test-windows
       - test-containers
       - test-activemq
       # - test-azure-service-bus
@@ -625,7 +594,7 @@ jobs:
   publish:
     name: Build and Publish NuGets
     timeout-minutes: 60
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/v8') && github.repository == 'MassTransit/MassTransit' && success()
     needs:
       - calc-version

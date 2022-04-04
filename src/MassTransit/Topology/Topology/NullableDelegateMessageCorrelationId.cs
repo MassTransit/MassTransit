@@ -1,7 +1,6 @@
 namespace MassTransit.Topology
 {
     using System;
-    using Context;
 
 
     public class NullableDelegateMessageCorrelationId<T> :
@@ -24,6 +23,7 @@ namespace MassTransit.Topology
                 return true;
             }
 
+            correlationId = Guid.Empty;
             return false;
         }
     }

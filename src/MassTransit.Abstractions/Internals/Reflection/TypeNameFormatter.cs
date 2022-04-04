@@ -62,7 +62,7 @@ namespace MassTransit.Internals
                 }
             }
 
-            if (type.IsNested)
+            if (type.IsNested && type.DeclaringType != null)
             {
                 FormatTypeName(sb, type.DeclaringType, type.Namespace);
                 sb.Append(_nestedTypeSeparator);

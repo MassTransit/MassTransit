@@ -24,7 +24,7 @@ namespace MassTransit
             : base(info, context)
         {
             RequestType = info.GetString("RequestType");
-            Fault = (Fault)info.GetValue("Fault", typeof(Fault));
+            Fault = info.GetValue("Fault", typeof(Fault)) as Fault;
         }
 
         public string? RequestType { get; private set; }

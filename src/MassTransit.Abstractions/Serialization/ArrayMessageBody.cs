@@ -20,7 +20,7 @@ namespace MassTransit
 
         public Stream GetStream()
         {
-            return new MemoryStream(_bytes.Array, _bytes.Offset, _bytes.Count, false);
+            return new MemoryStream(_bytes.Array ?? throw new InvalidOperationException("Array not accessible"), _bytes.Offset, _bytes.Count, false);
         }
 
         public byte[] GetBytes()
@@ -30,7 +30,7 @@ namespace MassTransit
 
         public string GetString()
         {
-            return Encoding.UTF8.GetString(_bytes.Array, _bytes.Offset, _bytes.Count);
+            return Encoding.UTF8.GetString(_bytes.Array ?? throw new InvalidOperationException("Array not accessible"), _bytes.Offset, _bytes.Count);
         }
     }
 }

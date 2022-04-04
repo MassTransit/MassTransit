@@ -15,7 +15,7 @@ namespace MassTransit
             Value = value;
         }
 
-        public bool IsStringValue(out HeaderValue<string> result)
+        public bool IsStringValue([NotNullWhen(true)] out HeaderValue<string> result)
         {
             switch (this)
             {
@@ -27,7 +27,7 @@ namespace MassTransit
             }
         }
 
-        public bool IsSimpleValue(out HeaderValue result)
+        public bool IsSimpleValue([NotNullWhen(true)] out HeaderValue result)
         {
             return HeaderValue.IsValueSimpleValue(Key, Value, out result);
         }
@@ -51,12 +51,12 @@ namespace MassTransit
             Value = pair.Value;
         }
 
-        public bool IsStringValue(out HeaderValue<string> result)
+        public bool IsStringValue([NotNullWhen(true)] out HeaderValue<string> result)
         {
             return IsValueStringValue(Key, Value, out result);
         }
 
-        public bool IsSimpleValue(out HeaderValue result)
+        public bool IsSimpleValue([NotNullWhen(true)] out HeaderValue result)
         {
             return IsValueSimpleValue(Key, Value, out result);
         }
@@ -66,7 +66,7 @@ namespace MassTransit
             return new HeaderValue(headerValue.Key, headerValue.Value);
         }
 
-        internal static bool IsValueStringValue(string key, object? value, out HeaderValue<string> result)
+        internal static bool IsValueStringValue(string key, object? value, [NotNullWhen(true)] out HeaderValue<string> result)
         {
             switch (value)
             {
@@ -83,7 +83,7 @@ namespace MassTransit
                     result = new HeaderValue<string>(key, uri.ToString());
                     return true;
                 case IFormattable formatValue when formatValue.GetType().IsValueType:
-                    result = new HeaderValue<string>(key, formatValue.ToString());
+                    result = new HeaderValue<string>(key, formatValue.ToString()!);
                     return true;
                 default:
                     result = default;
@@ -91,7 +91,7 @@ namespace MassTransit
             }
         }
 
-        internal static bool IsValueSimpleValue(string key, object? value, out HeaderValue result)
+        internal static bool IsValueSimpleValue(string key, object? value, [NotNullWhen(true)] out HeaderValue result)
         {
             switch (value)
             {

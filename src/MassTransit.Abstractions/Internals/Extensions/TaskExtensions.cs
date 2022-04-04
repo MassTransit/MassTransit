@@ -18,18 +18,17 @@ namespace MassTransit.Internals
 
             async Task WaitAsync()
             {
-                using (RegisterTask(cancellationToken, out var cancelTask))
+                using var registration = RegisterTask(cancellationToken, out var cancelTask);
+
+                var completed = await Task.WhenAny(task, cancelTask).ConfigureAwait(false);
+                if (completed != task)
                 {
-                    var completed = await Task.WhenAny(task, cancelTask).ConfigureAwait(false);
-                    if (completed != task)
-                    {
-                        task.IgnoreUnobservedExceptions();
+                    task.IgnoreUnobservedExceptions();
 
-                        throw new OperationCanceledException(cancellationToken);
-                    }
-
-                    task.GetAwaiter().GetResult();
+                    throw new OperationCanceledException(cancellationToken);
                 }
+
+                task.GetAwaiter().GetResult();
             }
 
             return WaitAsync();
@@ -42,18 +41,17 @@ namespace MassTransit.Internals
 
             async Task<T> WaitAsync()
             {
-                using (RegisterTask(cancellationToken, out var cancelTask))
+                using var registration = RegisterTask(cancellationToken, out var cancelTask);
+
+                var completed = await Task.WhenAny(task, cancelTask).ConfigureAwait(false);
+                if (completed != task)
                 {
-                    var completed = await Task.WhenAny(task, cancelTask).ConfigureAwait(false);
-                    if (completed != task)
-                    {
-                        task.IgnoreUnobservedExceptions();
+                    task.IgnoreUnobservedExceptions();
 
-                        throw new OperationCanceledException(cancellationToken);
-                    }
-
-                    return task.GetAwaiter().GetResult();
+                    throw new OperationCanceledException(cancellationToken);
                 }
+
+                return task.GetAwaiter().GetResult();
             }
 
             return WaitAsync();
@@ -217,7 +215,7 @@ namespace MassTransit.Internals
             return cancellationToken.Register(SetCompleted, source);
         }
 
-        static void SetCompleted(object obj)
+        static void SetCompleted(object? obj)
         {
             if (obj is TaskCompletionSource<bool> source)
                 source.TrySetResult(true);
@@ -231,7 +229,7 @@ namespace MassTransit.Internals
             return default;
         }
 
-        static void Cancel(object obj)
+        static void Cancel(object? obj)
         {
             if (obj is CancellationTokenSource source)
                 source.Cancel();

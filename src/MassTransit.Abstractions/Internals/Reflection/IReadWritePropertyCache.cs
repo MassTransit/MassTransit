@@ -7,7 +7,7 @@ namespace MassTransit.Internals
         IEnumerable<ReadWriteProperty<T>>
     {
         ReadWriteProperty<T> this[string name] { get; }
-        bool TryGetValue(string key, out ReadWriteProperty<T> value);
-        bool TryGetProperty(string propertyName, out ReadWriteProperty<T> property);
+        bool TryGetValue(string key, [NotNullWhen(true)] out ReadWriteProperty<T>? value);
+        bool TryGetProperty(string propertyName, [NotNullWhen(true)] out ReadWriteProperty<T>? property);
     }
 }

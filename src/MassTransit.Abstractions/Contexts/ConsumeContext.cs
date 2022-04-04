@@ -44,7 +44,7 @@
         /// <typeparam name="T"></typeparam>
         /// <param name="consumeContext"></param>
         /// <returns></returns>
-        bool TryGetMessage<T>(out ConsumeContext<T> consumeContext)
+        bool TryGetMessage<T>([NotNullWhen(true)] out ConsumeContext<T>? consumeContext)
             where T : class;
 
         /// <summary>

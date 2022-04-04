@@ -19,6 +19,7 @@ namespace MassTransit.Internals
         }
 
         public static IDictionary<TKey, TValue> MergeLeft<TKey, TValue>(this IDictionary<TKey, TValue> source, params IDictionary<TKey, TValue>[] others)
+            where TKey : notnull
         {
             var result = new Dictionary<TKey, TValue>(source.Count);
 

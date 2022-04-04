@@ -6,6 +6,7 @@
 
     public class Tarjan<T, TNode>
         where TNode : Node<T>, ITarjanNodeProperties
+        where T : notnull
     {
         readonly AdjacencyList<T, TNode> _list;
         readonly Stack<TNode> _stack;

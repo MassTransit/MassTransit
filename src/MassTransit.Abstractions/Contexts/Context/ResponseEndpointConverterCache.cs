@@ -35,7 +35,8 @@ namespace MassTransit.Context
         {
             var converterType = typeof(ResponseEndpointConverter<>).MakeGenericType(type);
 
-            return (IResponseEndpointConverter)Activator.CreateInstance(converterType);
+            return Activator.CreateInstance(converterType) as IResponseEndpointConverter
+                ?? throw new InvalidOperationException("Failed to create ResponseEndpointConverter");
         }
 
 

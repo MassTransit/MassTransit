@@ -132,7 +132,7 @@ namespace MassTransit.Topology
         IMessageTypeFactory GetOrAddByMessageType(Type type)
         {
             return _messageTypeFactoryCache.GetOrAdd(type,
-                _ => (IMessageTypeFactory)Activator.CreateInstance(typeof(MessageTypeFactory<>).MakeGenericType(type), this));
+                _ => (IMessageTypeFactory)Activator.CreateInstance(typeof(MessageTypeFactory<>).MakeGenericType(type), this)!);
         }
 
 

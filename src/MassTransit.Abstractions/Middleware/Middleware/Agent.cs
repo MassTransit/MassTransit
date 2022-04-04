@@ -154,8 +154,7 @@
                         _ready.TrySetCanceled();
                     else if (task.IsFaulted)
 
-                        // ReSharper disable once AssignNullToNotNullAttribute
-                        _ready.TrySetException(task.Exception);
+                        _ready.TrySetException(task.Exception!);
                     else
                         _ready.TrySetResult(task.Result);
                 }
@@ -173,7 +172,7 @@
                     else if (task.IsFaulted)
 
                         // ReSharper disable once AssignNullToNotNullAttribute
-                        setReady.TrySetException(task.Exception);
+                        setReady.TrySetException(task.Exception!);
                     else
                         setReady.TrySetResult(true);
                 }
@@ -214,10 +213,8 @@
 
                     if (task.IsCanceled)
                         _completed.TrySetCanceled();
-                    else if (task.IsFaulted)
-
-                        // ReSharper disable once AssignNullToNotNullAttribute
-                        _completed.TrySetException(task.Exception);
+                    else if (task.IsFaulted && task.Exception is { } aggregateException)
+                        _completed.TrySetException(aggregateException);
                     else
                         _completed.TrySetResult(task.Result);
                 }
@@ -232,10 +229,8 @@
 
                     if (task.IsCanceled)
                         setCompleted.TrySetCanceled();
-                    else if (task.IsFaulted)
-
-                        // ReSharper disable once AssignNullToNotNullAttribute
-                        setCompleted.TrySetException(task.Exception);
+                    else if (task.IsFaulted && task.Exception is { } aggregateException)
+                        setCompleted.TrySetException(aggregateException);
                     else
                         setCompleted.TrySetResult(true);
                 }

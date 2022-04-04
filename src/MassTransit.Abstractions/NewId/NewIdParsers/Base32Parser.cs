@@ -15,8 +15,7 @@
         readonly string _chars;
 
         public Base32Parser()
-            :
-            this(ConvertChars)
+            : this(ConvertChars)
         {
         }
 
@@ -33,7 +32,7 @@
             if (text.Length != 26)
                 throw new ArgumentException("The input string must be 26 characters", nameof(text));
 
-            var buffer = _buffer.Value;
+            var buffer = _buffer.Value!;
 
             var bufferOffset = 0;
             var offset = 0;

@@ -11,14 +11,14 @@
             Value = value;
         }
 
-        public int CompareTo(DependencyGraphNode<T> other)
+        public int CompareTo(DependencyGraphNode<T>? other)
         {
             return !Equals(other)
                 ? 0
                 : -1;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (ReferenceEquals(null, obj))
                 return false;

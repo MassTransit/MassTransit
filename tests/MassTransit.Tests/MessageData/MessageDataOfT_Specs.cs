@@ -22,7 +22,7 @@ namespace MassTransit.Tests.MessageData
             var payload = new SpecialPayload { Value = "Something special" };
 
             var streamBytes = new byte[1000];
-            await using var ms = new MemoryStream(streamBytes);
+            using var ms = new MemoryStream(streamBytes);
 
             Response<PayloadProcessed> response = await client.GetResponse<PayloadProcessed>(new { Payload = payload }, TestCancellationToken,
                 RequestTimeout.After(s: 5));

@@ -29,16 +29,20 @@ namespace MassTransit.Serialization
             foreach (var serializer in serializers)
                 _serializers[serializer.ContentType.MediaType] = serializer;
 
-            if (!_serializers.TryGetValue(serializerContentType.MediaType, out _defaultSerializer))
+            if (!_serializers.TryGetValue(serializerContentType.MediaType, out var defaultSerializer))
                 throw new ConfigurationException($"The serializer content type was not found: {serializerContentType}");
+
+            _defaultSerializer = defaultSerializer;
 
             _deserializers = new Dictionary<string, IMessageDeserializer>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var deserializer in deserializers)
                 _deserializers[deserializer.ContentType.MediaType] = deserializer;
 
-            if (!_deserializers.TryGetValue(defaultContentType.MediaType, out _defaultDeserializer))
+            if (!_deserializers.TryGetValue(defaultContentType.MediaType, out var defaultDeserializer))
                 throw new ConfigurationException($"The default content type deserializer was not found: {defaultContentType}");
+
+            _defaultDeserializer = defaultDeserializer;
         }
 
         public ContentType DefaultContentType { get; }
@@ -53,7 +57,7 @@ namespace MassTransit.Serialization
             return _defaultSerializer;
         }
 
-        public bool TryGetMessageSerializer(ContentType contentType, out IMessageSerializer serializer)
+        public bool TryGetMessageSerializer(ContentType contentType, out IMessageSerializer? serializer)
         {
             var mediaType = contentType.MediaType;
 
@@ -70,7 +74,7 @@ namespace MassTransit.Serialization
             return _defaultDeserializer;
         }
 
-        public bool TryGetMessageDeserializer(ContentType contentType, out IMessageDeserializer deserializer)
+        public bool TryGetMessageDeserializer(ContentType contentType, out IMessageDeserializer? deserializer)
         {
             var mediaType = contentType.MediaType;
 

@@ -158,7 +158,7 @@ namespace MassTransit
 
         byte[] GetFormatterArray()
         {
-            var bytes = _formatterArray.Value;
+            var bytes = _formatterArray.Value!;
 
             bytes[15] = (byte)(_b >> 16);
             bytes[14] = (byte)(_b >> 24);
@@ -182,7 +182,7 @@ namespace MassTransit
 
         byte[] GetSequentialFormatterArray()
         {
-            var bytes = _formatterArray.Value;
+            var bytes = _formatterArray.Value!;
 
             bytes[15] = (byte)_d;
             bytes[14] = (byte)(_d >> 8);

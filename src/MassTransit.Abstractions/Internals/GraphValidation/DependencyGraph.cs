@@ -6,6 +6,7 @@ namespace MassTransit.Internals.GraphValidation
 
 
     public class DependencyGraph<T>
+        where T : notnull
     {
         readonly AdjacencyList<T, DependencyGraphNode<T>> _adjacencyList;
 

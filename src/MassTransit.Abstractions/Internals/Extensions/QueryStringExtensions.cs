@@ -91,7 +91,7 @@
         /// <param name="address"></param>
         /// <param name="hostPath"></param>
         /// <param name="entityName"></param>
-        public static void ParseHostPathAndEntityName(this Uri address, out string hostPath, out string entityName)
+        public static void ParseHostPathAndEntityName(this Uri address, out string? hostPath, out string? entityName)
         {
             var path = address.AbsolutePath;
 
@@ -113,12 +113,15 @@
         /// </summary>
         /// <param name="address"></param>
         /// <returns></returns>
-        public static IEnumerable<(string, string)> SplitQueryString(this Uri address)
+        public static IEnumerable<(string, string?)> SplitQueryString(this Uri address)
         {
-            var query = address.Query?.TrimStart('?');
-            return string.IsNullOrWhiteSpace(query)
-                ? Array.Empty<(string, string)>()
-                : query!.Split('&').Select(x => x.Split('=')).Select(x => (x.First().ToLowerInvariant(), x.Skip(1).FirstOrDefault()));
+            var query = address.Query.TrimStart('?');
+            if (string.IsNullOrWhiteSpace(query))
+                yield break;
+
+            foreach (var element in query!.Split('&').Select(x => x.Split('='))
+                         .Select(x => (x.First().ToLowerInvariant(), x.Skip(1).FirstOrDefault())))
+                yield return element;
         }
     }
 }

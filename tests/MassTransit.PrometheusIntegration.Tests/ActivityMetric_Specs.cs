@@ -24,7 +24,7 @@ namespace MassTransit.PrometheusIntegration.Tests
 
             await _activityMonitor.AwaitBusInactivity(TestCancellationToken);
 
-            await using var stream = new MemoryStream();
+            using var stream = new MemoryStream();
             await Metrics.DefaultRegistry.CollectAndExportAsTextAsync(stream);
 
             var text = Encoding.UTF8.GetString(stream.ToArray());

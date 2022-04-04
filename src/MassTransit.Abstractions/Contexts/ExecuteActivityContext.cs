@@ -1,8 +1,5 @@
 ﻿namespace MassTransit
 {
-    using Courier;
-
-
     public interface ExecuteActivityContext<out TArguments> :
         ExecuteContext<TArguments>
         where TArguments : class

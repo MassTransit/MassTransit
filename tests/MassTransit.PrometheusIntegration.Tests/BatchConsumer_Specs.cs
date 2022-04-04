@@ -28,7 +28,7 @@ namespace MassTransit.PrometheusIntegration.Tests
 
             await InactivityTask;
 
-            await using var stream = new MemoryStream();
+            using var stream = new MemoryStream();
             await Metrics.DefaultRegistry.CollectAndExportAsTextAsync(stream);
 
             var text = Encoding.UTF8.GetString(stream.ToArray());
@@ -104,7 +104,7 @@ namespace MassTransit.PrometheusIntegration.Tests
 
             await InactivityTask;
 
-            await using var stream = new MemoryStream();
+            using var stream = new MemoryStream();
             await Metrics.DefaultRegistry.CollectAndExportAsTextAsync(stream);
 
             var text = Encoding.UTF8.GetString(stream.ToArray());

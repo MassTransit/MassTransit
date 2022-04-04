@@ -116,7 +116,7 @@ namespace MassTransit
             if (inputName.Length > maxLength)
             {
                 string hashed;
-                using (var hasher = new SHA1Managed())
+                using (var hasher = SHA1.Create())
                 {
                     var buffer = Encoding.UTF8.GetBytes(inputName);
                     var hash = hasher.ComputeHash(buffer);

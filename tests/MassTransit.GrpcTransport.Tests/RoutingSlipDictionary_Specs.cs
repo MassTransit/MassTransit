@@ -8,10 +8,26 @@ namespace MassTransit.GrpcTransport.Tests
     using Testing;
 
 
-    public record DemoArguments(Guid Id);
+    public class DemoArguments
+    {
+        public DemoArguments(Guid id)
+        {
+            Id = id;
+        }
+
+        public Guid Id { get; set; }
+    }
 
 
-    public record DemoEvent(Guid Id);
+    public class DemoEvent
+    {
+        public DemoEvent(Guid id)
+        {
+            Id = id;
+        }
+
+        public Guid Id { get; set; }
+    }
 
 
     public class DemoActivityTests :

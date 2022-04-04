@@ -25,8 +25,8 @@ namespace MassTransit.QuartzIntegration
             var jobData = context.MergedJobDataMap;
             var messageContext = new JobDataMessageContext(context, SystemTextJsonMessageSerializer.Instance);
 
-            var contentType = new ContentType(jobData.GetString("ContentType"));
-            var destinationAddress = new Uri(jobData.GetString("Destination"));
+            var contentType = new ContentType(jobData.GetString("ContentType")!);
+            var destinationAddress = new Uri(jobData.GetString("Destination")!);
             var body = jobData.GetString("Body") ?? string.Empty;
             var messageType = jobData.GetString("MessageType")?.Split(';')?.ToArray() ?? Array.Empty<string>();
 

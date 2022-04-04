@@ -30,7 +30,7 @@ namespace MassTransit.HangfireIntegration
         {
             var genericType = typeof(MassTransitJobActivatorFactory<>).MakeGenericType(type);
 
-            return (IMassTransitJobActivatorFactory)Activator.CreateInstance(genericType, _bus);
+            return (IMassTransitJobActivatorFactory)Activator.CreateInstance(genericType, _bus)!;
         }
 
 

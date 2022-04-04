@@ -44,7 +44,7 @@ namespace MassTransit.Serialization
                 _headers.Add(key, value);
         }
 
-        public bool TryGetHeader(string key, out object value)
+        public bool TryGetHeader(string key, out object? value)
         {
             return _headers.TryGetValue(key, out value);
         }

@@ -39,6 +39,7 @@ namespace MassTransit.Internals
             List<PropertyInfo> properties = typeInfo.DeclaredMethods
                 .Where(x => x.IsSpecialName && x.Name.StartsWith("get_") && !x.IsStatic)
                 .Select(x => typeInfo.GetDeclaredProperty(x.Name.Substring("get_".Length)))
+                .Cast<PropertyInfo>()
                 .ToList();
 
             if (typeInfo.IsInterface)
@@ -84,7 +85,8 @@ namespace MassTransit.Internals
 
             IEnumerable<PropertyInfo> props = info.DeclaredMethods
                 .Where(x => x.IsSpecialName && x.Name.StartsWith("get_") && x.IsStatic)
-                .Select(x => info.GetDeclaredProperty(x.Name.Substring("get_".Length)));
+                .Select(x => info.GetDeclaredProperty(x.Name.Substring("get_".Length)))
+                .Cast<PropertyInfo>();
 
             foreach (var propertyInfo in props)
                 yield return propertyInfo;
@@ -96,7 +98,8 @@ namespace MassTransit.Internals
 
             return info.DeclaredMethods
                 .Where(x => x.IsSpecialName && x.Name.StartsWith("get_") && x.IsStatic)
-                .Select(x => info.GetDeclaredProperty(x.Name.Substring("get_".Length)));
+                .Select(x => info.GetDeclaredProperty(x.Name.Substring("get_".Length)))
+                .Cast<PropertyInfo>();
         }
 
         /// <summary>
@@ -238,7 +241,7 @@ namespace MassTransit.Internals
         /// <returns></returns>
         public static bool IsAnonymousType(this TypeInfo typeInfo)
         {
-            return typeInfo.HasAttribute<CompilerGeneratedAttribute>() && typeInfo.FullName.Contains("AnonymousType");
+            return typeInfo.FullName != null && typeInfo.HasAttribute<CompilerGeneratedAttribute>() && typeInfo.FullName.Contains("AnonymousType");
         }
 
         /// <summary>

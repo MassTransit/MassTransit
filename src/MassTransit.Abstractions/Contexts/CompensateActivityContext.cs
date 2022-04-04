@@ -1,8 +1,5 @@
 ﻿namespace MassTransit
 {
-    using Courier;
-
-
     public interface CompensateActivityContext<out TLog> :
         CompensateContext<TLog>
         where TLog : class
