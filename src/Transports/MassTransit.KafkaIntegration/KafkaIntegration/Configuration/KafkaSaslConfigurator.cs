@@ -62,5 +62,10 @@ namespace MassTransit.KafkaIntegration.Configuration
         {
             set => _clientConfig.EnableSaslOauthbearerUnsecureJwt = value;
         }
+
+        public SecurityProtocol? SecurityProtocol
+        {
+            set => _clientConfig.SecurityProtocol = value;
+        }
     }
 }
