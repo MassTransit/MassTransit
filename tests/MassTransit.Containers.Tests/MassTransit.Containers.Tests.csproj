@@ -1,25 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
+    <LangVersion>9</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Lamar" Version="5.0.4" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
     <PackageReference Include="NUnit" Version="3.13.2" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
     <PackageReference Include="Shouldly" Version="4.0.3" />
     <ProjectReference Include="..\..\src\MassTransit.TestFramework\MassTransit.TestFramework.csproj" />
     <ProjectReference Include="..\..\src\MassTransit\MassTransit.csproj" />
-    <PackageReference Include="SimpleInjector" Version="5.3.2" />
-    <PackageReference Include="SimpleInjector.Integration.ServiceCollection" Version="5.3.0" />
-    <PackageReference Include="Autofac" Version="6.3.0" />
-    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="7.2.0" />
-    <PackageReference Include="StructureMap" Version="4.7.1" />
-    <PackageReference Include="StructureMap.Microsoft.DependencyInjection" Version="2.0.0" />
-    <PackageReference Include="Castle.Windsor" Version="5.1.1" />
-    <PackageReference Include="Castle.Windsor.Extensions.DependencyInjection" Version="5.1.1" />
 
   </ItemGroup>
 
