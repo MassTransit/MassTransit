@@ -22,6 +22,11 @@ namespace MassTransit
         bool? RequiresSession { set; }
 
         /// <summary>
+        /// Sets the maximum number of concurrent calls per session
+        /// </summary>
+        int? MaxConcurrentCallsPerSession { set; }
+
+        /// <summary>
         /// Move messages to the dead letter queue on expiration (time to live exceeded)
         /// </summary>
         bool? EnableDeadLetteringOnMessageExpiration { set; }

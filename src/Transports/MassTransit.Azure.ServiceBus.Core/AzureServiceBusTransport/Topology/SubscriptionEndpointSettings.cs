@@ -36,6 +36,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology
         public IServiceBusSubscriptionConfigurator SubscriptionConfigurator => _subscriptionConfigurator;
 
         public override bool RequiresSession => _subscriptionConfigurator.RequiresSession ?? false;
+        public override int MaxConcurrentCallsPerSession => _subscriptionConfigurator.MaxConcurrentCallsPerSession ?? 1;
 
         CreateTopicOptions SubscriptionSettings.CreateTopicOptions => _createTopicOptions;
         CreateSubscriptionOptions SubscriptionSettings.CreateSubscriptionOptions => _subscriptionConfigurator.GetCreateSubscriptionOptions();

@@ -26,6 +26,11 @@ namespace MassTransit.AzureServiceBusTransport
         TimeSpan SessionIdleTimeout { get; }
 
         /// <summary>
+        /// The maximum number of concurrent calls per session
+        /// </summary>
+        int MaxConcurrentCallsPerSession { get; }
+
+        /// <summary>
         /// The path of the message entity
         /// </summary>
         string Path { get; }

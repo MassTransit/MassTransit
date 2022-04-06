@@ -42,7 +42,7 @@
         TimeSpan LockDuration { set; }
 
         /// <summary>
-        /// Sets the maximum delivery count. A message is automatically deadlettered after this number of deliveries.
+        /// Sets the maximum delivery count. A message is automatically dead-lettered after this number of deliveries.
         /// </summary>
         int MaxDeliveryCount { set; }
 
@@ -50,6 +50,11 @@
         /// Sets the queue in session mode, requiring a session for inbound messages
         /// </summary>
         bool RequiresSession { set; }
+
+        /// <summary>
+        /// If session is required, sets the maximum concurrent calls per session (defaults to 1)
+        /// </summary>
+        int MaxConcurrentCallsPerSession { set; }
 
         /// <summary>
         /// Sets the user metadata.

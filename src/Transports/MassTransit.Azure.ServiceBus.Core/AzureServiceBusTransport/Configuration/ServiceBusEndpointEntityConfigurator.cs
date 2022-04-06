@@ -16,5 +16,7 @@
         public int? MaxDeliveryCount { get; set; }
 
         public bool? RequiresSession { get; set; }
+
+        public int? MaxConcurrentCallsPerSession { get; set; }
     }
 }

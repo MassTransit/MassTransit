@@ -266,7 +266,8 @@
                 PrefetchCount = settings.PrefetchCount,
                 MaxAutoLockRenewalDuration = settings.MaxAutoRenewDuration,
                 ReceiveMode = ServiceBusReceiveMode.PeekLock,
-                MaxConcurrentCallsPerSession = settings.MaxConcurrentCalls,
+                MaxConcurrentSessions = settings.MaxConcurrentCalls,
+                MaxConcurrentCallsPerSession = settings.MaxConcurrentCallsPerSession,
                 SessionIdleTimeout = settings.SessionIdleTimeout
             };
         }
