@@ -11,6 +11,7 @@ module.exports = {
       ['meta', { name: "msapplication-TileColor", content: "#3a0839"}],
       ['meta', { name: "msapplication-config", content: "/browserconfig.xml"}],
       ['meta', { name: "theme-color", content: "#ffffff"}],
+      ['meta', { name: "viewport", content: "width=device-width, initial-scale=1"}],
     ],
   plugins: [
     '@vuepress/back-to-top',
