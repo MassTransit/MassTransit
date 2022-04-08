@@ -83,7 +83,7 @@ namespace MassTransit.Configuration
                 collection.AddSingleton<TStateMachine>();
                 collection.AddSingleton<SagaStateMachine<TSaga>>(provider => provider.GetRequiredService<TStateMachine>());
 
-                return registrar.GetOrAdd<ISagaRegistration>(typeof(TSaga), _ => new SagaStateMachineRegistration<TSaga>());
+                return registrar.GetOrAdd<ISagaRegistration>(typeof(TSaga), _ => new SagaStateMachineRegistration<TStateMachine, TSaga>());
             }
         }
 

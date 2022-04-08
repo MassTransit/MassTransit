@@ -54,11 +54,11 @@ namespace MassTransit
         {
             if (!_stopped)
             {
+                _stopped = true;
+
                 await (_options.Value.StopTimeout.HasValue
                     ? _depot.Stop(_options.Value.StopTimeout.Value, cancellationToken)
                     : _depot.Stop(cancellationToken)).ConfigureAwait(false);
-
-                _stopped = true;
             }
         }
     }

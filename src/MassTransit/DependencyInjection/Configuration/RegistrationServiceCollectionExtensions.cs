@@ -2,6 +2,7 @@ namespace MassTransit.Configuration
 {
     using DependencyInjection;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.DependencyInjection.Extensions;
     using Saga;
 
 
@@ -19,6 +20,15 @@ namespace MassTransit.Configuration
             collection.AddSingleton<DependencyInjectionSagaRepositoryContextFactory<TSaga>>();
             collection.AddSingleton<ISagaRepository<TSaga>>(provider =>
                 new SagaRepository<TSaga>(provider.GetRequiredService<DependencyInjectionSagaRepositoryContextFactory<TSaga>>()));
+        }
+
+        internal static void RemoveSagaRepositories(this IServiceCollection collection)
+        {
+            collection.RemoveAll(typeof(ISagaConsumeContextFactory<,>));
+            collection.RemoveAll(typeof(ISagaRepositoryContextFactory<>));
+
+            collection.RemoveAll(typeof(DependencyInjectionSagaRepositoryContextFactory<>));
+            collection.RemoveAll(typeof(ISagaRepository<>));
         }
     }
 }

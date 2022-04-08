@@ -11,6 +11,7 @@ namespace MassTransit
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Options;
     using Monitoring;
+    using Transports;
 
 
     /// <summary>
@@ -139,6 +140,32 @@ namespace MassTransit
 
             collection.AddOptions<MassTransitHostOptions>();
             collection.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, MassTransitHostedService>());
+        }
+
+        internal static void RemoveMassTransit(this IServiceCollection collection)
+        {
+            collection.RemoveAll<IClientFactory>();
+            collection.RemoveAll<Bind<IBus, IBusRegistrationContext>>();
+            collection.RemoveAll<IBusRegistrationContext>();
+            collection.RemoveAll(typeof(IReceiveEndpointDispatcher<>));
+            collection.RemoveAll<IReceiveEndpointDispatcherFactory>();
+
+
+            collection.RemoveAll<IBusDepot>();
+            collection.RemoveAll<ScopedConsumeContextProvider>();
+            collection.RemoveAll<ConsumeContext>();
+            collection.RemoveAll<ISendEndpointProvider>();
+            collection.RemoveAll<IPublishEndpoint>();
+            collection.RemoveAll<IConsumeScopeProvider>();
+            collection.RemoveAll(typeof(IRequestClient<>));
+
+            collection.RemoveAll<Bind<IBus, IBusInstance>>();
+            collection.RemoveAll<IBusInstance>();
+            collection.RemoveAll<IReceiveEndpointConnector>();
+            collection.RemoveAll<IBusControl>();
+            collection.RemoveAll<IBus>();
+
+            collection.RemoveAll<IScopedClientFactory>();
         }
 
 
