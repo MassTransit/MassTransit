@@ -33,8 +33,6 @@ namespace MassTransit
 
             configure(configurator);
 
-            configurator.Validate().ThrowIfContainsFailure("The mediator configuration is invalid:");
-
             var mediatorDispatcher = configurator.Build();
 
             var responseEndpointConfiguration = busConfiguration.HostConfiguration.CreateReceiveEndpointConfiguration("response");
@@ -43,8 +41,6 @@ namespace MassTransit
             configurator = new MediatorConfiguration(busConfiguration.HostConfiguration, responseEndpointConfiguration);
 
             configure(configurator);
-
-            configurator.Validate().ThrowIfContainsFailure("The mediator response configuration is invalid:");
 
             var responseDispatcher = responseConfigurator.Build();
 
