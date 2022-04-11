@@ -49,11 +49,6 @@ namespace MassTransit
             Current = new BusLogContext(new SingleLoggerFactory(logger), Cached.Source.Value);
         }
 
-        public static EnabledScope? BeginScope()
-        {
-            return Current?.BeginScope();
-        }
-
         public static ILogContext CreateLogContext(string categoryName)
         {
             var current = Current ??= CreateDefaultLogContext();

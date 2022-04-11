@@ -67,11 +67,6 @@ namespace MassTransit.Logging
 
         public EnabledLogger? Warning => Logger.IsEnabled(LogLevel.Warning) ? new EnabledLogger(Logger, LogLevel.Warning) : default(EnabledLogger?);
 
-        public EnabledScope? BeginScope()
-        {
-            return new EnabledScope(Logger);
-        }
-
         public StartedActivity? StartSendActivity<T>(SendTransportContext transportContext, SendContext<T> context, params (string Key, object Value)[] tags)
             where T : class
         {
@@ -139,9 +134,7 @@ namespace MassTransit.Logging
             if (baggage != null)
                 context.Headers.Set(DiagnosticHeaders.ActivityCorrelationContext, baggage);
 
-            EnabledScope? scope = BeginScope(activity);
-
-            return new StartedActivity(activity, scope);
+            return new StartedActivity(activity);
         }
 
         public StartedActivity? StartReceiveActivity(string name, string inputAddress, string endpointName, ReceiveContext context,
@@ -173,9 +166,7 @@ namespace MassTransit.Logging
                 }
             }
 
-            EnabledScope? scope = BeginScope(activity);
-
-            return new StartedActivity(activity, scope);
+            return new StartedActivity(activity);
         }
 
         public StartedActivity? StartConsumerActivity<TConsumer, T>(ConsumeContext<T> context)
@@ -273,9 +264,7 @@ namespace MassTransit.Logging
             if (activity.IsAllDataRequested)
                 started(activity);
 
-            EnabledScope? scope = BeginScope(activity);
-
-            return new StartedActivity(activity, scope);
+            return new StartedActivity(activity);
         }
 
         static ActivityContext GetParentActivityContext(Headers headers)
@@ -286,65 +275,10 @@ namespace MassTransit.Logging
                     : default;
         }
 
-        static EnabledScope? BeginScope(System.Diagnostics.Activity activity)
-        {
-            EnabledScope? scope = LogContext.BeginScope();
-            if (!scope.HasValue)
-                return scope;
-
-            var spanId = activity.GetSpanId();
-            if (!string.IsNullOrWhiteSpace(spanId))
-                scope.Value.Add("SpanId", spanId);
-
-            var traceId = activity.GetTraceId();
-            if (!string.IsNullOrWhiteSpace(traceId))
-                scope.Value.Add("TraceId", traceId);
-
-            var parentId = activity.GetParentId();
-            if (!string.IsNullOrWhiteSpace(parentId))
-                scope.Value.Add("ParentId", parentId);
-
-            return scope;
-        }
-
 
         static class Cached
         {
             internal static readonly ConcurrentDictionary<string, string> OperationNames = new ConcurrentDictionary<string, string>();
-        }
-    }
-
-
-    static class ActivityExtensions
-    {
-        public static string GetSpanId(this System.Diagnostics.Activity activity)
-        {
-            return activity.IdFormat switch
-            {
-                ActivityIdFormat.Hierarchical => activity.Id,
-                ActivityIdFormat.W3C => activity.SpanId.ToHexString(),
-                _ => null,
-            } ?? string.Empty;
-        }
-
-        public static string GetTraceId(this System.Diagnostics.Activity activity)
-        {
-            return activity.IdFormat switch
-            {
-                ActivityIdFormat.Hierarchical => activity.RootId,
-                ActivityIdFormat.W3C => activity.TraceId.ToHexString(),
-                _ => null,
-            } ?? string.Empty;
-        }
-
-        public static string GetParentId(this System.Diagnostics.Activity activity)
-        {
-            return activity.IdFormat switch
-            {
-                ActivityIdFormat.Hierarchical => activity.ParentId,
-                ActivityIdFormat.W3C => activity.ParentSpanId.ToHexString(),
-                _ => null,
-            } ?? string.Empty;
         }
     }
 }
