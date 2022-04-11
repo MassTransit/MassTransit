@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.AzureServiceBusTransport
 {
     using System;
+    using System.Net.WebSockets;
     using System.Threading;
     using System.Threading.Tasks;
     using Azure.Messaging.ServiceBus;
@@ -49,6 +50,7 @@
             {
                 MessageTimeToLiveExpiredException _ => false,
                 MessageLockExpiredException _ => false,
+                WebSocketException _ => true,
                 ServiceBusException { Reason: ServiceBusFailureReason.MessageLockLost } => false,
                 ServiceBusException { Reason: ServiceBusFailureReason.ServiceCommunicationProblem } => true,
                 ServiceBusException { IsTransient: true } => false,
@@ -58,8 +60,14 @@
             if (args.Exception is ServiceBusException { IsTransient: true, Reason: ServiceBusFailureReason.ServiceCommunicationProblem })
             {
                 LogContext.Debug?.Log(args.Exception,
-                    "Exception on Receiver {InputAddress} during {Action} ActiveDispatchCount({activeDispatch}) ErrorRequiresRecycle({requiresRecycle})",
+                    "ServiceBusException on Receiver {InputAddress} during {Action} ActiveDispatchCount({activeDispatch}) ErrorRequiresRecycle({requiresRecycle})",
                     _context.InputAddress, args.ErrorSource, _messageReceiver.ActiveDispatchCount, requiresRecycle);
+            }
+            else if (args.Exception is WebSocketException exception)
+            {
+                LogContext.Debug?.Log(exception,
+                    "WebSocketException on Receiver {InputAddress} code {Code} ActiveDispatchCount({activeDispatch}) ErrorRequiresRecycle({requiresRecycle})",
+                    _context.InputAddress, exception.WebSocketErrorCode, _messageReceiver.ActiveDispatchCount, requiresRecycle);
             }
             else if (args.Exception is ObjectDisposedException { ObjectName: "$cbs" })
             {
@@ -69,7 +77,7 @@
             {
                 // don't log this one
             }
-            else if (!(args.Exception is OperationCanceledException))
+            else if (!(args.Exception is OperationCanceledException) && !(args.Exception.InnerException is TimeoutException))
             {
                 EnabledLogger? logger = requiresRecycle ? LogContext.Error : LogContext.Warning;
 
@@ -80,14 +88,13 @@
 
             if (requiresRecycle)
             {
-                if (_deliveryComplete.TrySetResult(false))
-                {
-                    await _context.NotifyFaulted(args.Exception, args.EntityPath).ConfigureAwait(false);
+                await _context.NotifyFaulted(args.Exception, args.EntityPath).ConfigureAwait(false);
 
-                #pragma warning disable 4014
-                    Task.Run(() => this.Stop($"Receiver Exception: {args.Exception.Message}"));
-                #pragma warning restore 4014
-                }
+                _deliveryComplete.TrySetResult(false);
+
+            #pragma warning disable 4014
+                Task.Run(() => this.Stop($"Receiver Exception: {args.Exception.Message}"));
+            #pragma warning restore 4014
             }
         }
 
