@@ -142,7 +142,10 @@ namespace MassTransit.Transports
                             }
 
                             if (retryContext == null && !policyContext.CanRetry(exception, out retryContext))
+                            {
+                                LogContext.Debug?.Log(exception, "ReceiveTransport Cannot Retry: {InputAddress}", _context.InputAddress);
                                 break;
+                            }
                         }
 
                         if (IsStopping)

@@ -1,6 +1,8 @@
 ﻿namespace MassTransit.AzureServiceBusTransport.Configuration
 {
     using System;
+    using System.Net.WebSockets;
+    using Azure;
     using Azure.Messaging.ServiceBus;
     using MassTransit.Configuration;
     using Topology;
@@ -32,7 +34,10 @@
             {
                 x.Ignore<UnauthorizedAccessException>();
 
+                x.Handle<ConnectionException>();
                 x.Handle<TimeoutException>();
+                x.Handle<WebSocketException>();
+                x.Handle<RequestFailedException>();
                 x.Handle<ServiceBusException>(ex => ex.Reason switch
                 {
                     ServiceBusFailureReason.MessagingEntityNotFound => false,

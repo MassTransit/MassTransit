@@ -50,7 +50,6 @@
             {
                 MessageTimeToLiveExpiredException _ => false,
                 MessageLockExpiredException _ => false,
-                WebSocketException _ => true,
                 ServiceBusException { Reason: ServiceBusFailureReason.MessageLockLost } => false,
                 ServiceBusException { Reason: ServiceBusFailureReason.ServiceCommunicationProblem } => true,
                 ServiceBusException { IsTransient: true } => false,
