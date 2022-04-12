@@ -2,7 +2,6 @@ namespace MassTransit.EventHubIntegration.Configuration
 {
     using System;
     using System.Collections.Generic;
-    using MassTransit.Configuration;
     using Observables;
     using Transports;
 

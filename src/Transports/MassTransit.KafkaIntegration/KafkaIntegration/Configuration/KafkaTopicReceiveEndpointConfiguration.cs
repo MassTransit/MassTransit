@@ -189,45 +189,54 @@ namespace MassTransit.KafkaIntegration.Configuration
 
         public ReceiveEndpoint Build()
         {
-            var consumerConfig = _hostConfiguration.GetConsumerConfig(_consumerConfig);
+            IReadOnlyList<ValidationResult> result = Validate().ThrowIfContainsFailure($"{GetType().Name} configuration is invalid:");
 
-            ConsumerBuilder<TKey, TValue> CreateConsumerBuilder()
+            try
             {
-                ConsumerBuilder<TKey, TValue> consumerBuilder = new ConsumerBuilder<TKey, TValue>(consumerConfig)
-                    .SetValueDeserializer(_valueDeserializer)
-                    .SetLogHandler((c, message) => _busInstance.HostConfiguration.ReceiveLogContext?.Debug?.Log(message.Message));
+                var consumerConfig = _hostConfiguration.GetConsumerConfig(_consumerConfig);
 
-                if (_keyDeserializer != null)
-                    consumerBuilder.SetKeyDeserializer(_keyDeserializer);
-                if (_offsetsCommittedHandler != null)
-                    consumerBuilder.SetOffsetsCommittedHandler(_offsetsCommittedHandler);
+                ConsumerBuilder<TKey, TValue> CreateConsumerBuilder()
+                {
+                    ConsumerBuilder<TKey, TValue> consumerBuilder = new ConsumerBuilder<TKey, TValue>(consumerConfig)
+                        .SetValueDeserializer(_valueDeserializer)
+                        .SetLogHandler((c, message) => _busInstance.HostConfiguration.ReceiveLogContext?.Debug?.Log(message.Message));
 
-                return consumerBuilder;
+                    if (_keyDeserializer != null)
+                        consumerBuilder.SetKeyDeserializer(_keyDeserializer);
+                    if (_offsetsCommittedHandler != null)
+                        consumerBuilder.SetOffsetsCommittedHandler(_offsetsCommittedHandler);
+
+                    return consumerBuilder;
+                }
+
+                KafkaReceiveEndpointContext<TKey, TValue> CreateContext()
+                {
+                    var builder = new KafkaReceiveEndpointBuilder<TKey, TValue>(_busInstance, _endpointConfiguration, _hostConfiguration, this,
+                        _headersDeserializer, CreateConsumerBuilder);
+                    foreach (var specification in Specifications)
+                        specification.Configure(builder);
+
+                    return builder.CreateReceiveEndpointContext();
+                }
+
+                KafkaReceiveEndpointContext<TKey, TValue> context = CreateContext();
+
+                if (_options.TryGetOptions(out KafkaTopicOptions options))
+                    _consumerConfigurator.UseFilter(new ConfigureKafkaTopologyFilter<TKey, TValue>(_hostConfiguration.Configuration, options));
+
+                _consumerConfigurator.UseFilter(new KafkaConsumerFilter<TKey, TValue>(context));
+
+                IPipe<ConsumerContext<TKey, TValue>> consumerPipe = _consumerConfigurator.Build();
+
+                var transport = new ReceiveTransport<ConsumerContext<TKey, TValue>>(_busInstance.HostConfiguration, context,
+                    () => context.ConsumerContextSupervisor, consumerPipe);
+
+                return new ReceiveEndpoint(transport, context);
             }
-
-            KafkaReceiveEndpointContext<TKey, TValue> CreateContext()
+            catch (Exception ex)
             {
-                var builder = new KafkaReceiveEndpointBuilder<TKey, TValue>(_busInstance, _endpointConfiguration, _hostConfiguration, this,
-                    _headersDeserializer, CreateConsumerBuilder);
-                foreach (var specification in Specifications)
-                    specification.Configure(builder);
-
-                return builder.CreateReceiveEndpointContext();
+                throw new ConfigurationException(result, "An exception occurred creating the BrokeredMessageReceiver", ex);
             }
-
-            KafkaReceiveEndpointContext<TKey, TValue> context = CreateContext();
-
-            if (_options.TryGetOptions(out KafkaTopicOptions options))
-                _consumerConfigurator.UseFilter(new ConfigureKafkaTopologyFilter<TKey, TValue>(_hostConfiguration.Configuration, options));
-
-            _consumerConfigurator.UseFilter(new KafkaConsumerFilter<TKey, TValue>(context));
-
-            IPipe<ConsumerContext<TKey, TValue>> consumerPipe = _consumerConfigurator.Build();
-
-            var transport = new ReceiveTransport<ConsumerContext<TKey, TValue>>(_busInstance.HostConfiguration, context,
-                () => context.ConsumerContextSupervisor, consumerPipe);
-
-            return new ReceiveEndpoint(transport, context);
         }
     }
 }

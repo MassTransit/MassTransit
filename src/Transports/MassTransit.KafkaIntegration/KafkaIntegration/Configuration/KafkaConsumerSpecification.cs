@@ -20,8 +20,7 @@ namespace MassTransit.KafkaIntegration.Configuration
         readonly string _topicName;
 
         public KafkaConsumerSpecification(IKafkaHostConfiguration hostConfiguration, ConsumerConfig consumerConfig, string topicName,
-            IHeadersDeserializer headersDeserializer,
-            Action<IKafkaTopicReceiveEndpointConfigurator<TKey, TValue>> configure)
+            IHeadersDeserializer headersDeserializer, Action<IKafkaTopicReceiveEndpointConfigurator<TKey, TValue>> configure)
         {
             _hostConfiguration = hostConfiguration;
             _consumerConfig = consumerConfig;
