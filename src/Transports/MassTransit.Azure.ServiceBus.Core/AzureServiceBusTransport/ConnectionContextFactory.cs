@@ -84,7 +84,7 @@ namespace MassTransit.AzureServiceBusTransport
             }
             else
             {
-                if (HasSharedAccess(settings.ConnectionString))
+                if (settings.ConnectionString != null && HasSharedAccess(settings.ConnectionString))
                 {
                     client ??= new ServiceBusClient(settings.ConnectionString, clientOptions);
                     managementClient ??= new ServiceBusAdministrationClient(settings.ConnectionString);
