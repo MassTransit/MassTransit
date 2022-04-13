@@ -18,11 +18,7 @@ public class Program
                 {
                     x.UsingAzureServiceBus((context, cfg) =>
                     {
-                        var settings = new HostSettings
-                        {
-                            ServiceUri = new Uri("sb://your-service-bus-namespace.servicebus.windows.net")
-                        };
-                        cfg.Host(settings);
+                        cfg.Host(new Uri("sb://your-service-bus-namespace.servicebus.windows.net"));
                     });
                 });
             })
