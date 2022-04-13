@@ -135,6 +135,7 @@ namespace MassTransit
         {
             collection.AddOptions();
             collection.AddHealthChecks();
+            collection.AddOptions<MassTransitHealthCheckOptions>();
             collection.TryAddEnumerable(ServiceDescriptor.Singleton<IConfigureOptions<HealthCheckServiceOptions>, ConfigureBusHealthCheckServiceOptions>());
 
             collection.AddOptions<MassTransitHostOptions>();
