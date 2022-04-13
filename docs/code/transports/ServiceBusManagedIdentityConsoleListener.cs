@@ -20,8 +20,7 @@ public class Program
                     {
                         var settings = new HostSettings
                         {
-                            ServiceUri = new Uri("sb://your-service-bus-namespace.servicebus.windows.net"),
-                            TokenCredential = new DefaultAzureCredential() // From Azure.Identity.dll
+                            ServiceUri = new Uri("sb://your-service-bus-namespace.servicebus.windows.net")
                         };
                         cfg.Host(settings);
                     });
