@@ -21,7 +21,7 @@ namespace MassTransit.Monitoring
 
         public void Configure(HealthCheckServiceOptions options)
         {
-            string[] tags = _options.Value.Tags.ToArray() ?? new[] { "ready", "masstransit" };
+            string[] tags = _options.Value.Tags?.ToArray() ?? new[] { "ready", "masstransit" };
             foreach (var busInstance in _busInstances)
             {
                 options.Registrations.Add(new HealthCheckRegistration(
