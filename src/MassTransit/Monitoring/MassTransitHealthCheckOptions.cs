@@ -6,7 +6,7 @@
     public class MassTransitHealthCheckOptions
     {
         /// <summary>
-        /// The health check name. Optional. If null the type name of bus instance will be used
+        /// The health check name. If null the type name of bus instance will be used
         /// </summary>
         public string Name { get; set; }
 
