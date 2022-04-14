@@ -280,4 +280,5 @@ public async System.Threading.Tasks.Task $TESTNAME$()
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=Substate/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=substates/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=tinerary/@EntryIndexedValue">True</s:Boolean>
-	<s:Boolean x:Key="/Default/UserDictionary/Words/=Unschedule/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=Unschedule/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=UPDLOCK/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>

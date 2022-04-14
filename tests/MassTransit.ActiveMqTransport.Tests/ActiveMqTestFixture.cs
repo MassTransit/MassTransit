@@ -2,14 +2,17 @@
 {
     using System;
     using System.Threading.Tasks;
-    using MassTransit.Testing;
     using NUnit.Framework;
+    using NUnit.Framework.Internal;
     using TestFramework;
+    using Testing;
 
 
     public class ActiveMqTestFixture :
         BusTestFixture
     {
+        TestExecutionContext _fixtureContext;
+
         public ActiveMqTestFixture(string inputQueueName = null)
             : this(new ActiveMqTestHarness(inputQueueName))
         {
@@ -46,15 +49,23 @@
         protected Uri BusAddress => ActiveMqTestHarness.BusAddress;
 
         [OneTimeSetUp]
-        public Task SetupInMemoryTestFixture()
+        public async Task SetupInMemoryTestFixture()
         {
-            return ActiveMqTestHarness.Start();
+            _fixtureContext = TestExecutionContext.CurrentContext;
+
+            LoggerFactory.Current = _fixtureContext;
+
+            await ActiveMqTestHarness.Start();
         }
 
         [OneTimeTearDown]
-        public Task TearDownInMemoryTestFixture()
+        public async Task TearDownInMemoryTestFixture()
         {
-            return ActiveMqTestHarness.Stop();
+            LoggerFactory.Current = _fixtureContext;
+
+            await ActiveMqTestHarness.Stop();
+
+            ActiveMqTestHarness.Dispose();
         }
 
         protected virtual void ConfigureActiveMqHost(IActiveMqHostConfigurator configurator)

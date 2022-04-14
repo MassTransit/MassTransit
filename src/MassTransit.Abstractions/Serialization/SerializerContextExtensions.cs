@@ -1,6 +1,7 @@
 #nullable enable
 namespace MassTransit
 {
+    using System;
     using System.Collections.Generic;
     using Serialization;
     using Transports;
@@ -68,6 +69,21 @@ namespace MassTransit
 
             value = context.DeserializeObject<T>(obj);
             return value != null;
+        }
+
+        public static MessageBody SerializeDictionary(this IObjectDeserializer deserializer, IEnumerable<KeyValuePair<string, object>> values)
+        {
+            var dictionary = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (KeyValuePair<string, object> pair in values)
+            {
+                if (pair.Value != null)
+                    dictionary[pair.Key] = pair.Value;
+            }
+
+            return dictionary.Count == 0
+                ? EmptyMessageBody.Instance
+                : deserializer.SerializeObject(dictionary);
         }
 
         public static bool TryGetValue<T>(this IObjectDeserializer context, IDictionary<string, object> dictionary, string key,

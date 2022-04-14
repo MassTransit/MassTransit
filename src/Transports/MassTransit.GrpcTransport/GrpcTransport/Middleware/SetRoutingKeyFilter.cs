@@ -1,7 +1,6 @@
 namespace MassTransit.GrpcTransport.Middleware
 {
     using System.Threading.Tasks;
-    using Topology;
 
 
     public class SetRoutingKeyFilter<T> :

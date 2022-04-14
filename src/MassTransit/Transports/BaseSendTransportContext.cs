@@ -2,6 +2,9 @@
 namespace MassTransit.Transports
 {
     using System;
+    using System.Collections.Generic;
+    using System.Threading;
+    using System.Threading.Tasks;
     using Configuration;
     using Logging;
     using Middleware;
@@ -55,9 +58,17 @@ namespace MassTransit.Transports
 
         public ISerialization Serialization { get; }
 
+        public abstract Task<SendContext<T>> CreateSendContext<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
+            where T : class;
+
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
             return SendObservers.Connect(observer);
+        }
+
+        public virtual IEnumerable<IAgent> GetAgentHandles()
+        {
+            return Array.Empty<IAgent>();
         }
     }
 }

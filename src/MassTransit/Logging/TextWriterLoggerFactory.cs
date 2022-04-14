@@ -1,34 +1,30 @@
 #nullable enable
 namespace MassTransit.Logging
 {
-    using System;
     using System.IO;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
 
 
     public class TextWriterLoggerFactory :
         ILoggerFactory
     {
-        readonly bool _enabled;
+        readonly TextWriterLoggerOptions _options;
 
-        public TextWriterLoggerFactory(TextWriter textWriter, bool enabled)
+        public TextWriterLoggerFactory(TextWriter textWriter, IOptions<TextWriterLoggerOptions> options)
         {
             Writer = textWriter;
-            _enabled = enabled;
-        }
-
-        public TextWriterLoggerFactory(bool enabled)
-        {
-            _enabled = enabled;
-
-            Writer = Console.Out;
+            _options = options.Value;
         }
 
         public TextWriter Writer { get; }
 
         public ILogger CreateLogger(string name)
         {
-            return new TextWriterLogger(this, _enabled);
+            if (_options.IsEnabled(name))
+                return new TextWriterLogger(this);
+
+            return NullLogger.Instance;
         }
 
         public void AddProvider(ILoggerProvider provider)

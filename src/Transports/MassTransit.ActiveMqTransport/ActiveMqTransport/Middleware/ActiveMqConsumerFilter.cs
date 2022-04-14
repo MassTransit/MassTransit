@@ -31,8 +31,6 @@ namespace MassTransit.ActiveMqTransport.Middleware
         {
             var receiveSettings = context.GetPayload<ReceiveSettings>();
 
-            var inputAddress = receiveSettings.GetInputAddress(context.ConnectionContext.HostAddress);
-
             var executor = new ChannelExecutor(receiveSettings.PrefetchCount, receiveSettings.ConcurrentMessageLimit);
 
             var consumers = new List<Task<ActiveMqConsumer>>
@@ -64,8 +62,7 @@ namespace MassTransit.ActiveMqTransport.Middleware
 
                 await _context.TransportObservers.NotifyCompleted(_context.InputAddress, metrics).ConfigureAwait(false);
 
-                LogContext.Debug?.Log("Consumer completed {InputAddress}: {DeliveryCount} received, {ConcurrentDeliveryCount} concurrent", inputAddress,
-                    metrics.DeliveryCount, metrics.ConcurrentDeliveryCount);
+                _context.LogConsumerCompleted(metrics.DeliveryCount, metrics.ConcurrentDeliveryCount);
 
                 await executor.DisposeAsync().ConfigureAwait(false);
             }

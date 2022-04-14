@@ -38,9 +38,9 @@ namespace MassTransit.InMemoryTransport
 
             IMessageExchange<InMemoryTransportMessage> exchange = _messageFabric.GetExchange(this, endpointAddress.Name, endpointAddress.ExchangeType);
 
-            var context = new ExchangeInMemorySendTransportContext(_hostConfiguration, receiveEndpointContext, exchange);
+            var context = new InMemorySendTransportContext(_hostConfiguration, receiveEndpointContext, exchange);
 
-            return new InMemorySendTransport(context);
+            return new SendTransport<PipeContext>(context);
         }
 
         public Uri NormalizeAddress(Uri address)

@@ -49,6 +49,11 @@ namespace MassTransit.ActiveMqTransport
             return _context.CreateMessageConsumer(destination, selector, noLocal);
         }
 
+        public IBytesMessage CreateBytesMessage()
+        {
+            return _context.CreateBytesMessage();
+        }
+
         Task SessionContext.DeleteTopic(string topicName)
         {
             return _context.DeleteTopic(topicName);

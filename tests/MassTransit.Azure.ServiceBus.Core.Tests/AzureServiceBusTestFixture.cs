@@ -66,11 +66,13 @@
         }
 
         [OneTimeTearDown]
-        public Task TearDownInMemoryTestFixture()
+        public async Task TearDownInMemoryTestFixture()
         {
             LoggerFactory.Current = _fixtureContext;
 
-            return AzureServiceBusTestHarness.Stop();
+            await AzureServiceBusTestHarness.Stop();
+
+            AzureServiceBusTestHarness.Dispose();
         }
 
         protected virtual void ConfigureServiceBusBus(IServiceBusBusFactoryConfigurator configurator)

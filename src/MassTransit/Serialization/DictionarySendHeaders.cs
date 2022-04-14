@@ -17,6 +17,19 @@ namespace MassTransit.Serialization
             _headers = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
         }
 
+        public DictionarySendHeaders(IDictionary<string, object?>? headers)
+            : this()
+        {
+            if (headers == null)
+                return;
+
+            foreach (KeyValuePair<string, object?> header in headers)
+            {
+                if (header.Value != null)
+                    _headers.Add(header.Key, header.Value);
+            }
+        }
+
         public void Set(string key, string? value)
         {
             if (key == null)

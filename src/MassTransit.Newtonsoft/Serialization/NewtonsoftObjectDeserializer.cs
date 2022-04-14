@@ -52,5 +52,14 @@ namespace MassTransit.Serialization
             using var jsonReader = token.CreateReader();
             return _deserializer.Deserialize<T>(jsonReader);
         }
+
+        public MessageBody SerializeObject<T>(T? value)
+            where T : class
+        {
+            if (value == null)
+                return new EmptyMessageBody();
+
+            return new NewtonsoftJsonObjectMessageBody<T>(value);
+        }
     }
 }

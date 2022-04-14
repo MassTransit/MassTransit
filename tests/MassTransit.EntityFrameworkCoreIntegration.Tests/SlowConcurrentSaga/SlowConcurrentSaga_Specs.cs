@@ -2,6 +2,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SlowConcurrentSaga
 {
     using System;
     using System.Linq;
+    using System.Text;
     using System.Threading.Tasks;
     using DataAccess;
     using Events;
@@ -52,7 +53,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SlowConcurrentSaga
         public SlowConcurrentSaga_Specs()
         {
             // rowlock statements that don't work to cause a deadlock.
-            var notWorkingRowLockStatements = new SqlLockStatementProvider("dbo", "SELECT * FROM \"{1}\" WHERE \"CorrelationId\" = @p0");
+            var notWorkingRowLockStatements = new SqlLockStatementProvider("dbo", new NoLockStatementFormatter());
 
             // add new migration by calling
             // dotnet ef migrations add --context "SagaDbContext``2" Init  -v
@@ -85,6 +86,28 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SlowConcurrentSaga
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.ConcurrentMessageLimit = 16;
+        }
+
+
+        class NoLockStatementFormatter :
+            ILockStatementFormatter
+        {
+            public void Create(StringBuilder sb, string schema, string table)
+            {
+                sb.AppendFormat("SELECT * FROM \"{0}\" WHERE ", table);
+            }
+
+            public void AppendColumn(StringBuilder sb, int index, string columnName)
+            {
+                if (index == 0)
+                    sb.AppendFormat("\"{0}\" = @p0", columnName);
+                else
+                    sb.AppendFormat(" AND \"{0}\" = @p{1}", columnName, index);
+            }
+
+            public void Complete(StringBuilder sb)
+            {
+            }
         }
     }
 }

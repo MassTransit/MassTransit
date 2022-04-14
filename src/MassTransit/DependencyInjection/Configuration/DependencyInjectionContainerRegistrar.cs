@@ -3,9 +3,9 @@ namespace MassTransit.Configuration
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Clients;
     using DependencyInjection;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.DependencyInjection.Extensions;
 
 
     public class DependencyInjectionContainerRegistrar :
@@ -21,46 +21,18 @@ namespace MassTransit.Configuration
         public void RegisterRequestClient<T>(RequestTimeout timeout)
             where T : class
         {
-            Collection.AddScoped(provider =>
-            {
-                var clientFactory = GetClientFactory(provider);
-                var consumeContext = provider.GetRequiredService<ScopedConsumeContextProvider>().GetContext();
-
-                if (consumeContext != null)
-                    return clientFactory.CreateRequestClient<T>(consumeContext, timeout);
-
-                return new ClientFactory(new ScopedClientFactoryContext<IServiceProvider>(clientFactory, provider))
-                    .CreateRequestClient<T>(timeout);
-            });
+            Collection.TryAddScoped(provider => GetScopedBusContext(provider).CreateRequestClient<T>(timeout));
         }
 
         public void RegisterRequestClient<T>(Uri destinationAddress, RequestTimeout timeout)
             where T : class
         {
-            Collection.AddScoped(provider =>
-            {
-                var clientFactory = GetClientFactory(provider);
-                var consumeContext = provider.GetRequiredService<ScopedConsumeContextProvider>().GetContext();
-
-                if (consumeContext != null)
-                    return clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout);
-
-                return new ClientFactory(new ScopedClientFactoryContext<IServiceProvider>(clientFactory, provider))
-                    .CreateRequestClient<T>(destinationAddress, timeout);
-            });
+            Collection.TryAddScoped(provider => GetScopedBusContext(provider).CreateRequestClient<T>(destinationAddress, timeout));
         }
 
         public void RegisterScopedClientFactory()
         {
-            Collection.AddScoped<IScopedClientFactory>(provider =>
-            {
-                var clientFactory = GetClientFactory(provider);
-                var consumeContext = provider.GetRequiredService<ScopedConsumeContextProvider>().GetContext();
-
-                return consumeContext != null
-                    ? new ScopedClientFactory(clientFactory, consumeContext)
-                    : new ScopedClientFactory(new ClientFactory(new ScopedClientFactoryContext<IServiceProvider>(clientFactory, provider)), null);
-            });
+            Collection.TryAddScoped(provider => GetScopedBusContext(provider));
         }
 
         public T GetOrAdd<T>(Type type, Func<Type, T> missingRegistrationFactory = default)
@@ -112,15 +84,16 @@ namespace MassTransit.Configuration
             Collection.Add(ServiceDescriptor.Singleton(value));
         }
 
-        protected virtual IClientFactory GetClientFactory(IServiceProvider provider)
+        protected virtual IScopedClientFactory GetScopedBusContext(IServiceProvider provider)
         {
-            return provider.GetRequiredService<IClientFactory>();
+            return provider.GetRequiredService<IScopedBusContextProvider<IBus>>().Context.ClientFactory;
         }
     }
 
 
     public class DependencyInjectionContainerRegistrar<TBus> :
         DependencyInjectionContainerRegistrar
+        where TBus : class, IBus
     {
         public DependencyInjectionContainerRegistrar(IServiceCollection collection)
             : base(collection)
@@ -144,9 +117,9 @@ namespace MassTransit.Configuration
             Collection.Add(ServiceDescriptor.Singleton(Bind<TBus>.Create(value)));
         }
 
-        protected override IClientFactory GetClientFactory(IServiceProvider provider)
+        protected override IScopedClientFactory GetScopedBusContext(IServiceProvider provider)
         {
-            return provider.GetRequiredService<Bind<TBus, IClientFactory>>().Value;
+            return provider.GetRequiredService<IScopedBusContextProvider<TBus>>().Context.ClientFactory;
         }
     }
 }

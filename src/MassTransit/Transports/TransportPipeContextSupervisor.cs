@@ -20,12 +20,6 @@ namespace MassTransit.Transports
             _sendSupervisor = new Supervisor();
         }
 
-        public void Probe(ProbeContext context)
-        {
-            if (HasContext)
-                context.Add("connected", true);
-        }
-
         public void AddSendAgent<TAgent>(TAgent agent)
             where TAgent : IAgent
         {

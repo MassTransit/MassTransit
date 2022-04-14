@@ -46,6 +46,13 @@ namespace MassTransit
         /// <returns></returns>
         IMessageSerializer GetMessageSerializer(object message, string[] messageTypes);
 
+        /// <summary>
+        /// Converts a message (or really any object) to a dictionary of string, object. This is serializer dependent, since
+        /// JSON serializers use internal objects for object properties, to encapsulate nested properties, etc.
+        /// </summary>
+        /// <param name="message">The message</param>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <returns></returns>
         Dictionary<string, object> ToDictionary<T>(T? message)
             where T : class;
     }

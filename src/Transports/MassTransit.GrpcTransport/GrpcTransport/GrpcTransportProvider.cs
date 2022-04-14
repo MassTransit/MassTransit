@@ -75,7 +75,7 @@ namespace MassTransit.GrpcTransport
 
         public IMessageFabric<NodeContext, GrpcTransportMessage> MessageFabric => _messageFabric;
 
-        public Task<ISendTransport> CreateSendTransport(ReceiveEndpointContext receiveEndpointContext, Uri address)
+        public async Task<ISendTransport> CreateSendTransport(ReceiveEndpointContext receiveEndpointContext, Uri address)
         {
             LogContext.SetCurrentIfNull(_hostConfiguration.LogContext);
 
@@ -85,9 +85,9 @@ namespace MassTransit.GrpcTransport
 
             IMessageExchange<GrpcTransportMessage> exchange = _messageFabric.GetExchange(HostNodeContext, endpointAddress.Name, endpointAddress.ExchangeType);
 
-            var transportContext = new ExchangeGrpcSendTransportContext(_hostConfiguration, receiveEndpointContext, exchange);
+            var transportContext = new GrpcSendTransportContext(_hostConfiguration, receiveEndpointContext, exchange);
 
-            return Task.FromResult<ISendTransport>(new GrpcSendTransport(transportContext));
+            return new SendTransport<PipeContext>(transportContext);
         }
 
         public Uri NormalizeAddress(Uri address)

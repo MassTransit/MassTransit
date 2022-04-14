@@ -11,11 +11,5 @@ namespace MassTransit.AzureServiceBusTransport
             : base(contextFactory)
         {
         }
-
-        public void Probe(ProbeContext context)
-        {
-            if (HasContext)
-                context.Add("connected", true);
-        }
     }
 }

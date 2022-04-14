@@ -213,8 +213,7 @@ namespace MassTransit.GrpcTransport
 
                 await _context.TransportObservers.NotifyCompleted(_context.InputAddress, metrics).ConfigureAwait(false);
 
-                LogContext.Debug?.Log("Consumer completed {InputAddress}: {DeliveryCount} received, {ConcurrentDeliveryCount} concurrent",
-                    _context.InputAddress, metrics.DeliveryCount, metrics.ConcurrentDeliveryCount);
+                _context.LogConsumerCompleted(metrics.DeliveryCount, metrics.ConcurrentDeliveryCount);
 
                 _topologyHandle?.Disconnect();
 

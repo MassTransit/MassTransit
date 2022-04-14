@@ -2,7 +2,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using System.Linq;
+    using System.Text;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata;
 
@@ -12,32 +14,47 @@ namespace MassTransit.EntityFrameworkCoreIntegration
     {
         protected static readonly ConcurrentDictionary<Type, SchemaTableColumnTrio> TableNames = new ConcurrentDictionary<Type, SchemaTableColumnTrio>();
         readonly bool _enableSchemaCaching;
+        readonly ILockStatementFormatter _formatter;
 
-        public SqlLockStatementProvider(string defaultSchema, string rowLockStatement, bool enableSchemaCaching = true)
+        public SqlLockStatementProvider(string defaultSchema, ILockStatementFormatter formatter, bool enableSchemaCaching = true)
         {
-            _enableSchemaCaching = enableSchemaCaching;
             DefaultSchema = defaultSchema ?? throw new ArgumentNullException(nameof(defaultSchema));
-            RowLockStatement = rowLockStatement ?? throw new ArgumentNullException(nameof(rowLockStatement));
+
+            _formatter = formatter;
+            _enableSchemaCaching = enableSchemaCaching;
         }
 
         string DefaultSchema { get; }
-        string RowLockStatement { get; }
 
         public virtual string GetRowLockStatement<T>(DbContext context)
             where T : class
         {
-            return FormatLockStatement<T>(context);
+            return FormatLockStatement<T>(context, nameof(ISaga.CorrelationId));
         }
 
-        string FormatLockStatement<T>(DbContext context)
+        public virtual string GetRowLockStatement<T>(DbContext context, params string[] propertyNames)
             where T : class
         {
-            var schemaTableTrio = GetSchemaAndTableNameAndColumnName(context, typeof(T));
-
-            return string.Format(RowLockStatement, schemaTableTrio.Schema, schemaTableTrio.Table, schemaTableTrio.ColumnName);
+            return FormatLockStatement<T>(context, propertyNames);
         }
 
-        SchemaTableColumnTrio GetSchemaAndTableNameAndColumnName(DbContext context, Type type)
+        string FormatLockStatement<T>(DbContext context, params string[] propertyNames)
+            where T : class
+        {
+            var schemaTableTrio = GetSchemaAndTableNameAndColumnName(context, typeof(T), propertyNames);
+
+            var sb = new StringBuilder(128);
+            _formatter.Create(sb, schemaTableTrio.Schema, schemaTableTrio.Table);
+
+            for (var i = 0; i < propertyNames.Length; i++)
+                _formatter.AppendColumn(sb, i, schemaTableTrio.ColumnNames[i]);
+
+            _formatter.Complete(sb);
+
+            return sb.ToString();
+        }
+
+        SchemaTableColumnTrio GetSchemaAndTableNameAndColumnName(DbContext context, Type type, string[] propertyNames)
         {
             if (TableNames.TryGetValue(type, out var result) && _enableSchemaCaching)
                 return result;
@@ -48,19 +65,26 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             var schema = entityType.GetSchema();
             var tableName = entityType.GetTableName();
 
-            var property = entityType.GetProperties().Single(x => x.Name.Equals(nameof(ISaga.CorrelationId), StringComparison.OrdinalIgnoreCase));
+            var columnNames = new List<string>();
 
-        #if NETSTANDARD2_0
-            var columnName = property.GetColumnName();
-        #else
-            var storeObjectIdentifier = StoreObjectIdentifier.Table(tableName, schema);
-            var columnName = property.GetColumnName(storeObjectIdentifier);
-        #endif
+            for (var i = 0; i < propertyNames.Length; i++)
+            {
+                var property = entityType.GetProperties().Single(x => x.Name.Equals(propertyNames[i], StringComparison.OrdinalIgnoreCase));
+
+            #if NETSTANDARD2_0
+                var columnName = property.GetColumnName();
+            #else
+                var storeObjectIdentifier = StoreObjectIdentifier.Table(tableName, schema);
+                var columnName = property.GetColumnName(storeObjectIdentifier);
+            #endif
+
+                columnNames.Add(columnName);
+            }
 
             if (string.IsNullOrWhiteSpace(tableName))
                 throw new MassTransitException($"Unable to determine saga table name: {TypeCache.GetShortName(type)} (using model metadata).");
 
-            result = new SchemaTableColumnTrio(schema ?? DefaultSchema, tableName, columnName);
+            result = new SchemaTableColumnTrio(schema ?? DefaultSchema, tableName, columnNames.ToArray());
 
             if (_enableSchemaCaching)
                 TableNames.TryAdd(type, result);
@@ -71,16 +95,16 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
         protected readonly struct SchemaTableColumnTrio
         {
-            public SchemaTableColumnTrio(string schema, string table, string columnName)
+            public SchemaTableColumnTrio(string schema, string table, string[] columnNames)
             {
                 Schema = schema;
                 Table = table;
-                ColumnName = columnName;
+                ColumnNames = columnNames;
             }
 
             public readonly string Schema;
             public readonly string Table;
-            public readonly string ColumnName;
+            public readonly string[] ColumnNames;
         }
     }
 }

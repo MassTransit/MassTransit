@@ -21,6 +21,8 @@
 
         Task<IMessageConsumer> CreateMessageConsumer(IDestination destination, string selector, bool noLocal);
 
+        IBytesMessage CreateBytesMessage();
+
         Task DeleteTopic(string topicName);
 
         Task DeleteQueue(string queueName);

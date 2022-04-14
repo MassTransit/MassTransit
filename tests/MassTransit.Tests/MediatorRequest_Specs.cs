@@ -4,8 +4,8 @@ namespace MassTransit.Tests
     using System.Threading.Tasks;
     using Mediator;
     using Microsoft.Extensions.DependencyInjection;
-    using Middleware;
     using NUnit.Framework;
+    using TestFramework;
 
 
     [TestFixture]

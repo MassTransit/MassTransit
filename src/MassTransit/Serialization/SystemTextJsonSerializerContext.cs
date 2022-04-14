@@ -5,7 +5,6 @@ namespace MassTransit.Serialization
     using System.Collections.Generic;
     using System.Net.Mime;
     using System.Text.Json;
-    using Util;
 
 
     public class SystemTextJsonSerializerContext :

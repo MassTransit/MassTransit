@@ -5,7 +5,10 @@
     using System.Threading.Tasks;
     using System.Transactions;
 
-    public class TransactionalEnlistmentBus : BaseTransactionalBus, ITransactionalBus
+
+    public class TransactionalEnlistmentBus :
+        BaseTransactionalBus,
+        ITransactionalBus
     {
         readonly ConcurrentDictionary<Transaction, TransactionalEnlistmentNotification> _pendingActions;
 
@@ -13,6 +16,11 @@
             : base(bus)
         {
             _pendingActions = new ConcurrentDictionary<Transaction, TransactionalEnlistmentNotification>();
+        }
+
+        public Task Release()
+        {
+            throw new NotImplementedException("Don't call release for transaction scope");
         }
 
         void ClearTransaction(Transaction transaction)
@@ -49,11 +57,6 @@
         void TransactionCompleted(object sender, TransactionEventArgs e)
         {
             ClearTransaction(e.Transaction);
-        }
-
-        public Task Release()
-        {
-            throw new NotImplementedException("Don't call release for transaction scope");
         }
     }
 }

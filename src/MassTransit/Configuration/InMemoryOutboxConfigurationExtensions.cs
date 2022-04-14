@@ -2,6 +2,10 @@
 {
     using System;
     using Configuration;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.DependencyInjection.Extensions;
+    using Middleware;
+    using Middleware.Outbox;
 
 
     public static class InMemoryOutboxConfigurationExtensions
@@ -90,6 +94,39 @@
 
             var observer = new InMemoryOutboxHandlerConfigurationObserver(configure);
             configurator.ConnectHandlerConfigurationObserver(observer);
+        }
+
+        /// <summary>
+        /// Adds the required components to support the in-memory version of the InboxOutbox, which is intended for
+        /// testing purposes only.
+        /// </summary>
+        /// <param name="collection"></param>
+        /// <returns></returns>
+        public static IServiceCollection AddInMemoryInboxOutbox(this IServiceCollection collection)
+        {
+            collection.TryAddSingleton<InMemoryOutboxMessageRepository>();
+            collection.TryAddScoped<IOutboxContextFactory<InMemoryOutboxMessageRepository>, InMemoryOutboxContextFactory>();
+
+            return collection;
+        }
+
+        /// <summary>
+        /// Includes a combination inbox/outbox in the consume pipeline, which stores outgoing messages in memory until
+        /// the message consumer completes.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="provider">Configuration service provider</param>
+        public static void UseInMemoryInboxOutbox(this IReceiveEndpointConfigurator configurator, IServiceProvider provider)
+        {
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+            if (provider == null)
+                throw new ArgumentNullException(nameof(provider));
+
+            var observer = new OutboxConsumePipeSpecificationObserver<InMemoryOutboxMessageRepository>(configurator, provider);
+
+            configurator.ConnectConsumerConfigurationObserver(observer);
+            configurator.ConnectSagaConfigurationObserver(observer);
         }
     }
 }

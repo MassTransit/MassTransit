@@ -7,6 +7,7 @@
     using MassTransit.Middleware;
     using NUnit.Framework;
     using RetryPolicies;
+    using TestFramework;
     using Util;
 
 

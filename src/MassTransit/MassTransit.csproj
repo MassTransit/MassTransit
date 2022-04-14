@@ -15,19 +15,19 @@
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net461'">
-    <Reference Include="System.Transactions"/>
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0.0"/>
-    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4"/>
+    <Reference Include="System.Transactions" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0.0" />
+    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' != 'net461'">
-    <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0"/>
-    <PackageReference Include="System.Reflection.Emit" Version="4.7.0"/>
+    <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
+    <PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0'">
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0.0"/>
-    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4"/>
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0.0" />
+    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
   </ItemGroup>
 
  <ItemGroup>

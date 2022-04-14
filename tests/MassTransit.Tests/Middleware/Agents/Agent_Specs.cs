@@ -7,6 +7,7 @@
     using MassTransit.Internals;
     using MassTransit.Middleware;
     using NUnit.Framework;
+    using TestFramework;
 
 
     [TestFixture]
@@ -241,10 +242,7 @@
 
             public IPipeContextAgent<SimpleContext> CreateContext(ISupervisor supervisor)
             {
-                var context = new SimpleContextImpl
-                {
-                    Value = Interlocked.Increment(ref _id).ToString()
-                };
+                var context = new SimpleContextImpl { Value = Interlocked.Increment(ref _id).ToString() };
 
                 IPipeContextAgent<SimpleContext> contextHandle = supervisor.AddContext<SimpleContext>(context);
 

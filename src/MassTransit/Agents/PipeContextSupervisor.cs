@@ -38,13 +38,11 @@
             get
             {
                 lock (_contextLock)
-                {
                     return _context is { IsDisposed: false };
-                }
             }
         }
 
-        async Task IPipeContextSource<TContext>.Send(IPipe<TContext> pipe, CancellationToken cancellationToken)
+        public async Task Send(IPipe<TContext> pipe, CancellationToken cancellationToken)
         {
             IActivePipeContextAgent<TContext> activeContext = CreateActiveContext(cancellationToken);
 
@@ -70,7 +68,7 @@
             }
         }
 
-        void IProbeSite.Probe(ProbeContext context)
+        public void Probe(ProbeContext context)
         {
             var scope = context.CreateScope("source");
             scope.Set(new
@@ -84,7 +82,6 @@
         {
             SetCompleted(ActiveAndActualAgentsCompleted(context));
 
-            // stop the active context agents
             await _activeSupervisor.Stop(context).ConfigureAwait(false);
 
             await Task.WhenAll(context.Agents.Select(x => x.Stop(context))).OrCanceled(context.CancellationToken).ConfigureAwait(false);

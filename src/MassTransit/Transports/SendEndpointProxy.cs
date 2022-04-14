@@ -11,13 +11,15 @@ namespace MassTransit.Transports
     /// Generalized proxy for ISendEndpoint to intercept pipe/context
     /// </summary>
     public abstract class SendEndpointProxy :
-        ISendEndpoint
+        ITransportSendEndpoint
     {
         readonly ISendEndpoint _endpoint;
+        readonly ITransportSendEndpoint _transportEndpoint;
 
         protected SendEndpointProxy(ISendEndpoint endpoint)
         {
             _endpoint = endpoint;
+            _transportEndpoint = endpoint as ITransportSendEndpoint;
         }
 
         public ISendEndpoint Endpoint => _endpoint;
@@ -25,6 +27,13 @@ namespace MassTransit.Transports
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
             return _endpoint.ConnectSendObserver(observer);
+        }
+
+        public Task<SendContext<T>> CreateSendContext<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
+            where T : class
+        {
+            return _transportEndpoint.CreateSendContext(message, GetPipeProxy(pipe), cancellationToken)
+                ?? throw new InvalidOperationException("The endpoint does not have a valid transport");
         }
 
         public virtual Task Send<T>(T message, CancellationToken cancellationToken)
@@ -125,7 +134,7 @@ namespace MassTransit.Transports
                 throw new ArgumentNullException(nameof(pipe));
 
             (var message, IPipe<SendContext<T>> sendPipe) =
-                await MessageInitializerCache<T>.InitializeMessage(values, GetPipeProxy<T>(pipe), cancellationToken).ConfigureAwait(false);
+                await MessageInitializerCache<T>.InitializeMessage(values, GetPipeProxy(pipe), cancellationToken).ConfigureAwait(false);
 
             await _endpoint.Send(message, sendPipe, cancellationToken).ConfigureAwait(false);
         }

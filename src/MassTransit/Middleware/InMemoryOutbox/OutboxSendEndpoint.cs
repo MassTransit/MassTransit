@@ -3,12 +3,13 @@
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Transports;
 
 
     public class OutboxSendEndpoint :
-        ISendEndpoint
+        ITransportSendEndpoint
     {
-        readonly ISendEndpoint _endpoint;
+        readonly ITransportSendEndpoint _endpoint;
         readonly OutboxContext _outboxContext;
 
         /// <summary>
@@ -19,7 +20,7 @@
         public OutboxSendEndpoint(OutboxContext outboxContext, ISendEndpoint endpoint)
         {
             _outboxContext = outboxContext;
-            _endpoint = endpoint;
+            _endpoint = endpoint as ITransportSendEndpoint ?? throw new ArgumentException("Must be a transport endpoint", nameof(endpoint));
         }
 
         /// <summary>
@@ -30,6 +31,12 @@
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
             return _endpoint.ConnectSendObserver(observer);
+        }
+
+        public Task<SendContext<T>> CreateSendContext<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
+            where T : class
+        {
+            return _endpoint.CreateSendContext(message, pipe, cancellationToken);
         }
 
         Task ISendEndpoint.Send<T>(T message, CancellationToken cancellationToken)

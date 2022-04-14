@@ -1,7 +1,6 @@
 namespace MassTransit.AmazonSqsTransport.Middleware
 {
     using System.Threading.Tasks;
-    using Topology;
     using Transports;
 
 
@@ -24,10 +23,6 @@ namespace MassTransit.AmazonSqsTransport.Middleware
 
         async Task IFilter<ClientContext>.Send(ClientContext context, IPipe<ClientContext> next)
         {
-            var receiveSettings = context.GetPayload<ReceiveSettings>();
-
-            var inputAddress = receiveSettings.GetInputAddress(context.ConnectionContext.HostAddress);
-
             var receiver = new AmazonSqsMessageReceiver(context, _context);
 
             await receiver.Ready.ConfigureAwait(false);
@@ -46,8 +41,7 @@ namespace MassTransit.AmazonSqsTransport.Middleware
 
                 await _context.TransportObservers.NotifyCompleted(_context.InputAddress, metrics).ConfigureAwait(false);
 
-                LogContext.Debug?.Log("Consumer completed {InputAddress}: {DeliveryCount} received, {ConcurrentDeliveryCount} concurrent", inputAddress,
-                    metrics.DeliveryCount, metrics.ConcurrentDeliveryCount);
+                _context.LogConsumerCompleted(metrics.DeliveryCount, metrics.ConcurrentDeliveryCount);
             }
         }
     }

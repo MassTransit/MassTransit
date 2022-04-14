@@ -14,11 +14,11 @@
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.1"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.1" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.18"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.18" />
   </ItemGroup>
 
   <ItemGroup>

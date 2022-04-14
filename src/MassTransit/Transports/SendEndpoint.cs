@@ -8,7 +8,7 @@
 
 
     public class SendEndpoint :
-        ISendEndpoint,
+        ITransportSendEndpoint,
         IAsyncDisposable
     {
         readonly ConnectHandle _observerHandle;
@@ -45,6 +45,12 @@
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
             return _transport.ConnectSendObserver(observer);
+        }
+
+        public Task<SendContext<T>> CreateSendContext<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
+            where T : class
+        {
+            return _transport.CreateSendContext(message, new SendEndpointPipe<T>(this, pipe), cancellationToken);
         }
 
         public Task Send<T>(T message, CancellationToken cancellationToken)

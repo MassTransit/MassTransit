@@ -147,6 +147,15 @@ namespace MassTransit.Serialization
                 : element.Deserialize<T>(Options);
         }
 
+        public MessageBody SerializeObject<T>(T? value)
+            where T : class
+        {
+            if (value == null)
+                return new EmptyMessageBody();
+
+            return new SystemTextJsonObjectMessageBody<T>(value, Options);
+        }
+
         static T? GetObject<T>(JsonElement jsonElement)
             where T : class
         {

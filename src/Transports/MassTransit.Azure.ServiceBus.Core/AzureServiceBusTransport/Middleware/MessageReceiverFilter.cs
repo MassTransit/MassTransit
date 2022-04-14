@@ -52,8 +52,7 @@ namespace MassTransit.AzureServiceBusTransport.Middleware
 
                 await _transportObserver.NotifyCompleted(_context.InputAddress, metrics).ConfigureAwait(false);
 
-                LogContext.Debug?.Log("Consumer completed {InputAddress}: {DeliveryCount} received, {ConcurrentDeliveryCount} concurrent", context.InputAddress,
-                    metrics.DeliveryCount, metrics.ConcurrentDeliveryCount);
+                _context.LogConsumerCompleted(metrics.DeliveryCount, metrics.ConcurrentDeliveryCount);
             }
 
             await next.Send(context).ConfigureAwait(false);

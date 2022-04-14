@@ -12,6 +12,7 @@ namespace MassTransit
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
     using Testing;
     using Testing.Implementations;
     using Transports;
@@ -43,7 +44,9 @@ namespace MassTransit
         public static IServiceCollection AddMassTransitTestHarness(this IServiceCollection services, TextWriter textWriter,
             Action<IBusRegistrationConfigurator> configure = null)
         {
-            services.TryAddSingleton<ILoggerFactory>(provider => new TextWriterLoggerFactory(textWriter, true));
+            services.AddOptions<TextWriterLoggerOptions>();
+            services.TryAddSingleton<ILoggerFactory>(provider =>
+                new TextWriterLoggerFactory(textWriter, provider.GetRequiredService<IOptions<TextWriterLoggerOptions>>()));
             services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
 
             services.AddBusObserver<ContainerTestHarnessBusObserver>();

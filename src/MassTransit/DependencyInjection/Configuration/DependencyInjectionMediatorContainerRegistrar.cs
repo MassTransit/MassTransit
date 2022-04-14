@@ -3,6 +3,7 @@ namespace MassTransit.Configuration
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Clients;
     using DependencyInjection;
     using Mediator;
     using Microsoft.Extensions.DependencyInjection;
@@ -33,9 +34,14 @@ namespace MassTransit.Configuration
             Collection.Add(ServiceDescriptor.Singleton(Bind<IMediator>.Create(value)));
         }
 
-        protected override IClientFactory GetClientFactory(IServiceProvider provider)
+        protected override IScopedClientFactory GetScopedBusContext(IServiceProvider provider)
         {
-            return provider.GetRequiredService<IMediator>();
+            var clientFactory = provider.GetRequiredService<IMediator>();
+            var consumeContext = provider.GetRequiredService<ScopedConsumeContextProvider>().GetContext();
+
+            return consumeContext != null
+                ? new ScopedClientFactory(clientFactory, consumeContext)
+                : new ScopedClientFactory(new ClientFactory(new ScopedClientFactoryContext<IServiceProvider>(clientFactory, provider)), null);
         }
     }
 }

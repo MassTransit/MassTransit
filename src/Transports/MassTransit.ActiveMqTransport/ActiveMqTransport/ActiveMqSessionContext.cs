@@ -15,8 +15,6 @@
         SessionContext,
         IAsyncDisposable
     {
-        readonly CancellationToken _cancellationToken;
-        readonly ConnectionContext _connectionContext;
         readonly ChannelExecutor _executor;
         readonly MessageProducerCache _messageProducerCache;
         readonly ISession _session;
@@ -24,9 +22,9 @@
         public ActiveMqSessionContext(ConnectionContext connectionContext, ISession session, CancellationToken cancellationToken)
             : base(connectionContext)
         {
-            _connectionContext = connectionContext;
+            ConnectionContext = connectionContext;
             _session = session;
-            _cancellationToken = cancellationToken;
+            CancellationToken = cancellationToken;
 
             _executor = new ChannelExecutor(1);
 
@@ -39,13 +37,13 @@
             {
                 try
                 {
-                    await _messageProducerCache.Stop().ConfigureAwait(false);
+                    await _messageProducerCache.Stop(CancellationToken.None).ConfigureAwait(false);
 
                     _session.Close();
                 }
                 catch (Exception ex)
                 {
-                    LogContext.Warning?.Log(ex, "Close session faulted: {Host}", _connectionContext.Description);
+                    LogContext.Warning?.Log(ex, "Close session faulted: {Host}", ConnectionContext.Description);
                 }
 
                 _session.Dispose();
@@ -54,11 +52,11 @@
             await _executor.DisposeAsync().ConfigureAwait(false);
         }
 
-        CancellationToken PipeContext.CancellationToken => _cancellationToken;
+        public override CancellationToken CancellationToken { get; }
 
-        ISession SessionContext.Session => _session;
+        public ISession Session => _session;
 
-        ConnectionContext SessionContext.ConnectionContext => _connectionContext;
+        public ConnectionContext ConnectionContext { get; }
 
         public Task<ITopic> GetTopic(string topicName)
         {
@@ -77,13 +75,17 @@
 
         public Task<IMessageProducer> CreateMessageProducer(IDestination destination)
         {
-            return _messageProducerCache.GetMessageProducer(destination, x =>
-                Task.Factory.StartNew(() => _session.CreateProducer(x), CancellationToken));
+            return _messageProducerCache.GetMessageProducer(destination, x => _executor.Run(() => _session.CreateProducer(x), CancellationToken));
         }
 
         public Task<IMessageConsumer> CreateMessageConsumer(IDestination destination, string selector, bool noLocal)
         {
             return _executor.Run(() => _session.CreateConsumer(destination, selector, noLocal), CancellationToken);
+        }
+
+        public IBytesMessage CreateBytesMessage()
+        {
+            return _session.CreateBytesMessage();
         }
 
         public Task DeleteTopic(string topicName)

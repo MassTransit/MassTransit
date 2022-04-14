@@ -62,7 +62,9 @@
                 return new ActiveMqSessionContext(connectionContext, session, createCancellationToken);
             }
 
+        #pragma warning disable CS4014
             _connectionContextSupervisor.CreateAgent(asyncContext, CreateSessionContext, cancellationToken);
+        #pragma warning restore CS4014
         }
     }
 }

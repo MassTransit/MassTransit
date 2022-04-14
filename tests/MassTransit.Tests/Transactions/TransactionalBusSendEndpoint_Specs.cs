@@ -5,6 +5,7 @@
     using System.Threading.Tasks;
     using System.Transactions;
     using MassTransit.Transactions;
+    using MassTransit.Transports;
     using NUnit.Framework;
     using TestFramework.Messages;
 
@@ -22,7 +23,7 @@
         }
 
         [Test]
-        public async Task Should_throw_exception_when_transaction_commited_and_disposed()
+        public async Task Should_throw_exception_when_transaction_committed_and_disposed()
         {
             var message = new PingMessage();
 
@@ -44,9 +45,16 @@
         }
 
 
-        class AlwaysThrowSendEndpointMock : ISendEndpoint
+        class AlwaysThrowSendEndpointMock :
+            ITransportSendEndpoint
         {
             public ConnectHandle ConnectSendObserver(ISendObserver observer)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task<SendContext<T>> CreateSendContext<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
+                where T : class
             {
                 throw new NotImplementedException();
             }

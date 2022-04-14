@@ -157,6 +157,18 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Returns the original MessageId from the message headers, or the MessageId if not present
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public static Guid? GetOriginalMessageId(this ConsumeContext context)
+        {
+            return context.TryGetHeader(MessageHeaders.OriginalMessageId, out Guid? originalMessageId)
+                ? originalMessageId
+                : context.MessageId;
+        }
+
+        /// <summary>
         /// Sets the ConversationId to a new value, starting a new conversation. If a message was being consumed, and the
         /// ConversationId was present, that value is stored in an MT-InitiatingConversationId header.
         /// </summary>

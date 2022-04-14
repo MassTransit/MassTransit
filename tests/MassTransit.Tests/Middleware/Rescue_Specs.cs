@@ -5,6 +5,7 @@
     using System.Threading.Tasks;
     using MassTransit.Middleware;
     using NUnit.Framework;
+    using TestFramework;
 
 
     [TestFixture]

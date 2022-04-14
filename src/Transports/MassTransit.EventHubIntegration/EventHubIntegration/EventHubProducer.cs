@@ -71,9 +71,7 @@ namespace MassTransit.EventHubIntegration
         {
             // TODO change this to use the proper header initialization, etc.
 
-            Task<InitializeContext<T>>[] messageTasks = values
-                .Select(value => MessageInitializerCache<T>.Initialize((object)value, cancellationToken))
-                .ToArray();
+            Task<InitializeContext<T>>[] messageTasks = values.Select(value => MessageInitializerCache<T>.Initialize(value, cancellationToken)).ToArray();
 
             async Task ProduceAsync()
             {

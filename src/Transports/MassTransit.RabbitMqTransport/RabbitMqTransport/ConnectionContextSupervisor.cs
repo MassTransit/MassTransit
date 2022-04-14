@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.RabbitMqTransport
 {
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
     using Configuration;
     using Middleware;
@@ -66,8 +65,8 @@
                 endpointAddress);
         }
 
-        Task<ISendTransport> CreateSendTransport(RabbitMqReceiveEndpointContext receiveEndpointContext,
-            IModelContextSupervisor modelContextSupervisor, IPipe<ModelContext> pipe, string exchangeName, RabbitMqEndpointAddress endpointAddress)
+        Task<ISendTransport> CreateSendTransport(ReceiveEndpointContext receiveEndpointContext, IModelContextSupervisor modelContextSupervisor,
+            IPipe<ModelContext> pipe, string exchangeName, RabbitMqEndpointAddress endpointAddress)
         {
             var supervisor = new ModelContextSupervisor(modelContextSupervisor);
 
@@ -79,55 +78,14 @@
 
             IPipe<ModelContext> delayPipe = new ConfigureRabbitMqTopologyFilter<DelaySettings>(delaySettings, delaySettings.GetBrokerTopology()).ToPipe();
 
-            var sendTransportContext = new SendTransportContext(_hostConfiguration, receiveEndpointContext, supervisor, pipe, exchangeName, delayPipe,
-                delaySettings.ExchangeName);
+            var sendTransportContext = new RabbitMqSendTransportContext(_hostConfiguration, receiveEndpointContext, supervisor, pipe, exchangeName,
+                delayPipe, delaySettings.ExchangeName);
 
-            var transport = new RabbitMqSendTransport(sendTransportContext);
+            var transport = new SendTransport<ModelContext>(sendTransportContext);
 
             modelContextSupervisor.AddSendAgent(transport);
 
             return Task.FromResult<ISendTransport>(transport);
-        }
-
-
-        class SendTransportContext :
-            BaseSendTransportContext,
-            RabbitMqSendTransportContext
-        {
-            readonly IRabbitMqHostConfiguration _hostConfiguration;
-
-            public SendTransportContext(IRabbitMqHostConfiguration hostConfiguration, ReceiveEndpointContext receiveEndpointContext,
-                IModelContextSupervisor modelContextSupervisor,
-                IPipe<ModelContext> configureTopologyPipe, string exchange,
-                IPipe<ModelContext> delayConfigureTopologyPipe, string delayExchange)
-                : base(hostConfiguration, receiveEndpointContext.Serialization)
-            {
-                _hostConfiguration = hostConfiguration;
-                ModelContextSupervisor = modelContextSupervisor;
-                ConfigureTopologyPipe = configureTopologyPipe;
-                Exchange = exchange;
-
-                DelayConfigureTopologyPipe = delayConfigureTopologyPipe;
-                DelayExchange = delayExchange;
-            }
-
-            public IPipe<ModelContext> ConfigureTopologyPipe { get; }
-            public IPipe<ModelContext> DelayConfigureTopologyPipe { get; }
-            public string DelayExchange { get; }
-            public string Exchange { get; }
-            public IModelContextSupervisor ModelContextSupervisor { get; }
-
-            public Task Send(IPipe<ModelContext> pipe, CancellationToken cancellationToken)
-            {
-                return _hostConfiguration.Retry(() => ModelContextSupervisor.Send(pipe, cancellationToken), ModelContextSupervisor, cancellationToken);
-            }
-
-            public void Probe(ProbeContext context)
-            {
-            }
-
-            public override string EntityName => Exchange;
-            public override string ActivitySystem => "rabbitmq";
         }
     }
 }

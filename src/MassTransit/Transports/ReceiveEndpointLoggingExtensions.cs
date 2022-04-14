@@ -38,6 +38,12 @@ namespace MassTransit.Transports
         static readonly LogMessage<Uri, Guid?, string, DateTime, Guid?> _logScheduled = LogContext.DefineMessage<Uri, Guid?, string, DateTime, Guid?>(
             LogLevel.Debug, "SCHED {DestinationAddress} {MessageId} {MessageType} {DeliveryTime:G} {Token}");
 
+        static readonly LogMessage<Uri, long, int> _logConsumerCompleted = LogContext.DefineMessage<Uri, long, int>(
+            LogLevel.Debug, "Consumer Completed: {InputAddress}: {DeliveryCount} received, {ConcurrentDeliveryCount} concurrent");
+
+        static readonly LogMessage<Uri, long, int, string> _logConsumerCompletedTag = LogContext.DefineMessage<Uri, long, int, string>(
+            LogLevel.Debug, "Consumer Completed: {InputAddress}: {DeliveryCount} received, {ConcurrentDeliveryCount} concurrent, {Tag}");
+
         /// <summary>
         /// Log a skipped message that was moved to the dead-letter queue
         /// </summary>
@@ -118,6 +124,18 @@ namespace MassTransit.Transports
             where T : class
         {
             _logSent(context.DestinationAddress, context.MessageId, TypeCache<T>.ShortName);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void LogConsumerCompleted(this ReceiveEndpointContext context, long deliveryCount, int concurrentDeliveryCount)
+        {
+            _logConsumerCompleted(context.InputAddress, deliveryCount, concurrentDeliveryCount);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void LogConsumerCompleted(this ReceiveEndpointContext context, long deliveryCount, int concurrentDeliveryCount, string tag)
+        {
+            _logConsumerCompletedTag(context.InputAddress, deliveryCount, concurrentDeliveryCount, tag);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

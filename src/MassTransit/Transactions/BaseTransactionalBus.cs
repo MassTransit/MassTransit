@@ -3,7 +3,6 @@
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Topology;
     using Transports;
 
 
@@ -14,7 +13,7 @@
         readonly IPublishEndpoint _publishEndpoint;
         readonly TransactionalBusPublishEndpointProvider _publishEndpointProvider;
 
-        public BaseTransactionalBus(IBus bus)
+        protected BaseTransactionalBus(IBus bus)
         {
             _bus = bus;
 

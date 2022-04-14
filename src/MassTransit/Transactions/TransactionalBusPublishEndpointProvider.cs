@@ -1,12 +1,13 @@
-﻿using System.Threading.Tasks;
-
-namespace MassTransit.Transactions
+﻿namespace MassTransit.Transactions
 {
+    using System.Threading.Tasks;
+
+
     public class TransactionalBusPublishEndpointProvider :
         IPublishEndpointProvider
     {
-        private readonly BaseTransactionalBus _bus;
-        private readonly IPublishEndpointProvider _publishEndpointProvider;
+        readonly BaseTransactionalBus _bus;
+        readonly IPublishEndpointProvider _publishEndpointProvider;
 
         public TransactionalBusPublishEndpointProvider(BaseTransactionalBus bus, IPublishEndpointProvider publishEndpointProvider)
         {

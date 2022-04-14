@@ -75,6 +75,11 @@ namespace MassTransit.KafkaIntegration
 
             public override string EntityName => TopicAddress.Topic;
             public override string ActivitySystem => "kafka";
+
+            public override Task<SendContext<T>> CreateSendContext<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
+            {
+                throw new NotImplementedByDesignException("Kafka is a producer, not an outbox compatible transport");
+            }
         }
     }
 }

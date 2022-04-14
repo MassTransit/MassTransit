@@ -1,8 +1,10 @@
 namespace MassTransit.Context
 {
     using System;
+    using System.Collections.Generic;
     using System.Net.Mime;
     using System.Runtime.Serialization;
+    using System.Text;
     using System.Threading;
     using Middleware;
     using Serialization;
@@ -10,7 +12,7 @@ namespace MassTransit.Context
 
     public class MessageSendContext<TMessage> :
         BasePipeContext,
-        PublishContext<TMessage>
+        TransportSendContext<TMessage>
         where TMessage : class
     {
         readonly Lazy<MessageBody> _body;
@@ -93,9 +95,99 @@ namespace MassTransit.Context
 
         public bool Mandatory { get; set; }
 
+        public virtual void WritePropertiesTo(IDictionary<string, object> properties)
+        {
+            if (!Durable)
+                properties[PropertyNames.Durable] = false;
+            if (Mandatory)
+                properties[PropertyNames.Mandatory] = true;
+        }
+
+        public virtual void ReadPropertiesFrom(IReadOnlyDictionary<string, object> properties)
+        {
+            Durable = ReadBoolean(properties, PropertyNames.Durable, true);
+            Mandatory = ReadBoolean(properties, PropertyNames.Mandatory);
+        }
+
         MessageBody GetMessageBody()
         {
             return Serializer?.GetMessageBody(this) ?? throw new SerializationException("Unable to serialize message, no serializer specified.");
+        }
+
+        protected static string ReadString(IReadOnlyDictionary<string, object> properties, string key, string defaultValue = null)
+        {
+            if (properties.TryGetValue(key, out var value))
+            {
+                if (value is string text)
+                    return text;
+
+                if (value is byte[] bytes)
+                {
+                    text = Encoding.UTF8.GetString(bytes);
+                    return text;
+                }
+            }
+
+            return defaultValue;
+        }
+
+        protected static T? ReadEnum<T>(IReadOnlyDictionary<string, object> properties, string key, T? defaultValue = default)
+            where T : struct
+        {
+            if (properties.TryGetValue(key, out var value))
+            {
+                if (value is string text)
+                    return Enum.TryParse<T>(text, out var enumValue) ? enumValue : defaultValue;
+            }
+
+            return defaultValue;
+        }
+
+        protected static byte ReadByte(IReadOnlyDictionary<string, object> properties, string key, byte defaultValue = default)
+        {
+            if (properties.TryGetValue(key, out var value))
+            {
+                if (value is byte byteValue)
+                    return byteValue;
+
+                if (value is string text)
+                    return byte.TryParse(text, out byteValue) ? byteValue : defaultValue;
+
+                if (value is byte[] bytes)
+                {
+                    text = Encoding.UTF8.GetString(bytes);
+                    return byte.TryParse(text, out byteValue) ? byteValue : defaultValue;
+                }
+            }
+
+            return defaultValue;
+        }
+
+        protected static bool ReadBoolean(IReadOnlyDictionary<string, object> properties, string key, bool defaultValue = default)
+        {
+            if (properties.TryGetValue(key, out var value))
+            {
+                if (value is bool boolValue)
+                    return boolValue;
+
+                if (value is string text)
+                    return bool.TryParse(text, out boolValue) ? boolValue : defaultValue;
+
+                if (value is byte[] bytes)
+                {
+                    text = Encoding.UTF8.GetString(bytes);
+                    return bool.TryParse(text, out boolValue) ? boolValue : defaultValue;
+                }
+            }
+
+            return defaultValue;
+        }
+
+
+        static class PropertyNames
+        {
+            public const string Durable = "Durable";
+            public const string Mandatory = "Mandatory";
         }
     }
 }

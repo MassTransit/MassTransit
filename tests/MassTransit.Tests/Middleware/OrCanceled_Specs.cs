@@ -6,6 +6,7 @@ namespace MassTransit.Tests.Middleware
     using System.Threading.Tasks;
     using MassTransit.Internals;
     using NUnit.Framework;
+    using TestFramework;
 
 
     [TestFixture]

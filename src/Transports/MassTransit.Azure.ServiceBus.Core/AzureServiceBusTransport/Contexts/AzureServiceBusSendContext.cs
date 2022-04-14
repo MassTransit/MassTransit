@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.AzureServiceBusTransport
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading;
     using Context;
 
@@ -110,6 +111,35 @@
         public long GetSequenceNumber(Guid scheduledMessageId)
         {
             return BitConverter.ToInt64(scheduledMessageId.ToByteArray(), 0);
+        }
+
+        public override void ReadPropertiesFrom(IReadOnlyDictionary<string, object> properties)
+        {
+            base.ReadPropertiesFrom(properties);
+
+            PartitionKey = ReadString(properties, PropertyNames.PartitionKey);
+            SessionId = ReadString(properties, PropertyNames.SessionId);
+            ReplyToSessionId = ReadString(properties, PropertyNames.ReplyToSessionId);
+        }
+
+        public override void WritePropertiesTo(IDictionary<string, object> properties)
+        {
+            base.WritePropertiesTo(properties);
+
+            if (!string.IsNullOrWhiteSpace(PartitionKey))
+                properties[PropertyNames.PartitionKey] = PartitionKey;
+            if (!string.IsNullOrWhiteSpace(SessionId))
+                properties[PropertyNames.SessionId] = SessionId;
+            if (!string.IsNullOrWhiteSpace(ReplyToSessionId))
+                properties[PropertyNames.ReplyToSessionId] = ReplyToSessionId;
+        }
+
+
+        static class PropertyNames
+        {
+            public const string PartitionKey = "ASB-PartitionKey";
+            public const string SessionId = "ASB-SessionId";
+            public const string ReplyToSessionId = "ASB-ReplyToSessionId";
         }
     }
 }

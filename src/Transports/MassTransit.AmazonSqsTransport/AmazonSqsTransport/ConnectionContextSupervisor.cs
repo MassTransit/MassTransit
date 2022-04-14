@@ -1,11 +1,8 @@
 ﻿namespace MassTransit.AmazonSqsTransport
 {
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
-    using Amazon.SQS.Model;
     using Configuration;
-    using MassTransit.Middleware;
     using Middleware;
     using Topology;
     using Transports;
@@ -45,7 +42,11 @@
 
                 IPipe<ClientContext> configureTopology = new ConfigureAmazonSqsTopologyFilter<EntitySettings>(settings, settings.GetBrokerTopology()).ToPipe();
 
-                return CreateTransport(receiveEndpointContext, clientContextSupervisor, configureTopology, settings.EntityName, x => new QueueSendTransport(x));
+                var supervisor = new ClientContextSupervisor(clientContextSupervisor);
+
+                var context = new QueueSendTransportContext(_hostConfiguration, receiveEndpointContext, supervisor, configureTopology, settings.EntityName);
+
+                return CreateTransport(clientContextSupervisor, context);
             }
             else
             {
@@ -59,7 +60,11 @@
 
                 IPipe<ClientContext> configureTopology = new ConfigureAmazonSqsTopologyFilter<EntitySettings>(settings, builder.BuildBrokerTopology()).ToPipe();
 
-                return CreateTransport(receiveEndpointContext, clientContextSupervisor, configureTopology, settings.EntityName, x => new TopicSendTransport(x));
+                var supervisor = new ClientContextSupervisor(clientContextSupervisor);
+
+                var context = new TopicSendTransportContext(_hostConfiguration, receiveEndpointContext, supervisor, configureTopology, settings.EntityName);
+
+                return CreateTransport(clientContextSupervisor, context);
             }
         }
 
@@ -76,62 +81,20 @@
             IPipe<ClientContext> configureTopology =
                 new ConfigureAmazonSqsTopologyFilter<EntitySettings>(settings, publishTopology.GetBrokerTopology()).ToPipe();
 
-            return CreateTransport(receiveEndpointContext, clientContextSupervisor, configureTopology, settings.EntityName, x => new TopicSendTransport(x));
-        }
-
-        Task<ISendTransport> CreateTransport<T>(SqsReceiveEndpointContext receiveEndpointContext, IClientContextSupervisor clientContextSupervisor,
-            IPipe<ClientContext> configureTopology, string entityName, Func<SqsSendTransportContext, T> factory)
-            where T : Supervisor, ISendTransport
-        {
             var supervisor = new ClientContextSupervisor(clientContextSupervisor);
 
-            var transportContext = new SendTransportContext(_hostConfiguration, receiveEndpointContext, supervisor, configureTopology, entityName);
+            var context = new TopicSendTransportContext(_hostConfiguration, receiveEndpointContext, supervisor, configureTopology, settings.EntityName);
 
-            var transport = factory(transportContext);
+            return CreateTransport(clientContextSupervisor, context);
+        }
+
+        static Task<ISendTransport> CreateTransport(IClientContextSupervisor clientContextSupervisor, SendTransportContext<ClientContext> transportContext)
+        {
+            var transport = new SendTransport<ClientContext>(transportContext);
 
             clientContextSupervisor.AddSendAgent(transport);
 
             return Task.FromResult<ISendTransport>(transport);
-        }
-
-
-        class SendTransportContext :
-            BaseSendTransportContext,
-            SqsSendTransportContext
-        {
-            readonly IAmazonSqsHostConfiguration _hostConfiguration;
-
-            public SendTransportContext(IAmazonSqsHostConfiguration hostConfiguration, ReceiveEndpointContext receiveEndpointContext,
-                IClientContextSupervisor clientContextSupervisor, IPipe<ClientContext> configureTopologyPipe, string entityName)
-                : base(hostConfiguration, receiveEndpointContext.Serialization)
-            {
-                _hostConfiguration = hostConfiguration;
-                ClientContextSupervisor = clientContextSupervisor;
-
-                ConfigureTopologyPipe = configureTopologyPipe;
-                EntityName = entityName;
-
-                SqsSetHeaderAdapter = new TransportSetHeaderAdapter<MessageAttributeValue>(
-                    new SqsHeaderValueConverter(hostConfiguration.Settings.AllowTransportHeader), TransportHeaderOptions.IncludeFaultMessage);
-                SnsSetHeaderAdapter = new TransportSetHeaderAdapter<Amazon.SimpleNotificationService.Model.MessageAttributeValue>(
-                    new SnsHeaderValueConverter(hostConfiguration.Settings.AllowTransportHeader), TransportHeaderOptions.IncludeFaultMessage);
-            }
-
-            public IPipe<ClientContext> ConfigureTopologyPipe { get; }
-            public override string EntityName { get; }
-            public override string ActivitySystem => "sqs";
-            public IClientContextSupervisor ClientContextSupervisor { get; }
-            public ITransportSetHeaderAdapter<MessageAttributeValue> SqsSetHeaderAdapter { get; }
-            public ITransportSetHeaderAdapter<Amazon.SimpleNotificationService.Model.MessageAttributeValue> SnsSetHeaderAdapter { get; }
-
-            public Task Send(IPipe<ClientContext> pipe, CancellationToken cancellationToken)
-            {
-                return _hostConfiguration.Retry(() => ClientContextSupervisor.Send(pipe, cancellationToken), ClientContextSupervisor, cancellationToken);
-            }
-
-            public void Probe(ProbeContext context)
-            {
-            }
         }
     }
 }
