@@ -36,7 +36,7 @@ Any topic can be subscribed to a receive endpoint, as shown below. The topic att
 
 ### Scoping
 
-Because there is only ever one "SQS/SNS" per AWS account it can be helpful to "Scope" your queues and topics.  This will prefix all SQS queues and SNS topics with scope value.
+Because there is only ever one "SQS/SNS" per AWS account it can be helpful to "Scope" your queues and topics. This will prefix all SQS queues and SNS topics with scope value.
 
 <<< @/docs/code/transports/AmazonSqsScopedConsoleListener.cs
 
