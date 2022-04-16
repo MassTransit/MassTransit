@@ -2,6 +2,7 @@ namespace MassTransit.KafkaIntegration.Configuration
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Confluent.Kafka;
     using Observables;
     using Serializers;
@@ -43,7 +44,8 @@ namespace MassTransit.KafkaIntegration.Configuration
 
             _configure?.Invoke(configurator);
 
-            IReadOnlyList<ValidationResult> result = Validate().ThrowIfContainsFailure($"{TypeCache.GetShortName(GetType())} configuration is invalid:");
+            IReadOnlyList<ValidationResult> result = Validate().Concat(configurator.Validate())
+                .ThrowIfContainsFailure($"{TypeCache.GetShortName(GetType())} configuration is invalid:");
 
             try
             {
@@ -51,7 +53,7 @@ namespace MassTransit.KafkaIntegration.Configuration
             }
             catch (Exception ex)
             {
-                throw new ConfigurationException(result, "An exception occurred creating the Kafka receive endpoint", ex);
+                throw new ConfigurationException(result, "An exception occurred creating Kafka receive endpoint", ex);
             }
         }
 
