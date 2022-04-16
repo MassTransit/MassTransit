@@ -2,6 +2,7 @@ namespace MassTransit.EventHubIntegration.Configuration
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Observables;
     using Transports;
 
@@ -64,7 +65,8 @@ namespace MassTransit.EventHubIntegration.Configuration
             var configurator = new EventHubReceiveEndpointConfigurator(_hostConfiguration, busInstance, endpointConfiguration, _eventHubName, _consumerGroup);
             _configure?.Invoke(configurator);
 
-            IReadOnlyList<ValidationResult> result = Validate().ThrowIfContainsFailure("The event hub receive endpoint configuration is invalid:");
+            IReadOnlyList<ValidationResult> result = Validate().Concat(configurator.Validate())
+                .ThrowIfContainsFailure($"{TypeCache.GetShortName(GetType())} configuration is invalid:");
 
             try
             {
@@ -72,7 +74,7 @@ namespace MassTransit.EventHubIntegration.Configuration
             }
             catch (Exception ex)
             {
-                throw new ConfigurationException(result, "An exception occurred creating the EventHub receive endpoint", ex);
+                throw new ConfigurationException(result, "An exception occurred creating EventHub receive endpoint", ex);
             }
         }
     }

@@ -1,7 +1,6 @@
 namespace MassTransit.EventHubIntegration.Configuration
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Azure.Messaging.EventHubs;
     using Azure.Messaging.EventHubs.Processor;
@@ -81,37 +80,28 @@ namespace MassTransit.EventHubIntegration.Configuration
 
         public ReceiveEndpoint Build()
         {
-            IReadOnlyList<ValidationResult> result = Validate().ThrowIfContainsFailure($"{GetType().Name} configuration is invalid:");
-
-            try
+            IEventHubReceiveEndpointContext CreateContext()
             {
-                IEventHubReceiveEndpointContext CreateContext()
-                {
-                    var builder = new EventHubReceiveEndpointBuilder(_hostConfiguration, _busInstance, _endpointConfiguration, this, CreateBlobClient,
-                        CreateEventProcessorClient, _partitionClosingHandler, _partitionInitializingHandler);
+                var builder = new EventHubReceiveEndpointBuilder(_hostConfiguration, _busInstance, _endpointConfiguration, this, CreateBlobClient,
+                    CreateEventProcessorClient, _partitionClosingHandler, _partitionInitializingHandler);
 
-                    foreach (var specification in Specifications)
-                        specification.Configure(builder);
+                foreach (var specification in Specifications)
+                    specification.Configure(builder);
 
-                    return builder.CreateReceiveEndpointContext();
-                }
-
-                var context = CreateContext();
-
-                _processorConfigurator.UseFilter(new EventHubBlobContainerFactoryFilter());
-                _processorConfigurator.UseFilter(new EventHubConsumerFilter(context));
-
-                IPipe<ProcessorContext> processorPipe = _processorConfigurator.Build();
-
-                var transport = new ReceiveTransport<ProcessorContext>(_busInstance.HostConfiguration, context, () => context.ContextSupervisor,
-                    processorPipe);
-
-                return new ReceiveEndpoint(transport, context);
+                return builder.CreateReceiveEndpointContext();
             }
-            catch (Exception ex)
-            {
-                throw new ConfigurationException(result, "An exception occurred creating the BrokeredMessageReceiver", ex);
-            }
+
+            var context = CreateContext();
+
+            _processorConfigurator.UseFilter(new EventHubBlobContainerFactoryFilter());
+            _processorConfigurator.UseFilter(new EventHubConsumerFilter(context));
+
+            IPipe<ProcessorContext> processorPipe = _processorConfigurator.Build();
+
+            var transport = new ReceiveTransport<ProcessorContext>(_busInstance.HostConfiguration, context, () => context.ContextSupervisor,
+                processorPipe);
+
+            return new ReceiveEndpoint(transport, context);
         }
 
         BlobContainerClient CreateBlobClient(IStorageSettings storageSettings)
