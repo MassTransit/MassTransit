@@ -1,5 +1,6 @@
 namespace MassTransit
 {
+    using System;
     using Configuration;
     using DependencyInjection;
     using Transports;
@@ -9,6 +10,10 @@ namespace MassTransit
         IRegistrationConfigurator
     {
         IContainerRegistrar Registrar { get; }
+
+        void TryAddScoped<TRider, TService>(Func<TRider, IServiceProvider, TService> factory)
+            where TRider : class, IRider
+            where TService : class;
 
         /// <summary>
         /// Add the rider to the container, configured properly
