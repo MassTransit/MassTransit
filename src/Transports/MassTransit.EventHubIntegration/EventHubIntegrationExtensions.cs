@@ -2,10 +2,8 @@ namespace MassTransit
 {
     using System;
     using DependencyInjection;
-    using EventHubIntegration;
     using EventHubIntegration.Configuration;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.DependencyInjection.Extensions;
 
 
     public static class EventHubIntegrationExtensions
@@ -19,22 +17,34 @@ namespace MassTransit
             var factory = new EventHubRegistrationRiderFactory(configure);
             configurator.SetRiderFactory(factory);
 
-            configurator.TryAddScoped(GetCurrentProducerProvider);
+            configurator.TryAddScoped<IEventHubRider, IEventHubProducerProvider>(GetCurrentProducerProvider);
         }
 
-        static IEventHubProducerProvider GetCurrentProducerProvider(IServiceProvider provider)
+        public static void UsingEventHub<TBus>(this IRiderRegistrationConfigurator<TBus> configurator,
+            Action<IRiderRegistrationContext, IEventHubFactoryConfigurator> configure)
+            where TBus : class, IBus
         {
-            var producerProvider = provider.GetRequiredService<IEventHubRider>();
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
 
+            var factory = new EventHubRegistrationRiderFactory(configure);
+            configurator.SetRiderFactory(factory);
+
+            configurator.TryAddScoped<IEventHubRider, Bind<TBus, IEventHubProducerProvider>>((rider, provider) =>
+                Bind<TBus>.Create(GetCurrentProducerProvider(rider, provider)));
+        }
+
+        static IEventHubProducerProvider GetCurrentProducerProvider(IEventHubRider rider, IServiceProvider provider)
+        {
             var contextProvider = provider.GetService<ScopedConsumeContextProvider>();
             if (contextProvider != null)
             {
                 return contextProvider.HasContext
-                    ? producerProvider.GetProducerProvider(contextProvider.GetContext())
-                    : producerProvider.GetProducerProvider();
+                    ? rider.GetProducerProvider(contextProvider.GetContext())
+                    : rider.GetProducerProvider();
             }
 
-            return producerProvider.GetProducerProvider(provider.GetService<ConsumeContext>());
+            return rider.GetProducerProvider(provider.GetService<ConsumeContext>());
         }
     }
 }

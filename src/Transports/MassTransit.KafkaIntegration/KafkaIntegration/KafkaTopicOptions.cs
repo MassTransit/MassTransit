@@ -52,14 +52,12 @@ namespace MassTransit.KafkaIntegration
                 yield return this.Failure(nameof(RequestTimeout), "should be greater than 0");
         }
 
-        internal TopicSpecification ToSpecification()
-        {
-            return new TopicSpecification
+        internal TopicSpecification ToSpecification() =>
+            new TopicSpecification
             {
                 Name = _topic,
                 NumPartitions = _numPartitions,
                 ReplicationFactor = _replicaFactor,
             };
-        }
     }
 }

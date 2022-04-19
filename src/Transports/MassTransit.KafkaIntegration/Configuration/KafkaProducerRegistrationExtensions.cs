@@ -60,7 +60,7 @@ namespace MassTransit
                 throw new ArgumentException(nameof(topicName));
 
             var registration = new KafkaProducerRegistration<TKey, T>(topicName, configure);
-            configurator.TryAddScoped(provider => GetProducer<TKey, T>(topicName, provider));
+            configurator.TryAddScoped<IKafkaRider, ITopicProducer<TKey, T>>((rider, provider) => GetProducer<TKey, T>(topicName, rider, provider));
             configurator.Registrar.GetOrAdd<IKafkaProducerRegistration>(typeof(IKafkaProducerRegistration), _ => registration);
         }
 
@@ -85,7 +85,7 @@ namespace MassTransit
                 throw new ArgumentNullException(nameof(producerConfig));
 
             var registration = new KafkaProducerRegistration<TKey, T>(topicName, configure, producerConfig);
-            configurator.TryAddScoped(provider => GetProducer<TKey, T>(topicName, provider));
+            configurator.TryAddScoped<IKafkaRider, ITopicProducer<TKey, T>>((rider, provider) => GetProducer<TKey, T>(topicName, rider, provider));
             configurator.Registrar.GetOrAdd<IKafkaProducerRegistration>(typeof(IKafkaProducerRegistration), _ => registration);
         }
 
@@ -130,19 +130,17 @@ namespace MassTransit
                 new KeyedTopicProducer<TKey, T>(provider.GetRequiredService<ITopicProducer<TKey, T>>(), keyResolver));
         }
 
-        static ITopicProducer<TKey, T> GetProducer<TKey, T>(string topicName, IServiceProvider provider)
+        static ITopicProducer<TKey, T> GetProducer<TKey, T>(string topicName, IKafkaRider rider, IServiceProvider provider)
             where T : class
         {
             var address = new Uri($"topic:{topicName}");
 
-            return GetProducer<TKey, T>(address, provider);
+            return GetProducer<TKey, T>(address, rider, provider);
         }
 
-        static ITopicProducer<TKey, T> GetProducer<TKey, T>(Uri address, IServiceProvider provider)
+        static ITopicProducer<TKey, T> GetProducer<TKey, T>(Uri address, IKafkaRider rider, IServiceProvider provider)
             where T : class
         {
-            var rider = provider.GetRequiredService<IKafkaRider>();
-
             var contextProvider = provider.GetService<ScopedConsumeContextProvider>();
             if (contextProvider != null)
             {

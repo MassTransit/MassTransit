@@ -166,6 +166,11 @@ namespace MassTransit.Configuration
 
         public override void AddRider(Action<IRiderRegistrationConfigurator> configure)
         {
+            AddRider(configurator => configure.Invoke(configurator));
+        }
+
+        public void AddRider(Action<IRiderRegistrationConfigurator<TBus>> configure)
+        {
             var configurator = new ServiceCollectionRiderConfigurator<TBus>(this, new DependencyInjectionRiderContainerRegistrar<TBus>(this));
             configure?.Invoke(configurator);
         }
