@@ -70,7 +70,7 @@ namespace MassTransit.Configuration
 
         public virtual void AddRider(Action<IRiderRegistrationConfigurator> configure)
         {
-            var configurator = new ServiceCollectionRiderConfigurator(this, Registrar);
+            var configurator = new ServiceCollectionRiderConfigurator(this, new DependencyInjectionRiderContainerRegistrar(this));
             configure?.Invoke(configurator);
         }
 
@@ -166,7 +166,7 @@ namespace MassTransit.Configuration
 
         public override void AddRider(Action<IRiderRegistrationConfigurator> configure)
         {
-            var configurator = new ServiceCollectionRiderConfigurator<TBus>(this, Registrar);
+            var configurator = new ServiceCollectionRiderConfigurator<TBus>(this, new DependencyInjectionRiderContainerRegistrar<TBus>(this));
             configure?.Invoke(configurator);
         }
 

@@ -5,7 +5,6 @@ namespace MassTransit.Configuration
     using System.Linq;
     using Clients;
     using DependencyInjection;
-    using Mediator;
     using Microsoft.Extensions.DependencyInjection;
 
 
@@ -148,38 +147,6 @@ namespace MassTransit.Configuration
         protected override IClientFactory GetClientFactory(IServiceProvider provider)
         {
             return provider.GetRequiredService<Bind<TBus, IClientFactory>>().Value;
-        }
-    }
-
-
-    public class DependencyInjectionMediatorContainerRegistrar :
-        DependencyInjectionContainerRegistrar
-    {
-        public DependencyInjectionMediatorContainerRegistrar(IServiceCollection collection)
-            : base(collection)
-        {
-        }
-
-        public override IEnumerable<T> GetRegistrations<T>()
-        {
-            return Collection.Where(x => x.ServiceType == typeof(Bind<IMediator, T>))
-                .Select(x => x.ImplementationInstance).Cast<Bind<IMediator, T>>()
-                .Select(x => x.Value);
-        }
-
-        public override IEnumerable<T> GetRegistrations<T>(IServiceProvider provider)
-        {
-            return provider.GetService<IEnumerable<Bind<IMediator, T>>>().Select(x => x.Value) ?? Array.Empty<T>();
-        }
-
-        protected override void AddRegistration<T>(T value)
-        {
-            Collection.Add(ServiceDescriptor.Singleton(Bind<IMediator>.Create(value)));
-        }
-
-        protected override IClientFactory GetClientFactory(IServiceProvider provider)
-        {
-            return provider.GetRequiredService<IMediator>();
         }
     }
 }
