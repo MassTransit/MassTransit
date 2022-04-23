@@ -176,6 +176,10 @@ return factory.CreateServiceProvider(container);
 
 MassTransit would then be able to use `IServiceProvider` with Autofac to create scopes, resolve dependencies, etc.
 
+### Transport Changes
+
+- [RabbitMQ batch publishing](/usage/transports/rabbitmq.md#configurebatch) is now disabled by default. If you are seeing a degradation in publishing performance after upgrading, you may benefit from enabling batch publish to increase throughput. Scenarios where batching can improve throughput include high-latency broker connectivity and HA/Lazy queues.
+
 ## Version 7
 
 As with previous major versions, MassTransit V7 includes a number of new features, but has also deprecated or changed from previous configuration syntax. For the most part, consumers, sagas, etc. should work exactly as they did with previous releases. However, some of the configuration aspects may have been updated to be more consistent.
