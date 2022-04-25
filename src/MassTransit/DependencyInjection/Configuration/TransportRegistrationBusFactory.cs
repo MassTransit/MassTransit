@@ -42,7 +42,13 @@ namespace MassTransit.Configuration
 
             try
             {
-                var busReceiveEndpointConfiguration = configurator.CreateBusEndpointConfiguration(x => x.ConfigureConsumeTopology = false);
+                var busReceiveEndpointConfiguration = configurator.CreateBusEndpointConfiguration(x =>
+                {
+                    x.ConfigureConsumeTopology = false;
+
+                    x.DiscardFaultedMessages();
+                    x.DiscardSkippedMessages();
+                });
 
                 var host = _hostConfiguration.Build() as IHost<TEndpointConfigurator>;
 
