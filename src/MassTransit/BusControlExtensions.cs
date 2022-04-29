@@ -13,14 +13,20 @@
         /// It is a wrapper of the async method `StopAsync`
         /// </summary>
         /// <param name="busControl">The bus handle</param>
-        public static void Stop(this IBusControl busControl) => Stop(busControl, TimeSpan.FromSeconds(60));
+        public static void Stop(this IBusControl busControl)
+        {
+            Stop(busControl, TimeSpan.FromSeconds(60));
+        }
 
         /// <summary>
         /// Starts a bus, throwing an exception if the bus does not start
         /// It is a wrapper of the async method `StartAsync`
         /// </summary>
         /// <param name="busControl">The bus handle</param>
-        public static void Start(this IBusControl busControl) => Start(busControl, TimeSpan.FromSeconds(60));
+        public static void Start(this IBusControl busControl)
+        {
+            Start(busControl, TimeSpan.FromSeconds(60));
+        }
 
         /// <summary>
         /// Stop a bus, throwing an exception if the bus does not stop in the specified timeout
