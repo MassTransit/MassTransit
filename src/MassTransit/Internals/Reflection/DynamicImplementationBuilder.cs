@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Linq;
     using System.Reflection;
     using System.Reflection.Emit;
@@ -144,9 +145,14 @@
                 }
             }
 
+            var constructorArgs = data.ConstructorArguments.Select(x =>
+                x.Value is ReadOnlyCollection<CustomAttributeTypedArgument> nestedValue
+                    ? nestedValue.Select(x => x.Value).ToArray()
+                    : x.Value).ToArray();
+
             return new CustomAttributeBuilder(
                 data.Constructor,
-                data.ConstructorArguments.Select(ctorArg => ctorArg.Value).ToArray(),
+                constructorArgs,
                 propertyArguments.ToArray(),
                 propertyArgumentValues.ToArray(),
                 fieldArguments.ToArray(),

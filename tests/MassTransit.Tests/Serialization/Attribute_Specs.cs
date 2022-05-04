@@ -1,8 +1,10 @@
+#nullable enable
 namespace MassTransit.Tests.Serialization
 {
     namespace AttributeSerialization
     {
         using System;
+        using System.Collections.Generic;
         using System.Text.Json;
         using System.Text.Json.Serialization;
         using MassTransit.Serialization;
@@ -40,6 +42,30 @@ namespace MassTransit.Tests.Serialization
                 var value = messageSerializer.DeserializeObject<SillyMessage>("{\"Value\": 10}");
 
                 Assert.That(value?.Value, Is.EqualTo(-1));
+            }
+        }
+
+
+        public interface Bar
+        {
+        }
+
+
+        public interface Foo
+        {
+            public IEnumerable<Bar>? Bars { get; }
+        }
+
+
+        public class Serializing_a_nullable_reference_type
+        {
+            [Test]
+            public void Should_properly_do_the_thing()
+            {
+                var messageSerializer = new SystemTextJsonMessageSerializer();
+                var value = messageSerializer.DeserializeObject<Foo>("{\"Bars\": []}");
+
+                Assert.That(value?.Bars, Is.Not.Null);
             }
         }
     }
