@@ -29,7 +29,7 @@ var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
 });
 ```
 
-In the above example, the kill switch will activate after _10_ messages have been consumed. If the ratio of failures/attempts exceeds _15%_, the kill switch with trip and stop the receive endpoint. After _1_ minute, the receive endpoint will be restarted. Once restarted, if exceptions are still observed, the receive endpoint will be stopped again for _1_ minute.
+In the above example, the kill switch will activate after _10_ messages have been consumed. If the ratio of failures/attempts exceeds _15%_, the kill switch will trip and stop the receive endpoint. After _1_ minute, the receive endpoint will be restarted. Once restarted, if exceptions are still observed, the receive endpoint will be stopped again for _1_ minute.
 
 To configure the kill switch on a receive endpoint, the syntax is the same as shown.
 
