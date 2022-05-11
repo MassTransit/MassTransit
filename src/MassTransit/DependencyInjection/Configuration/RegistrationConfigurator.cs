@@ -280,6 +280,9 @@ namespace MassTransit.Configuration
 
                     register.Configure(this, _sagaRepositoryRegistrationProvider);
                 }
+
+                if (Registrar.GetRegistrations<IFutureRegistration>().Any() && _collection.All(x => x.ServiceType != typeof(ISagaRepository<FutureState>)))
+                    new ConfigureSagaRepository<FutureState>().Configure(this, _sagaRepositoryRegistrationProvider);
             }
         }
 
