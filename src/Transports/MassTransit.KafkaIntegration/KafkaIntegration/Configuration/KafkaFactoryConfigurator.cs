@@ -24,7 +24,9 @@ namespace MassTransit.KafkaIntegration.Configuration
         Action<ISendPipeConfigurator> _configureSend;
         IHeadersDeserializer _headersDeserializer;
         IHeadersSerializer _headersSerializer;
+
         bool _isHostConfigured;
+        Action<IClient, string> _oAuthBearerTokenRefreshHandler;
 
         public KafkaFactoryConfigurator(ClientConfig clientConfig)
         {
@@ -54,6 +56,11 @@ namespace MassTransit.KafkaIntegration.Configuration
             _clientConfig.BootstrapServers = string.Join(serverSeparator, servers);
             var configurator = new KafkaHostConfigurator(_clientConfig);
             configure?.Invoke(configurator);
+        }
+
+        public void OAuthBearerTokenRefreshHandler(Action<IClient, string> handler)
+        {
+            _oAuthBearerTokenRefreshHandler = handler ?? throw new ArgumentNullException(nameof(handler));
         }
 
         public void ConfigureApi(Action<IKafkaApiConfigurator> configure)
@@ -98,7 +105,8 @@ namespace MassTransit.KafkaIntegration.Configuration
             if (producerConfig == null)
                 throw new ArgumentNullException(nameof(producerConfig));
 
-            var configurator = new KafkaProducerSpecification<TKey, TValue>(this, producerConfig, topicName, _headersSerializer);
+            var configurator =
+                new KafkaProducerSpecification<TKey, TValue>(this, producerConfig, topicName, _headersSerializer, _oAuthBearerTokenRefreshHandler);
             configure?.Invoke(configurator);
 
             configurator.ConnectSendObserver(_sendObservers);
@@ -273,7 +281,8 @@ namespace MassTransit.KafkaIntegration.Configuration
             consumerConfig.AutoCommitIntervalMs = null;
             consumerConfig.EnableAutoCommit = false;
 
-            var specification = new KafkaConsumerSpecification<TKey, TValue>(this, consumerConfig, topicName, _headersDeserializer, configure);
+            var specification =
+                new KafkaConsumerSpecification<TKey, TValue>(this, consumerConfig, topicName, _headersDeserializer, configure, _oAuthBearerTokenRefreshHandler);
             specification.ConnectReceiveEndpointObserver(_endpointObservers);
             return specification;
         }
