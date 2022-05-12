@@ -218,6 +218,12 @@ namespace MassTransit
         void Host(IReadOnlyList<string> servers, Action<IKafkaHostConfigurator> configure = null);
 
         /// <summary>
+        /// Configure Kafka bearer token refresh handler
+        /// </summary>
+        /// <param name="handler"></param>
+        void OAuthBearerTokenRefreshHandler(Action<IClient, string> handler);
+
+        /// <summary>
         /// Configure API versions
         /// </summary>
         /// <param name="configure"></param>

@@ -15,6 +15,7 @@ namespace MassTransit.KafkaIntegration.Configuration
         where TValue : class
     {
         readonly IKafkaHostConfiguration _hostConfiguration;
+        readonly Action<IClient, string> _oAuthBearerTokenRefreshHandler;
         readonly ProducerConfig _producerConfig;
         readonly SendObservable _sendObservers;
         readonly SerializationConfiguration _serialization;
@@ -24,12 +25,13 @@ namespace MassTransit.KafkaIntegration.Configuration
         ISerializer<TValue> _valueSerializer;
 
         public KafkaProducerSpecification(IKafkaHostConfiguration hostConfiguration, ProducerConfig producerConfig, string topicName,
-            IHeadersSerializer headersSerializer)
+            IHeadersSerializer headersSerializer, Action<IClient, string> oAuthBearerTokenRefreshHandler)
         {
             _hostConfiguration = hostConfiguration;
             _producerConfig = producerConfig;
             TopicName = topicName;
             _headersSerializer = headersSerializer;
+            _oAuthBearerTokenRefreshHandler = oAuthBearerTokenRefreshHandler;
             _sendObservers = new SendObservable();
 
             if (!SerializationUtils.Serializers.IsDefaultKeyType<TKey>())
@@ -167,6 +169,8 @@ namespace MassTransit.KafkaIntegration.Configuration
                     producerBuilder.SetKeySerializer(_keySerializer);
                 if (_valueSerializer != null)
                     producerBuilder.SetValueSerializer(_valueSerializer);
+                if (_oAuthBearerTokenRefreshHandler != null)
+                    producerBuilder.SetOAuthBearerTokenRefreshHandler(_oAuthBearerTokenRefreshHandler);
                 return producerBuilder;
             }
 

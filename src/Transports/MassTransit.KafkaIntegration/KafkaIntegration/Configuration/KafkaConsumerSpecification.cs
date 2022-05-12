@@ -18,10 +18,12 @@ namespace MassTransit.KafkaIntegration.Configuration
         readonly ReceiveEndpointObservable _endpointObservers;
         readonly IHeadersDeserializer _headersDeserializer;
         readonly IKafkaHostConfiguration _hostConfiguration;
+        readonly Action<IClient, string> _oAuthBearerTokenRefreshHandler;
         readonly string _topicName;
 
         public KafkaConsumerSpecification(IKafkaHostConfiguration hostConfiguration, ConsumerConfig consumerConfig, string topicName,
-            IHeadersDeserializer headersDeserializer, Action<IKafkaTopicReceiveEndpointConfigurator<TKey, TValue>> configure)
+            IHeadersDeserializer headersDeserializer, Action<IKafkaTopicReceiveEndpointConfigurator<TKey, TValue>> configure,
+            Action<IClient, string> oAuthBearerTokenRefreshHandler)
         {
             _hostConfiguration = hostConfiguration;
             _consumerConfig = consumerConfig;
@@ -29,6 +31,7 @@ namespace MassTransit.KafkaIntegration.Configuration
             _endpointObservers = new ReceiveEndpointObservable();
             _headersDeserializer = headersDeserializer;
             _configure = configure;
+            _oAuthBearerTokenRefreshHandler = oAuthBearerTokenRefreshHandler;
             EndpointName = $"{KafkaTopicAddress.PathPrefix}/{_topicName}";
         }
 
@@ -40,7 +43,7 @@ namespace MassTransit.KafkaIntegration.Configuration
             endpointConfiguration.ConnectReceiveEndpointObserver(_endpointObservers);
 
             var configurator = new KafkaTopicReceiveEndpointConfiguration<TKey, TValue>(_hostConfiguration, _consumerConfig, _topicName, busInstance,
-                endpointConfiguration, _headersDeserializer);
+                endpointConfiguration, _headersDeserializer, _oAuthBearerTokenRefreshHandler);
 
             _configure?.Invoke(configurator);
 
