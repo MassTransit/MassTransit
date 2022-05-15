@@ -15,6 +15,8 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             RetryMinBackoff = TimeSpan.FromMilliseconds(100);
             RetryMaxBackoff = TimeSpan.FromSeconds(30);
             RetryLimit = 3;
+            ReceiveTransportRetryLimit = 5;
+            ReceiveTransportRetryInterval = TimeSpan.FromSeconds(10);
 
             TransportType = ServiceBusTransportType.AmqpTcp;
 
@@ -32,5 +34,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         public TimeSpan RetryMaxBackoff { get; set; }
         public int RetryLimit { get; set; }
         public ServiceBusTransportType TransportType { get; set; }
+        public int ReceiveTransportRetryLimit { get; set; }
+        public TimeSpan ReceiveTransportRetryInterval { get; set; }
     }
 }

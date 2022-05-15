@@ -83,5 +83,15 @@
         /// The type of transport to use AMQP TCP or AMQP Websockets
         /// </summary>
         ServiceBusTransportType TransportType { get; }
+
+        /// <summary>
+        /// The retry limit for receive transport
+        /// </summary>
+        public int ReceiveTransportRetryLimit { get; }
+
+        /// <summary>
+        /// The retry interval for receive transport
+        /// </summary>
+        public TimeSpan ReceiveTransportRetryInterval { get; }
     }
 }

@@ -70,6 +70,10 @@ namespace MassTransitBenchmark
 
         public ServiceBusTransportType TransportType => _hostSettings.TransportType;
 
+        public int ReceiveTransportRetryLimit => _hostSettings.ReceiveTransportRetryLimit;
+
+        public TimeSpan ReceiveTransportRetryInterval => _hostSettings.ReceiveTransportRetryInterval;
+
         public void ShowOptions()
         {
             Console.WriteLine("Service URI: {0}", ServiceUri);

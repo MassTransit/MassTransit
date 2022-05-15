@@ -49,7 +49,7 @@
                     _ => false
                 });
 
-                x.Interval(5, TimeSpan.FromSeconds(10));
+                x.Interval(_hostSettings.ReceiveTransportRetryLimit, _hostSettings.ReceiveTransportRetryInterval);
             });
 
             _connectionContext = new Recycle<IConnectionContextSupervisor>(() => new ConnectionContextSupervisor(this, topologyConfiguration));
