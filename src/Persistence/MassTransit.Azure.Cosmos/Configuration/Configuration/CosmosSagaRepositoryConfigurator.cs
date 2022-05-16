@@ -2,13 +2,11 @@ namespace MassTransit.Configuration
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
+    using AzureCosmos;
     using AzureCosmos.Saga;
-    using Internals;
     using Microsoft.Azure.Cosmos;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
-    using Newtonsoft.Json;
     using Saga;
 
 
@@ -17,16 +15,17 @@ namespace MassTransit.Configuration
         ISpecification
         where TSaga : class, ISaga
     {
-        readonly JsonSerializerSettings _serializerSettings;
         string _clientName;
         Func<IServiceProvider, ICosmosCollectionIdFormatter> _collectionIdFormatter;
         Action<ItemRequestOptions> _itemRequestOptions;
         Action<QueryRequestOptions> _queryRequestOptions;
+        Action<ISagaRepositoryRegistrationConfigurator<TSaga>> _registerClientFactory;
 
         public CosmosSagaRepositoryConfigurator()
         {
-            _serializerSettings = GetSerializerSettingsIfNeeded();
             _collectionIdFormatter = _ => KebabCaseCollectionIdFormatter.Instance;
+
+            _registerClientFactory = RegisterSystemTextJsonClientFactory;
         }
 
         public void ConfigureEmulator()
@@ -76,6 +75,11 @@ namespace MassTransit.Configuration
             _clientName = clientName;
         }
 
+        public void UseNewtonsoftJson()
+        {
+            _registerClientFactory = RegisterNewtonsoftJsonClientFactory;
+        }
+
         public void SetCollectionIdFormatter(Func<IServiceProvider, ICosmosCollectionIdFormatter> collectionIdFormatterFactory)
         {
             _collectionIdFormatter = collectionIdFormatterFactory ?? throw new ArgumentNullException(nameof(collectionIdFormatterFactory));
@@ -92,51 +96,33 @@ namespace MassTransit.Configuration
 
         public void Register(ISagaRepositoryRegistrationConfigurator<TSaga> configurator)
         {
-            DatabaseContext<TSaga> DatabaseContextFactory(IServiceProvider provider)
-            {
-                var providerProvidedClient = true;
-                CosmosClient client;
-
-                if (!string.IsNullOrWhiteSpace(_clientName))
-                {
-                    var clientFactory = provider.GetRequiredService<ICosmosClientFactory>();
-                    client = clientFactory.GetCosmosClient(_clientName, _serializerSettings);
-                }
-                else
-                {
-                    providerProvidedClient = false;
-
-                    CosmosClientOptions clientOptions = null;
-                    if (_serializerSettings != null)
-                        clientOptions = new CosmosClientOptions { Serializer = new CosmosJsonDotNetSerializer(_serializerSettings) };
-
-                    client = new CosmosClient(EndpointUri, Key, clientOptions);
-                }
-
-                var collectionIdFormatter = _collectionIdFormatter(provider);
-                var container = client.GetContainer(DatabaseId, collectionIdFormatter.Saga<TSaga>());
-
-                // The provider owns the instance of the client, so the lifetime should be controlled by the provider,
-                // not this class.
-                return new CosmosDatabaseContext<TSaga>(providerProvidedClient ? null : client, container, _itemRequestOptions, _queryRequestOptions);
-            }
+            if (_clientName == null)
+                _registerClientFactory(configurator);
 
             configurator.TryAddSingleton(DatabaseContextFactory);
             configurator.RegisterSagaRepository<TSaga, DatabaseContext<TSaga>, SagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga>,
                 CosmosSagaRepositoryContextFactory<TSaga>>();
         }
 
-        static JsonSerializerSettings GetSerializerSettingsIfNeeded()
+        void RegisterNewtonsoftJsonClientFactory(ISagaRepositoryRegistrationConfigurator<TSaga> configurator)
         {
-            var correlationId = MessageTypeCache<TSaga>.Properties.Single(x => x.Name == nameof(ISaga.CorrelationId));
+            configurator.TryAddSingleton<ICosmosClientFactory>(provider => new NewtonsoftJsonCosmosClientFactory(EndpointUri, Key));
+        }
 
-            if (correlationId.GetAttribute<JsonPropertyAttribute>().Any(x => x.PropertyName == "id"))
-                return default;
+        void RegisterSystemTextJsonClientFactory(ISagaRepositoryRegistrationConfigurator<TSaga> configurator)
+        {
+            configurator.TryAddSingleton<ICosmosClientFactory>(provider => new SystemTextJsonCosmosClientFactory(EndpointUri, Key));
+        }
 
-            var resolver = new PropertyRenameSerializerContractResolver();
-            resolver.RenameProperty(typeof(TSaga), nameof(ISaga.CorrelationId), "id");
+        DatabaseContext<TSaga> DatabaseContextFactory(IServiceProvider provider)
+        {
+            var clientFactory = provider.GetRequiredService<ICosmosClientFactory>();
+            var client = clientFactory.GetCosmosClient<TSaga>(_clientName);
 
-            return new JsonSerializerSettings { ContractResolver = resolver };
+            var collectionIdFormatter = _collectionIdFormatter(provider);
+            var container = client.GetContainer(DatabaseId, collectionIdFormatter.Saga<TSaga>());
+
+            return new CosmosDatabaseContext<TSaga>(container, _itemRequestOptions, _queryRequestOptions);
         }
     }
 }

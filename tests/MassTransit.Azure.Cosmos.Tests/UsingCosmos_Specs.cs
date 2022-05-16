@@ -80,7 +80,7 @@
             _cosmosClient = new CosmosClient(Configuration.EndpointUri, Configuration.Key,
                 new CosmosClientOptions
                 {
-                    Serializer = new CosmosJsonDotNetSerializer(JsonSerializerSettingsExtensions.GetSagaRenameSettings<ShoppingChore>())
+                    Serializer = new SystemTextJsonCosmosSerializer(AzureCosmosSerializerExtensions.GetSerializerOptions<ShoppingChore>())
                 });
 
             _repository = new Lazy<ISagaRepository<ShoppingChore>>(() =>

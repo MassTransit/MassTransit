@@ -50,6 +50,11 @@ namespace MassTransit
         /// </remarks>
         /// <param name="clientName">The name of the <see cref="CosmosClient" /> that will be used</param>
         void UseClientFactory(string clientName);
+
+        /// <summary>
+        /// Use the previous Newtonsoft JSON serializer, instead of the new System.Text.Json serializer
+        /// </summary>
+        void UseNewtonsoftJson();
     }
 
 
