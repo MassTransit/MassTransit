@@ -64,5 +64,15 @@
         /// Sets the messaging protocol to use with the messaging factory, defaults to AMQP TCP.
         /// </summary>
         ServiceBusTransportType TransportType { set; }
+
+        /// <summary>
+        /// Set the receive transport retry limit
+        /// </summary>
+        public int ReceiveTransportRetryLimit { set; }
+
+        /// <summary>
+        /// Set the receive transport retry interval in second
+        /// </summary>
+        public TimeSpan ReceiveTransportRetryInterval { set; }
     }
 }

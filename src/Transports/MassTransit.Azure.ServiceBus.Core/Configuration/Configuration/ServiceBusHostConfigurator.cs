@@ -121,6 +121,14 @@
         {
             set => _settings.RetryLimit = value;
         }
+        public int ReceiveTransportRetryLimit
+        {
+            set => _settings.ReceiveTransportRetryLimit = value;
+        }
+        public TimeSpan ReceiveTransportRetryInterval
+        {
+            set => _settings.ReceiveTransportRetryInterval = value;
+        }
 
         static bool IsMissingCredentials(ServiceBusConnectionStringProperties properties)
         {
