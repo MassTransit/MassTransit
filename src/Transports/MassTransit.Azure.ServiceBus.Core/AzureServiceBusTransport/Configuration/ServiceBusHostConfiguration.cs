@@ -49,7 +49,7 @@
                     _ => false
                 });
 
-                x.Interval(5, TimeSpan.FromSeconds(10));
+                x.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
             });
 
             _connectionContext = new Recycle<IConnectionContextSupervisor>(() => new ConnectionContextSupervisor(this, topologyConfiguration));
