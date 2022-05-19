@@ -35,7 +35,6 @@ namespace MassTransit.Configuration
             instanceConfigurator.BusConfigurator.ConnectBusObserver(new JobServiceBusObserver(JobService));
             instanceConfigurator.AddSpecification(this);
 
-
             _options.JobService = JobService;
             _options.InstanceEndpointConfigurator = instanceConfigurator.InstanceEndpointConfigurator;
 
@@ -151,6 +150,8 @@ namespace MassTransit.Configuration
 
                 if (_options.SagaPartitionCount.HasValue)
                 {
+                    e.ConcurrentMessageLimit = _options.SagaPartitionCount;
+
                     var partition = new Partitioner(_options.SagaPartitionCount.Value, new Murmur3UnsafeHashGenerator());
 
                     e.UsePartitioner<JobSubmitted>(partition, p => p.Message.JobId);
@@ -186,6 +187,8 @@ namespace MassTransit.Configuration
 
                 if (_options.SagaPartitionCount.HasValue)
                 {
+                    e.ConcurrentMessageLimit = _options.SagaPartitionCount;
+
                     var partition = new Partitioner(_options.SagaPartitionCount.Value, new Murmur3UnsafeHashGenerator());
 
                     e.UsePartitioner<StartJobAttempt>(partition, p => p.Message.AttemptId);
@@ -215,6 +218,8 @@ namespace MassTransit.Configuration
 
                 if (_options.SagaPartitionCount.HasValue)
                 {
+                    e.ConcurrentMessageLimit = _options.SagaPartitionCount;
+
                     var partition = new Partitioner(_options.SagaPartitionCount.Value, new Murmur3UnsafeHashGenerator());
 
                     e.UsePartitioner<AllocateJobSlot>(partition, p => p.Message.JobTypeId);
