@@ -1,30 +1,31 @@
-# Observing lifecycle events
+# Observing life cycle events
 
 When integrating a framework into your application, it can be useful to understand when the framework is "doing stuff."
 Whether it is starting up, shutting down, or anything in between, being notified and thereby able to take action is a
 huge benefit.
 
-MassTransit supports a number of lifecycle events that can be observed, making it easy to build components that are
+MassTransit supports a number of life cycle events that can be observed, making it easy to build components that are
 started and stopped along with the bus.
 
 <div class="alert alert-info">
 <b>Note:</b>
     A good example of this is the <i>UseInMemoryMessageScheduler</i>, which is part of the Quartz.NET integration
-    package. Using the lifecycle events, Quartz is able to be started and stopped on a receive endpoint without
+    package. Using the life cycle events, Quartz is able to be started and stopped on a receive endpoint without
     any additional development. And that saves you time.
 </div>
 
 To observe bus events, create a class which implements `IBusObserver`, as shown below.
 
 ```csharp
-public class BusObserver : IBusObserver
+public class BusObserver : 
+    IBusObserver
 {
-    public Task PostCreate(IBus bus)
+    public void PostCreate(IBus bus)
     {
         // called after the bus has been created, but before it has been started.
     }
 
-    public Task CreateFaulted(Exception exception)
+    public void CreateFaulted(Exception exception)
     {
         // called if the bus creation fails for some reason
     }

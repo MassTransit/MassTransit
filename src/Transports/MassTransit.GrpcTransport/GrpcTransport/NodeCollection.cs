@@ -5,16 +5,17 @@ namespace MassTransit.GrpcTransport
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using Fabric;
+    using Transports.Fabric;
 
 
     public class NodeCollection :
         INodeCollection
     {
-        readonly IMessageFabric _messageFabric;
+        readonly IMessageFabric<NodeContext, GrpcTransportMessage> _messageFabric;
         readonly ConcurrentDictionary<Uri, IGrpcNode> _nodes;
         readonly ISupervisor _supervisor;
 
-        public NodeCollection(ISupervisor supervisor, IMessageFabric messageFabric)
+        public NodeCollection(ISupervisor supervisor, IMessageFabric<NodeContext, GrpcTransportMessage> messageFabric)
         {
             _supervisor = supervisor;
             _messageFabric = messageFabric;

@@ -30,4 +30,4 @@ For instance, when using Azure Service Bus, there are two settings which must be
 
 The `Batch` interface, shown below, also includes the first message receipt time, the last message receipt time, and the completion mode of the batch (message limit or time limit was reached).
 
-<<< @/src/MassTransit/Batch.cs
+<<< @/src/MassTransit.Abstractions/Contracts/Batch.cs

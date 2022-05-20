@@ -88,8 +88,9 @@ namespace MassTransit.Configuration
             if (_classMapFactory == null)
                 yield return this.Failure("ClassMapFactory", "must be specified");
 
-            if (string.IsNullOrWhiteSpace(_databaseName))
-                yield return this.Failure("DatabaseName", "must be specified");
+            if (string.IsNullOrWhiteSpace(_databaseName) && _databaseFactory == null)
+                yield return this.Failure("DatabaseName",
+                    "must be specified if no database factory is specified or if the connection string does not contain a database name");
         }
 
         public void Register<T>(ISagaRepositoryRegistrationConfigurator<T> configurator)

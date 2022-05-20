@@ -2,7 +2,14 @@
   <Import Project="../../../signing.props" />
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;netcoreapp3.1;net6.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(IsWindows)' == 'true' ">
+    <TargetFrameworks>$(TargetFrameworks);net461</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <RootNamespace>MassTransit</RootNamespace>
   </PropertyGroup>
 
@@ -14,8 +21,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.3.17" />
-    <PackageReference Include="AWSSDK.SQS" Version="3.7.2.14" />
+    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.3.57" />
+    <PackageReference Include="AWSSDK.SQS" Version="3.7.2.54" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
   </ItemGroup>
 

@@ -6,4 +6,12 @@ The in-memory transport is a great tool for testing, as it doesn't require a mes
 The in-memory transport is intended for use within a single process only. It cannot be used to communicate between multiple processes (even if they are on the same machine).
 :::
 
+## Broker Topology
+
+The in-memory transport uses an in-memory routing fabric, that replicates a lot of the behavior of RabbitMQ. 
+
+## Examples
+
+### Minimal
+
 <<< @/docs/code/transports/InMemoryBus.cs

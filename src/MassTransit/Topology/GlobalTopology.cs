@@ -4,6 +4,7 @@ namespace MassTransit
     using System.Collections.Generic;
     using System.Threading;
     using Configuration;
+    using Courier.Contracts;
     using Topology;
 
 
@@ -34,6 +35,8 @@ namespace MassTransit
 
             var observer = new PublishToSendTopologyConfigurationObserver(_send);
             _publishToSendHandle = _publish.ConnectPublishTopologyConfigurationObserver(observer);
+
+            ConfigureRoutingSlipCorrelation();
         }
 
         public static ISendTopologyConfigurator Send => Cached.Metadata.Value.Send;
@@ -87,6 +90,20 @@ namespace MassTransit
         public static void SeparatePublishFromSend()
         {
             Cached.Metadata.Value.SeparatePublishFromSend();
+        }
+
+        void ConfigureRoutingSlipCorrelation()
+        {
+            _send.UseCorrelationId<RoutingSlip>(x => x.TrackingNumber);
+            _send.UseCorrelationId<RoutingSlipCompleted>(x => x.TrackingNumber);
+            _send.UseCorrelationId<RoutingSlipFaulted>(x => x.TrackingNumber);
+            _send.UseCorrelationId<RoutingSlipActivityCompleted>(x => x.ExecutionId);
+            _send.UseCorrelationId<RoutingSlipActivityFaulted>(x => x.ExecutionId);
+            _send.UseCorrelationId<RoutingSlipActivityCompensated>(x => x.ExecutionId);
+            _send.UseCorrelationId<RoutingSlipActivityCompensationFailed>(x => x.ExecutionId);
+            _send.UseCorrelationId<RoutingSlipCompensationFailed>(x => x.TrackingNumber);
+            _send.UseCorrelationId<RoutingSlipTerminated>(x => x.TrackingNumber);
+            _send.UseCorrelationId<RoutingSlipRevised>(x => x.TrackingNumber);
         }
 
 

@@ -85,7 +85,7 @@ namespace MassTransit.KafkaIntegration
                 sendContext.SourceAddress ??= _context.HostAddress;
                 sendContext.ConversationId ??= NewId.NextGuid();
 
-                StartedActivity? activity = LogContext.IfEnabled(_context.ActivityName)?.StartSendActivity(sendContext,
+                StartedActivity? activity = LogContext.Current?.StartSendActivity(_context, sendContext,
                     (nameof(sendContext.Partition), sendContext.Partition.ToString()));
                 try
                 {

@@ -1,8 +1,7 @@
 ﻿namespace MassTransit
 {
-    using GrpcTransport.Configuration;
-    using GrpcTransport.Contracts;
-    using GrpcTransport.Topology;
+    using Configuration;
+    using Transports.Fabric;
 
 
     public interface IGrpcMessageConsumeTopologyConfigurator<TMessage> :
@@ -24,6 +23,6 @@
         /// Apply the message topology to the builder
         /// </summary>
         /// <param name="builder"></param>
-        void Apply(IGrpcConsumeTopologyBuilder builder);
+        void Apply(IMessageFabricConsumeTopologyBuilder builder);
     }
 }

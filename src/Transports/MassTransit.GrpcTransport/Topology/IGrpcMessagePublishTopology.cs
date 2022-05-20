@@ -1,7 +1,7 @@
 ﻿namespace MassTransit
 {
-    using GrpcTransport.Contracts;
-    using GrpcTransport.Topology;
+    using Configuration;
+    using Transports.Fabric;
 
 
     public interface IGrpcMessagePublishTopology<TMessage> :
@@ -19,6 +19,6 @@
         /// Apply the message topology to the builder, including any implemented types
         /// </summary>
         /// <param name="builder">The topology builder</param>
-        void Apply(IGrpcPublishTopologyBuilder builder);
+        void Apply(IMessageFabricPublishTopologyBuilder builder);
     }
 }

@@ -8,44 +8,45 @@ namespace MassTransit.Transports
         IBusInstance<TBus>
         where TBus : IBus
     {
-        readonly IBusInstance _instance;
+        readonly TBus _bus;
 
         public MultiBusInstance(TBus bus, IBusInstance instance)
         {
-            _instance = instance;
-            BusInstance = bus;
+            BusInstance = instance;
+            _bus = bus;
         }
 
         public string Name { get; } = FormatBusName();
         public Type InstanceType => typeof(TBus);
-        public IBus Bus => BusInstance;
-        public IBusControl BusControl => _instance.BusControl;
-        public IHostConfiguration HostConfiguration => _instance.HostConfiguration;
+        public IBus Bus => _bus;
+        public IBusInstance BusInstance { get; }
+        public IBusControl BusControl => BusInstance.BusControl;
+        public IHostConfiguration HostConfiguration => BusInstance.HostConfiguration;
+
+        TBus IBusInstance<TBus>.Bus => _bus;
 
         public void Connect<TRider>(IRiderControl riderControl)
             where TRider : IRider
         {
-            _instance.Connect<TRider>(riderControl);
+            BusInstance.Connect<TRider>(riderControl);
         }
 
         public TRider GetRider<TRider>()
             where TRider : IRider
         {
-            return _instance.GetRider<TRider>();
+            return BusInstance.GetRider<TRider>();
         }
-
-        public TBus BusInstance { get; }
 
         public HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
             Action<IBusRegistrationContext, IReceiveEndpointConfigurator> configure = null)
         {
-            return _instance.ConnectReceiveEndpoint(definition, endpointNameFormatter, configure);
+            return BusInstance.ConnectReceiveEndpoint(definition, endpointNameFormatter, configure);
         }
 
         public HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName,
             Action<IBusRegistrationContext, IReceiveEndpointConfigurator> configure = null)
         {
-            return _instance.ConnectReceiveEndpoint(queueName, configure);
+            return BusInstance.ConnectReceiveEndpoint(queueName, configure);
         }
 
         static string FormatBusName()

@@ -91,7 +91,7 @@ namespace MassTransit.EventHubIntegration.Checkpoints
                     {
                         var confirmation = await _channel.Reader.ReadAsync(batchToken.Token).ConfigureAwait(false);
 
-                        await confirmation.Confirmed.OrCanceled(batchToken.Token).ConfigureAwait(false);
+                        await confirmation.Confirmed.OrCanceled(_shutdownTokenSource.Token).ConfigureAwait(false);
 
                         batch.Add(confirmation);
 

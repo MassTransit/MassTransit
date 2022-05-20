@@ -32,7 +32,7 @@ namespace MassTransit.Courier.Results
             _exceptionInfo = new FaultExceptionInfo(exception);
             _elapsed = _executeContext.Elapsed;
 
-            _activityException = new ActivityExceptionImpl(_activity.Name, _executeContext.Host, _executeContext.ExecutionId,
+            _activityException = new RoutingSlipActivityException(_activity.Name, _executeContext.Host, _executeContext.ExecutionId,
                 _executeContext.Timestamp, _elapsed, _exceptionInfo);
         }
 

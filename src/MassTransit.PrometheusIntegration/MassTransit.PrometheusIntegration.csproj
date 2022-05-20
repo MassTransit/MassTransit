@@ -16,7 +16,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Http" Version="3.1.18" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
-    <PackageReference Include="prometheus-net" Version="5.0.2" />
+    <PackageReference Include="prometheus-net" Version="6.0.0" />
     <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 </Project>

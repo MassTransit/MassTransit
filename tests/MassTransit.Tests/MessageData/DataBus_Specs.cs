@@ -23,15 +23,15 @@
             public async Task Should_be_able_to_write_stream_too()
             {
                 var data = new byte[10000];
-                await using MemoryStream ms = new MemoryStream(data);
+                using MemoryStream ms = new MemoryStream(data);
 
-                var message = new MessageWithStreamImpl {Stream = await _repository.PutStream(ms)};
+                var message = new MessageWithStreamImpl { Stream = await _repository.PutStream(ms) };
 
                 await InputQueueSendEndpoint.Send(message);
 
                 await _receivedStream;
 
-                await using MemoryStream receivedMemoryStream = new MemoryStream();
+                using MemoryStream receivedMemoryStream = new MemoryStream();
                 await _receivedStreamData.CopyToAsync(receivedMemoryStream);
                 receivedMemoryStream.ToArray().ShouldBe(data);
             }
@@ -41,7 +41,7 @@
             {
                 var data = new byte[10000];
 
-                var message = new MessageWithByteArrayImpl {Bytes = await _repository.PutBytes(data)};
+                var message = new MessageWithByteArrayImpl { Bytes = await _repository.PutBytes(data) };
 
                 await InputQueueSendEndpoint.Send(message);
 
@@ -55,7 +55,7 @@
             {
                 var data = new string('*', 10000);
 
-                var message = new SendMessageWithBigData {Body = await _repository.PutString(data)};
+                var message = new SendMessageWithBigData { Body = await _repository.PutString(data) };
 
                 await InputQueueSendEndpoint.Send(message);
 
@@ -113,15 +113,15 @@
             public async Task Should_be_able_to_write_stream_too()
             {
                 var data = new byte[10000];
-                await using MemoryStream ms = new MemoryStream(data);
+                using MemoryStream ms = new MemoryStream(data);
 
-                var message = new MessageWithStreamImpl {Stream = await _repository.PutStream(ms)};
+                var message = new MessageWithStreamImpl { Stream = await _repository.PutStream(ms) };
 
                 await InputQueueSendEndpoint.Send(message);
 
                 await _receivedStream;
 
-                await using MemoryStream receivedMemoryStream = new MemoryStream();
+                using MemoryStream receivedMemoryStream = new MemoryStream();
                 await _receivedStreamData.CopyToAsync(receivedMemoryStream);
                 receivedMemoryStream.ToArray().ShouldBe(data);
             }
@@ -131,7 +131,7 @@
             {
                 var data = new byte[10000];
 
-                var message = new MessageWithByteArrayImpl {Bytes = await _repository.PutBytes(data)};
+                var message = new MessageWithByteArrayImpl { Bytes = await _repository.PutBytes(data) };
 
                 await InputQueueSendEndpoint.Send(message);
 
@@ -145,7 +145,7 @@
             {
                 var data = new string('*', 10000);
 
-                var message = new SendMessageWithBigData {Body = await _repository.PutString(data)};
+                var message = new SendMessageWithBigData { Body = await _repository.PutString(data) };
 
                 await InputQueueSendEndpoint.Send(message);
 
@@ -213,7 +213,7 @@
                     dataAddress = await _messageDataRepository.Put(stream);
                 }
 
-                var message = new SendMessageWithBigData {Body = new StoredMessageData<string>(dataAddress, data)};
+                var message = new SendMessageWithBigData { Body = new StoredMessageData<string>(dataAddress, data) };
 
                 await InputQueueSendEndpoint.Send(message);
 
@@ -260,7 +260,7 @@
 
                 var message = new Message
                 {
-                    Document = new Document {Body = new StoredMessageData<byte[]>(dataAddress, buffer)},
+                    Document = new Document { Body = new StoredMessageData<byte[]>(dataAddress, buffer) },
                     Documents = new IDocument[]
                     {
                         new Document
@@ -281,8 +281,8 @@
                     },
                     DocumentIndex = new Dictionary<string, IDocument>
                     {
-                        {"First", new Document {Body = new StoredMessageData<byte[]>(dataAddress, buffer)}},
-                        {"Second", new Document {Body = new StoredMessageData<byte[]>(dataAddress, buffer)}}
+                        { "First", new Document { Body = new StoredMessageData<byte[]>(dataAddress, buffer) } },
+                        { "Second", new Document { Body = new StoredMessageData<byte[]>(dataAddress, buffer) } }
                     }
                 };
 
@@ -354,7 +354,7 @@
                     dataAddress = await _messageDataRepository.Put(stream);
                 }
 
-                var message = new MessageWithByteArrayImpl {Bytes = new StoredMessageData<byte[]>(dataAddress, nextGuid.ToByteArray())};
+                var message = new MessageWithByteArrayImpl { Bytes = new StoredMessageData<byte[]>(dataAddress, nextGuid.ToByteArray()) };
 
                 await InputQueueSendEndpoint.Send(message);
 
@@ -385,6 +385,7 @@
             }
         }
 
+
         [TestFixture]
         public class Receiving_a_large_message_with_data_stream :
             InMemoryTestFixture
@@ -396,20 +397,20 @@
                 var data = nextGuid.ToString();
                 Uri dataAddress;
 
-                await using (var stream = new MemoryStream(nextGuid.ToByteArray(), false))
+                using (var stream = new MemoryStream(nextGuid.ToByteArray(), false))
                 {
                     dataAddress = await _messageDataRepository.Put(stream);
                 }
 
-                await using MemoryStream ms = new MemoryStream(nextGuid.ToByteArray());
+                using MemoryStream ms = new MemoryStream(nextGuid.ToByteArray());
 
-                var message = new MessageWithStreamImpl {Stream = new StoredMessageData<Stream>(dataAddress, ms)};
+                var message = new MessageWithStreamImpl { Stream = new StoredMessageData<Stream>(dataAddress, ms) };
 
                 await InputQueueSendEndpoint.Send(message);
 
                 await _received;
 
-                await using MemoryStream memoryStreamForReceivedStream = new MemoryStream();
+                using MemoryStream memoryStreamForReceivedStream = new MemoryStream();
                 await _receivedStream.CopyToAsync(memoryStreamForReceivedStream);
 
                 NewId newId = new NewId(memoryStreamForReceivedStream.ToArray());
@@ -521,6 +522,7 @@
             IDictionary<string, IHaveNoMessageDataEither> ChildIndex { get; }
         }
 
+
         public interface MessageWithStream
         {
             MessageData<Stream> Stream { get; }
@@ -531,6 +533,7 @@
         {
             public MessageData<Stream> Stream { get; set; }
         }
+
 
         public interface MessageWithByteArray
         {

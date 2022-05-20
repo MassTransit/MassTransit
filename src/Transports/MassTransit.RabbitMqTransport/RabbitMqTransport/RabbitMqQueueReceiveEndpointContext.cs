@@ -34,6 +34,11 @@
 
         public IModelContextSupervisor ModelContextSupervisor => _modelContext.Supervisor;
 
+        public override void AddSendAgent(IAgent agent)
+        {
+            _modelContext.Supervisor.AddSendAgent(agent);
+        }
+
         public override void AddConsumeAgent(IAgent agent)
         {
             _modelContext.Supervisor.AddConsumeAgent(agent);

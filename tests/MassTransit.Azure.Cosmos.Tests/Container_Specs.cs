@@ -96,7 +96,7 @@ namespace MassTransit.Azure.Cosmos.Tests
                     .AddScoped<PublishTestStartedActivity>()
                     .BuildServiceProvider(true);
 
-                var harness = provider.GetRequiredService<ITestHarness>();
+                var harness = provider.GetTestHarness();
 
                 await harness.Start();
 

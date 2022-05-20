@@ -11,9 +11,11 @@ namespace MassTransit.DependencyInjection.Registration
     /// A saga state machine represents a state machine and instance, which will use the container to resolve, as well
     /// as the saga repository.
     /// </summary>
+    /// <typeparam name="TStateMachine"></typeparam>
     /// <typeparam name="TInstance"></typeparam>
-    public class SagaStateMachineRegistration<TInstance> :
+    public class SagaStateMachineRegistration<TStateMachine, TInstance> :
         ISagaRegistration
+        where TStateMachine : class, SagaStateMachine<TInstance>
         where TInstance : class, SagaStateMachineInstance
     {
         readonly List<Action<ISagaConfigurator<TInstance>>> _configureActions;

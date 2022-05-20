@@ -4,246 +4,184 @@ namespace MassTransit.KafkaIntegration.Tests
     using System.Threading.Tasks;
     using Confluent.Kafka;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.DependencyInjection.Extensions;
-    using Microsoft.Extensions.Logging;
     using NUnit.Framework;
-    using TestFramework;
     using TestFramework.Sagas;
+    using Testing;
 
 
-    public class Producer_Specs :
-        InMemoryTestFixture
+    public class Producer_Specs
     {
         const string Topic = "producer";
 
         [Test]
-        public async Task Should_produce()
+        public async Task Should_receive_messages()
         {
-            TaskCompletionSource<ConsumeContext<KafkaMessage>> taskCompletionSource = GetTask<ConsumeContext<KafkaMessage>>();
-            var services = new ServiceCollection();
-            services.AddSingleton(taskCompletionSource);
-
-            services.TryAddSingleton<ILoggerFactory>(LoggerFactory);
-            services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
-
-            services.AddMassTransit(x =>
-            {
-                x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
-                x.AddRider(rider =>
+            await using var provider = new ServiceCollection()
+                .AddMassTransitTestHarness(x =>
                 {
-                    rider.AddConsumer<KafkaMessageConsumer>();
+                    x.AddTaskCompletionSource<ConsumeContext<KafkaMessage>>();
 
-                    rider.AddProducer<KafkaMessage>(Topic);
-
-                    rider.UsingKafka((context, k) =>
+                    x.AddRider(r =>
                     {
-                        k.Host("localhost:9092");
+                        r.AddConsumer<KafkaMessageConsumer>();
 
-                        k.TopicEndpoint<KafkaMessage>(Topic, nameof(Producer_Specs), c =>
+                        r.AddProducer<KafkaMessage>(Topic);
+
+                        r.UsingKafka((context, k) =>
                         {
-                            c.AutoOffsetReset = AutoOffsetReset.Earliest;
-                            c.ConfigureConsumer<KafkaMessageConsumer>(context);
+                            k.Host("localhost:9092");
+
+                            k.TopicEndpoint<KafkaMessage>(Topic, nameof(Receive_Specs), c =>
+                            {
+                                c.AutoOffsetReset = AutoOffsetReset.Earliest;
+                                c.CreateIfMissing();
+                                c.ConfigureConsumer<KafkaMessageConsumer>(context);
+                            });
                         });
                     });
+                })
+                .BuildServiceProvider(true);
+
+            var harness = provider.GetTestHarness();
+
+            await harness.Start();
+
+            ITopicProducer<KafkaMessage> producer = harness.GetProducer<KafkaMessage>();
+
+            var correlationId = NewId.NextGuid();
+            var conversationId = NewId.NextGuid();
+            var initiatorId = NewId.NextGuid();
+            var messageId = NewId.NextGuid();
+
+            await producer.Produce(new { Text = "text" }, Pipe.Execute<SendContext>(context =>
+            {
+                context.CorrelationId = correlationId;
+                context.MessageId = messageId;
+                context.InitiatorId = initiatorId;
+                context.ConversationId = conversationId;
+                context.Headers.Set("Special", new
+                {
+                    Key = "Hello",
+                    Value = "World"
                 });
-            });
+            }), harness.CancellationToken);
 
-            var provider = services.BuildServiceProvider(true);
+            ConsumeContext<KafkaMessage> result = await provider.GetRequiredService<TaskCompletionSource<ConsumeContext<KafkaMessage>>>().Task;
 
-            var busControl = provider.GetRequiredService<IBusControl>();
+            Assert.AreEqual("text", result.Message.Text);
+            Assert.That(result.SourceAddress, Is.EqualTo(new Uri("loopback://localhost/")));
+            Assert.That(result.DestinationAddress, Is.EqualTo(new Uri($"loopback://localhost/{KafkaTopicAddress.PathPrefix}/{Topic}")));
+            Assert.That(result.MessageId, Is.EqualTo(messageId));
+            Assert.That(result.CorrelationId, Is.EqualTo(correlationId));
+            Assert.That(result.InitiatorId, Is.EqualTo(initiatorId));
+            Assert.That(result.ConversationId, Is.EqualTo(conversationId));
 
-            await busControl.StartAsync(TestCancellationToken);
-
-            var serviceScope = provider.CreateScope();
-
-            var producer = serviceScope.ServiceProvider.GetRequiredService<ITopicProducer<KafkaMessage>>();
-
-            try
-            {
-                var correlationId = NewId.NextGuid();
-                var conversationId = NewId.NextGuid();
-                var initiatorId = NewId.NextGuid();
-                var messageId = NewId.NextGuid();
-                await producer.Produce(new { Text = "text" }, Pipe.Execute<SendContext>(context =>
-                    {
-                        context.CorrelationId = correlationId;
-                        context.MessageId = messageId;
-                        context.InitiatorId = initiatorId;
-                        context.ConversationId = conversationId;
-                        context.Headers.Set("Special", new
-                        {
-                            Key = "Hello",
-                            Value = "World"
-                        });
-                    }),
-                    TestCancellationToken);
-
-                ConsumeContext<KafkaMessage> result = await taskCompletionSource.Task;
-
-                Assert.AreEqual("text", result.Message.Text);
-                Assert.That(result.SourceAddress, Is.EqualTo(new Uri("loopback://localhost/")));
-                Assert.That(result.DestinationAddress, Is.EqualTo(new Uri($"loopback://localhost/{KafkaTopicAddress.PathPrefix}/{Topic}")));
-                Assert.That(result.MessageId, Is.EqualTo(messageId));
-                Assert.That(result.CorrelationId, Is.EqualTo(correlationId));
-                Assert.That(result.InitiatorId, Is.EqualTo(initiatorId));
-                Assert.That(result.ConversationId, Is.EqualTo(conversationId));
-
-                var headerType = result.Headers.Get<HeaderType>("Special");
-                Assert.That(headerType, Is.Not.Null);
-                Assert.That(headerType.Key, Is.EqualTo("Hello"));
-                Assert.That(headerType.Value, Is.EqualTo("World"));
-            }
-            finally
-            {
-                serviceScope.Dispose();
-
-                await busControl.StopAsync(TestCancellationToken);
-
-                await provider.DisposeAsync();
-            }
+            var headerType = result.Headers.Get<HeaderType>("Special");
+            Assert.That(headerType, Is.Not.Null);
+            Assert.That(headerType.Key, Is.EqualTo("Hello"));
+            Assert.That(headerType.Value, Is.EqualTo("World"));
         }
 
         [Test]
         public async Task Should_use_bus_send_observer()
         {
-            TaskCompletionSource<ConsumeContext<KafkaMessage>> taskCompletionSource = GetTask<ConsumeContext<KafkaMessage>>();
-            TaskCompletionSource<SendContext> preSendCompletionSource = GetTask<SendContext>();
-            TaskCompletionSource<SendContext> postSendCompletionSource = GetTask<SendContext>();
-            var services = new ServiceCollection();
-            services.AddSingleton(taskCompletionSource);
-
-            services.TryAddSingleton<ILoggerFactory>(LoggerFactory);
-            services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
-
-            services.AddMassTransit(x =>
-            {
-                x.UsingInMemory((context, cfg) =>
+            await using var provider = new ServiceCollection()
+                .AddMassTransitTestHarness(x =>
                 {
-                    cfg.ConnectSendObserver(new TestSendObserver(preSendCompletionSource, postSendCompletionSource));
-                    cfg.ConfigureEndpoints(context);
-                });
-                x.AddRider(rider =>
-                {
-                    rider.AddConsumer<KafkaMessageConsumer>();
+                    x.AddTaskCompletionSource<ConsumeContext<KafkaMessage>>();
 
-                    rider.AddProducer<KafkaMessage>(Topic);
-
-                    rider.UsingKafka((context, k) =>
+                    x.AddRider(r =>
                     {
-                        k.Host("localhost:9092");
+                        r.AddConsumer<KafkaMessageConsumer>();
 
-                        k.TopicEndpoint<KafkaMessage>(Topic, nameof(Producer_Specs), c =>
+                        r.AddProducer<KafkaMessage>(Topic);
+
+                        r.UsingKafka((context, k) =>
                         {
-                            c.AutoOffsetReset = AutoOffsetReset.Earliest;
-                            c.ConfigureConsumer<KafkaMessageConsumer>(context);
+                            k.Host("localhost:9092");
+
+                            k.TopicEndpoint<KafkaMessage>(Topic, nameof(Receive_Specs), c =>
+                            {
+                                c.AutoOffsetReset = AutoOffsetReset.Earliest;
+                                c.CreateIfMissing();
+                                c.ConfigureConsumer<KafkaMessageConsumer>(context);
+                            });
                         });
                     });
-                });
-            });
+                })
+                .BuildServiceProvider(true);
 
-            var provider = services.BuildServiceProvider(true);
+            var harness = provider.GetTestHarness();
 
-            var busControl = provider.GetRequiredService<IBusControl>();
+            await harness.Start();
 
-            await busControl.StartAsync(TestCancellationToken);
+            TaskCompletionSource<SendContext> preSendCompletionSource = harness.GetTask<SendContext>();
+            TaskCompletionSource<SendContext> postSendCompletionSource = harness.GetTask<SendContext>();
 
-            var serviceScope = provider.CreateScope();
+            harness.Bus.ConnectSendObserver(new TestSendObserver(preSendCompletionSource, postSendCompletionSource));
 
-            var producer = serviceScope.ServiceProvider.GetRequiredService<ITopicProducer<KafkaMessage>>();
+            ITopicProducer<KafkaMessage> producer = harness.GetProducer<KafkaMessage>();
 
-            try
-            {
-                await producer.Produce(new { Text = "text" }, TestCancellationToken);
+            await producer.Produce(new { Text = "text" }, harness.CancellationToken);
 
-                await preSendCompletionSource.Task;
+            await preSendCompletionSource.Task;
 
-                ConsumeContext<KafkaMessage> result = await taskCompletionSource.Task;
+            ConsumeContext<KafkaMessage> result = await provider.GetRequiredService<TaskCompletionSource<ConsumeContext<KafkaMessage>>>().Task;
 
-                Assert.AreEqual("text", result.Message.Text);
-                Assert.That(result.SourceAddress, Is.EqualTo(new Uri("loopback://localhost/")));
-                Assert.That(result.DestinationAddress, Is.EqualTo(new Uri($"loopback://localhost/{KafkaTopicAddress.PathPrefix}/{Topic}")));
+            Assert.AreEqual("text", result.Message.Text);
+            Assert.That(result.SourceAddress, Is.EqualTo(new Uri("loopback://localhost/")));
+            Assert.That(result.DestinationAddress, Is.EqualTo(new Uri($"loopback://localhost/{KafkaTopicAddress.PathPrefix}/{Topic}")));
 
-                await postSendCompletionSource.Task;
-            }
-            finally
-            {
-                serviceScope.Dispose();
-
-                await busControl.StopAsync(TestCancellationToken);
-
-                await provider.DisposeAsync();
-            }
+            await postSendCompletionSource.Task;
         }
 
         [Test]
         public async Task Should_produce_from_state_machine()
         {
-            TaskCompletionSource<ConsumeContext<KafkaMessage>> taskCompletionSource = GetTask<ConsumeContext<KafkaMessage>>();
-            var services = new ServiceCollection();
-            services.AddSingleton(taskCompletionSource);
-
-            services.TryAddSingleton<ILoggerFactory>(LoggerFactory);
-            services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
-
-            services.AddMassTransit(x =>
-            {
-                x.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
-                    .InMemoryRepository();
-
-                x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
-
-                x.AddRider(rider =>
+            await using var provider = new ServiceCollection()
+                .AddMassTransitTestHarness(x =>
                 {
-                    rider.AddConsumer<KafkaMessageConsumer>();
+                    x.AddTaskCompletionSource<ConsumeContext<KafkaMessage>>();
 
-                    rider.AddProducer<KafkaMessage>(Topic);
+                    x.AddSagaStateMachine<TestStateMachineSaga, TestInstance>();
 
-                    rider.UsingKafka((context, k) =>
+                    x.AddRider(r =>
                     {
-                        k.Host("localhost:9092");
+                        r.AddConsumer<KafkaMessageConsumer>();
 
-                        k.TopicEndpoint<KafkaMessage>(Topic, nameof(Producer_Specs), c =>
+                        r.AddProducer<KafkaMessage>(Topic);
+
+                        r.UsingKafka((context, k) =>
                         {
-                            c.AutoOffsetReset = AutoOffsetReset.Earliest;
-                            c.ConfigureConsumer<KafkaMessageConsumer>(context);
+                            k.Host("localhost:9092");
+
+                            k.TopicEndpoint<KafkaMessage>(Topic, nameof(Receive_Specs), c =>
+                            {
+                                c.AutoOffsetReset = AutoOffsetReset.Earliest;
+                                c.CreateIfMissing();
+                                c.ConfigureConsumer<KafkaMessageConsumer>(context);
+                            });
                         });
                     });
-                });
-            });
+                })
+                .BuildServiceProvider(true);
 
-            var provider = services.BuildServiceProvider(true);
+            var harness = provider.GetTestHarness();
 
-            var busControl = provider.GetRequiredService<IBusControl>();
+            await harness.Start();
 
-            await busControl.StartAsync(TestCancellationToken);
+            var correlationId = NewId.NextGuid();
 
-            var serviceScope = provider.CreateScope();
-
-            var publishEndpoint = serviceScope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
-
-            try
+            await harness.Bus.Publish(new StartTest
             {
-                var correlationId = NewId.NextGuid();
+                CorrelationId = correlationId,
+                TestKey = "ABC"
+            }, harness.CancellationToken);
 
-                await publishEndpoint.Publish(new StartTest
-                {
-                    CorrelationId = correlationId,
-                    TestKey = "ABC"
-                }, TestCancellationToken);
+            ConsumeContext<KafkaMessage> result = await provider.GetRequiredService<TaskCompletionSource<ConsumeContext<KafkaMessage>>>().Task;
 
-                ConsumeContext<KafkaMessage> result = await taskCompletionSource.Task;
-
-                Assert.AreEqual("text", result.Message.Text);
-                Assert.AreEqual(correlationId, result.InitiatorId);
-            }
-            finally
-            {
-                serviceScope.Dispose();
-
-                await busControl.StopAsync(TestCancellationToken);
-
-                await provider.DisposeAsync();
-            }
+            Assert.AreEqual("text", result.Message.Text);
+            Assert.AreEqual(correlationId, result.InitiatorId);
         }
 
 

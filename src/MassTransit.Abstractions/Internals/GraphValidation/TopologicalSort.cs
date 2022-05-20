@@ -6,6 +6,7 @@
 
     public class TopologicalSort<T, TNode>
         where TNode : Node<T>, ITopologicalSortNodeProperties
+        where T : notnull
     {
         readonly AdjacencyList<T, TNode> _list;
         readonly IList<TNode> _results;

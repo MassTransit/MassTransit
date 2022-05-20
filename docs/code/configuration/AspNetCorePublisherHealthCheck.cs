@@ -1,8 +1,6 @@
 namespace AspNetCorePublisherHealthCheck
 {
     using System;
-    using System.Threading.Tasks;
-    using EventContracts;
     using MassTransit;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -25,8 +23,6 @@ namespace AspNetCorePublisherHealthCheck
             {
                 x.UsingRabbitMq();
             });
-
-            services.AddMassTransitHostedService();
         }
 
         public void Configure(IApplicationBuilder app)

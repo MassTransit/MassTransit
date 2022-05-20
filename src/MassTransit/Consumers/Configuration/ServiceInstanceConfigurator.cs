@@ -1,3 +1,4 @@
+#nullable enable
 namespace MassTransit.Configuration
 {
     using System;
@@ -31,19 +32,18 @@ namespace MassTransit.Configuration
 
         public void AddSpecification(ISpecification specification)
         {
-            if (InstanceEndpointConfigurator != null)
-                InstanceEndpointConfigurator.AddEndpointSpecification(new ValidateSpecification(specification));
+            InstanceEndpointConfigurator.AddEndpointSpecification(new ValidateSpecification(specification));
         }
 
         public IEndpointNameFormatter EndpointNameFormatter => _options.EndpointNameFormatter;
 
-        public T Options<T>(Action<T> configure = null)
+        public T Options<T>(Action<T>? configure = null)
             where T : IOptions, new()
         {
             return _options.Options(configure);
         }
 
-        public T Options<T>(T options, Action<T> configure = null)
+        public T Options<T>(T options, Action<T>? configure = null)
             where T : IOptions
         {
             return _options.Options(options, configure);
@@ -61,21 +61,20 @@ namespace MassTransit.Configuration
             return _options.SelectOptions<T>();
         }
 
-        void IReceiveConfigurator.ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<IReceiveEndpointConfigurator> configureEndpoint)
+        void IReceiveConfigurator.ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter? endpointNameFormatter,
+            Action<IReceiveEndpointConfigurator>? configureEndpoint)
         {
-            ReceiveEndpoint(definition, endpointNameFormatter, x => configureEndpoint(x));
+            ReceiveEndpoint(definition, endpointNameFormatter, x => configureEndpoint?.Invoke(x));
         }
 
-        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<TEndpointConfigurator> configureEndpoint)
+        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter? endpointNameFormatter,
+            Action<TEndpointConfigurator>? configureEndpoint)
         {
             endpointNameFormatter ??= EndpointNameFormatter;
 
             BusConfigurator.ReceiveEndpoint(definition, endpointNameFormatter, endpointConfigurator =>
             {
-                if (InstanceEndpointConfigurator != null)
-                    endpointConfigurator.AddDependency(InstanceEndpointConfigurator);
+                endpointConfigurator.AddDependency(InstanceEndpointConfigurator);
 
                 configureEndpoint?.Invoke(endpointConfigurator);
             });
@@ -86,12 +85,11 @@ namespace MassTransit.Configuration
             ReceiveEndpoint(queueName, x => configureEndpoint(x));
         }
 
-        public void ReceiveEndpoint(string queueName, Action<TEndpointConfigurator> configureEndpoint)
+        public void ReceiveEndpoint(string queueName, Action<TEndpointConfigurator>? configureEndpoint)
         {
             BusConfigurator.ReceiveEndpoint(queueName, endpointConfigurator =>
             {
-                if (InstanceEndpointConfigurator != null)
-                    endpointConfigurator.AddDependency(InstanceEndpointConfigurator);
+                endpointConfigurator.AddDependency(InstanceEndpointConfigurator);
 
                 configureEndpoint?.Invoke(endpointConfigurator);
             });

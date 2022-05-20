@@ -1,9 +1,11 @@
-﻿namespace MassTransit.GrpcTransport.Topology
+﻿#nullable enable
+namespace MassTransit.GrpcTransport.Topology
 {
     using System;
     using System.Collections.Generic;
-    using Contracts;
+    using MassTransit.Configuration;
     using MassTransit.Topology;
+    using Transports.Fabric;
 
 
     public class GrpcMessagePublishTopology<TMessage> :
@@ -22,7 +24,7 @@
 
         public ExchangeType ExchangeType { get; set; }
 
-        public void Apply(IGrpcPublishTopologyBuilder builder)
+        public void Apply(IMessageFabricPublishTopologyBuilder builder)
         {
             var exchangeName = _messageTopology.EntityName;
 
@@ -40,7 +42,7 @@
                 configurator.Apply(builder);
         }
 
-        public override bool TryGetPublishAddress(Uri baseAddress, out Uri publishAddress)
+        public override bool TryGetPublishAddress(Uri baseAddress, out Uri? publishAddress)
         {
             var exchangeName = _messageTopology.EntityName;
 
@@ -70,7 +72,7 @@
                 _direct = direct;
             }
 
-            public void Apply(IGrpcPublishTopologyBuilder builder)
+            public void Apply(IMessageFabricPublishTopologyBuilder builder)
             {
                 if (_direct)
                 {

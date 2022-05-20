@@ -2,7 +2,8 @@
 {
     using System;
     using System.Threading.Tasks;
-    using InMemoryTransport.Fabric;
+    using InMemoryTransport;
+    using MassTransit.Transports.Fabric;
     using NUnit.Framework;
 
 
@@ -12,24 +13,24 @@
         [Test]
         public async Task Should_allow_a_legitimate_binding()
         {
-            var fabric = new MessageFabric(16);
+            var fabric = new MessageFabric<InMemoryTransportContext, InMemoryTransportMessage>();
 
-            fabric.ExchangeBind("Namespace.A", "input-exchange");
-            fabric.ExchangeBind("Namespace.B", "input-exchange");
-            fabric.QueueBind("input-exchange", "input-queue");
+            fabric.ExchangeBind(null, "Namespace.A", "input-exchange", default);
+            fabric.ExchangeBind(null, "Namespace.B", "input-exchange", default);
+            fabric.QueueBind(null, "input-exchange", "input-queue");
         }
 
         [Test]
         public async Task Should_not_allow_a_cyclic_binding()
         {
-            var fabric = new MessageFabric(16);
+            var fabric = new MessageFabric<InMemoryTransportContext, InMemoryTransportMessage>();
 
-            fabric.ExchangeBind("Namespace.A", "input-exchange");
-            fabric.ExchangeBind("Namespace.B", "input-exchange");
+            fabric.ExchangeBind(null, "Namespace.A", "input-exchange", default);
+            fabric.ExchangeBind(null, "Namespace.B", "input-exchange", default);
 
-            fabric.ExchangeBind("input-exchange", "output-exchange");
+            fabric.ExchangeBind(null, "input-exchange", "output-exchange", default);
 
-            Assert.That(() => fabric.ExchangeBind("output-exchange", "Namespace.A"), Throws.TypeOf<InvalidOperationException>());
+            Assert.That(() => fabric.ExchangeBind(null, "output-exchange", "Namespace.A", default), Throws.TypeOf<InvalidOperationException>());
         }
     }
 }

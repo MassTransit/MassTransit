@@ -82,7 +82,7 @@ namespace MassTransit.Containers.Tests
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.TransportConcurrencyLimit = 16;
+            configurator.ConcurrentMessageLimit = 16;
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

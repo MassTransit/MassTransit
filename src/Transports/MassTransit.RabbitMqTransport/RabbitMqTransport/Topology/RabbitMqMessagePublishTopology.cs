@@ -1,4 +1,5 @@
-﻿namespace MassTransit.RabbitMqTransport.Topology
+﻿#nullable enable
+namespace MassTransit.RabbitMqTransport.Topology
 {
     using System;
     using System.Collections.Generic;
@@ -14,7 +15,6 @@
     {
         readonly RabbitMqExchangeConfigurator _exchange;
         readonly IList<IRabbitMqMessagePublishTopology> _implementedMessageTypes;
-        readonly IMessageTopology<TMessage> _messageTopology;
         readonly IRabbitMqPublishTopology _publishTopology;
         readonly IList<IRabbitMqPublishTopologySpecification> _specifications;
 
@@ -22,7 +22,6 @@
             IMessageExchangeTypeSelector<TMessage> exchangeTypeSelector)
         {
             _publishTopology = publishTopology;
-            _messageTopology = messageTopology;
             ExchangeTypeSelector = exchangeTypeSelector;
 
             var exchangeName = messageTopology.EntityName;
@@ -67,7 +66,7 @@
                 configurator.Apply(builder);
         }
 
-        public override bool TryGetPublishAddress(Uri baseAddress, out Uri publishAddress)
+        public override bool TryGetPublishAddress(Uri baseAddress, out Uri? publishAddress)
         {
             publishAddress = _exchange.GetEndpointAddress(baseAddress);
             return true;
@@ -119,7 +118,7 @@
             set => _exchange.SetExchangeArgument(Headers.AlternateExchange, value);
         }
 
-        public void BindQueue(string exchangeName, string queueName, Action<IRabbitMqQueueBindingConfigurator> configure = null)
+        public void BindQueue(string exchangeName, string? queueName, Action<IRabbitMqQueueBindingConfigurator>? configure)
         {
             if (string.IsNullOrWhiteSpace(exchangeName))
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(exchangeName));
@@ -133,7 +132,7 @@
             _specifications.Add(specification);
         }
 
-        public void BindAlternateExchangeQueue(string exchangeName, string queueName = null, Action<IRabbitMqQueueBindingConfigurator> configure = null)
+        public void BindAlternateExchangeQueue(string exchangeName, string? queueName, Action<IRabbitMqQueueBindingConfigurator>? configure)
         {
             BindQueue(exchangeName, queueName, configure);
 

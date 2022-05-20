@@ -6,7 +6,6 @@
     using System.Threading.Tasks;
     using AzureCosmos;
     using AzureCosmos.Saga;
-    using MassTransit.Saga;
     using Microsoft.Azure.Cosmos;
     using NUnit.Framework;
     using TestFramework;
@@ -29,7 +28,7 @@
             {
                 var correlationId = NewId.NextGuid();
 
-                await InputQueueSendEndpoint.Send(new RehersalBegins {CorrelationId = correlationId});
+                await InputQueueSendEndpoint.Send(new RehersalBegins { CorrelationId = correlationId });
 
                 sagaIds[i] = correlationId;
             }
@@ -84,7 +83,7 @@
         {
             var correlationId = NewId.NextGuid();
 
-            await InputQueueSendEndpoint.Send(new RehersalBegins {CorrelationId = correlationId});
+            await InputQueueSendEndpoint.Send(new RehersalBegins { CorrelationId = correlationId });
 
             var saga = await GetSagaRetry(correlationId, TestTimeout);
 
@@ -150,7 +149,7 @@
             _cosmosClient = new CosmosClient(Configuration.EndpointUri, Configuration.Key,
                 new CosmosClientOptions
                 {
-                    Serializer = new CosmosJsonDotNetSerializer(JsonSerializerSettingsExtensions.GetSagaRenameSettings<ChoirStateOptimistic>())
+                    Serializer = new SystemTextJsonCosmosSerializer(AzureCosmosSerializerExtensions.GetSerializerOptions<ChoirStateOptimistic>())
                 });
 
             _repository = new Lazy<ISagaRepository<ChoirStateOptimistic>>(() =>
@@ -219,7 +218,7 @@
         {
             base.ConfigureInMemoryBus(configurator);
 
-            configurator.TransportConcurrencyLimit = 16;
+            configurator.ConcurrentMessageLimit = 16;
         }
     }
 }

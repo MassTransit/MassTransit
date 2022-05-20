@@ -1,8 +1,8 @@
 namespace UsageMediatorConnect
 {
-    using System;
     using System.Threading.Tasks;
     using UsageConsumer;
+    using Microsoft.Extensions.DependencyInjection;
     using MassTransit;
     using MassTransit.Mediator;
 
@@ -10,9 +10,11 @@ namespace UsageMediatorConnect
     {
         public static async Task Main()
         {
-            IMediator mediator = Bus.Factory.CreateMediator(cfg =>
-            {
-            });
+            await using var provider = new ServiceCollection()
+                .AddMediator(cfg => { })
+                .BuildServiceProvider();
+
+            var mediator = provider.GetRequiredService<IMediator>();
 
             var handle = mediator.ConnectConsumer<SubmitOrderConsumer>();
         }

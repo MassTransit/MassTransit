@@ -1,8 +1,7 @@
 namespace PersistedSaga
 {
     using System;
-    using MassTransit.Saga;
-    using Automatonymous;
+    using MassTransit;
 
     public class OrderState :
         SagaStateMachineInstance,

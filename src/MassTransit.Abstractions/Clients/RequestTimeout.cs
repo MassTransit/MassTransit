@@ -23,7 +23,7 @@ namespace MassTransit
         /// <summary>
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
-        public TimeSpan Value => _timeout.Value;
+        public TimeSpan Value => _timeout ?? throw new InvalidOperationException("RequestTimeout does not have a value");
 
         public static RequestTimeout None { get; } = new RequestTimeout();
         public static RequestTimeout Default { get; } = new RequestTimeout(TimeSpan.FromSeconds(30));

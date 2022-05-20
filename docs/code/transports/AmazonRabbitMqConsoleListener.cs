@@ -1,22 +1,30 @@
-namespace AmazonRabbitMqConsoleListener
-{
-    using System;
-    using System.Security.Authentication;
-    using System.Threading.Tasks;
-    using MassTransit;
+namespace AmazonRabbitMqConsoleListener;
 
-    public class Program
+using System;
+using System.Threading.Tasks;
+using MassTransit;
+using Microsoft.Extensions.Hosting;
+
+public class Program
+{
+    public static async Task Main(string[] args)
     {
-        public static async Task Main()
-        {
-            var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
+        await Host.CreateDefaultBuilder(args)
+            .ConfigureServices(services =>
             {
-                cfg.Host(new Uri("amqps://b-12345678-1234-1234-1234-123456789012.mq.us-east-2.amazonaws.com:5671"), h =>
+                services.AddMassTransit(x =>
                 {
-                    h.Username("username");
-                    h.Password("password");
+                    x.UsingRabbitMq((context, cfg) =>
+                    {
+                        cfg.Host(new Uri("amqps://b-12345678-1234-1234-1234-123456789012.mq.us-east-2.amazonaws.com:5671"), h =>
+                        {
+                            h.Username("username");
+                            h.Password("password");
+                        });
+                    });
                 });
-            });
-        }
+            })
+            .Build()
+            .RunAsync();
     }
 }

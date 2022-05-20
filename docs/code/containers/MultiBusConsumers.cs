@@ -1,12 +1,7 @@
 namespace ContainerConsumers
 {
-    using System;
     using System.Threading.Tasks;
-    using GreenPipes;
     using MassTransit;
-    using MassTransit.ConsumeConfigurators;
-    using MassTransit.Definition;
-    using Microsoft.Extensions.Logging;    
 
     public interface AllocateInventory
     {

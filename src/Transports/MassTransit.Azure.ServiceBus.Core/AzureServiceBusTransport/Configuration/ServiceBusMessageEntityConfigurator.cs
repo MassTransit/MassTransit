@@ -32,7 +32,9 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
         public bool? EnablePartitioning { get; set; }
 
-        public long? MaxSizeInMB { get; set; }
+        public long? MaxSizeInMegabytes { get; set; }
+
+        public long? MaxMessageSizeInKilobytes { get; set; }
 
         public bool? RequiresDuplicateDetection { get; set; }
 

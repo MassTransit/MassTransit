@@ -12,7 +12,7 @@ namespace MassTransit.Transports
         /// </summary>
         /// <param name="address"></param>
         /// <returns></returns>
-        public static string GetEndpointName(this Uri address)
+        public static string? GetEndpointName(this Uri? address)
         {
             return address?.AbsolutePath?.Split('/').LastOrDefault();
         }
@@ -23,7 +23,7 @@ namespace MassTransit.Transports
             if (string.IsNullOrWhiteSpace(endpointName))
                 return "";
 
-            return endpointName.Contains("_bus_") ? "bus" : endpointName;
+            return endpointName!.Contains("_bus_") ? "bus" : endpointName;
         }
     }
 }

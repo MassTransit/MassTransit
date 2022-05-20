@@ -21,7 +21,7 @@ namespace MassTransit.Configuration
             if (MessageTypeCache<T>.HasSagaInterfaces)
                 throw new ArgumentException($"{TypeCache<T>.ShortName} is a saga, and cannot be registered as a consumer", nameof(T));
 
-            return new Consumer<T>().Register(collection, registrar);
+            return new ConsumerRegistrar<T>().Register(collection, registrar);
         }
 
         public static IConsumerRegistration RegisterConsumer<T, TDefinition>(this IServiceCollection collection)
@@ -38,7 +38,7 @@ namespace MassTransit.Configuration
             if (MessageTypeCache<T>.HasSagaInterfaces)
                 throw new ArgumentException($"{TypeCache<T>.ShortName} is a saga, and cannot be registered as a consumer", nameof(T));
 
-            return new ConsumerDefinition<T, TDefinition>().Register(collection, registrar);
+            return new ConsumerDefinitionRegistrar<T, TDefinition>().Register(collection, registrar);
         }
 
         public static IConsumerRegistration RegisterConsumer<T>(this IServiceCollection collection, Type consumerDefinitionType)
@@ -62,20 +62,21 @@ namespace MassTransit.Configuration
                     nameof(consumerDefinitionType));
             }
 
-            var register = (IRegister)Activator.CreateInstance(typeof(ConsumerDefinition<,>).MakeGenericType(typeof(T), consumerDefinitionType));
+            var register = (IConsumerRegistrar)Activator.CreateInstance(
+                typeof(ConsumerDefinitionRegistrar<,>).MakeGenericType(typeof(T), consumerDefinitionType));
 
             return register.Register(collection, registrar);
         }
 
 
-        interface IRegister
+        interface IConsumerRegistrar
         {
             IConsumerRegistration Register(IServiceCollection collection, IContainerRegistrar registrar);
         }
 
 
-        class Consumer<TConsumer> :
-            IRegister
+        class ConsumerRegistrar<TConsumer> :
+            IConsumerRegistrar
             where TConsumer : class, IConsumer
         {
             public virtual IConsumerRegistration Register(IServiceCollection collection, IContainerRegistrar registrar)
@@ -87,8 +88,8 @@ namespace MassTransit.Configuration
         }
 
 
-        class ConsumerDefinition<TConsumer, TDefinition> :
-            Consumer<TConsumer>
+        class ConsumerDefinitionRegistrar<TConsumer, TDefinition> :
+            ConsumerRegistrar<TConsumer>
             where TDefinition : class, IConsumerDefinition<TConsumer>
             where TConsumer : class, IConsumer
         {

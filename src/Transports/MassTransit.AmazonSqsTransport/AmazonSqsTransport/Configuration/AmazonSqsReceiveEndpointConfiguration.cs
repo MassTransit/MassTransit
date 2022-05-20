@@ -52,7 +52,7 @@
         {
             var context = CreateSqsReceiveEndpointContext();
 
-            _clientConfigurator.UseFilter(new ConfigureAmazonSqsTopologyFilter<ReceiveSettings>(_settings, context.BrokerTopology));
+            _clientConfigurator.UseFilter(new ConfigureAmazonSqsTopologyFilter<ReceiveSettings>(_settings, context.BrokerTopology, context));
 
             if (_hostConfiguration.DeployTopologyOnly)
                 _clientConfigurator.UseFilter(new TransportReadyFilter<ClientContext>(context));

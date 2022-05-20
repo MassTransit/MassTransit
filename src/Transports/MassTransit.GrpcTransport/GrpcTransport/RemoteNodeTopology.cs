@@ -4,18 +4,19 @@ namespace MassTransit.GrpcTransport
     using System.Collections.Generic;
     using System.Linq;
     using Fabric;
+    using Transports.Fabric;
 
 
     public class RemoteNodeTopology
     {
         readonly Dictionary<long, TopologyEntry> _entries;
-        readonly IMessageFabric _messageFabric;
+        readonly IMessageFabric<NodeContext, GrpcTransportMessage> _messageFabric;
         readonly IGrpcNode _node;
         readonly Dictionary<ReceiverKey, long> _receiverMap;
         long _lastSequenceNumber;
         Guid _sessionId;
 
-        public RemoteNodeTopology(IGrpcNode node, IMessageFabric messageFabric)
+        public RemoteNodeTopology(IGrpcNode node, IMessageFabric<NodeContext, GrpcTransportMessage> messageFabric)
         {
             _node = node;
             _messageFabric = messageFabric;
@@ -59,7 +60,7 @@ namespace MassTransit.GrpcTransport
                     {
                         var exchange = nextEntry.Topology.Exchange;
 
-                        _messageFabric.ExchangeDeclare(_node, exchange.Name, exchange.Type);
+                        _messageFabric.ExchangeDeclare(_node, exchange.Name, exchange.Type.ToExchangeType());
 
                         _node.LogTopology(exchange, exchange.Type);
                     }

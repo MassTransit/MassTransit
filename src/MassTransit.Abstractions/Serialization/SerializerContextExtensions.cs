@@ -56,7 +56,8 @@ namespace MassTransit
             return dictionary.TryGetHeader(key, out var value) ? context.DeserializeObject(value, defaultValue) : defaultValue;
         }
 
-        public static bool TryGetValue<T>(this IObjectDeserializer context, IDictionary<string, object> dictionary, string key, out T? value)
+        public static bool TryGetValue<T>(this IObjectDeserializer context, IDictionary<string, object> dictionary, string key,
+            [NotNullWhen(true)] out T? value)
             where T : class
         {
             if (!dictionary.TryGetValue(key, out var obj) && !dictionary.TryGetValueCamelCase(key, out obj))
@@ -69,7 +70,8 @@ namespace MassTransit
             return value != null;
         }
 
-        public static bool TryGetValue<T>(this IObjectDeserializer context, IDictionary<string, object> dictionary, string key, out T? value)
+        public static bool TryGetValue<T>(this IObjectDeserializer context, IDictionary<string, object> dictionary, string key,
+            [NotNullWhen(true)] out T? value)
             where T : struct
         {
             if (!dictionary.TryGetValue(key, out var obj) && !dictionary.TryGetValueCamelCase(key, out obj))
@@ -82,7 +84,7 @@ namespace MassTransit
             return value != null;
         }
 
-        public static bool TryGetHeader<T>(this ConsumeContext context, string key, out T? value)
+        public static bool TryGetHeader<T>(this ConsumeContext context, string key, [NotNullWhen(true)] out T? value)
             where T : class
         {
             if (!context.Headers.TryGetHeader(key, out var headerValue))
@@ -95,7 +97,7 @@ namespace MassTransit
             return value != null;
         }
 
-        public static bool TryGetHeader<T>(this ConsumeContext context, string key, out T? value)
+        public static bool TryGetHeader<T>(this ConsumeContext context, string key, [NotNullWhen(true)] out T? value)
             where T : struct
         {
             if (!context.Headers.TryGetHeader(key, out var headerValue))
@@ -108,7 +110,7 @@ namespace MassTransit
             return value != null;
         }
 
-        public static bool TryGetHeader<T>(this SendContext context, string key, out T? value)
+        public static bool TryGetHeader<T>(this SendContext context, string key, [NotNullWhen(true)] out T? value)
             where T : class
         {
             if (context.Headers.TryGetHeader(key, out var headerValue))
@@ -121,7 +123,7 @@ namespace MassTransit
             return false;
         }
 
-        public static bool TryGetHeader<T>(this SendContext context, string key, out T? value)
+        public static bool TryGetHeader<T>(this SendContext context, string key, [NotNullWhen(true)] out T? value)
             where T : struct
         {
             if (context.Headers.TryGetHeader(key, out var headerValue))

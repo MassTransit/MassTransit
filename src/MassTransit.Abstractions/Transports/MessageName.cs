@@ -22,7 +22,7 @@ namespace MassTransit.Transports
             Name = info.GetString("Name");
         }
 
-        public string Name { get; }
+        public string? Name { get; }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {

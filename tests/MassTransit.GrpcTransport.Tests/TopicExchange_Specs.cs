@@ -2,9 +2,9 @@ namespace MassTransit.GrpcTransport.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Contracts;
     using NUnit.Framework;
     using TestFramework;
+    using Transports.Fabric;
 
 
     public class Using_a_hash_topic_pattern :

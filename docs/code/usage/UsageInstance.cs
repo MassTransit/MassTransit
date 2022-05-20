@@ -1,23 +1,31 @@
-namespace UsageInstance
+namespace UsageInstance;
+
+using System.Threading.Tasks;
+using UsageConsumer;
+using MassTransit;
+using Microsoft.Extensions.Hosting;
+
+public class Program
 {
-    using System;
-    using System.Threading.Tasks;
-    using UsageConsumer;
-    using MassTransit;
-
-    public class Program
+    public static async Task Main(string[] args)
     {
-        public static async Task Main()
-        {
-            var submitOrderConsumer = new SubmitOrderConsumer();
+        var submitOrderConsumer = new SubmitOrderConsumer();
 
-            var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
+        await Host.CreateDefaultBuilder(args)
+            .ConfigureServices(services =>
             {
-                cfg.ReceiveEndpoint("order-service", e =>
+                services.AddMassTransit(x =>
                 {
-                    e.Instance(submitOrderConsumer);
+                    x.UsingInMemory((context, cfg) =>
+                    {
+                        cfg.ReceiveEndpoint("order-service", e =>
+                        {
+                            e.Instance(submitOrderConsumer);
+                        });
+                    });
                 });
-            });
-        }
+            })
+            .Build()
+            .RunAsync();
     }
 }

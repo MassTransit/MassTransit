@@ -16,7 +16,6 @@ namespace JobSystemConsoleService
     using System.Threading.Tasks;
     using JobSystem.Jobs;
     using MassTransit;
-    using MassTransit.JobService;
     using Microsoft.Extensions.DependencyInjection;
 
     public class Program

@@ -22,7 +22,7 @@ namespace MassTransit
     {
         Type FutureType { get; }
 
-        IEndpointDefinition EndpointDefinition { get; }
+        IEndpointDefinition? EndpointDefinition { get; }
 
         /// <summary>
         /// Return the endpoint name for the future

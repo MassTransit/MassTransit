@@ -15,15 +15,15 @@ namespace MassTransit.RabbitMqTransport
         ConnectionContext,
         IAsyncDisposable
     {
-        readonly IConnection _connection;
         readonly ChannelExecutor _executor;
 
-        public RabbitMqConnectionContext(IConnection connection, IRabbitMqHostConfiguration hostConfiguration, CancellationToken cancellationToken)
+        public RabbitMqConnectionContext(IConnection connection, IRabbitMqHostConfiguration hostConfiguration, string description,
+            CancellationToken cancellationToken)
             : base(cancellationToken)
         {
-            _connection = connection;
+            Connection = connection;
 
-            Description = hostConfiguration.Settings.ToDescription();
+            Description = description;
             HostAddress = hostConfiguration.HostAddress;
 
             PublisherConfirmation = hostConfiguration.PublisherConfirmation;
@@ -39,7 +39,8 @@ namespace MassTransit.RabbitMqTransport
             connection.ConnectionShutdown += OnConnectionShutdown;
         }
 
-        IConnection ConnectionContext.Connection => _connection;
+        public IConnection Connection { get; }
+
         public string Description { get; }
         public Uri HostAddress { get; }
         public bool PublisherConfirmation { get; }
@@ -55,23 +56,23 @@ namespace MassTransit.RabbitMqTransport
         {
             using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
 
-            return await _executor.Run(() => _connection.CreateModel(), tokenSource.Token).ConfigureAwait(false);
+            return await _executor.Run(() => Connection.CreateModel(), tokenSource.Token).ConfigureAwait(false);
         }
 
-        async Task<ModelContext> ConnectionContext.CreateModelContext(CancellationToken cancellationToken)
+        public async Task<ModelContext> CreateModelContext(CancellationToken cancellationToken)
         {
             var model = await CreateModel(cancellationToken).ConfigureAwait(false);
 
             return new RabbitMqModelContext(this, model, cancellationToken);
         }
 
-        async ValueTask IAsyncDisposable.DisposeAsync()
+        public async ValueTask DisposeAsync()
         {
-            _connection.ConnectionShutdown -= OnConnectionShutdown;
+            Connection.ConnectionShutdown -= OnConnectionShutdown;
 
             TransportLogMessages.DisconnectHost(Description);
 
-            _connection.Cleanup(200, "Connection Disposed");
+            Connection.Cleanup(200, "Connection Disposed");
 
             TransportLogMessages.DisconnectedHost(Description);
 
@@ -80,7 +81,7 @@ namespace MassTransit.RabbitMqTransport
 
         void OnConnectionShutdown(object connection, ShutdownEventArgs reason)
         {
-            _connection.Cleanup(reason.ReplyCode, reason.ReplyText);
+            Connection.Cleanup(reason.ReplyCode, reason.ReplyText);
         }
     }
 }

@@ -147,6 +147,7 @@ namespace MassTransit.Containers.Tests
                 {
                     options.WaitUntilStarted = true;
                     options.StartTimeout = TimeSpan.FromSeconds(10);
+                    options.StopTimeout = TimeSpan.FromSeconds(30);
                 });
 
             IServiceProvider provider = collection.BuildServiceProvider(true);

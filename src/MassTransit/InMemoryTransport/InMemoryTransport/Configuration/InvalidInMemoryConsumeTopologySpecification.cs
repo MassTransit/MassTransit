@@ -1,6 +1,8 @@
 ﻿namespace MassTransit.InMemoryTransport.Configuration
 {
     using System.Collections.Generic;
+    using MassTransit.Configuration;
+    using Transports.Fabric;
 
 
     public class InvalidInMemoryConsumeTopologySpecification :
@@ -20,7 +22,7 @@
             yield return this.Failure(_key, _message);
         }
 
-        public void Apply(IInMemoryConsumeTopologyBuilder builder)
+        public void Apply(IMessageFabricConsumeTopologyBuilder builder)
         {
         }
     }

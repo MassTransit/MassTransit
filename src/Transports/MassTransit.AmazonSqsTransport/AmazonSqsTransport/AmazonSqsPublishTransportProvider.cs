@@ -1,3 +1,4 @@
+#nullable enable
 namespace MassTransit.AmazonSqsTransport
 {
     using System;
@@ -19,7 +20,7 @@ namespace MassTransit.AmazonSqsTransport
             _clientContextSupervisor = context.ClientContextSupervisor;
         }
 
-        public Task<ISendTransport> GetPublishTransport<T>(Uri publishAddress)
+        public Task<ISendTransport> GetPublishTransport<T>(Uri? publishAddress)
             where T : class
         {
             return _connectionContextSupervisor.CreatePublishTransport<T>(_context, _clientContextSupervisor);

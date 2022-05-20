@@ -1,6 +1,8 @@
-﻿namespace MassTransit
+﻿#nullable enable
+namespace MassTransit
 {
-    using InMemoryTransport.Configuration;
+    using Configuration;
+    using Transports.Fabric;
 
 
     public interface IInMemoryMessageConsumeTopologyConfigurator<TMessage> :
@@ -11,7 +13,7 @@
         /// <summary>
         /// Adds the exchange bindings for this message type
         /// </summary>
-        void Bind();
+        void Bind(ExchangeType? exchangeType = default, string? routingKey = null);
     }
 
 
@@ -22,6 +24,6 @@
         /// Apply the message topology to the builder
         /// </summary>
         /// <param name="builder"></param>
-        void Apply(IInMemoryConsumeTopologyBuilder builder);
+        void Apply(IMessageFabricConsumeTopologyBuilder builder);
     }
 }

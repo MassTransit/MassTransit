@@ -7,12 +7,10 @@ namespace MassTransit.Logging
     public readonly struct StartedActivity
     {
         public readonly Activity Activity;
-        public readonly EnabledScope? Scope;
 
-        public StartedActivity(Activity activity, EnabledScope? scope)
+        public StartedActivity(Activity activity)
         {
             Activity = activity;
-            Scope = scope;
         }
 
         public void AddTag(string key, string value)
@@ -33,8 +31,6 @@ namespace MassTransit.Logging
         public void Stop()
         {
             Activity.Stop();
-
-            Scope?.Dispose();
         }
     }
 }

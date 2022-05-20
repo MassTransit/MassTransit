@@ -22,7 +22,7 @@ namespace MassTransit.Configuration
             where T : class
             where TDefinition : class, IEndpointDefinition<T>
         {
-            return new Endpoint<TDefinition, T>().Register(collection, registrar, settings);
+            return new EndpointRegistrar<TDefinition, T>().Register(collection, registrar, settings);
         }
 
         public static IEndpointRegistration RegisterEndpoint(this IServiceCollection collection, Type endpointDefinitionType)
@@ -35,20 +35,20 @@ namespace MassTransit.Configuration
             if (!endpointDefinitionType.ClosesType(typeof(IEndpointDefinition<>), out Type[] types))
                 throw new ArgumentException($"{TypeCache.GetShortName(endpointDefinitionType)} is not an endpoint definition", nameof(endpointDefinitionType));
 
-            var register = (IRegister)Activator.CreateInstance(typeof(Endpoint<,>).MakeGenericType(endpointDefinitionType, types[0]));
+            var register = (IEndpointRegistrar)Activator.CreateInstance(typeof(EndpointRegistrar<,>).MakeGenericType(endpointDefinitionType, types[0]));
 
             return register.Register(collection, registrar);
         }
 
 
-        interface IRegister
+        interface IEndpointRegistrar
         {
             IEndpointRegistration Register(IServiceCollection collection, IContainerRegistrar registrar);
         }
 
 
-        class Endpoint<TDefinition, T> :
-            IRegister
+        class EndpointRegistrar<TDefinition, T> :
+            IEndpointRegistrar
             where TDefinition : class, IEndpointDefinition<T>
             where T : class
         {

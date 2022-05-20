@@ -2,7 +2,6 @@
 {
     using System;
     using Configuration;
-    using Context;
     using Topology;
     using Transports;
     using Util;
@@ -42,6 +41,11 @@
             });
 
             BrokerTopology.Probe(context);
+        }
+
+        public override void AddSendAgent(IAgent agent)
+        {
+            _clientContext.Supervisor.AddSendAgent(agent);
         }
 
         public override void AddConsumeAgent(IAgent agent)

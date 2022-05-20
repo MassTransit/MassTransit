@@ -24,6 +24,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology
         public bool UsingBasicTier { get; private set; }
 
         public abstract bool RequiresSession { get; }
+        public abstract int MaxConcurrentCallsPerSession { get; }
 
         public TimeSpan SessionIdleTimeout { get; set; }
 

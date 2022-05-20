@@ -49,7 +49,7 @@
 
             var specification = _messageTypes.GetOrAdd(typeof(T), CreateMessageTopology<T>);
 
-            return specification as IMessageTopologyConfigurator<T>;
+            return (IMessageTopologyConfigurator<T>)specification;
         }
 
         protected virtual IMessageTypeTopologyConfigurator CreateMessageTopology<T>(Type type)

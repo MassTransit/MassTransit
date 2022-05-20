@@ -44,6 +44,8 @@
             set => _hostSettings = value ?? throw new ArgumentNullException(nameof(value));
         }
 
+        public bool IsArtemis { get; set; }
+
         public IConnectionContextSupervisor ConnectionContextSupervisor => _connectionContext.Supervisor;
 
         IActiveMqBusTopology IActiveMqHostConfiguration.Topology => _topology;

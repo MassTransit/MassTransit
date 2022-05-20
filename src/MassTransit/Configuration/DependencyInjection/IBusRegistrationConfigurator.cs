@@ -43,5 +43,10 @@ namespace MassTransit
         IBusRegistrationConfigurator
         where TBus : class, IBus
     {
+        /// <summary>
+        /// Add bus rider
+        /// </summary>
+        /// <param name="configure"></param>
+        void AddRider(Action<IRiderRegistrationConfigurator<TBus>> configure);
     }
 }

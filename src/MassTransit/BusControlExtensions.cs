@@ -15,7 +15,7 @@
         /// <param name="busControl">The bus handle</param>
         public static void Stop(this IBusControl busControl)
         {
-            TaskUtil.Await(() => busControl.StopAsync());
+            Stop(busControl, TimeSpan.FromSeconds(60));
         }
 
         /// <summary>
@@ -25,7 +25,7 @@
         /// <param name="busControl">The bus handle</param>
         public static void Start(this IBusControl busControl)
         {
-            TaskUtil.Await(() => busControl.StartAsync());
+            Start(busControl, TimeSpan.FromSeconds(60));
         }
 
         /// <summary>

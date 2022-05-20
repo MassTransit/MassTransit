@@ -1,22 +1,34 @@
-namespace UsageConsumerTemporaryEndpoint
-{
-    using System;
-    using System.Threading.Tasks;
-    using UsageConsumer;
-    using MassTransit;
+namespace UsageConsumerTemporaryEndpoint;
 
-    public class Program
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using UsageConsumer;
+using MassTransit;
+using Microsoft.Extensions.Hosting;
+
+public class Program
+{
+    public static async Task Main(string[] args)
     {
-        public static async Task Main()
-        {
-            var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
+        await Host.CreateDefaultBuilder(args)
+            .ConfigureServices(services =>
             {
-                // ensures the receive endpoint is deleted when the bus is stopped
-                cfg.ReceiveEndpoint(new TemporaryEndpointDefinition(), e =>
+                services.AddMassTransit(x =>
                 {
-                    e.Consumer<SubmitOrderConsumer>();
+                    x.AddConsumer<SubmitOrderConsumer>();
+
+                    x.UsingInMemory((context, cfg) =>
+                    {
+                        cfg.ReceiveEndpoint(new TemporaryEndpointDefinition(), e =>
+                        {
+                            e.ConfigureConsumer<SubmitOrderConsumer>(context);
+                        });
+
+                        cfg.ConfigureEndpoints(context);
+                    });
                 });
-            });
-        }
+            })
+            .Build()
+            .RunAsync();
     }
 }

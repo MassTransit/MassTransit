@@ -1,3 +1,4 @@
+#nullable enable
 namespace MassTransit.AzureServiceBusTransport.Topology
 {
     using System;
@@ -14,22 +15,20 @@ namespace MassTransit.AzureServiceBusTransport.Topology
     {
         readonly Lazy<CreateTopicOptions> _createTopicOptions;
         readonly IList<IServiceBusMessagePublishTopology> _implementedMessageTypes;
-        readonly IMessageTopology<TMessage> _messageTopology;
         readonly IServiceBusPublishTopology _publishTopology;
         readonly ServiceBusTopicConfigurator _topicConfigurator;
 
         public ServiceBusMessagePublishTopology(IMessageTopology<TMessage> messageTopology, IServiceBusPublishTopology publishTopology)
         {
-            _messageTopology = messageTopology;
             _publishTopology = publishTopology;
-
-            _createTopicOptions = new Lazy<CreateTopicOptions>(() => _topicConfigurator.GetCreateTopicOptions());
 
             _topicConfigurator = new ServiceBusTopicConfigurator(messageTopology.EntityName, MessageTypeCache<TMessage>.IsTemporaryMessageType);
             _implementedMessageTypes = new List<IServiceBusMessagePublishTopology>();
+
+            _createTopicOptions = new Lazy<CreateTopicOptions>(() => _topicConfigurator.GetCreateTopicOptions());
         }
 
-        public override bool TryGetPublishAddress(Uri baseAddress, out Uri publishAddress)
+        public override bool TryGetPublishAddress(Uri baseAddress, out Uri? publishAddress)
         {
             publishAddress = new ServiceBusEndpointAddress(new Uri(baseAddress.GetLeftPart(UriPartial.Authority)), _topicConfigurator.FullPath);
             return true;
@@ -53,64 +52,64 @@ namespace MassTransit.AzureServiceBusTransport.Topology
             return new ServiceBusSubscriptionConfigurator(_publishTopology.FormatSubscriptionName(subscriptionName), CreateTopicOptions.Name);
         }
 
-        string IServiceBusMessageEntityConfigurator.Path => _topicConfigurator.Path;
+        public string Path => _topicConfigurator.Path;
 
-        string IServiceBusMessageEntityConfigurator.BasePath
+        public string BasePath
         {
             get => _topicConfigurator.BasePath;
             set => _topicConfigurator.BasePath = value;
         }
 
-        string IServiceBusMessageEntityConfigurator.FullPath => _topicConfigurator.FullPath;
+        public string FullPath => _topicConfigurator.FullPath;
 
-        TimeSpan? IServiceBusMessageEntityConfigurator.DuplicateDetectionHistoryTimeWindow
+        public TimeSpan? DuplicateDetectionHistoryTimeWindow
         {
             set => _topicConfigurator.DuplicateDetectionHistoryTimeWindow = value;
         }
 
-        bool? IServiceBusMessageEntityConfigurator.EnablePartitioning
+        public bool? EnablePartitioning
         {
             set => _topicConfigurator.EnablePartitioning = value;
         }
 
-        long? IServiceBusMessageEntityConfigurator.MaxSizeInMB
+        public long? MaxSizeInMegabytes
         {
-            set => _topicConfigurator.MaxSizeInMB = value;
+            set => _topicConfigurator.MaxSizeInMegabytes = value;
         }
 
-        bool? IServiceBusMessageEntityConfigurator.RequiresDuplicateDetection
+        public long? MaxMessageSizeInKilobytes
+        {
+            set => _topicConfigurator.MaxMessageSizeInKilobytes = value;
+        }
+
+        public bool? RequiresDuplicateDetection
         {
             set => _topicConfigurator.RequiresDuplicateDetection = value;
         }
 
-        void IServiceBusMessageEntityConfigurator.EnableDuplicateDetection(TimeSpan historyTimeWindow)
+        public void EnableDuplicateDetection(TimeSpan historyTimeWindow)
         {
             _topicConfigurator.EnableDuplicateDetection(historyTimeWindow);
         }
 
-        TimeSpan? IServiceBusEntityConfigurator.AutoDeleteOnIdle
+        public TimeSpan? AutoDeleteOnIdle
         {
             set => _topicConfigurator.AutoDeleteOnIdle = value;
         }
 
-        TimeSpan? IServiceBusEntityConfigurator.DefaultMessageTimeToLive
+        public TimeSpan? DefaultMessageTimeToLive
         {
             set => _topicConfigurator.DefaultMessageTimeToLive = value;
         }
 
-        bool? IServiceBusEntityConfigurator.EnableBatchedOperations
+        public bool? EnableBatchedOperations
         {
             set => _topicConfigurator.EnableBatchedOperations = value;
         }
 
-        string IServiceBusEntityConfigurator.UserMetadata
+        public string UserMetadata
         {
             set => _topicConfigurator.UserMetadata = value;
-        }
-
-        bool? IServiceBusTopicConfigurator.EnableFilteringMessagesBeforePublishing
-        {
-            set => _topicConfigurator.EnableFilteringMessagesBeforePublishing = value;
         }
 
         public void Apply(IPublishEndpointBrokerTopologyBuilder builder)

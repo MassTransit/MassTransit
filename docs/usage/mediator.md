@@ -8,13 +8,15 @@ Mediator is a [behavioral design pattern](https://en.wikipedia.org/wiki/Mediator
 
 ### Configuration
 
-Creating and configuring a mediator is similar to a bus, but uses the _CreateMediator_ factory method. Consumers and sagas are configured the same way they would on a receive endpoint. The example below configures the mediator with a single consumer.
+To configure Mediator, use the _AddMediator_ method.
 
-<<< @/docs/code/usage/UsageMediator.cs
+<<< @/docs/code/usage/UsageMediatorContainer.cs
 
-Once created, the mediator doesn't need to be started or stopped and can be used immediately. _IMediator_ combines several other interfaces into a single interface, including _IPublishEndpoint_, _ISendEndpoint_, and _IClientFactory_.
+Consumers and sagas (including saga repositories) can be added, routing slip activities are not supported using mediator. Consumer and saga definitions are supported as well, but certain properties like _EndpointName_ are ignored. Middleware components, including _UseMessageRetry_ and _UseInMemoryOutbox_, are fully supported.
 
-<<< @/src/MassTransit/Mediator/IMediator.cs
+Once created, Mediator doesn't need to be started or stopped and can be used immediately. _IMediator_ combines several other interfaces into a single interface, including _IPublishEndpoint_, _ISendEndpoint_, and _IClientFactory_.
+
+<<< @/src/MassTransit.Abstractions/Mediator/IMediator.cs
 
 MassTransit dispatches the command to the consumer asynchronously. Once the _Consume_ method completes, the _Send_ method will complete. If the consumer throws an exception, it will be propagated back to the caller.
 
@@ -41,14 +43,6 @@ The _OrderStatusConsumer_, along with the message contracts, is shown below.
 <<< @/docs/code/usage/UsageMediatorConsumer.cs
 
 Just like _Send_, the request is executed asynchronously. If an exception occurs, the exception will be propagated back to the caller. If the request times out, or if the request is canceled, the _GetResponse_ method will throw an exception (either a _RequestTimeoutException_ or an _OperationCanceledException_).
-
-### Containers
-
-To configure mediator using a container, use the _AddMediator_ method.
-
-<<< @/docs/code/usage/UsageMediatorContainer.cs
-
-Consumers and sagas (including saga repositories) can be added, routing slip activities are not supported using mediator. Consumer and saga definitions are supported as well, but certain properties like _EndpointName_ are ignored. Middleware components, including _UseMessageRetry_ and _UseInMemoryOutbox_, are fully supported.
 
 ### Middleware
 
@@ -155,4 +149,9 @@ public class HttpContextScopeFilter :
 
 Once the above have been added, the controller scope will be passed through the mediator send and consume filters so that the controller scope is used for the consumers.
 
+### Legacy Configuration
+
+When not using a container, Mediator can be created as shown below. Consumers and sagas are configured the same way they would on a receive endpoint. The example below configures the mediator with a single consumer.
+
+<<< @/docs/code/usage/UsageMediator.cs
 

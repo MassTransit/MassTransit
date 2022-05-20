@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../../signing.props" />
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netcoreapp3.1;net6.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(IsWindows)' == 'true' ">
+    <TargetFrameworks>$(TargetFrameworks);net461</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <RootNamespace>MassTransit</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>MassTransit.DynamoDb</PackageId>
+    <Title>MassTransit.DynamoDb</Title>
+    <PackageTags>MassTransit;DynamoDb;AWS;Amazon</PackageTags>
+    <Description>MassTransit DynamoDb persistence support; $(Description)</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.3.33" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
+    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
+  </ItemGroup>
+
+</Project>

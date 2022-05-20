@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using Grpc.Core;
     using MassTransit.Configuration;
     using Topology;
     using Transports;
@@ -37,7 +38,9 @@
             ReceiveTransportRetryPolicy = Retry.CreatePolicy(x =>
             {
                 x.Handle<ConnectionException>();
-                x.Exponential(1000, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
+                x.Handle<RpcException>();
+
+                x.Exponential(1000, TimeSpan.FromSeconds(0.1), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
             });
 
             _transportProvider = new Recycle<IGrpcTransportProvider>(() => new GrpcTransportProvider(this, topologyConfiguration));

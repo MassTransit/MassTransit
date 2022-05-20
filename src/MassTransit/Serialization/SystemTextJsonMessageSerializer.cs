@@ -38,8 +38,6 @@ namespace MassTransit.Serialization
                 Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
             };
 
-            Options.Converters.Add(new SystemTextJsonTimeSpanConverter());
-            Options.Converters.Add(new SystemTextJsonUriConverter());
             Options.Converters.Add(new SystemTextJsonMessageDataConverter());
             Options.Converters.Add(new SystemTextJsonConverterFactory());
         }
@@ -87,6 +85,11 @@ namespace MassTransit.Serialization
             {
                 throw new SerializationException("An error occured while deserializing the message envelope", ex);
             }
+        }
+
+        public MessageBody GetMessageBody(string text)
+        {
+            return new StringMessageBody(text);
         }
 
         public MessageBody GetMessageBody<T>(SendContext<T> context)

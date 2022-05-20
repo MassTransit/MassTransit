@@ -4,10 +4,11 @@ namespace MassTransit.GrpcTransport
     using System.Threading.Tasks;
     using Contracts;
     using Fabric;
+    using Transports.Fabric;
 
 
     public class RemoteNodeMessageReceiver :
-        IMessageReceiver
+        IMessageReceiver<GrpcTransportMessage>
     {
         readonly IGrpcNode _node;
         readonly string _queueName;

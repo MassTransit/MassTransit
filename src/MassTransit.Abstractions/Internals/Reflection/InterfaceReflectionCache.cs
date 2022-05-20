@@ -8,14 +8,14 @@ namespace MassTransit.Internals
 
     public class InterfaceReflectionCache
     {
-        readonly ConcurrentDictionary<Type, ConcurrentDictionary<Type, Type>> _cache;
+        readonly ConcurrentDictionary<Type, ConcurrentDictionary<Type, Type?>> _cache;
 
         public InterfaceReflectionCache()
         {
-            _cache = new ConcurrentDictionary<Type, ConcurrentDictionary<Type, Type>>();
+            _cache = new ConcurrentDictionary<Type, ConcurrentDictionary<Type, Type?>>();
         }
 
-        public Type GetGenericInterface(Type type, Type interfaceType)
+        public Type? GetGenericInterface(Type type, Type interfaceType)
         {
             if (!interfaceType.GetTypeInfo().IsGenericTypeDefinition)
             {
@@ -38,14 +38,14 @@ namespace MassTransit.Internals
                 .FirstOrDefault(t => t.GetGenericTypeDefinition() == interfaceType);
         }
 
-        public Type Get(Type type, Type interfaceType)
+        public Type? Get(Type type, Type interfaceType)
         {
-            ConcurrentDictionary<Type, Type> typeCache = _cache.GetOrAdd(type, x => new ConcurrentDictionary<Type, Type>());
+            ConcurrentDictionary<Type, Type?> typeCache = _cache.GetOrAdd(type, x => new ConcurrentDictionary<Type, Type?>());
 
             return typeCache.GetOrAdd(interfaceType, x => GetInterfaceInternal(type, interfaceType));
         }
 
-        Type GetInterfaceInternal(Type type, Type interfaceType)
+        Type? GetInterfaceInternal(Type type, Type interfaceType)
         {
             if (interfaceType.GetTypeInfo().IsGenericTypeDefinition)
                 return GetGenericInterface(type, interfaceType);

@@ -10,7 +10,7 @@
         /// <returns>The retry attempt number, 0 = first time, >= 1 = retry</returns>
         public static int GetRetryAttempt(this ConsumeContext context)
         {
-            return context.TryGetPayload(out ConsumeRetryContext retryContext) ? retryContext.RetryAttempt : 0;
+            return context.TryGetPayload(out ConsumeRetryContext? retryContext) ? retryContext!.RetryAttempt : 0;
         }
 
         /// <summary>
@@ -20,7 +20,7 @@
         /// <returns>The number of retries that have already been attempted, 0 = first time or first retry, >= 1 = subsequent retry</returns>
         public static int GetRetryCount(this ConsumeContext context)
         {
-            return context.TryGetPayload(out ConsumeRetryContext retryContext) ? retryContext.RetryCount : 0;
+            return context.TryGetPayload(out ConsumeRetryContext? retryContext) ? retryContext!.RetryCount : 0;
         }
 
         /// <summary>

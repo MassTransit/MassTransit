@@ -86,5 +86,10 @@ namespace MassTransit.Serialization
                 throw new SerializationException("An exception occurred while deserializing the message", ex);
             }
         }
+
+        public MessageBody GetMessageBody(string text)
+        {
+            return new StringMessageBody(text);
+        }
     }
 }

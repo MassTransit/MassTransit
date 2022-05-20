@@ -10,10 +10,10 @@ namespace MassTransit
         public readonly T Message;
         public readonly IPipe<SendContext<T>> Pipe;
 
-        public SendTuple(T message, IPipe<SendContext<T>> pipe)
+        public SendTuple(T message, IPipe<SendContext<T>>? pipe)
         {
             Message = message;
-            Pipe = pipe.IsNotEmpty() ? pipe : MassTransit.Pipe.Empty<SendContext<T>>();
+            Pipe = pipe != null && pipe.IsNotEmpty() ? pipe : MassTransit.Pipe.Empty<SendContext<T>>();
         }
 
         public SendTuple(T message)

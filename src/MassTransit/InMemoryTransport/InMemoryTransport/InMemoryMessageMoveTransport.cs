@@ -4,15 +4,15 @@ namespace MassTransit.InMemoryTransport
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
-    using Fabric;
     using Transports;
+    using Transports.Fabric;
 
 
     public class InMemoryMessageMoveTransport
     {
-        readonly IInMemoryExchange _exchange;
+        readonly IMessageExchange<InMemoryTransportMessage> _exchange;
 
-        protected InMemoryMessageMoveTransport(IInMemoryExchange exchange)
+        protected InMemoryMessageMoveTransport(IMessageExchange<InMemoryTransportMessage> exchange)
         {
             _exchange = exchange;
         }
@@ -33,7 +33,9 @@ namespace MassTransit.InMemoryTransport
 
             preSend(transportMessage, transportMessage.Headers);
 
-            await _exchange.Send(transportMessage, CancellationToken.None).ConfigureAwait(false);
+            var deliveryContext = new InMemoryDeliveryContext(transportMessage, CancellationToken.None);
+
+            await _exchange.Deliver(deliveryContext).ConfigureAwait(false);
         }
     }
 }

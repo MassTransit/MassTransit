@@ -69,9 +69,15 @@ namespace MassTransit.Transports
         void Reset();
 
         /// <summary>
-        /// Add an agent, which should be stopped during shutdown
+        /// Add an consume-side agent, which should be stopped during shutdown
         /// </summary>
         /// <param name="agent"></param>
         void AddConsumeAgent(IAgent agent);
+
+        /// <summary>
+        /// Add an agent, which should be stopped during shutdown after consume/send agents have been stopped
+        /// </summary>
+        /// <param name="agent"></param>
+        void AddSendAgent(IAgent agent);
     }
 }

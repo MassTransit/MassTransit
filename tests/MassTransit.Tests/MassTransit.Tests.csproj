@@ -1,8 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFrameworks>netcoreapp3.1;net6.0</TargetFrameworks>
   </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(IsWindows)' == 'true' ">
+    <TargetFrameworks>$(TargetFrameworks);net461</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net461'">
+    <Reference Include="System.Transactions" />
+  </ItemGroup>
 
   <ItemGroup>
     <Compile Remove="NewConfigurationModel.cs" />
@@ -11,10 +19,10 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="5.0.0" />
-    <PackageReference Include="Google.Protobuf" Version="3.19.3" />
+    <PackageReference Include="Google.Protobuf" Version="3.20.1" />
     <PackageReference Include="MathNet.Numerics" Version="4.15.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
-    <PackageReference Include="NUnit" Version="3.13.2" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
+    <PackageReference Include="NUnit" Version="3.13.3" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
     <PackageReference Include="Shouldly" Version="4.0.3" />
     <ProjectReference Include="..\..\src\MassTransit.Newtonsoft\MassTransit.Newtonsoft.csproj" />

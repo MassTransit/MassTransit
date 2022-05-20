@@ -2,7 +2,6 @@ namespace SchedulingActiveMQ
 {
     using System;
     using MassTransit;
-    using MassTransit.ActiveMqTransport;
     using Microsoft.Extensions.DependencyInjection;
 
     public class Program
@@ -15,7 +14,7 @@ namespace SchedulingActiveMQ
             {
                 x.AddDelayedMessageScheduler();
 
-                x.UsingActiveMq((context, cfg) => 
+                x.UsingActiveMq((context, cfg) =>
                 {
                     cfg.UseDelayedMessageScheduler();
 

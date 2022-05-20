@@ -27,7 +27,7 @@
             _busControl = Bus.Factory.CreateUsingInMemory(x =>
             {
                 x.AutoStart = true;
-                x.TransportConcurrencyLimit = _optionSet.TransportConcurrencyLimit;
+                x.ConcurrentMessageLimit = _optionSet.TransportConcurrencyLimit;
 
                 x.ReceiveEndpoint("rpc_consumer", e =>
                 {

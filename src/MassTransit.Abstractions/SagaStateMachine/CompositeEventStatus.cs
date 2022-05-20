@@ -40,7 +40,7 @@ namespace MassTransit
             return other._bits == _bits;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (ReferenceEquals(null, obj))
                 return false;

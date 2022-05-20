@@ -16,8 +16,6 @@ namespace MassTransit.Configuration
         RegistrationConfigurator,
         IBusRegistrationConfigurator
     {
-        protected readonly HashSet<Type> RiderTypes;
-
         public ServiceCollectionBusConfigurator(IServiceCollection collection)
             : this(collection, new DependencyInjectionContainerRegistrar(collection))
         {
@@ -44,13 +42,8 @@ namespace MassTransit.Configuration
         protected ServiceCollectionBusConfigurator(IServiceCollection collection, IContainerRegistrar registrar)
             : base(collection, registrar)
         {
-            Collection = collection;
-            RiderTypes = new HashSet<Type>();
-
             AddMassTransitComponents(collection);
         }
-
-        public IServiceCollection Collection { get; }
 
         public virtual void AddBus(Func<IBusRegistrationContext, IBusControl> busFactory)
         {
@@ -65,19 +58,19 @@ namespace MassTransit.Configuration
 
             ThrowIfAlreadyConfigured(nameof(SetBusFactory));
 
-            Collection.AddSingleton(provider => Bind<IBus>.Create(CreateBus(busFactory, provider)));
+            this.AddSingleton(provider => Bind<IBus>.Create(CreateBus(busFactory, provider)));
 
-            Collection.AddSingleton(provider => provider.GetRequiredService<Bind<IBus, IBusInstance>>().Value);
-            Collection.AddSingleton<IReceiveEndpointConnector>(provider => provider.GetRequiredService<Bind<IBus, IBusInstance>>().Value);
-            Collection.AddSingleton(provider => provider.GetRequiredService<Bind<IBus, IBusInstance>>().Value.BusControl);
-            Collection.AddSingleton(provider => provider.GetRequiredService<Bind<IBus, IBusInstance>>().Value.Bus);
+            this.AddSingleton(provider => provider.GetRequiredService<Bind<IBus, IBusInstance>>().Value);
+            this.AddSingleton<IReceiveEndpointConnector>(provider => provider.GetRequiredService<Bind<IBus, IBusInstance>>().Value);
+            this.AddSingleton(provider => provider.GetRequiredService<Bind<IBus, IBusInstance>>().Value.BusControl);
+            this.AddSingleton(provider => provider.GetRequiredService<Bind<IBus, IBusInstance>>().Value.Bus);
 
             Registrar.RegisterScopedClientFactory();
         }
 
         public virtual void AddRider(Action<IRiderRegistrationConfigurator> configure)
         {
-            var configurator = new ServiceCollectionRiderConfigurator(Collection, Registrar, RiderTypes);
+            var configurator = new ServiceCollectionRiderConfigurator(this, new DependencyInjectionRiderContainerRegistrar(this));
             configure?.Invoke(configurator);
         }
 
@@ -166,14 +159,19 @@ namespace MassTransit.Configuration
             this.AddSingleton<IBusInstance>(provider => provider.GetRequiredService<IBusInstance<TBus>>());
             this.AddSingleton(provider =>
                 Bind<TBus>.Create<IReceiveEndpointConnector>(provider.GetRequiredService<IBusInstance<TBus>>()));
-            this.AddSingleton(provider => provider.GetRequiredService<IBusInstance<TBus>>().BusInstance);
+            this.AddSingleton(provider => provider.GetRequiredService<IBusInstance<TBus>>().Bus);
 
             Registrar.RegisterScopedClientFactory();
         }
 
         public override void AddRider(Action<IRiderRegistrationConfigurator> configure)
         {
-            var configurator = new ServiceCollectionRiderConfigurator<TBus>(this, Registrar, RiderTypes);
+            AddRider(configurator => configure.Invoke(configurator));
+        }
+
+        public void AddRider(Action<IRiderRegistrationConfigurator<TBus>> configure)
+        {
+            var configurator = new ServiceCollectionRiderConfigurator<TBus>(this, new DependencyInjectionRiderContainerRegistrar<TBus>(this));
             configure?.Invoke(configurator);
         }
 

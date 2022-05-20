@@ -1,6 +1,6 @@
 # Middleware
 
-MassTransit is built on top of [Green Pipes](https://github.com/MassTransit/GreenPipes), which is used to create a network of pipes and filters to dispatch messages. A pipe is composed of a series of filters, each of which is a key atom and are described below.
+MassTransit is built using a network of pipes and filters to dispatch messages. A pipe is composed of a series of filters, each of which is a key atom and are described below.
 
 A detailed view of MassTransit's [Receive Pipeline](receive.md) is a good example of the sophistication possible.
 

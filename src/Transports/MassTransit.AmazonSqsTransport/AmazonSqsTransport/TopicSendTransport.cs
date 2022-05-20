@@ -71,7 +71,7 @@
 
                 await _pipe.Send(sendContext).ConfigureAwait(false);
 
-                StartedActivity? activity = LogContext.IfEnabled(_context.ActivityName)?.StartSendActivity(sendContext);
+                StartedActivity? activity = LogContext.Current?.StartSendActivity(_context, sendContext);
                 try
                 {
                     if (_context.SendObservers.Count > 0)

@@ -34,7 +34,7 @@ namespace MassTransit.Internals
             return GetEnumerator();
         }
 
-        public bool TryGetValue(string key, out ReadWriteProperty<T> value)
+        public bool TryGetValue(string key, [NotNullWhen(true)] out ReadWriteProperty<T>? value)
         {
             try
             {
@@ -46,7 +46,7 @@ namespace MassTransit.Internals
             }
         }
 
-        public bool TryGetProperty(string propertyName, out ReadWriteProperty<T> property)
+        public bool TryGetProperty(string propertyName, [NotNullWhen(true)] out ReadWriteProperty<T>? property)
         {
             return _properties.TryGetValue(propertyName, out property);
         }

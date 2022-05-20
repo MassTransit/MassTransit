@@ -50,7 +50,7 @@ namespace MassTransit.Containers.Tests
                 .AddScoped<IConsumerDependency, ConsumerDependency>()
                 .BuildServiceProvider(true);
 
-            var harness = provider.GetRequiredService<ITestHarness>();
+            var harness = provider.GetTestHarness();
 
             await harness.Start();
 
@@ -126,7 +126,7 @@ namespace MassTransit.Containers.Tests
                 })
                 .BuildServiceProvider(true);
 
-            var harness = provider.GetRequiredService<ITestHarness>();
+            var harness = provider.GetTestHarness();
 
             harness.TestInactivityTimeout = TimeSpan.FromSeconds(1);
 
@@ -178,7 +178,7 @@ namespace MassTransit.Containers.Tests
                 })
                 .BuildServiceProvider(true);
 
-            var harness = provider.GetRequiredService<ITestHarness>();
+            var harness = provider.GetTestHarness();
 
             await harness.Start();
 
@@ -221,13 +221,13 @@ namespace MassTransit.Containers.Tests
                 .AddScoped<PublishTestStartedActivity>()
                 .BuildServiceProvider(true);
 
-            var harness = provider.GetRequiredService<ITestHarness>();
+            var harness = provider.GetTestHarness();
 
             await harness.Start();
 
             var correlationId = NewId.NextGuid();
 
-            await harness.Bus.Publish(new StartTest
+            await (await harness.GetSagaEndpoint<TestInstance>()).Send(new StartTest
             {
                 CorrelationId = correlationId,
                 TestKey = "Unique"

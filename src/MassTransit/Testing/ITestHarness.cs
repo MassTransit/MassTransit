@@ -1,12 +1,17 @@
 namespace MassTransit.Testing
 {
     using System.Threading.Tasks;
+    using Microsoft.Extensions.DependencyInjection;
 
 
     public interface ITestHarness :
         IBaseTestHarness
     {
         IBus Bus { get; }
+
+        IServiceScope Scope { get; }
+
+        IEndpointNameFormatter EndpointNameFormatter { get; }
 
         /// <summary>
         /// Returns a task completion source that is automatically canceled when the test is canceled
@@ -46,6 +51,32 @@ namespace MassTransit.Testing
 
         IRequestClient<T> GetRequestClient<T>()
             where T : class;
+
+        /// <summary>
+        /// Use the endpoint name formatter to get the send endpoint for the consumer type
+        /// </summary>
+        /// <typeparam name="T">The consumer type</typeparam>
+        /// <returns></returns>
+        Task<ISendEndpoint> GetConsumerEndpoint<T>()
+            where T : class, IConsumer;
+
+        /// <summary>
+        /// Use the endpoint name formatter to get the send endpoint for the saga type
+        /// </summary>
+        /// <typeparam name="T">The saga type</typeparam>
+        /// <returns></returns>
+        Task<ISendEndpoint> GetSagaEndpoint<T>()
+            where T : class, ISaga;
+
+        /// <summary>
+        /// Use the endpoint name formatter to get the execute send endpoint for the activity type
+        /// </summary>
+        /// <typeparam name="T">The activity type</typeparam>
+        /// <typeparam name="TArguments">The argument type</typeparam>
+        /// <returns></returns>
+        Task<ISendEndpoint> GetExecuteActivityEndpoint<T, TArguments>()
+            where T : class, IExecuteActivity<TArguments>
+            where TArguments : class;
 
         Task Start();
     }

@@ -26,6 +26,8 @@ namespace MassTransit.Internals
         {
             if (property.DeclaringType == null)
                 throw new ArgumentException("DeclaringType is null", nameof(property));
+            if (property.GetMethod == null)
+                return _ => throw new InvalidOperationException("No GetMethod available on " + property.Name);
 
             var instance = Expression.Parameter(typeof(object), "instance");
             var instanceCast = property.DeclaringType.GetTypeInfo().IsValueType
@@ -49,8 +51,11 @@ namespace MassTransit.Internals
         {
         }
 
-        public ReadOnlyProperty(PropertyInfo property)
+        public ReadOnlyProperty(PropertyInfo? property)
         {
+            if (property == null)
+                throw new ArgumentNullException(nameof(property));
+
             Property = property;
             GetProperty = GetGetMethod(Property);
         }
@@ -64,6 +69,9 @@ namespace MassTransit.Internals
 
         static Func<T, object> GetGetMethod(PropertyInfo property)
         {
+            if (property.GetMethod == null)
+                return _ => throw new InvalidOperationException("No GetMethod available on " + property.Name);
+
             var instance = Expression.Parameter(typeof(T), "instance");
             var call = Expression.Call(instance, property.GetMethod);
             var typeAs = Expression.TypeAs(call, typeof(object));
@@ -81,8 +89,11 @@ namespace MassTransit.Internals
         {
         }
 
-        public ReadOnlyProperty(PropertyInfo property)
+        public ReadOnlyProperty(PropertyInfo? property)
         {
+            if (property == null)
+                throw new ArgumentNullException(nameof(property));
+
             Property = property;
             GetProperty = GetGetMethod(Property);
         }
@@ -96,6 +107,9 @@ namespace MassTransit.Internals
 
         static Func<T, TProperty> GetGetMethod(PropertyInfo property)
         {
+            if (property.GetMethod == null)
+                return _ => throw new InvalidOperationException("No GetMethod available on " + property.Name);
+
             var instance = Expression.Parameter(typeof(T), "instance");
             var call = Expression.Call(instance, property.GetMethod);
 

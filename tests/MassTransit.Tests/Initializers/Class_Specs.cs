@@ -14,7 +14,7 @@ namespace MassTransit.Tests.Initializers
         [Test]
         public async Task Should_initialize_a_fault()
         {
-            InitializeContext<Top> topContext = await MessageInitializerCache<Top>.Initialize(new {Text = "Hello"});
+            InitializeContext<Top> topContext = await MessageInitializerCache<Top>.Initialize(new { Text = "Hello" });
 
             InitializeContext<Report> context = await MessageInitializerCache<Report>.Initialize(new
             {
@@ -55,7 +55,7 @@ namespace MassTransit.Tests.Initializers
         [Test]
         public async Task Should_initialize_interface_with_readonly_property()
         {
-            var model1 = new {ReadWrite = "Some Property Value"};
+            var model1 = new { ReadWrite = "Some Property Value" };
 
             await MessageInitializerCache<IReadWriteReadOnly>.Initialize(model1);
         }
@@ -63,7 +63,7 @@ namespace MassTransit.Tests.Initializers
         [Test]
         public async Task Should_initialize_object_with_readonly_property()
         {
-            var model1 = new {ReadWrite = "Some Property Value"};
+            var model1 = new { ReadWrite = "Some Property Value" };
 
             await MessageInitializerCache<ReadWriteReadOnly>.Initialize(model1);
         }
@@ -71,7 +71,7 @@ namespace MassTransit.Tests.Initializers
         [Test]
         public async Task Should_initialize_interface_with_readonly_property_from_subclass()
         {
-            var model2 = new ReadWriteReadOnly {ReadWrite = "Some Property Value"};
+            var model2 = new ReadWriteReadOnly { ReadWrite = "Some Property Value" };
 
             await MessageInitializerCache<IReadWriteReadOnly>.Initialize(model2);
         }
@@ -79,7 +79,7 @@ namespace MassTransit.Tests.Initializers
         [Test]
         public async Task Should_initialize_object_with_readonly_property_from_subclass()
         {
-            var model2 = new ReadWriteReadOnly {ReadWrite = "Some Property Value"};
+            var model2 = new ReadWriteReadOnly { ReadWrite = "Some Property Value" };
 
             await MessageInitializerCache<ReadWriteReadOnly>.Initialize(model2);
         }
@@ -95,7 +95,7 @@ namespace MassTransit.Tests.Initializers
         public interface IReadWriteReadOnly
         {
             string ReadWrite { get; set; }
-            string ReadOnly => ReadWrite;
+            string ReadOnly { get; }
         }
 
 

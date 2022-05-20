@@ -91,6 +91,10 @@ namespace MassTransit.DependencyInjection.Testing
         public IPublishedMessageList Published => _published.Value.Messages;
         public ISentMessageList Sent => _sent.Value.Messages;
 
+        public IServiceScope Scope => _scope.Value;
+
+        public IEndpointNameFormatter EndpointNameFormatter => _provider.GetService<IEndpointNameFormatter>() ?? DefaultEndpointNameFormatter.Instance;
+
         public IBus Bus => _provider.GetRequiredService<IBus>();
 
         public void Cancel()
@@ -128,9 +132,40 @@ namespace MassTransit.DependencyInjection.Testing
             return _scope.Value.ServiceProvider.GetRequiredService<IRequestClient<T>>();
         }
 
+        public Task<ISendEndpoint> GetConsumerEndpoint<T>()
+            where T : class, IConsumer
+        {
+            var provider = _scope.Value.ServiceProvider.GetRequiredService<ISendEndpointProvider>();
+
+            var shortName = new Uri($"queue:{EndpointNameFormatter.Consumer<T>()}");
+
+            return provider.GetSendEndpoint(shortName);
+        }
+
+        public Task<ISendEndpoint> GetSagaEndpoint<T>()
+            where T : class, ISaga
+        {
+            var provider = _scope.Value.ServiceProvider.GetRequiredService<ISendEndpointProvider>();
+
+            var shortName = new Uri($"queue:{EndpointNameFormatter.Saga<T>()}");
+
+            return provider.GetSendEndpoint(shortName);
+        }
+
+        public Task<ISendEndpoint> GetExecuteActivityEndpoint<T, TArguments>()
+            where T : class, IExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            var provider = _scope.Value.ServiceProvider.GetRequiredService<ISendEndpointProvider>();
+
+            var shortName = new Uri($"queue:{EndpointNameFormatter.ExecuteActivity<T, TArguments>()}");
+
+            return provider.GetSendEndpoint(shortName);
+        }
+
         public Task Start()
         {
-            _hostedServices = _provider.GetService<IEnumerable<IHostedService>>();
+            _hostedServices = _provider.GetServices<IHostedService>();
             if (_hostedServices == null)
                 throw new ConfigurationException("The MassTransit hosted service was not found.");
 

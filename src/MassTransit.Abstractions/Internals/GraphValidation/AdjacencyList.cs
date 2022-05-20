@@ -6,6 +6,7 @@
 
     public class AdjacencyList<T, TNode>
         where TNode : Node<T>
+        where T : notnull
     {
         readonly IDictionary<TNode, HashSet<Edge<T, TNode>>> _edges;
         readonly NodeList<T, TNode> _nodeList;
@@ -20,7 +21,7 @@
 
         public HashSet<Edge<T, TNode>> GetEdges(TNode index)
         {
-            if (_edges.TryGetValue(index, out HashSet<Edge<T, TNode>> edges))
+            if (_edges.TryGetValue(index, out HashSet<Edge<T, TNode>>? edges))
                 return edges;
 
             return new HashSet<Edge<T, TNode>>();
@@ -36,7 +37,7 @@
 
         void AddEdge(TNode source, TNode target, int weight)
         {
-            if (!_edges.TryGetValue(source, out HashSet<Edge<T, TNode>> edges))
+            if (!_edges.TryGetValue(source, out HashSet<Edge<T, TNode>>? edges))
             {
                 edges = new HashSet<Edge<T, TNode>>();
                 _edges.Add(source, edges);

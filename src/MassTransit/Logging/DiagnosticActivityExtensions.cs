@@ -4,6 +4,7 @@ namespace MassTransit.Logging
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Runtime.CompilerServices;
 
 
     public static class DiagnosticActivityExtensions
@@ -20,6 +21,7 @@ namespace MassTransit.Logging
                 activity.AddTag(key, value.ToString());
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void AddConsumeContextTags(this Activity activity, ConsumeContext context)
         {
             if (activity.IsAllDataRequested)
@@ -29,11 +31,11 @@ namespace MassTransit.Logging
 
                 AddTag(activity, DiagnosticHeaders.CorrelationId, context.CorrelationId);
                 AddTag(activity, DiagnosticHeaders.InitiatorId, context.InitiatorId);
+                AddTag(activity, DiagnosticHeaders.RequestId, context.RequestId);
                 AddTag(activity, DiagnosticHeaders.SourceAddress, context.SourceAddress);
                 AddTag(activity, DiagnosticHeaders.DestinationAddress, context.DestinationAddress);
 
-                if (context.SupportedMessageTypes != null)
-                    activity.AddTag(DiagnosticHeaders.MessageTypes, string.Join(",", context.SupportedMessageTypes));
+                activity.AddTag(DiagnosticHeaders.MessageTypes, string.Join(",", context.SupportedMessageTypes));
             }
 
             if (context.CorrelationId.HasValue)

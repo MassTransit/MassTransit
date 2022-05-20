@@ -3,13 +3,14 @@ namespace MassTransit.GrpcTransport
     using System.Threading.Tasks;
     using Fabric;
     using Transports;
+    using Transports.Fabric;
 
 
     public class GrpcDeadLetterTransport :
         GrpcMoveTransport,
         IDeadLetterTransport
     {
-        public GrpcDeadLetterTransport(IMessageExchange exchange)
+        public GrpcDeadLetterTransport(IMessageExchange<GrpcTransportMessage> exchange)
             : base(exchange)
         {
         }

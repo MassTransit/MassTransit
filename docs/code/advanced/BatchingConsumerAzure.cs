@@ -4,7 +4,6 @@ namespace BatchingConsumerAzure
     using System.Threading.Tasks;
     using BatchingConsumer;
     using MassTransit;
-    using MassTransit.Azure.ServiceBus.Core;
 
     public class Program
     {

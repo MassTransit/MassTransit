@@ -24,8 +24,6 @@
             _hostAddress = baseAddress ?? new Uri("loopback://localhost/");
             _topology = new InMemoryBusTopology(this, topologyConfiguration);
 
-            TransportConcurrencyLimit = Math.Min(Environment.ProcessorCount, 4);
-
             ReceiveTransportRetryPolicy = Retry.CreatePolicy(x =>
             {
                 x.Handle<ConnectionException>();
@@ -45,8 +43,6 @@
         {
             set => _hostAddress = value ?? new Uri("loopback://localhost/");
         }
-
-        public int TransportConcurrencyLimit { get; set; }
 
         IInMemoryHostConfigurator IInMemoryHostConfiguration.Configurator => this;
         IInMemoryTransportProvider IInMemoryHostConfiguration.TransportProvider => _transportProvider.Supervisor;
@@ -100,8 +96,7 @@
             CreateReceiveEndpointConfiguration(queueName, configureEndpoint);
         }
 
-        public override IReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
-            Action<IReceiveEndpointConfigurator> configure = null)
+        public override IReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName, Action<IReceiveEndpointConfigurator> configure)
         {
             return CreateReceiveEndpointConfiguration(queueName, configure);
         }

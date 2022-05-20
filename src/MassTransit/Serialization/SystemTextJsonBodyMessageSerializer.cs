@@ -16,7 +16,7 @@ namespace MassTransit.Serialization
     {
         readonly JsonMessageEnvelope? _envelope;
         readonly JsonSerializerOptions _options;
-        object _message;
+        object? _message;
 
         public SystemTextJsonBodyMessageSerializer(MessageEnvelope envelope, ContentType contentType, JsonSerializerOptions options)
         {

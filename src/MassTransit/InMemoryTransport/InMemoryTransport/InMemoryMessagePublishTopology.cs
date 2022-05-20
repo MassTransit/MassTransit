@@ -1,9 +1,11 @@
-﻿namespace MassTransit.InMemoryTransport
+﻿#nullable enable
+namespace MassTransit.InMemoryTransport
 {
     using System;
     using System.Collections.Generic;
-    using Configuration;
+    using MassTransit.Configuration;
     using Topology;
+    using Transports.Fabric;
 
 
     public class InMemoryMessagePublishTopology<TMessage> :
@@ -20,34 +22,32 @@
             _implementedMessageTypes = new List<IInMemoryMessagePublishTopology>();
         }
 
-        public void Apply(IInMemoryPublishTopologyBuilder builder)
+        public ExchangeType ExchangeType { get; set; }
+
+        public void Apply(IMessageFabricPublishTopologyBuilder builder)
         {
-            var exchangeHandle = ExchangeDeclare(builder);
+            var exchangeName = _messageTopology.EntityName;
+
+            builder.ExchangeDeclare(exchangeName, ExchangeType);
 
             if (builder.ExchangeName != null)
-                builder.ExchangeBind(builder.ExchangeName, exchangeHandle);
+                builder.ExchangeBind(builder.ExchangeName, exchangeName, builder.ExchangeType == ExchangeType.Topic ? "#" : default);
             else
-                builder.ExchangeName = exchangeHandle;
+            {
+                builder.ExchangeName = exchangeName;
+                builder.ExchangeType = ExchangeType;
+            }
 
             foreach (var configurator in _implementedMessageTypes)
                 configurator.Apply(builder);
         }
 
-        public override bool TryGetPublishAddress(Uri baseAddress, out Uri publishAddress)
+        public override bool TryGetPublishAddress(Uri baseAddress, out Uri? publishAddress)
         {
             var exchangeName = _messageTopology.EntityName;
 
-            publishAddress = new Uri($"{baseAddress}{exchangeName}");
+            publishAddress = new InMemoryEndpointAddress(new InMemoryHostAddress(baseAddress), exchangeName, exchangeType: ExchangeType);
             return true;
-        }
-
-        string ExchangeDeclare(IInMemoryTopologyBuilder builder)
-        {
-            var exchangeName = _messageTopology.EntityName;
-
-            builder.ExchangeDeclare(exchangeName);
-
-            return exchangeName;
         }
 
         public void AddImplementedMessageConfigurator<T>(IInMemoryMessagePublishTopologyConfigurator<T> configurator, bool direct)
@@ -72,7 +72,7 @@
                 _direct = direct;
             }
 
-            public void Apply(IInMemoryPublishTopologyBuilder builder)
+            public void Apply(IMessageFabricPublishTopologyBuilder builder)
             {
                 if (_direct)
                 {

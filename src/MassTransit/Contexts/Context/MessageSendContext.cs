@@ -30,8 +30,7 @@ namespace MassTransit.Context
             MessageId = messageId.ToGuid();
             SentTime = messageId.Timestamp;
 
-            _body = new Lazy<MessageBody>(() => Serializer?.GetMessageBody(this)
-                ?? throw new SerializationException("Unable to serialize message, no serializer specified."));
+            _body = new Lazy<MessageBody>(() => GetMessageBody());
         }
 
         /// <summary>
@@ -93,5 +92,10 @@ namespace MassTransit.Context
         public TMessage Message { get; }
 
         public bool Mandatory { get; set; }
+
+        MessageBody GetMessageBody()
+        {
+            return Serializer?.GetMessageBody(this) ?? throw new SerializationException("Unable to serialize message, no serializer specified.");
+        }
     }
 }

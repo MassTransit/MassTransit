@@ -64,11 +64,11 @@ namespace MassTransit
             CorrelationId = Guid.Empty;
         }
 
-        public Type SagaType { get; }
+        public Type? SagaType { get; }
 
-        public Type MessageType { get; }
+        public Type? MessageType { get; }
 
-        public Guid CorrelationId { get; }
+        public Guid? CorrelationId { get; }
 
         static string FormatMessage(Type sagaType, Type messageType, string message)
         {

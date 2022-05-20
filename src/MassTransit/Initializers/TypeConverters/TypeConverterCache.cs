@@ -30,6 +30,7 @@ namespace MassTransit.Initializers.TypeConverters
             AddSupportedTypes(typeof(LongTypeConverter));
             AddSupportedTypes(typeof(ShortTypeConverter));
             AddSupportedTypes(typeof(StringTypeConverter));
+            AddSupportedTypes(typeof(StateTypeConverter));
             AddSupportedTypes(typeof(TimeSpanTypeConverter));
             AddSupportedTypes(typeof(UriTypeConverter));
             AddSupportedTypes(typeof(VersionTypeConverter));

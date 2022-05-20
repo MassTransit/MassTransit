@@ -16,7 +16,7 @@ To use job consumers, a _service instance_ must be configured (see below).
 
 A job consumer implements the `IJobConsumer<T>` interface, shown below.
 
-<<< @/src/MassTransit/JobService/IJobConsumer.cs
+<<< @/src/MassTransit.Abstractions/IJobConsumer.cs
 
 ### Configuration
 

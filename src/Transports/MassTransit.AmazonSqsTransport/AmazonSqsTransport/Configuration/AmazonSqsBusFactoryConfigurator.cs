@@ -1,4 +1,5 @@
-﻿namespace MassTransit.AmazonSqsTransport.Configuration
+﻿#nullable enable
+namespace MassTransit.AmazonSqsTransport.Configuration
 {
     using System;
     using System.Collections.Generic;
@@ -76,14 +77,14 @@
         public new IAmazonSqsSendTopologyConfigurator SendTopology => _busConfiguration.Topology.Send;
         public new IAmazonSqsPublishTopologyConfigurator PublishTopology => _busConfiguration.Topology.Publish;
 
-        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<IAmazonSqsReceiveEndpointConfigurator> configureEndpoint = null)
+        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter? endpointNameFormatter,
+            Action<IAmazonSqsReceiveEndpointConfigurator>? configureEndpoint)
         {
             _hostConfiguration.ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
         }
 
-        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<IReceiveEndpointConfigurator> configureEndpoint = null)
+        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter? endpointNameFormatter,
+            Action<IReceiveEndpointConfigurator>? configureEndpoint)
         {
             _hostConfiguration.ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
         }

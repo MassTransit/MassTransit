@@ -2,6 +2,7 @@ namespace MassTransit.Serialization.JsonConverters
 {
     using System;
     using System.Reflection;
+    using Batching;
     using Courier.Contracts;
     using Courier.Messages;
     using Events;
@@ -40,17 +41,17 @@ namespace MassTransit.Serialization.JsonConverters
                     return new CachedConverter<JsonMessageEnvelope>();
 
                 if (objectType == typeof(RoutingSlip))
-                    return new CachedConverter<RoutingSlipImpl>();
+                    return new CachedConverter<RoutingSlipRoutingSlip>();
                 if (objectType == typeof(Activity))
-                    return new CachedConverter<ActivityImpl>();
+                    return new CachedConverter<RoutingSlipActivity>();
                 if (objectType == typeof(ActivityLog))
-                    return new CachedConverter<ActivityLogImpl>();
+                    return new CachedConverter<RoutingSlipActivityLog>();
                 if (objectType == typeof(CompensateLog))
-                    return new CachedConverter<CompensateLogImpl>();
+                    return new CachedConverter<RoutingSlipCompensateLog>();
                 if (objectType == typeof(ActivityException))
-                    return new CachedConverter<ActivityExceptionImpl>();
+                    return new CachedConverter<RoutingSlipActivityException>();
                 if (objectType == typeof(Subscription))
-                    return new CachedConverter<SubscriptionImpl>();
+                    return new CachedConverter<RoutingSlipSubscription>();
 
                 if (objectType == typeof(RoutingSlipCompleted))
                     return new CachedConverter<RoutingSlipCompletedMessage>();
@@ -78,6 +79,16 @@ namespace MassTransit.Serialization.JsonConverters
                         {
                             return (IConverter)Activator.CreateInstance(typeof(CachedConverter<>).MakeGenericType(
                                 typeof(FaultEvent<>).MakeGenericType(arguments[0])));
+                        }
+                    }
+
+                    if (typeInfo.GetGenericTypeDefinition() == typeof(Batch<>))
+                    {
+                        Type[] arguments = typeInfo.GetGenericArguments();
+                        if (arguments.Length == 1 && !arguments[0].IsGenericParameter)
+                        {
+                            return (IConverter)Activator.CreateInstance(typeof(CachedConverter<>).MakeGenericType(
+                                typeof(MessageBatch<>).MakeGenericType(arguments[0])));
                         }
                     }
                 }

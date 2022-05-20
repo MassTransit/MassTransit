@@ -6,6 +6,10 @@ By specifying a concurrent message limit, MassTransit limits the number of messa
 The concurrent message limit applies to the total of all message types consumed by the consumer.
 :::
 
+::: tip
+The `ConcurrentMessageLimit` is not initialized by default, and does not need to be specified. If no limit is specified, which is the default, it will equal the PrefetchCount.
+:::
+
 ### Consumer
 
 To add a concurrent message limit to a consumer:

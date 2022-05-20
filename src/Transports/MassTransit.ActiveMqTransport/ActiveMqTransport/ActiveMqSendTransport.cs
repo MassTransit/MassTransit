@@ -82,7 +82,7 @@
 
                 await _pipe.Send(context).ConfigureAwait(false);
 
-                StartedActivity? activity = LogContext.IfEnabled(_context.ActivityName)?.StartSendActivity(context);
+                StartedActivity? activity = LogContext.Current?.StartSendActivity(_context, context);
                 try
                 {
                     if (_context.SendObservers.Count > 0)
@@ -112,7 +112,12 @@
 
                     var delay = context.Delay?.TotalMilliseconds;
                     if (delay > 0)
-                        transportMessage.Properties["AMQ_SCHEDULED_DELAY"] = (long)delay.Value;
+                    {
+                        if (_context.IsArtemis)
+                            transportMessage.Properties["_AMQ_SCHED_DELIVERY"] = (DateTimeOffset.UtcNow + context.Delay.Value).ToUnixTimeMilliseconds();
+                        else
+                            transportMessage.Properties["AMQ_SCHEDULED_DELAY"] = (long)delay.Value;
+                    }
 
                     var publishTask = Task.Run(() => producer.Send(transportMessage), context.CancellationToken);
 

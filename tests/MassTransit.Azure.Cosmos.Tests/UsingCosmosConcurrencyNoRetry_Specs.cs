@@ -141,7 +141,7 @@
             _cosmosClient = new CosmosClient(Configuration.EndpointUri, Configuration.Key,
                 new CosmosClientOptions
                 {
-                    Serializer = new CosmosJsonDotNetSerializer(JsonSerializerSettingsExtensions.GetSagaRenameSettings<ChoirStateOptimistic>())
+                    Serializer = new SystemTextJsonCosmosSerializer(AzureCosmosSerializerExtensions.GetSerializerOptions<ChoirStateOptimistic>())
                 });
 
             _repository = new Lazy<ISagaRepository<ChoirStateOptimistic>>(() =>
@@ -212,7 +212,7 @@
         {
             base.ConfigureInMemoryBus(configurator);
 
-            configurator.TransportConcurrencyLimit = 16;
+            configurator.ConcurrentMessageLimit = 16;
         }
     }
 }

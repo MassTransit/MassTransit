@@ -3,7 +3,6 @@
     using System;
     using System.Threading.Tasks;
     using Quartz;
-    using Util;
 
 
     /// <summary>
@@ -14,7 +13,6 @@
     {
         readonly QuartzSchedulerOptions _options;
         readonly Uri _schedulerEndpointAddress;
-        readonly TaskCompletionSource<IScheduler> _schedulerSource;
         IScheduler? _scheduler;
 
         /// <summary>
@@ -25,10 +23,7 @@
         {
             _options = options;
             _schedulerEndpointAddress = new Uri($"queue:{options.QueueName}");
-            _schedulerSource = TaskUtil.GetTask<IScheduler>();
         }
-
-        public Task<IScheduler> Scheduler => _schedulerSource.Task;
 
         public void PostCreate(IBus bus)
         {
@@ -42,19 +37,10 @@
         {
             LogContext.Debug?.Log("Creating Quartz Scheduler: {InputAddress}", _schedulerEndpointAddress);
 
-            try
-            {
-                _scheduler = await _options.SchedulerFactory.GetScheduler().ConfigureAwait(false);
+            _scheduler = await _options.SchedulerFactory.GetScheduler().ConfigureAwait(false);
 
-                _scheduler.Context[ScheduledMessageJob.BusContextKey] = bus;
-
-                _schedulerSource.TrySetResult(_scheduler);
-            }
-            catch (Exception exception)
-            {
-                _schedulerSource.TrySetException(exception);
-                throw;
-            }
+            if (_options.JobFactoryFactory != null)
+                _scheduler.JobFactory = _options.JobFactoryFactory(bus);
         }
 
         public async Task PostStart(IBus bus, Task<BusReady> busReady)

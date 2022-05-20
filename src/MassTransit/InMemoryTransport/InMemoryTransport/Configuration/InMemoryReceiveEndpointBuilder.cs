@@ -34,8 +34,6 @@ namespace MassTransit.InMemoryTransport.Configuration
 
             context.GetOrAddPayload(() => _hostConfiguration.Topology);
 
-            context.ConfigureTopology();
-
             return context;
         }
     }

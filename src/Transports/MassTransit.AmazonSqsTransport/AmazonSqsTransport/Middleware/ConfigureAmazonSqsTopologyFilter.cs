@@ -15,12 +15,14 @@ namespace MassTransit.AmazonSqsTransport.Middleware
         where TSettings : class
     {
         readonly BrokerTopology _brokerTopology;
+        readonly SqsReceiveEndpointContext _context;
         readonly TSettings _settings;
 
-        public ConfigureAmazonSqsTopologyFilter(TSettings settings, BrokerTopology brokerTopology)
+        public ConfigureAmazonSqsTopologyFilter(TSettings settings, BrokerTopology brokerTopology, SqsReceiveEndpointContext context = null)
         {
             _settings = settings;
             _brokerTopology = brokerTopology;
+            _context = context;
         }
 
         async Task IFilter<ClientContext>.Send(ClientContext context, IPipe<ClientContext> next)
@@ -30,12 +32,12 @@ namespace MassTransit.AmazonSqsTransport.Middleware
                 await ConfigureTopology(context).ConfigureAwait(false);
 
                 context.GetOrAddPayload(() => _settings);
+
+                if (_context != null && AnyAutoDelete())
+                    _context.AddSendAgent(new RemoveAmazonSqsTopologyAgent(context, _brokerTopology));
             }, () => new Context()).ConfigureAwait(false);
 
             await next.Send(context).ConfigureAwait(false);
-
-            if (_settings is ReceiveSettings)
-                await DeleteAutoDelete(context).ConfigureAwait(false);
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -47,7 +49,7 @@ namespace MassTransit.AmazonSqsTransport.Middleware
 
         async Task ConfigureTopology(ClientContext context)
         {
-            IEnumerable<Task<TopicInfo>> topics = _brokerTopology.Topics.Select(topic => Declare(context, (Topic)topic));
+            IEnumerable<Task<TopicInfo>> topics = _brokerTopology.Topics.Select(topic => Declare(context, topic));
 
             IEnumerable<Task<QueueInfo>> queues = _brokerTopology.Queues.Select(queue => Declare(context, queue));
 
@@ -58,13 +60,9 @@ namespace MassTransit.AmazonSqsTransport.Middleware
             await Task.WhenAll(subscriptions).ConfigureAwait(false);
         }
 
-        async Task DeleteAutoDelete(ClientContext context)
+        bool AnyAutoDelete()
         {
-            IEnumerable<Task> topics = _brokerTopology.Topics.Where(x => x.AutoDelete).Select(topic => Delete(context, topic));
-
-            IEnumerable<Task> queues = _brokerTopology.Queues.Where(x => x.AutoDelete).Select(queue => Delete(context, queue));
-
-            await Task.WhenAll(topics.Concat(queues)).ConfigureAwait(false);
+            return _brokerTopology.Topics.Any(x => x.AutoDelete) || _brokerTopology.Queues.Any(x => x.AutoDelete);
         }
 
         async Task<TopicInfo> Declare(ClientContext context, Topic topic)
@@ -94,20 +92,6 @@ namespace MassTransit.AmazonSqsTransport.Middleware
             LogContext.Debug?.Log("Created queue {Queue} {QueueArn} {QueueUrl}", queueInfo.EntityName, queueInfo.Arn, queueInfo.Url);
 
             return queueInfo;
-        }
-
-        Task Delete(ClientContext context, Topic topic)
-        {
-            LogContext.Debug?.Log("Delete topic {Topic}", topic);
-
-            return context.DeleteTopic(topic);
-        }
-
-        Task Delete(ClientContext context, Queue queue)
-        {
-            LogContext.Debug?.Log("Delete queue {Queue}", queue);
-
-            return context.DeleteQueue(queue);
         }
 
 

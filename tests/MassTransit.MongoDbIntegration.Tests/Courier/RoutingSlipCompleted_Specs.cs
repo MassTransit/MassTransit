@@ -59,13 +59,6 @@
             await Bus.Publish<RoutingSlipCompleted>(new RoutingSlipCompletedEvent(_trackingNumber, DateTime.UtcNow, TimeSpan.FromSeconds(1)));
         }
 
-        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
-        {
-            base.ConfigureInMemoryBus(configurator);
-
-            configurator.ConfigureRoutingSlipEventCorrelation();
-        }
-
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             base.ConfigureInMemoryReceiveEndpoint(configurator);

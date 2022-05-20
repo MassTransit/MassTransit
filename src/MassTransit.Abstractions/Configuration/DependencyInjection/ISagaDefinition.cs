@@ -11,7 +11,7 @@ namespace MassTransit
         /// </summary>
         Type SagaType { get; }
 
-        IEndpointDefinition EndpointDefinition { get; }
+        IEndpointDefinition? EndpointDefinition { get; }
 
         /// <summary>
         /// Return the endpoint name for the consumer, using the specified formatter if necessary.

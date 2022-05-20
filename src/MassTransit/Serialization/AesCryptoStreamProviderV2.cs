@@ -74,7 +74,9 @@
 
         Aes CreateAes()
         {
-            return new AesCryptoServiceProvider { Padding = _paddingMode };
+            var aes = Aes.Create();
+            aes.Padding = _paddingMode;
+            return aes;
         }
     }
 }

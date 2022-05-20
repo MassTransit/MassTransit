@@ -77,7 +77,7 @@ namespace MassTransit.Transports
                 _endpoint.Message = $"faulted ({faulted.Exception.Message})";
                 _endpoint.HealthResult = EndpointHealthResult.Unhealthy(_endpoint, _endpoint.Message, faulted.Exception);
 
-                LogContext.Debug?.Log("Endpoint Faulted: {InputAddress}", _endpoint.InputAddress);
+                LogContext.Debug?.Log(faulted.Exception, "Endpoint Faulted: {InputAddress}", _endpoint.InputAddress);
 
                 _endpoint.CurrentState = ReceiveEndpoint.State.Faulted;
             }

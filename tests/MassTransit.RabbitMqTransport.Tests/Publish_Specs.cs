@@ -46,6 +46,37 @@
             }
         }
 
+        [TestFixture]
+        public class WhenAMessageIsSendToTheEndpointWithAGuidHeader :
+            RabbitMqTestFixture
+        {
+            [Test]
+            public async Task Should_be_received()
+            {
+                var endpoint = await Bus.GetSendEndpoint(InputQueueAddress);
+
+                var message = new A { Id = Guid.NewGuid() };
+                await endpoint.Send(message, context =>
+                {
+                    Guid? value = NewId.NextGuid();
+                    context.Headers.Set(MessageHeaders.SchedulingTokenId, value);
+                });
+
+                ConsumeContext<A> received = await _receivedA;
+
+                Assert.AreEqual(message.Id, received.Message.Id);
+            }
+
+            Task<ConsumeContext<A>> _receivedA;
+
+            protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+            {
+                base.ConfigureRabbitMqReceiveEndpoint(configurator);
+
+                _receivedA = Handled<A>(configurator);
+            }
+        }
+
 
         [TestFixture]
         public class When_a_message_is_send_to_the_bus_itself :

@@ -1,8 +1,10 @@
-﻿namespace MassTransit.InMemoryTransport.Configuration
+﻿#nullable enable
+namespace MassTransit.InMemoryTransport.Configuration
 {
     using System;
     using MassTransit.Configuration;
     using Transports;
+    using Transports.Fabric;
 
 
     public class InMemoryReceiveEndpointConfiguration :
@@ -54,9 +56,18 @@
             ReceiveEndpoint = receiveEndpoint;
         }
 
-        public int ConcurrencyLimit
+        public void Bind(string exchangeName, ExchangeType exchangeType = ExchangeType.FanOut, string? routingKey = default)
         {
-            set => ConcurrentMessageLimit = value;
+            if (exchangeName == null)
+                throw new ArgumentNullException(nameof(exchangeName));
+
+            _endpointConfiguration.Topology.Consume.Bind(exchangeName, exchangeType, routingKey);
+        }
+
+        public void Bind<T>(ExchangeType exchangeType, string? routingKey = default)
+            where T : class
+        {
+            _endpointConfiguration.Topology.Consume.GetMessageTopology<T>().Bind(exchangeType, routingKey);
         }
 
         InMemoryReceiveEndpointContext CreateInMemoryReceiveEndpointContext()

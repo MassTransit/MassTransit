@@ -1,3 +1,4 @@
+#nullable disable
 namespace MassTransit
 {
     using System;
@@ -36,7 +37,7 @@ namespace MassTransit
 
                 return _pending;
             }
-            private set => _pending = value;
+            set => _pending = value;
         }
 
         public HashSet<FutureSubscription> Subscriptions
@@ -51,7 +52,7 @@ namespace MassTransit
 
                 return _subscriptions;
             }
-            private set => _subscriptions = value;
+            set => _subscriptions = value;
         }
 
         public Dictionary<string, object> Variables
@@ -66,7 +67,7 @@ namespace MassTransit
 
                 return _variables;
             }
-            private set => _variables = value != null ? new Dictionary<string, object>(value, StringComparer.OrdinalIgnoreCase) : null;
+            set => _variables = value != null ? new Dictionary<string, object>(value, StringComparer.OrdinalIgnoreCase) : null;
         }
 
         public Dictionary<Guid, FutureMessage> Results
@@ -81,7 +82,7 @@ namespace MassTransit
 
                 return _results;
             }
-            private set => _results = value;
+            set => _results = value;
         }
 
         public Dictionary<Guid, FutureMessage> Faults
@@ -96,7 +97,7 @@ namespace MassTransit
 
                 return _faults;
             }
-            private set => _faults = value;
+            set => _faults = value;
         }
 
         public byte[] RowVersion { get; set; }

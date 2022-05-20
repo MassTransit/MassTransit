@@ -112,7 +112,7 @@ Logo Design by _The Agile Badger_
 
 [Cosmos.nuget]: https://www.nuget.org/packages/MassTransit.Azure.Cosmos
 [AzureStorage.nuget]: https://www.nuget.org/packages/MassTransit.Azure.Storage
-[Dapper.nuget]: https://www.nuget.org/packages/MassTransit.Dapper
+[Dapper.nuget]: https://www.nuget.org/packages/MassTransit.DapperIntegration
 [EFCore.nuget]: https://www.nuget.org/packages/MassTransit.EntityFrameworkCore
 [EF.nuget]: https://www.nuget.org/packages/MassTransit.EntityFramework
 [Marten.nuget]: https://www.nuget.org/packages/MassTransit.Marten

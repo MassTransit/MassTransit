@@ -21,7 +21,7 @@ namespace MassTransit
         /// <param name="key">The header name</param>
         /// <param name="value">The output header value</param>
         /// <returns>True if the header is present, otherwise false</returns>
-        bool TryGetHeader(string key, out object? value);
+        bool TryGetHeader(string key, [NotNullWhen(true)] out object? value);
 
         /// <summary>
         /// Returns the specified header as the type, returning a default value is the header is not found

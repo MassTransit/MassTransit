@@ -45,7 +45,7 @@ namespace MassTransit.Topology
             return GetMessageTopology<T>();
         }
 
-        public bool TryGetPublishAddress(Type messageType, Uri baseAddress, out Uri publishAddress)
+        public bool TryGetPublishAddress(Type messageType, Uri baseAddress, out Uri? publishAddress)
         {
             return _messageTypes.GetOrAdd(messageType, CreateMessageType)
                 .TryGetPublishAddress(baseAddress, out publishAddress);
@@ -101,7 +101,7 @@ namespace MassTransit.Topology
 
             var topology = _messageTypes.GetOrAdd(typeof(T), CreateMessageTopology<T>);
 
-            return topology as IMessagePublishTopologyConfigurator<T>;
+            return (IMessagePublishTopologyConfigurator<T>)topology;
         }
 
         protected void OnMessageTopologyCreated<T>(IMessagePublishTopologyConfigurator<T> messageTopology)
@@ -132,7 +132,7 @@ namespace MassTransit.Topology
         IMessageTypeFactory GetOrAddByMessageType(Type type)
         {
             return _messageTypeFactoryCache.GetOrAdd(type,
-                _ => (IMessageTypeFactory)Activator.CreateInstance(typeof(MessageTypeFactory<>).MakeGenericType(type), this));
+                _ => (IMessageTypeFactory)Activator.CreateInstance(typeof(MessageTypeFactory<>).MakeGenericType(type), this)!);
         }
 
 

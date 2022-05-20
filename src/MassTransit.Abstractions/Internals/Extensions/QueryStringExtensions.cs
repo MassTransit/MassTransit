@@ -7,7 +7,7 @@
 
     public static class QueryStringExtensions
     {
-        public static bool TryGetValueFromQueryString(this Uri uri, string key, out string value)
+        public static bool TryGetValueFromQueryString(this Uri uri, string key, out string? value)
         {
             var queryString = uri.Query;
             if (string.IsNullOrEmpty(queryString) || queryString.Length <= 1)
@@ -20,7 +20,7 @@
                 .Split('&')
                 .Select(x =>
                 {
-                    string[] values = x.Split('=');
+                    var values = x.Split('=');
                     if (values.Length == 2)
                     {
                         return new
@@ -91,7 +91,7 @@
         /// <param name="address"></param>
         /// <param name="hostPath"></param>
         /// <param name="entityName"></param>
-        public static void ParseHostPathAndEntityName(this Uri address, out string hostPath, out string entityName)
+        public static void ParseHostPathAndEntityName(this Uri address, out string? hostPath, out string? entityName)
         {
             var path = address.AbsolutePath;
 
@@ -113,13 +113,15 @@
         /// </summary>
         /// <param name="address"></param>
         /// <returns></returns>
-        public static IEnumerable<(string, string)> SplitQueryString(this Uri address)
+        public static IEnumerable<(string, string?)> SplitQueryString(this Uri address)
         {
-            var query = address.Query?.TrimStart('?');
-            if (!string.IsNullOrWhiteSpace(query))
-                return query.Split('&').Select(x => x.Split('=')).Select(x => (x.First().ToLowerInvariant(), x.Skip(1).FirstOrDefault()));
+            var query = address.Query.TrimStart('?');
+            if (string.IsNullOrWhiteSpace(query))
+                yield break;
 
-            return Enumerable.Empty<(string, string)>();
+            foreach (var element in query!.Split('&').Select(x => x.Split('='))
+                         .Select(x => (x.First().ToLowerInvariant(), x.Skip(1).FirstOrDefault())))
+                yield return element;
         }
     }
 }

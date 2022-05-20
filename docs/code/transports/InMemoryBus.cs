@@ -1,24 +1,25 @@
-namespace InMemoryConsoleListener
+namespace InMemoryConsoleListener;
+
+using System.Threading.Tasks;
+using MassTransit;
+using Microsoft.Extensions.Hosting;
+
+public class Program
 {
-    using System;
-    using System.Threading.Tasks;
-    using MassTransit;
-    using Microsoft.Extensions.DependencyInjection;
-
-    public class Program
+    public static async Task Main(string[] args)
     {
-        public static async Task Main()
-        {
-            var services = new ServiceCollection();
-            services.AddMassTransit(x =>
+        await Host.CreateDefaultBuilder(args)
+            .ConfigureServices(services =>
             {
-                x.UsingInMemory((context, cfg) =>
+                services.AddMassTransit(x =>
                 {
-                    cfg.TransportConcurrencyLimit = 100;
-
-                    cfg.ConfigureEndpoints(context);
+                    x.UsingInMemory((context, cfg) =>
+                    {
+                        cfg.ConfigureEndpoints(context);
+                    });
                 });
-            });
-        }
+            })
+            .Build()
+            .RunAsync();
     }
 }

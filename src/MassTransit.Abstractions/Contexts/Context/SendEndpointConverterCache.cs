@@ -34,7 +34,8 @@ namespace MassTransit.Context
 
         static ISendEndpointConverter CreateConverter(Type type)
         {
-            return (ISendEndpointConverter)Activator.CreateInstance(typeof(SendEndpointConverter<>).MakeGenericType(type));
+            return Activator.CreateInstance(typeof(SendEndpointConverter<>).MakeGenericType(type)) as ISendEndpointConverter
+                ?? throw new InvalidOperationException("Failed to create SendEndpointConverter");
         }
 
 

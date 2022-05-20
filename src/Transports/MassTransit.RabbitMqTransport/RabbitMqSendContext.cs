@@ -4,7 +4,8 @@
 
 
     public interface RabbitMqSendContext :
-        SendContext
+        SendContext,
+        RoutingKeySendContext
     {
         /// <summary>
         /// Specify that the published message must be delivered to a queue or it will be returned
@@ -15,11 +16,6 @@
         /// The destination exchange for the message
         /// </summary>
         string Exchange { get; }
-
-        /// <summary>
-        /// The routing key for the message (defaults to "")
-        /// </summary>
-        string RoutingKey { get; set; }
 
         /// <summary>
         /// True if the ack from the broker should be awaited, otherwise only the BasicPublish call is awaited

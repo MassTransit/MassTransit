@@ -2,18 +2,16 @@ namespace MassTransit.InMemoryTransport
 {
     using System;
     using System.Threading.Tasks;
-    using Configuration;
-    using Fabric;
     using Transports;
+    using Transports.Fabric;
 
 
     public interface IInMemoryTransportProvider :
+        InMemoryTransportContext,
         IAgent,
         IProbeSite
     {
-        IMessageFabric MessageFabric { get; }
-
-        IInMemoryConsumeTopologyBuilder CreateConsumeTopologyBuilder();
+        IMessageFabric<InMemoryTransportContext, InMemoryTransportMessage> MessageFabric { get; }
 
         Task<ISendTransport> CreateSendTransport(ReceiveEndpointContext context, Uri address);
 

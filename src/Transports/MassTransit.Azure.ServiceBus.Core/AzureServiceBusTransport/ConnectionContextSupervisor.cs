@@ -5,7 +5,6 @@ namespace MassTransit.AzureServiceBusTransport
     using System.Threading.Tasks;
     using Agents;
     using Configuration;
-    using Context;
     using Middleware;
     using Transports;
 
@@ -71,7 +70,7 @@ namespace MassTransit.AzureServiceBusTransport
         {
             LogContext.SetCurrentIfNull(_hostConfiguration.LogContext);
 
-            var configureTopology = new ConfigureServiceBusTopologyFilter<SendSettings>(settings, settings.GetBrokerTopology(), false, Stopping);
+            var configureTopology = new ConfigureServiceBusTopologyFilter<SendSettings>(settings, settings.GetBrokerTopology(), false);
 
             var contextFactory = new SendEndpointContextFactory(this, configureTopology.ToPipe<SendEndpointContext>(), settings);
 
@@ -116,9 +115,10 @@ namespace MassTransit.AzureServiceBusTransport
                 EntityName = settings.EntityPath;
             }
 
-            public Uri Address { get; }
-
             public override string EntityName { get; }
+            public override string ActivitySystem => "service-bus";
+
+            public Uri Address { get; }
 
             public Task Send(IPipe<SendEndpointContext> pipe, CancellationToken cancellationToken)
             {

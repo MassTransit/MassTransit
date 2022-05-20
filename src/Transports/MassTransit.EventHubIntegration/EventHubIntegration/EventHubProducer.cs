@@ -137,7 +137,7 @@ namespace MassTransit.EventHubIntegration
                     PartitionKey = sendContext.PartitionKey
                 };
 
-                StartedActivity? activity = LogContext.IfEnabled(_context.ActivityName)?.StartSendActivity(sendContext,
+                StartedActivity? activity = LogContext.Current?.StartSendActivity(_context, sendContext,
                     (nameof(sendContext.PartitionId), options.PartitionId), (nameof(sendContext.PartitionKey), options.PartitionKey));
                 try
                 {
@@ -147,6 +147,14 @@ namespace MassTransit.EventHubIntegration
                     var eventData = new EventData(sendContext.Body.GetBytes());
 
                     eventData.Properties.Set(sendContext.Headers);
+
+                    if (sendContext.MessageId.HasValue)
+                        eventData.MessageId = sendContext.MessageId.Value.ToString("N");
+
+                    if (sendContext.CorrelationId.HasValue)
+                        eventData.CorrelationId = sendContext.CorrelationId.Value.ToString("N");
+
+                    eventData.ContentType = sendContext.ContentType.ToString();
 
                     await context.Produce(new[] { eventData }, options, sendContext.CancellationToken).ConfigureAwait(false);
 
@@ -233,7 +241,7 @@ namespace MassTransit.EventHubIntegration
                     PartitionKey = sendContext.PartitionKey
                 };
 
-                StartedActivity? activity = LogContext.IfEnabled(_context.ActivityName)?.StartSendActivity(sendContext,
+                StartedActivity? activity = LogContext.Current?.StartSendActivity(_context, sendContext,
                     (nameof(EventHubMessageSendContext<T>.PartitionId), options.PartitionId),
                     (nameof(EventHubMessageSendContext<T>.PartitionKey), options.PartitionKey));
                 try

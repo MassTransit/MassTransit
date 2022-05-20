@@ -10,6 +10,7 @@ namespace MassTransit.GrpcTransport
     using Grpc.Core;
     using Internals;
     using MassTransit.Middleware;
+    using Transports.Fabric;
 
 
     public class GrpcNode :
@@ -17,11 +18,11 @@ namespace MassTransit.GrpcTransport
         IGrpcNode
     {
         readonly Channel<TransportMessage> _channel;
-        readonly IMessageFabric _messageFabric;
+        readonly IMessageFabric<NodeContext, GrpcTransportMessage> _messageFabric;
         readonly RemoteNodeTopology _remoteTopology;
         NodeContext _context;
 
-        public GrpcNode(IMessageFabric messageFabric, NodeContext context)
+        public GrpcNode(IMessageFabric<NodeContext, GrpcTransportMessage> messageFabric, NodeContext context)
         {
             _messageFabric = messageFabric;
             _context = context;
@@ -62,7 +63,29 @@ namespace MassTransit.GrpcTransport
             var writerTask = StartWriter(writer, source.Token);
             var readerTask = StartReader(reader, source.Token);
 
-            await Task.WhenAll(readerTask, writerTask).ConfigureAwait(false);
+            try
+            {
+                await Task.WhenAll(readerTask, writerTask).ConfigureAwait(false);
+            }
+            catch (Exception)
+            {
+                source.Cancel();
+
+                try
+                {
+                    if (!readerTask.IsCompleted)
+                        await readerTask.ConfigureAwait(false);
+
+                    if (!writerTask.IsCompleted)
+                        await writerTask.ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    LogContext.Debug?.Log(ex, "gRPC Cancel Faulted: {Server}", _context.NodeAddress);
+                }
+
+                throw;
+            }
         }
 
         public void Join(NodeContext context, IEnumerable<Contracts.Topology> topologies)
@@ -88,22 +111,21 @@ namespace MassTransit.GrpcTransport
             {
                 while (await _channel.Reader.WaitToReadAsync(cancellationToken).ConfigureAwait(false))
                 {
-                    var message = await _channel.Reader.ReadAsync(cancellationToken).ConfigureAwait(false);
+                    if (!_channel.Reader.TryPeek(out var message))
+                        continue;
 
                     if (string.IsNullOrWhiteSpace(message.MessageId))
                         message.MessageId = NewId.NextGuid().ToString();
 
                     await writer.WriteAsync(message).ConfigureAwait(false);
 
+                    await _channel.Reader.ReadAsync(cancellationToken).ConfigureAwait(false);
+
                     _context.LogSent(message);
                 }
             }
             catch (OperationCanceledException)
             {
-            }
-            catch (Exception exception)
-            {
-                LogContext.Warning?.Log(exception, "Writer faulted: {InstanceAddress}", NodeAddress);
             }
         }
 
@@ -125,10 +147,6 @@ namespace MassTransit.GrpcTransport
             }
             catch (RpcException exception) when (exception.Status.StatusCode == StatusCode.Cancelled)
             {
-            }
-            catch (Exception exception)
-            {
-                LogContext.Warning?.Log(exception, "Reader faulted: {InstanceAddress}", NodeAddress);
             }
         }
 
@@ -177,13 +195,13 @@ namespace MassTransit.GrpcTransport
                 {
                     var destination = message.Deliver.Exchange;
 
-                    var exchange = _messageFabric.GetExchange(_context, destination.Name);
+                    IMessageExchange<GrpcTransportMessage> exchange = _messageFabric.GetExchange(_context, destination.Name);
 
                     return exchange.Send(transportMessage, Stopping);
                 }
                 case Deliver.DestinationOneofCase.Queue:
                 {
-                    var queue = _messageFabric.GetQueue(_context, message.Deliver.Queue.Name);
+                    IMessageQueue<NodeContext, GrpcTransportMessage> queue = _messageFabric.GetQueue(_context, message.Deliver.Queue.Name);
 
                     return queue.Send(transportMessage, Stopping);
                 }
@@ -191,7 +209,7 @@ namespace MassTransit.GrpcTransport
                 {
                     var receiver = message.Deliver.Receiver;
 
-                    var queue = _messageFabric.GetQueue(_context, receiver.QueueName);
+                    IMessageQueue<NodeContext, GrpcTransportMessage> queue = _messageFabric.GetQueue(_context, receiver.QueueName);
 
                     message.Deliver.Receiver.ReceiverId = _remoteTopology.GetLocalConsumerId(receiver.QueueName, receiver.ReceiverId);
 

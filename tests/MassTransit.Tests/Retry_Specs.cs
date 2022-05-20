@@ -268,6 +268,92 @@
 
 
     [TestFixture]
+    public class When_multiple_retry_policies_are_specified :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_only_call_the_inner_policy()
+        {
+            Task<ConsumeContext<Fault<YourMessage>>> fault = SubscribeHandler<Fault<YourMessage>>();
+
+            await InputQueueSendEndpoint.Send(new YourMessage { Text = "Hi" }, Pipe.Execute<SendContext<YourMessage>>(x =>
+            {
+                x.ResponseAddress = BusAddress;
+                x.FaultAddress = BusAddress;
+            }));
+
+            await fault;
+
+            _attempts.ShouldBe(6);
+
+            _lastCount.ShouldBe(4);
+            _lastAttempt.ShouldBe(5);
+        }
+
+        static int _attempts;
+        static int _lastAttempt;
+        static int _lastCount;
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.UseMessageRetry(retry =>
+            {
+                retry.Immediate(5);
+                retry.Ignore<TimeoutException>();
+            });
+
+            configurator.UseMessageRetry(retry =>
+            {
+                retry.Handle<TimeoutException>();
+                retry.Interval(2, TimeSpan.FromSeconds(1));
+            });
+
+            base.ConfigureInMemoryBus(configurator);
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            configurator.Consumer(() => new YourMessageConsumer());
+        }
+
+
+        public class YourMessage
+        {
+            public string Text { get; set; }
+        }
+
+
+        class YourMessageConsumer :
+            IConsumer<YourMessage>,
+            IConsumer<Fault<YourMessage>>
+        {
+            public Task Consume(ConsumeContext<YourMessage> context)
+            {
+                Interlocked.Increment(ref _attempts);
+
+                _lastAttempt = context.GetRetryAttempt();
+                _lastCount = context.GetRetryCount();
+
+                TestContext.Out.WriteLine($"Attempt: {context.GetRetryAttempt()}");
+
+                throw new Exception("Big bad exception");
+            }
+
+            public Task Consume(ConsumeContext<Fault<YourMessage>> context)
+            {
+                var faultRetryCount = context.Headers.Get(MessageHeaders.FaultRetryCount, default(int?)) ?? 0;
+
+                TestContext.Out.WriteLine($"Attempt (from fault consumer): {faultRetryCount}");
+
+                TestContext.Out.WriteLine(@"Faulted, won't retry any more.");
+
+                return Task.CompletedTask;
+            }
+        }
+    }
+
+
+    [TestFixture]
     public class When_the_retry_is_specified_within_the_consumer :
         InMemoryTestFixture
     {

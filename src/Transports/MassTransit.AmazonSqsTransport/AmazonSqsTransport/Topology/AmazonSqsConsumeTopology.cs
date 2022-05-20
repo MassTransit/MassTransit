@@ -4,7 +4,6 @@ namespace MassTransit.AmazonSqsTransport.Topology
     using System.Collections.Generic;
     using System.Linq;
     using Configuration;
-    using MassTransit.Topology;
 
 
     public class AmazonSqsConsumeTopology :
@@ -26,7 +25,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
 
         IAmazonSqsMessageConsumeTopology<T> IAmazonSqsConsumeTopology.GetMessageTopology<T>()
         {
-            return base.GetMessageTopology<T>() as IAmazonSqsMessageConsumeTopologyConfigurator<T>;
+            return (IAmazonSqsMessageConsumeTopologyConfigurator<T>)base.GetMessageTopology<T>();
         }
 
         public void AddSpecification(IAmazonSqsConsumeTopologySpecification specification)
@@ -39,7 +38,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
 
         IAmazonSqsMessageConsumeTopologyConfigurator<T> IAmazonSqsConsumeTopologyConfigurator.GetMessageTopology<T>()
         {
-            return base.GetMessageTopology<T>() as IAmazonSqsMessageConsumeTopologyConfigurator<T>;
+            return (IAmazonSqsMessageConsumeTopologyConfigurator<T>)base.GetMessageTopology<T>();
         }
 
         public void Apply(IReceiveEndpointBrokerTopologyBuilder builder)

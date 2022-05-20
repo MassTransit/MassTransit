@@ -2,8 +2,6 @@ namespace UsageMediatorConfigure
 {
     using System;
     using System.Threading.Tasks;
-    using GreenPipes;
-    using GreenPipes.Internals.Extensions;
     using UsageContracts;
     using UsageConsumer;
     using UsageMediatorConsumer;

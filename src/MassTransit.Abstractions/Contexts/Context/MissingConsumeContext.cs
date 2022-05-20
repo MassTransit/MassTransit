@@ -16,7 +16,7 @@ namespace MassTransit.Context
             throw new ConsumeContextNotAvailableException();
         }
 
-        public bool TryGetPayload<T>(out T payload)
+        public bool TryGetPayload<T>(out T? payload)
             where T : class
         {
             throw new ConsumeContextNotAvailableException();

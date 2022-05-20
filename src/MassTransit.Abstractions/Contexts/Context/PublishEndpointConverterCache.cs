@@ -34,7 +34,8 @@ namespace MassTransit.Context
 
         static IPublishEndpointConverter CreateConverter(Type type)
         {
-            return (IPublishEndpointConverter)Activator.CreateInstance(typeof(PublishEndpointConverter<>).MakeGenericType(type));
+            return Activator.CreateInstance(typeof(PublishEndpointConverter<>).MakeGenericType(type)) as IPublishEndpointConverter
+                ?? throw new InvalidOperationException("Failed to create PublishEndpointConverter");
         }
 
 

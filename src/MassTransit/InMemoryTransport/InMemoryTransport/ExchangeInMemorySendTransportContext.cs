@@ -1,21 +1,24 @@
 namespace MassTransit.InMemoryTransport
 {
-    using Fabric;
     using MassTransit.Configuration;
     using Transports;
+    using Transports.Fabric;
 
 
     public class ExchangeInMemorySendTransportContext :
         BaseSendTransportContext,
         InMemorySendTransportContext
     {
-        public ExchangeInMemorySendTransportContext(IHostConfiguration hostConfiguration, ReceiveEndpointContext context, IInMemoryExchange exchange)
+        public ExchangeInMemorySendTransportContext(IHostConfiguration hostConfiguration, ReceiveEndpointContext context,
+            IMessageExchange<InMemoryTransportMessage> exchange)
             : base(hostConfiguration, context.Serialization)
         {
             Exchange = exchange;
         }
 
-        public IInMemoryExchange Exchange { get; }
         public override string EntityName => Exchange.Name;
+        public override string ActivitySystem => "in-memory";
+
+        public IMessageExchange<InMemoryTransportMessage> Exchange { get; }
     }
 }

@@ -10,7 +10,7 @@ namespace MassTransit.AmazonSqsTransport
             MessageLimit = 10;
             BatchLimit = 10;
             SizeLimit = 128 * 1024;
-            Timeout = TimeSpan.FromMilliseconds(4);
+            Timeout = TimeSpan.FromMilliseconds(1);
         }
 
         public static int MessageLimit { get; set; }

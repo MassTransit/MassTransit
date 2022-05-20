@@ -32,6 +32,8 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
         public bool? RequiresSession { get; set; }
 
+        public int? MaxConcurrentCallsPerSession { get; set; }
+
         public IEnumerable<ValidationResult> Validate()
         {
             if (!ServiceBusEntityNameValidator.Validator.IsValidEntityName(Path))
@@ -75,8 +77,11 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
             if (MaxDeliveryCount.HasValue)
                 options.MaxDeliveryCount = MaxDeliveryCount.Value;
 
-            if (MaxSizeInMB.HasValue)
-                options.MaxSizeInMegabytes = MaxSizeInMB.Value;
+            if (MaxSizeInMegabytes.HasValue)
+                options.MaxSizeInMegabytes = MaxSizeInMegabytes.Value;
+
+            if (MaxMessageSizeInKilobytes.HasValue)
+                options.MaxMessageSizeInKilobytes = MaxMessageSizeInKilobytes;
 
             if (RequiresDuplicateDetection.HasValue)
                 options.RequiresDuplicateDetection = RequiresDuplicateDetection.Value;

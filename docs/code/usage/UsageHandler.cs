@@ -1,24 +1,33 @@
-namespace UsageHandler
-{
-    using System;
-    using System.Threading.Tasks;
-    using UsageContracts;
-    using MassTransit;
+namespace UsageHandler;
 
-    public class Program
+using System;
+using System.Threading.Tasks;
+using UsageContracts;
+using MassTransit;
+using Microsoft.Extensions.Hosting;
+
+public class Program
+{
+    public static async Task Main(string[] args)
     {
-        public static async Task Main()
-        {
-            var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
+        await Host.CreateDefaultBuilder(args)
+            .ConfigureServices(services =>
             {
-                cfg.ReceiveEndpoint("order-service", e =>
+                services.AddMassTransit(x =>
                 {
-                    e.Handler<SubmitOrder>(async context =>
+                    x.UsingInMemory((cxt, cfg) =>
                     {
-                        await Console.Out.WriteLineAsync($"Submit Order Received: {context.Message.OrderId}");
+                        cfg.ReceiveEndpoint("order-service", e =>
+                        {
+                            e.Handler<SubmitOrder>(async context =>
+                            {
+                                await Console.Out.WriteLineAsync($"Submit Order Received: {context.Message.OrderId}");
+                            });
+                        });
                     });
                 });
-            });
-        }
+            })
+            .Build()
+            .RunAsync();
     }
 }

@@ -1,4 +1,5 @@
-﻿namespace MassTransit.ActiveMqTransport.Configuration
+﻿#nullable enable
+namespace MassTransit.ActiveMqTransport.Configuration
 {
     using System;
     using System.Collections.Generic;
@@ -58,14 +59,14 @@
         public new IActiveMqSendTopologyConfigurator SendTopology => _busConfiguration.Topology.Send;
         public new IActiveMqPublishTopologyConfigurator PublishTopology => _busConfiguration.Topology.Publish;
 
-        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<IActiveMqReceiveEndpointConfigurator> configureEndpoint = null)
+        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter? endpointNameFormatter,
+            Action<IActiveMqReceiveEndpointConfigurator>? configureEndpoint)
         {
             _hostConfiguration.ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
         }
 
-        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<IReceiveEndpointConfigurator> configureEndpoint = null)
+        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter? endpointNameFormatter,
+            Action<IReceiveEndpointConfigurator>? configureEndpoint)
         {
             _hostConfiguration.ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
         }
@@ -88,9 +89,11 @@
         public void EnableArtemisCompatibility()
         {
             SetConsumerEndpointQueueNameFormatter(new ArtemisConsumerEndpointQueueNameFormatter());
+
+            _hostConfiguration.IsArtemis = true;
         }
 
-        public void SetTemporaryQueueNameFormatter(IActiveMqTemporaryQueueNameFormatter formatter)
+        public void SetTemporaryQueueNameFormatter(IActiveMqTemporaryQueueNameFormatter? formatter)
         {
             _busConfiguration.Topology.Consume.TemporaryQueueNameFormatter = formatter;
         }

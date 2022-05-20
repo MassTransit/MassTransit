@@ -52,7 +52,7 @@ namespace MassTransit.Azure.Table.Tests.SlowConcurrentSaga
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.ConcurrencyLimit = 16;
+            configurator.ConcurrentMessageLimit = 16;
         }
     }
 }

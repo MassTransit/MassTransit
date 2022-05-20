@@ -1,10 +1,7 @@
 namespace UsageMessageSetCorrelation
 {
-    using System;
     using UsageContracts;
     using MassTransit;
-    using MassTransit.Context;
-    using MassTransit.Topology.Topologies;
 
 
     public class Program

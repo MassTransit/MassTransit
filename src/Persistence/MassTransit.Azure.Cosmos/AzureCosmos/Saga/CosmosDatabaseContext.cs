@@ -5,11 +5,9 @@ namespace MassTransit.AzureCosmos.Saga
 
 
     public class CosmosDatabaseContext<TSaga> :
-        DatabaseContext<TSaga>,
-        IDisposable
+        DatabaseContext<TSaga>
         where TSaga : class, ISaga
     {
-        readonly CosmosClient _client;
         readonly Action<ItemRequestOptions> _itemRequestOptions;
 
         public CosmosDatabaseContext(Container container, Action<ItemRequestOptions> itemRequestOptions = null,
@@ -20,13 +18,6 @@ namespace MassTransit.AzureCosmos.Saga
             QueryRequestOptions = queryRequestOptions;
 
             Container = container;
-        }
-
-        internal CosmosDatabaseContext(CosmosClient client, Container container, Action<ItemRequestOptions> itemRequestOptions,
-            Action<QueryRequestOptions> queryRequestOptions)
-            : this(container, itemRequestOptions, queryRequestOptions)
-        {
-            _client = client;
         }
 
         public Container Container { get; }
@@ -42,11 +33,6 @@ namespace MassTransit.AzureCosmos.Saga
             _itemRequestOptions(options);
 
             return options;
-        }
-
-        public void Dispose()
-        {
-            _client?.Dispose();
         }
     }
 }

@@ -2,15 +2,15 @@ namespace MassTransit.InMemoryTransport
 {
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Fabric;
     using Transports;
+    using Transports.Fabric;
 
 
     public class InMemoryMessageErrorTransport :
         InMemoryMessageMoveTransport,
         IErrorTransport
     {
-        public InMemoryMessageErrorTransport(IInMemoryExchange exchange)
+        public InMemoryMessageErrorTransport(IMessageExchange<InMemoryTransportMessage> exchange)
             : base(exchange)
         {
         }

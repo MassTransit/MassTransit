@@ -82,32 +82,5 @@
             sendContext.AwaitAck = awaitAck;
             return true;
         }
-
-        /// <summary>
-        /// Sets the routing key for this message
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="routingKey">The routing key for this message</param>
-        public static void SetRoutingKey(this SendContext context, string routingKey)
-        {
-            if (!context.TryGetPayload(out RabbitMqSendContext sendContext))
-                throw new ArgumentException("The RabbitMqSendContext was not available");
-
-            sendContext.RoutingKey = routingKey;
-        }
-
-        /// <summary>
-        /// Sets the routing key for this message
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="routingKey">The routing key for this message</param>
-        public static bool TrySetRoutingKey(this SendContext context, string routingKey)
-        {
-            if (!context.TryGetPayload(out RabbitMqSendContext sendContext))
-                return false;
-
-            sendContext.RoutingKey = routingKey;
-            return true;
-        }
     }
 }

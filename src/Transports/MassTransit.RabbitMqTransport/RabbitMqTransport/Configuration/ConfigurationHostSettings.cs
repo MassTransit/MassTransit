@@ -83,7 +83,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         {
             public ConfigurationBatchSettings()
             {
-                Enabled = true;
+                Enabled = false;
                 MessageLimit = 100;
                 SizeLimit = 64 * 1024;
                 Timeout = TimeSpan.FromMilliseconds(1);

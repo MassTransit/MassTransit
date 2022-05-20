@@ -100,7 +100,7 @@
                     activityName = "reply-to send";
                 }
 
-                StartedActivity? activity = LogContext.IfEnabled(activityName)?.StartSendActivity(context);
+                StartedActivity? activity = LogContext.Current?.StartSendActivity(_context, context);
                 try
                 {
                     if (_context.SendObservers.Count > 0)
@@ -210,6 +210,10 @@
 
                             break;
 
+                        case Guid value:
+                            dictionary[header.Key] = value.ToString("D");
+                            break;
+
                         case string value when header.Key == "CC" || header.Key == "BCC":
                             dictionary[header.Key] = new[] { value };
                             break;
@@ -235,7 +239,6 @@
                                 dictionary[header.Key] = header.Value;
                             else
                                 dictionary[header.Key] = formatValue.ToString();
-
                             break;
                     }
                 }

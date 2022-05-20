@@ -23,8 +23,6 @@ namespace AspNetCoreListener
                     });
                 });
             });
-
-            services.AddMassTransitHostedService();
         }
     }
 

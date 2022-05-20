@@ -27,7 +27,7 @@
             var observer = new PublishToSendTopologyConfigurationObserver(_sendTopology);
             _publishTopology.ConnectPublishTopologyConfigurationObserver(observer);
 
-            _consumeTopology = new InMemoryConsumeTopology(messageTopology);
+            _consumeTopology = new InMemoryConsumeTopology(messageTopology, _publishTopology);
         }
 
         public InMemoryTopologyConfiguration(IInMemoryTopologyConfiguration topologyConfiguration)
@@ -36,7 +36,7 @@
             _sendTopology = topologyConfiguration.Send;
             _publishTopology = topologyConfiguration.Publish;
 
-            _consumeTopology = new InMemoryConsumeTopology(topologyConfiguration.Message);
+            _consumeTopology = new InMemoryConsumeTopology(topologyConfiguration.Message, _publishTopology);
         }
 
         IMessageTopologyConfigurator ITopologyConfiguration.Message => _messageTopology;

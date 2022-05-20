@@ -2,12 +2,13 @@ namespace MassTransit.GrpcTransport
 {
     using Fabric;
     using Transports;
+    using Transports.Fabric;
 
 
     public interface GrpcReceiveEndpointContext :
         ReceiveEndpointContext
     {
-        IMessageFabric MessageFabric { get; }
+        IMessageFabric<NodeContext, GrpcTransportMessage> MessageFabric { get; }
 
         IGrpcTransportProvider TransportProvider { get; }
 

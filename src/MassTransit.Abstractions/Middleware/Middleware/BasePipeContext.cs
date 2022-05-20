@@ -13,7 +13,7 @@ namespace MassTransit.Middleware
     public abstract class BasePipeContext :
         PipeContext
     {
-        IPayloadCache _payloadCache;
+        IPayloadCache? _payloadCache;
 
         /// <summary>
         /// A pipe with no cancellation support
@@ -27,7 +27,7 @@ namespace MassTransit.Middleware
         /// A pipe with no cancellation support
         /// </summary>
         /// <param name="payloads">Loads the payload cache with the specified objects</param>
-        protected BasePipeContext(params object[] payloads)
+        protected BasePipeContext(params object[]? payloads)
         {
             CancellationToken = CancellationToken.None;
 
@@ -49,7 +49,7 @@ namespace MassTransit.Middleware
         /// </summary>
         /// <param name="cancellationToken">A cancellation token</param>
         /// <param name="payloads">Loads the payload cache with the specified objects</param>
-        protected BasePipeContext(CancellationToken cancellationToken, params object[] payloads)
+        protected BasePipeContext(CancellationToken cancellationToken, params object[]? payloads)
         {
             CancellationToken = cancellationToken;
 
@@ -95,7 +95,7 @@ namespace MassTransit.Middleware
                 while (Volatile.Read(ref _payloadCache) == null)
                     Interlocked.CompareExchange(ref _payloadCache, new ListPayloadCache(), null);
 
-                return _payloadCache;
+                return _payloadCache!;
             }
         }
 
@@ -115,7 +115,7 @@ namespace MassTransit.Middleware
         /// <param name="payload"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public virtual bool TryGetPayload<T>(out T payload)
+        public virtual bool TryGetPayload<T>(out T? payload)
             where T : class
         {
             if (this is T context)

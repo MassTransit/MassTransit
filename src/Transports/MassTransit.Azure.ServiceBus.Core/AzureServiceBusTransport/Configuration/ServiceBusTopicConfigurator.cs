@@ -17,8 +17,6 @@
                 AutoDeleteOnIdle = Defaults.TemporaryAutoDeleteOnIdle;
         }
 
-        public bool? EnableFilteringMessagesBeforePublishing { get; set; }
-
         public IEnumerable<ValidationResult> Validate()
         {
             if (!ServiceBusEntityNameValidator.Validator.IsValidEntityName(Path))
@@ -47,8 +45,11 @@
             if (EnablePartitioning.HasValue)
                 options.EnablePartitioning = EnablePartitioning.Value;
 
-            if (MaxSizeInMB.HasValue)
-                options.MaxSizeInMegabytes = MaxSizeInMB.Value;
+            if (MaxSizeInMegabytes.HasValue)
+                options.MaxSizeInMegabytes = MaxSizeInMegabytes.Value;
+
+            if (MaxMessageSizeInKilobytes.HasValue)
+                options.MaxMessageSizeInKilobytes = MaxMessageSizeInKilobytes;
 
             if (RequiresDuplicateDetection.HasValue)
                 options.RequiresDuplicateDetection = RequiresDuplicateDetection.Value;

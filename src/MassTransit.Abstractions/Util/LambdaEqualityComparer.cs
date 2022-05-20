@@ -7,6 +7,7 @@ namespace MassTransit.Util
 
     public class LambdaEqualityComparer<T> :
         IEqualityComparer<T>
+        where T : class
     {
         readonly Func<T, T, bool> _comparer;
         readonly Func<T, int> _hash;
@@ -16,7 +17,7 @@ namespace MassTransit.Util
         {
         }
 
-        public LambdaEqualityComparer(Func<T, T, bool> comparer, Func<T, int> hash)
+        public LambdaEqualityComparer(Func<T, T, bool> comparer, Func<T?, int> hash)
         {
             if (comparer == null)
                 throw new ArgumentNullException(nameof(comparer));
@@ -27,8 +28,11 @@ namespace MassTransit.Util
             _hash = hash;
         }
 
-        public bool Equals(T x, T y)
+        public bool Equals(T? x, T? y)
         {
+            if (x == null || y == null)
+                return false;
+
             return _comparer(x, y);
         }
 
@@ -42,11 +46,13 @@ namespace MassTransit.Util
     public static class LambdaEqualityComparerExtensions
     {
         public static IEnumerable<T> Distinct<T>(this IEnumerable<T> source, Func<T, T, bool> comparer)
+            where T : class
         {
             return source.Distinct(new LambdaEqualityComparer<T>(comparer));
         }
 
-        public static IEnumerable<T> Except<T>(this IEnumerable<T> first, IEnumerable<T> second, Func<T, T, bool> comparer)
+        public static IEnumerable<T> Except<T>(this IEnumerable<T> first, IEnumerable<T> second, Func<T?, T?, bool> comparer)
+            where T : class
         {
             return first.Except(second, new LambdaEqualityComparer<T>(comparer));
         }

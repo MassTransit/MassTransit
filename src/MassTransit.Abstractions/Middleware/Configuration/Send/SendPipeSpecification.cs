@@ -4,6 +4,7 @@ namespace MassTransit.Configuration
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
+    using Internals;
     using Metadata;
 
 
@@ -100,6 +101,10 @@ namespace MassTransit.Configuration
             public void ImplementsMessageType<T>(bool direct)
                 where T : class
             {
+                // Do not create implemented types for message types that have been excluded
+                if (typeof(T).HasAttribute<ExcludeFromImplementedTypesAttribute>())
+                    return;
+
                 IMessageSendPipeSpecification<T> implementedTypeSpecification = _specification.GetMessageSpecification<T>();
 
                 _messageSpecification.AddImplementedMessageSpecification(implementedTypeSpecification);

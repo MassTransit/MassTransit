@@ -1,3 +1,4 @@
+#nullable enable
 namespace MassTransit.Configuration
 {
     using System;
@@ -21,7 +22,7 @@ namespace MassTransit.Configuration
         readonly ReceiveObservable _receiveObservers;
         readonly SendObservable _sendObservers;
         IList<TConfiguration> _endpoints;
-        ILogContext _logContext;
+        ILogContext? _logContext;
 
         protected BaseHostConfiguration(IBusConfiguration busConfiguration)
         {
@@ -46,20 +47,20 @@ namespace MassTransit.Configuration
 
         public ISendObserver SendObservers => _sendObservers;
 
-        public ILogContext LogContext
+        public ILogContext? LogContext
         {
             get => _logContext;
             set
             {
                 _logContext = value;
 
-                SendLogContext = value.CreateLogContext(LogCategoryName.Transport.Send);
-                ReceiveLogContext = value.CreateLogContext(LogCategoryName.Transport.Receive);
+                SendLogContext = value?.CreateLogContext(LogCategoryName.Transport.Send);
+                ReceiveLogContext = value?.CreateLogContext(LogCategoryName.Transport.Receive);
             }
         }
 
-        public ILogContext ReceiveLogContext { get; private set; }
-        public ILogContext SendLogContext { get; private set; }
+        public ILogContext? ReceiveLogContext { get; private set; }
+        public ILogContext? SendLogContext { get; private set; }
 
         public ConnectHandle ConnectEndpointConfigurationObserver(IEndpointConfigurationObserver observer)
         {
@@ -78,15 +79,14 @@ namespace MassTransit.Configuration
 
         public virtual IEnumerable<ValidationResult> Validate()
         {
-            return _endpoints?.SelectMany(x => x.Validate()) ?? Enumerable.Empty<ValidationResult>();
+            return _endpoints.SelectMany(x => x.Validate()) ?? Enumerable.Empty<ValidationResult>();
         }
 
         public abstract IBusTopology Topology { get; }
 
         public abstract IRetryPolicy ReceiveTransportRetryPolicy { get; }
 
-        public abstract IReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
-            Action<IReceiveEndpointConfigurator> configure = null);
+        public abstract IReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName, Action<IReceiveEndpointConfigurator>? configure);
 
         public abstract IHost Build();
 
@@ -115,14 +115,14 @@ namespace MassTransit.Configuration
             ReceiveEndpoint(queueName, (TConfigurator configuration) => configureEndpoint(configuration));
         }
 
-        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<IReceiveEndpointConfigurator> configureEndpoint)
+        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter? endpointNameFormatter,
+            Action<IReceiveEndpointConfigurator>? configureEndpoint)
         {
-            ReceiveEndpoint(definition, endpointNameFormatter, (TConfigurator configuration) => configureEndpoint(configuration));
+            ReceiveEndpoint(definition, endpointNameFormatter, (TConfigurator configuration) => configureEndpoint?.Invoke(configuration));
         }
 
-        public abstract void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<TConfigurator> configureEndpoint = null);
+        public abstract void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter? endpointNameFormatter,
+            Action<TConfigurator>? configureEndpoint = null);
 
         public abstract void ReceiveEndpoint(string queueName, Action<TConfigurator> configureEndpoint);
 
@@ -150,14 +150,14 @@ namespace MassTransit.Configuration
         {
             IList<TConfiguration> endpoints = _endpoints;
 
-            _endpoints = null;
+            _endpoints = new List<TConfiguration>();
 
             return endpoints;
         }
 
         protected void Add(TConfiguration configuration)
         {
-            _endpoints?.Add(configuration);
+            _endpoints.Add(configuration);
         }
     }
 }

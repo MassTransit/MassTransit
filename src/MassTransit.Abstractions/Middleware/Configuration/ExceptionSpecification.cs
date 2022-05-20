@@ -70,16 +70,12 @@ namespace MassTransit.Configuration
         static bool Match<T>(Exception exception, Func<T, bool> filter)
             where T : Exception
         {
-            if (exception is T exceptionOfT)
-                return filter(exceptionOfT);
+            if (exception is T ofT)
+                return filter(ofT);
 
             var baseException = exception.GetBaseException();
 
-            exceptionOfT = baseException as T;
-            if (exceptionOfT != null)
-                return filter(exceptionOfT);
-
-            return false;
+            return baseException is T exceptionOfT && filter(exceptionOfT);
         }
     }
 }

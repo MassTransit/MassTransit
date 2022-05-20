@@ -25,6 +25,7 @@ namespace MassTransit.Topology
                 return true;
             }
 
+            correlationId = Guid.Empty;
             return false;
         }
     }

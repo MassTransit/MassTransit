@@ -28,7 +28,7 @@ namespace MassTransit.PrometheusIntegration.Tests
 
             await InactivityTask;
 
-            await using var stream = new MemoryStream();
+            using var stream = new MemoryStream();
             await Metrics.DefaultRegistry.CollectAndExportAsTextAsync(stream);
 
             var text = Encoding.UTF8.GetString(stream.ToArray());
@@ -52,7 +52,7 @@ namespace MassTransit.PrometheusIntegration.Tests
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.ConcurrencyLimit = 10;
+            configurator.ConcurrentMessageLimit = 10;
             configurator.Consumer(() => new TestBatchConsumer(), x =>
                 x.Options<BatchOptions>(options => options.SetMessageLimit(8).SetTimeLimit(s: 5)));
         }
@@ -84,7 +84,7 @@ namespace MassTransit.PrometheusIntegration.Tests
             var receiveEndpoint = Bus.ConnectReceiveEndpoint("batching", configurator =>
             {
                 if (configurator is IInMemoryReceiveEndpointConfigurator cfg)
-                    cfg.ConcurrencyLimit = 10;
+                    cfg.ConcurrentMessageLimit = 10;
 
                 configurator.Consumer(() => new TestBatchConsumer(), x =>
                     x.Options<BatchOptions>(options => options.SetMessageLimit(8).SetTimeLimit(s: 5)));
@@ -104,7 +104,7 @@ namespace MassTransit.PrometheusIntegration.Tests
 
             await InactivityTask;
 
-            await using var stream = new MemoryStream();
+            using var stream = new MemoryStream();
             await Metrics.DefaultRegistry.CollectAndExportAsTextAsync(stream);
 
             var text = Encoding.UTF8.GetString(stream.ToArray());

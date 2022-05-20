@@ -23,6 +23,6 @@ namespace MassTransit
         {
         }
 
-        public Type MessageType { get; private set; }
+        public Type? MessageType { get; private set; }
     }
 }

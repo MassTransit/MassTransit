@@ -3,11 +3,7 @@ namespace KafkaProducer
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Confluent.Kafka;
-    using ContainerConsumers;
     using MassTransit;
-    using MassTransit.KafkaIntegration;
-    using MassTransit.KafkaIntegration.Transport;
     using Microsoft.Extensions.DependencyInjection;
 
     public class Program

@@ -3,8 +3,6 @@ namespace MassTransit.DependencyInjection.Registration
     using System;
     using System.Collections.Generic;
     using Configuration;
-    using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Logging;
     using Transports;
 
 
@@ -20,9 +18,7 @@ namespace MassTransit.DependencyInjection.Registration
 
         public IBusInstance CreateBus(IBusRegistrationContext context, IEnumerable<IBusInstanceSpecification> specifications, string busName)
         {
-            var loggerFactory = context.GetService<ILoggerFactory>();
-            if (loggerFactory != null)
-                LogContext.ConfigureCurrentLogContext(loggerFactory);
+            LogContext.ConfigureCurrentLogContextIfNull(context);
 
             var busControl = _configure(context);
 

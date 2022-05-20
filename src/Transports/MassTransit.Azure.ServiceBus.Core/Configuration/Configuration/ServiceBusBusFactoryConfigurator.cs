@@ -1,4 +1,5 @@
-﻿namespace MassTransit.Configuration
+﻿#nullable enable
+namespace MassTransit.Configuration
 {
     using System;
     using AzureServiceBusTransport;
@@ -44,9 +45,14 @@
             set => _queueConfigurator.EnablePartitioning = value;
         }
 
-        public int MaxSizeInMegabytes
+        public long MaxSizeInMegabytes
         {
-            set => _queueConfigurator.MaxSizeInMB = value;
+            set => _queueConfigurator.MaxSizeInMegabytes = value;
+        }
+
+        public long MaxMessageSizeInKilobytes
+        {
+            set => _settings.QueueConfigurator.MaxMessageSizeInKilobytes = value;
         }
 
         public bool RequiresDuplicateDetection
@@ -103,14 +109,14 @@
             _busConfiguration.HostConfiguration.Settings = settings;
         }
 
-        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<IServiceBusReceiveEndpointConfigurator> configureEndpoint = null)
+        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter? endpointNameFormatter,
+            Action<IServiceBusReceiveEndpointConfigurator>? configureEndpoint)
         {
             _hostConfiguration.ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
         }
 
-        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<IReceiveEndpointConfigurator> configureEndpoint = null)
+        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter? endpointNameFormatter,
+            Action<IReceiveEndpointConfigurator>? configureEndpoint)
         {
             _hostConfiguration.ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
         }
@@ -174,6 +180,11 @@
         public bool RequiresSession
         {
             set => _queueConfigurator.RequiresSession = value;
+        }
+
+        public int MaxConcurrentCallsPerSession
+        {
+            set => _queueConfigurator.MaxConcurrentCallsPerSession = value;
         }
 
         public string UserMetadata

@@ -5,7 +5,7 @@ namespace MassTransit
 
     public readonly struct EndpointHealthResult
     {
-        EndpointHealthResult(BusHealthStatus status, IReceiveEndpoint receiveEndpoint, string description = null, Exception exception = null)
+        EndpointHealthResult(BusHealthStatus status, IReceiveEndpoint receiveEndpoint, string? description = null, Exception? exception = null)
         {
             Status = status;
             ReceiveEndpoint = receiveEndpoint;
@@ -15,23 +15,23 @@ namespace MassTransit
 
         public readonly BusHealthStatus Status;
 
-        public readonly string Description;
+        public readonly string? Description;
+
+        public readonly Exception? Exception;
 
         public readonly IReceiveEndpoint ReceiveEndpoint;
 
-        public readonly Exception Exception;
-
-        public static EndpointHealthResult Healthy(IReceiveEndpoint receiveEndpoint, string description)
+        public static EndpointHealthResult Healthy(IReceiveEndpoint receiveEndpoint, string? description)
         {
             return new EndpointHealthResult(BusHealthStatus.Healthy, receiveEndpoint, description);
         }
 
-        public static EndpointHealthResult Degraded(IReceiveEndpoint receiveEndpoint, string description)
+        public static EndpointHealthResult Degraded(IReceiveEndpoint receiveEndpoint, string? description)
         {
             return new EndpointHealthResult(BusHealthStatus.Degraded, receiveEndpoint, description);
         }
 
-        public static EndpointHealthResult Unhealthy(IReceiveEndpoint receiveEndpoint, string description, Exception exception)
+        public static EndpointHealthResult Unhealthy(IReceiveEndpoint receiveEndpoint, string? description, Exception? exception)
         {
             return new EndpointHealthResult(BusHealthStatus.Unhealthy, receiveEndpoint, description, exception);
         }

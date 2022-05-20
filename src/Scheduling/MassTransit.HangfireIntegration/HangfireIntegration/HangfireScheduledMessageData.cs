@@ -24,7 +24,7 @@ namespace MassTransit.HangfireIntegration
         public string? TokenId { get; set; }
         public string? HeadersAsJson { get; set; }
 
-        public Uri Destination => new Uri(DestinationAddress);
+        public Uri Destination => new Uri(DestinationAddress!);
 
         protected static void SetBaseProperties(HangfireScheduledMessageData data, ConsumeContext context, Uri destination, MessageBody messageBody,
             Guid? tokenId = default)

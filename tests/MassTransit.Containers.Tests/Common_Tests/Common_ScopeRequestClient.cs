@@ -2,7 +2,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Autofac.Extensions.DependencyInjection;
     using NUnit.Framework;
     using Scenarios;
     using TestFramework;
@@ -22,9 +21,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
             var sent = await _taskCompletionSource.Task;
 
             Assert.IsTrue(sent.TryGetPayload<IServiceProvider>(out var serviceProvider));
-
-            if (serviceProvider is AutofacServiceProvider)
-                return;
 
             Assert.AreEqual(serviceProvider, ServiceScope.ServiceProvider);
         }
@@ -67,9 +63,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
             var sent = await _taskCompletionSource.Task;
 
             Assert.IsTrue(sent.TryGetPayload<IServiceProvider>(out var serviceProvider));
-
-            if (serviceProvider is AutofacServiceProvider)
-                return;
 
             Assert.AreEqual(serviceProvider, ServiceScope.ServiceProvider);
         }

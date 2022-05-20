@@ -31,25 +31,25 @@ namespace MassTransit.Context
             _context = context;
         }
 
-        public Uri SourceAddress
+        public Uri? SourceAddress
         {
             get => _context.SourceAddress;
             set => _context.SourceAddress = value;
         }
 
-        public Uri DestinationAddress
+        public Uri? DestinationAddress
         {
             get => _context.DestinationAddress;
             set => _context.DestinationAddress = value;
         }
 
-        public Uri ResponseAddress
+        public Uri? ResponseAddress
         {
             get => _context.ResponseAddress;
             set => _context.ResponseAddress = value;
         }
 
-        public Uri FaultAddress
+        public Uri? FaultAddress
         {
             get => _context.FaultAddress;
             set => _context.FaultAddress = value;
@@ -101,7 +101,7 @@ namespace MassTransit.Context
 
         public DateTime? SentTime => _context.SentTime;
 
-        public ContentType ContentType
+        public ContentType? ContentType
         {
             get => _context.ContentType;
             set => _context.ContentType = value;

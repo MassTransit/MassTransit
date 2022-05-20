@@ -1,13 +1,15 @@
 namespace MassTransit.InMemoryTransport
 {
-    using Fabric;
     using Transports;
+    using Transports.Fabric;
 
 
     public interface InMemoryReceiveEndpointContext :
         ReceiveEndpointContext
     {
-        IMessageFabric MessageFabric { get; }
+        IMessageFabric<InMemoryTransportContext, InMemoryTransportMessage> MessageFabric { get; }
+
+        InMemoryTransportContext TransportContext { get; }
 
         void ConfigureTopology();
     }

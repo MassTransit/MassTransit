@@ -10,6 +10,8 @@
     {
         ActiveMqHostSettings Settings { get; set; }
 
+        bool IsArtemis { get; set; }
+
         IConnectionContextSupervisor ConnectionContextSupervisor { get; }
 
         new IActiveMqBusTopology Topology { get; }

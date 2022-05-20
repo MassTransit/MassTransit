@@ -121,7 +121,7 @@ namespace MassTransit.ActiveMqTransport.Tests
         [Test]
         public async Task Pub_Sub_Queue_Names_Should_Not_Contain_Periods()
         {
-            var consumeTopology = new ActiveMqConsumeTopology(null, null);
+            var consumeTopology = new ActiveMqConsumeTopology(null);
             var queueName = consumeTopology.CreateTemporaryQueueName("bus.test");
             Assert.That(queueName, Does.Not.Contain('.'));
         }

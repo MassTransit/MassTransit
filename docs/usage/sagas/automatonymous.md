@@ -6,10 +6,10 @@ sidebarDepth: 2
 
 ## Introduction
 
-[Automatonymous][1] is a state machine library for .NET and provides a C# syntax to define a state machine, including states, events, and behaviors. MassTransit includes Automatonymous, and adds instance storage, event correlation, message binding, request and response support, and scheduling. Like MassTransit, Automatonymous is free, open-source, and Apache 2.0 licensed.
+Automatonymous is a state machine library for .NET and provides a C# syntax to define a state machine, including states, events, and behaviors. MassTransit includes Automatonymous, and adds instance storage, event correlation, message binding, request and response support, and scheduling.
 
-::: tip V6
-Automatonymous is now included by default with _MassTransit_. In previous versions, an additional package reference was required. If _MassTransit.Automatonymous_ was previously used, it must be removed as it is no longer compatible.
+::: tip V8
+Automatonymous is no longer a separate NuGet package and has been assimilated by _MassTransit_. In previous versions, an additional package reference was required. If _Automatonymous_ is referenced, that reference must be removed as it is no longer compatible.
 :::
 
 ### State Machine
@@ -216,7 +216,7 @@ public class OrderStateMachine :
     {
         Initially(
             When(SubmitOrder)
-                .Then(x => x.Instance.OrderDate = x.Data.OrderDate)
+                .Then(x => x.Saga.OrderDate = x.Message.OrderDate)
                 .TransitionTo(Submitted),
             When(OrderAccepted)
                 .TransitionTo(Accepted));
@@ -227,25 +227,20 @@ public class OrderStateMachine :
 
         During(Accepted,
             When(SubmitOrder)
-                .Then(x => x.Instance.OrderDate = x.Data.OrderDate));
+                .Then(x => x.Saga.OrderDate = x.Message.OrderDate));
     }
 }
 ```
 
 ### Configuration
 
-To add a state machine saga to a receive endpoint:
+To configure a saga state machine:
 
 ```cs
-var machine = new OrderStateMachine();
-var repository = new InMemorySagaRepository<OrderState>();
-
-var busControl = Bus.Factory.CreateUsingInMemory(cfg =>
-{    
-    cfg.ReceiveEndpoint("order", e =>
-    {
-        e.StateMachineSaga(machine, repository);
-    });
+services.AddMassTransit(x =>
+{
+    x.AddSagaStateMachine<OrderStateMachine, OrderState>()
+        .InMemorySagaRepository();
 });
 ```
 
@@ -452,7 +447,7 @@ public class OrderStateMachine :
 
         DuringAny(
             When(OrderReady)
-                .Then(context => Console.WriteLine("Order Ready: {0}", context.Instance.CorrelationId)));
+                .Then(context => Console.WriteLine("Order Ready: {0}", context.Saga.CorrelationId)));
     }
 
     public Event OrderReady { get; private set; }
@@ -669,7 +664,7 @@ public class OrderStateMachine :
     {
         Initially(
             When(SubmitOrder)
-                .Publish(context => (OrderSubmitted)new OrderSubmittedEvent(context.Instance.CorrelationId))
+                .Publish(context => (OrderSubmitted)new OrderSubmittedEvent(context.Saga.CorrelationId))
                 .TransitionTo(Submitted));
     }
 }
@@ -690,7 +685,7 @@ public class OrderStateMachine :
     {
         Initially(
             When(SubmitOrder)
-                .PublishAsync(context => context.Init<OrderSubmitted>(new { OrderId = context.Instance.CorrelationId }))
+                .PublishAsync(context => context.Init<OrderSubmitted>(new { OrderId = context.Saga.CorrelationId }))
                 .TransitionTo(Submitted));
     }
 }
@@ -724,7 +719,7 @@ public class OrderStateMachine :
     {
         Initially(
             When(SubmitOrder)
-                .Send(settings.AccountServiceAddress, context => new UpdateAccountHistoryCommand(context.Instance.CorrelationId))
+                .Send(settings.AccountServiceAddress, context => new UpdateAccountHistoryCommand(context.Saga.CorrelationId))
                 .TransitionTo(Submitted));
     }
 }
@@ -745,7 +740,7 @@ public class OrderStateMachine :
     {
         Initially(
             When(SubmitOrder)
-                .SendAsync(settings.AccountServiceAddress, context => context.Init<UpdateAccountHistory>(new { OrderId = context.Instance.CorrelationId }))
+                .SendAsync(settings.AccountServiceAddress, context => context.Init<UpdateAccountHistory>(new { OrderId = context.Saga.CorrelationId }))
                 .TransitionTo(Submitted));
     }
 }
@@ -788,7 +783,7 @@ public class OrderStateMachine :
 
         DuringAny(
             When(OrderCancellationRequested)
-                .RespondAsync(context => context.Init<OrderCanceled>(new { OrderId = context.Instance.CorrelationId }))
+                .RespondAsync(context => context.Init<OrderCanceled>(new { OrderId = context.Saga.CorrelationId }))
                 .TransitionTo(Canceled));
     }
 
@@ -846,18 +841,18 @@ public class OrderStateMachine : MassTransitStateMachine<OrderState>
             When(OrderSubmitted)
                 .Then(context =>
                 {
-                    context.Instance.CorrelationId = context.Data.CorrelationId;
-                    context.Instance.ProcessingId = Guid.NewGuid();
+                    context.Saga.CorrelationId = context.Message.CorrelationId;
+                    context.Saga.ProcessingId = Guid.NewGuid();
 
-                    context.Instance.OrderId = Guid.NewGuid();
+                    context.Saga.OrderId = Guid.NewGuid();
 
                     if (!context.TryGetPayload(out SagaConsumeContext<OrderState, CreateOrder> payload))
                         throw new Exception("Unable to retrieve required payload for callback data.");
 
-                    context.Instance.RequestId = payload.RequestId;
-                    context.Instance.ResponseAddress = payload.ResponseAddress;
+                    context.Saga.RequestId = payload.RequestId;
+                    context.Saga.ResponseAddress = payload.ResponseAddress;
                 })
-                .Request(ProcessOrder, context => new ProcessOrder(context.Instance.OrderId, context.Instance.ProcessingId!.Value))
+                .Request(ProcessOrder, context => new ProcessOrder(context.Saga.OrderId, context.Saga.ProcessingId!.Value))
                 .TransitionTo(ProcessOrder.Pending));
         
         During(ProcessOrder.Pending,
@@ -865,22 +860,22 @@ public class OrderStateMachine : MassTransitStateMachine<OrderState>
                 .TransitionTo(Created)
                 .ThenAsync(async context =>
                 {
-                    var endpoint = await context.GetSendEndpoint(context.Instance.ResponseAddress);
-                    await endpoint.Send(context.Instance, r => r.RequestId = context.Instance.RequestId);
+                    var endpoint = await context.GetSendEndpoint(context.Saga.ResponseAddress);
+                    await endpoint.Send(context.Saga, r => r.RequestId = context.Saga.RequestId);
                 }),
             When(ProcessOrder.Faulted)
                 .TransitionTo(Cancelled)
                 .ThenAsync(async context =>
                 {
-                    var endpoint = await context.GetSendEndpoint(context.Instance.ResponseAddress);
-                    await endpoint.Send(new OrderCancelled(context.Instance.OrderId, "Faulted"), r => r.RequestId = context.Instance.RequestId);
+                    var endpoint = await context.GetSendEndpoint(context.Saga.ResponseAddress);
+                    await endpoint.Send(new OrderCancelled(context.Saga.OrderId, "Faulted"), r => r.RequestId = context.Saga.RequestId);
                 }),
             When(ProcessOrder.TimeoutExpired)
                 .TransitionTo(Cancelled)
                 .ThenAsync(async context =>
                 {
-                    var endpoint = await context.GetSendEndpoint(context.Instance.ResponseAddress);
-                    await endpoint.Send(new OrderCancelled(context.Instance.OrderId, "Time-out"), r => r.RequestId = context.Instance.RequestId);
+                    var endpoint = await context.GetSendEndpoint(context.Saga.ResponseAddress);
+                    await endpoint.Send(new OrderCancelled(context.Saga.OrderId, "Time-out"), r => r.RequestId = context.Saga.RequestId);
                 }));
     }
 }
@@ -941,7 +936,7 @@ public class OrderStateMachine :
     {
         During(Accepted,
             When(OrderCompletionTimeout.Received)
-                .PublishAsync(context => context.Init<OrderCompleted>(new { OrderId = context.Instance.CorrelationId }))
+                .PublishAsync(context => context.Init<OrderCompleted>(new { OrderId = context.Saga.CorrelationId }))
                 .Finalize());
     }
 
@@ -959,7 +954,7 @@ public class OrderStateMachine :
     {
         During(Submitted,
             When(OrderAccepted)
-                .Schedule(OrderCompletionTimeout, context => context.Init<OrderCompletionTimeoutExpired>(new { OrderId = context.Instance.CorrelationId }))
+                .Schedule(OrderCompletionTimeout, context => context.Init<OrderCompletionTimeoutExpired>(new { OrderId = context.Saga.CorrelationId }))
                 .TransitionTo(Accepted));
     }
 }
@@ -981,8 +976,8 @@ public class OrderStateMachine :
     {
         During(Submitted,
             When(OrderAccepted)
-                .Schedule(OrderCompletionTimeout, context => context.Init<OrderCompletionTimeoutExpired>(new { OrderId = context.Instance.CorrelationId }),
-                    context => context.Data.CompletionTime)
+                .Schedule(OrderCompletionTimeout, context => context.Init<OrderCompletionTimeoutExpired>(new { OrderId = context.Saga.CorrelationId }),
+                    context => context.Message.CompletionTime)
                 .TransitionTo(Accepted));
     }
 }
@@ -1006,7 +1001,7 @@ public class OrderStateMachine :
     {
         DuringAny(
             When(OrderCancellationRequested)
-                .RespondAsync(context => context.Init<OrderCanceled>(new { OrderId = context.Instance.CorrelationId }))
+                .RespondAsync(context => context.Init<OrderCanceled>(new { OrderId = context.Saga.CorrelationId }))
                 .Unschedule(OrderCompletionTimeout)
                 .TransitionTo(Canceled));
     }
@@ -1083,12 +1078,12 @@ public class OrderStateMachine :
     {
         During(Submitted,
             When(OrderAccepted)
-                .Request(ProcessOrder, x => x.Init<ProcessOrder>(new { OrderId = x.Instance.CorrelationId}))
+                .Request(ProcessOrder, x => x.Init<ProcessOrder>(new { OrderId = x.Saga.CorrelationId}))
                 .TransitionTo(ProcessOrder.Pending));
 
         During(ProcessOrder.Pending,
             When(ProcessOrder.Completed)
-                .Then(context => context.Instance.ProcessingId = context.Data.ProcessingId)
+                .Then(context => context.Saga.ProcessingId = context.Message.ProcessingId)
                 .TransitionTo(Processed),
             When(ProcessOrder.Faulted)
                 .TransitionTo(ProcessFaulted),
@@ -1138,7 +1133,7 @@ public class PublishOrderSubmittedActivity :
     public async Task Execute(BehaviorContext<OrderState, SubmitOrder> context, Behavior<OrderState, SubmitOrder> next)
     {
         // do the activity thing
-        await _context.Publish<OrderSubmitted>(new { OrderId = context.Instance.CorrelationId }).ConfigureAwait(false);
+        await _context.Publish<OrderSubmitted>(new { OrderId = context.Saga.CorrelationId }).ConfigureAwait(false);
 
         // call the next activity in the behavior
         await next.Execute(context).ConfigureAwait(false);
@@ -1200,14 +1195,14 @@ public class PublishOrderSubmittedActivity :
 
     public async Task Execute(BehaviorContext<OrderState> context, Behavior<OrderState> next)
     {
-        await _context.Publish<OrderSubmitted>(new { OrderId = context.Instance.CorrelationId }).ConfigureAwait(false);
+        await _context.Publish<OrderSubmitted>(new { OrderId = context.Saga.CorrelationId }).ConfigureAwait(false);
 
         await next.Execute(context).ConfigureAwait(false);
     }
 
     public async Task Execute<T>(BehaviorContext<OrderState, T> context, Behavior<OrderState, T> next)
     {
-        await _context.Publish<OrderSubmitted>(new { OrderId = context.Instance.CorrelationId }).ConfigureAwait(false);
+        await _context.Publish<OrderSubmitted>(new { OrderId = context.Saga.CorrelationId }).ConfigureAwait(false);
 
         await next.Execute(context).ConfigureAwait(false);
     }
@@ -1247,7 +1242,4 @@ public class OrderStateMachine :
 }
 ```
 
-
-
-[1]: https://github.com/MassTransit/Automatonymous
 [2]: https://github.com/MassTransit/Sample-ShoppingWeb

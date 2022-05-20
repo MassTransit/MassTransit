@@ -1,6 +1,6 @@
 name: MassTransit
 env:
-  MASSTRANSIT_VERSION: 8.0.0
+  MASSTRANSIT_VERSION: 8.0.3
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
   DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: true
 on:
@@ -22,9 +22,13 @@ on:
 
 jobs:
   compile:
-    name: Compile and Unit Tests
+    name: Build
     timeout-minutes: 10
-    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 2
+      matrix: 
+        os: ['ubuntu-latest', 'windows-latest']
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Check out code
         uses: actions/checkout@v2
@@ -47,21 +51,44 @@ jobs:
         run: dotnet build -c Release --no-restore
         working-directory: ./
 
-      - name: Test
-        run: dotnet test -c Release --no-build --filter Category!=Flaky
+      - name: Test Analyzers
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --no-build --filter Category!=Flaky
+        working-directory: tests/MassTransit.Analyzers.Tests
+
+  test-ubuntu:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      max-parallel: 2
+      matrix: 
+        framework: ['netcoreapp3.1', 'net6.0']
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        if: matrix.framework == 'netcoreapp3.1'
+        with:
+          dotnet-version: '3.1.x'
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Unit Tests
+        run: dotnet test -c Release -f ${{ matrix.framework }} --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.Tests
 
       - name: Test Abstractions
-        run: dotnet test -c Release --no-build --filter Category!=Flaky
+        run: dotnet test -c Release -f ${{ matrix.framework }} --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.Abstractions.Tests
 
-      - name: Test Analyzers
-        run: dotnet test -c Release --no-build --filter Category!=Flaky
-        working-directory: tests/MassTransit.Analyzers.Tests
-
-  test-containers:
-    name: Container Tests
-    runs-on: ubuntu-latest
+  test-windows:
+    name: Unit Tests
+    runs-on: windows-latest
     timeout-minutes: 10
     steps:
       - name: Check out code
@@ -70,18 +97,43 @@ jobs:
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
+          dotnet-version: '6.0.x'
+
+      - name: Unit Tests
+        run: dotnet test -c Release -f net461 --logger:"console;verbosity=normal" --filter Category!=Flaky
+        working-directory: tests/MassTransit.Tests
+
+      - name: Test Abstractions
+        run: dotnet test -c Release -f net461 --logger:"console;verbosity=normal" --filter Category!=Flaky
+        working-directory: tests/MassTransit.Abstractions.Tests
+
+  test-containers:
+    name: Container Tests
+    runs-on: windows-latest
+    timeout-minutes: 10
+    strategy:
+      max-parallel: 3
+      matrix: 
+        framework: ['netcoreapp3.1', 'net6.0', 'net461']
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install .NET Core SDK 3.1
+        uses: actions/setup-dotnet@v1
+        if: matrix.framework == 'netcoreapp3.1'
+        with:
           dotnet-version: '3.1.x'
 
-      # - name: Test Containers
-      #   uses: zyborg/dotnet-tests-report@v1
-      #   with:
-      #     project_path: tests/MassTransit.Containers.Tests
-      #     report_name: container_tests
-      #     report_title: Container Tests
-      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install .NET Core SDK 6.0
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+
       - name: Test Containers
-        run: dotnet test -c Release --filter Category!=Flaky
+        run: dotnet test -c Release -f ${{ matrix.framework }} --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.Containers.Tests
+
   test-activemq:
     name: "Transports: ActiveMQ"
     timeout-minutes: 10
@@ -92,7 +144,6 @@ jobs:
         ports:
           - "61616:61616"
           - "8161:8161"
-        #options: --health-cmd "rabbitmqctl node_health_check" --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
       - name: Check out code
         uses: actions/checkout@v2
@@ -100,11 +151,12 @@ jobs:
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '3.1.x'
+          dotnet-version: '6.0.x'
 
       - name: Test ActiveMQ
-        run: dotnet test -c Release --filter Category!=Flaky
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.ActiveMqTransport.Tests
+
   test-grpc:
     name: "Transports: gRPC"
     timeout-minutes: 10
@@ -119,7 +171,7 @@ jobs:
           dotnet-version: '6.0.x'
 
       - name: Test gRPC
-        run: dotnet test -c Release --filter Category!=Flaky
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.GrpcTransport.Tests
   test-azure-service-bus:
     name: "Transports: Azure Service Bus"
@@ -132,13 +184,13 @@ jobs:
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '3.1.x'
+          dotnet-version: '6.0.x'
 
       - name: Test Azure Service Bus
         env:
           MT_ASB_KEYVALUE: ${{ secrets.AZURE_SERVICEBUS }}
           MT_AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE }}
-        run: dotnet test -c Release --filter Category!=Flaky
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.Azure.ServiceBus.Core.Tests
   test-rabbitmq:
     name: "Transports: RabbitMQ"
@@ -158,10 +210,10 @@ jobs:
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '3.1.x'
+          dotnet-version: '6.0.x'
 
       - name: Test RabbitMQ
-        run: dotnet test -c Release --filter Category!=Flaky
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.RabbitMqTransport.Tests
   test-sqs:
     name: "Transports: SQS"
@@ -182,10 +234,10 @@ jobs:
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '3.1.x'
+          dotnet-version: '6.0.x'
 
       - name: Test SQS
-        run: dotnet test -c Release --filter Category!=Flaky
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.AmazonSqsTransport.Tests
   test-azure-table:
     name: "Storage: Azure Table"
@@ -199,12 +251,12 @@ jobs:
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '3.1.x'
+          dotnet-version: '6.0.x'
 
       - name: Test Azure Table
         env:
           MT_AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE }}
-        run: dotnet test -c Release --filter "Category!=Flaky&Category!=Integration"
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter "Category!=Flaky&Category!=Integration"
         working-directory: tests/MassTransit.Azure.Table.Tests
   test-cosmosdb:
     name: "Storage: CosmosDB"
@@ -218,13 +270,13 @@ jobs:
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '3.1.x'
+          dotnet-version: '6.0.x'
 
       - name: Test CosmosDB
         env:
           MT_COSMOS_ENDPOINT: ${{ secrets.AZURE_COSMOSENDPOINT }}
           MT_COSMOS_KEY: ${{ secrets.AZURE_COSMOSKEY }}
-        run: dotnet test -c Release --filter "Category!=Flaky&Category!=Integration"
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter "Category!=Flaky&Category!=Integration"
         working-directory: tests/MassTransit.Azure.Cosmos.Tests
   test-dapper:
     name: "Storage: Dapper"
@@ -248,10 +300,10 @@ jobs:
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '3.1.x'
+          dotnet-version: '6.0.x'
 
       - name: Test Dapper
-        run: dotnet test -c Release --filter "Category!=Flaky&Category!=Integration"
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter "Category!=Flaky&Category!=Integration"
         working-directory: tests/MassTransit.DapperIntegration.Tests
   test-entity-framework:
     name: "Storage: EntityFramework"
@@ -289,16 +341,16 @@ jobs:
         with:
           dotnet-version: '6.0.x'
 
-      - name: Test EntityFrameworkCore 3.1
-        run: dotnet test -c Release -f netcoreapp3.1 --filter "Category!=Flaky&Category!=Integration"
+      - name: Test EntityFrameworkCore 6.0
+        run: dotnet test -c Release --logger:"console;verbosity=normal" -f netcoreapp3.1 --filter "Category!=Flaky&Category!=Integration"
         working-directory: tests/MassTransit.EntityFrameworkCoreIntegration.Tests
 
       - name: Test EntityFrameworkCore 6.0
-        run: dotnet test -c Release -f net6.0 --filter "Category!=Flaky&Category!=Integration"
+        run: dotnet test -c Release --logger:"console;verbosity=normal" -f net6.0 --filter "Category!=Flaky&Category!=Integration"
         working-directory: tests/MassTransit.EntityFrameworkCoreIntegration.Tests
 
       - name: Test EntityFramework
-        run: dotnet test -c Release --filter "Category!=Flaky&Category!=Integration"
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter "Category!=Flaky&Category!=Integration"
         working-directory: tests/MassTransit.EntityFrameworkIntegration.Tests
   test-marten:
     name: "Storage: Marten"
@@ -319,10 +371,10 @@ jobs:
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '3.1.x'
+          dotnet-version: '6.0.x'
 
       - name: Test Marten
-        run: dotnet test -c Release --filter Category!=Flaky
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.MartenIntegration.Tests
   test-mongo:
     name: "Storage: MongoDB"
@@ -340,10 +392,10 @@ jobs:
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '3.1.x'
+          dotnet-version: '6.0.x'
 
       - name: Test MongoDB
-        run: dotnet test -c Release --filter Category!=Flaky
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.MongoDbIntegration.Tests
   test-nhibernate:
     name: "Storage: NHibernate"
@@ -356,10 +408,10 @@ jobs:
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '3.1.x'
+          dotnet-version: '6.0.x'
 
       - name: Test NHibernate
-        run: dotnet test -c Release --filter Category!=Flaky
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.NHibernateIntegration.Tests
   test-redis:
     name: "Storage: Redis"
@@ -378,10 +430,10 @@ jobs:
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '3.1.x'
+          dotnet-version: '6.0.x'
 
       - name: Test Redis
-        run: dotnet test -c Release --filter Category!=Flaky
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.RedisIntegration.Tests
   test-hangfire:
     name: "Scheduler: Hangfire"
@@ -394,10 +446,10 @@ jobs:
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '3.1.x'
+          dotnet-version: '6.0.x'
 
       - name: Test Hangfire
-        run: dotnet test -c Release --filter Category!=Flaky
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.HangfireIntegration.Tests
   test-quartz:
     name: "Scheduler: Quartz"
@@ -410,10 +462,10 @@ jobs:
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '3.1.x'
+          dotnet-version: '6.0.x'
 
       - name: Test Quartz
-        run: dotnet test -c Release --filter Category!=Flaky
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.QuartzIntegration.Tests
   test-eventhub:
     name: "Rider: EventHub"
@@ -426,10 +478,10 @@ jobs:
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '3.1.x'
+          dotnet-version: '6.0.x'
 
       - name: Test EventHub
-        run: dotnet test -c Release --filter Category!=Flaky
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         env:
           MT_EH_NAMESPACE: ${{ secrets.AZURE_EVENTHUB }}
           MT_AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE }}
@@ -479,10 +531,10 @@ jobs:
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '3.1.x'
+          dotnet-version: '6.0.x'
 
       - name: Test Kafka
-        run: dotnet test -c Release --filter Category!=Flaky
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.KafkaIntegration.Tests
 
   test-signalr:
@@ -496,10 +548,10 @@ jobs:
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '3.1.x'
+          dotnet-version: '6.0.x'
 
       - name: Test SignalR
-        run: dotnet test -c Release --filter Category!=Flaky
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.SignalR.Tests
         
   calc-version:
@@ -507,6 +559,8 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - compile
+      - test-ubuntu
+      - test-windows
       - test-containers
       - test-activemq
       # - test-azure-service-bus
@@ -540,7 +594,7 @@ jobs:
   publish:
     name: Build and Publish NuGets
     timeout-minutes: 60
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/v8') && github.repository == 'MassTransit/MassTransit' && success()
     needs:
       - calc-version
@@ -575,6 +629,14 @@ jobs:
         uses: drusellers/publish-nuget@master
         with:
           project-file-path: src/MassTransit.Abstractions/MassTransit.Abstractions.csproj
+          version: ${{ needs.calc-version.outputs.version }}
+          tag-commit: false
+          nuget-key: ${{secrets.NUGET_API_KEY}}
+      - name: Build and Publish MassTransit Newtonsoft
+        # was: brandedoutcast/publish-nuget@v2.5.5
+        uses: drusellers/publish-nuget@master
+        with:
+          project-file-path: src/MassTransit.Newtonsoft/MassTransit.Newtonsoft.csproj
           version: ${{ needs.calc-version.outputs.version }}
           tag-commit: false
           nuget-key: ${{secrets.NUGET_API_KEY}}
@@ -639,6 +701,13 @@ jobs:
         uses: drusellers/publish-nuget@master
         with:
           project-file-path: src/Persistence/MassTransit.DapperIntegration/MassTransit.DapperIntegration.csproj
+          version: ${{ needs.calc-version.outputs.version }}
+          tag-commit: false
+          nuget-key: ${{secrets.NUGET_API_KEY}}
+      - name: Build and Publish MassTransit.DynamoDb
+        uses: drusellers/publish-nuget@master
+        with:
+          project-file-path: src/Persistence/MassTransit.DynamoDbIntegration/MassTransit.DynamoDbIntegration.csproj
           version: ${{ needs.calc-version.outputs.version }}
           tag-commit: false
           nuget-key: ${{secrets.NUGET_API_KEY}}
@@ -744,6 +813,13 @@ jobs:
         uses: drusellers/publish-nuget@master
         with:
           project-file-path: src/Transports/MassTransit.RabbitMqTransport/MassTransit.RabbitMqTransport.csproj
+          version: ${{ needs.calc-version.outputs.version }}
+          tag-commit: false
+          nuget-key: ${{secrets.NUGET_API_KEY}}
+      - name: Build and Publish MassTransit.Visualizer
+        uses: drusellers/publish-nuget@master
+        with:
+          project-file-path: src/MassTransit.StateMachineVisualizer/MassTransit.StateMachineVisualizer.csproj
           version: ${{ needs.calc-version.outputs.version }}
           tag-commit: false
           nuget-key: ${{secrets.NUGET_API_KEY}}

@@ -61,16 +61,17 @@ The response will be sent back to the requester. In case the exception is thrown
 
 ### Request Client Configuration
 
-> Uses [MassTransit.ExtensionsDependencyInjection](https://www.nuget.org/packages/MassTransit.Extensions.DependencyInjection/)
-> or [MassTransit.AspNetCore](https://www.nuget.org/packages/MassTransit.AspNetCore/)
-
-Most interactions of the request/response nature consist of four elements: the request arguments, the response values, exception handling, and the time to wait for a response. The .NET framework gives us one additional element, a `CancellationToken` which can prematurely cancel waiting for the response.
+Most interactions of the request/response nature consist of four elements: the request arguments, the response values, exception handling, and the time to wait for a response. The .NET framework gives us one additional element, a `CancellationToken`, which can cancel waiting for the response (the request is still sent, and may be processed, the CancellationToken only cancels waiting for the response).
 
 MassTransit includes a request client which encapsulates the request/response messaging pattern.
 
-To register a request client, MassTransit has registration methods to ensure request clients are properly registered. To configure the request client, use the `AddRequestClient` method as shown below. In this case, no destination address is specified, however it is possible to specify the destination address for the request. The default request timeout may also be specified.
+::: tip V8
+By default, MassTransit registers a generic request client in the container that publishes requests using the default request parameters. The only time a request client needs to be manually configured is when a specific _DestinationAddress_ or _Timeout_ is specified.
+::: 
 
-```csharp
+To configure the request client with a specific destination address, use the `AddRequestClient` method as shown below. The default request timeout may also be specified.
+
+```cs
 public void ConfigureServices(IServiceCollection services)
 {
     services.AddMassTransit(x =>
@@ -82,17 +83,18 @@ public void ConfigureServices(IServiceCollection services)
             cfg.ConfigureEndpoints(context);
         }));
 
-        x.AddRequestClient<CheckOrderStatus>();
-    })
-    .AddMassTransitHostedService();
+        // ONLY required if the destination address must be specified
+        x.AddRequestClient<CheckOrderStatus>(new Uri("exchange:order-status"));
+    });
 }
 ```
 
 ::: warning IMPORTANT
-In the example shown above, the bus is automatically started by including the MassTransit hosted service. The bus must always be started, so if the hosted service is not included, be sure to start the bus manually using `IBusControl`.
+The bus _must_ be started, always. If requests are timing out, the bus is likely not started.
+MassTransit registers a hosted service in the container, which is automatically started by the .NET Generic Host and ASP.NET Core.
 :::
 
-Once registered, a controller (or another consumer) can use the client via a constructor dependency.
+To use the request client, a controller (or a consumer) uses the client via a constructor dependency.
 
 ```csharp
 public class RequestController :
@@ -114,57 +116,15 @@ public class RequestController :
 }
 ```
 
-The controller method will send the command, and return the view once the result has been received.
+The controller method will send the request and return the view once the response has been received.
 
+### Request Headers
 
-If multiple request clients are needed, there is a generic registration method available. Since no address is specified, the generic request client will publish the request, allowing the command to be routed to the consumer via the broker topology.
-
-```csharp
-public void ConfigureServices(IServiceCollection services)
-{
-    services.AddMassTransit(x =>
-    {
-        // ...
-    });
-    services.AddGenericRequestClient();
-}
-```
-#### Using Autofac
-
-> Uses [MassTransit.AutofacIntegration](https://www.nuget.org/packages/MassTransit.Autofac)
-
-To use the generic request client:
-```csharp
-ContainerBuilder builder;
-builder.RegisterGenericRequestClient();
-```
-
-Or choose one of the following for a typed request:
-```csharp
-ContainerBuilder builder;
-builder.AddMassTransit(x =>
-{
-    // Either this
-    x.AddRequestClient<OrderStatusResult>();
-
-    // Or this to specify a timeout
-    x.AddRequestClient<OrderStatusResult>(TimeSpan.FromSeconds(60));
-    
-    // ...
-});
-```
-
-### Customizing Requests
-
-To create a request, and add a header to the `SendContext`, use the _Create_ method which returns a _RequestHandle_ and then set the header using an execute filter as shown.
+To create a request and add a header to the `SendContext`, use the callback overload as shown below.
 
 ```csharp
-using (var request = client.Create(new { OrderId = id})
-{
-    request.UseExecute(x => x.Headers.Set("custom-header", "some-value"));
-
-    var response = await request.GetResponse<OrderStatusResult>();
-}
+await client.GetResponse<OrderStatusResult>(new { OrderId = id }, 
+    context => context.Headers.Set("tenant-id", "some-value"));
 ```
 
 Calling the `GetResponse` method triggers the request to be sent, after which the caller awaits the response. To add additional response types, see below for the tuple syntax, or just add multiple `GetResponse` methods, passing _false_ for the _readyToSend_ parameter.
@@ -271,6 +231,78 @@ var accepted = response switch
     _ => throw new InvalidOperationException()
 };
 ```
+
+### Request Client Accept Response Types
+
+The request client sets a message header, `MT-Request-AcceptType`, that contains the response types supported by the request client. This allows the request consumer to determine if the client can handle a response type, which can be useful as services evolve and new response types may be added to handle new conditions. For instance, if a consumer adds a new response type, such as `OrderAlreadyShipped`, if the response type isn't supported an exception may be thrown instead. 
+
+To see this in code, check out the client code:
+
+```cs
+var response = await client.GetResponse<OrderCanceled, OrderNotFound>(new CancelOrder());
+
+if (response.Is(out Response<OrderCanceled> canceled))
+{
+    return Ok();
+}
+else if (response.Is(out Response<OrderNotFound> responseB))
+{
+    return NotFound();
+}
+```
+
+The original consumer, prior to adding the new response type:
+
+```cs
+public async Task Consume(ConsumeContext<CancelOrder> context)
+{
+    var order = _repository.Load(context.Message.OrderId);
+    if(order == null)
+    {
+        await context.ResponseAsync<OrderNotFound>(new { context.Message.OrderId });
+        return;
+    }
+
+    order.Cancel();
+
+    await context.RespondAsync<OrderCanceled>(new { context.Message.OrderId });
+}
+```
+
+Now, the new consumer that checks if the order has already shipped:
+
+```cs
+public async Task Consume(ConsumeContext<CancelOrder> context)
+{
+    var order = _repository.Load(context.Message.OrderId);
+    if(order == null)
+    {
+        await context.ResponseAsync<OrderNotFound>(new { context.Message.OrderId });
+        return;
+    }
+
+    if(order.HasShipped)
+    {
+        if (context.IsResponseAccepted<OrderAlreadyShipped>())
+        {
+            await context.RespondAsync<OrderAlreadyShipped>(new { context.Message.OrderId, order.ShipDate });
+            return;
+        }
+        else
+            throw new InvalidOperationException("The order has already shipped"); // to throw a RequestFaultException in the client
+    }
+
+    order.Cancel();
+
+    await context.RespondAsync<OrderCanceled>(new { context.Message.OrderId });
+}
+```
+
+This way, the consumer can check the request client response types and act accordingly.
+
+::: tip NOTE
+For backwards compatibility, if the new `MT-Request-AcceptType` header is not found, `IsResponseAccepted` will return true for all message types.
+:::
 
 ### Request Client Details
 

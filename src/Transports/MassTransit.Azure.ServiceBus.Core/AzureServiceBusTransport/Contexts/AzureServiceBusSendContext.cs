@@ -26,6 +26,9 @@
         ServiceBusSendContext<T>
         where T : class
     {
+        string _partitionKey;
+        string _sessionId;
+
         public AzureServiceBusSendContext(T message, CancellationToken cancellationToken)
             : base(message, cancellationToken)
         {
@@ -41,9 +44,29 @@
 
         public DateTime? ScheduledEnqueueTimeUtc { get; set; }
 
-        public string PartitionKey { get; set; }
+        public string PartitionKey
+        {
+            get => _partitionKey;
+            set
+            {
+                _partitionKey = value;
 
-        public string SessionId { get; set; }
+                if (string.IsNullOrWhiteSpace(_sessionId) || _sessionId.Equals(value))
+                    return;
+
+                _sessionId = null;
+            }
+        }
+
+        public string SessionId
+        {
+            get => _sessionId;
+            set
+            {
+                _partitionKey = value;
+                _sessionId = value;
+            }
+        }
 
         public void SetScheduledMessageId(long sequenceNumber)
         {

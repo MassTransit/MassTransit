@@ -94,17 +94,10 @@ namespace MassTransit.Tests
         {
             public Task Consume(ConsumeContext<PingMessage> context)
             {
-                try
-                {
-                    var exception = new IntentionalTestException("This was intentional");
-                    exception.Data.Add("Username", "Frank");
-                    exception.Data.Add("CustomerId", 27);
-                    throw exception;
-                }
-                catch (Exception exception)
-                {
-                    throw new MassTransitApplicationException(exception);
-                }
+                var exception = new IntentionalTestException("This was intentional");
+                exception.Data.Add("Username", "Frank");
+                exception.Data.Add("CustomerId", 27);
+                throw exception;
             }
         }
     }

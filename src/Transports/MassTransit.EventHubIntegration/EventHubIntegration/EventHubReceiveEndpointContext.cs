@@ -32,6 +32,11 @@ namespace MassTransit.EventHubIntegration
                     blobContainerClientFactory, clientFactory, partitionClosingHandler, partitionInitializingHandler));
         }
 
+        public override void AddSendAgent(IAgent agent)
+        {
+            _contextSupervisor.Supervisor.AddSendAgent(agent);
+        }
+
         public override void AddConsumeAgent(IAgent agent)
         {
             _contextSupervisor.Supervisor.AddConsumeAgent(agent);

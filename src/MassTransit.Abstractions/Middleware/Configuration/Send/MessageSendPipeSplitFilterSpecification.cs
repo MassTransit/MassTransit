@@ -25,8 +25,7 @@ namespace MassTransit.Configuration
 
         public IEnumerable<ValidationResult> Validate()
         {
-            if (_specification == null)
-                yield return this.Failure("Specification", "must not be null");
+            yield break;
         }
 
 
@@ -65,9 +64,9 @@ namespace MassTransit.Configuration
                 return context;
             }
 
-            SendContext<T> InputContextProvider(SendContext<TMessage> context)
+            static SendContext<T> InputContextProvider(SendContext<TMessage> context)
             {
-                return context as SendContext<T>;
+                return (SendContext<T>)context;
             }
         }
     }

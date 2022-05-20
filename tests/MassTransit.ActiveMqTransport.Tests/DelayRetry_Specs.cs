@@ -4,8 +4,7 @@
     using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
-    using Context;
-    using Logging;
+    using Internals;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
@@ -145,7 +144,7 @@
         [Test]
         public async Task Should_retry_each_message_type()
         {
-            var pingMessage = new OneMessage {CorrelationId = NewId.NextGuid()};
+            var pingMessage = new OneMessage { CorrelationId = NewId.NextGuid() };
 
             Task<ConsumeContext<Fault<OneMessage>>> pingFault =
                 SubscribeHandler<Fault<OneMessage>>(x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
@@ -153,7 +152,7 @@
                 SubscribeHandler<Fault<TwoMessage>>(x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
 
             await InputQueueSendEndpoint.Send(pingMessage, x => x.FaultAddress = Bus.Address);
-            await InputQueueSendEndpoint.Send(new TwoMessage {CorrelationId = pingMessage.CorrelationId}, x => x.FaultAddress = Bus.Address);
+            await InputQueueSendEndpoint.Send(new TwoMessage { CorrelationId = pingMessage.CorrelationId }, x => x.FaultAddress = Bus.Address);
 
             ConsumeContext<Fault<OneMessage>> pingFaultContext = await pingFault;
             ConsumeContext<Fault<TwoMessage>> pongFaultContext = await pongFault;
@@ -212,6 +211,134 @@
 
 
     [TestFixture]
+    public class Delayed_redelivery
+    {
+        Consumer _consumer;
+
+        [Test]
+        [Category("Flaky")]
+        [TestCase("activemq")]
+        [TestCase("artemis")]
+        public async Task Should_properly_redeliver(string flavor)
+        {
+            TaskCompletionSource<bool> received = TaskUtil.GetTask<bool>();
+
+            Uri sendAddress = null;
+
+            var busControl = Bus.Factory.CreateUsingActiveMq(cfg =>
+            {
+                BusTestFixture.ConfigureBusDiagnostics(cfg);
+
+                if (flavor == "artemis")
+                {
+                    cfg.Host("localhost", 61618, cfgHost =>
+                    {
+                        cfgHost.Username("admin");
+                        cfgHost.Password("admin");
+                    });
+                    cfg.EnableArtemisCompatibility();
+                }
+
+                cfg.ReceiveEndpoint("input-queue", x =>
+                {
+                    x.ConfigureConsumeTopology = false;
+
+                    x.UseDelayedRedelivery(r => r.Intervals(2000, 5000));
+
+                    _consumer = new Consumer();
+                    x.Consumer(() => _consumer);
+                    sendAddress = x.InputAddress;
+                });
+
+                cfg.ReceiveEndpoint("input-queue-too", x =>
+                {
+                    x.Handler<PongMessage>(async context =>
+                    {
+                        received.TrySetResult(true);
+                    });
+                });
+            });
+
+            await busControl.StartAsync();
+
+            var sendEndpoint = await busControl.GetSendEndpoint(sendAddress);
+
+            var pingMessage = new OneMessage { CorrelationId = NewId.NextGuid() };
+
+            Task<ConsumeContext<Fault<OneMessage>>> pingFault =
+                SubscribeHandler<Fault<OneMessage>>(busControl, x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
+            Task<ConsumeContext<Fault<TwoMessage>>> pongFault =
+                SubscribeHandler<Fault<TwoMessage>>(busControl, x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
+
+            await sendEndpoint.Send(pingMessage, x => x.FaultAddress = busControl.Address);
+            await sendEndpoint.Send(new TwoMessage { CorrelationId = pingMessage.CorrelationId }, x => x.FaultAddress = busControl.Address);
+
+            ConsumeContext<Fault<OneMessage>> pingFaultContext = await pingFault;
+            ConsumeContext<Fault<TwoMessage>> pongFaultContext = await pongFault;
+
+            Assert.That(_consumer.PingCount, Is.EqualTo(3));
+            Assert.That(_consumer.PongCount, Is.EqualTo(3));
+
+            await busControl.StopAsync();
+        }
+
+        public Task<ConsumeContext<T>> SubscribeHandler<T>(IBus bus, Func<ConsumeContext<T>, bool> filter)
+            where T : class
+        {
+            TaskCompletionSource<ConsumeContext<T>> source = TaskUtil.GetTask<ConsumeContext<T>>();
+
+            ConnectHandle handler = null;
+            handler = bus.ConnectHandler<T>(async context =>
+            {
+                if (filter(context))
+                {
+                    handler.Disconnect();
+
+                    source.SetResult(context);
+                }
+            });
+
+            return source.Task;
+        }
+
+
+        class Consumer :
+            IConsumer<OneMessage>,
+            IConsumer<TwoMessage>
+        {
+            public int PingCount;
+            public int PongCount;
+
+            public Task Consume(ConsumeContext<OneMessage> context)
+            {
+                Interlocked.Increment(ref PingCount);
+
+                throw new IntentionalTestException();
+            }
+
+            public Task Consume(ConsumeContext<TwoMessage> context)
+            {
+                Interlocked.Increment(ref PongCount);
+
+                throw new IntentionalTestException();
+            }
+        }
+
+
+        public class OneMessage
+        {
+            public Guid CorrelationId { get; set; }
+        }
+
+
+        public class TwoMessage
+        {
+            public Guid CorrelationId { get; set; }
+        }
+    }
+
+
+    [TestFixture]
     public class Using_delayed_exchange_redelivery_with_a_consumer_and_retry :
         ActiveMqTestFixture
     {
@@ -229,15 +356,6 @@
             ConsumeContext<Fault<PingMessage>> pingFaultContext = await pingFault;
 
             Assert.That(Consumer.PingCount, Is.EqualTo(6));
-        }
-
-        [Test]
-        [Explicit]
-        public async Task Show_me_the_pipeline()
-        {
-            var result = Bus.GetProbeResult();
-
-            Console.WriteLine(result.ToJsonString());
         }
 
         protected override void ConfigureActiveMqReceiveEndpoint(IActiveMqReceiveEndpointConfigurator configurator)

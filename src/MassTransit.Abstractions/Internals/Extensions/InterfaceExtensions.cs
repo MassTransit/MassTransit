@@ -39,12 +39,12 @@
             return interfaceTypeInfo.IsAssignableFrom(type.GetTypeInfo());
         }
 
-        public static Type GetInterface<T>(this Type type)
+        public static Type? GetInterface<T>(this Type type)
         {
             return GetInterface(type, typeof(T));
         }
 
-        public static Type GetInterface(this Type type, Type interfaceType)
+        public static Type? GetInterface(this Type type, Type interfaceType)
         {
             if (type == null)
                 throw new ArgumentNullException(nameof(type));
@@ -59,11 +59,11 @@
             return _cache.Get(type, interfaceType);
         }
 
-        public static bool IsTask(this Type type, out Type taskType)
+        public static bool IsTask(this Type type, out Type? taskType)
         {
-            if (ClosesType(type, typeof(Task<>), out Type closedType))
+            if (ClosesType(type, typeof(Task<>), out Type? closedType))
             {
-                Type[] arguments = closedType.GetGenericArguments();
+                Type[] arguments = closedType!.GetGenericArguments();
                 for (var i = 0; i < arguments.Length; i++)
                 {
                     if (arguments[i].IsGenericParameter)
@@ -80,22 +80,22 @@
 
         public static bool ClosesType(this Type type, Type openType)
         {
-            return ClosesType(type, openType, out Type _);
+            return ClosesType(type, openType, out Type? _);
         }
 
         public static bool ClosesType(this Type type, Type openType, out Type[] arguments)
         {
-            if (ClosesType(type, openType, out Type closedType))
+            if (ClosesType(type, openType, out Type? closedType))
             {
-                arguments = closedType.GetGenericArguments().Where(x => !x.IsGenericParameter).ToArray();
+                arguments = closedType!.GetGenericArguments().Where(x => !x.IsGenericParameter).ToArray();
                 return true;
             }
 
-            arguments = default;
+            arguments = Array.Empty<Type>();
             return false;
         }
 
-        public static bool ClosesType(this Type type, Type openType, out Type closedType)
+        public static bool ClosesType(this Type type, Type openType, out Type? closedType)
         {
             if (type == null)
                 throw new ArgumentNullException(nameof(type));

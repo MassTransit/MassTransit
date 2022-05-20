@@ -2,10 +2,10 @@
 {
     using System;
     using System.Threading.Tasks;
-    using Contracts;
     using Internals;
     using NUnit.Framework;
     using RoutingKeyDirect;
+    using Transports.Fabric;
     using Util;
 
 

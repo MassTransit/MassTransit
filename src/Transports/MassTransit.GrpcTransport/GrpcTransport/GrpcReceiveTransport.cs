@@ -8,6 +8,7 @@ namespace MassTransit.GrpcTransport
     using Internals;
     using MassTransit.Middleware;
     using Transports;
+    using Transports.Fabric;
 
 
     /// <summary>
@@ -67,7 +68,7 @@ namespace MassTransit.GrpcTransport
         class ReceiveTransportAgent :
             Agent,
             ReceiveTransportHandle,
-            IMessageReceiver
+            IMessageReceiver<GrpcTransportMessage>
         {
             readonly Channel<GrpcTransportMessage> _channel;
             readonly Task _consumeDispatcher;

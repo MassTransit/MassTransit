@@ -1,8 +1,5 @@
 namespace MassTransit
 {
-    using GrpcTransport.Topology;
-
-
     public interface IGrpcPublishTopologyConfigurator :
         IPublishTopologyConfigurator,
         IGrpcPublishTopology

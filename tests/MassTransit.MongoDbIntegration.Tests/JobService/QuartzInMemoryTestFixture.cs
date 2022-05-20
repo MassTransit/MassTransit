@@ -12,7 +12,7 @@ namespace MassTransit.MongoDbIntegration.Tests.JobService
         InMemoryTestFixture
     {
         readonly Lazy<IMessageScheduler> _messageScheduler;
-        Task<IScheduler> _schedulerTask;
+        ISchedulerFactory _schedulerFactory;
         TimeSpan _testOffset;
 
         public QuartzInMemoryTestFixture()
@@ -32,14 +32,14 @@ namespace MassTransit.MongoDbIntegration.Tests.JobService
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.UseInMemoryScheduler(out _schedulerTask);
+            configurator.UseInMemoryScheduler(out _schedulerFactory);
 
             base.ConfigureInMemoryBus(configurator);
         }
 
         protected async Task AdvanceTime(TimeSpan duration)
         {
-            var scheduler = await _schedulerTask.ConfigureAwait(false);
+            var scheduler = await _schedulerFactory.GetScheduler(TestCancellationToken).ConfigureAwait(false);
 
             await scheduler.Standby().ConfigureAwait(false);
 

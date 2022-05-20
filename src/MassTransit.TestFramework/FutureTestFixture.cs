@@ -43,8 +43,7 @@ namespace MassTransit.TestFramework
 
             await _testFixtureConfigurator.OneTimeSetup(Provider);
 
-            TestHarness = Provider.GetRequiredService<ITestHarness>();
-            TestHarness.TestTimeout = TimeSpan.FromSeconds(5);
+            TestHarness = Provider.GetTestHarness();
 
             await TestHarness.Start();
         }

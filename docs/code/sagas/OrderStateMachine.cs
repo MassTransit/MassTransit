@@ -1,6 +1,6 @@
 namespace PersistedSaga
 {
-    using Automatonymous;
+    using MassTransit;
 
     public class OrderStateMachine :
         MassTransitStateMachine<OrderState>

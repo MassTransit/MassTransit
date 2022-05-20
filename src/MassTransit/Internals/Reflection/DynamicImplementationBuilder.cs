@@ -3,6 +3,8 @@
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
+    using System.Linq;
     using System.Reflection;
     using System.Reflection.Emit;
 
@@ -41,7 +43,7 @@
             return GetModuleBuilderForType(interfaceType, moduleBuilder => CreateTypeFromInterface(moduleBuilder, interfaceType));
         }
 
-        Type CreateTypeFromInterface(ModuleBuilder builder, Type interfaceType)
+        static Type CreateTypeFromInterface(ModuleBuilder builder, Type interfaceType)
         {
             var typeName = "MassTransit.DynamicInternal." +
                 (interfaceType.IsNested && interfaceType.DeclaringType != null
@@ -65,6 +67,9 @@
                     var propertyBuilder = typeBuilder.DefineProperty(property.Name,
                         property.Attributes | PropertyAttributes.HasDefault, property.PropertyType, null);
 
+                    foreach (var attributeData in property.GetCustomAttributesData())
+                        propertyBuilder.SetCustomAttribute(GetCustomAttributeBuilder(attributeData));
+
                     var getMethod = GetGetMethodBuilder(property, typeBuilder, fieldBuilder);
                     var setMethod = GetSetMethodBuilder(property, typeBuilder, fieldBuilder);
 
@@ -82,7 +87,7 @@
             }
         }
 
-        MethodBuilder GetGetMethodBuilder(PropertyInfo propertyInfo, TypeBuilder typeBuilder, FieldBuilder fieldBuilder)
+        static MethodBuilder GetGetMethodBuilder(PropertyInfo propertyInfo, TypeBuilder typeBuilder, FieldBuilder fieldBuilder)
         {
             var getMethodBuilder = typeBuilder.DefineMethod("get_" + propertyInfo.Name,
                 PropertyAccessMethodAttributes,
@@ -97,7 +102,7 @@
             return getMethodBuilder;
         }
 
-        MethodBuilder GetSetMethodBuilder(PropertyInfo propertyInfo, TypeBuilder typeBuilder, FieldBuilder fieldBuilder)
+        static MethodBuilder GetSetMethodBuilder(PropertyInfo propertyInfo, TypeBuilder typeBuilder, FieldBuilder fieldBuilder)
         {
             var setMethodBuilder = typeBuilder.DefineMethod("set_" + propertyInfo.Name,
                 PropertyAccessMethodAttributes,
@@ -111,6 +116,47 @@
             il.Emit(OpCodes.Ret);
 
             return setMethodBuilder;
+        }
+
+        static CustomAttributeBuilder GetCustomAttributeBuilder(CustomAttributeData data)
+        {
+            if (data == null)
+                throw new ArgumentNullException(nameof(data));
+
+            var propertyArguments = new List<PropertyInfo>();
+            var propertyArgumentValues = new List<object>();
+            var fieldArguments = new List<FieldInfo>();
+            var fieldArgumentValues = new List<object>();
+            foreach (var namedArg in data.NamedArguments)
+            {
+                var argName = namedArg.MemberName;
+                var fi = data.AttributeType.GetField(argName);
+                var pi = data.AttributeType.GetProperty(argName);
+
+                if (fi != null)
+                {
+                    fieldArguments.Add(fi);
+                    fieldArgumentValues.Add(namedArg.TypedValue.Value);
+                }
+                else if (pi != null)
+                {
+                    propertyArguments.Add(pi);
+                    propertyArgumentValues.Add(namedArg.TypedValue.Value);
+                }
+            }
+
+            var constructorArgs = data.ConstructorArguments.Select(x =>
+                x.Value is ReadOnlyCollection<CustomAttributeTypedArgument> nestedValue
+                    ? nestedValue.Select(x => x.Value).ToArray()
+                    : x.Value).ToArray();
+
+            return new CustomAttributeBuilder(
+                data.Constructor,
+                constructorArgs,
+                propertyArguments.ToArray(),
+                propertyArgumentValues.ToArray(),
+                fieldArguments.ToArray(),
+                fieldArgumentValues.ToArray());
         }
 
         TResult GetModuleBuilderForType<TResult>(Type interfaceType, Func<ModuleBuilder, TResult> callback)

@@ -1,3 +1,4 @@
+#nullable enable
 namespace MassTransit.GrpcTransport.Configuration
 {
     using System;
@@ -35,7 +36,7 @@ namespace MassTransit.GrpcTransport.Configuration
             set { }
         }
 
-        public void Publish<T>(Action<IGrpcMessagePublishTopologyConfigurator<T>> configureTopology)
+        public void Publish<T>(Action<IGrpcMessagePublishTopologyConfigurator<T>>? configureTopology)
             where T : class
         {
             IGrpcMessagePublishTopologyConfigurator<T> configurator = _busConfiguration.Topology.Publish.GetMessageTopology<T>();
@@ -43,12 +44,12 @@ namespace MassTransit.GrpcTransport.Configuration
             configureTopology?.Invoke(configurator);
         }
 
-        public void Host(Action<IGrpcHostConfigurator> configure = null)
+        public void Host(Action<IGrpcHostConfigurator>? configure)
         {
             configure?.Invoke(_hostConfiguration.Configurator);
         }
 
-        public void Host(Uri baseAddress, Action<IGrpcHostConfigurator> configure = null)
+        public void Host(Uri baseAddress, Action<IGrpcHostConfigurator>? configure)
         {
             _hostConfiguration.BaseAddress = baseAddress;
 
@@ -57,14 +58,14 @@ namespace MassTransit.GrpcTransport.Configuration
 
         public new IGrpcPublishTopologyConfigurator PublishTopology => _busConfiguration.Topology.Publish;
 
-        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<IGrpcReceiveEndpointConfigurator> configureEndpoint = null)
+        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter? endpointNameFormatter,
+            Action<IGrpcReceiveEndpointConfigurator>? configureEndpoint)
         {
             _hostConfiguration.ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
         }
 
-        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<IReceiveEndpointConfigurator> configureEndpoint = null)
+        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter? endpointNameFormatter,
+            Action<IReceiveEndpointConfigurator>? configureEndpoint)
         {
             _hostConfiguration.ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
         }
@@ -77,11 +78,6 @@ namespace MassTransit.GrpcTransport.Configuration
         public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
             _hostConfiguration.ReceiveEndpoint(queueName, configureEndpoint);
-        }
-
-        public int TransportConcurrencyLimit
-        {
-            set => ConcurrentMessageLimit = value;
         }
     }
 }

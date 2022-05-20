@@ -1,4 +1,5 @@
-﻿namespace MassTransit.Events
+﻿#nullable enable
+namespace MassTransit.Events
 {
     using System;
 
@@ -14,6 +15,6 @@
 
         public Uri InputAddress { get; }
 
-        public Exception Exception { get; }
+        public Exception? Exception { get; }
     }
 }

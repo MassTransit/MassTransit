@@ -1,3 +1,4 @@
+#nullable enable
 namespace MassTransit.Configuration
 {
     using System;
@@ -28,11 +29,7 @@ namespace MassTransit.Configuration
 
         public IEnumerable<ValidationResult> Validate()
         {
-            if (_sagaRepository == null)
-                yield return this.Failure("The saga repository cannot be null. How else are we going to save stuff? #facetopalm");
-
-            foreach (var result in _specification.Validate())
-                yield return result;
+            return _specification.Validate();
         }
 
         public int? ConcurrentMessageLimit
@@ -62,13 +59,13 @@ namespace MassTransit.Configuration
             return _specification.ConnectSagaConfigurationObserver(observer);
         }
 
-        public T Options<T>(Action<T> configure)
+        public T Options<T>(Action<T>? configure)
             where T : IOptions, new()
         {
             return _specification.Options(configure);
         }
 
-        public T Options<T>(T options, Action<T> configure)
+        public T Options<T>(T options, Action<T>? configure)
             where T : IOptions
         {
             return _specification.Options(options, configure);

@@ -47,7 +47,7 @@ namespace MassTransit.Internals
             return FormatTypeName(sb, type, null);
         }
 
-        string FormatTypeName(StringBuilder sb, Type type, string scope)
+        string FormatTypeName(StringBuilder sb, Type type, string? scope)
         {
             if (type.IsGenericParameter)
                 return "";
@@ -62,7 +62,7 @@ namespace MassTransit.Internals
                 }
             }
 
-            if (type.IsNested)
+            if (type.IsNested && type.DeclaringType != null)
             {
                 FormatTypeName(sb, type.DeclaringType, type.Namespace);
                 sb.Append(_nestedTypeSeparator);

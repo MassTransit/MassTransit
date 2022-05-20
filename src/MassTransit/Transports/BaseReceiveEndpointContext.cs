@@ -110,7 +110,7 @@ namespace MassTransit.Transports
         public int PrefetchCount { get; }
         public int? ConcurrentMessageLimit { get; }
 
-        public ILogContext LogContext => _hostConfiguration.ReceiveLogContext;
+        public ILogContext LogContext => _hostConfiguration.ReceiveLogContext ?? throw new InvalidOperationException("ReceiveLogContext should not be null");
 
         public IPublishTopology Publish => _publishTopology;
 
@@ -134,6 +134,7 @@ namespace MassTransit.Transports
             _publishEndpointProvider = new Lazy<IPublishEndpointProvider>(CreatePublishEndpointProvider);
         }
 
+        public abstract void AddSendAgent(IAgent agent);
         public abstract void AddConsumeAgent(IAgent agent);
 
         public virtual void Probe(ProbeContext context)

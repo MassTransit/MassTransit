@@ -113,7 +113,7 @@
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.TransportConcurrencyLimit = 200;
+            configurator.ConcurrentMessageLimit = 200;
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -209,7 +209,7 @@
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.TransportConcurrencyLimit = 16;
+            configurator.ConcurrentMessageLimit = 16;
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -242,7 +242,7 @@
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.TransportConcurrencyLimit = 16;
+            configurator.ConcurrentMessageLimit = 16;
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -278,7 +278,7 @@
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.TransportConcurrencyLimit = 16;
+            configurator.ConcurrentMessageLimit = 16;
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -313,7 +313,7 @@
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.TransportConcurrencyLimit = 16;
+            configurator.ConcurrentMessageLimit = 16;
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -529,7 +529,7 @@
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.ConcurrencyLimit = 10;
+            configurator.ConcurrentMessageLimit = 10;
 
             configurator.Consumer(() =>
             {
@@ -571,7 +571,7 @@
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.ConcurrencyLimit = 10;
+            configurator.ConcurrentMessageLimit = 10;
 
             configurator.Consumer(() =>
             {

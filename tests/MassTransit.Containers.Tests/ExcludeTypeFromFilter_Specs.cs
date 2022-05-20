@@ -28,7 +28,7 @@ namespace MassTransit.Containers.Tests
                 })
                 .BuildServiceProvider(true);
 
-            var harness = provider.GetRequiredService<ITestHarness>();
+            var harness = provider.GetTestHarness();
 
             await harness.Start();
 

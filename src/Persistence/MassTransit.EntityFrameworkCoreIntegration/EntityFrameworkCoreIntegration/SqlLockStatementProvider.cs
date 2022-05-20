@@ -23,16 +23,16 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         string DefaultSchema { get; }
         string RowLockStatement { get; }
 
-        public virtual string GetRowLockStatement<TSaga>(DbContext context)
-            where TSaga : class, ISaga
+        public virtual string GetRowLockStatement<T>(DbContext context)
+            where T : class
         {
-            return FormatLockStatement<TSaga>(context);
+            return FormatLockStatement<T>(context);
         }
 
-        string FormatLockStatement<TSaga>(DbContext context)
-            where TSaga : class, ISaga
+        string FormatLockStatement<T>(DbContext context)
+            where T : class
         {
-            var schemaTableTrio = GetSchemaAndTableNameAndColumnName(context, typeof(TSaga));
+            var schemaTableTrio = GetSchemaAndTableNameAndColumnName(context, typeof(T));
 
             return string.Format(RowLockStatement, schemaTableTrio.Schema, schemaTableTrio.Table, schemaTableTrio.ColumnName);
         }

@@ -1,6 +1,8 @@
 ﻿namespace MassTransit.AzureServiceBusTransport.Configuration
 {
     using System;
+    using System.Net.WebSockets;
+    using Azure;
     using Azure.Messaging.ServiceBus;
     using MassTransit.Configuration;
     using Topology;
@@ -32,7 +34,10 @@
             {
                 x.Ignore<UnauthorizedAccessException>();
 
+                x.Handle<ConnectionException>();
                 x.Handle<TimeoutException>();
+                x.Handle<WebSocketException>();
+                x.Handle<RequestFailedException>();
                 x.Handle<ServiceBusException>(ex => ex.Reason switch
                 {
                     ServiceBusFailureReason.MessagingEntityNotFound => false,
@@ -44,7 +49,7 @@
                     _ => false
                 });
 
-                x.Interval(5, TimeSpan.FromSeconds(10));
+                x.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
             });
 
             _connectionContext = new Recycle<IConnectionContextSupervisor>(() => new ConnectionContextSupervisor(this, topologyConfiguration));
@@ -59,13 +64,7 @@
         public ServiceBusHostSettings Settings
         {
             get => _hostSettings;
-            set
-            {
-                _hostSettings = value ?? throw new ArgumentNullException(nameof(value));
-
-                if (_hostSettings.TokenCredential != null)
-                    SetNamespaceSeparatorToUnderscore();
-            }
+            set => _hostSettings = value ?? throw new ArgumentNullException(nameof(value));
         }
 
         public override IRetryPolicy ReceiveTransportRetryPolicy { get; }

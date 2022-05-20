@@ -1,7 +1,9 @@
 #nullable enable
 namespace MassTransit.Logging
 {
+    using Courier.Contracts;
     using Microsoft.Extensions.Logging;
+    using Transports;
 
 
     /// <summary>
@@ -23,37 +25,38 @@ namespace MassTransit.Logging
         EnabledLogger? Warning { get; }
 
         /// <summary>
-        /// If enabled, returns a valid source which can be used
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns>A valid source, or null</returns>
-        EnabledActivitySource? IfEnabled(string name);
-
-        /// <summary>
-        /// Creates a new ILogger instance using the full name of the given type.
-        /// </summary>
-        /// <typeparam name="T">The type.</typeparam>
-        ILogContext<T> CreateLogContext<T>();
-
-        /// <summary>
         /// Creates a new <see cref="T:Microsoft.Extensions.Logging.ILogger" /> instance.
         /// </summary>
         /// <param name="categoryName">The category name for messages produced by the logger.</param>
         /// <returns>The <see cref="T:Microsoft.Extensions.Logging.ILogger" />.</returns>
         ILogContext CreateLogContext(string categoryName);
 
-        EnabledLogger? IfEnabled(LogLevel level);
+        StartedActivity? StartSendActivity<T>(SendTransportContext transportContext, SendContext<T> context, params (string Key, object Value)[] tags)
+            where T : class;
 
-        /// <summary>
-        /// Begin a scope for the logger
-        /// </summary>
-        /// <returns></returns>
-        EnabledScope? BeginScope();
-    }
+        StartedActivity? StartReceiveActivity(string name, string inputAddress, string endpointName, ReceiveContext context,
+            params (string Key, string Value)[] tags);
 
+        StartedActivity? StartConsumerActivity<TConsumer, T>(ConsumeContext<T> context)
+            where T : class;
 
-    public interface ILogContext<T> :
-        ILogContext
-    {
+        StartedActivity? StartHandlerActivity<T>(ConsumeContext<T> context)
+            where T : class;
+
+        StartedActivity? StartSagaActivity<TSaga, T>(SagaConsumeContext<TSaga, T> context)
+            where TSaga : class, ISaga
+            where T : class;
+
+        StartedActivity? StartSagaStateMachineActivity<TSaga, T>(BehaviorContext<TSaga, T> context)
+            where TSaga : class, ISaga
+            where T : class;
+
+        StartedActivity? StartExecuteActivity<TActivity, TArguments>(ConsumeContext<RoutingSlip> context)
+            where TActivity : IExecuteActivity<TArguments>
+            where TArguments : class;
+
+        StartedActivity? StartCompensateActivity<TActivity, TLog>(ConsumeContext<RoutingSlip> context)
+            where TActivity : ICompensateActivity<TLog>
+            where TLog : class;
     }
 }

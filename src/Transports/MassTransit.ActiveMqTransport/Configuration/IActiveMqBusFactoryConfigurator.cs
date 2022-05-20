@@ -1,4 +1,5 @@
-﻿namespace MassTransit
+﻿#nullable enable
+namespace MassTransit
 {
     using System;
     using ActiveMqTransport;
@@ -60,6 +61,6 @@
         /// e.g. adding a prefix
         /// </summary>
         /// <param name="formatter"></param>
-        public void SetTemporaryQueueNameFormatter(IActiveMqTemporaryQueueNameFormatter formatter);
+        public void SetTemporaryQueueNameFormatter(IActiveMqTemporaryQueueNameFormatter? formatter);
     }
 }

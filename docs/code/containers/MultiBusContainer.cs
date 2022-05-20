@@ -21,8 +21,6 @@ namespace MultiBusContainer
                     cfg.ConfigureEndpoints(context);
                 });
             });
-
-            services.AddMassTransitHostedService();
         }
     }
 }

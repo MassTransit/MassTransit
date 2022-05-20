@@ -1,29 +1,31 @@
-namespace ActiveMqConsoleListener
+namespace ActiveMqConsoleListener;
+
+using System.Threading.Tasks;
+using MassTransit;
+using Microsoft.Extensions.Hosting;
+
+public class Program
 {
-    using System;
-    using System.Threading.Tasks;
-    using MassTransit;
-    using MassTransit.ActiveMqTransport;
-    using Microsoft.Extensions.DependencyInjection;
-
-    public class Program
+    public static async Task Main(string[] args)
     {
-        public static async Task Main()
-        {
-            var services = new ServiceCollection();
-            services.AddMassTransit(x =>
+        await Host.CreateDefaultBuilder(args)
+            .ConfigureServices(services =>
             {
-                x.UsingActiveMq((context, cfg) =>
+                services.AddMassTransit(x =>
                 {
-                    cfg.Host("localhost", h =>
+                    x.UsingActiveMq((context, cfg) =>
                     {
-                        h.UseSsl();
+                        cfg.Host("localhost", h =>
+                        {
+                            h.UseSsl();
 
-                        h.Username("admin");
-                        h.Password("admin");
+                            h.Username("admin");
+                            h.Password("admin");
+                        });
                     });
                 });
-            });
-        }
+            })
+            .Build()
+            .RunAsync();
     }
 }

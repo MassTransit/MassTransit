@@ -1,11 +1,7 @@
 namespace BusHostTopologyMatch
 {
-    using System;
     using System.Threading.Tasks;
-    using BatchingConsumer;
     using MassTransit;
-    using MassTransit.Azure.ServiceBus.Core;
-    using MassTransit.Azure.ServiceBus.Core.Topology;
 
     public class Program
     {
@@ -16,7 +12,7 @@ namespace BusHostTopologyMatch
                 cfg.Host("connection-string");
             });
 
-            if (busControl.Topology is IServiceBusHostTopology serviceBusTopology)
+            if (busControl.Topology is IServiceBusBusTopology serviceBusTopology)
             {
 
             }

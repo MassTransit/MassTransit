@@ -1,11 +1,8 @@
 namespace MultiBusTwoContainer
 {
-    using System;
-    using System.Threading.Tasks;
     using ContainerContracts;
     using ContainerConsumers;
     using MassTransit;
-    using MassTransit.MultiBus;
     using Microsoft.Extensions.DependencyInjection;
 
     public interface ISecondBus :
@@ -35,13 +32,11 @@ namespace MultiBusTwoContainer
 
                 x.UsingRabbitMq((context, cfg) =>
                 {
-                    cfg.Host("remote-host");  
+                    cfg.Host("remote-host");
 
                     cfg.ConfigureEndpoints(context);
                 });
             });
-
-            services.AddMassTransitHostedService();
         }
     }
 }

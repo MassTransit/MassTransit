@@ -39,6 +39,7 @@ namespace MassTransit.Internals
             List<PropertyInfo> properties = typeInfo.DeclaredMethods
                 .Where(x => x.IsSpecialName && x.Name.StartsWith("get_") && !x.IsStatic)
                 .Select(x => typeInfo.GetDeclaredProperty(x.Name.Substring("get_".Length)))
+                .Cast<PropertyInfo>()
                 .ToList();
 
             if (typeInfo.IsInterface)
@@ -84,7 +85,8 @@ namespace MassTransit.Internals
 
             IEnumerable<PropertyInfo> props = info.DeclaredMethods
                 .Where(x => x.IsSpecialName && x.Name.StartsWith("get_") && x.IsStatic)
-                .Select(x => info.GetDeclaredProperty(x.Name.Substring("get_".Length)));
+                .Select(x => info.GetDeclaredProperty(x.Name.Substring("get_".Length)))
+                .Cast<PropertyInfo>();
 
             foreach (var propertyInfo in props)
                 yield return propertyInfo;
@@ -96,7 +98,8 @@ namespace MassTransit.Internals
 
             return info.DeclaredMethods
                 .Where(x => x.IsSpecialName && x.Name.StartsWith("get_") && x.IsStatic)
-                .Select(x => info.GetDeclaredProperty(x.Name.Substring("get_".Length)));
+                .Select(x => info.GetDeclaredProperty(x.Name.Substring("get_".Length)))
+                .Cast<PropertyInfo>();
         }
 
         /// <summary>
@@ -153,11 +156,10 @@ namespace MassTransit.Internals
         /// <param name="type">The type</param>
         /// <param name="underlyingType">The underlying type of the nullable</param>
         /// <returns>True if the type can be null</returns>
-        public static bool IsNullable(this Type type, out Type underlyingType)
+        public static bool IsNullable(this Type type, out Type? underlyingType)
         {
             var typeInfo = type.GetTypeInfo();
-            var isNullable = typeInfo.IsGenericType
-                && typeInfo.GetGenericTypeDefinition() == typeof(Nullable<>);
+            var isNullable = typeInfo.IsGenericType && typeInfo.GetGenericTypeDefinition() == typeof(Nullable<>);
 
             underlyingType = isNullable ? Nullable.GetUnderlyingType(type) : null;
             return isNullable;
@@ -239,7 +241,7 @@ namespace MassTransit.Internals
         /// <returns></returns>
         public static bool IsAnonymousType(this TypeInfo typeInfo)
         {
-            return typeInfo.HasAttribute<CompilerGeneratedAttribute>() && typeInfo.FullName.Contains("AnonymousType");
+            return typeInfo.FullName != null && typeInfo.HasAttribute<CompilerGeneratedAttribute>() && typeInfo.FullName.Contains("AnonymousType");
         }
 
         /// <summary>

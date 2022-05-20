@@ -38,15 +38,21 @@ namespace MassTransit
             if (type.ContainsGenericParameters)
                 throw new ArgumentException("A message type may not contain generic parameters", nameof(type));
 
-            return _cache.GetOrAdd(type, _ => (Cached)Activator.CreateInstance(typeof(Cached<>).MakeGenericType(type))).Urn;
+            return _cache.GetOrAdd(type, ValueFactory).Urn;
         }
 
         public static string ForTypeString(Type type)
         {
-            return _cache.GetOrAdd(type, _ => (Cached)Activator.CreateInstance(typeof(Cached<>).MakeGenericType(type))).UrnString;
+            return _cache.GetOrAdd(type, ValueFactory).UrnString;
         }
 
-        public void Deconstruct(out string name, out string ns, out string assemblyName)
+        static Cached ValueFactory(Type type)
+        {
+            return Activator.CreateInstance(typeof(Cached<>).MakeGenericType(type)) as Cached
+                ?? throw new InvalidOperationException($"MessageUrn creation failed for type: {TypeCache.GetShortName(type)} ");
+        }
+
+        public void Deconstruct(out string? name, out string? ns, out string? assemblyName)
         {
             name = null;
             ns = null;
@@ -54,7 +60,7 @@ namespace MassTransit
 
             if (Segments.Length > 0)
             {
-                string[] names = Segments[0].Split(':');
+                var names = Segments[0].Split(':');
                 if (string.Compare(names[0], "message", StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     if (names.Length == 2)
@@ -95,7 +101,7 @@ namespace MassTransit
                 sb.Append(':');
             }
 
-            if (typeInfo.IsNested)
+            if (typeInfo.IsNested && typeInfo.DeclaringType != null)
             {
                 GetMessageName(sb, typeInfo.DeclaringType, false);
                 sb.Append('+');

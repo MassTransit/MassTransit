@@ -11,10 +11,10 @@ namespace MassTransit
 
         IMessageSerializer GetMessageSerializer(ContentType? contentType = null);
 
-        bool TryGetMessageSerializer(ContentType contentType, out IMessageSerializer serializer);
+        bool TryGetMessageSerializer(ContentType contentType, [NotNullWhen(true)] out IMessageSerializer? serializer);
 
         IMessageDeserializer GetMessageDeserializer(ContentType? contentType = null);
 
-        bool TryGetMessageDeserializer(ContentType contentType, out IMessageDeserializer deserializer);
+        bool TryGetMessageDeserializer(ContentType contentType, [NotNullWhen(true)] out IMessageDeserializer? deserializer);
     }
 }

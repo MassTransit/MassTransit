@@ -27,7 +27,7 @@
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
-            return ScheduleRecurringSend(destinationAddress, schedule, Task.FromResult(message), cancellationToken);
+            return Schedule(destinationAddress, schedule, message, cancellationToken);
         }
 
         public Task<ScheduledRecurringMessage<T>> ScheduleRecurringSend<T>(Uri destinationAddress, RecurringSchedule schedule, T message,
@@ -43,7 +43,7 @@
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            return ScheduleRecurringSend(destinationAddress, schedule, Task.FromResult(message), pipe, cancellationToken);
+            return Schedule(destinationAddress, schedule, message, pipe, cancellationToken);
         }
 
         public Task<ScheduledRecurringMessage<T>> ScheduleRecurringSend<T>(Uri destinationAddress, RecurringSchedule schedule, T message,
@@ -59,7 +59,7 @@
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            return ScheduleRecurringSend(destinationAddress, schedule, Task.FromResult(message), pipe, cancellationToken);
+            return Schedule(destinationAddress, schedule, message, pipe, cancellationToken);
         }
 
         public Task<ScheduledRecurringMessage> ScheduleRecurringSend(Uri destinationAddress, RecurringSchedule schedule, object message,
@@ -138,7 +138,7 @@
 
             SendTuple<T> send = await MessageInitializerCache<T>.InitializeMessage(values, cancellationToken).ConfigureAwait(false);
 
-            return await ScheduleRecurringSend(destinationAddress, schedule, send.Message, send.Pipe, cancellationToken).ConfigureAwait(false);
+            return await Schedule(destinationAddress, schedule, send.Message, send.Pipe, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<ScheduledRecurringMessage<T>> ScheduleRecurringSend<T>(Uri destinationAddress, RecurringSchedule schedule,
@@ -156,7 +156,7 @@
 
             SendTuple<T> send = await MessageInitializerCache<T>.InitializeMessage(values, pipe, cancellationToken).ConfigureAwait(false);
 
-            return await ScheduleRecurringSend(destinationAddress, schedule, send.Message, send.Pipe, cancellationToken).ConfigureAwait(false);
+            return await Schedule(destinationAddress, schedule, send.Message, send.Pipe, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<ScheduledRecurringMessage<T>> ScheduleRecurringSend<T>(Uri destinationAddress, RecurringSchedule schedule,
@@ -174,57 +174,57 @@
 
             SendTuple<T> send = await MessageInitializerCache<T>.InitializeMessage(values, pipe, cancellationToken).ConfigureAwait(false);
 
-            return await ScheduleRecurringSend(destinationAddress, schedule, send.Message, send.Pipe, cancellationToken).ConfigureAwait(false);
+            return await Schedule(destinationAddress, schedule, send.Message, send.Pipe, cancellationToken).ConfigureAwait(false);
         }
 
-        Task IRecurringMessageScheduler.CancelScheduledRecurringSend(string scheduleId, string scheduleGroup)
+        public Task CancelScheduledRecurringSend(string scheduleId, string scheduleGroup)
         {
             var command = new CancelScheduledRecurringMessageCommand(scheduleId, scheduleGroup);
 
             return _publishEndpoint.Publish<CancelScheduledRecurringMessage>(command);
         }
 
-        async Task<ScheduledRecurringMessage<T>> ScheduleRecurringSend<T>(Uri destinationAddress, RecurringSchedule schedule, Task<T> message,
-            CancellationToken cancellationToken)
+        async Task<ScheduledRecurringMessage<T>> Schedule<T>(Uri destinationAddress, RecurringSchedule schedule, T message, CancellationToken cancellationToken)
             where T : class
         {
-            var command = await CreateCommand(destinationAddress, schedule, message).ConfigureAwait(false);
+            var command = CreateCommand(destinationAddress, schedule, message);
 
             await _publishEndpoint.Publish(command, cancellationToken).ConfigureAwait(false);
 
-            return new ScheduledRecurringMessageHandle<T>(schedule, command.Destination, message.Result);
+            return new ScheduledRecurringMessageHandle<T>(schedule, command.Destination, message);
         }
 
-        async Task<ScheduledRecurringMessage<T>> ScheduleRecurringSend<T>(Uri destinationAddress, RecurringSchedule schedule, Task<T> message,
-            IPipe<SendContext> pipe, CancellationToken cancellationToken)
+        async Task<ScheduledRecurringMessage<T>> Schedule<T>(Uri destinationAddress, RecurringSchedule schedule, T message, IPipe<SendContext> pipe,
+            CancellationToken cancellationToken)
             where T : class
         {
-            var command = await CreateCommand(destinationAddress, schedule, message).ConfigureAwait(false);
+            var command = CreateCommand(destinationAddress, schedule, message);
 
             await _publishEndpoint.Publish(command, pipe, cancellationToken).ConfigureAwait(false);
 
-            return new ScheduledRecurringMessageHandle<T>(schedule, command.Destination, message.Result);
+            return new ScheduledRecurringMessageHandle<T>(schedule, command.Destination, message);
         }
 
-        async Task<ScheduledRecurringMessage<T>> ScheduleRecurringSend<T>(Uri destinationAddress, RecurringSchedule schedule, Task<T> message,
-            IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
+        async Task<ScheduledRecurringMessage<T>> Schedule<T>(Uri destinationAddress, RecurringSchedule schedule, T message, IPipe<SendContext<T>> pipe,
+            CancellationToken cancellationToken)
             where T : class
         {
-            var command = await CreateCommand(destinationAddress, schedule, message).ConfigureAwait(false);
+            var command = CreateCommand(destinationAddress, schedule, message);
 
-            var scheduleMessagePipe = new ScheduleRecurringMessageContextPipe<T>(message.Result, pipe);
+            var scheduleMessagePipe = new ScheduleRecurringMessageContextPipe<T>(message, pipe);
 
             await _publishEndpoint.Publish(command, scheduleMessagePipe, cancellationToken).ConfigureAwait(false);
 
-            return new ScheduledRecurringMessageHandle<T>(schedule, command.Destination, message.Result);
+            return new ScheduledRecurringMessageHandle<T>(schedule, command.Destination, message);
         }
 
-        static async Task<ScheduleRecurringMessage> CreateCommand<T>(Uri destinationAddress, RecurringSchedule schedule, Task<T> message)
+        static ScheduleRecurringMessage CreateCommand<T>(Uri destinationAddress, RecurringSchedule schedule, T message)
             where T : class
         {
-            var payload = await message.ConfigureAwait(false);
+            if (!MessageTypeCache<T>.IsValidMessageType)
+                throw new ArgumentException(MessageTypeCache<T>.InvalidMessageTypeReason, nameof(T));
 
-            return new ScheduleRecurringMessageCommand<T>(schedule, destinationAddress, payload);
+            return new ScheduleRecurringMessageCommand<T>(schedule, destinationAddress, message);
         }
 
 

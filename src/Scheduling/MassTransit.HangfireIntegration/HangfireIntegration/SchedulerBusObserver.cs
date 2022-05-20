@@ -1,6 +1,7 @@
 namespace MassTransit.HangfireIntegration
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Hangfire;
 
@@ -11,19 +12,14 @@ namespace MassTransit.HangfireIntegration
     class SchedulerBusObserver :
         IBusObserver
     {
-        public const string DefaultQueueName = "mt-message-queue";
-        readonly Action<BackgroundJobServerOptions>? _configureServer;
-
-        readonly IHangfireComponentResolver _hangfireComponentResolver;
+        readonly HangfireSchedulerOptions _options;
         readonly Uri _schedulerEndpointAddress;
         BackgroundJobServer? _server;
 
-        public SchedulerBusObserver(IHangfireComponentResolver hangfireComponentResolver, Uri schedulerEndpointAddress,
-            Action<BackgroundJobServerOptions>? configureServer)
+        public SchedulerBusObserver(HangfireSchedulerOptions options)
         {
-            _hangfireComponentResolver = hangfireComponentResolver;
-            _schedulerEndpointAddress = schedulerEndpointAddress;
-            _configureServer = configureServer;
+            _schedulerEndpointAddress = new Uri($"queue:{options.QueueName}");
+            _options = options;
         }
 
         public void PostCreate(IBus bus)
@@ -43,20 +39,20 @@ namespace MassTransit.HangfireIntegration
         {
             var backgroundJobServerOptions = new BackgroundJobServerOptions
             {
-                TimeZoneResolver = _hangfireComponentResolver.TimeZoneResolver,
-                FilterProvider = _hangfireComponentResolver.JobFilterProvider,
+                TimeZoneResolver = _options.ComponentResolver.TimeZoneResolver,
+                FilterProvider = _options.ComponentResolver.JobFilterProvider,
                 ServerName = $"MT-Server-{NewId.NextGuid():N}"
             };
 
-            _configureServer?.Invoke(backgroundJobServerOptions);
+            _options.ConfigureServer?.Invoke(backgroundJobServerOptions);
 
             backgroundJobServerOptions.Activator = new MassTransitJobActivator(bus);
-            backgroundJobServerOptions.Queues = new[] { DefaultQueueName };
+            backgroundJobServerOptions.Queues = new[] { HangfireEndpointOptions.DefaultQueueName };
 
             _server = new BackgroundJobServer(
                 backgroundJobServerOptions,
-                _hangfireComponentResolver.JobStorage,
-                _hangfireComponentResolver.BackgroundProcesses);
+                _options.ComponentResolver.JobStorage,
+                _options.ComponentResolver.BackgroundProcesses);
 
             LogContext.Debug?.Log("Hangfire Scheduler Starting: {InputAddress}", _schedulerEndpointAddress);
 
@@ -79,13 +75,16 @@ namespace MassTransit.HangfireIntegration
             return Task.CompletedTask;
         }
 
-        public Task PostStop(IBus bus)
+        public async Task PostStop(IBus bus)
         {
-            _server?.Dispose();
+            if (_server != null)
+            {
+                using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+                await _server.WaitForShutdownAsync(cancellationTokenSource.Token).ConfigureAwait(false);
+                _server.Dispose();
+            }
 
             LogContext.Debug?.Log("Hangfire Scheduler Stopped: {InputAddress}", _schedulerEndpointAddress);
-
-            return Task.CompletedTask;
         }
 
         public Task StopFaulted(IBus bus, Exception exception)

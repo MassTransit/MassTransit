@@ -22,8 +22,6 @@ namespace AspNetCoreEndpointListener
                     cfg.ConfigureEndpoints(context);
                 });
             });
-
-            services.AddMassTransitHostedService();
         }
     }
 

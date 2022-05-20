@@ -7,9 +7,9 @@ namespace MassTransit
         IEndpointDefinition
     {
         readonly string _tag;
-        string _name;
+        string? _name;
 
-        public TemporaryEndpointDefinition(string tag = default, int? concurrentMessageLimit = default, int? prefetchCount = default,
+        public TemporaryEndpointDefinition(string? tag = default, int? concurrentMessageLimit = default, int? prefetchCount = default,
             bool configureConsumeTopology = true)
         {
             ConcurrentMessageLimit = concurrentMessageLimit;

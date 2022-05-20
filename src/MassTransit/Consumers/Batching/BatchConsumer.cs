@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.Batching
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
@@ -119,7 +118,7 @@
         {
             _timer.Dispose();
 
-            Batch<TMessage> batch = new Batch(_firstMessage, _lastMessage, batchCompletionMode, messages);
+            Batch<TMessage> batch = new MessageBatch<TMessage>(_firstMessage, _lastMessage, batchCompletionMode, messages);
 
             ConsumeContext<Batch<TMessage>> batchConsumeContext = new BatchConsumeContext<TMessage>(context, batch);
 
@@ -150,40 +149,6 @@
             return _messages.Values
                 .OrderBy(x => x.SentTime ?? x.MessageId?.ToNewId().Timestamp ?? default)
                 .ToList();
-        }
-
-
-        class Batch :
-            Batch<TMessage>
-        {
-            readonly IReadOnlyList<ConsumeContext<TMessage>> _messages;
-
-            public Batch(DateTime firstMessageReceived, DateTime lastMessageReceived, BatchCompletionMode mode,
-                IReadOnlyList<ConsumeContext<TMessage>> messages)
-            {
-                FirstMessageReceived = firstMessageReceived;
-                LastMessageReceived = lastMessageReceived;
-                Mode = mode;
-                _messages = messages;
-            }
-
-            public BatchCompletionMode Mode { get; }
-            public DateTime FirstMessageReceived { get; }
-            public DateTime LastMessageReceived { get; }
-
-            public ConsumeContext<TMessage> this[int index] => _messages[index];
-
-            public int Length => _messages.Count;
-
-            public IEnumerator<ConsumeContext<TMessage>> GetEnumerator()
-            {
-                return _messages.GetEnumerator();
-            }
-
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return GetEnumerator();
-            }
         }
     }
 }

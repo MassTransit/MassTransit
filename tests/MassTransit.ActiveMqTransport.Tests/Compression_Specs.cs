@@ -18,7 +18,8 @@ namespace MassTransit.ActiveMqTransport.Tests
             using var output = new MemoryStream();
             using (var compressOutput = new ZlibStream(output, CompressionMode.Compress))
             {
-                compressOutput.Write(Encoding.UTF8.GetBytes(text));
+                var b = Encoding.UTF8.GetBytes(text);
+                compressOutput.Write(b, 0, b.Length);
                 compressOutput.Flush();
             }
 
@@ -45,7 +46,8 @@ namespace MassTransit.ActiveMqTransport.Tests
             using var output = new MemoryStream();
             using (var compressOutput = new DeflaterOutputStream(output))
             {
-                compressOutput.Write(Encoding.UTF8.GetBytes(text));
+                var b = Encoding.UTF8.GetBytes(text);
+                compressOutput.Write(b, 0, b.Length);
                 compressOutput.Flush();
             }
 
@@ -72,7 +74,8 @@ namespace MassTransit.ActiveMqTransport.Tests
             using var output = new MemoryStream();
             using (var compressOutput = new ZlibStream(output, CompressionMode.Compress))
             {
-                compressOutput.Write(Encoding.UTF8.GetBytes(text));
+                var b = Encoding.UTF8.GetBytes(text);
+                compressOutput.Write(b, 0, b.Length);
                 compressOutput.Flush();
             }
 

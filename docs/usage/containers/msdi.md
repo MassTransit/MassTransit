@@ -4,7 +4,7 @@ MassTransit fully supports the Microsoft Dependency Injection framework used by 
 
 The [container section](/usage/containers/) includes examples and usage details, refer to that section for more details.
 
-> Uses [MassTransit.RabbitMQ](https://www.nuget.org/packages/MassTransit.RabbitMQ/) [MassTransit.Extensions.DependencyInjection](https://www.nuget.org/packages/MassTransit.Extensions.DependencyInjection/)
+> Uses [MassTransit.RabbitMQ](https://www.nuget.org/packages/MassTransit.RabbitMQ/)
 
 <<< @/docs/code/containers/MicrosoftContainer.cs
 

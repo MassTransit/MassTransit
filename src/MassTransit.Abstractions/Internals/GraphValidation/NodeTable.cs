@@ -9,6 +9,7 @@
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class NodeTable<T>
+        where T : notnull
     {
         readonly IDictionary<T, int> _nodes;
         int _count;

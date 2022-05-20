@@ -23,6 +23,15 @@ namespace MassTransit
             where T : Exception;
 
         /// <summary>
+        /// Retry the behavior, using the specified retry policy
+        /// </summary>
+        /// <param name="configure">Configures the retry</param>
+        /// <param name="activityCallback"></param>
+        /// <returns></returns>
+        EventActivityBinder<TSaga> Retry(Action<IRetryConfigurator> configure,
+            Func<EventActivityBinder<TSaga>, EventActivityBinder<TSaga>> activityCallback);
+
+        /// <summary>
         /// Create a conditional branch of activities for processing
         /// </summary>
         /// <param name="condition"></param>
@@ -86,6 +95,15 @@ namespace MassTransit
         EventActivityBinder<TSaga, TMessage> Catch<T>(
             Func<ExceptionActivityBinder<TSaga, TMessage, T>, ExceptionActivityBinder<TSaga, TMessage, T>> activityCallback)
             where T : Exception;
+
+        /// <summary>
+        /// Retry the behavior, using the specified retry policy
+        /// </summary>
+        /// <param name="configure">Configures the retry</param>
+        /// <param name="activityCallback"></param>
+        /// <returns></returns>
+        EventActivityBinder<TSaga, TMessage> Retry(Action<IRetryConfigurator> configure,
+            Func<EventActivityBinder<TSaga, TMessage>, EventActivityBinder<TSaga, TMessage>> activityCallback);
 
         /// <summary>
         /// Create a conditional branch of activities for processing

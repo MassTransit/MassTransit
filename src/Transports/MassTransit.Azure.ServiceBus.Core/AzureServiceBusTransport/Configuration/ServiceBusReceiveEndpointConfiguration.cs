@@ -56,7 +56,7 @@
             var context = CreateServiceBusReceiveEndpointContext();
 
             ClientPipeConfigurator.UseFilter(new ConfigureServiceBusTopologyFilter<ReceiveSettings>(_settings, context.BrokerTopology,
-                _settings.RemoveSubscriptions, _hostConfiguration.ConnectionContextSupervisor.Stopping));
+                _settings.RemoveSubscriptions, context));
 
             var errorTransport = CreateErrorTransport();
             var deadLetterTransport = CreateDeadLetterTransport();
@@ -83,9 +83,14 @@
             set => _settings.QueueConfigurator.EnablePartitioning = value;
         }
 
-        public int MaxSizeInMegabytes
+        public long MaxSizeInMegabytes
         {
-            set => _settings.QueueConfigurator.MaxSizeInMB = value;
+            set => _settings.QueueConfigurator.MaxSizeInMegabytes = value;
+        }
+
+        public long MaxMessageSizeInKilobytes
+        {
+            set => _settings.QueueConfigurator.MaxMessageSizeInKilobytes = value;
         }
 
         public bool RequiresDuplicateDetection

@@ -4,8 +4,6 @@ namespace MassTransit.InMemoryTransport
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
-    using Context;
-    using Fabric;
     using Initializers.TypeConverters;
     using Logging;
     using Transports;
@@ -31,11 +29,11 @@ namespace MassTransit.InMemoryTransport
         {
             LogContext.SetCurrentIfNull(_context.LogContext);
 
-            var context = new MessageSendContext<T>(message, cancellationToken);
+            var context = new InMemorySendContext<T>(message, cancellationToken);
 
             await pipe.Send(context).ConfigureAwait(false);
 
-            StartedActivity? activity = LogContext.IfEnabled(_context.ActivityName)?.StartSendActivity(context);
+            StartedActivity? activity = LogContext.Current?.StartSendActivity(_context, context);
             try
             {
                 if (_context.SendObservers.Count > 0)
@@ -43,12 +41,17 @@ namespace MassTransit.InMemoryTransport
 
                 var messageId = context.MessageId ?? NewId.NextGuid();
 
-                var transportMessage = new InMemoryTransportMessage(messageId, context.Body.GetBytes(), context.ContentType.ToString(),
-                    TypeCache<T>.ShortName) { Delay = context.Delay };
+                var transportMessage = new InMemoryTransportMessage(messageId, context.Body.GetBytes(), context.ContentType.ToString(), TypeCache<T>.ShortName)
+                {
+                    Delay = context.Delay,
+                    RoutingKey = context.RoutingKey
+                };
 
                 SetHeaders(transportMessage.Headers, context.Headers);
 
-                await _context.Exchange.Send(transportMessage, cancellationToken).ConfigureAwait(false);
+                var deliveryContext = new InMemoryDeliveryContext(transportMessage, cancellationToken);
+
+                await _context.Exchange.Deliver(deliveryContext).ConfigureAwait(false);
 
                 activity?.Update(context);
                 context.LogSent();

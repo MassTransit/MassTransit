@@ -75,7 +75,7 @@
 
                 CopyIncomingIdentifiersIfPresent(context);
 
-                StartedActivity? activity = LogContext.IfEnabled(_context.ActivityName)?.StartSendActivity(context,
+                StartedActivity? activity = LogContext.Current?.StartSendActivity(_context, context,
                     (nameof(context.PartitionKey), context.PartitionKey),
                     (nameof(context.SessionId), context.SessionId));
                 try
@@ -164,7 +164,7 @@
                 {
                     await clientContext.CancelScheduledSend(sequenceNumber).ConfigureAwait(false);
 
-                    LogContext.Debug?.Log("CANCEL {DestinationAddress} {TokenId}", clientContext.EntityPath, tokenId, sequenceNumber);
+                    LogContext.Debug?.Log("CANCEL {DestinationAddress} {TokenId}", clientContext.EntityPath, tokenId);
                 }
                 catch (ServiceBusException exception) when (exception.Reason == ServiceBusFailureReason.MessageNotFound)
                 {

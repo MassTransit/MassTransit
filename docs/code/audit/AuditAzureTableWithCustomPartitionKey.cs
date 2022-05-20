@@ -1,7 +1,7 @@
 namespace AuditAzureTableWithCustomPartitionKey
 {
     using MassTransit;
-    using MassTransit.Azure.Table.Audit;
+    using MassTransit.AzureTable;
     using Microsoft.Azure.Cosmos.Table;
     using Microsoft.Extensions.DependencyInjection;
 
@@ -17,10 +17,10 @@ namespace AuditAzureTableWithCustomPartitionKey
 
             services.AddMassTransit(x =>
             {
-                x.AddBus(bus => Bus.Factory.CreateUsingInMemory(cfg =>
+                x.UsingInMemory((context, cfg) =>
                 {
                     cfg.UseAzureTableAuditStore(storageAccount, auditTableName, new ConstantPartitionKeyFormatter(PartitionKey));
-                }));
+                });
             });
         }
     }

@@ -1,4 +1,5 @@
-﻿namespace MassTransit.Configuration
+﻿#nullable enable
+namespace MassTransit.Configuration
 {
     using System;
 
@@ -22,7 +23,8 @@
         public int MessageLimit { private get; set; }
         public int ConcurrencyLimit { private get; set; }
 
-        public void Consumer<TConsumer>(IConsumerFactory<TConsumer> consumerFactory, Action<IConsumerMessageConfigurator<TConsumer, Batch<TMessage>>> configure)
+        public void Consumer<TConsumer>(IConsumerFactory<TConsumer> consumerFactory,
+            Action<IConsumerMessageConfigurator<TConsumer, Batch<TMessage>>>? configure)
             where TConsumer : class, IConsumer<Batch<TMessage>>
         {
             var configurator = new ConsumerConfigurator<TConsumer>(consumerFactory, _configurator);

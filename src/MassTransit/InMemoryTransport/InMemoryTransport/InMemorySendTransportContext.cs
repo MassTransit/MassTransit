@@ -1,13 +1,12 @@
 namespace MassTransit.InMemoryTransport
 {
-    using Context;
-    using Fabric;
     using Transports;
+    using Transports.Fabric;
 
 
     public interface InMemorySendTransportContext :
         SendTransportContext
     {
-        IInMemoryExchange Exchange { get; }
+        IMessageExchange<InMemoryTransportMessage> Exchange { get; }
     }
 }

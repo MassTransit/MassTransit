@@ -2,6 +2,11 @@
   <!-- These properties will be shared for all projects -->
 
   <PropertyGroup>
+    <IsMac>$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::get_OSX())))</IsMac>
+    <IsWindows>$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::get_Windows())))</IsWindows>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <LangVersion>8</LangVersion>
     <WarningLevel>4</WarningLevel>
     <NoWarn>CS1587,CS1591,CS1998,NU5105</NoWarn>
@@ -14,6 +19,7 @@
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <Optimize>true</Optimize>
+    <DebugType>embedded</DebugType>
     <DefineConstants>TRACE;$(DefineConstants)</DefineConstants>
   </PropertyGroup>
 

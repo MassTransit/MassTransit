@@ -8,6 +8,8 @@ namespace MassTransit.ActiveMqTransport
         SendTransportContext,
         IPipeContextSource<SessionContext>
     {
+        bool IsArtemis { get; }
+
         IPipe<SessionContext> ConfigureTopologyPipe { get; }
 
         string EntityName { get; }

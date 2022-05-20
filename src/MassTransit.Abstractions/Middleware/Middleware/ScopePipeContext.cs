@@ -9,7 +9,7 @@ namespace MassTransit.Middleware
     public class ScopePipeContext
     {
         readonly PipeContext _context;
-        IPayloadCache _payloadCache;
+        IPayloadCache? _payloadCache;
 
         /// <summary>
         /// A pipe using the parent scope cancellationToken
@@ -25,7 +25,7 @@ namespace MassTransit.Middleware
         /// </summary>
         /// <param name="context"></param>
         /// <param name="payloads">Loads the payload cache with the specified objects</param>
-        protected ScopePipeContext(PipeContext context, params object[] payloads)
+        protected ScopePipeContext(PipeContext context, params object[]? payloads)
         {
             _context = context;
 
@@ -45,7 +45,7 @@ namespace MassTransit.Middleware
                 while (Volatile.Read(ref _payloadCache) == null)
                     Interlocked.CompareExchange(ref _payloadCache, new ListPayloadCache(), null);
 
-                return _payloadCache;
+                return _payloadCache!;
             }
         }
 
@@ -54,7 +54,7 @@ namespace MassTransit.Middleware
             return payloadType.GetTypeInfo().IsInstanceOfType(this) || PayloadCache.HasPayloadType(payloadType) || _context.HasPayloadType(payloadType);
         }
 
-        public virtual bool TryGetPayload<T>(out T payload)
+        public virtual bool TryGetPayload<T>(out T? payload)
             where T : class
         {
             if (this is T context)
@@ -73,10 +73,10 @@ namespace MassTransit.Middleware
                 return context;
 
             if (PayloadCache.TryGetPayload<T>(out var payload))
-                return payload;
+                return payload!;
 
             if (_context.TryGetPayload(out payload))
-                return payload;
+                return payload!;
 
             return PayloadCache.GetOrAddPayload(payloadFactory);
         }
@@ -94,7 +94,7 @@ namespace MassTransit.Middleware
             {
                 T Add()
                 {
-                    return updateFactory(payload);
+                    return updateFactory(payload!);
                 }
 
                 return PayloadCache.AddOrUpdatePayload(Add, updateFactory);

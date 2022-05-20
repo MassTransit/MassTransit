@@ -1,5 +1,6 @@
 namespace MassTransit
 {
+    using System;
     using Quartz;
     using Quartz.Impl;
     using Quartz.Spi;
@@ -18,9 +19,10 @@ namespace MassTransit
         public string QueueName { get; set; } = "quartz";
 
         /// <summary>
-        /// Optional, can be used to specify a job factory for non-MassTransit job types.
+        /// Only supported when configuring the in-memory scheduler to inject the MassTransitJobFactory
+        /// when not using a container.
         /// </summary>
-        public IJobFactory? JobFactory { get; set; }
+        public Func<IBus, IJobFactory>? JobFactoryFactory { get; set; }
 
         /// <summary>
         /// Whether to start the scheduler when bus starts, defaults to true.

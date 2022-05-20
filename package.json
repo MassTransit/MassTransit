@@ -4,13 +4,17 @@
   "description": "MassTransit Documentation",
   "main": "index.js",
   "devDependencies": {
-    "@vuepress/plugin-active-header-links": "^1.8.2",
-    "@vuepress/plugin-back-to-top": "^1.8.2",
-    "@vuepress/plugin-google-analytics": "^1.8.2",
-    "vuepress": "^1.8.2"
+    "@vuepress/plugin-active-header-links": "^1.9.7",
+    "@vuepress/plugin-back-to-top": "^1.9.7",
+    "@vuepress/plugin-google-analytics": "^1.9.7",
+    "vuepress": "^1.9.7"
   },
   "dependencies": {
     "esm": "^3.2.25",
+    "follow-redirects": "^1.14.8",
+    "markdown-it-html5-embed": "^1.0.0",
+    "path-parse": "^1.0.7",
+    "prismjs": "^1.26.0",
     "remove-markdown": "^0.3.0",
     "vue-tweet-embed": "^2.4.0"
   },

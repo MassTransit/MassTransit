@@ -3,11 +3,11 @@ namespace MassTransit.GrpcTransport
     using System;
     using System.Linq;
     using Contracts;
-    using Fabric;
+    using Transports.Fabric;
 
 
     public class NodeMessageFabricObserver :
-        IMessageFabricObserver
+        IMessageFabricObserver<NodeContext>
     {
         readonly IGrpcHostNode _hostNode;
         readonly INodeCollection _nodes;
@@ -18,7 +18,7 @@ namespace MassTransit.GrpcTransport
             _hostNode = hostNode;
         }
 
-        public void ExchangeDeclared(NodeContext context, string name, ExchangeType exchangeType)
+        public void ExchangeDeclared(NodeContext context, string name, Transports.Fabric.ExchangeType exchangeType)
         {
             if (context.NodeType != NodeType.Host)
                 return;
@@ -28,7 +28,7 @@ namespace MassTransit.GrpcTransport
                 Exchange = new Exchange
                 {
                     Name = name,
-                    Type = exchangeType
+                    Type = exchangeType.ToGrpcExchangeType()
                 }
             });
         }
@@ -54,7 +54,7 @@ namespace MassTransit.GrpcTransport
             if (context.NodeType != NodeType.Host)
                 return;
 
-            Send(context, new Contracts.Topology {Queue = new Queue {Name = name}});
+            Send(context, new Contracts.Topology { Queue = new Queue { Name = name } });
         }
 
         public void QueueBindingCreated(NodeContext context, string source, string destination)

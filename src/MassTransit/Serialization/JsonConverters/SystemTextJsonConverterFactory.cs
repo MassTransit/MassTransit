@@ -5,6 +5,7 @@
     using System.Reflection;
     using System.Text.Json;
     using System.Text.Json.Serialization;
+    using Batching;
     using Courier.Contracts;
     using Courier.Messages;
     using Events;
@@ -21,6 +22,7 @@
         static readonly IDictionary<Type, Type> _openTypeFactory = new Dictionary<Type, Type>
         {
             { typeof(Fault<>), typeof(FaultEvent<>) },
+            { typeof(Batch<>), typeof(MessageBatch<>) },
         };
 
         static SystemTextJsonConverterFactory()
@@ -32,12 +34,12 @@
                 .Add<HostInfo, BusHostInfo>()
                 .Add<ScheduleMessage, ScheduleMessageCommand>()
                 .Add<MessageEnvelope, JsonMessageEnvelope>()
-                .Add<RoutingSlip, RoutingSlipImpl>()
-                .Add<Activity, ActivityImpl>()
-                .Add<ActivityLog, ActivityLogImpl>()
-                .Add<CompensateLog, CompensateLogImpl>()
-                .Add<ActivityException, ActivityExceptionImpl>()
-                .Add<Subscription, SubscriptionImpl>()
+                .Add<RoutingSlip, RoutingSlipRoutingSlip>()
+                .Add<Activity, RoutingSlipActivity>()
+                .Add<ActivityLog, RoutingSlipActivityLog>()
+                .Add<CompensateLog, RoutingSlipCompensateLog>()
+                .Add<ActivityException, RoutingSlipActivityException>()
+                .Add<Subscription, RoutingSlipSubscription>()
                 .Add<RoutingSlipCompleted, RoutingSlipCompletedMessage>()
                 .Add<RoutingSlipFaulted, RoutingSlipFaultedMessage>()
                 .Add<RoutingSlipActivityCompleted, RoutingSlipActivityCompletedMessage>()

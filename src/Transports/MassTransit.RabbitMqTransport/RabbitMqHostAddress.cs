@@ -10,8 +10,8 @@ namespace MassTransit
     {
         const string HeartbeatKey = "heartbeat";
         const string PrefetchKey = "prefetch";
-        const string RabbitMqSchema = "rabbitmq";
-        const string RabbitMqSslSchema = "rabbitmqs";
+        public const string RabbitMqSchema = "rabbitmq";
+        public const string RabbitMqSslSchema = "rabbitmqs";
         const string TimeToLiveKey = "ttl";
 
         public readonly string Scheme;
@@ -76,10 +76,9 @@ namespace MassTransit
 
             if (port.HasValue)
             {
-                if (port.Value == 0)
+                if (port.Value <= 0)
                     Port = 5672;
-
-                if (port.Value == 5671)
+                else if (port.Value == 5671)
                     Scheme = RabbitMqSslSchema;
             }
 
@@ -93,8 +92,8 @@ namespace MassTransit
             scheme = address.Scheme;
             host = address.Host;
 
-            port = address.IsDefaultPort
-                ? scheme.EndsWith("s", StringComparison.OrdinalIgnoreCase) ? 5671 : 5672
+            port = address.IsDefaultPort || address.Port <= 0
+                ? scheme.EndsWith("s") ? 5671 : 5672
                 : address.Port;
 
             virtualHost = address.ParseHostPath();

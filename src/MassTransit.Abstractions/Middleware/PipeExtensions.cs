@@ -51,10 +51,10 @@ namespace MassTransit
         public static TPayload GetPayload<TPayload>(this PipeContext context)
             where TPayload : class
         {
-            if (!context.TryGetPayload(out TPayload payload))
+            if (!context.TryGetPayload(out TPayload? payload))
                 throw new PayloadNotFoundException($"The payload was not found: {TypeCache<TPayload>.ShortName}");
 
-            return payload;
+            return payload!;
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace MassTransit
         public static TPayload GetPayload<TPayload>(this PipeContext context, TPayload defaultPayload)
             where TPayload : class
         {
-            return context.TryGetPayload(out TPayload payload) ? payload : defaultPayload;
+            return context.TryGetPayload(out TPayload? payload) ? payload! : defaultPayload;
         }
 
         /// <summary>

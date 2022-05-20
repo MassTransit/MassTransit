@@ -1,11 +1,11 @@
 ﻿namespace MassTransit
 {
-    using GrpcTransport.Configuration;
+    using Configuration;
 
 
     public interface IGrpcConsumeTopologySpecification :
         ISpecification
     {
-        void Apply(IGrpcConsumeTopologyBuilder builder);
+        void Apply(IMessageFabricConsumeTopologyBuilder builder);
     }
 }

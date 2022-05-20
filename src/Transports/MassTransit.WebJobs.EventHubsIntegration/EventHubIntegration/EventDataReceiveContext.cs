@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using Azure.Messaging.EventHubs;
+    using Serialization;
     using Transports;
 
 
@@ -20,7 +21,7 @@
             Body = new MemoryMessageBody(_eventData.Body);
         }
 
-        protected override IHeaderProvider HeaderProvider => new DictionaryHeaderProvider(_eventData.Properties);
+        protected override IHeaderProvider HeaderProvider => new EventDataHeaderProvider(_eventData);
 
         public override MessageBody Body { get; }
 

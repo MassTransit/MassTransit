@@ -28,7 +28,7 @@
 
         public string Format(in byte[] bytes)
         {
-            var result = _formatBuffer.Value;
+            var result = _formatBuffer.Value!;
 
             var offset = 0;
             for (var i = 0; i < 3; i++)

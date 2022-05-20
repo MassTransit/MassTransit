@@ -46,7 +46,8 @@ namespace MassTransit.Observables
 
                 var converterType = typeof(ConsumeObserverConverter<>).MakeGenericType(messageType);
 
-                return (IConsumeObserverConverter)Activator.CreateInstance(converterType);
+                return Activator.CreateInstance(converterType) as IConsumeObserverConverter
+                    ?? throw new InvalidOperationException("Failed to create Consume Observer converter");
             }
 
             throw new ArgumentException($"The context was not a ConsumeContext: {TypeCache.GetShortName(type)}", nameof(type));

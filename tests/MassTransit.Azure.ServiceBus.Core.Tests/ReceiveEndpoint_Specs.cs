@@ -2,6 +2,7 @@
 {
     using System;
     using System.Threading.Tasks;
+    using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
     using TestFramework.Messages;
 
@@ -18,8 +19,6 @@
             var handle = Bus.ConnectReceiveEndpoint("second_queue", x =>
             {
                 pingHandled = Handled<PingMessage>(x);
-
-                ((IServiceBusReceiveEndpointConfigurator)x).RemoveSubscriptions = true;
             });
 
             await handle.Ready;
@@ -106,6 +105,55 @@
         public Creating_a_receive_endpoint_from_an_existing_bus()
         {
             TestTimeout = TimeSpan.FromMinutes(1);
+        }
+    }
+
+
+    public class Connecting_a_temporary_endpoint :
+        AzureServiceBusTestFixture
+    {
+        [Test]
+        public async Task Should_work_as_expected()
+        {
+            var connector = _provider.GetRequiredService<IReceiveEndpointConnector>();
+
+            Task<ConsumeContext<PingMessage>> pingHandled = null;
+
+            var handle = connector.ConnectReceiveEndpoint(new TemporaryEndpointDefinition(), KebabCaseEndpointNameFormatter.Instance, (context, cfg) =>
+            {
+                pingHandled = Handled<PingMessage>(cfg);
+            });
+
+            await handle.Ready;
+
+            try
+            {
+                await Bus.Publish(new PingMessage());
+
+                ConsumeContext<PingMessage> pinged = await pingHandled;
+            }
+            finally
+            {
+                await handle.StopAsync();
+            }
+        }
+
+        readonly IServiceProvider _provider;
+
+        public Connecting_a_temporary_endpoint()
+        {
+            _provider = new ServiceCollection()
+                .AddMassTransit(ConfigureRegistration)
+                .BuildServiceProvider(true);
+        }
+
+        void ConfigureRegistration(IBusRegistrationConfigurator configurator)
+        {
+            configurator.AddBus(provider => BusControl);
+        }
+
+        protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+        {
         }
     }
 }

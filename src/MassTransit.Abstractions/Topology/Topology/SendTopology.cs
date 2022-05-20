@@ -39,7 +39,7 @@
 
             var specification = _messageTypes.GetOrAdd(typeof(T), CreateMessageTopology<T>);
 
-            return specification as IMessageSendTopologyConfigurator<T>;
+            return (IMessageSendTopologyConfigurator<T>)specification;
         }
 
         public ConnectHandle ConnectSendTopologyConfigurationObserver(ISendTopologyConfigurationObserver observer)

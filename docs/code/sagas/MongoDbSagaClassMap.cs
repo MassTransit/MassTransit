@@ -1,8 +1,6 @@
 namespace MongoDbSagaClassMap
 {
-    using System;
     using MassTransit;
-    using MassTransit.MongoDbIntegration;
     using Microsoft.Extensions.DependencyInjection;
     using PersistedSaga;
 

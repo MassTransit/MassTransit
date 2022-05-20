@@ -8,19 +8,12 @@ namespace MassTransit.QuartzIntegration
     using System.Threading.Tasks;
     using Quartz;
     using Serialization;
-    using Transports;
 
 
     public class ScheduledMessageJob :
         IJob
     {
-        public const string BusContextKey = "MassTransit.Bus";
-
-        IBus? _bus;
-
-        public ScheduledMessageJob()
-        {
-        }
+        readonly IBus _bus;
 
         public ScheduledMessageJob(IBus bus)
         {
@@ -29,13 +22,11 @@ namespace MassTransit.QuartzIntegration
 
         public async Task Execute(IJobExecutionContext context)
         {
-            _bus ??= (IBus)context.Scheduler.Context[BusContextKey] ?? throw new InvalidOperationException("");
-
             var jobData = context.MergedJobDataMap;
             var messageContext = new JobDataMessageContext(context, SystemTextJsonMessageSerializer.Instance);
 
-            var contentType = new ContentType(jobData.GetString("ContentType"));
-            var destinationAddress = new Uri(jobData.GetString("Destination"));
+            var contentType = new ContentType(jobData.GetString("ContentType")!);
+            var destinationAddress = new Uri(jobData.GetString("Destination")!);
             var body = jobData.GetString("Body") ?? string.Empty;
             var messageType = jobData.GetString("MessageType")?.Split(';')?.ToArray() ?? Array.Empty<string>();
 
@@ -85,7 +76,7 @@ namespace MassTransit.QuartzIntegration
             {
                 var deserializer = context.Serialization.GetMessageDeserializer(_contentType);
 
-                var body = new StringMessageBody(_body);
+                var body = deserializer.GetMessageBody(_body);
 
                 var serializerContext = deserializer.Deserialize(body, _messageContext, _destinationAddress);
 

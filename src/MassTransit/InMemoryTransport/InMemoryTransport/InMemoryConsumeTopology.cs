@@ -4,6 +4,8 @@ namespace MassTransit.InMemoryTransport
     using System.Collections.Generic;
     using System.Linq;
     using Configuration;
+    using MassTransit.Configuration;
+    using Transports.Fabric;
 
 
     public class InMemoryConsumeTopology :
@@ -11,11 +13,13 @@ namespace MassTransit.InMemoryTransport
         IInMemoryConsumeTopologyConfigurator
     {
         readonly IMessageTopology _messageTopology;
+        readonly IInMemoryPublishTopologyConfigurator _publishTopology;
         readonly IList<IInMemoryConsumeTopologySpecification> _specifications;
 
-        public InMemoryConsumeTopology(IMessageTopology messageTopology)
+        public InMemoryConsumeTopology(IMessageTopology messageTopology, IInMemoryPublishTopologyConfigurator publishTopology)
         {
             _messageTopology = messageTopology;
+            _publishTopology = publishTopology;
             _specifications = new List<IInMemoryConsumeTopologySpecification>();
         }
 
@@ -34,12 +38,19 @@ namespace MassTransit.InMemoryTransport
             _specifications.Add(specification);
         }
 
+        public void Bind(string exchangeName, ExchangeType exchangeType = ExchangeType.FanOut, string routingKey = default)
+        {
+            var specification = new ExchangeBindingConsumeTopologySpecification(exchangeName, exchangeType, routingKey);
+
+            _specifications.Add(specification);
+        }
+
         IInMemoryMessageConsumeTopologyConfigurator<T> IInMemoryConsumeTopologyConfigurator.GetMessageTopology<T>()
         {
             return GetMessageTopology<T>() as IInMemoryMessageConsumeTopologyConfigurator<T>;
         }
 
-        public void Apply(IInMemoryConsumeTopologyBuilder builder)
+        public void Apply(IMessageFabricConsumeTopologyBuilder builder)
         {
             foreach (var specification in _specifications)
                 specification.Apply(builder);
@@ -54,7 +65,7 @@ namespace MassTransit.InMemoryTransport
 
         protected override IMessageConsumeTopologyConfigurator CreateMessageTopology<T>(Type type)
         {
-            var topology = new InMemoryMessageConsumeTopology<T>(_messageTopology.GetMessageTopology<T>());
+            var topology = new InMemoryMessageConsumeTopology<T>(_messageTopology.GetMessageTopology<T>(), _publishTopology);
 
             OnMessageTopologyCreated(topology);
 

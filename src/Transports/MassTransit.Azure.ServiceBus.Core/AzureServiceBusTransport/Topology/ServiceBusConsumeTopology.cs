@@ -24,12 +24,12 @@ namespace MassTransit.AzureServiceBusTransport.Topology
 
         IServiceBusMessageConsumeTopology<T> IServiceBusConsumeTopology.GetMessageTopology<T>()
         {
-            return GetMessageTopology<T>() as IServiceBusMessageConsumeTopologyConfigurator<T>;
+            return (IServiceBusMessageConsumeTopologyConfigurator<T>)GetMessageTopology<T>();
         }
 
         IServiceBusMessageConsumeTopologyConfigurator<T> IServiceBusConsumeTopologyConfigurator.GetMessageTopology<T>()
         {
-            return GetMessageTopology<T>() as IServiceBusMessageConsumeTopologyConfigurator<T>;
+            return (IServiceBusMessageConsumeTopologyConfigurator<T>)GetMessageTopology<T>();
         }
 
         public void AddSpecification(IServiceBusConsumeTopologySpecification specification)

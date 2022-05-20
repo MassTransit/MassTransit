@@ -1,7 +1,9 @@
 ﻿namespace MassTransit
 {
     using System;
+    using System.Linq;
     using AzureServiceBusTransport;
+    using DependencyInjection;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Transports;
@@ -32,9 +34,42 @@
 
             configurator.TryAddSingleton(provider =>
             {
-                var subscriptionEndpointConnector = provider.GetRequiredService<IBusInstance>() as ISubscriptionEndpointConnector;
+                var subscriptionEndpointConnector = provider.GetRequiredService<Bind<IBus, IBusInstance>>().Value as ISubscriptionEndpointConnector;
 
                 return subscriptionEndpointConnector ?? throw new ConfigurationException("The default bus instance is not an Azure Service Bus Instance");
+            });
+        }
+
+        /// <summary>
+        /// Configure MassTransit to use Azure Service Bus for the transport.
+        /// </summary>
+        /// <param name="configurator">The registration configurator (configured via AddMassTransit)</param>
+        /// <param name="configure">The configuration callback for the bus factory</param>
+        public static void UsingAzureServiceBus<TBus>(this IBusRegistrationConfigurator<TBus> configurator,
+            Action<IBusRegistrationContext, IServiceBusBusFactoryConfigurator> configure = null)
+            where TBus : class, IBus
+        {
+            configurator.SetBusFactory(new ServiceBusRegistrationBusFactory(configure));
+
+            AddSubscriptionEndpointConnector<TBus>(configurator);
+        }
+
+        static void AddSubscriptionEndpointConnector<TBus>(IServiceCollection services)
+            where TBus : class, IBus
+        {
+            services.TryAddSingleton(provider =>
+            {
+                var subscriptionEndpointConnector = provider.GetRequiredService<IBusInstance<TBus>>().BusInstance as ISubscriptionEndpointConnector;
+
+                return subscriptionEndpointConnector ?? throw new ConfigurationException("The default bus instance is not an Azure Service Bus Instance");
+            });
+
+            services.TryAddSingleton(provider =>
+            {
+                var subscriptionEndpointConnector = provider.GetRequiredService<IBusInstance<TBus>>().BusInstance as ISubscriptionEndpointConnector;
+
+                return Bind<TBus>.Create(subscriptionEndpointConnector
+                    ?? throw new ConfigurationException("The default bus instance is not an Azure Service Bus Instance"));
             });
         }
     }

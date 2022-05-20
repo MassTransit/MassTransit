@@ -27,6 +27,11 @@ namespace MassTransit.Transports
         IBusInstance
         where TBus : IBus
     {
-        TBus BusInstance { get; }
+        new TBus Bus { get; }
+
+        /// <summary>
+        /// The original bus instance (since this is wrapped inside a multi-bus instance
+        /// </summary>
+        IBusInstance BusInstance { get; }
     }
 }

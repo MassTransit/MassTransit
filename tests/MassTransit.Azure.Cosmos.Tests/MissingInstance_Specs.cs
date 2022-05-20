@@ -86,7 +86,7 @@
                 _cosmosClient = new CosmosClient(Configuration.EndpointUri, Configuration.Key,
                     new CosmosClientOptions
                     {
-                        Serializer = new CosmosJsonDotNetSerializer(JsonSerializerSettingsExtensions.GetSagaRenameSettings<MissingInstance>())
+                        Serializer = new NewtonsoftJsonCosmosSerializer(AzureCosmosSerializerExtensions.GetSagaRenameSettings<MissingInstance>())
                     });
 
                 _repository = new Lazy<ISagaRepository<MissingInstance>>(() =>

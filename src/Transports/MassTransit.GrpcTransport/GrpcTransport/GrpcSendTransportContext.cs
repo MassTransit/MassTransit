@@ -2,11 +2,12 @@ namespace MassTransit.GrpcTransport
 {
     using Fabric;
     using Transports;
+    using Transports.Fabric;
 
 
     public interface GrpcSendTransportContext :
         SendTransportContext
     {
-        IMessageExchange Exchange { get; }
+        IMessageExchange<GrpcTransportMessage> Exchange { get; }
     }
 }

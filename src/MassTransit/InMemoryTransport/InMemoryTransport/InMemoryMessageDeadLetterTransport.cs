@@ -2,15 +2,15 @@ namespace MassTransit.InMemoryTransport
 {
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Fabric;
     using Transports;
+    using Transports.Fabric;
 
 
     public class InMemoryMessageDeadLetterTransport :
         InMemoryMessageMoveTransport,
         IDeadLetterTransport
     {
-        public InMemoryMessageDeadLetterTransport(IInMemoryExchange exchange)
+        public InMemoryMessageDeadLetterTransport(IMessageExchange<InMemoryTransportMessage> exchange)
             : base(exchange)
         {
         }

@@ -80,6 +80,11 @@
             set => _configurator.RequiresSession = value;
         }
 
+        public int MaxConcurrentCallsPerSession
+        {
+            set => _configurator.MaxConcurrentCallsPerSession = value;
+        }
+
         public string UserMetadata
         {
             set => _configurator.UserMetadata = value;

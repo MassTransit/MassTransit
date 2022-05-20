@@ -42,7 +42,7 @@ namespace MassTransit.Tests.MessageData
             const string byteValue = "Such a byte value, a really great byte value.";
 
             byte[] streamBytes = new byte[1000];
-            await using MemoryStream ms = new MemoryStream(streamBytes);
+            using MemoryStream ms = new MemoryStream(streamBytes);
 
             Response<DocumentProcessed> response = await client.GetResponse<DocumentProcessed>(new
             {
@@ -75,7 +75,7 @@ namespace MassTransit.Tests.MessageData
             Assert.That(response.Message.StreamData, Is.Not.Null);
             Assert.That(response.Message.StreamData.HasValue, Is.True);
             Assert.That(response.Message.StreamData.Address, Is.EqualTo(_streamDataAddress), "Should use the existing message data address");
-            await using MemoryStream receivedStream = new MemoryStream();
+            using MemoryStream receivedStream = new MemoryStream();
             var stream = await response.Message.StreamData.Value;
             await stream.CopyToAsync(receivedStream);
             Assert.That(receivedStream.ToArray(), Is.EqualTo(streamBytes));

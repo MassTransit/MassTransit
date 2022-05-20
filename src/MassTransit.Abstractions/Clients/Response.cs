@@ -2,7 +2,6 @@
 {
     using System;
     using System.Threading.Tasks;
-    using Serialization;
 
 
     /// <summary>
@@ -43,8 +42,8 @@
         where T1 : class
         where T2 : class
     {
-        readonly Response<T1> _response1;
-        readonly Response<T2> _response2;
+        readonly Response<T1>? _response1;
+        readonly Response<T2>? _response2;
         readonly Response _response;
         readonly Task<Response<T1>> _response1Task;
         readonly Task<Response<T2>> _response2Task;
@@ -57,24 +56,24 @@
             _response1 = response1.Status == TaskStatus.RanToCompletion ? response1.GetAwaiter().GetResult() : default;
             _response2 = response2.Status == TaskStatus.RanToCompletion ? response2.GetAwaiter().GetResult() : default;
 
-            _response = (Response)_response1 ?? _response2;
+            _response = _response1 as Response ?? _response2 ?? throw new ArgumentException("At least one response must have completed");
         }
 
-        public bool Is(out Response<T1> result)
+        public bool Is([NotNullWhen(true)] out Response<T1>? result)
         {
             result = _response1;
 
             return result != default;
         }
 
-        public bool Is(out Response<T2> result)
+        public bool Is([NotNullWhen(true)] out Response<T2>? result)
         {
             result = _response2;
 
             return result != default;
         }
 
-        public bool Is<T>(out Response<T> result)
+        public bool Is<T>([NotNullWhen(true)] out Response<T>? result)
             where T : class
         {
             if (_response1 is Response<T> response1)
@@ -104,33 +103,33 @@
             return new Response<T1, T2>(source.response1, source.response2);
         }
 
-        public Guid? MessageId => _response?.MessageId;
+        public Guid? MessageId => _response.MessageId;
 
-        public Guid? RequestId => _response?.RequestId;
+        public Guid? RequestId => _response.RequestId;
 
-        public Guid? CorrelationId => _response?.CorrelationId;
+        public Guid? CorrelationId => _response.CorrelationId;
 
-        public Guid? ConversationId => _response?.ConversationId;
+        public Guid? ConversationId => _response.ConversationId;
 
-        public Guid? InitiatorId => _response?.InitiatorId;
+        public Guid? InitiatorId => _response.InitiatorId;
 
-        public DateTime? ExpirationTime => _response?.ExpirationTime;
+        public DateTime? ExpirationTime => _response.ExpirationTime;
 
-        public Uri SourceAddress => _response?.SourceAddress;
+        public Uri? SourceAddress => _response.SourceAddress;
 
-        public Uri DestinationAddress => _response?.DestinationAddress;
+        public Uri? DestinationAddress => _response.DestinationAddress;
 
-        public Uri ResponseAddress => _response?.ResponseAddress;
+        public Uri? ResponseAddress => _response.ResponseAddress;
 
-        public Uri FaultAddress => _response?.FaultAddress;
+        public Uri? FaultAddress => _response.FaultAddress;
 
-        public DateTime? SentTime => _response?.SentTime;
+        public DateTime? SentTime => _response.SentTime;
 
-        public Headers Headers => _response.Headers ?? EmptyHeaders.Instance;
+        public Headers Headers => _response.Headers;
 
-        public HostInfo Host => _response?.Host;
+        public HostInfo Host => _response.Host;
 
-        public object Message => _response?.Message;
+        public object Message => _response.Message;
     }
 
 
@@ -147,9 +146,9 @@
         where T2 : class
         where T3 : class
     {
-        readonly Response<T1> _response1;
-        readonly Response<T2> _response2;
-        readonly Response<T3> _response3;
+        readonly Response<T1>? _response1;
+        readonly Response<T2>? _response2;
+        readonly Response<T3>? _response3;
         readonly Response _response;
         readonly Task<Response<T1>> _response1Task;
         readonly Task<Response<T2>> _response2Task;
@@ -165,31 +164,32 @@
             _response2 = response2.Status == TaskStatus.RanToCompletion ? response2.GetAwaiter().GetResult() : default;
             _response3 = response3.Status == TaskStatus.RanToCompletion ? response3.GetAwaiter().GetResult() : default;
 
-            _response = _response1 ?? (Response)_response2 ?? _response3;
+            _response = _response1 as Response ?? _response2 as Response ?? _response3
+                ?? throw new ArgumentException("At least one response must have completed");
         }
 
-        public bool Is(out Response<T1> result)
+        public bool Is([NotNullWhen(true)] out Response<T1>? result)
         {
             result = _response1;
 
             return result != default;
         }
 
-        public bool Is(out Response<T2> result)
+        public bool Is([NotNullWhen(true)] out Response<T2>? result)
         {
             result = _response2;
 
             return result != default;
         }
 
-        public bool Is(out Response<T3> result)
+        public bool Is([NotNullWhen(true)] out Response<T3>? result)
         {
             result = _response3;
 
             return result != default;
         }
 
-        public bool Is<T>(out Response<T> result)
+        public bool Is<T>([NotNullWhen(true)] out Response<T>? result)
             where T : class
         {
             if (_response1 is Response<T> response1)
@@ -226,32 +226,32 @@
             return new Response<T1, T2, T3>(source.response1, source.response2, source.response3);
         }
 
-        public Guid? MessageId => _response?.MessageId;
+        public Guid? MessageId => _response.MessageId;
 
-        public Guid? RequestId => _response?.RequestId;
+        public Guid? RequestId => _response.RequestId;
 
-        public Guid? CorrelationId => _response?.CorrelationId;
+        public Guid? CorrelationId => _response.CorrelationId;
 
-        public Guid? ConversationId => _response?.ConversationId;
+        public Guid? ConversationId => _response.ConversationId;
 
-        public Guid? InitiatorId => _response?.InitiatorId;
+        public Guid? InitiatorId => _response.InitiatorId;
 
-        public DateTime? ExpirationTime => _response?.ExpirationTime;
+        public DateTime? ExpirationTime => _response.ExpirationTime;
 
-        public Uri SourceAddress => _response?.SourceAddress;
+        public Uri? SourceAddress => _response.SourceAddress;
 
-        public Uri DestinationAddress => _response?.DestinationAddress;
+        public Uri? DestinationAddress => _response.DestinationAddress;
 
-        public Uri ResponseAddress => _response?.ResponseAddress;
+        public Uri? ResponseAddress => _response.ResponseAddress;
 
-        public Uri FaultAddress => _response?.FaultAddress;
+        public Uri? FaultAddress => _response.FaultAddress;
 
-        public DateTime? SentTime => _response?.SentTime;
+        public DateTime? SentTime => _response.SentTime;
 
-        public Headers Headers => _response.Headers ?? EmptyHeaders.Instance;
+        public Headers Headers => _response.Headers;
 
-        public HostInfo Host => _response?.Host;
+        public HostInfo Host => _response.Host;
 
-        public object Message => _response?.Message;
+        public object Message => _response.Message;
     }
 }

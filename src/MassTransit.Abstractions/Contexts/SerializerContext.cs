@@ -18,7 +18,7 @@ namespace MassTransit
         bool TryGetMessage<T>(out T? message)
             where T : class;
 
-        bool TryGetMessage(Type messageType, out object? message);
+        bool TryGetMessage(Type messageType, [NotNullWhen(true)] out object? message);
 
         /// <summary>
         /// Returns a message serializer using the deserialized message ContentType, that can be used to

@@ -8,7 +8,7 @@ Topology is separate from the send, publish, and consume pipelines which are foc
 
 Once the bus is created, access to topology is via the _Topology_ property on _IBus_. The _IBusTopology_ interface is shown below.
 
-<<< @/src/MassTransit/Topology/IBusTopology.cs
+<<< @/src/MassTransit.Abstractions/Topology/IBusTopology.cs
 
 The message, publish, and send topologies can be accessed using this interface. It is also possible to retrieve a message's publish address. The _Topology_ property may support other interfaces, such as a transport-specific host topology. Pattern matching can be used to check the host topology type as shown below.
 
