@@ -92,7 +92,7 @@ namespace MassTransit.SagaStateMachine
 
                 var activity = factory.GetService<TActivity>(context);
 
-                return activity.Execute(exceptionContext, next);
+                return activity.Faulted(exceptionContext, next);
             }
 
             return next.Faulted(context);
