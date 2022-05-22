@@ -23,7 +23,7 @@
         SagaStateMachine<TInstance>
         where TInstance : class, SagaStateMachineInstance
     {
-        readonly Dictionary<string, Dictionary<string, List<EventActivityBinder<TInstance>>>> _compositeBindings;
+        readonly Dictionary<string, (CompositeEventOptions Options, List<EventActivityBinder<TInstance>> Binders)> _compositeBindings;
         readonly HashSet<string> _compositeEvents;
         readonly Dictionary<string, StateMachineEvent<TInstance>> _eventCache;
         readonly Dictionary<Event, EventCorrelation> _eventCorrelations;
@@ -43,7 +43,7 @@
             _registrations = new Lazy<ConfigurationHelpers.StateMachineRegistration[]>(() => ConfigurationHelpers.GetRegistrations(this));
             _stateCache = new Dictionary<string, State<TInstance>>();
             _eventCache = new Dictionary<string, StateMachineEvent<TInstance>>();
-            _compositeBindings = new Dictionary<string, Dictionary<string, List<EventActivityBinder<TInstance>>>>();
+            _compositeBindings = new Dictionary<string, (CompositeEventOptions, List<EventActivityBinder<TInstance>>)>();
             _compositeEvents = new HashSet<string>();
 
             _eventObservers = new EventObservable<TInstance>();
@@ -661,18 +661,7 @@
 
                 var activity = new CompositeEventActivity<TInstance>(accessor, flag, complete, @event);
 
-                bool Filter(State<TInstance> state)
-                {
-                    if (Equals(state, Initial))
-                        return options.HasFlag(CompositeEventOptions.IncludeInitial);
-
-                    if (Equals(state, Final))
-                        return options.HasFlag(CompositeEventOptions.IncludeFinal);
-
-                    return true;
-                }
-
-                List<State<TInstance>> states = _stateCache.Values.Where(Filter).ToList();
+                List<State<TInstance>> states = _stateCache.Values.Where(s => Filter(options, s)).ToList();
 
                 foreach (State<TInstance> state in states)
                 {
@@ -681,18 +670,11 @@
                     if (currentEvent != null)
                         _compositeEvents.Add(currentEvent.Name);
 
-                    // Determine which event the composited event belongs to
-                    State<TInstance> boundToState = _stateCache.Values.FirstOrDefault(s => s.Events.Any(evt => evt.Name == events[i].Name));
-                    State<TInstance> bindingState = boundToState ?? state;
-
                     if (!_compositeBindings.ContainsKey(@event.Name))
-                        _compositeBindings[@event.Name] = new Dictionary<string, List<EventActivityBinder<TInstance>>>();
+                        _compositeBindings[@event.Name] = (options, new List<EventActivityBinder<TInstance>>());
 
-                    if (!_compositeBindings[@event.Name].ContainsKey(bindingState.Name))
-                        _compositeBindings[@event.Name][bindingState.Name] = new List<EventActivityBinder<TInstance>>();
-
-                    if (_compositeBindings[@event.Name][bindingState.Name].All(x => x.Event.Name != events[i].Name))
-                        _compositeBindings[@event.Name][bindingState.Name].Add(When(events[i]).Execute(activity));
+                    if (_compositeBindings[@event.Name].Binders.All(x => x.Event.Name != events[i].Name))
+                        _compositeBindings[@event.Name].Binders.Add(When(events[i]).Execute(activity));
                 }
             }
 
@@ -959,20 +941,32 @@
         {
             State<TInstance> activityState = GetState(state.Name);
 
+            List<State<TInstance>> states = _stateCache.Values.ToList();
+
             foreach (IActivityBinder<TInstance> activity in eventActivities)
             {
                 activity.Bind(activityState);
+
                 if (!_compositeEvents.Contains(activity.Event.Name) || !_compositeBindings.ContainsKey(activity.Event.Name))
                     continue;
 
-                foreach (KeyValuePair<string, List<EventActivityBinder<TInstance>>> compositeBinding in _compositeBindings[activity.Event.Name])
+                // Bind events from the composite event.
+                List<IActivityBinder<TInstance>> activityBindings = _compositeBindings[activity.Event.Name]
+                    .Binders
+                    .SelectMany(binder => binder.GetStateActivityBinders())
+                    .ToList();
+
+                foreach (IActivityBinder<TInstance> activityBinding in activityBindings)
                 {
-                    IActivityBinder<TInstance>[] activitiesBinder = compositeBinding.Value.SelectMany(x => x.GetStateActivityBinders()).ToArray();
+                    List<State<TInstance>> statesToUse = states.Where(s => Filter(_compositeBindings[activity.Event.Name].Options, s)).ToList();
+                    State<TInstance> binderState = statesToUse.FirstOrDefault(x => x.Events.Any(evt => evt.Name == activityBinding.Event.Name));
 
-                    if (!activitiesBinder.Any())
-                        continue;
-
-                    BindActivitiesToState(GetState(compositeBinding.Key), activitiesBinder);
+                    // binderState != null: Event has already been bound, bind to same state
+                    // binderState == null: Event has not been bound, bind it to all states to keep it from 'floating away'.
+                    foreach (State<TInstance> x in statesToUse.Where(x => binderState == null || x.Name == binderState.Name))
+                    {
+                        activityBinding.Bind(x);
+                    }
                 }
 
                 _compositeBindings.Remove(activity.Event.Name);
@@ -1817,6 +1811,17 @@
                 var registration = GetEventRegistration(@event, arguments[0]);
                 registration.RegisterCorrelation(this);
             }
+        }
+
+        bool Filter(CompositeEventOptions options, State<TInstance> filterState)
+        {
+            if (Equals(filterState, Initial))
+                return options.HasFlag(CompositeEventOptions.IncludeInitial);
+
+            if (Equals(filterState, Final))
+                return options.HasFlag(CompositeEventOptions.IncludeFinal);
+
+            return true;
         }
 
         static EventRegistration GetEventRegistration(Event @event, Type messageType)
