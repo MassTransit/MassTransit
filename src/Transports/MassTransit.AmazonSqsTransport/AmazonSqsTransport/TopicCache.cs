@@ -37,14 +37,7 @@ namespace MassTransit.AmazonSqsTransport
 
             return _nameIndex.Get(topic.EntityName, async key =>
             {
-                try
-                {
-                    return await GetExistingTopic(topic.EntityName).ConfigureAwait(false);
-                }
-                catch (AmazonSqsTransportException e) when (e.Message.Equals($"Topic {topic.EntityName} not found."))
-                {
-                    return await CreateMissingTopic(topic).ConfigureAwait(false);
-                }
+                return await GetTopic(topic).ConfigureAwait(false);
             });
         }
 
@@ -67,7 +60,7 @@ namespace MassTransit.AmazonSqsTransport
             _nameIndex.Remove(entityName);
         }
 
-        async Task<TopicInfo> CreateMissingTopic(Topology.Topic topic)
+        async Task<TopicInfo> GetTopic(Topology.Topic topic)
         {
             Dictionary<string, string> attributes = topic.TopicAttributes.ToDictionary(x => x.Key, x => x.Value.ToString());
 
