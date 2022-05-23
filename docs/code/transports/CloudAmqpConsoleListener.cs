@@ -18,7 +18,7 @@ public class Program
                 h.UseSsl(s =>
                 {
                     s.Protocol = SslProtocols.Tls12;
-                });;
+                });
             });
         });
     }
