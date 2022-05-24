@@ -846,11 +846,8 @@ public class OrderStateMachine : MassTransitStateMachine<OrderState>
 
                     context.Saga.OrderId = Guid.NewGuid();
 
-                    if (!context.TryGetPayload(out SagaConsumeContext<OrderState, CreateOrder> payload))
-                        throw new Exception("Unable to retrieve required payload for callback data.");
-
-                    context.Saga.RequestId = payload.RequestId;
-                    context.Saga.ResponseAddress = payload.ResponseAddress;
+                    context.Saga.RequestId = context.RequestId;
+                    context.Saga.ResponseAddress = context.ResponseAddress;
                 })
                 .Request(ProcessOrder, context => new ProcessOrder(context.Saga.OrderId, context.Saga.ProcessingId!.Value))
                 .TransitionTo(ProcessOrder.Pending));
