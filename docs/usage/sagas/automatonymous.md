@@ -1107,11 +1107,11 @@ The request timeout is scheduled using the message scheduler, and the scheduled 
 
 There are scenarios when an event behavior may have dependencies that need to be managed at a scope level, such as a database connection, or the complexity is best encapsulated in a separate class rather than being part of the state machine itself. Developers can create their own activities for state machine use, and optionally create their own extension methods to add them to a behavior.
 
-To create an activity, create a class that implements `IActivity<TInstance, TData>` as shown.
+To create an activity, create a class that implements `IStateMachineActivity<TInstance, TData>` as shown.
 
 ```cs
 public class PublishOrderSubmittedActivity :
-    Activity<OrderState, SubmitOrder>
+    IStateMachineActivity<OrderState, SubmitOrder>
 {
     readonly ConsumeContext _context;
 
@@ -1130,7 +1130,7 @@ public class PublishOrderSubmittedActivity :
         visitor.Visit(this);
     }
 
-    public async Task Execute(BehaviorContext<OrderState, SubmitOrder> context, Behavior<OrderState, SubmitOrder> next)
+    public async Task Execute(BehaviorContext<OrderState, SubmitOrder> context, IBehavior<OrderState, SubmitOrder> next)
     {
         // do the activity thing
         await _context.Publish<OrderSubmitted>(new { OrderId = context.Saga.CorrelationId }).ConfigureAwait(false);
@@ -1139,7 +1139,8 @@ public class PublishOrderSubmittedActivity :
         await next.Execute(context).ConfigureAwait(false);
     }
 
-    public Task Faulted<TException>(BehaviorExceptionContext<OrderState, SubmitOrder, TException> context, Behavior<OrderState, SubmitOrder> next)
+    public Task Faulted<TException>(BehaviorExceptionContext<OrderState, SubmitOrder, TException> context, 
+        IBehavior<OrderState, SubmitOrder> next)
         where TException : Exception
     {
         return next.Faulted(context);
@@ -1174,7 +1175,7 @@ In the above example, the event type was known in advance. If an activity for an
 
 ```cs
 public class PublishOrderSubmittedActivity :
-    Activity<OrderState>
+    IStateMachineActivity<OrderState>
 {
     readonly ConsumeContext _context;
 
@@ -1193,27 +1194,27 @@ public class PublishOrderSubmittedActivity :
         visitor.Visit(this);
     }
 
-    public async Task Execute(BehaviorContext<OrderState> context, Behavior<OrderState> next)
+    public async Task Execute(BehaviorContext<OrderState> context, IBehavior<OrderState> next)
     {
         await _context.Publish<OrderSubmitted>(new { OrderId = context.Saga.CorrelationId }).ConfigureAwait(false);
 
         await next.Execute(context).ConfigureAwait(false);
     }
 
-    public async Task Execute<T>(BehaviorContext<OrderState, T> context, Behavior<OrderState, T> next)
+    public async Task Execute<T>(BehaviorContext<OrderState, T> context, IBehavior<OrderState, T> next)
     {
         await _context.Publish<OrderSubmitted>(new { OrderId = context.Saga.CorrelationId }).ConfigureAwait(false);
 
         await next.Execute(context).ConfigureAwait(false);
     }
 
-    public Task Faulted<TException>(BehaviorExceptionContext<OrderState, TException> context, Behavior<OrderState> next) 
+    public Task Faulted<TException>(BehaviorExceptionContext<OrderState, TException> context, IBehavior<OrderState> next) 
         where TException : Exception
     {
         return next.Faulted(context);
     }
 
-    public Task Faulted<T, TException>(BehaviorExceptionContext<OrderState, T, TException> context, Behavior<OrderState, T> next)
+    public Task Faulted<T, TException>(BehaviorExceptionContext<OrderState, T, TException> context, IBehavior<OrderState, T> next)
         where TException : Exception
     {
         return next.Faulted(context);
