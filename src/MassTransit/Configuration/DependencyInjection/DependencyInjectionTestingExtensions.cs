@@ -65,6 +65,7 @@ namespace MassTransit
                 services.RemoveSagaRepositories();
             }
 
+
             return services.AddMassTransit(x =>
             {
                 var harnessConfigurator = new TestHarnessRegistrationConfigurator(x);
@@ -73,8 +74,23 @@ namespace MassTransit
 
                 configure?.Invoke(harnessConfigurator);
 
+                var addScheduler = false;
+                if (services.All(d => d.ServiceType != typeof(IMessageScheduler)))
+                {
+                    x.AddDelayedMessageScheduler();
+                    addScheduler = true;
+                }
+
                 if (harnessConfigurator.UseDefaultBusFactory)
-                    harnessConfigurator.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
+                {
+                    harnessConfigurator.UsingInMemory((context, cfg) =>
+                    {
+                        if (addScheduler)
+                            cfg.UseDelayedMessageScheduler();
+
+                        cfg.ConfigureEndpoints(context);
+                    });
+                }
             });
         }
 
