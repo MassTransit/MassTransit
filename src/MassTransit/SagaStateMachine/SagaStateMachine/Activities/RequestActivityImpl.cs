@@ -38,7 +38,7 @@
                 var now = DateTime.UtcNow;
                 var expirationTime = now + _request.Settings.Timeout;
 
-                RequestTimeoutExpired<TRequest> message = new TimeoutExpired<TRequest>(now, expirationTime, context.Saga.CorrelationId, pipe.RequestId);
+                RequestTimeoutExpired<TRequest> message = new TimeoutExpired<TRequest>(now, expirationTime, context.Saga.CorrelationId, pipe.RequestId, sendTuple.Message);
 
                 if (context.TryGetPayload(out MessageSchedulerContext schedulerContext))
                     await schedulerContext.ScheduleSend(expirationTime, message).ConfigureAwait(false);
@@ -101,12 +101,13 @@
             RequestTimeoutExpired<T>
             where T : class
         {
-            public TimeoutExpired(DateTime timestamp, DateTime expirationTime, Guid correlationId, Guid requestId)
+            public TimeoutExpired(DateTime timestamp, DateTime expirationTime, Guid correlationId, Guid requestId, T requestMessage)
             {
                 Timestamp = timestamp;
                 ExpirationTime = expirationTime;
                 CorrelationId = correlationId;
                 RequestId = requestId;
+                Message = requestMessage;
             }
 
             public DateTime Timestamp { get; }
@@ -116,6 +117,8 @@
             public Guid CorrelationId { get; }
 
             public Guid RequestId { get; }
+
+            public T Message { get; }
         }
     }
 }
