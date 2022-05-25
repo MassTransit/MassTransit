@@ -29,6 +29,6 @@ namespace MassTransit.Contracts
         /// <summary>
         /// The  original request message. 
         /// </summary>
-        TRequest Message { get; }
+        TRequest? Message { get; }
     }
 }
