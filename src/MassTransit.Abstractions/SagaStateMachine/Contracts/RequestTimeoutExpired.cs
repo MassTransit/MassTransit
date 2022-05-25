@@ -3,7 +3,7 @@ namespace MassTransit.Contracts
     using System;
 
 
-    public interface RequestTimeoutExpired<TRequest>
+    public interface RequestTimeoutExpired<out TRequest>
         where TRequest : class
     {
         /// <summary>
@@ -25,5 +25,10 @@ namespace MassTransit.Contracts
         /// The requestId of the request
         /// </summary>
         Guid RequestId { get; }
+
+        /// <summary>
+        /// The  original request message.
+        /// </summary>
+        TRequest? Message { get; }
     }
 }
