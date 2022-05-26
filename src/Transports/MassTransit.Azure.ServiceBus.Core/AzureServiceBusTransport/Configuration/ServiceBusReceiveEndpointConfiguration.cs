@@ -114,13 +114,6 @@
             _endpointConfiguration.Topology.Consume.GetMessageTopology<T>().Subscribe(subscriptionName, callback);
         }
 
-        public override void SelectBasicTier()
-        {
-            base.SelectBasicTier();
-
-            ConfigureConsumeTopology = false;
-        }
-
         ServiceBusReceiveEndpointContext CreateServiceBusReceiveEndpointContext()
         {
             var builder = new ServiceBusReceiveEndpointBuilder(_hostConfiguration, this);

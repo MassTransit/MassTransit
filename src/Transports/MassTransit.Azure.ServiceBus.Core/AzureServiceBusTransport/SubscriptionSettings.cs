@@ -13,7 +13,5 @@ namespace MassTransit.AzureServiceBusTransport
         CreateRuleOptions Rule { get; }
 
         RuleFilter Filter { get; }
-
-        bool RemoveSubscriptions { get; }
     }
 }

@@ -34,12 +34,6 @@ namespace MassTransit.AzureServiceBusTransport.Topology
             return _queueConfigurator.GetCreateQueueOptions();
         }
 
-        public override void SelectBasicTier()
-        {
-            _queueConfigurator.AutoDeleteOnIdle = default;
-            _queueConfigurator.DefaultMessageTimeToLive = Defaults.BasicMessageTimeToLive;
-        }
-
         protected override IEnumerable<string> GetQueryStringOptions()
         {
             if (_queueConfigurator.AutoDeleteOnIdle.HasValue && _queueConfigurator.AutoDeleteOnIdle.Value > TimeSpan.Zero

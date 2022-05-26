@@ -192,11 +192,6 @@ namespace MassTransit.Configuration
             set => _queueConfigurator.UserMetadata = value;
         }
 
-        public void SelectBasicTier()
-        {
-            _settings.SelectBasicTier();
-        }
-
         public TimeSpan MessageWaitTimeout
         {
             set => _settings.SessionIdleTimeout = value;

@@ -105,11 +105,6 @@
             set => _settings.MaxAutoRenewDuration = value;
         }
 
-        public virtual void SelectBasicTier()
-        {
-            _settings.SelectBasicTier();
-        }
-
         public override IEnumerable<ValidationResult> Validate()
         {
             return ClientPipeConfigurator.Validate()

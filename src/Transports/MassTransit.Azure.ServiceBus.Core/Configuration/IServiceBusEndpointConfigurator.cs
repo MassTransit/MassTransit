@@ -76,10 +76,5 @@
         /// Sets the maximum time for locks/sessions to be automatically renewed
         /// </summary>
         TimeSpan MaxAutoRenewDuration { set; }
-
-        /// <summary>
-        /// IF using the Basic Tier of Service Bus, this resets some values to avoid failing
-        /// </summary>
-        void SelectBasicTier();
     }
 }
