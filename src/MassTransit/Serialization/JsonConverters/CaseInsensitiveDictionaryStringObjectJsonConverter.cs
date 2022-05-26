@@ -90,22 +90,6 @@ namespace MassTransit.Serialization.JsonConverters
                 default:
                     JsonSerializer.Serialize(writer, objectValue, options);
                     break;
-
-                // case IEnumerable<KeyValuePair<string, object>> enumerable:
-                //     Write(writer, enumerable, options);
-                //     break;
-                // case object[] array:
-                //     writer.WriteStartArray();
-                //     foreach (var item in array)
-                //     {
-                //         HandleValue(writer, item);
-                //     }
-                //
-                //     writer.WriteEndArray();
-                //     break;
-                // default:
-                //     writer.WriteNullValue();
-                //     break;
             }
         }
 
@@ -159,17 +143,7 @@ namespace MassTransit.Serialization.JsonConverters
             switch (reader.TokenType)
             {
                 case JsonTokenType.String:
-                    if (reader.TryGetDateTime(out var date))
-                        return date;
-                    if (reader.TryGetGuid(out var guid))
-                        return guid;
-
-                    var text = reader.GetString();
-
-                    // if (Uri.IsWellFormedUriString(text, UriKind.Absolute))
-                    //     return new Uri(text);
-                    //
-                    return text;
+                    return reader.GetString();
 
                 case JsonTokenType.False:
                     return false;
