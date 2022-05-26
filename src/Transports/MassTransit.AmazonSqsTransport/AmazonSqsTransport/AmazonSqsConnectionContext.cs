@@ -2,16 +2,21 @@ namespace MassTransit.AmazonSqsTransport
 {
     using System;
     using System.Threading;
+    using System.Threading.Tasks;
     using Configuration;
     using MassTransit.Middleware;
+    using Topology;
 
 
     public class AmazonSqsConnectionContext :
         BasePipeContext,
         ConnectionContext,
-        IDisposable
+        IAsyncDisposable
     {
         readonly IAmazonSqsHostConfiguration _hostConfiguration;
+
+        readonly QueueCache _queueCache;
+        readonly TopicCache _topicCache;
 
         public AmazonSqsConnectionContext(IConnection connection, IAmazonSqsHostConfiguration hostConfiguration, CancellationToken cancellationToken)
             : base(cancellationToken)
@@ -20,6 +25,9 @@ namespace MassTransit.AmazonSqsTransport
             Connection = connection;
 
             Topology = hostConfiguration.Topology;
+
+            _queueCache = new QueueCache(Connection.SqsClient, cancellationToken);
+            _topicCache = new TopicCache(Connection.SnsClient, cancellationToken);
         }
 
         public IConnection Connection { get; }
@@ -27,13 +35,47 @@ namespace MassTransit.AmazonSqsTransport
 
         public Uri HostAddress => _hostConfiguration.HostAddress;
 
+        public Task<QueueInfo> GetQueue(Queue queue)
+        {
+            return _queueCache.Get(queue);
+        }
+
+        public Task<QueueInfo> GetQueueByName(string name)
+        {
+            return _queueCache.GetByName(name);
+        }
+
+        public void RemoveQueueByName(string name)
+        {
+            _queueCache.RemoveByName(name);
+        }
+
+        public Task<TopicInfo> GetTopic(Topic topic)
+        {
+            return _topicCache.Get(topic);
+        }
+
+        public Task<TopicInfo> GetTopicByName(string name)
+        {
+            return _topicCache.GetByName(name);
+        }
+
+        public void RemoveTopicByName(string name)
+        {
+            _topicCache.RemoveByName(name);
+        }
+
         public ClientContext CreateClientContext(CancellationToken cancellationToken)
         {
             return new AmazonSqsClientContext(this, Connection.SqsClient, Connection.SnsClient, cancellationToken);
         }
 
-        public void Dispose()
+        public async ValueTask DisposeAsync()
         {
+            await _queueCache.DisposeAsync().ConfigureAwait(false);
+
+            _topicCache.Clear();
+
             Connection?.Dispose();
         }
     }

@@ -2,7 +2,9 @@
 {
     using System;
     using System.Threading;
+    using System.Threading.Tasks;
     using MassTransit.Middleware;
+    using Topology;
 
 
     public class SharedConnectionContext :
@@ -23,6 +25,36 @@
         IConnection ConnectionContext.Connection => _context.Connection;
         public Uri HostAddress => _context.HostAddress;
         public IAmazonSqsBusTopology Topology => _context.Topology;
+
+        public Task<QueueInfo> GetQueue(Queue queue)
+        {
+            return _context.GetQueue(queue);
+        }
+
+        public Task<QueueInfo> GetQueueByName(string name)
+        {
+            return _context.GetQueueByName(name);
+        }
+
+        public void RemoveQueueByName(string name)
+        {
+            _context.RemoveQueueByName(name);
+        }
+
+        public Task<TopicInfo> GetTopic(Topic topic)
+        {
+            return _context.GetTopic(topic);
+        }
+
+        public Task<TopicInfo> GetTopicByName(string name)
+        {
+            return _context.GetTopicByName(name);
+        }
+
+        public void RemoveTopicByName(string name)
+        {
+            _context.RemoveTopicByName(name);
+        }
 
         public ClientContext CreateClientContext(CancellationToken cancellationToken)
         {

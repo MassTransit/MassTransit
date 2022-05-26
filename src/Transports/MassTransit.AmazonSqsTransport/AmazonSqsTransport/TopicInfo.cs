@@ -1,16 +1,9 @@
 namespace MassTransit.AmazonSqsTransport
 {
-    using System.Collections.Generic;
-
-
     public class TopicInfo
     {
-        readonly IDictionary<string, string> _attributes;
-
-        public TopicInfo(string entityName, string arn, IDictionary<string, string> attributes)
+        public TopicInfo(string entityName, string arn)
         {
-            _attributes = attributes;
-
             EntityName = entityName;
             Arn = arn;
         }

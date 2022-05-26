@@ -18,14 +18,10 @@ namespace MassTransit.AmazonSqsTransport
 
     public class AmazonSqsClientContext :
         ScopePipeContext,
-        ClientContext,
-        IAsyncDisposable
+        ClientContext
     {
-        readonly CancellationToken _cancellationToken;
-        readonly QueueCache _queueCache;
         readonly IAmazonSimpleNotificationService _snsClient;
         readonly IAmazonSQS _sqsClient;
-        readonly TopicCache _topicCache;
 
         public AmazonSqsClientContext(ConnectionContext connectionContext, IAmazonSQS sqsClient, IAmazonSimpleNotificationService snsClient,
             CancellationToken cancellationToken)
@@ -35,30 +31,27 @@ namespace MassTransit.AmazonSqsTransport
 
             _sqsClient = sqsClient;
             _snsClient = snsClient;
-            _cancellationToken = cancellationToken;
-
-            _queueCache = new QueueCache(sqsClient, cancellationToken);
-            _topicCache = new TopicCache(snsClient, cancellationToken);
+            CancellationToken = cancellationToken;
         }
 
-        public override CancellationToken CancellationToken => _cancellationToken;
+        public override CancellationToken CancellationToken { get; }
 
         public ConnectionContext ConnectionContext { get; }
 
         public Task<TopicInfo> CreateTopic(Topology.Topic topic)
         {
-            return _topicCache.Get(topic);
+            return ConnectionContext.GetTopic(topic);
         }
 
         public Task<QueueInfo> CreateQueue(Queue queue)
         {
-            return _queueCache.Get(queue);
+            return ConnectionContext.GetQueue(queue);
         }
 
         public async Task CreateQueueSubscription(Topology.Topic topic, Queue queue)
         {
-            var topicInfo = await _topicCache.Get(topic).ConfigureAwait(false);
-            var queueInfo = await _queueCache.Get(queue).ConfigureAwait(false);
+            var topicInfo = await ConnectionContext.GetTopic(topic).ConfigureAwait(false);
+            var queueInfo = await ConnectionContext.GetQueue(queue).ConfigureAwait(false);
 
             Dictionary<string, string> subscriptionAttributes = topic.TopicSubscriptionAttributes.Select(x => (x.Key, x.Value.ToString()))
                 .Concat(queue.QueueSubscriptionAttributes.Select(x => (x.Key, x.Value.ToString())))
@@ -110,7 +103,7 @@ namespace MassTransit.AmazonSqsTransport
 
         public async Task DeleteTopic(Topology.Topic topic)
         {
-            var topicInfo = await _topicCache.Get(topic).ConfigureAwait(false);
+            var topicInfo = await ConnectionContext.GetTopic(topic).ConfigureAwait(false);
 
             TransportLogMessages.DeleteTopic(topicInfo.Arn);
 
@@ -118,12 +111,12 @@ namespace MassTransit.AmazonSqsTransport
 
             response.EnsureSuccessfulResponse();
 
-            _topicCache.RemoveByName(topic.EntityName);
+            ConnectionContext.RemoveTopicByName(topic.EntityName);
         }
 
         public async Task DeleteQueue(Queue queue)
         {
-            var queueInfo = await _queueCache.Get(queue).ConfigureAwait(false);
+            var queueInfo = await ConnectionContext.GetQueue(queue).ConfigureAwait(false);
 
             TransportLogMessages.DeleteQueue(queueInfo.Url);
 
@@ -138,12 +131,12 @@ namespace MassTransit.AmazonSqsTransport
 
             response.EnsureSuccessfulResponse();
 
-            _queueCache.RemoveByName(queue.EntityName);
+            ConnectionContext.RemoveQueueByName(queue.EntityName);
         }
 
         public async Task<PublishRequest> CreatePublishRequest(string topicName, string body)
         {
-            var topicInfo = await _topicCache.GetByName(topicName).ConfigureAwait(false);
+            var topicInfo = await ConnectionContext.GetTopicByName(topicName).ConfigureAwait(false);
 
             return new PublishRequest(topicInfo.Arn, body);
         }
@@ -157,21 +150,21 @@ namespace MassTransit.AmazonSqsTransport
 
         public async Task SendMessage(string queueName, SendMessageBatchRequestEntry request, CancellationToken cancellationToken)
         {
-            var queueInfo = await _queueCache.GetByName(queueName).ConfigureAwait(false);
+            var queueInfo = await ConnectionContext.GetQueueByName(queueName).ConfigureAwait(false);
 
             await queueInfo.Send(request, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task DeleteMessage(string queueName, string receiptHandle, CancellationToken cancellationToken)
         {
-            var queueInfo = await _queueCache.GetByName(queueName).ConfigureAwait(false);
+            var queueInfo = await ConnectionContext.GetQueueByName(queueName).ConfigureAwait(false);
 
             await queueInfo.Delete(receiptHandle, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task PurgeQueue(string queueName, CancellationToken cancellationToken)
         {
-            var queueInfo = await _queueCache.GetByName(queueName).ConfigureAwait(false);
+            var queueInfo = await ConnectionContext.GetQueueByName(queueName).ConfigureAwait(false);
 
             var response = await _sqsClient.PurgeQueueAsync(queueInfo.Url, cancellationToken).ConfigureAwait(false);
 
@@ -180,7 +173,7 @@ namespace MassTransit.AmazonSqsTransport
 
         public async Task<IList<Message>> ReceiveMessages(string queueName, int messageLimit, int waitTime, CancellationToken cancellationToken)
         {
-            var queueInfo = await _queueCache.GetByName(queueName).ConfigureAwait(false);
+            var queueInfo = await ConnectionContext.GetQueueByName(queueName).ConfigureAwait(false);
 
             var request = new ReceiveMessageRequest(queueInfo.Url)
             {
@@ -199,7 +192,7 @@ namespace MassTransit.AmazonSqsTransport
 
         public Task<QueueInfo> GetQueueInfo(string queueName)
         {
-            return _queueCache.GetByName(queueName);
+            return ConnectionContext.GetQueueByName(queueName);
         }
 
         public async Task ChangeMessageVisibility(string queueUrl, string receiptHandle, int seconds)
@@ -212,13 +205,6 @@ namespace MassTransit.AmazonSqsTransport
             }, CancellationToken).ConfigureAwait(false);
 
             response.EnsureSuccessfulResponse();
-        }
-
-        public async ValueTask DisposeAsync()
-        {
-            await _queueCache.DisposeAsync().ConfigureAwait(false);
-
-            _topicCache.Clear();
         }
 
         async Task DeleteQueueSubscription(string subscriptionArn)
