@@ -56,7 +56,14 @@
 
         public bool TryConvert(string input, out DateTime result)
         {
-            return DateTime.TryParse(input, out result);
+            if (DateTimeOffset.TryParse(input, out var value))
+            {
+                result = value.Offset == TimeSpan.Zero ? value.UtcDateTime : value.LocalDateTime;
+                return true;
+            }
+
+            result = default;
+            return false;
         }
 
         public bool TryConvert(DateTime input, out int result)

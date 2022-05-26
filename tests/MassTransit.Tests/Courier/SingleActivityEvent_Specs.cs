@@ -26,7 +26,7 @@
         {
             ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
 
-            Assert.AreEqual("Hello", context.GetResult<string>("OriginalValue"));
+            Assert.AreEqual(_originalValue, context.GetResult<string>("OriginalValue"));
         }
 
         [Test]
@@ -67,6 +67,7 @@
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
         Guid _trackingNumber;
+        string _originalValue;
 
         [OneTimeSetUp]
         public async Task Should_publish_the_completed_event()
@@ -78,8 +79,10 @@
             var builder = new RoutingSlipBuilder(_trackingNumber);
             builder.AddSubscription(Bus.Address, RoutingSlipEvents.All);
 
+            _originalValue = NewId.NextGuid().ToString("D").ToUpperInvariant();
+
             var testActivity = GetActivityContext<TestActivity>();
-            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new { Value = "Hello" });
+            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new { Value = _originalValue });
 
             builder.AddVariable("Variable", "Knife");
 

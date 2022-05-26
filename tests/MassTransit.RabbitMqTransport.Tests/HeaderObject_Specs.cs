@@ -115,6 +115,9 @@
         {
             await InputQueueSendEndpoint.Send(new PingMessage(), x =>
             {
+                _sometime = DateTime.Now;
+                x.Headers.Set("Sometime", _sometime);
+
                 _now = DateTime.UtcNow;
                 x.Headers.Set("Now", _now);
 
@@ -127,11 +130,14 @@
             Assert.AreEqual(_now, context.Headers.Get("Now", default(DateTime?)));
 
             Assert.AreEqual(_later, context.Headers.Get("Later", default(DateTimeOffset?)));
+
+            Assert.AreEqual(_sometime, context.Headers.Get("Sometime", default(DateTime?)));
         }
 
         Task<ConsumeContext<PingMessage>> _handled;
         DateTime _now;
         DateTimeOffset _later;
+        DateTime _sometime;
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
