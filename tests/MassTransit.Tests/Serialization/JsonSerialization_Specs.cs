@@ -539,6 +539,21 @@ namespace MassTransit.Tests.Serialization
             deserializedMessage.Decimal.ShouldBe(message.Decimal);
         }
 
+        [Test]
+        public void Should_deserialize_correctly_with_stj()
+        {
+            // arrange
+            var message = new MessageA {Decimal = decimal.MaxValue};
+
+            // act, assert
+            var serializedMessage = JsonConvert.SerializeObject(message, NewtonsoftJsonMessageSerializer.SerializerSettings);
+            serializedMessage.ShouldNotBeNull();
+
+            var deserializedMessage = System.Text.Json.JsonSerializer.Deserialize<MessageA>(serializedMessage, SystemTextJsonMessageSerializer.Options);
+            deserializedMessage.ShouldNotBeNull();
+            deserializedMessage.Decimal.ShouldBe(message.Decimal);
+        }
+
 
         class MessageA
         {
