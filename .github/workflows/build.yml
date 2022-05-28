@@ -555,6 +555,8 @@ jobs:
         working-directory: tests/MassTransit.SignalR.Tests
         
   calc-version:
+    permissions:
+      contents: none
     name: Calculate Version
     runs-on: ubuntu-latest
     needs:

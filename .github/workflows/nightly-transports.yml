@@ -5,6 +5,9 @@ env:
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   test-transports:
     name: "Transport Validation"
