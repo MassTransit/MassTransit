@@ -74,7 +74,9 @@ MassTransit includes several host-level configuration options that control the b
 
 MassTransit can connect to a cluster of RabbitMQ virtual hosts and treat them as a single virtual host. To configure a cluster, call the `UseCluster` methods, and add the cluster nodes, each of which becomes part of the virtual host identified by the host name. Each cluster node can specify either a `host` or a `host:port` combination.
 
-#### ConfigureBatch
+> While this exists, it's generally preferable to configure something like HAProxy in front of a RabbitMQ cluster, instead of using MassTransit's built-in cluster configuration.
+
+#### ConfigureBatchPublish
 
 MassTransit will briefly buffer messages before sending them to RabbitMQ, to increase message throughput. While use of the default values is recommended, the batch options can be configured.
 
@@ -84,6 +86,8 @@ MassTransit will briefly buffer messages before sending them to RabbitMQ, to inc
 | MessageLimit        | int | 100 | Limit the number of messages per batch
 | SizeLimit        | int | 64K | A rough limit of the total message size
 | Timeout        | TimeSpan | 1ms | The time to wait for additional messages before sending
+
+<<< @/docs/code/transports/ConfigureBatchConsoleListener.cs
 
 MassTransit includes several receive endpoint level configuration options that control receive endpoint behavior.
 
