@@ -341,6 +341,8 @@ public interface IRequestClient<TRequest>
 }
 ```
 
+> For `RequestTimeout` three options are available, `None`, `Default`, and a factory with `RequestTimeout.After`. `None` would never be recommended since it would essentially wait forever for a response. There is always a relevant timeout, or you're using the wrong pattern.
+
 ### Sending a Request
 
 To create a request client, and use it to make a standalone request (not from a consumer, API controller, etc.):
