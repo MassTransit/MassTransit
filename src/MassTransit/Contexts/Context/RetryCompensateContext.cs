@@ -11,6 +11,7 @@ namespace MassTransit.Context
     {
         readonly CompensateContext<TLog> _context;
         readonly IRetryPolicy _retryPolicy;
+        readonly CompensationResult _existingResult;
 
         public RetryCompensateContext(CompensateContext<TLog> context, IRetryPolicy retryPolicy, RetryContext retryContext)
             : base(context)
@@ -18,7 +19,10 @@ namespace MassTransit.Context
             _retryPolicy = retryPolicy;
             _context = context;
 
-            context.Result = new RetryCompensationResult();
+            if (retryContext is RetryContext<CompensateContext<TLog>> compensateRetryContext)
+                _existingResult = compensateRetryContext.Context.Result;
+
+            Result = new RetryCompensationResult();
 
             if (retryContext != null)
             {
@@ -44,6 +48,9 @@ namespace MassTransit.Context
 
         public Task NotifyPendingFaults()
         {
+            if (_existingResult != null && Result is RetryCompensationResult)
+                Result = _existingResult;
+
             return Task.CompletedTask;
         }
 
@@ -51,6 +58,13 @@ namespace MassTransit.Context
         class RetryCompensationResult :
             CompensationResult
         {
+            readonly Exception _exception;
+
+            public RetryCompensationResult(Exception exception = null)
+            {
+                _exception = exception;
+            }
+
             public Task Evaluate()
             {
                 return Task.CompletedTask;
@@ -58,8 +72,8 @@ namespace MassTransit.Context
 
             public bool IsFailed(out Exception exception)
             {
-                exception = null;
-                return false;
+                exception = _exception;
+                return exception != null;
             }
         }
     }

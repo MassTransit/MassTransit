@@ -10,6 +10,7 @@ namespace MassTransit.Context
         where TArguments : class
     {
         readonly ExecuteContext<TArguments> _context;
+        readonly ExecutionResult _existingResult;
         readonly IRetryPolicy _retryPolicy;
 
         public RetryExecuteContext(ExecuteContext<TArguments> context, IRetryPolicy retryPolicy, RetryContext retryContext)
@@ -18,7 +19,10 @@ namespace MassTransit.Context
             _retryPolicy = retryPolicy;
             _context = context;
 
-            context.Result = new RetryExecutionResult();
+            if (retryContext is RetryContext<ExecuteContext<TArguments>> executeRetryContext)
+                _existingResult = executeRetryContext.Context.Result;
+
+            Result = new RetryExecutionResult();
 
             if (retryContext != null)
             {
@@ -44,6 +48,9 @@ namespace MassTransit.Context
 
         public Task NotifyPendingFaults()
         {
+            if (_existingResult != null && Result is RetryExecutionResult)
+                Result = _existingResult;
+
             return Task.CompletedTask;
         }
 
@@ -51,6 +58,13 @@ namespace MassTransit.Context
         class RetryExecutionResult :
             ExecutionResult
         {
+            readonly Exception _exception;
+
+            public RetryExecutionResult(Exception exception = null)
+            {
+                _exception = exception;
+            }
+
             public Task Evaluate()
             {
                 return Task.CompletedTask;
@@ -58,8 +72,8 @@ namespace MassTransit.Context
 
             public bool IsFaulted(out Exception exception)
             {
-                exception = null;
-                return false;
+                exception = _exception;
+                return exception != null;
             }
         }
     }

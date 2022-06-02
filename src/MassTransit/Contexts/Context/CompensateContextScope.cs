@@ -17,39 +17,40 @@ namespace MassTransit.Context
             _context = context;
         }
 
-        TLog CompensateContext<TLog>.Log => _context.Log;
+        public TLog Log => _context.Log;
 
-        CompensateActivityContext<TActivity, TLog> CompensateContext<TLog>.CreateActivityContext<TActivity>(TActivity activity)
+        public CompensateActivityContext<TActivity, TLog> CreateActivityContext<TActivity>(TActivity activity)
+            where TActivity : class, ICompensateActivity<TLog>
         {
             return new HostCompensateActivityContext<TActivity, TLog>(activity, this);
         }
 
-        CompensationResult CompensateContext.Compensated()
+        public CompensationResult Compensated()
         {
             return _context.Compensated();
         }
 
-        CompensationResult CompensateContext.Compensated(object values)
+        public CompensationResult Compensated(object values)
         {
             return _context.Compensated(values);
         }
 
-        CompensationResult CompensateContext.Compensated(IDictionary<string, object> variables)
+        public CompensationResult Compensated(IDictionary<string, object> variables)
         {
             return _context.Compensated(variables);
         }
 
-        CompensationResult CompensateContext.Failed()
+        public CompensationResult Failed()
         {
             return _context.Failed();
         }
 
-        CompensationResult CompensateContext.Failed(Exception exception)
+        public CompensationResult Failed(Exception exception)
         {
             return _context.Failed(exception);
         }
 
-        CompensationResult CompensateContext.Result
+        public CompensationResult Result
         {
             get => _context.Result;
             set => _context.Result = value;
