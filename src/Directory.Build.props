@@ -3,7 +3,7 @@
 
   <PropertyGroup>
     <Product>MassTransit</Product>
-    <Copyright>Copyright 2007-2021 Chris Patterson</Copyright>
+    <Copyright>Copyright 2007-2022 Chris Patterson</Copyright>
     <Authors>Chris Patterson</Authors>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
