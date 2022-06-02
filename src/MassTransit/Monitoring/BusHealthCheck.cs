@@ -62,8 +62,8 @@ namespace MassTransit.Monitoring
                 Description = description;
             }
 
-            string Status { get; }
-            string Description { get; }
+            public string Status { get; set; }
+            public string Description { get; set; }
 
             public override string ToString()
             {
