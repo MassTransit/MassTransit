@@ -6,7 +6,6 @@ namespace MassTransit.KafkaIntegration.Checkpoints
     using System.Threading.Channels;
     using System.Threading.Tasks;
     using Confluent.Kafka;
-    using Internals;
     using Util;
 
 
@@ -18,7 +17,6 @@ namespace MassTransit.KafkaIntegration.Checkpoints
         readonly IConsumer<TKey, TValue> _consumer;
         readonly ChannelExecutor _executor;
         readonly ReceiveSettings _settings;
-        readonly CancellationTokenSource _shutdownTokenSource;
 
         public BatchCheckpointer(ChannelExecutor executor, IConsumer<TKey, TValue> consumer, ReceiveSettings settings)
         {
@@ -35,7 +33,6 @@ namespace MassTransit.KafkaIntegration.Checkpoints
 
             _channel = Channel.CreateBounded<IPendingConfirmation>(channelOptions);
             _checkpointTask = Task.Run(WaitForBatch);
-            _shutdownTokenSource = new CancellationTokenSource();
         }
 
         public async Task Pending(IPendingConfirmation confirmation)
@@ -47,11 +44,7 @@ namespace MassTransit.KafkaIntegration.Checkpoints
         {
             _channel.Writer.Complete();
 
-            _shutdownTokenSource.Cancel();
-
             await _checkpointTask.ConfigureAwait(false);
-
-            _shutdownTokenSource.Dispose();
         }
 
         async Task WaitForBatch()
@@ -75,8 +68,7 @@ namespace MassTransit.KafkaIntegration.Checkpoints
 
         async Task ReadBatch()
         {
-            var timeoutToken = new CancellationTokenSource(_settings.CheckpointInterval);
-            var batchToken = CancellationTokenSource.CreateLinkedTokenSource(timeoutToken.Token, _shutdownTokenSource.Token);
+            var batchToken = new CancellationTokenSource(_settings.CheckpointInterval);
             var batch = new List<IPendingConfirmation>();
 
             try
@@ -87,7 +79,7 @@ namespace MassTransit.KafkaIntegration.Checkpoints
                     {
                         var confirmation = await _channel.Reader.ReadAsync(batchToken.Token).ConfigureAwait(false);
 
-                        await confirmation.Confirmed.OrCanceled(_shutdownTokenSource.Token).ConfigureAwait(false);
+                        await confirmation.Confirmed.ConfigureAwait(false);
 
                         batch.Add(confirmation);
 
@@ -112,7 +104,6 @@ namespace MassTransit.KafkaIntegration.Checkpoints
             finally
             {
                 batchToken.Dispose();
-                timeoutToken.Dispose();
             }
         }
 

@@ -18,7 +18,6 @@ namespace MassTransit.EventHubIntegration.Checkpoints
         readonly Task _checkpointTask;
         readonly ChannelExecutor _executor;
         readonly ReceiveSettings _settings;
-        readonly CancellationTokenSource _shutdownTokenSource;
 
         public BatchCheckpointer(ChannelExecutor executor, ReceiveSettings settings)
         {
@@ -35,7 +34,6 @@ namespace MassTransit.EventHubIntegration.Checkpoints
             _channel = Channel.CreateBounded<IPendingConfirmation>(channelOptions);
             _checkpointTask = Task.Run(WaitForBatch);
             _cancellationTokenSource = new CancellationTokenSource();
-            _shutdownTokenSource = new CancellationTokenSource();
         }
 
         public async Task Pending(IPendingConfirmation confirmation)
@@ -50,12 +48,9 @@ namespace MassTransit.EventHubIntegration.Checkpoints
             if (stoppedReason != ProcessingStoppedReason.Shutdown)
                 _cancellationTokenSource.Cancel();
 
-            _shutdownTokenSource.Cancel();
-
             await _checkpointTask.ConfigureAwait(false);
 
             _cancellationTokenSource.Dispose();
-            _shutdownTokenSource.Dispose();
         }
 
         async Task WaitForBatch()
@@ -80,7 +75,7 @@ namespace MassTransit.EventHubIntegration.Checkpoints
         async Task ReadBatch()
         {
             var timeoutToken = new CancellationTokenSource(_settings.CheckpointInterval);
-            var batchToken = CancellationTokenSource.CreateLinkedTokenSource(timeoutToken.Token, _cancellationTokenSource.Token, _shutdownTokenSource.Token);
+            var batchToken = CancellationTokenSource.CreateLinkedTokenSource(timeoutToken.Token, _cancellationTokenSource.Token);
             var batch = new List<IPendingConfirmation>();
 
             try
@@ -91,7 +86,7 @@ namespace MassTransit.EventHubIntegration.Checkpoints
                     {
                         var confirmation = await _channel.Reader.ReadAsync(batchToken.Token).ConfigureAwait(false);
 
-                        await confirmation.Confirmed.OrCanceled(_shutdownTokenSource.Token).ConfigureAwait(false);
+                        await confirmation.Confirmed.OrCanceled(_cancellationTokenSource.Token).ConfigureAwait(false);
 
                         batch.Add(confirmation);
 
