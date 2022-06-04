@@ -30,7 +30,7 @@ namespace MassTransit.Configuration
             if (riderFactory == null)
                 throw new ArgumentNullException(nameof(riderFactory));
 
-            ThrowIfAlreadyConfigured<TRider>();
+            ThrowIfAlreadyConfigured(typeof(TRider));
 
             IRiderRegistrationContext CreateRegistrationContext(IServiceProvider provider)
             {
@@ -45,14 +45,11 @@ namespace MassTransit.Configuration
             this.AddSingleton(provider => provider.GetRequiredService<Bind<IBus, TRider>>().Value);
         }
 
-        protected void ThrowIfAlreadyConfigured<TRider>()
-            where TRider : class, IRider
+        protected void ThrowIfAlreadyConfigured(Type serviceType)
         {
             ThrowIfAlreadyConfigured(nameof(SetRiderFactory));
-            var riderType = typeof(TRider);
-
-            if (this.Any(d => d.ServiceType == riderType))
-                throw new ConfigurationException($"'{riderType.Name}' has been already registered.");
+            if (this.Any(d => d.ServiceType == serviceType))
+                throw new ConfigurationException($"'{serviceType.Name}' has been already registered.");
         }
     }
 
@@ -77,7 +74,7 @@ namespace MassTransit.Configuration
             if (riderFactory == null)
                 throw new ArgumentNullException(nameof(riderFactory));
 
-            ThrowIfAlreadyConfigured<TRider>();
+            ThrowIfAlreadyConfigured(typeof(Bind<TBus, TRider>));
 
             IRiderRegistrationContext CreateRegistrationContext(IServiceProvider provider)
             {
