@@ -1094,7 +1094,7 @@ public class OrderStateMachine :
 }
 ```
 
-The _Request_ includes three events: _Completed, _Faulted_, and _TimeoutExpired_. These events can be consumed during any state, however, the _Request_ includes a _Pending_ state which can be used to avoid declaring a separate pending state.
+The _Request_ includes three events: _Completed_, _Faulted_, and _TimeoutExpired_. These events can be consumed during any state, however, the _Request_ includes a _Pending_ state which can be used to avoid declaring a separate pending state.
 
 ::: tip NOTE
 The request timeout is scheduled using the message scheduler, and the scheduled message is canceled when a response or fault is received. Not all message schedulers support cancellation, so it may be necessary to _Ignore_ the `TimeoutExpired` event in subsequent states.
