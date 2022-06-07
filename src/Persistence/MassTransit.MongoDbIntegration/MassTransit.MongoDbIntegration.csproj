@@ -20,8 +20,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MongoDB.Driver" Version="2.15.1" />
-    <PackageReference Include="MongoDB.Driver.GridFS" Version="2.15.1" />
+    <PackageReference Include="MongoDB.Driver" Version="2.16.0" />
+    <PackageReference Include="MongoDB.Driver.GridFS" Version="2.16.0" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>

@@ -22,7 +22,7 @@
 
   <ItemGroup>
     <PackageReference Include="Azure.Identity" Version="1.6.0" />
-    <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.7.0" />
+    <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.8.1" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
