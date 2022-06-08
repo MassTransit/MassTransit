@@ -30,5 +30,28 @@ namespace MassTransit.AzureServiceBusTransport
         {
             return _host.ConnectSubscriptionEndpoint(subscriptionName, topicName, configure);
         }
+
+        public HostReceiveEndpointHandle ConnectSubscriptionEndpoint<T>(string subscriptionName,
+            Action<IBusRegistrationContext, IServiceBusSubscriptionEndpointConfigurator> configure = null)
+            where T : class
+        {
+            return _host.ConnectSubscriptionEndpoint<T>(subscriptionName, configurator =>
+            {
+                RegistrationContext.GetConfigureReceiveEndpoints().Configure(subscriptionName, configurator);
+
+                configure?.Invoke(RegistrationContext, configurator);
+            });
+        }
+
+        public HostReceiveEndpointHandle ConnectSubscriptionEndpoint(string subscriptionName, string topicName,
+            Action<IBusRegistrationContext, IServiceBusSubscriptionEndpointConfigurator> configure = null)
+        {
+            return _host.ConnectSubscriptionEndpoint(subscriptionName, topicName, configurator =>
+            {
+                RegistrationContext.GetConfigureReceiveEndpoints().Configure(subscriptionName, configurator);
+
+                configure?.Invoke(RegistrationContext, configurator);
+            });
+        }
     }
 }

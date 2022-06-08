@@ -9,18 +9,19 @@ namespace MassTransit.Transports
         IReceiveEndpointConnector<TEndpointConfigurator>
         where TEndpointConfigurator : class, IReceiveEndpointConfigurator
     {
-        readonly IBusRegistrationContext _busRegistrationContext;
         readonly IHost<TEndpointConfigurator> _host;
 
         public TransportBusInstance(IBusControl busControl, IHost<TEndpointConfigurator> host, IHostConfiguration hostConfiguration, IBusRegistrationContext
             busRegistrationContext)
         {
             _host = host;
-            _busRegistrationContext = busRegistrationContext;
+            RegistrationContext = busRegistrationContext;
 
             BusControl = busControl;
             HostConfiguration = hostConfiguration;
         }
+
+        protected IBusRegistrationContext RegistrationContext { get; }
 
         public string Name => "masstransit-bus";
         public Type InstanceType => typeof(IBus);
@@ -48,7 +49,7 @@ namespace MassTransit.Transports
         {
             return _host.ConnectReceiveEndpoint(definition, endpointNameFormatter, configurator =>
             {
-                configure?.Invoke(_busRegistrationContext, configurator);
+                configure?.Invoke(RegistrationContext, configurator);
             });
         }
 
@@ -57,7 +58,7 @@ namespace MassTransit.Transports
         {
             return _host.ConnectReceiveEndpoint(queueName, configurator =>
             {
-                configure?.Invoke(_busRegistrationContext, configurator);
+                configure?.Invoke(RegistrationContext, configurator);
             });
         }
 
@@ -66,9 +67,9 @@ namespace MassTransit.Transports
         {
             return _host.ConnectReceiveEndpoint(definition, endpointNameFormatter, configurator =>
             {
-                _busRegistrationContext.GetConfigureReceiveEndpoints().Configure(definition.GetEndpointName(endpointNameFormatter), configurator);
+                RegistrationContext.GetConfigureReceiveEndpoints().Configure(definition.GetEndpointName(endpointNameFormatter), configurator);
 
-                configure?.Invoke(_busRegistrationContext, configurator);
+                configure?.Invoke(RegistrationContext, configurator);
             });
         }
 
@@ -76,9 +77,9 @@ namespace MassTransit.Transports
         {
             return _host.ConnectReceiveEndpoint(queueName, configurator =>
             {
-                _busRegistrationContext.GetConfigureReceiveEndpoints().Configure(queueName, configurator);
+                RegistrationContext.GetConfigureReceiveEndpoints().Configure(queueName, configurator);
 
-                configure?.Invoke(_busRegistrationContext, configurator);
+                configure?.Invoke(RegistrationContext, configurator);
             });
         }
 
