@@ -6,6 +6,7 @@
     using System.Reflection;
     using System.Text;
     using HeaderInitializers;
+    using Internals;
     using PropertyInitializers;
     using PropertyProviders;
 
@@ -43,8 +44,17 @@
                 // can only copy to object, no idea what the destination type would/could be
                 if (propertyType == typeof(object))
                 {
-                    var type = typeof(CopyObjectPropertyInitializer<,,>).MakeGenericType(typeof(TMessage), typeof(TInput), inputPropertyType);
-                    initializer = (IPropertyInitializer<TMessage, TInput>)Activator.CreateInstance(type, propertyInfo, inputPropertyInfo);
+                    if (inputPropertyType.IsTask(out var taskType))
+                    {
+                        var type = typeof(CopyAsyncObjectPropertyInitializer<,,>).MakeGenericType(typeof(TMessage), typeof(TInput), taskType);
+                        initializer = (IPropertyInitializer<TMessage, TInput>)Activator.CreateInstance(type, propertyInfo, inputPropertyInfo);
+                    }
+                    else
+                    {
+                        var type = typeof(CopyObjectPropertyInitializer<,,>).MakeGenericType(typeof(TMessage), typeof(TInput), inputPropertyType);
+                        initializer = (IPropertyInitializer<TMessage, TInput>)Activator.CreateInstance(type, propertyInfo, inputPropertyInfo);
+                    }
+
                     return true;
                 }
 
