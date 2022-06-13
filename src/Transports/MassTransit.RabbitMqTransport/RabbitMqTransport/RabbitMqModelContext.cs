@@ -9,6 +9,7 @@
     using MassTransit.Middleware;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
+    using RabbitMQ.Client.Exceptions;
     using Util;
 
 
@@ -17,7 +18,6 @@
         ModelContext,
         IAsyncDisposable
     {
-        readonly CancellationToken _cancellationToken;
         readonly PendingConfirmationCollection _confirmations;
         readonly ConnectionContext _connectionContext;
         readonly ChannelExecutor _executor;
@@ -29,7 +29,7 @@
         {
             _connectionContext = connectionContext;
             _model = model;
-            _cancellationToken = cancellationToken;
+            CancellationToken = cancellationToken;
 
             if (_connectionContext.PublisherConfirmation)
             {
@@ -79,25 +79,25 @@
             _model.Cleanup(200, message);
         }
 
-        CancellationToken PipeContext.CancellationToken => _cancellationToken;
+        public override CancellationToken CancellationToken { get; }
 
-        IModel ModelContext.Model => _model;
+        public IModel Model => _model;
 
         ConnectionContext ModelContext.ConnectionContext => _connectionContext;
 
-        Task ModelContext.BasicPublishAsync(string exchange, string routingKey, bool mandatory, IBasicProperties basicProperties, byte[] body, bool awaitAck)
+        public Task BasicPublishAsync(string exchange, string routingKey, bool mandatory, IBasicProperties basicProperties, byte[] body, bool awaitAck)
         {
             return _publisher.Publish(exchange, routingKey, mandatory, basicProperties, body, awaitAck);
         }
 
-        Task ModelContext.ExchangeBind(string destination, string source, string routingKey, IDictionary<string, object> arguments)
+        public Task ExchangeBind(string destination, string source, string routingKey, IDictionary<string, object> arguments)
         {
-            return _executor.Run(() => _model.ExchangeBind(destination, source, routingKey, arguments), CancellationToken);
+            return RunRpc(() => _model.ExchangeBind(destination, source, routingKey, arguments), CancellationToken);
         }
 
-        Task ModelContext.ExchangeDeclare(string exchange, string type, bool durable, bool autoDelete, IDictionary<string, object> arguments)
+        public Task ExchangeDeclare(string exchange, string type, bool durable, bool autoDelete, IDictionary<string, object> arguments)
         {
-            return _executor.Run(() => _model.ExchangeDeclare(exchange, type, durable, autoDelete, arguments), CancellationToken);
+            return RunRpc(() => _model.ExchangeDeclare(exchange, type, durable, autoDelete, arguments), CancellationToken);
         }
 
         public Task ExchangeDeclarePassive(string exchange)
@@ -105,39 +105,39 @@
             return _executor.Run(() => _model.ExchangeDeclarePassive(exchange), CancellationToken);
         }
 
-        Task ModelContext.QueueBind(string queue, string exchange, string routingKey, IDictionary<string, object> arguments)
+        public Task QueueBind(string queue, string exchange, string routingKey, IDictionary<string, object> arguments)
         {
-            return _executor.Run(() => _model.QueueBind(queue, exchange, routingKey, arguments), CancellationToken);
+            return RunRpc(() => _model.QueueBind(queue, exchange, routingKey, arguments), CancellationToken);
         }
 
         Task<QueueDeclareOk> ModelContext.QueueDeclare(string queue, bool durable, bool exclusive, bool autoDelete, IDictionary<string, object> arguments)
         {
-            return _executor.Run(() => _model.QueueDeclare(queue, durable, exclusive, autoDelete, arguments), CancellationToken);
+            return RunRpc(() => _model.QueueDeclare(queue, durable, exclusive, autoDelete, arguments), CancellationToken);
         }
 
-        Task<QueueDeclareOk> ModelContext.QueueDeclarePassive(string queue)
+        public Task<QueueDeclareOk> QueueDeclarePassive(string queue)
         {
             return _executor.Run(() => _model.QueueDeclarePassive(queue), CancellationToken);
         }
 
-        Task<uint> ModelContext.QueuePurge(string queue)
+        public Task<uint> QueuePurge(string queue)
         {
-            return _executor.Run(() => _model.QueuePurge(queue), CancellationToken);
+            return RunRpc(() => _model.QueuePurge(queue), CancellationToken);
         }
 
-        Task ModelContext.BasicQos(uint prefetchSize, ushort prefetchCount, bool global)
+        public Task BasicQos(uint prefetchSize, ushort prefetchCount, bool global)
         {
-            return _executor.Run(() => _model.BasicQos(prefetchSize, prefetchCount, global), CancellationToken);
+            return RunRpc(() => _model.BasicQos(prefetchSize, prefetchCount, global), CancellationToken);
         }
 
-        Task ModelContext.BasicAck(ulong deliveryTag, bool multiple)
+        public Task BasicAck(ulong deliveryTag, bool multiple)
         {
             return _model.IsClosed
                 ? TaskUtil.Faulted<bool>(new InvalidOperationException($"The channel was closed: {_model.CloseReason} {_model.ChannelNumber}"))
                 : _executor.Run(() => _model.BasicAck(deliveryTag, multiple), CancellationToken);
         }
 
-        async Task ModelContext.BasicNack(ulong deliveryTag, bool multiple, bool requeue)
+        public async Task BasicNack(ulong deliveryTag, bool multiple, bool requeue)
         {
             if (_model.IsClosed)
                 return;
@@ -151,10 +151,10 @@
             }
         }
 
-        Task<string> ModelContext.BasicConsume(string queue, bool noAck, bool exclusive, IDictionary<string, object> arguments, IBasicConsumer consumer,
+        public Task<string> BasicConsume(string queue, bool noAck, bool exclusive, IDictionary<string, object> arguments, IBasicConsumer consumer,
             string consumerTag)
         {
-            return _executor.Run(() => _model.BasicConsume(consumer, queue, noAck, consumerTag, false, exclusive, arguments), CancellationToken);
+            return RunRpc(() => _model.BasicConsume(consumer, queue, noAck, consumerTag, false, exclusive, arguments), CancellationToken);
         }
 
         public Task BasicCancel(string consumerTag)
@@ -201,6 +201,48 @@
         void OnAcknowledged(object model, BasicAckEventArgs args)
         {
             _confirmations?.Acknowledged(args.DeliveryTag, args.Multiple);
+        }
+
+        async Task RunRpc(Action callback, CancellationToken cancellationToken)
+        {
+            if (_model.IsClosed)
+                throw new InvalidOperationException($"The channel was closed: {_model.CloseReason} {_model.ChannelNumber}");
+
+            try
+            {
+                await _executor.Run(callback, cancellationToken).ConfigureAwait(false);
+            }
+            catch (OperationInterruptedException ex) when (ex.ChannelShouldBeClosed())
+            {
+                _model.Close(500, "Channel unusable due to OperationInterruptedException");
+                throw;
+            }
+            catch (NotSupportedException ex) when (ex.Message.Contains("Pipelining of requests forbidden"))
+            {
+                _model.Close(500, "Channel unusable due to continuation timeout");
+                throw;
+            }
+        }
+
+        async Task<T> RunRpc<T>(Func<T> callback, CancellationToken cancellationToken)
+        {
+            if (_model.IsClosed)
+                throw new InvalidOperationException($"The channel was closed: {_model.CloseReason} {_model.ChannelNumber}");
+
+            try
+            {
+                return await _executor.Run(callback, cancellationToken).ConfigureAwait(false);
+            }
+            catch (OperationInterruptedException ex) when (ex.ChannelShouldBeClosed())
+            {
+                _model.Close(500, "Channel unusable due to OperationInterruptedException");
+                throw;
+            }
+            catch (NotSupportedException ex) when (ex.Message.Contains("Pipelining of requests forbidden"))
+            {
+                _model.Close(500, "Channel unusable due to continuation timeout");
+                throw;
+            }
         }
     }
 }

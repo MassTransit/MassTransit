@@ -42,6 +42,8 @@ namespace MassTransit.RabbitMqTransport.Configuration
                     exception.Message.Contains("CONNECTION_FORCED")
                     || exception.Message.Contains("End of stream")
                     || exception.Message.Contains("Unexpected Exception"));
+                x.Handle<OperationInterruptedException>(exception => exception.ChannelShouldBeClosed());
+                x.Handle<NotSupportedException>(exception => exception.Message.Contains("Pipelining of requests forbidden"));
 
                 x.Ignore<AuthenticationFailureException>();
 
