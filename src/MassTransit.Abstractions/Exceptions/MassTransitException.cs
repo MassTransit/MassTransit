@@ -12,12 +12,12 @@ namespace MassTransit
         {
         }
 
-        public MassTransitException(string message)
+        public MassTransitException(string? message)
             : base(message)
         {
         }
 
-        public MassTransitException(string message, Exception innerException)
+        public MassTransitException(string? message, Exception? innerException)
             : base(message, innerException)
         {
         }

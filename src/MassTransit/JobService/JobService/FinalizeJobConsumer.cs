@@ -1,8 +1,6 @@
 namespace MassTransit.JobService
 {
     using System;
-    using System.Collections;
-    using System.Linq;
     using System.Runtime.Serialization;
     using System.Threading.Tasks;
     using Contracts.JobService;
@@ -47,26 +45,7 @@ namespace MassTransit.JobService
             using var jobContext = new ConsumeJobContext<TJob>(context, _jobService.InstanceAddress, message.JobId, message.AttemptId, message.RetryAttempt,
                 job, _options.JobTimeout);
 
-            return jobContext.NotifyFaulted(message.Duration ?? TimeSpan.Zero, _jobConsumerTypeName, new JobFaultedException(message.Exceptions));
-        }
-
-
-        class JobFaultedException :
-            MassTransitException
-        {
-            readonly ExceptionInfo _exceptionInfo;
-
-            public JobFaultedException(ExceptionInfo exceptionInfo)
-                : base(exceptionInfo.Message, exceptionInfo.InnerException != null ? new JobFaultedException(exceptionInfo.InnerException) : default)
-            {
-                _exceptionInfo = exceptionInfo;
-                if (_exceptionInfo.Data != null)
-                    Data = _exceptionInfo.Data.ToDictionary(x => x.Key);
-            }
-
-            public override string StackTrace => _exceptionInfo.StackTrace;
-            public override string Source => _exceptionInfo.Source;
-            public override IDictionary Data { get; }
+            return jobContext.NotifyFaulted(message.Duration ?? TimeSpan.Zero, _jobConsumerTypeName, new ExceptionInfoException(message.Exceptions));
         }
     }
 }

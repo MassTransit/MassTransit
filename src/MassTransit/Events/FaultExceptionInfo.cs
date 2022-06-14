@@ -32,7 +32,11 @@ namespace MassTransit.Events
                     UpdateData(exception.Data);
             }
 
-            ExceptionType = TypeCache.GetShortName(exception.GetType());
+            if (exception is ExceptionInfoException infoException)
+                ExceptionType = infoException.ExceptionInfo.ExceptionType;
+            else
+                ExceptionType = TypeCache.GetShortName(exception.GetType());
+
             InnerException = exception.InnerException != null
                 ? new FaultExceptionInfo(exception.InnerException)
                 : null;

@@ -16,7 +16,7 @@ namespace MassTransit
         /// <summary>
         /// The inner exception if present (also converted to ExceptionInfo)
         /// </summary>
-        ExceptionInfo InnerException { get; }
+        ExceptionInfo? InnerException { get; }
 
         /// <summary>
         /// The stack trace of the exception site
@@ -33,6 +33,6 @@ namespace MassTransit
         /// </summary>
         string Source { get; }
 
-        IDictionary<string, object> Data { get; }
+        IDictionary<string, object>? Data { get; }
     }
 }
