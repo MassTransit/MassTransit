@@ -23,7 +23,6 @@
         SagaStateMachine<TInstance>
         where TInstance : class, SagaStateMachineInstance
     {
-        readonly Dictionary<string, Dictionary<string, List<EventActivityBinder<TInstance>>>> _compositeBindings;
         readonly HashSet<string> _compositeEvents;
         readonly Dictionary<string, StateMachineEvent<TInstance>> _eventCache;
         readonly Dictionary<Event, EventCorrelation> _eventCorrelations;
@@ -43,7 +42,6 @@
             _registrations = new Lazy<ConfigurationHelpers.StateMachineRegistration[]>(() => ConfigurationHelpers.GetRegistrations(this));
             _stateCache = new Dictionary<string, State<TInstance>>();
             _eventCache = new Dictionary<string, StateMachineEvent<TInstance>>();
-            _compositeBindings = new Dictionary<string, Dictionary<string, List<EventActivityBinder<TInstance>>>>();
             _compositeEvents = new HashSet<string>();
 
             _eventObservers = new EventObservable<TInstance>();
@@ -676,23 +674,9 @@
 
                 foreach (State<TInstance> state in states)
                 {
-                    // Set the IsComposite flag just to make sure it is really set.
-                    var currentEvent = state.Events.FirstOrDefault(x => Equals(x, @event));
-                    if (currentEvent != null)
-                        _compositeEvents.Add(currentEvent.Name);
-
-                    // Determine which event the composited event belongs to
-                    State<TInstance> boundToState = _stateCache.Values.FirstOrDefault(s => s.Events.Any(evt => evt.Name == events[i].Name));
-                    State<TInstance> bindingState = boundToState ?? state;
-
-                    if (!_compositeBindings.ContainsKey(@event.Name))
-                        _compositeBindings[@event.Name] = new Dictionary<string, List<EventActivityBinder<TInstance>>>();
-
-                    if (!_compositeBindings[@event.Name].ContainsKey(bindingState.Name))
-                        _compositeBindings[@event.Name][bindingState.Name] = new List<EventActivityBinder<TInstance>>();
-
-                    if (_compositeBindings[@event.Name][bindingState.Name].All(x => x.Event.Name != events[i].Name))
-                        _compositeBindings[@event.Name][bindingState.Name].Add(When(events[i]).Execute(activity));
+                    During(state,
+                        When(events[i])
+                            .Execute(activity));
                 }
             }
 
@@ -962,20 +946,6 @@
             foreach (IActivityBinder<TInstance> activity in eventActivities)
             {
                 activity.Bind(activityState);
-                if (!_compositeEvents.Contains(activity.Event.Name) || !_compositeBindings.ContainsKey(activity.Event.Name))
-                    continue;
-
-                foreach (KeyValuePair<string, List<EventActivityBinder<TInstance>>> compositeBinding in _compositeBindings[activity.Event.Name])
-                {
-                    IActivityBinder<TInstance>[] activitiesBinder = compositeBinding.Value.SelectMany(x => x.GetStateActivityBinders()).ToArray();
-
-                    if (!activitiesBinder.Any())
-                        continue;
-
-                    BindActivitiesToState(GetState(compositeBinding.Key), activitiesBinder);
-                }
-
-                _compositeBindings.Remove(activity.Event.Name);
             }
         }
 

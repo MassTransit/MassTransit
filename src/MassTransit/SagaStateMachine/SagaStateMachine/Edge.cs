@@ -1,9 +1,11 @@
 namespace MassTransit.SagaStateMachine
 {
     using System;
+    using System.Diagnostics;
 
 
     [Serializable]
+    [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
     public class Edge :
         IEquatable<Edge>
     {
@@ -19,6 +21,8 @@ namespace MassTransit.SagaStateMachine
         public Vertex From { get; }
 
         string Title { get; }
+
+        public string DebuggerDisplay => ToString();
 
         public bool Equals(Edge other)
         {
@@ -49,6 +53,11 @@ namespace MassTransit.SagaStateMachine
                 hashCode = (hashCode * 397) ^ (Title?.GetHashCode() ?? 0);
                 return hashCode;
             }
+        }
+
+        public override string ToString()
+        {
+            return $"{From} -> {To} {Title}";
         }
     }
 }

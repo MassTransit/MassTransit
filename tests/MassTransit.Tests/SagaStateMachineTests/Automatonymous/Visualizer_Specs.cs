@@ -86,7 +86,7 @@
 2 [shape=ellipse, label=""Final""];
 3 [shape=rectangle, label=""Start""];
 4 [shape=rectangle, label=""First""];
-5 [shape=rectangle, label=""Third""];
+5 [shape=invhouse, label=""Third""];
 6 [shape=rectangle, label=""Second""];
 0 -> 3;
 1 -> 4;
@@ -105,7 +105,7 @@
 2 [shape=ellipse, label=""Final""];
 3 [shape=rectangle, label=""Start""];
 4 [shape=rectangle, label=""First""];
-5 [shape=rectangle, label=""Third""];
+5 [shape=invhouse, label=""Third""];
 6 [shape=rectangle, label=""Second""];
 0 -> 3;
 1 -> 4;

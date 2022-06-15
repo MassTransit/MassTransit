@@ -1,9 +1,11 @@
 namespace MassTransit.SagaStateMachine
 {
     using System;
+    using System.Diagnostics;
 
 
     [Serializable]
+    [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
     public class Vertex :
         IEquatable<Vertex>
     {
@@ -22,6 +24,8 @@ namespace MassTransit.SagaStateMachine
         public Type TargetType { get; }
 
         public bool IsComposite { get; }
+
+        public string DebuggerDisplay => $"{VertexType.Name}({IsComposite}) {Title} -> {TargetType.Name}";
 
         public bool Equals(Vertex other)
         {
@@ -52,6 +56,11 @@ namespace MassTransit.SagaStateMachine
                 hashCode = (hashCode * 397) ^ (TargetType?.GetHashCode() ?? 0);
                 return hashCode;
             }
+        }
+
+        public override string ToString()
+        {
+            return $"{VertexType.Name}({IsComposite}) {Title} -> {TargetType.Name}";
         }
     }
 }

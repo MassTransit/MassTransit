@@ -153,11 +153,9 @@
 
         void InspectCompositeEventActivity(CompositeEventActivity<TSaga> compositeActivity)
         {
-            var previousEvent = _currentEvent;
+            var compositeEvent = GetEventVertex(compositeActivity.Event);
 
-            _currentEvent = GetEventVertex(compositeActivity.Event);
-
-            _edges.Add(new Edge(previousEvent, _currentEvent, _currentEvent.Title));
+            _edges.Add(new Edge(_currentEvent, compositeEvent, compositeEvent.Title));
         }
 
         //        void InspectExceptionActivity(ExceptionActivity<TInstance> exceptionActivity, Action<Activity> next)
