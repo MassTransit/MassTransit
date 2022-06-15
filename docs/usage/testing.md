@@ -70,7 +70,7 @@ Assert.That(await sagaHarness.Consumed.Any<OrderSubmitted>());
 
 Assert.That(await sagaHarness.Created.Any(x => x.CorrelationId == sagaId));
 
-var instance = sagaHarness.Created.ContainsInState(sagaId, sagaHarness.StateMachine, machine.Submitted);
+var instance = sagaHarness.Created.ContainsInState(sagaId, sagaHarness.StateMachine, sagaHarness.StateMachine.Submitted);
 Assert.IsNotNull(instance, "Saga instance not found");
 Assert.That(instance.OrderNumber, Is.EqualTo(orderNumber));
 
