@@ -193,11 +193,11 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
                 {
                     ReliableDbContextFactory.Apply(builder);
                 })
-                .AddEntityFrameworkOutbox<ReliableDbContext>()
                 .AddHostedService<MigrationHostedService<ReliableDbContext>>()
-                .AddSingleton<ILockStatementProvider, SqlServerLockStatementProvider>()
                 .AddMassTransitTestHarness(x =>
                 {
+                    x.AddEntityFrameworkOutbox<ReliableDbContext>();
+
                     x.AddConsumer<ReliableConsumer, ReliableConsumerDefinition>();
                     x.AddSagaStateMachine<ReliableStateMachine, ReliableState, ReliableStateDefinition>()
                         .EntityFrameworkRepository(r => r.ExistingDbContext<ReliableDbContext>());
@@ -214,11 +214,11 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
                 {
                     ReliableDbContextFactory.Apply(builder);
                 })
-                .AddEntityFrameworkOutbox<ReliableDbContext>()
                 .AddHostedService<MigrationHostedService<ReliableDbContext>>()
-                .AddSingleton<ILockStatementProvider, SqlServerLockStatementProvider>()
                 .AddMassTransitTestHarness(x =>
                 {
+                    x.AddEntityFrameworkOutbox<ReliableDbContext>();
+
                     x.AddConsumer<ReliableEventConsumer, ReliableEventConsumerDefinition>();
                     x.AddConsumer<ReliableConsumer, ReliableConsumerDefinition>();
                     x.AddSagaStateMachine<ReliableStateMachine, ReliableState, ReliableStateDefinition>()

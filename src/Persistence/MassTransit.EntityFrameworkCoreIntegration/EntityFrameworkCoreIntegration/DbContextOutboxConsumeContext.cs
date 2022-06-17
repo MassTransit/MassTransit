@@ -64,9 +64,12 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
         public override async Task<List<OutboxMessageContext>> LoadOutboxMessages()
         {
+            var lastSequenceNumber = LastSequenceNumber ?? 0;
+
             List<OutboxMessage> messages = await _dbContext.Set<OutboxMessage>()
-                .Where(x => x.InboxMessageId == MessageId && x.InboxConsumerId == ConsumerId)
+                .Where(x => x.InboxMessageId == MessageId && x.InboxConsumerId == ConsumerId && x.SequenceNumber > lastSequenceNumber)
                 .OrderBy(x => x.SequenceNumber)
+                .Take(Options.MessageDeliveryLimit + 1)
                 .AsNoTracking()
                 .ToListAsync(CancellationToken);
 
@@ -88,7 +91,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         {
             List<OutboxMessage> messages = await _dbContext.Set<OutboxMessage>()
                 .Where(x => x.InboxMessageId == MessageId && x.InboxConsumerId == ConsumerId)
-                .OrderBy(x => x.SequenceNumber)
                 .ToListAsync(CancellationToken);
 
             _dbContext.RemoveRange(messages);

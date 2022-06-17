@@ -11,9 +11,11 @@ namespace MassTransit.Middleware
         where TMessage : class
     {
         readonly IPipe<ConsumeContext<TMessage>> _next;
+        readonly OutboxConsumeOptions _options;
 
-        public OutboxMessagePipe(IPipe<ConsumeContext<TMessage>> next)
+        public OutboxMessagePipe(OutboxConsumeOptions options, IPipe<ConsumeContext<TMessage>> next)
         {
+            _options = options;
             _next = next;
         }
 
@@ -51,11 +53,11 @@ namespace MassTransit.Middleware
             _next.Probe(scope);
         }
 
-        static async Task DeliverOutboxMessages(OutboxConsumeContext context)
+        async Task DeliverOutboxMessages(OutboxConsumeContext context)
         {
             List<OutboxMessageContext> messages = await context.LoadOutboxMessages().ConfigureAwait(false);
 
-            const int messageLimit = 1;
+            var messageLimit = _options.MessageDeliveryLimit;
             var messageCount = 0;
             var messageIndex = 0;
             for (; messageIndex < messages.Count && messageCount < messageLimit; messageIndex++)
@@ -91,7 +93,7 @@ namespace MassTransit.Middleware
                 }
             }
 
-            if (messageIndex == messages.Count)
+            if (messageIndex == messages.Count && messages.Count < messageLimit)
                 await context.SetDelivered().ConfigureAwait(false);
         }
 

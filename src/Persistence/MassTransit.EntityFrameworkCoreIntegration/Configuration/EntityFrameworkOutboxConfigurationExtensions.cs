@@ -2,103 +2,29 @@
 namespace MassTransit
 {
     using System;
-    using System.Linq;
     using Configuration;
-    using DependencyInjection;
     using EntityFrameworkCoreIntegration;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
-    using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Options;
-    using Middleware;
 
 
     public static class EntityFrameworkOutboxConfigurationExtensions
     {
         /// <summary>
-        /// Adds the DbContext Outbox to the container, using the specified <typeparamref name="TDbContext" /> type.
-        /// The DbContext should use AddInboxMessageEntity and AddOutboxMessageEntity to register the outbox entities.
+        /// Configures the Entity Framework Outbox on the bus, which can subsequently be used to configure
+        /// the transactional outbox on a receive endpoint.
         /// </summary>
-        /// <param name="collection"></param>
+        /// <param name="configurator"></param>
+        /// <param name="configure"></param>
         /// <typeparam name="TDbContext"></typeparam>
         /// <returns></returns>
-        public static IServiceCollection AddEntityFrameworkOutbox<TDbContext>(this IServiceCollection collection)
+        public static void AddEntityFrameworkOutbox<TDbContext>(this IBusRegistrationConfigurator configurator,
+            Action<IEntityFrameworkOutboxConfigurator>? configure = null)
             where TDbContext : DbContext
         {
-            collection.AddScoped<IOutboxContextFactory<TDbContext>, EntityFrameworkOutboxContextFactory<TDbContext>>();
-            collection.AddOptions<EntityFrameworkOutboxOptions>();
+            var outboxConfigurator = new EntityFrameworkOutboxConfigurator<TDbContext>(configurator);
 
-            return collection;
-        }
-
-        /// <summary>
-        /// Adds an Entity Framework on ramp (Outbox) to the bus, which is stores all messages that are published/sent using the bus
-        /// (including any ISendEndpointProvider and IPublishEndpoint references that resolve to the bus) in the database
-        /// associated with the specified DbContext. Those messages are later sent to the message broker asynchronously using
-        /// a separate message delivery hosted service.
-        /// </summary>
-        /// <param name="busConfigurator"></param>
-        /// <typeparam name="TDbContext"></typeparam>
-        /// <returns></returns>
-        public static IBusRegistrationConfigurator AddEntityFrameworkOnRamp<TDbContext>(this IBusRegistrationConfigurator busConfigurator)
-            where TDbContext : DbContext
-        {
-            ReplaceScopedBusContextProvider<IBus, TDbContext>(busConfigurator);
-
-            return busConfigurator;
-        }
-
-        /// <summary>
-        /// Adds an Entity Framework on ramp (Outbox) to the bus, which is stores all messages that are published/sent using the bus
-        /// (including any ISendEndpointProvider and IPublishEndpoint references that resolve to the bus) in the database
-        /// associated with the specified DbContext. Those messages are later sent to the message broker asynchronously using
-        /// a separate message delivery hosted service.
-        /// </summary>
-        /// <param name="busConfigurator"></param>
-        /// <typeparam name="TDbContext"></typeparam>
-        /// <typeparam name="TBus"></typeparam>
-        /// <returns></returns>
-        public static IBusRegistrationConfigurator AddEntityFrameworkOnRamp<TBus, TDbContext>(this IBusRegistrationConfigurator<TBus> busConfigurator)
-            where TDbContext : DbContext
-            where TBus : class, IBus
-        {
-            ReplaceScopedBusContextProvider<TBus, TDbContext>(busConfigurator);
-
-            return busConfigurator;
-        }
-
-        /// <summary>
-        /// Adds the DbContext Outbox to the container, using the specified <typeparamref name="TDbContext" /> type.
-        /// The DbContext should use AddInboxMessageEntity and AddOutboxMessageEntity to register the outbox entities.
-        /// </summary>
-        /// <param name="collection"></param>
-        /// <param name="configure">Configure the delivery options</param>
-        /// <typeparam name="TDbContext"></typeparam>
-        /// <returns></returns>
-        public static IServiceCollection AddEntityFrameworkOnRampDeliveryService<TDbContext>(this IServiceCollection collection,
-            Action<OnRampDeliveryOptions>? configure = null)
-            where TDbContext : DbContext
-        {
-            collection.AddHostedService<OnRampDeliveryHostedService<TDbContext>>();
-            collection.AddOptions<EntityFrameworkOutboxOptions>();
-
-            OptionsBuilder<OnRampDeliveryOptions>? options = collection.AddOptions<OnRampDeliveryOptions>();
-
-            if (configure != null)
-                options.Configure(configure);
-
-            return collection;
-        }
-
-        static void ReplaceScopedBusContextProvider<TBus, TDbContext>(IServiceCollection busConfigurator)
-            where TBus : class, IBus
-            where TDbContext : DbContext
-        {
-            var descriptor = busConfigurator.FirstOrDefault(x => x.ServiceType == typeof(IScopedBusContextProvider<TBus>));
-            if (descriptor != null)
-                busConfigurator.Remove(descriptor);
-
-            busConfigurator.AddScoped<IScopedBusContextProvider<TBus>, EntityFrameworkScopedBusContextProvider<TBus, TDbContext>>();
+            configure?.Invoke(outboxConfigurator);
         }
 
         /// <summary>
@@ -120,6 +46,42 @@ namespace MassTransit
             configurator.ConnectSagaConfigurationObserver(observer);
         }
 
+        /// <summary>
+        /// Configure the outbox for use with SQL Server
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <returns></returns>
+        public static IEntityFrameworkOutboxConfigurator UseSqlServer(this IEntityFrameworkOutboxConfigurator configurator)
+        {
+            configurator.LockStatementProvider = new SqlServerLockStatementProvider();
+
+            return configurator;
+        }
+
+        /// <summary>
+        /// Configure the outbox for use with Postgres
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <returns></returns>
+        public static IEntityFrameworkOutboxConfigurator UsePostgres(this IEntityFrameworkOutboxConfigurator configurator)
+        {
+            configurator.LockStatementProvider = new PostgresLockStatementProvider();
+
+            return configurator;
+        }
+
+        /// <summary>
+        /// Configure the outbox for use with MySQL
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <returns></returns>
+        public static IEntityFrameworkOutboxConfigurator UseMySql(this IEntityFrameworkOutboxConfigurator configurator)
+        {
+            configurator.LockStatementProvider = new MySqlLockStatementProvider();
+
+            return configurator;
+        }
+
         public static void AddInboxStateEntity(this ModelBuilder modelBuilder, Action<EntityTypeBuilder<InboxState>>? callback = null)
         {
             EntityTypeBuilder<InboxState> inbox = modelBuilder.Entity<InboxState>();
@@ -139,8 +101,12 @@ namespace MassTransit
             inbox.Property(p => p.ReceiveCount);
             inbox.Property(p => p.ExpirationTime);
             inbox.Property(p => p.Consumed);
+
             inbox.Property(p => p.Delivered);
+            inbox.HasIndex(p => p.Delivered);
+
             inbox.Property(p => p.LastSequenceNumber);
+
 
             callback?.Invoke(inbox);
         }

@@ -19,7 +19,15 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
                 .AddBusOutboxServices()
                 .AddMassTransitTestHarness(x =>
                 {
-                    x.AddEntityFrameworkOnRamp<ReliableDbContext>();
+                    x.AddEntityFrameworkOutbox<ReliableDbContext>(o =>
+                    {
+                        o.QueryDelay = TimeSpan.FromSeconds(1);
+
+                        o.UseBusOutbox(bo =>
+                        {
+                            bo.MessageDeliveryLimit = 10;
+                        });
+                    });
 
                     x.AddConsumer<PingConsumer>();
                 })
@@ -65,12 +73,10 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
         public static IServiceCollection AddBusOutboxServices(this IServiceCollection services)
         {
             services.AddDbContext<ReliableDbContext>(builder =>
-                {
-                    ReliableDbContextFactory.Apply(builder);
-                })
-                .AddHostedService<MigrationHostedService<ReliableDbContext>>()
-                .AddEntityFrameworkOnRampDeliveryService<ReliableDbContext>(x => x.SweepInterval = TimeSpan.FromSeconds(1))
-                .AddSingleton<ILockStatementProvider, SqlServerLockStatementProvider>();
+            {
+                ReliableDbContextFactory.Apply(builder);
+            });
+            services.AddHostedService<MigrationHostedService<ReliableDbContext>>();
 
             services.AddOptions<TextWriterLoggerOptions>().Configure(options => options.Disable("Microsoft"));
 

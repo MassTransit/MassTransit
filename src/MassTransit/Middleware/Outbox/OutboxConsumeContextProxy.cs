@@ -11,12 +11,10 @@ namespace MassTransit.Middleware.Outbox
         OutboxConsumeContext<TMessage>
         where TMessage : class
     {
-        readonly OutboxConsumeOptions _options;
-
         protected OutboxConsumeContextProxy(ConsumeContext<TMessage> context, OutboxConsumeOptions options)
             : base(context)
         {
-            _options = options;
+            Options = options;
 
             CapturedContext = context;
 
@@ -32,9 +30,11 @@ namespace MassTransit.Middleware.Outbox
             // }
         }
 
-        public ConsumeContext CapturedContext { get; }
+        protected OutboxConsumeOptions Options { get; }
 
-        protected Guid ConsumerId => _options.ConsumerId;
+        protected Guid ConsumerId => Options.ConsumerId;
+
+        public ConsumeContext CapturedContext { get; }
 
         public abstract bool ContinueProcessing { get; set; }
         public abstract bool IsMessageConsumed { get; }

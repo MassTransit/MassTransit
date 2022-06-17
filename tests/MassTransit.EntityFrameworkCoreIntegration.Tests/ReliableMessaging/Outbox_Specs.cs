@@ -71,14 +71,16 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
             var services = new ServiceCollection();
 
             services.AddDbContext<ResponsibleDbContext>(builder =>
-                {
-                    ResponsibleDbContextFactory.Apply(builder);
-                })
-                .AddEntityFrameworkOutbox<ResponsibleDbContext>()
+            {
+                ResponsibleDbContextFactory.Apply(builder);
+            });
+
+            services
                 .AddHostedService<MigrationHostedService<ResponsibleDbContext>>()
-                .AddSingleton<ILockStatementProvider, SqlServerLockStatementProvider>()
                 .AddMassTransitTestHarness(x =>
                 {
+                    x.AddEntityFrameworkOutbox<ResponsibleDbContext>();
+
                     x.AddSagaStateMachine<ResponsibleStateMachine, ResponsibleState, ResponsibleStateDefinition>()
                         .EntityFrameworkRepository(r => r.ExistingDbContext<ResponsibleDbContext>());
                 });

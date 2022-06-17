@@ -1,6 +1,7 @@
 namespace MassTransit.EntityFrameworkCoreIntegration
 {
     using System;
+    using System.Data;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.EntityFrameworkCore;
@@ -14,16 +15,14 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         where TDbContext : DbContext
     {
         readonly TDbContext _dbContext;
+        readonly IsolationLevel _isolationLevel;
         readonly ILockStatementProvider _lockStatementProvider;
-        readonly EntityFrameworkOutboxOptions _options;
 
-        public EntityFrameworkOutboxContextFactory(TDbContext dbContext, ILockStatementProvider lockStatementProvider,
-            IOptions<EntityFrameworkOutboxOptions> options)
+        public EntityFrameworkOutboxContextFactory(TDbContext dbContext, IOptions<EntityFrameworkOutboxOptions> options)
         {
             _dbContext = dbContext;
-            _lockStatementProvider = lockStatementProvider;
-
-            _options = options.Value;
+            _lockStatementProvider = options.Value.LockStatementProvider;
+            _isolationLevel = options.Value.IsolationLevel;
         }
 
         public async Task Send<T>(ConsumeContext<T> context, OutboxConsumeOptions options, IPipe<OutboxConsumeContext<T>> next)
@@ -38,7 +37,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
             async Task<bool> Execute()
             {
-                await using var transaction = await _dbContext.Database.BeginTransactionAsync(_options.IsolationLevel, context.CancellationToken)
+                await using var transaction = await _dbContext.Database.BeginTransactionAsync(_isolationLevel, context.CancellationToken)
                     .ConfigureAwait(false);
 
                 try

@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore.Internal;
-
 namespace MassTransit.EntityFrameworkCoreIntegration
 {
     using System;
@@ -18,7 +16,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
     using Serialization;
 
 
-    public class OnRampDeliveryHostedService<TDbContext> :
+    public class BusOutboxDeliveryService<TDbContext> :
         BackgroundService
         where TDbContext : DbContext
     {
@@ -26,36 +24,36 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         readonly IsolationLevel _isolationLevel;
         readonly ILockStatementProvider _lockStatementProvider;
         readonly ILogger _logger;
-        readonly OnRampDeliveryOptions _options;
+        readonly OutboxDeliveryServiceOptions _options;
         readonly IServiceProvider _provider;
 
-        public OnRampDeliveryHostedService(IBusControl busControl, IOptions<OnRampDeliveryOptions> options,
-            IOptions<EntityFrameworkOutboxOptions> dbContextOptions,
-            ILockStatementProvider lockStatementFormatter,
-            ILogger<OnRampDeliveryHostedService<TDbContext>> logger, IServiceProvider provider)
+        public BusOutboxDeliveryService(IBusControl busControl, IOptions<OutboxDeliveryServiceOptions> options,
+            IOptions<EntityFrameworkOutboxOptions> outboxOptions,
+            ILogger<BusOutboxDeliveryService<TDbContext>> logger, IServiceProvider provider)
         {
             _busControl = busControl;
-            _lockStatementProvider = lockStatementFormatter;
             _provider = provider;
             _logger = logger;
 
             _options = options.Value;
-            _isolationLevel = dbContextOptions.Value.IsolationLevel;
+
+            _lockStatementProvider = outboxOptions.Value.LockStatementProvider;
+            _isolationLevel = outboxOptions.Value.IsolationLevel;
         }
 
-        protected override async Task ExecuteAsync(CancellationToken cancellationToken)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            while (!cancellationToken.IsCancellationRequested)
+            while (!stoppingToken.IsCancellationRequested)
             {
                 try
                 {
-                    await Task.Delay(_options.SweepInterval, cancellationToken).ConfigureAwait(false);
+                    await Task.Delay(_options.QueryDelay, stoppingToken).ConfigureAwait(false);
 
-                    await _busControl.WaitForHealthStatus(BusHealthStatus.Healthy, cancellationToken).ConfigureAwait(false);
+                    await _busControl.WaitForHealthStatus(BusHealthStatus.Healthy, stoppingToken).ConfigureAwait(false);
 
-                    await ProcessMessageBatch(cancellationToken).ConfigureAwait(false);
+                    await ProcessMessageBatch(stoppingToken).ConfigureAwait(false);
                 }
-                catch (OperationCanceledException exception) when (exception.CancellationToken == cancellationToken)
+                catch (OperationCanceledException exception) when (exception.CancellationToken == stoppingToken)
                 {
                 }
                 catch (Exception exception)
@@ -71,7 +69,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
             await using var dbContext = scope.ServiceProvider.GetRequiredService<TDbContext>();
 
-            var messageLimit = _options.MessageLimit;
+            var messageLimit = _options.QueryMessageLimit;
 
             List<Guid> outboxIds = await dbContext.Set<OutboxMessage>()
                 .Where(x => x.OutboxId != null)
@@ -130,9 +128,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                                 continueProcessing = false;
                             }
                             else
-                            {
                                 continueProcessing = await DeliverOutboxMessages(dbContext, outboxState, cancellationToken).ConfigureAwait(false);
-                            }
                         }
 
                         await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
@@ -198,7 +194,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
         async Task<bool> DeliverOutboxMessages(TDbContext dbContext, OutboxState outboxState, CancellationToken cancellationToken)
         {
-            var messageLimit = _options.MessageLimit;
+            var messageLimit = _options.MessageDeliveryLimit;
 
             var lastSequenceNumber = outboxState.LastSequenceNumber ?? 0;
 
@@ -208,6 +204,10 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                 .Take(messageLimit)
                 .ToListAsync(cancellationToken).ConfigureAwait(false);
 
+            var sentSequenceNumber = 0L;
+
+            bool saveChanges = false;
+
             var messageCount = 0;
             var messageIndex = 0;
             for (; messageIndex < messages.Count && messageCount < messageLimit; messageIndex++)
@@ -216,10 +216,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
                 message.Deserialize(SystemTextJsonMessageSerializer.Instance);
 
-                if (outboxState.LastSequenceNumber != null && outboxState.LastSequenceNumber >= message.SequenceNumber)
-                {
-                }
-                else if (message.DestinationAddress == null)
+                if (message.DestinationAddress == null)
                 {
                     LogContext.Warning?.Log("Outbox message DestinationAddress not present: {SequenceNumber} {MessageId}", message.SequenceNumber,
                         message.MessageId);
@@ -228,7 +225,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                 {
                     try
                     {
-                        using var sendToken = new CancellationTokenSource(_options.SendTimeout);
+                        using var sendToken = new CancellationTokenSource(_options.MessageDeliveryTimeout);
                         using var token = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, sendToken.Token);
 
                         var pipe = new OutboxMessageSendPipe(message, message.DestinationAddress);
@@ -237,8 +234,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
                         await endpoint.Send(new Outbox(), pipe, token.Token).ConfigureAwait(false);
 
-                        LogContext.Debug?.Log("Outbox Sent: {OutboxId} {SequenceNumber} {MessageId}", message.OutboxId, message.SequenceNumber,
-                            message.MessageId);
+                        sentSequenceNumber = message.SequenceNumber;
+
+                        LogContext.Debug?.Log("Outbox Sent: {OutboxId} {SequenceNumber} {MessageId}", message.OutboxId, sentSequenceNumber, message.MessageId);
                     }
                     catch (Exception ex)
                     {
@@ -250,10 +248,18 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
                     dbContext.Remove((object)message);
 
-                    await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    saveChanges = true;
 
                     messageCount++;
                 }
+            }
+
+            if (sentSequenceNumber > 0)
+            {
+                outboxState.LastSequenceNumber = sentSequenceNumber;
+                dbContext.Update(outboxState);
+
+                saveChanges = true;
             }
 
             if (messageIndex == messages.Count && messages.Count < messageLimit)
@@ -261,12 +267,13 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                 outboxState.Delivered = DateTime.UtcNow;
                 dbContext.Update(outboxState);
 
-                await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                saveChanges = true;
 
                 LogContext.Debug?.Log("Outbox Delivered: {OutboxId} {Delivered}", outboxState.OutboxId, outboxState.Delivered);
-
-                return false;
             }
+
+            if (saveChanges)
+                await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
             return true;
         }

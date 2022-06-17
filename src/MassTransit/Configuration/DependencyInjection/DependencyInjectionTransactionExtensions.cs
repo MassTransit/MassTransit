@@ -1,6 +1,5 @@
 ﻿namespace MassTransit
 {
-    using System.Linq;
     using DependencyInjection;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -18,7 +17,7 @@
         {
             busConfigurator.TryAddSingleton<ITransactionalBus>(provider => new TransactionalEnlistmentBus(provider.GetService<IBus>()));
 
-            ReplaceScopedBusContextProvider<IBus>(busConfigurator);
+            busConfigurator.ReplaceScoped<IScopedBusContextProvider<IBus>, TransactionalScopedBusContextProvider<IBus>>();
         }
 
         /// <summary>
@@ -31,7 +30,7 @@
         {
             busConfigurator.TryAddSingleton<ITransactionalBus>(provider => new TransactionalEnlistmentBus(provider.GetRequiredService<TBus>()));
 
-            ReplaceScopedBusContextProvider<TBus>(busConfigurator);
+            busConfigurator.ReplaceScoped<IScopedBusContextProvider<TBus>, TransactionalScopedBusContextProvider<TBus>>();
         }
 
         /// <summary>
@@ -43,7 +42,7 @@
         {
             busConfigurator.TryAddScoped<ITransactionalBus>(provider => new TransactionalBus(provider.GetService<IBus>()));
 
-            ReplaceScopedBusContextProvider<IBus>(busConfigurator);
+            busConfigurator.ReplaceScoped<IScopedBusContextProvider<IBus>, TransactionalScopedBusContextProvider<IBus>>();
         }
 
         /// <summary>
@@ -56,17 +55,7 @@
         {
             busConfigurator.TryAddScoped<ITransactionalBus>(provider => new TransactionalBus(provider.GetRequiredService<TBus>()));
 
-            ReplaceScopedBusContextProvider<TBus>(busConfigurator);
-        }
-
-        static void ReplaceScopedBusContextProvider<TBus>(IServiceCollection busConfigurator)
-            where TBus : class, IBus
-        {
-            var descriptor = busConfigurator.FirstOrDefault(x => x.ServiceType == typeof(IScopedBusContextProvider<TBus>));
-            if (descriptor != null)
-                busConfigurator.Remove(descriptor);
-
-            busConfigurator.AddScoped<IScopedBusContextProvider<TBus>, TransactionalScopedBusContextProvider<TBus>>();
+            busConfigurator.ReplaceScoped<IScopedBusContextProvider<TBus>, TransactionalScopedBusContextProvider<TBus>>();
         }
     }
 }

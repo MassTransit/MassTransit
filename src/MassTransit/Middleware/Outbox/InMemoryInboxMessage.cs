@@ -74,8 +74,10 @@ namespace MassTransit.Middleware.Outbox
 
         public List<InMemoryOutboxMessage> GetOutboxMessages()
         {
+            var sequenceNumber = LastSequenceNumber ?? 0;
+
             lock (_outboxMessages)
-                return _outboxMessages.ToList();
+                return _outboxMessages.Where(x => x.SequenceNumber > sequenceNumber).ToList();
         }
 
         public void RemoveOutboxMessages()
