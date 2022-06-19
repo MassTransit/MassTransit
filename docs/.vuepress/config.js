@@ -200,6 +200,7 @@ module.exports = {
                   '/advanced/middleware/scoped'
                 ]
               },
+              '/advanced/transactional-outbox',
               '/usage/message-data',
               {
                 title: 'Monitoring',
