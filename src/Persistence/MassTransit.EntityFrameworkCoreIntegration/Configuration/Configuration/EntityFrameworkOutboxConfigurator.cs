@@ -24,22 +24,6 @@ namespace MassTransit.Configuration
 
             _lockStatementProvider = new SqlServerLockStatementProvider();
             _isolationLevel = IsolationLevel.Serializable;
-
-            configurator.TryAddScoped<IOutboxContextFactory<TDbContext>, EntityFrameworkOutboxContextFactory<TDbContext>>();
-            configurator.AddOptions<EntityFrameworkOutboxOptions>().Configure(options =>
-            {
-                options.IsolationLevel = _isolationLevel;
-                options.LockStatementProvider = _lockStatementProvider;
-            });
-
-            configurator.AddHostedService<InboxCleanupService<TDbContext>>();
-            configurator.AddOptions<InboxCleanupServiceOptions>().Configure(options =>
-            {
-                options.DuplicateDetectionWindow = DuplicateDetectionWindow;
-                options.QueryMessageLimit = QueryMessageLimit;
-                options.QueryDelay = QueryDelay;
-                options.QueryTimeout = QueryTimeout;
-            });
         }
 
         public TimeSpan DuplicateDetectionWindow { get; set; } = TimeSpan.FromMinutes(30);
@@ -60,11 +44,37 @@ namespace MassTransit.Configuration
 
         public TimeSpan QueryTimeout { get; set; } = TimeSpan.FromSeconds(30);
 
+        public void DisableInboxCleanupService()
+        {
+            _configurator.RemoveHostedService<InboxCleanupService<TDbContext>>();
+        }
+
         public virtual void UseBusOutbox(Action<IEntityFrameworkBusOutboxConfigurator>? configure = null)
         {
             var busOutboxConfigurator = new EntityFrameworkBusOutboxConfigurator<TDbContext>(_configurator, this);
 
             busOutboxConfigurator.Configure(configure);
+        }
+
+        public virtual void Configure(Action<IEntityFrameworkOutboxConfigurator>? configure)
+        {
+            _configurator.TryAddScoped<IOutboxContextFactory<TDbContext>, EntityFrameworkOutboxContextFactory<TDbContext>>();
+            _configurator.AddOptions<EntityFrameworkOutboxOptions>().Configure(options =>
+            {
+                options.IsolationLevel = _isolationLevel;
+                options.LockStatementProvider = _lockStatementProvider;
+            });
+
+            _configurator.AddHostedService<InboxCleanupService<TDbContext>>();
+            _configurator.AddOptions<InboxCleanupServiceOptions>().Configure(options =>
+            {
+                options.DuplicateDetectionWindow = DuplicateDetectionWindow;
+                options.QueryMessageLimit = QueryMessageLimit;
+                options.QueryDelay = QueryDelay;
+                options.QueryTimeout = QueryTimeout;
+            });
+
+            configure?.Invoke(this);
         }
     }
 }

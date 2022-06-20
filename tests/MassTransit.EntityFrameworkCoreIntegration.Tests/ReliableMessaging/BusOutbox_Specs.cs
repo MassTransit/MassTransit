@@ -1,9 +1,11 @@
 namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
 {
     using System;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Logging;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
     using TestFramework.Messages;
@@ -54,6 +56,53 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
             }
 
             Assert.That(await consumerHarness.Consumed.Any<PingMessage>(), Is.True);
+        }
+
+        [Explicit]
+        [Test]
+        public async Task Should_work_without_starting_the_bus()
+        {
+            await using var provider = new ServiceCollection()
+                .AddBusOutboxServices()
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.AddEntityFrameworkOutbox<ReliableDbContext>(o =>
+                    {
+                        o.DisableInboxCleanupService();
+
+                        o.UseBusOutbox(bo => bo.DisableDeliveryService());
+                    });
+
+                    x.AddConsumer<PingConsumer>();
+                })
+                .RemoveMassTransitHostedService()
+                .BuildServiceProvider(true);
+
+            var harness = provider.GetTestHarness();
+
+            await harness.Start();
+
+            {
+                await using var dbContext = harness.Scope.ServiceProvider.GetRequiredService<ReliableDbContext>();
+
+                var publishEndpoint = harness.Scope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
+
+                await publishEndpoint.Publish(new PingMessage());
+
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+
+                await dbContext.SaveChangesAsync(harness.CancellationToken);
+            }
+
+            {
+                using var scope = provider.CreateScope();
+
+                await using var dbContext = scope.ServiceProvider.GetRequiredService<ReliableDbContext>();
+
+                var count = await dbContext.Set<OutboxMessage>().CountAsync();
+
+                Assert.That(count, Is.EqualTo(1));
+            }
         }
 
 

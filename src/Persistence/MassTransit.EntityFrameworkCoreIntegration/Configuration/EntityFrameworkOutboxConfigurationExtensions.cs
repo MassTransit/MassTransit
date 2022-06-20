@@ -24,7 +24,7 @@ namespace MassTransit
         {
             var outboxConfigurator = new EntityFrameworkOutboxConfigurator<TDbContext>(configurator);
 
-            configure?.Invoke(outboxConfigurator);
+            outboxConfigurator.Configure(configure);
         }
 
         /// <summary>

@@ -34,6 +34,11 @@ namespace MassTransit
         public TimeSpan QueryTimeout { set; }
 
         /// <summary>
+        /// Disable the inbox cleanup service, removing the hosted service from the service collection
+        /// </summary>
+        void DisableInboxCleanupService();
+
+        /// <summary>
         /// The Bus Outbox intercepts the <see cref="ISendEndpointProvider" /> and <see cref="IPublishEndpoint" /> interfaces
         /// that are used when not consuming messages. Messages sent or published via those interfaces are written to the outbox
         /// instead of being delivered directly to the message broker.
