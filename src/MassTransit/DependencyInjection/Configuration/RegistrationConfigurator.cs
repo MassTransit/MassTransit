@@ -31,8 +31,6 @@ namespace MassTransit.Configuration
 
         public IContainerRegistrar Registrar { get; }
 
-        protected Func<IServiceProvider, IBus, IClientFactory> ClientFactoryProvider { get; } = BusClientFactoryProvider;
-
         public IConsumerRegistrationConfigurator<T> AddConsumer<T>(Action<IConsumerConfigurator<T>> configure)
             where T : class, IConsumer
         {
@@ -302,11 +300,6 @@ namespace MassTransit.Configuration
         protected static void ConfigureLogContext(IServiceProvider provider)
         {
             LogContext.ConfigureCurrentLogContextIfNull(provider);
-        }
-
-        static IClientFactory BusClientFactoryProvider(IServiceProvider provider, IBus bus)
-        {
-            return bus.CreateClientFactory();
         }
 
 
