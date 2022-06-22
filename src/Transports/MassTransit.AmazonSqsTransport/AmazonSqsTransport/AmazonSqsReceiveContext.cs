@@ -7,7 +7,6 @@
     using Amazon.SQS;
     using Amazon.SQS.Model;
     using Internals;
-    using Topology;
     using Transports;
 
 
@@ -21,20 +20,20 @@
         readonly CancellationTokenSource _activeTokenSource;
         readonly ClientContext _clientContext;
         readonly SqsReceiveEndpointContext _context;
-        readonly ReceiveSettings _receiveSettings;
+        readonly Message _message;
+        readonly ReceiveSettings _settings;
         bool _locked;
 
-        public AmazonSqsReceiveContext(Message transportMessage, bool redelivered, SqsReceiveEndpointContext context,
-            ClientContext clientContext, ReceiveSettings receiveSettings, ConnectionContext connectionContext)
-            : base(redelivered, context, receiveSettings, clientContext, connectionContext)
+        public AmazonSqsReceiveContext(Message message, bool redelivered, SqsReceiveEndpointContext context, ClientContext clientContext,
+            ReceiveSettings settings, ConnectionContext connectionContext)
+            : base(redelivered, context, settings, clientContext, connectionContext)
         {
             _context = context;
             _clientContext = clientContext;
-            _receiveSettings = receiveSettings;
+            _message = message;
+            _settings = settings;
 
-            TransportMessage = transportMessage;
-
-            Body = new StringMessageBody(transportMessage?.Body);
+            Body = new StringMessageBody(message?.Body);
 
             _activeTokenSource = new CancellationTokenSource();
             _locked = true;
@@ -46,15 +45,15 @@
 
         public override MessageBody Body { get; }
 
-        public Message TransportMessage { get; }
+        public Message TransportMessage => _message;
 
-        public Dictionary<string, MessageAttributeValue> Attributes => TransportMessage.MessageAttributes;
+        public Dictionary<string, MessageAttributeValue> Attributes => _message.MessageAttributes;
 
         public Task Complete()
         {
             _activeTokenSource.Cancel();
 
-            return _clientContext.DeleteMessage(_receiveSettings.EntityName, TransportMessage.ReceiptHandle);
+            return _clientContext.DeleteMessage(_settings.EntityName, _message.ReceiptHandle);
         }
 
         public async Task Faulted(Exception exception)
@@ -63,8 +62,9 @@
 
             try
             {
-                // return message to available message pool immediately
-                await _clientContext.ChangeMessageVisibility(_receiveSettings.QueueUrl, TransportMessage.ReceiptHandle, 0).ConfigureAwait(false);
+                await _clientContext.ChangeMessageVisibility(_settings.QueueUrl, _message.ReceiptHandle, _settings.RedeliverVisibilityTimeout)
+                    .ConfigureAwait(false);
+
                 _locked = false;
             }
             catch (OperationCanceledException)
@@ -99,7 +99,7 @@
                 return TimeSpan.FromSeconds(timeout * 0.7);
             }
 
-            var visibilityTimeout = _receiveSettings.VisibilityTimeout;
+            var visibilityTimeout = _settings.VisibilityTimeout;
 
             var delay = CalculateDelay(visibilityTimeout);
 
@@ -115,7 +115,7 @@
                     if (_activeTokenSource.Token.IsCancellationRequested)
                         break;
 
-                    await _clientContext.ChangeMessageVisibility(_receiveSettings.QueueUrl, TransportMessage.ReceiptHandle, visibilityTimeout)
+                    await _clientContext.ChangeMessageVisibility(_settings.QueueUrl, TransportMessage.ReceiptHandle, visibilityTimeout)
                         .ConfigureAwait(false);
 
                     // Max 12 hours, https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html

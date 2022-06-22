@@ -47,6 +47,11 @@
 
         int VisibilityTimeout { get; set; }
 
+        /// <summary>
+        /// The number of seconds to wait before allowing SQS to redeliver the message when faults are returned back to SQS.
+        /// </summary>
+        int RedeliverVisibilityTimeout { get; set; }
+
         string QueueUrl { get; set; }
     }
 }

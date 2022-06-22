@@ -17,6 +17,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
 
             WaitTimeSeconds = 3;
             VisibilityTimeout = 30;
+            RedeliverVisibilityTimeout = 0;
 
             if (AmazonSqsEndpointAddress.IsFifo(queueName))
                 IsOrdered = true;
@@ -32,6 +33,8 @@ namespace MassTransit.AmazonSqsTransport.Topology
         public bool IsOrdered { get; set; }
 
         public int VisibilityTimeout { get; set; }
+
+        public int RedeliverVisibilityTimeout { get; set; }
 
         public string QueueUrl { get; set; }
 

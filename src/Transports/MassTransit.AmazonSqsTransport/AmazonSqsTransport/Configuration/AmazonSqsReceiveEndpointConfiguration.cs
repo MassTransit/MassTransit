@@ -137,6 +137,11 @@
             _endpointConfiguration.Topology.Consume.Bind(topicName, configure);
         }
 
+        public int RedeliverVisibilityTimeout
+        {
+            set => _settings.RedeliverVisibilityTimeout = value;
+        }
+
         public void Subscribe<T>(Action<IAmazonSqsTopicSubscriptionConfigurator> configure = null)
             where T : class
         {

@@ -12,6 +12,12 @@
         IAmazonSqsQueueEndpointConfigurator
     {
         /// <summary>
+        /// The number of seconds to wait before allowing SQS to redeliver the message when faults are returned back to SQS.
+        /// Defaults to 0.
+        /// </summary>
+        int RedeliverVisibilityTimeout { set; }
+
+        /// <summary>
         /// Bind an existing exchange for the message type to the receive endpoint by name
         /// </summary>
         /// <typeparam name="T"></typeparam>
