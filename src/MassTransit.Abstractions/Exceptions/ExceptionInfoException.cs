@@ -16,7 +16,7 @@ namespace MassTransit
         {
             ExceptionInfo = exceptionInfo;
             if (ExceptionInfo.Data != null)
-                _data = ExceptionInfo.Data.ToDictionary(x => x.Key);
+                _data = (IDictionary)ExceptionInfo.Data;
         }
 
         public ExceptionInfo ExceptionInfo { get; }
