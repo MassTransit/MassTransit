@@ -81,6 +81,11 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _settings.ContinuationTimeout = timeout;
         }
 
+        public void MaxMessageSize(uint maxMessageSize)
+        {
+            _settings.MaxMessageSize = maxMessageSize;
+        }
+
         public RefreshConnectionFactoryCallback OnRefreshConnectionFactory
         {
             set => _settings.OnRefreshConnectionFactory = value;

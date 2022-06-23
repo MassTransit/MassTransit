@@ -61,6 +61,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         public BatchSettings BatchSettings => _batchSettings;
         public TimeSpan ContinuationTimeout { get; set; }
+        public uint? MaxMessageSize { get; set; }
 
         public Task Refresh(ConnectionFactory connectionFactory)
         {

@@ -8,7 +8,6 @@ namespace MassTransit.RabbitMqTransport
     using Configuration;
     using Metadata;
     using RabbitMQ.Client;
-    using Topology;
 
 
     public static class RabbitMqAddressExtensions
@@ -48,8 +47,11 @@ namespace MassTransit.RabbitMqTransport
                 VirtualHost = settings.VirtualHost ?? "/",
                 RequestedHeartbeat = settings.Heartbeat,
                 RequestedConnectionTimeout = settings.RequestedConnectionTimeout,
-                RequestedChannelMax = settings.RequestedChannelMax
+                RequestedChannelMax = settings.RequestedChannelMax,
             };
+
+            if (settings.MaxMessageSize.HasValue)
+                factory.MaxMessageSize = settings.MaxMessageSize.Value;
 
             if (settings.EndpointResolver != null)
             {

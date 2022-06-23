@@ -102,6 +102,7 @@ namespace MassTransitBenchmark
         public BatchSettings BatchSettings => _batchSettings;
 
         public TimeSpan ContinuationTimeout => TimeSpan.FromSeconds(20);
+        public uint? MaxMessageSize { get; set; }
 
         public Task Refresh(ConnectionFactory connectionFactory)
         {

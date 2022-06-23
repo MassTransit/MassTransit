@@ -16,6 +16,8 @@
         /// </summary>
         bool PublisherConfirmation { set; }
 
+        RefreshConnectionFactoryCallback OnRefreshConnectionFactory { set; }
+
         /// <summary>
         /// Configure the use of SSL to connection to RabbitMQ
         /// </summary>
@@ -84,6 +86,9 @@
         /// <param name="timeout"></param>
         void ContinuationTimeout(TimeSpan timeout);
 
-        RefreshConnectionFactoryCallback OnRefreshConnectionFactory { set; }
+        /// <summary>
+        /// Configure the Max message size for RabbitMQ.Client
+        /// </summary>
+        void MaxMessageSize(uint maxMessageSize);
     }
 }
