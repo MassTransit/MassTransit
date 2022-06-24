@@ -30,6 +30,7 @@ namespace MassTransit.AzureServiceBusTransport
                 case MessageLockExpiredException _:
                 case MessageTimeToLiveExpiredException _:
                 case ServiceBusException { Reason: ServiceBusFailureReason.MessageLockLost }:
+                case ServiceBusException { Reason: ServiceBusFailureReason.SessionLockLost }:
                 case ServiceBusException { Reason: ServiceBusFailureReason.ServiceCommunicationProblem }:
                     return;
                 default:
