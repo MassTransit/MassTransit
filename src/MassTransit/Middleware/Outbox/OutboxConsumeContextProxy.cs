@@ -23,11 +23,12 @@ namespace MassTransit.Middleware.Outbox
             ReceiveContext = outboxReceiveContext;
             PublishEndpointProvider = outboxReceiveContext.PublishEndpointProvider;
 
-            // if (context.TryGetPayload(out MessageSchedulerContext schedulerContext))
-            // {
-            //     _outboxSchedulerContext = new OutboxMessageSchedulerContext(schedulerContext, _clearToSend.Task);
-            //     context.AddOrUpdatePayload(() => _outboxSchedulerContext, _ => _outboxSchedulerContext);
-            // }
+            if (context.TryGetPayload(out MessageSchedulerContext schedulerContext))
+            {
+                context.AddOrUpdatePayload<MessageSchedulerContext>(
+                    () => new ConsumeMessageSchedulerContext(this, schedulerContext.SchedulerFactory, context.ReceiveContext.InputAddress),
+                    existing => new ConsumeMessageSchedulerContext(this, existing.SchedulerFactory, context.ReceiveContext.InputAddress));
+            }
         }
 
         protected OutboxConsumeOptions Options { get; }

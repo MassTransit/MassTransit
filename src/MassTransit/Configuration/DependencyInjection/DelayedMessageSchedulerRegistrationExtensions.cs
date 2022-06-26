@@ -14,8 +14,8 @@ namespace MassTransit
         {
             configurator.TryAddScoped(provider =>
             {
-                var bus = ServiceProviderServiceExtensions.GetRequiredService<IBus>(provider);
-                var sendEndpointProvider = ServiceProviderServiceExtensions.GetRequiredService<ISendEndpointProvider>(provider);
+                var bus = provider.GetRequiredService<IBus>();
+                var sendEndpointProvider = provider.GetRequiredService<ISendEndpointProvider>();
                 return sendEndpointProvider.CreateDelayedMessageScheduler(bus.Topology);
             });
         }

@@ -1,7 +1,6 @@
 namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
 {
     using System;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Logging;
@@ -53,6 +52,55 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
                 Assert.That(await consumerHarness.Consumed.Any<PingMessage>(cts.Token), Is.False);
 
                 await dbContext.SaveChangesAsync(harness.CancellationToken);
+            }
+
+            Assert.That(await consumerHarness.Consumed.Any<PingMessage>(), Is.True);
+        }
+
+        [Test]
+        [Explicit]
+        public async Task Should_support_delayed_message_scheduler()
+        {
+            await using var provider = new ServiceCollection()
+                .AddBusOutboxServices()
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.AddEntityFrameworkOutbox<ReliableDbContext>(o =>
+                    {
+                        o.QueryDelay = TimeSpan.FromSeconds(1);
+
+                        o.UseBusOutbox(bo =>
+                        {
+                            bo.MessageDeliveryLimit = 10;
+                        });
+                    });
+
+                    x.AddConsumer<PingConsumer>();
+                })
+                .BuildServiceProvider(true);
+
+            var harness = provider.GetTestHarness();
+
+            harness.TestInactivityTimeout = TimeSpan.FromSeconds(10);
+
+            await harness.Start();
+
+            IConsumerTestHarness<PingConsumer> consumerHarness = harness.GetConsumerHarness<PingConsumer>();
+
+            {
+                await using var dbContext = harness.Scope.ServiceProvider.GetRequiredService<ReliableDbContext>();
+
+                var scheduler = harness.Scope.ServiceProvider.GetRequiredService<IMessageScheduler>();
+
+                await scheduler.SchedulePublish(TimeSpan.FromSeconds(8), new PingMessage());
+
+                await dbContext.SaveChangesAsync(harness.CancellationToken);
+            }
+
+            {
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+
+                Assert.That(await consumerHarness.Consumed.Any<PingMessage>(cts.Token), Is.False);
             }
 
             Assert.That(await consumerHarness.Consumed.Any<PingMessage>(), Is.True);

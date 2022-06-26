@@ -25,6 +25,8 @@
             _cancelMessages = new List<Func<Task>>();
         }
 
+        public MessageSchedulerFactory SchedulerFactory => _context.SchedulerFactory;
+
         public async Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, CancellationToken cancellationToken)
             where T : class
         {

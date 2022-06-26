@@ -8,6 +8,8 @@ namespace MassTransit
     public interface MessageSchedulerContext :
         IMessageScheduler
     {
+        MessageSchedulerFactory SchedulerFactory { get; }
+
         /// <summary>
         /// Send a message
         /// </summary>

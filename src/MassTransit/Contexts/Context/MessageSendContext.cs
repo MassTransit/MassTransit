@@ -6,6 +6,7 @@ namespace MassTransit.Context
     using System.Runtime.Serialization;
     using System.Text;
     using System.Threading;
+    using Initializers.TypeConverters;
     using Middleware;
     using Serialization;
 
@@ -15,6 +16,8 @@ namespace MassTransit.Context
         TransportSendContext<TMessage>
         where TMessage : class
     {
+        static readonly TimeSpanTypeConverter _timeSpanConverter = new TimeSpanTypeConverter();
+
         readonly Lazy<MessageBody> _body;
         readonly DictionarySendHeaders _headers;
 
@@ -101,12 +104,15 @@ namespace MassTransit.Context
                 properties[PropertyNames.Durable] = false;
             if (Mandatory)
                 properties[PropertyNames.Mandatory] = true;
+            if (Delay.HasValue)
+                properties[PropertyNames.Delay] = Delay.Value;
         }
 
         public virtual void ReadPropertiesFrom(IReadOnlyDictionary<string, object> properties)
         {
             Durable = ReadBoolean(properties, PropertyNames.Durable, true);
             Mandatory = ReadBoolean(properties, PropertyNames.Mandatory);
+            Delay = ReadTimeSpan(properties, PropertyNames.Delay);
         }
 
         MessageBody GetMessageBody()
@@ -129,6 +135,16 @@ namespace MassTransit.Context
             }
 
             return defaultValue;
+        }
+
+        protected static TimeSpan? ReadTimeSpan(IReadOnlyDictionary<string, object> properties, string key, TimeSpan? defaultValue = null)
+        {
+            var value = ReadString(properties, key);
+
+            if (string.IsNullOrWhiteSpace(value))
+                return defaultValue;
+
+            return _timeSpanConverter.TryConvert(value, out var result) ? result : defaultValue;
         }
 
         protected static T? ReadEnum<T>(IReadOnlyDictionary<string, object> properties, string key, T? defaultValue = default)
@@ -186,6 +202,7 @@ namespace MassTransit.Context
 
         static class PropertyNames
         {
+            public const string Delay = "Delay";
             public const string Durable = "Durable";
             public const string Mandatory = "Mandatory";
         }
