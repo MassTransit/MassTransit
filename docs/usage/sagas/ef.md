@@ -77,7 +77,7 @@ services.AddMassTransit(x =>
         {
             r.ConcurrencyMode = ConcurrencyMode.Pessimistic; // or use Optimistic, which requires RowVersion
 
-            r.AddDbContext<DbContext, OrderStateDbContext>(connectionString)
+            r.DatabaseFactory(() => new OrderStateDbContext(connectionString));
         });
 });
 ```
