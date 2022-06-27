@@ -27,5 +27,11 @@ namespace MassTransit.MongoDbIntegration.Saga
         {
             return _collectionName;
         }
+
+        public string Collection<T>()
+            where T : class
+        {
+            return _collectionName;
+        }
     }
 }

@@ -4,8 +4,8 @@ namespace MassTransit.MongoDbIntegration.Saga
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using Context;
     using Logging;
-    using MassTransit.Context;
     using MassTransit.Saga;
     using Middleware;
     using MongoDB.Driver;
@@ -18,14 +18,14 @@ namespace MassTransit.MongoDbIntegration.Saga
         where TMessage : class
     {
         readonly ConsumeContext<TMessage> _consumeContext;
-        readonly ISagaConsumeContextFactory<IMongoCollection<TSaga>, TSaga> _factory;
-        readonly IMongoCollection<TSaga> _mongoCollection;
+        readonly MongoDbCollectionContext<TSaga> _dbContext;
+        readonly ISagaConsumeContextFactory<MongoDbCollectionContext<TSaga>, TSaga> _factory;
 
-        public MongoDbSagaRepositoryContext(IMongoCollection<TSaga> mongoCollection, ConsumeContext<TMessage> consumeContext,
-            ISagaConsumeContextFactory<IMongoCollection<TSaga>, TSaga> factory)
+        public MongoDbSagaRepositoryContext(MongoDbCollectionContext<TSaga> dbContext, ConsumeContext<TMessage> consumeContext,
+            ISagaConsumeContextFactory<MongoDbCollectionContext<TSaga>, TSaga> factory)
             : base(consumeContext)
         {
-            _mongoCollection = mongoCollection;
+            _dbContext = dbContext;
             _consumeContext = consumeContext;
             _factory = factory;
         }
@@ -34,23 +34,23 @@ namespace MassTransit.MongoDbIntegration.Saga
             SagaConsumeContextMode mode)
             where T : class
         {
-            return _factory.CreateSagaConsumeContext(_mongoCollection, consumeContext, instance, mode);
+            return _factory.CreateSagaConsumeContext(_dbContext, consumeContext, instance, mode);
         }
 
         public Task<SagaConsumeContext<TSaga, TMessage>> Add(TSaga instance)
         {
-            return _factory.CreateSagaConsumeContext(_mongoCollection, _consumeContext, instance, SagaConsumeContextMode.Add);
+            return _factory.CreateSagaConsumeContext(_dbContext, _consumeContext, instance, SagaConsumeContextMode.Add);
         }
 
         public async Task<SagaConsumeContext<TSaga, TMessage>> Insert(TSaga instance)
         {
             try
             {
-                await _mongoCollection.InsertOneAsync(instance).ConfigureAwait(false);
+                await _dbContext.InsertOne(instance, CancellationToken).ConfigureAwait(false);
 
                 _consumeContext.LogInsert<TSaga, TMessage>(instance.CorrelationId);
 
-                return await _factory.CreateSagaConsumeContext(_mongoCollection, _consumeContext, instance, SagaConsumeContextMode.Insert)
+                return await _factory.CreateSagaConsumeContext(_dbContext, _consumeContext, instance, SagaConsumeContextMode.Insert)
                     .ConfigureAwait(false);
             }
             catch (Exception ex)
@@ -63,36 +63,38 @@ namespace MassTransit.MongoDbIntegration.Saga
 
         public async Task<SagaConsumeContext<TSaga, TMessage>> Load(Guid correlationId)
         {
-            var instance = await _mongoCollection.Find(Builders<TSaga>.Filter.Eq(x => x.CorrelationId, correlationId))
-                .FirstOrDefaultAsync()
-                .ConfigureAwait(false);
+            FilterDefinition<TSaga> filter = Builders<TSaga>.Filter.Eq(x => x.CorrelationId, correlationId);
 
+            var instance = await _dbContext.Find(filter).FirstOrDefaultAsync(CancellationToken).ConfigureAwait(false);
             if (instance == null)
                 return default;
 
-            return await _factory.CreateSagaConsumeContext(_mongoCollection, _consumeContext, instance, SagaConsumeContextMode.Load).ConfigureAwait(false);
+            return await _factory.CreateSagaConsumeContext(_dbContext, _consumeContext, instance, SagaConsumeContextMode.Load).ConfigureAwait(false);
         }
 
         public Task Save(SagaConsumeContext<TSaga> context)
         {
-            return _mongoCollection.InsertOneAsync(context.Saga, null, CancellationToken);
+            return _dbContext.InsertOne(context.Saga, CancellationToken);
         }
 
         public async Task Update(SagaConsumeContext<TSaga> context)
         {
             context.Saga.Version++;
-            var result = await _mongoCollection.FindOneAndReplaceAsync(x => x.CorrelationId == context.Saga.CorrelationId && x.Version < context.Saga.Version,
-                context.Saga, cancellationToken: CancellationToken).ConfigureAwait(false);
 
+            FilterDefinitionBuilder<TSaga> builder = Builders<TSaga>.Filter;
+            FilterDefinition<TSaga> filter = builder.Eq(x => x.CorrelationId, context.Saga.CorrelationId) & builder.Lt(x => x.Version, context.Saga.Version);
+
+            var result = await _dbContext.FindOneAndReplace(filter, context.Saga, CancellationToken).ConfigureAwait(false);
             if (result == null)
                 throw new MongoDbConcurrencyException("Saga Update Failed", typeof(TSaga), context.Saga.CorrelationId);
         }
 
         public async Task Delete(SagaConsumeContext<TSaga> context)
         {
-            var result = await _mongoCollection.DeleteOneAsync(x => x.CorrelationId == context.Saga.CorrelationId && x.Version <= context.Saga.Version,
-                CancellationToken).ConfigureAwait(false);
+            FilterDefinitionBuilder<TSaga> builder = Builders<TSaga>.Filter;
+            FilterDefinition<TSaga> filter = builder.Eq(x => x.CorrelationId, context.Saga.CorrelationId) & builder.Lte(x => x.Version, context.Saga.Version);
 
+            var result = await _dbContext.DeleteOne(filter, CancellationToken).ConfigureAwait(false);
             if (result.DeletedCount == 0)
                 throw new MongoDbConcurrencyException("Saga Delete Failed", typeof(TSaga), context.Saga.CorrelationId);
         }
@@ -114,17 +116,17 @@ namespace MassTransit.MongoDbIntegration.Saga
         SagaRepositoryContext<TSaga>
         where TSaga : class, ISagaVersion
     {
-        readonly IMongoCollection<TSaga> _context;
+        readonly MongoDbCollectionContext<TSaga> _dbContext;
 
-        public MongoDbSagaRepositoryContext(IMongoCollection<TSaga> context, CancellationToken cancellationToken)
+        public MongoDbSagaRepositoryContext(MongoDbCollectionContext<TSaga> dbContext, CancellationToken cancellationToken)
             : base(cancellationToken)
         {
-            _context = context;
+            _dbContext = dbContext;
         }
 
         public async Task<SagaRepositoryQueryContext<TSaga>> Query(ISagaQuery<TSaga> query, CancellationToken cancellationToken)
         {
-            IList<Guid> instances = await _context.Find(query.FilterExpression)
+            IList<Guid> instances = await _dbContext.Find(query.FilterExpression)
                 .Project(x => x.CorrelationId)
                 .ToListAsync(cancellationToken)
                 .ConfigureAwait(false);
@@ -134,7 +136,9 @@ namespace MassTransit.MongoDbIntegration.Saga
 
         public Task<TSaga> Load(Guid correlationId)
         {
-            return _context.Find(x => x.CorrelationId == correlationId).FirstOrDefaultAsync();
+            FilterDefinition<TSaga> filter = Builders<TSaga>.Filter.Eq(x => x.CorrelationId, correlationId);
+
+            return _dbContext.Find(filter).FirstOrDefaultAsync();
         }
     }
 }

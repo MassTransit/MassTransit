@@ -1,4 +1,4 @@
-namespace MassTransit.EntityFrameworkCoreIntegration
+namespace MassTransit
 {
     using System;
 

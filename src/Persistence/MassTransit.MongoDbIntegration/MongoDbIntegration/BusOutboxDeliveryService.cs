@@ -1,44 +1,37 @@
-namespace MassTransit.EntityFrameworkCoreIntegration
+namespace MassTransit.MongoDbIntegration
 {
     using System;
     using System.Collections.Generic;
-    using System.Data;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Storage;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Middleware;
+    using MongoDB.Bson;
+    using MongoDB.Driver;
+    using Outbox;
     using Serialization;
 
 
-    public class BusOutboxDeliveryService<TDbContext> :
+    public class BusOutboxDeliveryService :
         BackgroundService
-        where TDbContext : DbContext
     {
         readonly IBusControl _busControl;
-        readonly IsolationLevel _isolationLevel;
-        readonly ILockStatementProvider _lockStatementProvider;
         readonly ILogger _logger;
         readonly OutboxDeliveryServiceOptions _options;
         readonly IServiceProvider _provider;
 
-        public BusOutboxDeliveryService(IBusControl busControl, IOptions<OutboxDeliveryServiceOptions> options,
-            IOptions<EntityFrameworkOutboxOptions> outboxOptions,
-            ILogger<BusOutboxDeliveryService<TDbContext>> logger, IServiceProvider provider)
+        public BusOutboxDeliveryService(IBusControl busControl, IOptions<OutboxDeliveryServiceOptions> options, ILogger<BusOutboxDeliveryService> logger,
+            IServiceProvider provider)
         {
             _busControl = busControl;
             _provider = provider;
             _logger = logger;
 
             _options = options.Value;
-
-            _lockStatementProvider = outboxOptions.Value.LockStatementProvider;
-            _isolationLevel = outboxOptions.Value.IsolationLevel;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -65,45 +58,60 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
         async Task ProcessMessageBatch(CancellationToken cancellationToken)
         {
-            using var scope = _provider.CreateScope();
+            var scope = _provider.CreateScope();
 
-            await using var dbContext = scope.ServiceProvider.GetRequiredService<TDbContext>();
+            try
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<MongoDbContext>();
 
-            var messageLimit = _options.QueryMessageLimit;
+                var messageLimit = _options.QueryMessageLimit;
 
-            List<Guid> outboxIds = await dbContext.Set<OutboxMessage>()
-                .Where(x => x.OutboxId != null)
-                .OrderBy(x => x.SequenceNumber)
-                .Take(messageLimit)
-                .Select(x => x.OutboxId.Value)
-                .Distinct()
-                .ToListAsync(cancellationToken).ConfigureAwait(false);
+                FilterDefinitionBuilder<OutboxMessage> builder = Builders<OutboxMessage>.Filter;
+                FilterDefinition<OutboxMessage> filter = builder.Not(builder.Eq(x => x.OutboxId, null));
 
-            await Task.WhenAll(outboxIds.Select(outboxId => DeliverOutbox(outboxId, cancellationToken)));
+                List<Guid> outboxIds = await dbContext.GetCollection<OutboxMessage>()
+                    .Find(filter)
+                    .Limit(messageLimit)
+                    .Project(x => x.OutboxId.Value)
+                    .ToListAsync(cancellationToken).ConfigureAwait(false);
+
+                await Task.WhenAll(outboxIds.Distinct().Select(outboxId => DeliverOutbox(outboxId, cancellationToken)));
+            }
+            finally
+            {
+                // ReSharper disable once SuspiciousTypeConversion.Global
+                if (scope is IAsyncDisposable asyncDisposable)
+                    await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+                else
+                    scope.Dispose();
+            }
         }
 
         async Task DeliverOutbox(Guid outboxId, CancellationToken cancellationToken)
         {
             var scope = _provider.CreateScope();
 
-            var dbContext = scope.ServiceProvider.GetRequiredService<TDbContext>();
+            var dbContext = scope.ServiceProvider.GetRequiredService<MongoDbContext>();
+
+            FilterDefinitionBuilder<OutboxState> builder = Builders<OutboxState>.Filter;
+            FilterDefinition<OutboxState> filter = builder.Eq(x => x.OutboxId, outboxId);
 
             try
             {
-                var statement = _lockStatementProvider.GetRowLockStatement<OutboxState>(dbContext, nameof(OutboxState.OutboxId));
-
                 async Task<bool> Execute()
                 {
                     using var timeoutToken = new CancellationTokenSource(_options.QueryTimeout);
 
-                    await using var transaction = await dbContext.Database.BeginTransactionAsync(_isolationLevel, timeoutToken.Token)
-                        .ConfigureAwait(false);
+                    await dbContext.BeginTransaction(cancellationToken).ConfigureAwait(false);
+
+                    MongoDbCollectionContext<OutboxState> stateCollection = dbContext.GetCollection<OutboxState>();
+                    MongoDbCollectionContext<OutboxMessage> messageCollection = dbContext.GetCollection<OutboxMessage>();
+
+                    UpdateDefinition<OutboxState> update = Builders<OutboxState>.Update.Set(x => x.LockToken, ObjectId.GenerateNewId());
 
                     try
                     {
-                        var outboxState = await dbContext.Set<OutboxState>()
-                            .FromSqlRaw(statement, outboxId)
-                            .SingleOrDefaultAsync(timeoutToken.Token).ConfigureAwait(false);
+                        var outboxState = await stateCollection.Lock(filter, update, cancellationToken).ConfigureAwait(false);
 
                         bool continueProcessing;
 
@@ -112,10 +120,10 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                             outboxState = new OutboxState
                             {
                                 OutboxId = outboxId,
+                                Version = 1
                             };
 
-                            await dbContext.AddAsync(outboxState, timeoutToken.Token).ConfigureAwait(false);
-                            await dbContext.SaveChangesAsync(timeoutToken.Token).ConfigureAwait(false);
+                            await stateCollection.InsertOne(outboxState, cancellationToken).ConfigureAwait(false);
 
                             continueProcessing = true;
                         }
@@ -123,90 +131,82 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                         {
                             if (outboxState.Delivered != null)
                             {
-                                await RemoveOutbox(dbContext, outboxState, cancellationToken).ConfigureAwait(false);
+                                await RemoveOutbox(messageCollection, stateCollection, outboxState, cancellationToken).ConfigureAwait(false);
 
                                 continueProcessing = false;
                             }
                             else
-                                continueProcessing = await DeliverOutboxMessages(dbContext, outboxState, cancellationToken).ConfigureAwait(false);
+                                continueProcessing = await DeliverOutboxMessages(messageCollection, outboxState, cancellationToken).ConfigureAwait(false);
+
+                            outboxState.Version++;
+
+                            FilterDefinition<OutboxState> updateFilter =
+                                builder.Eq(x => x.OutboxId, outboxId) & builder.Lt(x => x.Version, outboxState.Version);
+
+                            await stateCollection.FindOneAndReplace(updateFilter, outboxState, cancellationToken).ConfigureAwait(false);
                         }
 
-                        await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+                        await dbContext.CommitTransaction(cancellationToken).ConfigureAwait(false);
+
 
                         return continueProcessing;
                     }
-                    catch (DbUpdateConcurrencyException)
+                    catch (MongoCommandException)
                     {
-                        await RollbackTransaction(transaction).ConfigureAwait(false);
-                        throw;
-                    }
-                    catch (DbUpdateException)
-                    {
-                        await RollbackTransaction(transaction).ConfigureAwait(false);
+                        await AbortTransaction(dbContext).ConfigureAwait(false);
                         throw;
                     }
                     catch (Exception)
                     {
-                        await RollbackTransaction(transaction).ConfigureAwait(false);
+                        await AbortTransaction(dbContext).ConfigureAwait(false);
                         throw;
                     }
                 }
 
                 var continueProcessing = true;
                 while (continueProcessing)
-                {
-                    var executionStrategy = dbContext.Database.CreateExecutionStrategy();
-                    if (executionStrategy is ExecutionStrategy)
-                        continueProcessing = await executionStrategy.ExecuteAsync(() => Execute()).ConfigureAwait(false);
-                    else
-                        continueProcessing = await Execute().ConfigureAwait(false);
-                }
+                    continueProcessing = await Execute().ConfigureAwait(false);
             }
             finally
             {
-                if (dbContext != null)
-                    await dbContext.DisposeAsync().ConfigureAwait(false);
-
                 // ReSharper disable once SuspiciousTypeConversion.Global
-                if (scope is IAsyncDisposable disposable)
-                    await disposable.DisposeAsync().ConfigureAwait(false);
+                if (scope is IAsyncDisposable asyncDisposable)
+                    await asyncDisposable.DisposeAsync().ConfigureAwait(false);
                 else
                     scope.Dispose();
             }
         }
 
-        static async Task RemoveOutbox(TDbContext dbContext, OutboxState outboxState, CancellationToken cancellationToken)
+        static async Task RemoveOutbox(MongoDbCollectionContext<OutboxMessage> messageCollection, MongoDbCollectionContext<OutboxState> stateCollection,
+            OutboxState outboxState, CancellationToken cancellationToken)
         {
-            List<OutboxMessage> messages = await dbContext.Set<OutboxMessage>()
-                .Where(x => x.OutboxId == outboxState.OutboxId)
-                .OrderBy(x => x.SequenceNumber)
-                .ToListAsync(cancellationToken);
+            var messages = await messageCollection.DeleteMany(Builders<OutboxMessage>.Filter.Eq(x => x.OutboxId, outboxState.OutboxId), cancellationToken)
+                .ConfigureAwait(false);
 
-            dbContext.RemoveRange(messages);
+            if (messages.DeletedCount > 0)
+                LogContext.Debug?.Log("Outbox removed {Count} messages: {MessageId}", messages.DeletedCount, outboxState.OutboxId);
 
-            dbContext.Remove(outboxState);
-
-            await dbContext.SaveChangesAsync(cancellationToken);
-
-            if (messages.Count > 0)
-                LogContext.Debug?.Log("Outbox removed {Count} messages: {OutboxId}", messages.Count, outboxState);
+            await stateCollection.DeleteOne(Builders<OutboxState>.Filter.Eq(x => x.OutboxId, outboxState.OutboxId), cancellationToken)
+                .ConfigureAwait(false);
         }
 
-        async Task<bool> DeliverOutboxMessages(TDbContext dbContext, OutboxState outboxState, CancellationToken cancellationToken)
+        async Task<bool> DeliverOutboxMessages(MongoDbCollectionContext<OutboxMessage> messageCollection, OutboxState outboxState,
+            CancellationToken
+                cancellationToken)
         {
             var messageLimit = _options.MessageDeliveryLimit;
 
             var lastSequenceNumber = outboxState.LastSequenceNumber ?? 0;
 
-            List<OutboxMessage> messages = await dbContext.Set<OutboxMessage>()
-                .Where(x => x.OutboxId == outboxState.OutboxId && x.SequenceNumber > lastSequenceNumber)
-                .OrderBy(x => x.SequenceNumber)
-                .Take(messageLimit)
-                .ToListAsync(cancellationToken).ConfigureAwait(false);
+            FilterDefinitionBuilder<OutboxMessage> builder = Builders<OutboxMessage>.Filter;
+            FilterDefinition<OutboxMessage> filter = builder.Eq(x => x.OutboxId, outboxState.OutboxId) & builder.Gt(x => x.SequenceNumber, lastSequenceNumber);
+
+            List<OutboxMessage> messages = await messageCollection.Find(filter)
+                .Sort(Builders<OutboxMessage>.Sort.Ascending(x => x.SequenceNumber))
+                .Limit(messageLimit + 1)
+                .ToListAsync(cancellationToken);
 
             var sentSequenceNumber = 0L;
-
-            var saveChanges = false;
 
             var messageCount = 0;
             var messageIndex = 0;
@@ -246,43 +246,31 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                         break;
                     }
 
-                    dbContext.Remove((object)message);
-
-                    saveChanges = true;
+                    await messageCollection.DeleteOne(Builders<OutboxMessage>.Filter.Eq(x => x.MessageId, message.MessageId), cancellationToken)
+                        .ConfigureAwait(false);
 
                     messageCount++;
                 }
             }
 
             if (sentSequenceNumber > 0)
-            {
                 outboxState.LastSequenceNumber = sentSequenceNumber;
-                dbContext.Update(outboxState);
-
-                saveChanges = true;
-            }
 
             if (messageIndex == messages.Count && messages.Count < messageLimit)
             {
                 outboxState.Delivered = DateTime.UtcNow;
-                dbContext.Update(outboxState);
-
-                saveChanges = true;
 
                 LogContext.Debug?.Log("Outbox Delivered: {OutboxId} {Delivered}", outboxState.OutboxId, outboxState.Delivered);
             }
 
-            if (saveChanges)
-                await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
             return true;
         }
 
-        static async Task RollbackTransaction(IDbContextTransaction transaction)
+        static async Task AbortTransaction(MongoDbContext dbContext)
         {
             try
             {
-                await transaction.RollbackAsync(CancellationToken.None).ConfigureAwait(false);
+                await dbContext.AbortTransaction(CancellationToken.None).ConfigureAwait(false);
             }
             catch (Exception innerException)
             {

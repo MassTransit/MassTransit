@@ -1,8 +1,11 @@
 namespace MassTransit.Testing
 {
     using System;
+    using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
 
 
     public static class TestingServiceProviderExtensions
@@ -34,6 +37,11 @@ namespace MassTransit.Testing
         public static void AddTaskCompletionSource<T>(this IBusRegistrationConfigurator configurator)
         {
             configurator.AddSingleton(provider => provider.GetRequiredService<ITestHarness>().GetTask<T>());
+        }
+
+        public static Task Stop(this ITestHarness harness, CancellationToken cancellationToken = default)
+        {
+            return Task.WhenAll(harness.Scope.ServiceProvider.GetServices<IHostedService>().Select(x => x.StopAsync(cancellationToken)));
         }
     }
 }

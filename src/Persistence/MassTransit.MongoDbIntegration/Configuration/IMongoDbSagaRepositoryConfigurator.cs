@@ -35,6 +35,12 @@ namespace MassTransit
         /// </summary>
         /// <param name="databaseFactory"></param>
         void DatabaseFactory(Func<IServiceProvider, IMongoDatabase> databaseFactory);
+
+        /// <summary>
+        /// Use the configuration service provider to resolve the MongoDB client <see cref="IMongoClient" />
+        /// </summary>
+        /// <param name="clientFactory"></param>
+        void ClientFactory(Func<IServiceProvider, IMongoClient> clientFactory);
     }
 
 

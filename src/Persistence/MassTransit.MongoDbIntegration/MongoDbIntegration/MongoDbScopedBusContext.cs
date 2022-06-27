@@ -1,26 +1,25 @@
 #nullable enable
-namespace MassTransit.EntityFrameworkCoreIntegration
+namespace MassTransit.MongoDbIntegration
 {
     using System;
     using System.Threading.Tasks;
     using Clients;
     using DependencyInjection;
-    using Microsoft.EntityFrameworkCore;
     using Middleware;
     using Middleware.Outbox;
+    using Outbox;
     using Serialization;
     using Transports;
 
 
-    public class EntityFrameworkScopedBusContext<TBus, TDbContext> :
+    public class MongoDbScopedBusContext<TBus> :
         ScopedBusContext,
         OutboxSendContext
         where TBus : class, IBus
-        where TDbContext : DbContext
     {
         readonly TBus _bus;
         readonly IClientFactory _clientFactory;
-        readonly TDbContext _dbContext;
+        readonly MongoDbCollectionContext<OutboxMessage> _collection;
         readonly Guid _outboxId;
         readonly IServiceProvider _provider;
 
@@ -28,20 +27,20 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         IScopedClientFactory? _scopedClientFactory;
         ISendEndpointProvider? _sendEndpointProvider;
 
-        public EntityFrameworkScopedBusContext(TBus bus, TDbContext dbContext, IClientFactory clientFactory, IServiceProvider provider)
+        public MongoDbScopedBusContext(TBus bus, MongoDbContext dbContext, IClientFactory clientFactory, IServiceProvider provider)
         {
             _bus = bus;
-            _dbContext = dbContext;
             _clientFactory = clientFactory;
             _provider = provider;
 
+            _collection = dbContext.GetCollection<OutboxMessage>();
             _outboxId = NewId.NextGuid();
         }
 
         public Task AddSend<T>(SendContext<T> context)
             where T : class
         {
-            return _dbContext.Set<OutboxMessage>().AddSend(context, SystemTextJsonMessageSerializer.Instance, outboxId: _outboxId);
+            return _collection.AddSend(context, SystemTextJsonMessageSerializer.Instance, outboxId: _outboxId);
         }
 
         public ISendEndpointProvider SendEndpointProvider

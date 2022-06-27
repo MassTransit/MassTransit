@@ -7,6 +7,9 @@ namespace MassTransit.MongoDbIntegration
     {
         string Saga<TSaga>()
             where TSaga : ISaga;
+
+        string Collection<T>()
+            where T : class;
     }
 
 

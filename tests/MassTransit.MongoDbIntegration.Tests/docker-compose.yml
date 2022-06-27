@@ -1,9 +1,37 @@
-# this compose file will start local services the same as those running on appveyor CI for testing.
+version: '3.8'
 
-version: '2.3'
 services:
-  mongo:
-    image: "mongo"
-    container_name: mongo
+  mongo1:
+    container_name: mongo1
+    image: mongo
+    volumes:
+      - ./rs-init.sh:/scripts/rs-init.sh
+    networks:
+      - mongors-network
     ports:
-      - '27017-27019:27017-27019'
+      - 27017:27017
+      - 27021:27017
+    links:
+      - mongo2
+      - mongo3
+    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "dbrs" ]
+  mongo2:
+    container_name: mongo2
+    image: mongo
+    networks:
+      - mongors-network
+    ports:
+      - 27022:27017
+    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "dbrs" ]
+  mongo3:
+    container_name: mongo3
+    image: mongo
+    networks:
+      - mongors-network
+    ports:
+      - 27023:27017
+    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "dbrs" ]
+
+networks:
+  mongors-network:
+    driver: bridge

@@ -25,6 +25,12 @@ namespace MassTransit.MongoDbIntegration.Saga
             return Pluralize(Pattern.Replace(typeof(TSaga).Name, m => $".{m.Value}")).ToLowerInvariant();
         }
 
+        public string Collection<T>()
+            where T : class
+        {
+            return Pluralize(Pattern.Replace(typeof(T).Name, m => $".{m.Value}")).ToLowerInvariant();
+        }
+
         static string Pluralize(string str)
         {
             if (string.IsNullOrEmpty(str))
