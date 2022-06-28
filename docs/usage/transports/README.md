@@ -6,6 +6,7 @@ MassTransit support multiple transports, including:
 * [Azure Service Bus](azure-sb)
 * [ActiveMQ](activemq)
 * [Amazon SQS](amazonsqs)
+* [gRPC](grpc)
 * [In Memory](in-memory)
 
 ### What does MassTransit add to the transport?
