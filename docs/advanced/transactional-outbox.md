@@ -24,7 +24,7 @@ When the bus outbox is configured, the scoped interfaces are replaced with versi
 
 Once the changes are saved in the `DbContext` (typically by the application calling `SaveChangesAsync`), the messages will be written to the database as part of the transaction and will be available to the delivery service.
 
-The delivery service queries the `OutboxMessage` table for messages published or sent via the Bus Outbox, and attempt to deliver any messages found to the message broker.
+The delivery service queries the `OutboxMessage` table for messages published or sent via the Bus Outbox, and attempts to deliver any messages found to the message broker.
 
 ![Delivery to Broker](/outbox-to-broker.png "Delivery to Broker")
 
