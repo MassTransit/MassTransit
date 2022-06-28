@@ -21,8 +21,8 @@ public class Program
                             h.Host = "127.0.0.1";
                             h.Port = 19796;
 
-                            h.AddServer(new Uri("127.0.0.1:19797"));
-                            h.AddServer(new Uri("127.0.0.1:19798"));
+                            h.AddServer(new Uri("http://127.0.0.1:19797"));
+                            h.AddServer(new Uri("http://127.0.0.1:19798"));
                         });
 
                         cfg.ConfigureEndpoints(context);
