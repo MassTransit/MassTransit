@@ -6,9 +6,9 @@ It is common that a service may need to combine database writes with publishing 
 
 The Transactional Outbox has two main components:
 
-- The **Bus Outbox** works within a container scope (such as the scope created for an ASP.NET Controller) and sadds published and sent messages to the specified `DbContext`. Once the changes are saved, the messages are available to the delivery service which delivers them to the broker.
+- The **Bus Outbox** works within a container scope (such as the scope created for an ASP.NET Controller) and adds published and sent messages to the specified `DbContext`. Once the changes are saved, the messages are available to the delivery service which delivers them to the broker.
 
-- The **Consumer Outbox** is a combination of an _inbox_ and an _outbox_. The _inbox_ is used to keep track of received messages to guarantee  exactly-once consumer behavior. The _outbox_ is used to store published and sent messages until the consumer completes successfully. Once completed, the stored messages are delivered to the broker after which the received message is acknowledged. The Consumer Outbox works with all consumer types, including Consumers, Sages, and Courier Actvities.
+- The **Consumer Outbox** is a combination of an _inbox_ and an _outbox_. The _inbox_ is used to keep track of received messages to guarantee  exactly-once consumer behavior. The _outbox_ is used to store published and sent messages until the consumer completes successfully. Once completed, the stored messages are delivered to the broker after which the received message is acknowledged. The Consumer Outbox works with all consumer types, including Consumers, Sagas, and Courier Actvities.
 
 Either of these components can be used independently or both at the same time.
 
@@ -22,7 +22,7 @@ When the bus outbox is configured, the scoped interfaces are replaced with versi
 
 ![Delivery to Outbox](/write-to-outbox.png "Delivery to Outbox")
 
-Once the changed are saved in the `DbContext` (typically by the application calling `SaveChangesAsync`), the messages will be written to the database as part of the transaction and will be available to the delivery service.
+Once the changes are saved in the `DbContext` (typically by the application calling `SaveChangesAsync`), the messages will be written to the database as part of the transaction and will be available to the delivery service.
 
 The delivery service queries the `OutboxMessage` table for messages published or sent via the Bus Outbox, and attempt to deliver any messages found to the message broker.
 
