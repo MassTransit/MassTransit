@@ -20,8 +20,9 @@ namespace MassTransit.Logging
 
         public const string MessageTypes = "messaging.masstransit.message_types";
 
+        public const string ConsumerType = "messaging.masstransit.consumer_type";
+
         public const string PeerAddress = "peer.address";
-        public const string ServiceName = "service.name";
 
         public const string BeginState = "messaging.masstransit.begin_state";
         public const string EndState = "messaging.masstransit.end_state";

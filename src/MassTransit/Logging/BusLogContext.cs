@@ -208,7 +208,7 @@ namespace MassTransit.Logging
         {
             return StartActivity(activity =>
             {
-                activity.AddTag(DiagnosticHeaders.ServiceName, TypeCache<TConsumer>.ShortName);
+                activity.AddTag(DiagnosticHeaders.ConsumerType, TypeCache<TConsumer>.ShortName);
                 activity.AddTag(DiagnosticHeaders.PeerAddress, MessageTypeCache<T>.DiagnosticAddress);
             });
         }
@@ -218,7 +218,7 @@ namespace MassTransit.Logging
         {
             return StartActivity(activity =>
             {
-                activity.AddTag(DiagnosticHeaders.ServiceName, "Handler");
+                activity.AddTag(DiagnosticHeaders.ConsumerType, "Handler");
                 activity.AddTag(DiagnosticHeaders.PeerAddress, MessageTypeCache<T>.DiagnosticAddress);
             });
         }
@@ -230,7 +230,7 @@ namespace MassTransit.Logging
             return StartActivity(activity =>
             {
                 activity.AddTag(DiagnosticHeaders.SagaId, context.Saga.CorrelationId.ToString("D"));
-                activity.AddTag(DiagnosticHeaders.ServiceName, TypeCache<TSaga>.ShortName);
+                activity.AddTag(DiagnosticHeaders.ConsumerType, TypeCache<TSaga>.ShortName);
                 activity.AddTag(DiagnosticHeaders.PeerAddress, MessageTypeCache<T>.DiagnosticAddress);
             });
         }
@@ -242,7 +242,7 @@ namespace MassTransit.Logging
             return StartActivity(activity =>
             {
                 activity.AddTag(DiagnosticHeaders.SagaId, context.Saga.CorrelationId.ToString("D"));
-                activity.AddTag(DiagnosticHeaders.ServiceName, context.StateMachine.Name);
+                activity.AddTag(DiagnosticHeaders.ConsumerType, context.StateMachine.Name);
                 activity.AddTag(DiagnosticHeaders.PeerAddress, MessageTypeCache<T>.DiagnosticAddress);
             });
         }
@@ -254,7 +254,7 @@ namespace MassTransit.Logging
             return StartActivity(activity =>
             {
                 activity.AddTag(DiagnosticHeaders.TrackingNumber, context.Message.TrackingNumber.ToString("D"));
-                activity.AddTag(DiagnosticHeaders.ServiceName, TypeCache<TActivity>.ShortName);
+                activity.AddTag(DiagnosticHeaders.ConsumerType, TypeCache<TActivity>.ShortName);
                 activity.AddTag(DiagnosticHeaders.PeerAddress, MessageTypeCache<TArguments>.DiagnosticAddress);
             });
         }
@@ -266,7 +266,7 @@ namespace MassTransit.Logging
             return StartActivity(activity =>
             {
                 activity.AddTag(DiagnosticHeaders.TrackingNumber, context.Message.TrackingNumber.ToString("D"));
-                activity.AddTag(DiagnosticHeaders.ServiceName, TypeCache<TActivity>.ShortName);
+                activity.AddTag(DiagnosticHeaders.ConsumerType, TypeCache<TActivity>.ShortName);
                 activity.AddTag(DiagnosticHeaders.PeerAddress, MessageTypeCache<TLog>.DiagnosticAddress);
             });
         }
