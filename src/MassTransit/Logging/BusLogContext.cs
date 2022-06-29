@@ -7,6 +7,7 @@ namespace MassTransit.Logging
     using System.Diagnostics;
     using Courier.Contracts;
     using Microsoft.Extensions.Logging;
+    using Middleware;
     using Transports;
 
 
@@ -80,6 +81,26 @@ namespace MassTransit.Logging
             activity.AddTag(DiagnosticHeaders.Messaging.Destination, transportContext.ActivityDestination);
             activity.AddTag(DiagnosticHeaders.Messaging.Operation, "send");
 
+            return PopulateSendActivity<T>(context, tags, activity);
+        }
+
+        public StartedActivity? StartOutboxSendActivity<T>(SendContext<T> context, params (string Key, object Value)[] tags)
+            where T : class
+        {
+            var parentActivityContext = System.Diagnostics.Activity.Current?.Context ?? default;
+
+            var activity = _source.CreateActivity("outbox send", ActivityKind.Producer, parentActivityContext);
+            if (activity == null)
+                return null;
+
+            activity.AddTag(DiagnosticHeaders.Messaging.Operation, "send");
+
+            return PopulateSendActivity<T>(context, tags, activity);
+        }
+
+        static StartedActivity? PopulateSendActivity<T>(SendContext context, IList<(string Key, object Value)> tags, System.Diagnostics.Activity activity)
+            where T : class
+        {
             var conversationId = context.ConversationId?.ToString("D");
 
             if (context.CorrelationId.HasValue)
@@ -108,7 +129,7 @@ namespace MassTransit.Logging
 
                 activity.AddTag(DiagnosticHeaders.MessageTypes, string.Join(",", MessageTypeCache<T>.MessageTypeNames));
 
-                for (var i = 0; i < tags.Length; i++)
+                for (var i = 0; i < tags.Count; i++)
                 {
                     if (tags[i].Value != null)
                         activity.AddTag(tags[i].Key, tags[i].Value?.ToString());
@@ -133,6 +154,19 @@ namespace MassTransit.Logging
 
             if (baggage != null)
                 context.Headers.Set(DiagnosticHeaders.ActivityCorrelationContext, baggage);
+
+            return new StartedActivity(activity);
+        }
+
+        public StartedActivity? StartOutboxDeliverActivity(OutboxMessageContext context)
+        {
+            var parentActivityContext = GetParentActivityContext(context.Headers);
+
+            var activity = _source.CreateActivity("outbox process", ActivityKind.Client, parentActivityContext);
+            if (activity == null)
+                return null;
+
+            activity.Start();
 
             return new StartedActivity(activity);
         }

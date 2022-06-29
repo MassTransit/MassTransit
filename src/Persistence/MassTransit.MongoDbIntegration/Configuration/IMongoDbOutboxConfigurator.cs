@@ -68,6 +68,6 @@ namespace MassTransit
         /// that are used when not consuming messages. Messages sent or published via those interfaces are written to the outbox
         /// instead of being delivered directly to the message broker.
         /// </summary>
-        void UseBusOutbox(Action<IMongoDbBusOutboxConfigurator> configure = null);
+        void UseBusOutbox(Action<IMongoDbBusOutboxConfigurator>? configure = null);
     }
 }

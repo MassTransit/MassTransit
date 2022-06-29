@@ -1,6 +1,7 @@
 namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
 {
     using System;
+    using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
     using Logging;
@@ -16,6 +17,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
         [Test]
         public async Task Should_support_the_test_harness()
         {
+            using var tracerProvider = TraceConfig.CreateTraceProvider("ef-core-tests");
+
             await using var provider = new ServiceCollection()
                 .AddBusOutboxServices()
                 .AddMassTransitTestHarness(x =>
@@ -45,6 +48,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
 
                 var publishEndpoint = harness.Scope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
 
+                var activity = TraceConfig.Source.StartActivity(ActivityKind.Client);
+
                 await publishEndpoint.Publish(new PingMessage());
 
                 using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
@@ -52,15 +57,21 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
                 Assert.That(await consumerHarness.Consumed.Any<PingMessage>(cts.Token), Is.False);
 
                 await dbContext.SaveChangesAsync(harness.CancellationToken);
+
+                activity.Stop();
             }
 
             Assert.That(await consumerHarness.Consumed.Any<PingMessage>(), Is.True);
+
+            await harness.Stop();
         }
 
         [Test]
         [Explicit]
         public async Task Should_support_delayed_message_scheduler()
         {
+            using var tracerProvider = TraceConfig.CreateTraceProvider("ef-core-tests");
+
             await using var provider = new ServiceCollection()
                 .AddBusOutboxServices()
                 .AddMassTransitTestHarness(x =>
@@ -110,6 +121,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
         [Test]
         public async Task Should_work_without_starting_the_bus()
         {
+            using var tracerProvider = TraceConfig.CreateTraceProvider("ef-core-tests");
+
             await using var provider = new ServiceCollection()
                 .AddBusOutboxServices()
                 .AddMassTransitTestHarness(x =>

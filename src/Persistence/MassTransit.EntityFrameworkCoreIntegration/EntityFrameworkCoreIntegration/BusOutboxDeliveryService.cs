@@ -6,6 +6,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Logging;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Storage;
     using Microsoft.Extensions.DependencyInjection;
@@ -53,7 +54,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
                     await ProcessMessageBatch(stoppingToken).ConfigureAwait(false);
                 }
-                catch (OperationCanceledException exception) when (exception.CancellationToken == stoppingToken)
+                catch (OperationCanceledException)
                 {
                 }
                 catch (Exception exception)
@@ -134,6 +135,10 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                         await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
 
                         return continueProcessing;
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        throw;
                     }
                     catch (DbUpdateConcurrencyException)
                     {
@@ -232,7 +237,15 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
                         var endpoint = await _busControl.GetSendEndpoint(message.DestinationAddress).ConfigureAwait(false);
 
-                        await endpoint.Send(new Outbox(), pipe, token.Token).ConfigureAwait(false);
+                        StartedActivity? activity = LogContext.Current?.StartOutboxDeliverActivity(message);
+                        try
+                        {
+                            await endpoint.Send(new Outbox(), pipe, token.Token).ConfigureAwait(false);
+                        }
+                        finally
+                        {
+                            activity?.Stop();
+                        }
 
                         sentSequenceNumber = message.SequenceNumber;
 

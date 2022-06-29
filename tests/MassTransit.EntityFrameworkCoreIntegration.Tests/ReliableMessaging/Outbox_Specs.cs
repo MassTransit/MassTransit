@@ -5,6 +5,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
     using Logging;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
+    using OpenTelemetry;
+    using OpenTelemetry.Resources;
+    using OpenTelemetry.Trace;
     using Responsible;
     using Testing;
 
@@ -15,6 +18,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
         [Test]
         public async Task Should_fault_when_failed_to_start()
         {
+            using var tracerProvider = TraceConfig.CreateTraceProvider("ef-core-tests");
+
             await using var provider = CreateServiceProvider();
 
             var harness = provider.GetTestHarness();
@@ -30,6 +35,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
         [Test]
         public async Task Should_only_publish_one_fault()
         {
+            using var tracerProvider = TraceConfig.CreateTraceProvider("ef-core-tests");
+
             await using var provider = CreateServiceProvider();
 
             var harness = provider.GetTestHarness();
@@ -55,6 +62,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
         [Test]
         public async Task Should_start_successfully()
         {
+            using var tracerProvider = TraceConfig.CreateTraceProvider("ef-core-tests");
+
             await using var provider = CreateServiceProvider();
 
             var harness = provider.GetTestHarness();

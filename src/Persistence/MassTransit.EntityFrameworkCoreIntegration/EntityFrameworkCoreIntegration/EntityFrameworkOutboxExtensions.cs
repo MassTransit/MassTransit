@@ -46,17 +46,14 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             if (context.Delay.HasValue)
                 outboxMessage.EnqueueTime = now + context.Delay;
 
-            var headers = deserializer.SerializeDictionary(context.Headers.GetAll());
-            if (headers.Length > 0)
-                outboxMessage.Headers = headers.GetString();
+            outboxMessage.Headers = deserializer.SerializeDictionary(context.Headers.GetAll());
 
             if (context is TransportSendContext<T> transportSendContext)
             {
                 var properties = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
                 transportSendContext.WritePropertiesTo(properties);
-                if (properties.Count > 0)
-                    outboxMessage.Properties = deserializer.SerializeDictionary(properties).GetString();
+                outboxMessage.Properties = deserializer.SerializeDictionary(properties);
             }
 
             await collection.AddAsync(outboxMessage, context.CancellationToken).ConfigureAwait(false);

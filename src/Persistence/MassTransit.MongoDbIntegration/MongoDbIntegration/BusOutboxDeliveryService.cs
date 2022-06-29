@@ -5,6 +5,7 @@ namespace MassTransit.MongoDbIntegration
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Logging;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
@@ -46,7 +47,7 @@ namespace MassTransit.MongoDbIntegration
 
                     await ProcessMessageBatch(stoppingToken).ConfigureAwait(false);
                 }
-                catch (OperationCanceledException exception) when (exception.CancellationToken == stoppingToken)
+                catch (OperationCanceledException)
                 {
                 }
                 catch (Exception exception)
@@ -151,6 +152,10 @@ namespace MassTransit.MongoDbIntegration
 
                         return continueProcessing;
                     }
+                    catch (OperationCanceledException)
+                    {
+                        throw;
+                    }
                     catch (MongoCommandException)
                     {
                         await AbortTransaction(dbContext).ConfigureAwait(false);
@@ -232,7 +237,15 @@ namespace MassTransit.MongoDbIntegration
 
                         var endpoint = await _busControl.GetSendEndpoint(message.DestinationAddress).ConfigureAwait(false);
 
-                        await endpoint.Send(new Outbox(), pipe, token.Token).ConfigureAwait(false);
+                        StartedActivity? activity = LogContext.Current?.StartOutboxDeliverActivity(message);
+                        try
+                        {
+                            await endpoint.Send(new Outbox(), pipe, token.Token).ConfigureAwait(false);
+                        }
+                        finally
+                        {
+                            activity?.Stop();
+                        }
 
                         sentSequenceNumber = message.SequenceNumber;
 

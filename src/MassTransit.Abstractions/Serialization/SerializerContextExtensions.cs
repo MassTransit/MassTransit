@@ -71,7 +71,7 @@ namespace MassTransit
             return value != null;
         }
 
-        public static MessageBody SerializeDictionary(this IObjectDeserializer deserializer, IEnumerable<KeyValuePair<string, object>> values)
+        public static string? SerializeDictionary(this IObjectDeserializer deserializer, IEnumerable<KeyValuePair<string, object>> values)
         {
             var dictionary = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
@@ -82,8 +82,8 @@ namespace MassTransit
             }
 
             return dictionary.Count == 0
-                ? EmptyMessageBody.Instance
-                : deserializer.SerializeObject(dictionary);
+                ? null
+                : deserializer.SerializeObject(dictionary).GetString();
         }
 
         public static bool TryGetValue<T>(this IObjectDeserializer context, IDictionary<string, object> dictionary, string key,

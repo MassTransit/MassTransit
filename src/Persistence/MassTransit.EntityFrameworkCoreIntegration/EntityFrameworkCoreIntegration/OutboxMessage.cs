@@ -81,10 +81,10 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
         Headers DeserializerHeaders(IObjectDeserializer deserializer)
         {
-            if (string.IsNullOrWhiteSpace(Properties))
+            if (string.IsNullOrWhiteSpace(Headers))
                 return EmptyHeaders.Instance;
 
-            var dictionary = deserializer.DeserializeObject<Dictionary<string, object?>>(Properties);
+            var dictionary = deserializer.DeserializeObject<Dictionary<string, object?>>(Headers);
             if (dictionary != null && dictionary.Count > 0)
                 return new DictionarySendHeaders(dictionary);
 

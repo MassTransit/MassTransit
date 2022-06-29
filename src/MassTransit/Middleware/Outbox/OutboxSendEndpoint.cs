@@ -5,6 +5,7 @@ namespace MassTransit.Middleware.Outbox
     using System.Threading.Tasks;
     using Context;
     using Initializers;
+    using Logging;
     using Transports;
     using Util;
 
@@ -14,8 +15,6 @@ namespace MassTransit.Middleware.Outbox
     {
         readonly ITransportSendEndpoint _endpoint;
         readonly OutboxSendContext _outboxContext;
-
-        public ISendEndpoint Endpoint => _endpoint;
 
         /// <summary>
         /// Creates an send endpoint on the outbox
@@ -27,6 +26,8 @@ namespace MassTransit.Middleware.Outbox
             _outboxContext = outboxContext;
             _endpoint = endpoint as ITransportSendEndpoint ?? throw new ArgumentException("Must be a transport endpoint", nameof(endpoint));
         }
+
+        public ISendEndpoint Endpoint => _endpoint;
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
@@ -47,7 +48,7 @@ namespace MassTransit.Middleware.Outbox
 
             SendContext<T> context = await _endpoint.CreateSendContext(message, new OutboxSendEndpointPipe<T>(), cancellationToken).ConfigureAwait(false);
 
-            await _outboxContext.AddSend(context).ConfigureAwait(false);
+            await AddSend(context).ConfigureAwait(false);
         }
 
         public async Task Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
@@ -60,7 +61,7 @@ namespace MassTransit.Middleware.Outbox
 
             SendContext<T> context = await _endpoint.CreateSendContext(message, new OutboxSendEndpointPipe<T>(pipe), cancellationToken).ConfigureAwait(false);
 
-            await _outboxContext.AddSend(context).ConfigureAwait(false);
+            await AddSend(context).ConfigureAwait(false);
         }
 
         public Task Send(object message, CancellationToken cancellationToken)
@@ -93,7 +94,7 @@ namespace MassTransit.Middleware.Outbox
 
             SendContext<T> context = await _endpoint.CreateSendContext(message, new OutboxSendEndpointPipe<T>(pipe), cancellationToken).ConfigureAwait(false);
 
-            await _outboxContext.AddSend(context).ConfigureAwait(false);
+            await AddSend(context).ConfigureAwait(false);
         }
 
         public Task Send(object message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
@@ -132,7 +133,7 @@ namespace MassTransit.Middleware.Outbox
             SendContext<T> context =
                 await _endpoint.CreateSendContext(message, new OutboxSendEndpointPipe<T>(sendPipe), cancellationToken).ConfigureAwait(false);
 
-            await _outboxContext.AddSend(context).ConfigureAwait(false);
+            await AddSend(context).ConfigureAwait(false);
         }
 
         public async Task Send<T>(object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
@@ -147,7 +148,7 @@ namespace MassTransit.Middleware.Outbox
             SendContext<T> context =
                 await _endpoint.CreateSendContext(message, new OutboxSendEndpointPipe<T>(sendPipe), cancellationToken).ConfigureAwait(false);
 
-            await _outboxContext.AddSend(context).ConfigureAwait(false);
+            await AddSend(context).ConfigureAwait(false);
         }
 
         public async Task Send<T>(object values, IPipe<SendContext> pipe, CancellationToken cancellationToken)
@@ -164,7 +165,22 @@ namespace MassTransit.Middleware.Outbox
             SendContext<T> context =
                 await _endpoint.CreateSendContext(message, new OutboxSendEndpointPipe<T>(sendPipe), cancellationToken).ConfigureAwait(false);
 
-            await _outboxContext.AddSend(context).ConfigureAwait(false);
+            await AddSend(context).ConfigureAwait(false);
+        }
+
+        async Task AddSend<T>(SendContext<T> context)
+            where T : class
+        {
+            StartedActivity? activity = LogContext.Current?.StartOutboxSendActivity(context);
+            try
+            {
+                await _outboxContext.AddSend(context).ConfigureAwait(false);
+                activity?.Update(context);
+            }
+            finally
+            {
+                activity?.Stop();
+            }
         }
 
 
