@@ -36,6 +36,8 @@ namespace MassTransit.Transports
         public Task<SendContext<T>> CreateSendContext<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
             where T : class
         {
+            LogContext.SetCurrentIfNull(_context.LogContext);
+
             return _context.CreateSendContext(message, pipe, cancellationToken);
         }
 

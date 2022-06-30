@@ -5,7 +5,6 @@ namespace MassTransit.MongoDbIntegration
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Options;
     using MongoDB.Driver;
 
 
@@ -21,15 +20,15 @@ namespace MassTransit.MongoDbIntegration
         };
 
         readonly IMongoClient _client;
-        readonly MongoDbSessionOptions _options;
+        readonly object _lock = new object();
         readonly IServiceProvider _provider;
 
-        public TransactionMongoDbContext(IMongoClient client, IServiceProvider provider, IOptions<MongoDbSessionOptions> options)
+        Task<IClientSessionHandle>? _session;
+
+        public TransactionMongoDbContext(IMongoClient client, IServiceProvider provider)
         {
             _client = client;
             _provider = provider;
-
-            _options = options.Value;
         }
 
         public IClientSessionHandle? Session { get; private set; }
@@ -39,16 +38,34 @@ namespace MassTransit.MongoDbIntegration
             Session?.Dispose();
         }
 
-        public async Task<IClientSessionHandle> StartSession(CancellationToken cancellationToken)
+        public Task<IClientSessionHandle> StartSession(CancellationToken cancellationToken)
         {
-            return Session ??= await _client.StartSessionAsync(_sessionOptions, cancellationToken).ConfigureAwait(false);
+            async Task<IClientSessionHandle> Start()
+            {
+                var handle = await _client.StartSessionAsync(_sessionOptions, cancellationToken).ConfigureAwait(false);
+
+                Session = handle;
+
+                return handle;
+            }
+
+            lock (_lock)
+            {
+                if (_session != null)
+                    return _session;
+
+                _session = Start();
+
+                return _session;
+            }
         }
 
         public async Task BeginTransaction(CancellationToken cancellationToken)
         {
-            Session ??= await _client.StartSessionAsync(_sessionOptions, cancellationToken).ConfigureAwait(false);
+            var session = await StartSession(cancellationToken).ConfigureAwait(false);
 
-            Session.StartTransaction();
+            if (!session.IsInTransaction)
+                session.StartTransaction();
         }
 
         public Task CommitTransaction(CancellationToken cancellationToken)
@@ -77,9 +94,7 @@ namespace MassTransit.MongoDbIntegration
         {
             var collection = _provider.GetRequiredService<IMongoCollection<T>>();
 
-            return Session != null
-                ? (MongoDbCollectionContext<T>)new SessionMongoDbCollectionContext<T>(Session, collection, _options)
-                : new NoSessionMongoDbCollectionContext<T>(collection);
+            return new TransactionMongoDbCollectionContext<T>(this, collection);
         }
     }
 }

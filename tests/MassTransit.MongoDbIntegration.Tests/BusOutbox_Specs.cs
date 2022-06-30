@@ -17,7 +17,7 @@ namespace MassTransit.MongoDbIntegration.Tests
     public class Using_the_bus_outbox
     {
         [Test]
-        public async Task Should_support_the_test_harness()
+        public async Task Should_not_send_when_transaction_aborted()
         {
             await using var provider = new ServiceCollection()
                 .AddBusOutboxServices()
@@ -51,7 +51,7 @@ namespace MassTransit.MongoDbIntegration.Tests
             {
                 using var dbContext = harness.Scope.ServiceProvider.GetRequiredService<MongoDbContext>();
 
-                await dbContext.BeginTransaction(harness.CancellationToken);
+                //                await dbContext.BeginTransaction(harness.CancellationToken);
 
                 var publishEndpoint = harness.Scope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
 
@@ -61,10 +61,12 @@ namespace MassTransit.MongoDbIntegration.Tests
 
                 Assert.That(await consumerHarness.Consumed.Any<PingMessage>(cts.Token), Is.False);
 
-                await dbContext.CommitTransaction(harness.CancellationToken);
+                await dbContext.AbortTransaction(harness.CancellationToken);
             }
 
-            Assert.That(await consumerHarness.Consumed.Any<PingMessage>(), Is.True);
+            using var anotherCts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+
+            Assert.That(await consumerHarness.Consumed.Any<PingMessage>(anotherCts.Token), Is.False);
 
             await harness.Stop();
         }
@@ -124,6 +126,59 @@ namespace MassTransit.MongoDbIntegration.Tests
         }
 
         [Test]
+        public async Task Should_support_the_test_harness()
+        {
+            await using var provider = new ServiceCollection()
+                .AddBusOutboxServices()
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.AddMongoDbOutbox(o =>
+                    {
+                        o.Connection = "mongodb://127.0.0.1:27021";
+                        o.DatabaseName = "sagaTest";
+
+                        o.QueryDelay = TimeSpan.FromSeconds(1);
+
+                        o.UseBusOutbox(bo =>
+                        {
+                            bo.MessageDeliveryLimit = 10;
+                        });
+                    });
+
+                    x.AddConsumer<PingConsumer>();
+                })
+                .BuildServiceProvider(true);
+
+            var harness = provider.GetTestHarness();
+
+            await ClearOutbox(provider, harness);
+
+            await harness.Start();
+
+            IConsumerTestHarness<PingConsumer> consumerHarness = harness.GetConsumerHarness<PingConsumer>();
+
+            {
+                using var dbContext = harness.Scope.ServiceProvider.GetRequiredService<MongoDbContext>();
+
+                await dbContext.BeginTransaction(harness.CancellationToken);
+
+                var publishEndpoint = harness.Scope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
+
+                await publishEndpoint.Publish(new PingMessage());
+
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+
+                Assert.That(await consumerHarness.Consumed.Any<PingMessage>(cts.Token), Is.False);
+
+                await dbContext.CommitTransaction(harness.CancellationToken);
+            }
+
+            Assert.That(await consumerHarness.Consumed.Any<PingMessage>(), Is.True);
+
+            await harness.Stop();
+        }
+
+        [Test]
         public async Task Should_work_without_starting_the_bus()
         {
             await using var provider = new ServiceCollection()
@@ -169,7 +224,9 @@ namespace MassTransit.MongoDbIntegration.Tests
 
                 using var dbContext = scope.ServiceProvider.GetRequiredService<MongoDbContext>();
 
-                var count = await dbContext.GetCollection<OutboxMessage>().Find(Builders<OutboxMessage>.Filter.Empty).CountDocumentsAsync();
+                MongoDbCollectionContext<OutboxMessage> collection = dbContext.GetCollection<OutboxMessage>();
+
+                var count = await collection.Find(Builders<OutboxMessage>.Filter.Empty).CountDocumentsAsync();
 
                 Assert.That(count, Is.EqualTo(1));
             }
@@ -183,7 +240,9 @@ namespace MassTransit.MongoDbIntegration.Tests
 
             using var dbContext = scope.ServiceProvider.GetRequiredService<MongoDbContext>();
 
-            await dbContext.GetCollection<OutboxMessage>().DeleteMany(Builders<OutboxMessage>.Filter.Empty, harness.CancellationToken);
+            MongoDbCollectionContext<OutboxMessage> collection = dbContext.GetCollection<OutboxMessage>();
+
+            await collection.DeleteMany(Builders<OutboxMessage>.Filter.Empty, harness.CancellationToken);
         }
 
 

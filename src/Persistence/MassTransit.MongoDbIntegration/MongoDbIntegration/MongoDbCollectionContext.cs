@@ -17,8 +17,8 @@ namespace MassTransit.MongoDbIntegration
         Task<DeleteResult> DeleteOne(FilterDefinition<T> filter, CancellationToken cancellationToken);
         Task<DeleteResult> DeleteMany(FilterDefinition<T> filter, CancellationToken cancellationToken);
 
-        IFindFluent<T, T> Find(FilterDefinition<T> filter);
-
         Task<T> Lock(FilterDefinition<T> filter, UpdateDefinition<T> update, CancellationToken cancellationToken);
+
+        IFindFluent<T, T> Find(FilterDefinition<T> filter);
     }
 }

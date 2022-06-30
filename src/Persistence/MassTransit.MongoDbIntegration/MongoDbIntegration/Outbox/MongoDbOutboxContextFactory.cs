@@ -66,7 +66,7 @@ namespace MassTransit.MongoDbIntegration.Outbox
 
                         updateReceiveCount = false;
 
-                        var outboxContext = new MongoDbOutboxConsumeContext<T>(context, options, _dbContext, inboxState);
+                        var outboxContext = new MongoDbOutboxConsumeContext<T>(context, options, inboxState, _dbContext);
 
                         await next.Send(outboxContext).ConfigureAwait(false);
 

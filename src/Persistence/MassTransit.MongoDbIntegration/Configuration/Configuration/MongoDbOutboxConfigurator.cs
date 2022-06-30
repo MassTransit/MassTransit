@@ -66,8 +66,6 @@ namespace MassTransit.Configuration
             RegisterCollectionFactory<OutboxMessage>();
             RegisterCollectionFactory<OutboxState>();
 
-            _configurator.AddOptions<MongoDbSessionOptions>();
-
             _configurator.TryAddSingleton(ProviderClientFactory);
             _configurator.TryAddScoped<MongoDbContext, TransactionMongoDbContext>();
         }

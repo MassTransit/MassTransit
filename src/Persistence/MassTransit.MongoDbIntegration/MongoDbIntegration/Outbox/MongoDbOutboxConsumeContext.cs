@@ -14,15 +14,13 @@ namespace MassTransit.MongoDbIntegration.Outbox
         where TMessage : class
     {
         readonly InboxState _inboxState;
-        readonly MongoDbCollectionContext<OutboxMessage> _outboxMessageCollection;
+        readonly MongoDbCollectionContext<OutboxMessage> _collection;
 
-        public MongoDbOutboxConsumeContext(ConsumeContext<TMessage> context, OutboxConsumeOptions options, MongoDbContext dbContext,
-            InboxState inboxState)
+        public MongoDbOutboxConsumeContext(ConsumeContext<TMessage> context, OutboxConsumeOptions options, InboxState inboxState, MongoDbContext dbContext)
             : base(context, options)
         {
             _inboxState = inboxState;
-
-            _outboxMessageCollection = dbContext.GetCollection<OutboxMessage>();
+            _collection = dbContext.GetCollection<OutboxMessage>();
         }
 
         public override Guid? MessageId => _inboxState.MessageId;
@@ -56,10 +54,10 @@ namespace MassTransit.MongoDbIntegration.Outbox
             FilterDefinition<OutboxMessage> filter = builder.Eq(x => x.InboxMessageId, MessageId) & builder.Eq(x => x.InboxConsumerId, ConsumerId)
                 & builder.Gt(x => x.SequenceNumber, lastSequenceNumber);
 
-            List<OutboxMessage> messages = await _outboxMessageCollection.Find(filter)
+            List<OutboxMessage> messages = await _collection.Find(filter)
                 .Sort(Builders<OutboxMessage>.Sort.Ascending(x => x.SequenceNumber))
                 .Limit(Options.MessageDeliveryLimit + 1)
-                .ToListAsync(CancellationToken);
+                .ToListAsync(CancellationToken).ConfigureAwait(false);
 
             for (var i = 0; i < messages.Count; i++)
                 messages[i].Deserialize(SerializerContext);
@@ -79,7 +77,7 @@ namespace MassTransit.MongoDbIntegration.Outbox
             FilterDefinitionBuilder<OutboxMessage> builder = Builders<OutboxMessage>.Filter;
             FilterDefinition<OutboxMessage> filter = builder.Eq(x => x.InboxMessageId, MessageId) & builder.Eq(x => x.InboxConsumerId, ConsumerId);
 
-            var messages = await _outboxMessageCollection.DeleteMany(filter, CancellationToken).ConfigureAwait(false);
+            var messages = await _collection.DeleteMany(filter, CancellationToken).ConfigureAwait(false);
 
             if (messages.DeletedCount > 0)
                 LogContext.Debug?.Log("Outbox removed {Count} messages: {MessageId}", messages.DeletedCount, MessageId);
@@ -88,7 +86,7 @@ namespace MassTransit.MongoDbIntegration.Outbox
         public override Task AddSend<T>(SendContext<T> context)
             where T : class
         {
-            return _outboxMessageCollection.AddSend(context, SerializerContext, MessageId, ConsumerId);
+            return _collection.AddSend(context, SerializerContext, MessageId, ConsumerId);
         }
     }
 }

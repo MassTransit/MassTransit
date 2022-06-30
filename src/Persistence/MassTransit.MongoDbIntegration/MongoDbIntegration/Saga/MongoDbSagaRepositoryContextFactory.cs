@@ -15,7 +15,8 @@ namespace MassTransit.MongoDbIntegration.Saga
         readonly MongoDbCollectionContext<TSaga> _dbContext;
         readonly ISagaConsumeContextFactory<MongoDbCollectionContext<TSaga>, TSaga> _factory;
 
-        public MongoDbSagaRepositoryContextFactory(MongoDbCollectionContext<TSaga> dbContext, ISagaConsumeContextFactory<MongoDbCollectionContext<TSaga>, TSaga> factory)
+        public MongoDbSagaRepositoryContextFactory(MongoDbCollectionContext<TSaga> dbContext,
+            ISagaConsumeContextFactory<MongoDbCollectionContext<TSaga>, TSaga> factory)
         {
             _dbContext = dbContext;
             _factory = factory;

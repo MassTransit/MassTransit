@@ -59,8 +59,6 @@ namespace MassTransit.Configuration
 
             if (ProviderClientFactory != null)
             {
-                configurator.AddOptions<MongoDbSessionOptions>();
-
                 configurator.TryAddSingleton(ProviderClientFactory);
                 configurator.TryAddScoped<MongoDbContext, TransactionMongoDbContext>();
             }

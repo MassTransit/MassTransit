@@ -17,6 +17,8 @@ namespace MassTransit.MongoDbIntegration
             _collection = collection;
         }
 
+        public IMongoCollection<T> Collection => _collection;
+
         public Task InsertOne(T instance, CancellationToken cancellationToken)
         {
             return _collection.InsertOneAsync(instance, _options, cancellationToken);

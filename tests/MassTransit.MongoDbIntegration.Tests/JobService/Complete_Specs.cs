@@ -23,6 +23,7 @@ namespace MassTransit.MongoDbIntegration.Tests.JobService
     }
 
 
+    [Explicit]
     public class Submitting_a_job_to_turnout_via_container :
         QuartzInMemoryTestFixture
     {

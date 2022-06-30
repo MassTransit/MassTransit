@@ -65,12 +65,14 @@ namespace MassTransit.MongoDbIntegration
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<MongoDbContext>();
 
+                MongoDbCollectionContext<OutboxMessage> collection = dbContext.GetCollection<OutboxMessage>();
+
                 var messageLimit = _options.QueryMessageLimit;
 
                 FilterDefinitionBuilder<OutboxMessage> builder = Builders<OutboxMessage>.Filter;
                 FilterDefinition<OutboxMessage> filter = builder.Not(builder.Eq(x => x.OutboxId, null));
 
-                List<Guid> outboxIds = await dbContext.GetCollection<OutboxMessage>()
+                List<Guid> outboxIds = await collection
                     .Find(filter)
                     .Limit(messageLimit)
                     .Project(x => x.OutboxId.Value)
@@ -94,6 +96,9 @@ namespace MassTransit.MongoDbIntegration
 
             var dbContext = scope.ServiceProvider.GetRequiredService<MongoDbContext>();
 
+            MongoDbCollectionContext<OutboxState> stateCollection = dbContext.GetCollection<OutboxState>();
+            MongoDbCollectionContext<OutboxMessage> messageCollection = dbContext.GetCollection<OutboxMessage>();
+
             FilterDefinitionBuilder<OutboxState> builder = Builders<OutboxState>.Filter;
             FilterDefinition<OutboxState> filter = builder.Eq(x => x.OutboxId, outboxId);
 
@@ -105,13 +110,10 @@ namespace MassTransit.MongoDbIntegration
 
                     await dbContext.BeginTransaction(cancellationToken).ConfigureAwait(false);
 
-                    MongoDbCollectionContext<OutboxState> stateCollection = dbContext.GetCollection<OutboxState>();
-                    MongoDbCollectionContext<OutboxMessage> messageCollection = dbContext.GetCollection<OutboxMessage>();
-
-                    UpdateDefinition<OutboxState> update = Builders<OutboxState>.Update.Set(x => x.LockToken, ObjectId.GenerateNewId());
-
                     try
                     {
+                        UpdateDefinition<OutboxState> update = Builders<OutboxState>.Update.Set(x => x.LockToken, ObjectId.GenerateNewId());
+
                         var outboxState = await stateCollection.Lock(filter, update, cancellationToken).ConfigureAwait(false);
 
                         bool continueProcessing;
