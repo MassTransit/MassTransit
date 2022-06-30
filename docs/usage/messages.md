@@ -28,7 +28,7 @@ An example message to update a customer address is shown below.
 ```
 
 ::: tip
-It is strongly suggested to use interfaces for message contracts, based on experience over several years with varying levels of developer experience. MassTransit will create dynamic interface implementations for the messages, ensuring a clean separation of the message contract from the consumer.
+Records are great if you are comfortable with using them and you are on .NET 5 or later. Interfaces are great if you prefer them. MassTransit will create dynamic interface implementations for the messages, ensuring a clean separation of the message contract from the consumer. In the end it does not really matter as long as it is a reference type.
 :::
 
 A common mistake when engineers are new to messaging is to create a base class for messages, and try to dispatch that base class in the consumer – including the behavior of the subclass. Ouch. This always leads to pain and suffering, so just say no to base classes.
