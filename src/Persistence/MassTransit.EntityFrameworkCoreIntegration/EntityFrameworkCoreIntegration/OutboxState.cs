@@ -11,19 +11,14 @@ namespace MassTransit.EntityFrameworkCoreIntegration
     public class OutboxState
     {
         /// <summary>
-        /// Primary key for table, to have ordered clustered index
-        /// </summary>
-        public long Id { get; set; }
-
-        /// <summary>
         /// Assigned when the scope is created for an outbox
         /// </summary>
         public Guid OutboxId { get; set; }
 
         /// <summary>
-        /// Available for optimistic concurrency, not used by MassTransit
+        /// The point at which the outbox was created
         /// </summary>
-        public byte[]? RowVersion { get; set; }
+        public DateTime Created { get; set; }
 
         /// <summary>
         /// When all messages in the outbox were delivered to the transport

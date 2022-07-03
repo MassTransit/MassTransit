@@ -111,12 +111,6 @@ namespace MassTransit
             callback?.Invoke(inbox);
         }
 
-        public static void SetOptimistic(this EntityTypeBuilder<InboxState> builder)
-        {
-            builder.Property(x => x.RowVersion)
-                .IsRowVersion();
-        }
-
         public static void AddOutboxStateEntity(this ModelBuilder modelBuilder, Action<EntityTypeBuilder<OutboxState>>? callback = null)
         {
             EntityTypeBuilder<OutboxState> outbox = modelBuilder.Entity<OutboxState>();
@@ -124,16 +118,13 @@ namespace MassTransit
             outbox.Property(p => p.OutboxId);
             outbox.HasKey(p => p.OutboxId);
 
+            outbox.Property(p => p.Created);
+            outbox.HasIndex(p => p.Created);
+
             outbox.Property(p => p.Delivered);
             outbox.Property(p => p.LastSequenceNumber);
 
             callback?.Invoke(outbox);
-        }
-
-        public static void SetOptimistic(this EntityTypeBuilder<OutboxState> builder)
-        {
-            builder.Property(x => x.RowVersion)
-                .IsRowVersion();
         }
 
         public static void AddOutboxMessageEntity(this ModelBuilder modelBuilder, Action<EntityTypeBuilder<OutboxMessage>>? callback = null)
@@ -156,11 +147,9 @@ namespace MassTransit
             outbox.Property(p => p.FaultAddress).HasMaxLength(256);
 
             outbox.Property(p => p.ExpirationTime);
-
             outbox.HasIndex(p => p.ExpirationTime);
 
             outbox.Property(p => p.EnqueueTime);
-
             outbox.HasIndex(p => p.EnqueueTime);
 
             outbox.Property(p => p.SentTime);
@@ -191,12 +180,6 @@ namespace MassTransit
             outbox.Property(p => p.Body);
 
             callback?.Invoke(outbox);
-        }
-
-        public static void SetOptimistic(this EntityTypeBuilder<OutboxMessage> builder)
-        {
-            builder.Property(x => x.RowVersion)
-                .IsRowVersion();
         }
     }
 }

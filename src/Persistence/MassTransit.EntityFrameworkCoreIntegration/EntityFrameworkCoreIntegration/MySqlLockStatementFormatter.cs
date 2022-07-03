@@ -23,5 +23,10 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         {
             sb.Append(" FOR UPDATE");
         }
+
+        public void CreateOutboxStatement(StringBuilder sb, string schema, string table, string columnName)
+        {
+            sb.AppendFormat(@"SELECT * FROM `{0}` ORDER BY `{1}` LIMIT 1 FOR UPDATE SKIP LOCKED", table, columnName);
+        }
     }
 }

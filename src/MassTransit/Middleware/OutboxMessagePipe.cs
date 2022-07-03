@@ -4,6 +4,7 @@ namespace MassTransit.Middleware
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using Logging;
 
 
     public class OutboxMessagePipe<TMessage> :
@@ -82,7 +83,15 @@ namespace MassTransit.Middleware
                     if (failDelivery)
                         throw new ApplicationException("Simulated Delivery Failure Requested");
 
-                    await endpoint.Send(new Outbox(), pipe, context.CancellationToken).ConfigureAwait(false);
+                    StartedActivity? activity = LogContext.Current?.StartOutboxDeliverActivity(message);
+                    try
+                    {
+                        await endpoint.Send(new Outbox(), pipe, context.CancellationToken).ConfigureAwait(false);
+                    }
+                    finally
+                    {
+                        activity?.Stop();
+                    }
 
                     LogContext.Debug?.Log("Outbox Sent: {InboxMessageId} {SequenceNumber} {MessageId}", context.MessageId, message.SequenceNumber,
                         message.MessageId);

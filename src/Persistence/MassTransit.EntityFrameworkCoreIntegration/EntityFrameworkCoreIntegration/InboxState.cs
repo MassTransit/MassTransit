@@ -22,11 +22,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         public Guid ConsumerId { get; set; }
 
         /// <summary>
-        /// Available for optimistic concurrency, not used by MassTransit
-        /// </summary>
-        public byte[]? RowVersion { get; set; }
-
-        /// <summary>
         /// When the message was first received
         /// </summary>
         public DateTime Received { get; set; }

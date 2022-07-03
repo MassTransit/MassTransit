@@ -6,7 +6,7 @@ namespace MassTransit
 
     public class EntityFrameworkOutboxOptions
     {
-        public IsolationLevel IsolationLevel { get; set; } = IsolationLevel.Serializable;
+        public IsolationLevel IsolationLevel { get; set; } = IsolationLevel.RepeatableRead;
         public ILockStatementProvider LockStatementProvider { get; set; } = new SqlServerLockStatementProvider();
     }
 }

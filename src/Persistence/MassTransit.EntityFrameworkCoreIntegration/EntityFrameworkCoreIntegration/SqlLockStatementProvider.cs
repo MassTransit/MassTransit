@@ -38,6 +38,16 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             return FormatLockStatement<T>(context, propertyNames);
         }
 
+        public virtual string GetOutboxStatement(DbContext context)
+        {
+            var schemaTableTrio = GetSchemaAndTableNameAndColumnName(context, typeof(OutboxState), nameof(OutboxState.Created));
+
+            var sb = new StringBuilder(128);
+            _formatter.CreateOutboxStatement(sb, schemaTableTrio.Schema, schemaTableTrio.Table, schemaTableTrio.ColumnNames[0]);
+
+            return sb.ToString();
+        }
+
         string FormatLockStatement<T>(DbContext context, params string[] propertyNames)
             where T : class
         {
@@ -54,7 +64,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             return sb.ToString();
         }
 
-        SchemaTableColumnTrio GetSchemaAndTableNameAndColumnName(DbContext context, Type type, string[] propertyNames)
+        SchemaTableColumnTrio GetSchemaAndTableNameAndColumnName(DbContext context, Type type, params string[] propertyNames)
         {
             if (TableNames.TryGetValue(type, out var result) && _enableSchemaCaching)
                 return result;

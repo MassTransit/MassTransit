@@ -17,6 +17,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         readonly TDbContext _dbContext;
         readonly IsolationLevel _isolationLevel;
         readonly ILockStatementProvider _lockStatementProvider;
+        string _lockStatement;
 
         public EntityFrameworkOutboxContextFactory(TDbContext dbContext, IOptions<EntityFrameworkOutboxOptions> options)
         {
@@ -32,8 +33,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
             var messageId = context.GetOriginalMessageId() ?? throw new MessageException(typeof(T), "MessageId required to use the outbox");
 
-            var statement = _lockStatementProvider.GetRowLockStatement<InboxState>(_dbContext, nameof(InboxState.MessageId),
-                nameof(InboxState.ConsumerId));
+            _lockStatement ??= _lockStatementProvider.GetRowLockStatement<InboxState>(_dbContext, nameof(InboxState.MessageId), nameof(InboxState.ConsumerId));
 
             async Task<bool> Execute()
             {
@@ -43,7 +43,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                 try
                 {
                     var inboxState = await _dbContext.Set<InboxState>()
-                        .FromSqlRaw(statement, messageId, options.ConsumerId)
+                        .FromSqlRaw(_lockStatement, messageId, options.ConsumerId)
                         .SingleOrDefaultAsync(context.CancellationToken).ConfigureAwait(false);
 
                     bool continueProcessing;

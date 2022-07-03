@@ -25,6 +25,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
                 options.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name);
                 options.MigrationsHistoryTable($"__{nameof(ReliableDbContext)}");
 
+                options.EnableRetryOnFailure(5);
                 options.MinBatchSize(1);
             });
 

@@ -1,6 +1,8 @@
 namespace MassTransit.MongoDbIntegration.Tests
 {
     using System;
+    using System.Diagnostics;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Logging;
@@ -174,6 +176,79 @@ namespace MassTransit.MongoDbIntegration.Tests
             }
 
             Assert.That(await consumerHarness.Consumed.Any<PingMessage>(), Is.True);
+
+            await harness.Stop();
+        }
+
+        [Test]
+        [Explicit]
+        public async Task Fill_up_the_outbox()
+        {
+            await using var provider = new ServiceCollection()
+                .AddBusOutboxServices()
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.AddMongoDbOutbox(o =>
+                    {
+                        o.Connection = "mongodb://127.0.0.1:27021";
+                        o.DatabaseName = "sagaTest";
+
+                        o.QueryDelay = TimeSpan.FromSeconds(1);
+
+                        o.UseBusOutbox(bo =>
+                        {
+                            bo.MessageDeliveryLimit = 10;
+                        });
+                    });
+
+                    x.AddConsumer<PingConsumer>();
+                })
+                .BuildServiceProvider(true);
+
+            var harness = provider.GetTestHarness();
+
+            await harness.Start();
+
+            var totalTimer = Stopwatch.StartNew();
+            var sendTimer = Stopwatch.StartNew();
+
+            const int loopCount = 100;
+            const int messagesPerLoop = 1;
+            await Task.WhenAll(Enumerable.Range(0, loopCount).Select(async n =>
+            {
+                // ReSharper disable once AccessToDisposedClosure
+                using var scope = provider.CreateScope();
+
+                using var dbContext = scope.ServiceProvider.GetRequiredService<MongoDbContext>();
+
+                await dbContext.BeginTransaction(harness.CancellationToken);
+
+                var publishEndpoint = scope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
+
+                await Task.WhenAll(Enumerable.Range(0, messagesPerLoop).Select(_ => publishEndpoint.Publish(new PingMessage())));
+
+                await dbContext.CommitTransaction(harness.CancellationToken);
+            }));
+
+            sendTimer.Stop();
+
+            var count = await harness.Consumed.SelectAsync<PingMessage>().Count();
+
+            totalTimer.Stop();
+
+            var totalTime = totalTimer.Elapsed - harness.TestInactivityTimeout;
+
+            const int messageCount = loopCount * messagesPerLoop;
+
+            Assert.That(count, Is.EqualTo(messageCount));
+
+            TestContext.Out.WriteLine("Message Count: {0}", messageCount);
+
+            TestContext.Out.WriteLine("Total send duration: {0:g}", sendTimer.Elapsed);
+            TestContext.Out.WriteLine("Send message rate: {0:F2} (msg/s)", messageCount * 1000 / sendTimer.Elapsed.TotalMilliseconds);
+            TestContext.Out.WriteLine("Total consume duration: {0:g}", totalTime);
+            TestContext.Out.WriteLine("Consume message rate: {0:F2} (msg/s)", messageCount * 1000 / totalTime.TotalMilliseconds);
+
 
             await harness.Stop();
         }

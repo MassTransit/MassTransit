@@ -27,6 +27,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         readonly ILogger _logger;
         readonly OutboxDeliveryServiceOptions _options;
         readonly IServiceProvider _provider;
+        string _getOutboxIdStatement;
 
         public BusOutboxDeliveryService(IBusControl busControl, IOptions<OutboxDeliveryServiceOptions> options,
             IOptions<EntityFrameworkOutboxOptions> outboxOptions,
@@ -66,24 +67,18 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
         async Task ProcessMessageBatch(CancellationToken cancellationToken)
         {
-            using var scope = _provider.CreateScope();
-
-            await using var dbContext = scope.ServiceProvider.GetRequiredService<TDbContext>();
-
             var messageLimit = _options.QueryMessageLimit;
 
-            List<Guid> outboxIds = await dbContext.Set<OutboxMessage>()
-                .Where(x => x.OutboxId != null)
-                .OrderBy(x => x.SequenceNumber)
-                .Take(messageLimit)
-                .Select(x => x.OutboxId.Value)
-                .Distinct()
-                .ToListAsync(cancellationToken).ConfigureAwait(false);
+            for (var i = 0; i < messageLimit / 10; i++)
+            {
+                var counts = await Task.WhenAll(Enumerable.Range(0, 10).Select(_ => DeliverOutbox(cancellationToken))).ConfigureAwait(false);
 
-            await Task.WhenAll(outboxIds.Select(outboxId => DeliverOutbox(outboxId, cancellationToken)));
+                if (counts.All(x => x < 0))
+                    break;
+            }
         }
 
-        async Task DeliverOutbox(Guid outboxId, CancellationToken cancellationToken)
+        async Task<int> DeliverOutbox(CancellationToken cancellationToken)
         {
             var scope = _provider.CreateScope();
 
@@ -91,9 +86,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
             try
             {
-                var statement = _lockStatementProvider.GetRowLockStatement<OutboxState>(dbContext, nameof(OutboxState.OutboxId));
+                _getOutboxIdStatement ??= _lockStatementProvider.GetOutboxStatement(dbContext);
 
-                async Task<bool> Execute()
+                async Task<int> Execute()
                 {
                     using var timeoutToken = new CancellationTokenSource(_options.QueryTimeout);
 
@@ -103,34 +98,22 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                     try
                     {
                         var outboxState = await dbContext.Set<OutboxState>()
-                            .FromSqlRaw(statement, outboxId)
+                            .FromSqlRaw(_getOutboxIdStatement)
                             .SingleOrDefaultAsync(timeoutToken.Token).ConfigureAwait(false);
 
-                        bool continueProcessing;
-
                         if (outboxState == null)
+                            return -1;
+
+                        int continueProcessing;
+
+                        if (outboxState.Delivered != null)
                         {
-                            outboxState = new OutboxState
-                            {
-                                OutboxId = outboxId,
-                            };
+                            await RemoveOutbox(dbContext, outboxState, cancellationToken).ConfigureAwait(false);
 
-                            await dbContext.AddAsync(outboxState, timeoutToken.Token).ConfigureAwait(false);
-                            await dbContext.SaveChangesAsync(timeoutToken.Token).ConfigureAwait(false);
-
-                            continueProcessing = true;
+                            continueProcessing = 0;
                         }
                         else
-                        {
-                            if (outboxState.Delivered != null)
-                            {
-                                await RemoveOutbox(dbContext, outboxState, cancellationToken).ConfigureAwait(false);
-
-                                continueProcessing = false;
-                            }
-                            else
-                                continueProcessing = await DeliverOutboxMessages(dbContext, outboxState, cancellationToken).ConfigureAwait(false);
-                        }
+                            continueProcessing = await DeliverOutboxMessages(dbContext, outboxState, cancellationToken).ConfigureAwait(false);
 
                         await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
 
@@ -157,8 +140,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                     }
                 }
 
-                var continueProcessing = true;
-                while (continueProcessing)
+                var continueProcessing = 1;
+                while (continueProcessing >= 0)
                 {
                     var executionStrategy = dbContext.Database.CreateExecutionStrategy();
                     if (executionStrategy is ExecutionStrategy)
@@ -166,6 +149,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                     else
                         continueProcessing = await Execute().ConfigureAwait(false);
                 }
+
+                return continueProcessing;
             }
             finally
             {
@@ -197,7 +182,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                 LogContext.Debug?.Log("Outbox removed {Count} messages: {OutboxId}", messages.Count, outboxState);
         }
 
-        async Task<bool> DeliverOutboxMessages(TDbContext dbContext, OutboxState outboxState, CancellationToken cancellationToken)
+        async Task<int> DeliverOutboxMessages(TDbContext dbContext, OutboxState outboxState, CancellationToken cancellationToken)
         {
             var messageLimit = _options.MessageDeliveryLimit;
 
@@ -288,7 +273,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             if (saveChanges)
                 await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-            return true;
+            return messageCount;
         }
 
         static async Task RollbackTransaction(IDbContextTransaction transaction)

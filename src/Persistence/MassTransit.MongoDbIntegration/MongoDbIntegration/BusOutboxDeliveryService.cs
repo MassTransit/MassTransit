@@ -65,20 +65,20 @@ namespace MassTransit.MongoDbIntegration
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<MongoDbContext>();
 
-                MongoDbCollectionContext<OutboxMessage> collection = dbContext.GetCollection<OutboxMessage>();
+                MongoDbCollectionContext<OutboxState> collection = dbContext.GetCollection<OutboxState>();
 
                 var messageLimit = _options.QueryMessageLimit;
 
-                FilterDefinitionBuilder<OutboxMessage> builder = Builders<OutboxMessage>.Filter;
-                FilterDefinition<OutboxMessage> filter = builder.Not(builder.Eq(x => x.OutboxId, null));
+                FilterDefinitionBuilder<OutboxState> builder = Builders<OutboxState>.Filter;
 
                 List<Guid> outboxIds = await collection
-                    .Find(filter)
+                    .Find(builder.Empty)
+                    .Sort(Builders<OutboxState>.Sort.Ascending(x => x.Created))
                     .Limit(messageLimit)
-                    .Project(x => x.OutboxId.Value)
+                    .Project(x => x.OutboxId)
                     .ToListAsync(cancellationToken).ConfigureAwait(false);
 
-                await Task.WhenAll(outboxIds.Distinct().Select(outboxId => DeliverOutbox(outboxId, cancellationToken)));
+                await Task.WhenAll(outboxIds.Select(outboxId => DeliverOutbox(outboxId, cancellationToken)));
             }
             finally
             {

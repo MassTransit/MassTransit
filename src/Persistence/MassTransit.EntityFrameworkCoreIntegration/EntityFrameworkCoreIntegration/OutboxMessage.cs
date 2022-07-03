@@ -14,8 +14,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         Headers? _headers;
         IReadOnlyDictionary<string, object>? _properties;
 
-        public byte[]? RowVersion { get; set; }
-
         /// <summary>
         /// When the message should be visible / ready to be delivered
         /// </summary>

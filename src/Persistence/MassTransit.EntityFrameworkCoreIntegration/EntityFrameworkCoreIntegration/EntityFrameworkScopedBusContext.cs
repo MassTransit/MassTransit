@@ -21,8 +21,10 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         readonly TBus _bus;
         readonly IClientFactory _clientFactory;
         readonly TDbContext _dbContext;
+        readonly object _lock = new object();
         readonly Guid _outboxId;
         readonly IServiceProvider _provider;
+        OutboxState? _outboxState;
 
         IPublishEndpoint? _publishEndpoint;
         IScopedClientFactory? _scopedClientFactory;
@@ -41,6 +43,22 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         public Task AddSend<T>(SendContext<T> context)
             where T : class
         {
+            if (_outboxState == null)
+            {
+                lock (_lock)
+                {
+                    if (_outboxState == null)
+                    {
+                        _outboxState = new OutboxState
+                        {
+                            OutboxId = _outboxId,
+                            Created = DateTime.UtcNow
+                        };
+                        _dbContext.Add(_outboxState);
+                    }
+                }
+            }
+
             return _dbContext.Set<OutboxMessage>().AddSend(context, SystemTextJsonMessageSerializer.Instance, outboxId: _outboxId);
         }
 

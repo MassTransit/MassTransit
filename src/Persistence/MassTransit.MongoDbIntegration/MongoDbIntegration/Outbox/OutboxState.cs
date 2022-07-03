@@ -18,6 +18,8 @@ namespace MassTransit.MongoDbIntegration.Outbox
 
         public ObjectId LockToken { get; set; }
 
+        public DateTime Created { get; set; }
+
         /// <summary>
         /// Available for optimistic concurrency
         /// </summary>

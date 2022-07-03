@@ -17,5 +17,7 @@
         /// <returns></returns>
         string GetRowLockStatement<T>(DbContext context, params string[] propertyNames)
             where T : class;
+
+        string GetOutboxStatement(DbContext context);
     }
 }

@@ -2,6 +2,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
 {
     using System;
     using System.Diagnostics;
+    using System.Linq;
+    using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
     using Logging;
@@ -62,6 +64,79 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
             }
 
             Assert.That(await consumerHarness.Consumed.Any<PingMessage>(), Is.True);
+
+            await harness.Stop();
+        }
+
+        [Test]
+        [Explicit]
+        public async Task Fill_up_the_outbox()
+        {
+            using var tracerProvider = TraceConfig.CreateTraceProvider("ef-core-tests");
+
+            await using var provider = new ServiceCollection()
+                .AddBusOutboxServices()
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.AddEntityFrameworkOutbox<ReliableDbContext>(o =>
+                    {
+                        o.QueryDelay = TimeSpan.FromSeconds(1);
+                        o.DisableInboxCleanupService();
+
+//                        o.UsePostgres();
+
+                        o.UseBusOutbox(bo =>
+                        {
+                            bo.MessageDeliveryLimit = 10;
+                        });
+                    });
+
+                    x.AddConsumer<PingConsumer>();
+                })
+                .BuildServiceProvider(true);
+
+            var harness = provider.GetTestHarness();
+
+            await harness.Start();
+
+            var totalTimer = Stopwatch.StartNew();
+            var sendTimer = Stopwatch.StartNew();
+
+            const int loopCount = 100;
+            const int messagesPerLoop = 3;
+            await Task.WhenAll(Enumerable.Range(0, loopCount).Select(async n =>
+            {
+                // ReSharper disable once AccessToDisposedClosure
+                using var scope = provider.CreateScope();
+
+                await using var dbContext = scope.ServiceProvider.GetRequiredService<ReliableDbContext>();
+
+                var publishEndpoint = scope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
+
+                await Task.WhenAll(Enumerable.Range(0, messagesPerLoop).Select(_ => publishEndpoint.Publish(new PingMessage())));
+
+                await dbContext.SaveChangesAsync(harness.CancellationToken);
+            }));
+
+            sendTimer.Stop();
+
+            var count = await harness.Consumed.SelectAsync<PingMessage>().Count();
+
+            totalTimer.Stop();
+
+            var totalTime = totalTimer.Elapsed - harness.TestInactivityTimeout;
+
+            const int messageCount = loopCount * messagesPerLoop;
+
+            Assert.That(count, Is.EqualTo(messageCount));
+
+            TestContext.Out.WriteLine("Message Count: {0}", messageCount);
+
+            TestContext.Out.WriteLine("Total send duration: {0:g}", sendTimer.Elapsed);
+            TestContext.Out.WriteLine("Send message rate: {0:F2} (msg/s)", messageCount * 1000 / sendTimer.Elapsed.TotalMilliseconds);
+            TestContext.Out.WriteLine("Total consume duration: {0:g}", totalTime);
+            TestContext.Out.WriteLine("Consume message rate: {0:F2} (msg/s)", messageCount * 1000 / totalTime.TotalMilliseconds);
+
 
             await harness.Stop();
         }
@@ -185,6 +260,15 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
             services.AddDbContext<ReliableDbContext>(builder =>
             {
                 ReliableDbContextFactory.Apply(builder);
+                //
+                // builder.UseNpgsql("host=localhost;user id=postgres;password=Password12!;database=MassTransitUnitTests;", options =>
+                // {
+                //     options.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name);
+                //     options.MigrationsHistoryTable($"__{nameof(ReliableDbContext)}");
+                //
+                //     options.EnableRetryOnFailure(5);
+                //     options.MinBatchSize(1);
+                // });
             });
             services.AddHostedService<MigrationHostedService<ReliableDbContext>>();
 

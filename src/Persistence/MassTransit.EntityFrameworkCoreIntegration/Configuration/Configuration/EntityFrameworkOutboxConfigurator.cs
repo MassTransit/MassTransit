@@ -23,7 +23,7 @@ namespace MassTransit.Configuration
             _configurator = configurator;
 
             _lockStatementProvider = new SqlServerLockStatementProvider();
-            _isolationLevel = IsolationLevel.Serializable;
+            _isolationLevel = IsolationLevel.RepeatableRead;
         }
 
         public TimeSpan DuplicateDetectionWindow { get; set; } = TimeSpan.FromMinutes(30);
