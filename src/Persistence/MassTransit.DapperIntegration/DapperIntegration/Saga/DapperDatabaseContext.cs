@@ -119,7 +119,16 @@ namespace MassTransit.DapperIntegration.Saga
 
         static string GetTableName<T>()
         {
-            return $"{typeof(T).Name}s";
+            var tableAttribute = Attribute.GetCustomAttribute(typeof(T), typeof(TableAttribute));
+
+            if (tableAttribute != null)
+            {
+                return (tableAttribute as TableAttribute).Name;
+            }
+            else
+            {
+                return $"{typeof(T).Name}s";
+            }
         }
     }
 }
