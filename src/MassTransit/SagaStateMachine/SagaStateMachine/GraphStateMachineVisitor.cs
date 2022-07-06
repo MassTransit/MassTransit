@@ -16,6 +16,7 @@
         readonly Dictionary<State, Vertex> _states;
         Vertex _currentEvent;
         Vertex _currentState;
+        Edge _currentEdge;
 
         public GraphStateMachineVisitor(StateMachine<TSaga> machine)
         {
@@ -55,9 +56,7 @@
         public void Visit(Event @event, Action<Event> next)
         {
             _currentEvent = GetEventVertex(@event);
-
-            if (!_currentEvent.IsComposite)
-                _edges.Add(new Edge(_currentState, _currentEvent, _currentEvent.Title));
+            _currentEdge = null;
 
             next(@event);
         }
@@ -66,11 +65,18 @@
             where TData : class
         {
             _currentEvent = GetEventVertex(@event);
-
-            if (!_currentEvent.IsComposite)
-                _edges.Add(new Edge(_currentState, _currentEvent, _currentEvent.Title));
+            _currentEdge = null;
 
             next(@event);
+        }
+
+        void AddCurrentEdge()
+        {
+            if (_currentEvent.IsComposite || _currentEdge != null)
+                return;
+
+            _currentEdge = new Edge(_currentState, _currentEvent, _currentEvent.Title);
+            _edges.Add(_currentEdge);
         }
 
         public void Visit(IStateMachineActivity activity)
@@ -134,6 +140,8 @@
 
             if (compensateType != null)
             {
+                AddCurrentEdge();
+
                 var previousEvent = _currentEvent;
 
                 var eventType = typeof(MessageEvent<>).MakeGenericType(compensateType);
@@ -151,40 +159,22 @@
             next(activity);
         }
 
-        void InspectCompositeEventActivity(CompositeEventActivity<TSaga> compositeActivity)
-        {
-            var compositeEvent = GetEventVertex(compositeActivity.Event);
-
-            _edges.Add(new Edge(_currentEvent, compositeEvent, compositeEvent.Title));
-        }
-
-        //        void InspectExceptionActivity(ExceptionActivity<TInstance> exceptionActivity, Action<Activity> next)
-        //        {
-        //            Vertex previousEvent = _currentEvent;
-        //
-        //            _currentEvent = GetEventVertex(exceptionActivity.Event);
-        //
-        //            _edges.Add(new Edge(previousEvent, _currentEvent, _currentEvent.Title));
-        //
-        //            next(exceptionActivity);
-        //
-        //            _currentEvent = previousEvent;
-        //        }
-
-        //        void InspectTryActivity(TryActivity<TInstance> exceptionActivity, Action<Activity> next)
-        //        {
-        //            Vertex previousEvent = _currentEvent;
-        //
-        //            next(exceptionActivity);
-        //
-        //            _currentEvent = previousEvent;
-        //        }
-
         void InspectTransitionActivity(TransitionActivity<TSaga> transitionActivity)
         {
+            AddCurrentEdge();
+
             var targetState = GetStateVertex(transitionActivity.ToState);
 
             _edges.Add(new Edge(_currentEvent, targetState, _currentEvent.Title));
+        }
+
+        void InspectCompositeEventActivity(CompositeEventActivity<TSaga> compositeActivity)
+        {
+            AddCurrentEdge();
+
+            var compositeEvent = GetEventVertex(compositeActivity.Event);
+
+            _edges.Add(new Edge(_currentEvent, compositeEvent, compositeEvent.Title));
         }
 
         Vertex GetStateVertex(State state)
