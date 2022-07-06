@@ -3,6 +3,7 @@ namespace MassTransit.DapperIntegration.Saga
     using System;
     using System.Collections.Generic;
     using System.Linq.Expressions;
+    using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
     using Dapper;
@@ -61,7 +62,7 @@ namespace MassTransit.DapperIntegration.Saga
             await _inUse.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                await _connection.QueryAsync($"DELETE FROM {GetTableName<T>()} WHERE CorrelationId = @correlationId", new {correlationId}, _transaction)
+                await _connection.QueryAsync($"DELETE FROM {GetTableName<T>()} WHERE CorrelationId = @correlationId", new { correlationId }, _transaction)
                     .ConfigureAwait(false);
             }
             finally
@@ -78,7 +79,7 @@ namespace MassTransit.DapperIntegration.Saga
             {
                 return await _connection.QuerySingleOrDefaultAsync<T>(
                     $"SELECT * FROM {GetTableName<T>()} WITH (UPDLOCK, ROWLOCK) WHERE CorrelationId = @correlationId",
-                    new {correlationId}, _transaction).ConfigureAwait(false);
+                    new { correlationId }, _transaction).ConfigureAwait(false);
             }
             finally
             {
@@ -119,7 +120,7 @@ namespace MassTransit.DapperIntegration.Saga
 
         static string GetTableName<T>()
         {
-            return $"{typeof(T).Name}s";
+            return typeof(T).GetCustomAttribute<TableAttribute>()?.Name ?? $"{typeof(T).Name}s";
         }
     }
 }
