@@ -76,3 +76,60 @@ Assert.That(instance.OrderNumber, Is.EqualTo(orderNumber));
 
 Assert.IsTrue(await harness.Published.Any<OrderApprovalRequired>());
 ```
+
+### Send and `EndpointConvention.Map<T>()`
+
+When using `Send()`, don't forget to map the endpoints (e.g.  `EndpointConvention.Map<T>()`) or get the send endpoint using an address in your test:
+
+```cs
+// Use convention with the default name
+EndpointConvention.Map<OrderSubmitted>(new Uri("queue:OrderSubmitted"));
+
+await using var provider = new ServiceCollection()
+    .AddMassTransitTestHarness(cfg =>
+    {
+        cfg.AddConsumer<OrderSubmittedConsumer>();
+    })
+    .BuildServiceProvider(true);
+
+var harness = provider.GetRequiredService<ITestHarness>();
+await harness.Start();
+
+harness.Bus.Send<OrderSubmitted>(new
+{
+    OrderId = Guid.NewId(),
+    OrderNumber = "123"
+});
+
+// XUnit assertions
+Assert.True(await harness.Sent.Any<OrderSubmitted>());
+Assert.True(await harness.Consumed.Any<OrderSubmitted>());
+```
+
+When using a custom name, be sure to also update the consumer configuration in the setup of the harness:
+
+```cs
+// Use convention with a custom name
+EndpointConvention.Map<OrderSubmitted>(new Uri("queue:order-submitted"));
+
+await using var provider = new ServiceCollection()
+    .AddMassTransitTestHarness(cfg =>
+    {
+        cfg.AddConsumer<OrderSubmittedConsumer>()
+           .Endpoint(e => e.Name = "order-submitted"); // NOTE: mirror custom name
+    })
+    .BuildServiceProvider(true);
+
+var harness = provider.GetRequiredService<ITestHarness>();
+await harness.Start();
+
+harness.Bus.Send<OrderSubmitted>(new
+{
+    OrderId = Guid.NewId(),
+    OrderNumber = "123"
+});
+
+// XUnit assertions
+Assert.True(await harness.Sent.Any<OrderSubmitted>());
+Assert.True(await harness.Consumed.Any<OrderSubmitted>());
+```
