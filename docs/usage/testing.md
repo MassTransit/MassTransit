@@ -95,7 +95,7 @@ await using var provider = new ServiceCollection()
 var harness = provider.GetRequiredService<ITestHarness>();
 await harness.Start();
 
-harness.Bus.Send<OrderSubmitted>(new
+await harness.Bus.Send<OrderSubmitted>(new
 {
     OrderId = Guid.NewId(),
     OrderNumber = "123"
@@ -123,7 +123,7 @@ await using var provider = new ServiceCollection()
 var harness = provider.GetRequiredService<ITestHarness>();
 await harness.Start();
 
-harness.Bus.Send<OrderSubmitted>(new
+await harness.Bus.Send<OrderSubmitted>(new
 {
     OrderId = Guid.NewId(),
     OrderNumber = "123"
