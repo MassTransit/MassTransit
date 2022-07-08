@@ -72,7 +72,7 @@
         {
             await _readyToSend.Task.ConfigureAwait(false);
 
-            context.RequestId = ((RequestHandle)this).RequestId;
+            context.RequestId = RequestId;
             context.ResponseAddress = _context.ResponseAddress;
 
             context.Headers.Set(MessageHeaders.Request.Accept, _accept);
@@ -142,7 +142,7 @@
         {
             try
             {
-                var message = await _sendRequestCallback(((RequestHandle)this).RequestId, this, _cancellationTokenSource.Token).ConfigureAwait(false);
+                var message = await _sendRequestCallback(RequestId, this, _cancellationTokenSource.Token).ConfigureAwait(false);
 
                 _message.TrySetResult(message);
             }
@@ -157,7 +157,7 @@
                 if (_sendContext.Task.IsFaulted)
                     await _sendContext.Task.ConfigureAwait(false);
 
-                var requestException = new RequestCanceledException(((RequestHandle)this).RequestId.ToString("D"), exception, exception.CancellationToken);
+                var requestException = new RequestCanceledException(RequestId.ToString("D"), exception, exception.CancellationToken);
 
                 Fail(requestException);
 
@@ -184,7 +184,7 @@
             if (_cancellationToken.IsCancellationRequested)
                 return TaskUtil.Cancelled<Response<T>>();
 
-            HandlerConnectHandle<T> handle = configurator.Connect(_context, ((RequestHandle)this).RequestId);
+            HandlerConnectHandle<T> handle = configurator.Connect(_context, RequestId);
 
             _responseHandlers.Add(typeof(T), handle);
 
@@ -201,7 +201,7 @@
                 return FaultHandler(context);
             }
 
-            var connectHandle = _context.ConnectRequestHandler(((RequestHandle)this).RequestId, MessageHandler,
+            var connectHandle = _context.ConnectRequestHandler(RequestId, MessageHandler,
                 new PipeConfigurator<ConsumeContext<Fault<TRequest>>>());
 
             var handle = new FaultHandlerConnectHandle(connectHandle);
@@ -276,7 +276,7 @@
 
         void TimeoutExpired(object state)
         {
-            var timeoutException = new RequestTimeoutException(((RequestHandle)this).RequestId.ToString());
+            var timeoutException = new RequestTimeoutException(RequestId.ToString());
 
             Fail(timeoutException);
         }
