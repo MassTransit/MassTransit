@@ -129,24 +129,24 @@ namespace MassTransit
             return endpoint.Publish(values, callback.ToPipe(), cancellationToken);
         }
 
-        static IPipe<PublishContext<T>> ToPipe<T>(this Action<PublishContext<T>> callback)
+        public static IPipe<PublishContext<T>> ToPipe<T>(this Action<PublishContext<T>> callback)
             where T : class
         {
             return new PublishContextPipe<T>(callback);
         }
 
-        static IPipe<PublishContext<T>> ToPipe<T>(this Func<PublishContext<T>, Task> callback)
+        public static IPipe<PublishContext<T>> ToPipe<T>(this Func<PublishContext<T>, Task> callback)
             where T : class
         {
             return new PublishContextAsyncPipe<T>(callback);
         }
 
-        static IPipe<PublishContext> ToPipe(this Action<PublishContext> callback)
+        public static IPipe<PublishContext> ToPipe(this Action<PublishContext> callback)
         {
             return new PublishContextPipe(callback);
         }
 
-        static IPipe<PublishContext> ToPipe(this Func<PublishContext, Task> callback)
+        public static IPipe<PublishContext> ToPipe(this Func<PublishContext, Task> callback)
         {
             return new PublishContextAsyncPipe(callback);
         }
