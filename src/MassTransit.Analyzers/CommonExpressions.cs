@@ -17,32 +17,34 @@ namespace MassTransit.Analyzers
         {
             return new Dictionary<string, int>
             {
-                {"MassTransit.ISendEndpoint.Send", 0},
-                {"MassTransit.IPublishEndpoint.Publish", 0},
-                {"MassTransit.ConsumeContext.RespondAsync", 0},
-                {"MassTransit.ConsumeContextExtensions.Forward", 0},
-                {"MassTransit.ConsumeContextSelfSchedulerExtensions.ScheduleSend", 0},
-                {"MassTransit.EndpointConventionExtensions.Send", 0},
-                {"MassTransit.IRequestClient.Create", -1},
-                {"MassTransit.IRequestClient.Request", 0},
-                {"MassTransit.IRequestClient.GetResponse", -1},
-                {"MassTransit.MessageInitializerExtensions.Init", 0},
-                {"MassTransit.Initializers.MessageInitializerCache.Initialize", 0},
-                {"MassTransit.Initializers.MessageInitializerCache.InitializeMessage", 0},
-                {"MassTransit.PublishContextExecuteExtensions.Publish", 0},
-                {"MassTransit.RequestHandle.GetResponse", -1},
-                {"MassTransit.PublishEndpointRecurringSchedulerExtensions.ScheduleRecurringSend", 0},
-                {"MassTransit.PublishEndpointSchedulerExtensions.ScheduleSend", 0},
-                {"MassTransit.RedeliverExtensions.Redeliver", 0},
-                {"MassTransit.RequestClientExtensions.Request", -1},
-                {"MassTransit.RequestExtensions.Request", 0},
-                {"MassTransit.RespondAsyncExecuteExtensions.RespondAsync", 0},
-                {"MassTransit.SendContextExecuteExtensions.Send", 0},
-                {"MassTransit.SendEndpointExtensions.Send", 0},
-                {"MassTransit.SendEndpointRecurringSchedulerExtensions.ScheduleRecurringSend", 0},
-                {"MassTransit.SendEndpointSchedulerExtensions.ScheduleSend", 0},
-                {"MassTransit.TimeSpanContextScheduleExtensions.ScheduleSend", 0},
-                {"MassTransit.TimeSpanScheduleExtensions.ScheduleSend", 0}
+                { "MassTransit.BehaviorContext.Init", 0 },
+                { "MassTransit.ConsumeContext.RespondAsync", 0 },
+                { "MassTransit.ConsumeContextSelfSchedulerExtensions.ScheduleSend", 0 },
+                { "MassTransit.EndpointConventionExtensions.Send", 0 },
+                { "MassTransit.ForwardExtensions.Forward", 0 },
+                { "MassTransit.IClientFactory.CreateRequest", 0 },
+                { "MassTransit.IMessageScheduler.ScheduleSend", 0 },
+                { "MassTransit.IMessageScheduler.SchedulePublish", 0 },
+                { "MassTransit.IPublishEndpoint.Publish", 0 },
+                { "MassTransit.IRecurringMessageScheduler.ScheduleRecurringSend", 0 },
+                { "MassTransit.IRequestClient.Create", -1 },
+                { "MassTransit.IRequestClient.GetResponse", -1 },
+                { "MassTransit.ISendEndpoint.Send", 0 },
+                { "MassTransit.Initializers.MessageInitializerCache.Initialize", -1 },
+                { "MassTransit.Initializers.MessageInitializerCache.InitializeMessage", -1 },
+                { "MassTransit.PublishExecuteExtensions.Publish", 0 },
+                { "MassTransit.PublishEndpointRecurringSchedulerExtensions.ScheduleRecurringSend", 0 },
+                { "MassTransit.RequestExtensions.Request", 0 },
+                { "MassTransit.RespondAsyncExecuteExtensions.RespondAsync", 0 },
+                { "MassTransit.SchedulePublishExtensions.SchedulePublish", 0 },
+                { "MassTransit.SendConsumeContextExecuteExtensions.Send", 0 },
+                { "MassTransit.SendConsumeContextExtensions.Send", 0 },
+                { "MassTransit.SendExecuteExtensions.Send", 0 },
+                { "MassTransit.SendEndpointRecurringSchedulerExtensions.ScheduleRecurringSend", 0 },
+                { "MassTransit.SendEndpointSchedulerExtensions.ScheduleSend", 0 },
+                { "MassTransit.TimeSpanContextScheduleExtensions.ScheduleSend", 0 },
+                { "MassTransit.TimeSpanScheduleExtensions.ScheduleSend", 0 },
+                { "MassTransit.TimeSpanSchedulePublishExtensions.SchedulePublish", 0 }
             };
         }
 
@@ -170,11 +172,11 @@ namespace MassTransit.Analyzers
 
         public static List<IPropertySymbol> GetContractProperties(this ITypeSymbol contractType)
         {
-            var contractTypes = new List<ITypeSymbol> {contractType};
+            var contractTypes = new List<ITypeSymbol> { contractType };
 
             contractTypes.AddRange(contractType.AllInterfaces);
 
-            #pragma warning disable RS1024
+        #pragma warning disable RS1024
             return contractTypes.SelectMany(i => i.GetMembers().OfType<IPropertySymbol>().Where(x => x.DeclaredAccessibility == Accessibility.Public))
                 .Distinct(PropertyNameEqualityComparer.Instance)
                 .ToList();
@@ -261,7 +263,7 @@ namespace MassTransit.Analyzers
             ImmutableArray<INamedTypeSymbol> allInterfaces = type.AllInterfaces;
             if (type is INamedTypeSymbol namedType && namedType.TypeKind.IsClassOrInterface() && !allInterfaces.Contains(namedType))
             {
-                var result = new List<INamedTypeSymbol>(allInterfaces.Length + 1) {namedType};
+                var result = new List<INamedTypeSymbol>(allInterfaces.Length + 1) { namedType };
                 result.AddRange(allInterfaces);
                 return result;
             }
