@@ -8,16 +8,15 @@ namespace MassTransit.Serialization
     using System.Text.Json;
 
 
-    public class SystemTextJsonObjectMessageBody<T> :
+    public class SystemTextJsonObjectMessageBody :
         MessageBody
-        where T : class
     {
         readonly JsonSerializerOptions _options;
-        readonly T _value;
+        readonly object _value;
         byte[]? _bytes;
         string? _string;
 
-        public SystemTextJsonObjectMessageBody(T value, JsonSerializerOptions options)
+        public SystemTextJsonObjectMessageBody(object value, JsonSerializerOptions options)
         {
             _value = value;
             _options = options;

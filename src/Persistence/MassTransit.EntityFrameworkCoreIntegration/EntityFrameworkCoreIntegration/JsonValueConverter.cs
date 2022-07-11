@@ -1,6 +1,5 @@
 namespace MassTransit.EntityFrameworkCoreIntegration
 {
-    using System.Text.Json;
     using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
     using Serialization;
 
@@ -16,12 +15,12 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
         static T Deserialize(string json)
         {
-            return string.IsNullOrWhiteSpace(json) ? null : JsonSerializer.Deserialize<T>(json, SystemTextJsonMessageSerializer.Options);
+            return ObjectDeserializer.Deserialize<T>(json);
         }
 
         static string Serialize(T obj)
         {
-            return obj == null ? null : JsonSerializer.Serialize(obj, SystemTextJsonMessageSerializer.Options);
+            return ObjectDeserializer.Serialize(obj);
         }
     }
 }

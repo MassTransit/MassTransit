@@ -1,13 +1,13 @@
 namespace MassTransit.EntityFrameworkCoreIntegration
 {
     using System;
-    using System.Text.Json;
     using Microsoft.EntityFrameworkCore.ChangeTracking;
     using Serialization;
 
 
     public class JsonValueComparer<T> :
         ValueComparer<T>
+        where T : class
     {
         public JsonValueComparer()
             : base((t1, t2) => DoEquals(t1, t2), t => DoGetHashCode(t), t => DoGetSnapshot(t))
@@ -16,7 +16,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
         static string Json(T instance)
         {
-            return JsonSerializer.Serialize(instance, SystemTextJsonMessageSerializer.Options);
+            return ObjectDeserializer.Serialize(instance);
         }
 
         static T DoGetSnapshot(T instance)
@@ -24,7 +24,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             if (instance is ICloneable cloneable)
                 return (T)cloneable.Clone();
 
-            return JsonSerializer.Deserialize<T>(Json(instance), SystemTextJsonMessageSerializer.Options);
+            return ObjectDeserializer.Deserialize<T>(Json(instance));
         }
 
         static int DoGetHashCode(T instance)

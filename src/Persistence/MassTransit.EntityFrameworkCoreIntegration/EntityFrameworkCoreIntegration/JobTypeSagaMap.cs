@@ -1,7 +1,5 @@
 namespace MassTransit.EntityFrameworkCoreIntegration
 {
-    using System;
-    using System.Collections.Generic;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -37,12 +35,10 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             entity.Property(x => x.OverrideLimitExpiration);
 
             entity.Property(x => x.ActiveJobs)
-                .HasConversion(new JsonValueConverter<List<ActiveJob>>())
-                .Metadata.SetValueComparer(new JsonValueComparer<List<ActiveJob>>());
+                .HasJsonConversion();
 
             entity.Property(x => x.Instances)
-                .HasConversion(new JsonValueConverter<Dictionary<Uri, JobTypeInstance>>())
-                .Metadata.SetValueComparer(new JsonValueComparer<Dictionary<Uri, JobTypeInstance>>());
+                .HasJsonConversion();
         }
     }
 }

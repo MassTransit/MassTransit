@@ -1,7 +1,5 @@
 namespace MassTransit.EntityFrameworkCoreIntegration
 {
-    using System;
-    using System.Collections.Generic;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -34,23 +32,18 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
             entity.Property(x => x.Location);
 
-            entity.Property(x => x.Command).HasConversion(new JsonValueConverter<FutureMessage>())
-                .Metadata.SetValueComparer(new JsonValueComparer<FutureMessage>());
+            entity.Property(x => x.Command)
+                .HasJsonConversion();
             entity.Property(x => x.Pending)
-                .HasConversion(new JsonValueConverter<HashSet<Guid>>())
-                .Metadata.SetValueComparer(new JsonValueComparer<HashSet<Guid>>());
+                .HasJsonConversion();
             entity.Property(x => x.Subscriptions)
-                .HasConversion(new JsonValueConverter<HashSet<FutureSubscription>>())
-                .Metadata.SetValueComparer(new JsonValueComparer<HashSet<FutureSubscription>>());
+                .HasJsonConversion();
             entity.Property(x => x.Variables)
-                .HasConversion(new JsonValueConverter<Dictionary<string, object>>())
-                .Metadata.SetValueComparer(new JsonValueComparer<Dictionary<string, object>>());
+                .HasJsonConversion();
             entity.Property(x => x.Results)
-                .HasConversion(new JsonValueConverter<Dictionary<Guid, FutureMessage>>())
-                .Metadata.SetValueComparer(new JsonValueComparer<Dictionary<Guid, FutureMessage>>());
+                .HasJsonConversion();
             entity.Property(x => x.Faults)
-                .HasConversion(new JsonValueConverter<Dictionary<Guid, FutureMessage>>())
-                .Metadata.SetValueComparer(new JsonValueComparer<Dictionary<Guid, FutureMessage>>());
+                .HasJsonConversion();
         }
     }
 }

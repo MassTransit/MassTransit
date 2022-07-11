@@ -8,15 +8,14 @@ namespace MassTransit.Serialization
     using Newtonsoft.Json;
 
 
-    public class NewtonsoftJsonObjectMessageBody<T> :
+    public class NewtonsoftJsonObjectMessageBody :
         MessageBody
-        where T : class
     {
-        readonly T _value;
+        readonly object _value;
         byte[]? _bytes;
         string? _string;
 
-        public NewtonsoftJsonObjectMessageBody(T value)
+        public NewtonsoftJsonObjectMessageBody(object value)
         {
             _value = value;
         }
@@ -37,7 +36,7 @@ namespace MassTransit.Serialization
             {
                 using var stream = new MemoryStream();
                 using var writer = new StreamWriter(stream, MessageDefaults.Encoding, 1024, true);
-                using var jsonWriter = new JsonTextWriter(writer) { Formatting = Formatting.Indented };
+                using var jsonWriter = new JsonTextWriter(writer) { Formatting = Formatting.None };
 
                 NewtonsoftJsonMessageSerializer.Serializer.Serialize(jsonWriter, _value);
 

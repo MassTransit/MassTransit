@@ -14,7 +14,6 @@ namespace MassTransit
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        MessageBody SerializeObject<T>(T? value)
-            where T : class;
+        MessageBody SerializeObject(object? value);
     }
 }

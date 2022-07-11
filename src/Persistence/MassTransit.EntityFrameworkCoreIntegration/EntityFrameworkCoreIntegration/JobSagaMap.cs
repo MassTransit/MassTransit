@@ -1,6 +1,5 @@
 namespace MassTransit.EntityFrameworkCoreIntegration
 {
-    using System.Collections.Generic;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -33,8 +32,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             entity.Property(x => x.ServiceAddress);
             entity.Property(x => x.JobTimeout);
             entity.Property(x => x.Job)
-                .HasConversion(new JsonValueConverter<IDictionary<string, object>>())
-                .Metadata.SetValueComparer(new JsonValueComparer<IDictionary<string, object>>());
+                .HasJsonConversion();
 
             entity.Property(x => x.JobTypeId);
 
