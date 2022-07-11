@@ -67,27 +67,5 @@ namespace MassTransit.ActiveMqTransport.Topology
 
             return settings.GetSendAddress(_hostConfiguration.HostAddress);
         }
-
-        public override bool TryGetPublishAddress<T>(out Uri publishAddress)
-        {
-            if (base.TryGetPublishAddress<T>(out publishAddress))
-            {
-                publishAddress = new ActiveMqEndpointAddress(_hostConfiguration.HostAddress, publishAddress).TopicAddress;
-                return true;
-            }
-
-            return false;
-        }
-
-        public override bool TryGetPublishAddress(Type messageType, out Uri publishAddress)
-        {
-            if (base.TryGetPublishAddress(messageType, out publishAddress))
-            {
-                publishAddress = new ActiveMqEndpointAddress(_hostConfiguration.HostAddress, publishAddress).TopicAddress;
-                return true;
-            }
-
-            return false;
-        }
     }
 }

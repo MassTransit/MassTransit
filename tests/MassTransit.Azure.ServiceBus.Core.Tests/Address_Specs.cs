@@ -3,7 +3,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
     using System;
     using System.Linq;
     using AzureServiceBusTransport;
+    using Internals;
     using NUnit.Framework;
+    using TestFramework.Messages;
 
 
     [TestFixture]
@@ -39,6 +41,22 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
             Assert.That(address.Scope, Is.EqualTo(typeof(An_address).Namespace));
 
             Assert.That(address.Path, Is.EqualTo(InputQueueAddress.AbsolutePath.Substring(1)));
+        }
+
+        [Test]
+        public void Should_handle_address_loopback()
+        {
+            Assert.IsTrue(Bus.Topology.TryGetPublishAddress<PingMessage>(out var address));
+
+            Assert.That(address.TryGetValueFromQueryString("type", out var type), Is.True);
+            Assert.That(type, Is.EqualTo("topic"));
+
+            Uri normalizedAddress = new ServiceBusEndpointAddress(AzureServiceBusTestHarness.HostAddress, address);
+
+            Assert.That(normalizedAddress.TryGetValueFromQueryString("type", out type), Is.True);
+            Assert.That(type, Is.EqualTo("topic"));
+
+            Assert.That(normalizedAddress.AbsolutePath, Is.EqualTo(address.AbsolutePath));
         }
     }
 }

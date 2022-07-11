@@ -110,7 +110,7 @@ namespace MassTransit
             {
                 Scheme = address.Scheme,
                 Host = address.Host,
-                Path = address.Scope == "/" || address.Type == AddressType.Topic
+                Path = address.Scope == "/" || address.Name.IndexOf('/') > 0
                     ? $"/{address.Name}"
                     : $"/{address.Scope}/{address.Name}"
             };
@@ -147,7 +147,7 @@ namespace MassTransit
                 yield return $"{AutoDeleteKey}={AutoDelete.Value.TotalSeconds:F0}";
 
             if (Type != AddressType.Queue)
-                yield return $"{TypeKey}=Topic";
+                yield return $"{TypeKey}=topic";
         }
     }
 }

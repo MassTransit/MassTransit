@@ -44,9 +44,7 @@ namespace MassTransit.InMemoryTransport
 
         public override bool TryGetPublishAddress(Uri baseAddress, out Uri? publishAddress)
         {
-            var exchangeName = _messageTopology.EntityName;
-
-            publishAddress = new InMemoryEndpointAddress(new InMemoryHostAddress(baseAddress), exchangeName, exchangeType: ExchangeType);
+            publishAddress = new InMemoryEndpointAddress(new InMemoryHostAddress(baseAddress), _messageTopology.EntityName, exchangeType: ExchangeType);
             return true;
         }
 

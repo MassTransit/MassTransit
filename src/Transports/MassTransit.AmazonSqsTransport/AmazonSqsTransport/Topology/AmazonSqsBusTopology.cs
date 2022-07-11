@@ -65,29 +65,5 @@ namespace MassTransit.AmazonSqsTransport.Topology
 
             return publishSettings.GetSendAddress(_hostConfiguration.HostAddress);
         }
-
-        public override bool TryGetPublishAddress<T>(out Uri publishAddress)
-        {
-            if (base.TryGetPublishAddress<T>(out publishAddress))
-            {
-                publishAddress = new AmazonSqsEndpointAddress(_hostConfiguration.HostAddress, publishAddress,
-                    AmazonSqsEndpointAddress.AddressType.Topic).TopicAddress;
-                return true;
-            }
-
-            return false;
-        }
-
-        public override bool TryGetPublishAddress(Type messageType, out Uri publishAddress)
-        {
-            if (base.TryGetPublishAddress(messageType, out publishAddress))
-            {
-                publishAddress = new AmazonSqsEndpointAddress(_hostConfiguration.HostAddress, publishAddress,
-                    AmazonSqsEndpointAddress.AddressType.Topic).TopicAddress;
-                return true;
-            }
-
-            return false;
-        }
     }
 }

@@ -2,7 +2,6 @@
 {
     using System;
     using Configuration;
-    using MassTransit.Topology;
     using Transports;
 
 
@@ -40,30 +39,6 @@
         IServiceBusMessageSendTopology<T> IServiceBusBusTopology.Send<T>()
         {
             return _configuration.Send.GetMessageTopology<T>();
-        }
-
-        public override bool TryGetPublishAddress<T>(out Uri publishAddress)
-        {
-            if (base.TryGetPublishAddress<T>(out publishAddress))
-            {
-                publishAddress = new ServiceBusEndpointAddress(_hostConfiguration.HostAddress, publishAddress,
-                    ServiceBusEndpointAddress.AddressType.Topic).TopicAddress;
-                return true;
-            }
-
-            return false;
-        }
-
-        public override bool TryGetPublishAddress(Type messageType, out Uri publishAddress)
-        {
-            if (base.TryGetPublishAddress(messageType, out publishAddress))
-            {
-                publishAddress = new ServiceBusEndpointAddress(_hostConfiguration.HostAddress, publishAddress,
-                    ServiceBusEndpointAddress.AddressType.Topic).TopicAddress;
-                return true;
-            }
-
-            return false;
         }
     }
 }

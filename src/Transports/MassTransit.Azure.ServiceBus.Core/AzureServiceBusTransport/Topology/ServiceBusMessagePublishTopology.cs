@@ -30,7 +30,9 @@ namespace MassTransit.AzureServiceBusTransport.Topology
 
         public override bool TryGetPublishAddress(Uri baseAddress, out Uri? publishAddress)
         {
-            publishAddress = new ServiceBusEndpointAddress(new Uri(baseAddress.GetLeftPart(UriPartial.Authority)), _topicConfigurator.FullPath);
+            publishAddress = new ServiceBusEndpointAddress(new Uri(baseAddress.GetLeftPart(UriPartial.Authority)),
+                _topicConfigurator.FullPath, _topicConfigurator.AutoDeleteOnIdle, ServiceBusEndpointAddress.AddressType.Topic);
+
             return true;
         }
 
