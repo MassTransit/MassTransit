@@ -67,14 +67,20 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
         async Task ProcessMessageBatch(CancellationToken cancellationToken)
         {
-            var messageLimit = _options.QueryMessageLimit;
+            const int batchSize = 10;
 
-            for (var i = 0; i < messageLimit / 10; i++)
+            var messageLimit = _options.QueryMessageLimit;
+            var loopCount = Math.Max(messageLimit / batchSize, 1);
+
+            for (var i = 0; i < loopCount; i++)
             {
-                var counts = await Task.WhenAll(Enumerable.Range(0, 10).Select(_ => DeliverOutbox(cancellationToken))).ConfigureAwait(false);
+                var messageCount = Math.Min(messageLimit, batchSize);
+                var counts = await Task.WhenAll(Enumerable.Range(0, messageCount).Select(_ => DeliverOutbox(cancellationToken))).ConfigureAwait(false);
 
                 if (counts.All(x => x < 0))
                     break;
+
+                messageLimit -= messageCount;
             }
         }
 

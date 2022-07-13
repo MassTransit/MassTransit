@@ -6,7 +6,7 @@ namespace MassTransit
     public class OutboxDeliveryServiceOptions
     {
         /// <summary>
-        /// The number of message to deliver at a time from the outbox
+        /// The number of message to deliver at a time from an individual outbox
         /// </summary>
         public int MessageDeliveryLimit { get; set; } = 100;
 
@@ -21,7 +21,7 @@ namespace MassTransit
         public TimeSpan QueryDelay { get; set; } = TimeSpan.FromSeconds(5);
 
         /// <summary>
-        /// The number of messages to query from the outbox on each query
+        /// The number of outboxes to deliver concurrently (set to 1 if you need in-order delivery across multiple transactions)
         /// </summary>
         public int QueryMessageLimit { get; set; } = 100;
 
