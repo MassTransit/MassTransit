@@ -166,8 +166,8 @@ namespace MassTransit
             outbox.Property(p => p.OutboxId);
             outbox.HasIndex(p => new
             {
-                p.SequenceNumber,
                 p.OutboxId,
+                p.SequenceNumber,
             }).IsUnique();
 
             outbox.Property(p => p.Headers);
