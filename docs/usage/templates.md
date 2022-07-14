@@ -38,7 +38,7 @@ Creates a dotnet project that is configured as a MassTransit Worker. Includes pr
 ### MassTransit Docker
 
 ```
-dotnet new docker
+dotnet new mtdocker
 ```
 
 Creates a `Dockerfile` and a `docker-compose.yml` in the project, configured for RabbitMQ.
