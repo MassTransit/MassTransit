@@ -27,6 +27,12 @@ namespace MassTransit.AzureTable.Saga
                     typeof(EntityPropertyConverter<,>).MakeGenericType(typeof(T), propertyInfo.PropertyType), propertyInfo.Name);
             }
 
+            if (propertyInfo.PropertyType.IsValueType)
+            {
+                return (IEntityPropertyConverter<T>)Activator.CreateInstance(
+                    typeof(ValueTypeEntityPropertyConverter<,>).MakeGenericType(typeof(T), propertyInfo.PropertyType), propertyInfo.Name);
+            }
+
             return (IEntityPropertyConverter<T>)Activator.CreateInstance(
                 typeof(ObjectEntityPropertyConverter<,>).MakeGenericType(typeof(T), propertyInfo.PropertyType), propertyInfo.Name);
         }

@@ -30,14 +30,29 @@ namespace MassTransit.Serialization
             return serializer.SerializeObject(value).GetString();
         }
 
-        public static T? Deserialize<T>(object? value)
+        public static T? Deserialize<T>(object? value, T? defaultValue = null)
             where T : class
         {
             switch (value)
             {
                 case null:
                 case string text when string.IsNullOrWhiteSpace(text):
-                    return null;
+                    return defaultValue;
+            }
+
+            var serializer = _currentSerializer.Value ?? _serializer ?? throw new ConfigurationException("No JSON serializer configured");
+
+            return serializer.DeserializeObject<T>(value);
+        }
+
+        public static T? Deserialize<T>(object? value, T? defaultValue = default)
+            where T : struct
+        {
+            switch (value)
+            {
+                case null:
+                case string text when string.IsNullOrWhiteSpace(text):
+                    return defaultValue;
             }
 
             var serializer = _currentSerializer.Value ?? _serializer ?? throw new ConfigurationException("No JSON serializer configured");
