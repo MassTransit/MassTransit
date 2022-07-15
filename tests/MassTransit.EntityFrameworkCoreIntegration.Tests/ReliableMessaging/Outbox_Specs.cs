@@ -5,9 +5,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
     using Logging;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
-    using OpenTelemetry;
-    using OpenTelemetry.Resources;
-    using OpenTelemetry.Trace;
     using Responsible;
     using Testing;
 
@@ -26,10 +23,17 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
 
             await harness.Start();
 
-            IRequestClient<Start> client = harness.GetRequestClient<Start>();
+            try
+            {
+                IRequestClient<Start> client = harness.GetRequestClient<Start>();
 
-            Assert.That(async () => await client.GetResponse<StartupComplete>(new Start { FailToStart = true }, harness.CancellationToken),
-                Throws.TypeOf<RequestFaultException>());
+                Assert.That(async () => await client.GetResponse<StartupComplete>(new Start { FailToStart = true }, harness.CancellationToken),
+                    Throws.TypeOf<RequestFaultException>());
+            }
+            finally
+            {
+                await harness.Stop();
+            }
         }
 
         [Test]
@@ -49,14 +53,21 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
                 Interlocked.Increment(ref count);
             });
 
-            IRequestClient<Start> client = harness.GetRequestClient<Start>();
+            try
+            {
+                IRequestClient<Start> client = harness.GetRequestClient<Start>();
 
-            Assert.That(async () => await client.GetResponse<StartupComplete>(new Start { FailToStart = true }, harness.CancellationToken),
-                Throws.TypeOf<RequestFaultException>());
+                Assert.That(async () => await client.GetResponse<StartupComplete>(new Start { FailToStart = true }, harness.CancellationToken),
+                    Throws.TypeOf<RequestFaultException>());
 
-            await harness.InactivityTask;
+                await harness.InactivityTask;
 
-            Assert.That(count, Is.EqualTo(1));
+                Assert.That(count, Is.EqualTo(1));
+            }
+            finally
+            {
+                await harness.Stop();
+            }
         }
 
         [Test]
@@ -70,9 +81,16 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
 
             await harness.Start();
 
-            IRequestClient<Start> client = harness.GetRequestClient<Start>();
+            try
+            {
+                IRequestClient<Start> client = harness.GetRequestClient<Start>();
 
-            Response<StartupComplete> complete = await client.GetResponse<StartupComplete>(new Start(), harness.CancellationToken);
+                Response<StartupComplete> complete = await client.GetResponse<StartupComplete>(new Start(), harness.CancellationToken);
+            }
+            finally
+            {
+                await harness.Stop();
+            }
         }
 
         static ServiceProvider CreateServiceProvider()

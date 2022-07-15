@@ -39,9 +39,12 @@ namespace MassTransit.Testing
             configurator.AddSingleton(provider => provider.GetRequiredService<ITestHarness>().GetTask<T>());
         }
 
-        public static Task Stop(this ITestHarness harness, CancellationToken cancellationToken = default)
+        public static async Task Stop(this ITestHarness harness, CancellationToken cancellationToken = default)
         {
-            return Task.WhenAll(harness.Scope.ServiceProvider.GetServices<IHostedService>().Select(x => x.StopAsync(cancellationToken)));
+            IHostedService[] services = harness.Scope.ServiceProvider.GetServices<IHostedService>().ToArray();
+
+            foreach (var service in services.Reverse())
+                await service.StopAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }

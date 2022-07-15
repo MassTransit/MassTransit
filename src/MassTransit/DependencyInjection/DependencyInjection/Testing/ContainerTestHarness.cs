@@ -163,13 +163,16 @@ namespace MassTransit.DependencyInjection.Testing
             return provider.GetSendEndpoint(shortName);
         }
 
-        public Task Start()
+        public async Task Start()
         {
-            _hostedServices = _provider.GetServices<IHostedService>();
+            _hostedServices = _provider.GetServices<IHostedService>().ToArray();
             if (_hostedServices == null)
                 throw new ConfigurationException("The MassTransit hosted service was not found.");
 
-            return Task.WhenAll(_hostedServices.Select(x => x.StartAsync(CancellationToken)));
+            foreach (var service in _hostedServices)
+            {
+                await service.StartAsync(CancellationToken).ConfigureAwait(false);
+            }
         }
 
         public TimeSpan TestTimeout { get; set; } = Debugger.IsAttached ? TimeSpan.FromMinutes(50) : TimeSpan.FromSeconds(30);

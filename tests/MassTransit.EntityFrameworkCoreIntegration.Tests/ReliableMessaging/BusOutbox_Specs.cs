@@ -45,27 +45,32 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
 
             IConsumerTestHarness<PingConsumer> consumerHarness = harness.GetConsumerHarness<PingConsumer>();
 
+            try
             {
-                await using var dbContext = harness.Scope.ServiceProvider.GetRequiredService<ReliableDbContext>();
+                {
+                    await using var dbContext = harness.Scope.ServiceProvider.GetRequiredService<ReliableDbContext>();
 
-                var publishEndpoint = harness.Scope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
+                    var publishEndpoint = harness.Scope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
 
-                var activity = TraceConfig.Source.StartActivity(ActivityKind.Client);
+                    var activity = TraceConfig.Source.StartActivity(ActivityKind.Client);
 
-                await publishEndpoint.Publish(new PingMessage());
+                    await publishEndpoint.Publish(new PingMessage());
 
-                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+                    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
 
-                Assert.That(await consumerHarness.Consumed.Any<PingMessage>(cts.Token), Is.False);
+                    Assert.That(await consumerHarness.Consumed.Any<PingMessage>(cts.Token), Is.False);
 
-                await dbContext.SaveChangesAsync(harness.CancellationToken);
+                    await dbContext.SaveChangesAsync(harness.CancellationToken);
 
-                activity.Stop();
+                    activity.Stop();
+                }
+
+                Assert.That(await consumerHarness.Consumed.Any<PingMessage>(), Is.True);
             }
-
-            Assert.That(await consumerHarness.Consumed.Any<PingMessage>(), Is.True);
-
-            await harness.Stop();
+            finally
+            {
+                await harness.Stop();
+            }
         }
 
         [Test]
@@ -83,7 +88,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
                         o.QueryDelay = TimeSpan.FromSeconds(1);
                         o.DisableInboxCleanupService();
 
-//                        o.UsePostgres();
+                        //                        o.UsePostgres();
 
                         o.UseBusOutbox(bo =>
                         {
@@ -239,6 +244,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
 
                 Assert.That(count, Is.EqualTo(1));
             }
+
+            await harness.Stop();
         }
 
 

@@ -52,15 +52,22 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
 
             await harness.Start();
 
-            await harness.Bus.Publish<FirstMessage>(new { });
+            try
+            {
+                await harness.Bus.Publish<FirstMessage>(new { });
 
-            Assert.That(await harness.GetConsumerHarness<FirstMessageConsumer>().Consumed.Any<FirstMessage>(), Is.True);
+                Assert.That(await harness.GetConsumerHarness<FirstMessageConsumer>().Consumed.Any<FirstMessage>(), Is.True);
 
-            Assert.That(await harness.Consumed.Any<ScheduleMessage>(), Is.True);
+                Assert.That(await harness.Consumed.Any<ScheduleMessage>(), Is.True);
 
-            await adjustment.AdvanceTime(TimeSpan.FromSeconds(10));
+                await adjustment.AdvanceTime(TimeSpan.FromSeconds(10));
 
-            Assert.That(await harness.GetConsumerHarness<SecondMessageConsumer>().Consumed.Any<SecondMessage>(), Is.True);
+                Assert.That(await harness.GetConsumerHarness<SecondMessageConsumer>().Consumed.Any<SecondMessage>(), Is.True);
+            }
+            finally
+            {
+                await harness.Stop();
+            }
         }
 
 

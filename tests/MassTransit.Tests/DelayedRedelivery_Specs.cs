@@ -9,6 +9,7 @@ namespace MassTransit.Tests
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class Using_delayed_redelivery :
         InMemoryTestFixture
     {
@@ -62,6 +63,7 @@ namespace MassTransit.Tests
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class Using_delayed_redelivery_with_system_text_json :
         InMemoryTestFixture
     {
@@ -112,6 +114,7 @@ namespace MassTransit.Tests
     }
 
     [TestFixture]
+    [Category("Flaky")]
     public class Using_delayed_redelivery_with_new_message_id :
         InMemoryTestFixture
     {

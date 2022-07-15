@@ -25,20 +25,27 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
 
             await harness.Start();
 
-            var messageId = NewId.NextGuid();
+            try
+            {
+                var messageId = NewId.NextGuid();
 
-            Task<ConsumeContext<Event>> first =
-                await harness.ConnectPublishHandler<Event>(context => context.Message.MessageId == messageId && context.Message.Text == "First");
-            Task<ConsumeContext<Event>> second =
-                await harness.ConnectPublishHandler<Event>(context => context.Message.MessageId == messageId && context.Message.Text == "Second");
+                Task<ConsumeContext<Event>> first =
+                    await harness.ConnectPublishHandler<Event>(context => context.Message.MessageId == messageId && context.Message.Text == "First");
+                Task<ConsumeContext<Event>> second =
+                    await harness.ConnectPublishHandler<Event>(context => context.Message.MessageId == messageId && context.Message.Text == "Second");
 
-            await harness.Bus.Publish<Command>(new { messageId }, x => x.MessageId = messageId);
+                await harness.Bus.Publish<Command>(new { messageId }, x => x.MessageId = messageId);
 
-            Assert.That(await harness.GetConsumerHarness<ReliableConsumer>().Consumed.Any<Command>(), Is.True);
+                Assert.That(await harness.GetConsumerHarness<ReliableConsumer>().Consumed.Any<Command>(), Is.True);
 
-            await first;
+                await first;
 
-            await second;
+                await second;
+            }
+            finally
+            {
+                await harness.Stop();
+            }
         }
 
         [Test]
@@ -53,24 +60,31 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
 
             await harness.Start();
 
-            var messageId = NewId.NextGuid();
-
-            Task<ConsumeContext<Event>> first =
-                await harness.ConnectPublishHandler<Event>(context => context.Message.MessageId == messageId && context.Message.Text == "First");
-            Task<ConsumeContext<Event>> second =
-                await harness.ConnectPublishHandler<Event>(context => context.Message.MessageId == messageId && context.Message.Text == "Second");
-
-            await harness.Bus.Publish<Command>(new
+            try
             {
-                messageId,
-                FailWhenConsuming = true
-            }, x => x.MessageId = messageId);
+                var messageId = NewId.NextGuid();
 
-            Assert.That(await harness.GetConsumerHarness<ReliableConsumer>().Consumed.Any<Command>(), Is.True);
+                Task<ConsumeContext<Event>> first =
+                    await harness.ConnectPublishHandler<Event>(context => context.Message.MessageId == messageId && context.Message.Text == "First");
+                Task<ConsumeContext<Event>> second =
+                    await harness.ConnectPublishHandler<Event>(context => context.Message.MessageId == messageId && context.Message.Text == "Second");
 
-            await first;
+                await harness.Bus.Publish<Command>(new
+                {
+                    messageId,
+                    FailWhenConsuming = true
+                }, x => x.MessageId = messageId);
 
-            await second;
+                Assert.That(await harness.GetConsumerHarness<ReliableConsumer>().Consumed.Any<Command>(), Is.True);
+
+                await first;
+
+                await second;
+            }
+            finally
+            {
+                await harness.Stop();
+            }
         }
 
         [Test]
@@ -85,17 +99,24 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
 
             await harness.Start();
 
-            var messageId = NewId.NextGuid();
-            var sagaId = NewId.NextGuid();
+            try
+            {
+                var messageId = NewId.NextGuid();
+                var sagaId = NewId.NextGuid();
 
-            await harness.Bus.Publish<CreateState>(new { CorrelationId = sagaId }, x => x.MessageId = messageId);
+                await harness.Bus.Publish<CreateState>(new { CorrelationId = sagaId }, x => x.MessageId = messageId);
 
-            ISagaStateMachineTestHarness<ReliableStateMachine, ReliableState>? sagaHarness =
-                harness.GetSagaStateMachineHarness<ReliableStateMachine, ReliableState>();
+                ISagaStateMachineTestHarness<ReliableStateMachine, ReliableState>? sagaHarness =
+                    harness.GetSagaStateMachineHarness<ReliableStateMachine, ReliableState>();
 
-            Assert.That(await sagaHarness.Consumed.Any<CreateState>(), Is.True);
+                Assert.That(await sagaHarness.Consumed.Any<CreateState>(), Is.True);
 
-            Assert.That(await sagaHarness.Exists(sagaId, x => x.Verified), Is.Not.Null);
+                Assert.That(await sagaHarness.Exists(sagaId, x => x.Verified), Is.Not.Null);
+            }
+            finally
+            {
+                await harness.Stop();
+            }
         }
 
         [Test]
@@ -110,21 +131,28 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
 
             await harness.Start();
 
-            var messageId = NewId.NextGuid();
-            var sagaId = NewId.NextGuid();
-
-            await harness.Bus.Publish(new CreateState
+            try
             {
-                CorrelationId = sagaId,
-                FailOnFirstAttempt = true
-            }, x => x.MessageId = messageId);
+                var messageId = NewId.NextGuid();
+                var sagaId = NewId.NextGuid();
 
-            ISagaStateMachineTestHarness<ReliableStateMachine, ReliableState>? sagaHarness =
-                harness.GetSagaStateMachineHarness<ReliableStateMachine, ReliableState>();
+                await harness.Bus.Publish(new CreateState
+                {
+                    CorrelationId = sagaId,
+                    FailOnFirstAttempt = true
+                }, x => x.MessageId = messageId);
 
-            Assert.That(await sagaHarness.Consumed.Any<CreateState>(), Is.True);
+                ISagaStateMachineTestHarness<ReliableStateMachine, ReliableState>? sagaHarness =
+                    harness.GetSagaStateMachineHarness<ReliableStateMachine, ReliableState>();
 
-            Assert.That(await sagaHarness.Exists(sagaId, x => x.Verified), Is.Not.Null);
+                Assert.That(await sagaHarness.Consumed.Any<CreateState>(), Is.True);
+
+                Assert.That(await sagaHarness.Exists(sagaId, x => x.Verified), Is.Not.Null);
+            }
+            finally
+            {
+                await harness.Stop();
+            }
         }
 
         [Test]
@@ -139,21 +167,28 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
 
             await harness.Start();
 
-            var messageId = NewId.NextGuid();
-            var sagaId = NewId.NextGuid();
-
-            await harness.Bus.Publish(new CreateState
+            try
             {
-                CorrelationId = sagaId,
-                FailMessageDelivery = true
-            }, x => x.MessageId = messageId);
+                var messageId = NewId.NextGuid();
+                var sagaId = NewId.NextGuid();
 
-            ISagaStateMachineTestHarness<ReliableStateMachine, ReliableState>? sagaHarness =
-                harness.GetSagaStateMachineHarness<ReliableStateMachine, ReliableState>();
+                await harness.Bus.Publish(new CreateState
+                {
+                    CorrelationId = sagaId,
+                    FailMessageDelivery = true
+                }, x => x.MessageId = messageId);
 
-            Assert.That(await sagaHarness.Consumed.Any<CreateState>(), Is.True);
+                ISagaStateMachineTestHarness<ReliableStateMachine, ReliableState>? sagaHarness =
+                    harness.GetSagaStateMachineHarness<ReliableStateMachine, ReliableState>();
 
-            Assert.That(await sagaHarness.Exists(sagaId, x => x.Verified), Is.Not.Null);
+                Assert.That(await sagaHarness.Consumed.Any<CreateState>(), Is.True);
+
+                Assert.That(await sagaHarness.Exists(sagaId, x => x.Verified), Is.Not.Null);
+            }
+            finally
+            {
+                await harness.Stop();
+            }
         }
 
         [Test]
@@ -168,19 +203,26 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
 
             await harness.Start();
 
-            var messageId = NewId.NextGuid();
+            try
+            {
+                var messageId = NewId.NextGuid();
 
-            await harness.Bus.Publish<Command>(new { messageId }, x => x.MessageId = messageId);
+                await harness.Bus.Publish<Command>(new { messageId }, x => x.MessageId = messageId);
 
-            Assert.That(await harness.GetConsumerHarness<ReliableConsumer>().Consumed.Any<Command>(), Is.True);
+                Assert.That(await harness.GetConsumerHarness<ReliableConsumer>().Consumed.Any<Command>(), Is.True);
 
-            IConsumerTestHarness<ReliableEventConsumer> consumerHarness = harness.GetConsumerHarness<ReliableEventConsumer>();
+                IConsumerTestHarness<ReliableEventConsumer> consumerHarness = harness.GetConsumerHarness<ReliableEventConsumer>();
 
-            Assert.That(await consumerHarness.Consumed.Any<Event>(), Is.True);
+                Assert.That(await consumerHarness.Consumed.Any<Event>(), Is.True);
 
-            IReceivedMessage<Event>? context = await consumerHarness.Consumed.SelectAsync<Event>().First();
+                IReceivedMessage<Event>? context = await consumerHarness.Consumed.SelectAsync<Event>().First();
 
-            Assert.That(context.Context.RoutingKey(), Is.EqualTo("alpha"));
+                Assert.That(context.Context.RoutingKey(), Is.EqualTo("alpha"));
+            }
+            finally
+            {
+                await harness.Stop();
+            }
         }
     }
 
