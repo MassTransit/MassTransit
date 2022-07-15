@@ -69,8 +69,6 @@ namespace MassTransit.TestFramework.Sagas
                 Event(() => TenorStarts, x => x.CorrelateById(context => context.Message.CorrelationId));
                 Event(() => CountertenorStarts, x => x.CorrelateById(context => context.Message.CorrelationId));
 
-                CompositeEvent(() => AllSinging, x => x.Harmony, BassStarts, BaritoneStarts, TenorStarts, CountertenorStarts);
-
                 Initially(
                     When(RehearsalStarts)
                         .Then(context => Console.WriteLine("Rehearsal Started!!"))
@@ -88,7 +86,11 @@ namespace MassTransit.TestFramework.Sagas
                         .Then(context => context.Saga.TenorName = context.Message.Name),
                     When(CountertenorStarts)
                         .Then(context => Console.WriteLine("CounterTenor Started!!"))
-                        .Then(context => context.Saga.CountertenorName = context.Message.Name),
+                        .Then(context => context.Saga.CountertenorName = context.Message.Name));
+
+                CompositeEvent(() => AllSinging, x => x.Harmony, BassStarts, BaritoneStarts, TenorStarts, CountertenorStarts);
+
+                During(Warmup,
                     When(AllSinging)
                         .Then(context => Console.WriteLine("Harmony Reached!!"))
                         .TransitionTo(Harmony));
