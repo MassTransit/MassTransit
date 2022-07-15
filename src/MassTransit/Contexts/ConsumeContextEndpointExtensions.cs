@@ -90,22 +90,16 @@ namespace MassTransit
             where T : class
         {
             if (destinationAddress != null && consumeContext != null)
-            {
-                Task<ISendEndpoint> sendEndpointTask = receiveContext.SendEndpointProvider.GetSendEndpoint(destinationAddress);
-                if (sendEndpointTask.Status == TaskStatus.RanToCompletion)
-                    return Task.FromResult<ISendEndpoint>(new ConsumeSendEndpoint(sendEndpointTask.Result, consumeContext, requestId));
+                return GetSendEndpoint(receiveContext.SendEndpointProvider, consumeContext, destinationAddress, requestId);
 
-                async Task<ISendEndpoint> GetResponseEndpointAsync()
-                {
-                    var sendEndpoint = await sendEndpointTask.ConfigureAwait(false);
+            return GetPublishEndpoint<T>(receiveContext.PublishEndpointProvider, consumeContext, requestId);
+        }
 
-                    return new ConsumeSendEndpoint(sendEndpoint, consumeContext, requestId);
-                }
-
-                return GetResponseEndpointAsync();
-            }
-
-            Task<ISendEndpoint> publishSendEndpointTask = receiveContext.PublishEndpointProvider.GetPublishSendEndpoint<T>();
+        internal static Task<ISendEndpoint> GetPublishEndpoint<T>(this IPublishEndpointProvider publishEndpointProvider, ConsumeContext consumeContext,
+            Guid? requestId)
+            where T : class
+        {
+            Task<ISendEndpoint> publishSendEndpointTask = publishEndpointProvider.GetPublishSendEndpoint<T>();
             if (publishSendEndpointTask.Status == TaskStatus.RanToCompletion)
             {
                 return consumeContext != null
@@ -123,6 +117,23 @@ namespace MassTransit
             }
 
             return GetPublishSendEndpointAsync();
+        }
+
+        internal static Task<ISendEndpoint> GetSendEndpoint(this ISendEndpointProvider sendEndpointProvider, ConsumeContext consumeContext,
+            Uri destinationAddress, Guid? requestId)
+        {
+            Task<ISendEndpoint> sendEndpointTask = sendEndpointProvider.GetSendEndpoint(destinationAddress);
+            if (sendEndpointTask.Status == TaskStatus.RanToCompletion)
+                return Task.FromResult<ISendEndpoint>(new ConsumeSendEndpoint(sendEndpointTask.Result, consumeContext, requestId));
+
+            async Task<ISendEndpoint> GetResponseEndpointAsync()
+            {
+                var sendEndpoint = await sendEndpointTask.ConfigureAwait(false);
+
+                return new ConsumeSendEndpoint(sendEndpoint, consumeContext, requestId);
+            }
+
+            return GetResponseEndpointAsync();
         }
     }
 }

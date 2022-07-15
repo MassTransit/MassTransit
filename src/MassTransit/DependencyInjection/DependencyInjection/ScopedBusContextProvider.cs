@@ -7,6 +7,26 @@ namespace MassTransit.DependencyInjection
     /// Captures the bus context for the current scope as a scoped provider, so that it can be resolved
     /// by components at runtime (since MS DI doesn't support runtime configuration of scopes)
     /// </summary>
+    public class ScopedBusContextProvider :
+        IScopedBusContextProvider<IBus>
+    {
+        public ScopedBusContextProvider(IBus bus, Bind<IBus, IClientFactory> clientFactory, ScopedConsumeContextProvider consumeContextProvider,
+            IServiceProvider provider)
+        {
+            if (consumeContextProvider.HasContext)
+                Context = new ConsumeContextScopedBusContext(consumeContextProvider.GetContext(), clientFactory.Value);
+            else
+                Context = new BusScopedBusContext<IBus>(bus, clientFactory.Value, provider);
+        }
+
+        public ScopedBusContext Context { get; }
+    }
+
+
+    /// <summary>
+    /// Captures the bus context for the current scope as a scoped provider, so that it can be resolved
+    /// by components at runtime (since MS DI doesn't support runtime configuration of scopes)
+    /// </summary>
     public class ScopedBusContextProvider<TBus> :
         IScopedBusContextProvider<TBus>
         where TBus : class, IBus
@@ -15,7 +35,7 @@ namespace MassTransit.DependencyInjection
             IServiceProvider provider)
         {
             if (consumeContextProvider.HasContext)
-                Context = new ConsumeContextScopedBusContext(consumeContextProvider.GetContext(), clientFactory.Value);
+                Context = new ConsumeContextScopedBusContext<TBus>(bus, consumeContextProvider.GetContext(), clientFactory.Value, provider);
             else
                 Context = new BusScopedBusContext<TBus>(bus, clientFactory.Value, provider);
         }
