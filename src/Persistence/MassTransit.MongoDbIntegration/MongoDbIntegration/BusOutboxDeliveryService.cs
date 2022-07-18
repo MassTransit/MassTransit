@@ -2,7 +2,6 @@ namespace MassTransit.MongoDbIntegration
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Logging;
@@ -15,6 +14,7 @@ namespace MassTransit.MongoDbIntegration
     using MongoDB.Driver;
     using Outbox;
     using Serialization;
+    using Util;
 
 
     public class BusOutboxDeliveryService :
@@ -37,6 +37,12 @@ namespace MassTransit.MongoDbIntegration
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            using var algorithm = new RequestRateAlgorithm(new RequestRateAlgorithmOptions
+            {
+                PrefetchCount = _options.QueryMessageLimit,
+                RequestResultLimit = _options.QueryMessageLimit
+            });
+
             while (!stoppingToken.IsCancellationRequested)
             {
                 try
@@ -45,7 +51,7 @@ namespace MassTransit.MongoDbIntegration
 
                     await _busControl.WaitForHealthStatus(BusHealthStatus.Healthy, stoppingToken).ConfigureAwait(false);
 
-                    await ProcessMessageBatch(stoppingToken).ConfigureAwait(false);
+                    await algorithm.Run(GetOutboxes, DeliverOutbox, stoppingToken).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException)
                 {
@@ -57,7 +63,7 @@ namespace MassTransit.MongoDbIntegration
             }
         }
 
-        async Task ProcessMessageBatch(CancellationToken cancellationToken)
+        async Task<IEnumerable<Guid>> GetOutboxes(int resultLimit, CancellationToken cancellationToken)
         {
             var scope = _provider.CreateScope();
 
@@ -67,18 +73,16 @@ namespace MassTransit.MongoDbIntegration
 
                 MongoDbCollectionContext<OutboxState> collection = dbContext.GetCollection<OutboxState>();
 
-                var messageLimit = _options.QueryMessageLimit;
-
                 FilterDefinitionBuilder<OutboxState> builder = Builders<OutboxState>.Filter;
 
                 List<Guid> outboxIds = await collection
                     .Find(builder.Empty)
                     .Sort(Builders<OutboxState>.Sort.Ascending(x => x.Created))
-                    .Limit(messageLimit)
+                    .Limit(resultLimit)
                     .Project(x => x.OutboxId)
                     .ToListAsync(cancellationToken).ConfigureAwait(false);
 
-                await Task.WhenAll(outboxIds.Select(outboxId => DeliverOutbox(outboxId, cancellationToken)));
+                return outboxIds;
             }
             finally
             {

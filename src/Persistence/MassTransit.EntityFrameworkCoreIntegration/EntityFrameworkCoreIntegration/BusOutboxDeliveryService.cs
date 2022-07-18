@@ -15,6 +15,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
     using Microsoft.Extensions.Options;
     using Middleware;
     using Serialization;
+    using Util;
 
 
     public class BusOutboxDeliveryService<TDbContext> :
@@ -45,6 +46,12 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            using var algorithm = new RequestRateAlgorithm(new RequestRateAlgorithmOptions
+            {
+                PrefetchCount = _options.QueryMessageLimit,
+                RequestResultLimit = 10
+            });
+
             while (!stoppingToken.IsCancellationRequested)
             {
                 try
@@ -53,7 +60,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
                     await _busControl.WaitForHealthStatus(BusHealthStatus.Healthy, stoppingToken).ConfigureAwait(false);
 
-                    await ProcessMessageBatch(stoppingToken).ConfigureAwait(false);
+                    await algorithm.Run(DeliverOutbox, stoppingToken).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException)
                 {
@@ -65,23 +72,18 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             }
         }
 
-        async Task ProcessMessageBatch(CancellationToken cancellationToken)
+        async Task<int> DeliverOutbox(int resultLimit, CancellationToken cancellationToken)
         {
-            const int batchSize = 10;
+            var resultCount = 0;
 
-            var messageLimit = _options.QueryMessageLimit;
-            var loopCount = Math.Max(messageLimit / batchSize, 1);
-
-            for (var i = 0; i < loopCount; i++)
+            for (var i = 0; i < resultLimit; i++)
             {
-                var messageCount = Math.Min(messageLimit, batchSize);
-                var counts = await Task.WhenAll(Enumerable.Range(0, messageCount).Select(_ => DeliverOutbox(cancellationToken))).ConfigureAwait(false);
-
-                if (counts.All(x => x < 0))
-                    break;
-
-                messageLimit -= messageCount;
+                var messageCount = await DeliverOutbox(cancellationToken).ConfigureAwait(false);
+                if (messageCount > 0)
+                    resultCount++;
             }
+
+            return resultCount;
         }
 
         async Task<int> DeliverOutbox(CancellationToken cancellationToken)
@@ -146,17 +148,22 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                     }
                 }
 
-                var continueProcessing = 1;
-                while (continueProcessing >= 0)
+                var messageCount = 0;
+
+                var executeResult = 1;
+                while (executeResult >= 0)
                 {
                     var executionStrategy = dbContext.Database.CreateExecutionStrategy();
                     if (executionStrategy is ExecutionStrategy)
-                        continueProcessing = await executionStrategy.ExecuteAsync(() => Execute()).ConfigureAwait(false);
+                        executeResult = await executionStrategy.ExecuteAsync(() => Execute()).ConfigureAwait(false);
                     else
-                        continueProcessing = await Execute().ConfigureAwait(false);
+                        executeResult = await Execute().ConfigureAwait(false);
+
+                    if (executeResult > 0)
+                        messageCount += executeResult;
                 }
 
-                return continueProcessing;
+                return messageCount;
             }
             finally
             {

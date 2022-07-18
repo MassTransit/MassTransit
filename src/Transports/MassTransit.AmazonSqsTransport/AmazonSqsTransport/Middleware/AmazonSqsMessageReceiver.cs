@@ -3,12 +3,12 @@ namespace MassTransit.AmazonSqsTransport.Middleware
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using Amazon.SQS;
     using Amazon.SQS.Model;
     using Internals;
     using MassTransit.Middleware;
-    using Topology;
     using Transports;
     using Util;
 
@@ -43,7 +43,6 @@ namespace MassTransit.AmazonSqsTransport.Middleware
             _dispatcher = context.CreateReceivePipeDispatcher();
             _dispatcher.ZeroActivity += HandleDeliveryComplete;
 
-
             var task = Task.Run(Consume);
             SetCompleted(task);
         }
@@ -57,11 +56,28 @@ namespace MassTransit.AmazonSqsTransport.Middleware
 
             await GetQueueAttributes().ConfigureAwait(false);
 
+            using var algorithm = new RequestRateAlgorithm(new RequestRateAlgorithmOptions()
+            {
+                PrefetchCount = _receiveSettings.PrefetchCount,
+                RequestResultLimit = 10
+            });
+
             SetReady();
 
             try
             {
-                await PollMessages(executor).ConfigureAwait(false);
+                while (!IsStopping)
+                {
+                    if (_receiveSettings.IsOrdered)
+                    {
+                        await algorithm.Run(ReceiveMessages, (m, t) => executor.Push(() => HandleMessage(m), t), GroupMessages, OrderMessages, Stopping)
+                            .ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        await algorithm.Run(ReceiveMessages, (m, t) => executor.Push(() => HandleMessage(m), t), Stopping).ConfigureAwait(false);
+                    }
+                }
             }
             catch (OperationCanceledException exception) when (exception.CancellationToken == Stopping)
             {
@@ -124,88 +140,27 @@ namespace MassTransit.AmazonSqsTransport.Middleware
             }
         }
 
-        async Task PollMessages(ChannelExecutor executor)
+        static IEnumerable<IGrouping<string, Message>> GroupMessages(IEnumerable<Message> messages)
         {
-            var maxReceiveCount = (_receiveSettings.PrefetchCount + 9) / 10;
-            var receiveCount = 1;
-            var messageLimit = Math.Min(_receiveSettings.PrefetchCount, 10);
-
-            while (!IsStopping)
-            {
-                var received = 0;
-
-                if (_receiveSettings.IsOrdered)
-                {
-                    Task<IList<Message>>[] receiveTasks = Enumerable.Repeat(0, receiveCount).Select(_ => ReceiveOrderedMessages(messageLimit)).ToArray();
-                    IList<Message>[] messages = await Task.WhenAll(receiveTasks).ConfigureAwait(false);
-
-                    received = await HandleOrderedMessages(executor, messages.SelectMany(x => x)).ConfigureAwait(false);
-                }
-                else
-                {
-                    Task<int>[] receiveTasks = Enumerable.Repeat(0, receiveCount).Select(_ => ReceiveAndHandleMessages(messageLimit, executor)).ToArray();
-                    var counts = await Task.WhenAll(receiveTasks).ConfigureAwait(false);
-
-                    received = counts.Sum();
-                }
-
-                if (received == receiveCount * 10) // ramp up receivers when busy
-                    receiveCount = Math.Min(maxReceiveCount, receiveCount + (maxReceiveCount - receiveCount) / 2);
-                else if (received / 10 < receiveCount - 1) // dial it back when not so busy
-                    receiveCount = Math.Max(1, (received + 9) / 10);
-            }
+            return messages.GroupBy(x => x.Attributes.TryGetValue(MessageSystemAttributeName.MessageGroupId, out var groupId) ? groupId : "");
         }
 
-        async Task<IList<Message>> ReceiveOrderedMessages(int messageLimit)
+        static IEnumerable<Message> OrderMessages(IEnumerable<Message> messages)
+        {
+            return messages.OrderBy(x => x.Attributes.TryGetValue("SequenceNumber", out var sequenceNumber) ? sequenceNumber : "",
+                SequenceNumberComparer.Instance);
+        }
+
+        async Task<IEnumerable<Message>> ReceiveMessages(int messageLimit, CancellationToken cancellationToken)
         {
             try
             {
-                return await _client.ReceiveMessages(_receiveSettings.EntityName, messageLimit, _receiveSettings.WaitTimeSeconds, Stopping)
+                return await _client.ReceiveMessages(_receiveSettings.EntityName, messageLimit, _receiveSettings.WaitTimeSeconds, cancellationToken)
                     .ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {
                 return Array.Empty<Message>();
-            }
-        }
-
-        async Task<int> HandleOrderedMessages(ChannelExecutor executor, IEnumerable<Message> messages)
-        {
-            IEnumerable<IGrouping<string, Message>> messageGroups = messages
-                .GroupBy(x => x.Attributes.TryGetValue(MessageSystemAttributeName.MessageGroupId, out var groupId)
-                    ? groupId
-                    : "")
-                .ToList();
-
-            List<Task> messageGroupTasks = messageGroups.Select(x => HandleOrderedMessageGroup(executor, x)).ToList();
-
-            await Task.WhenAll(messageGroupTasks).ConfigureAwait(false);
-
-            return messageGroups.Sum(x => x.Count());
-        }
-
-        async Task HandleOrderedMessageGroup(ChannelExecutor executor, IEnumerable<Message> messages)
-        {
-            foreach (var message in messages.OrderBy(x => x.Attributes.TryGetValue("SequenceNumber", out var sequenceNumber) ? sequenceNumber : "",
-                         SequenceNumberComparer.Instance))
-                await executor.Run(() => HandleMessage(message), Stopping).ConfigureAwait(false);
-        }
-
-        async Task<int> ReceiveAndHandleMessages(int messageLimit, ChannelExecutor executor)
-        {
-            try
-            {
-                IList<Message> messages = await _client.ReceiveMessages(_receiveSettings.EntityName, messageLimit, _receiveSettings.WaitTimeSeconds, Stopping)
-                    .ConfigureAwait(false);
-
-                foreach (var message in messages)
-                    await executor.Push(() => HandleMessage(message), Stopping).ConfigureAwait(false);
-
-                return messages.Count;
-            }
-            catch (OperationCanceledException)
-            {
-                return 0;
             }
         }
 
