@@ -13,7 +13,7 @@ namespace MassTransit.Mediator.Contexts
 
 
     public class MediatorSendEndpoint :
-        ISendEndpoint,
+        ITransportSendEndpoint,
         IPublishEndpointProvider,
         ISendEndpointProvider
     {
@@ -181,6 +181,18 @@ namespace MassTransit.Mediator.Contexts
                 await MessageInitializerCache<T>.InitializeMessage(values, new MediatorPipe<T>(this, pipe), cancellationToken).ConfigureAwait(false);
 
             await SendMessage(message, sendPipe, cancellationToken).ConfigureAwait(false);
+        }
+
+        public async Task<SendContext<T>> CreateSendContext<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
+            where T : class
+        {
+            LogContext.SetCurrentIfNull(_logContext);
+
+            var context = new MessageSendContext<T>(message, cancellationToken);
+
+            await pipe.Send(context).ConfigureAwait(false);
+
+            return context;
         }
 
         public Task<ISendEndpoint> GetSendEndpoint(Uri address)
