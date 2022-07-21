@@ -18,15 +18,22 @@ namespace MassTransit.Internals
             return value;
         }
 
-        public static IDictionary<TKey, TValue> MergeLeft<TKey, TValue>(this IDictionary<TKey, TValue> source, params IDictionary<TKey, TValue>[] others)
-            where TKey : notnull
+        public static IDictionary<string, TValue> MergeLeft<TValue>(this IDictionary<string, TValue> source, params IDictionary<string, TValue>[] others)
         {
-            var result = new Dictionary<TKey, TValue>(source.Count);
+            var result = new Dictionary<string, TValue>(source.Count, StringComparer.OrdinalIgnoreCase);
 
-            foreach (IDictionary<TKey, TValue> dictionary in new[] {source}.Concat(others))
+            foreach (IDictionary<string, TValue> dictionary in new[] { source }.Concat(others))
             {
-                foreach (KeyValuePair<TKey, TValue> element in dictionary)
-                    result[element.Key] = element.Value;
+                foreach (KeyValuePair<string, TValue> element in dictionary)
+                {
+                    if (result.ContainsKey(element.Key))
+                    {
+                        if (element.Value != null)
+                            result[element.Key] = element.Value;
+                    }
+                    else
+                        result[element.Key] = element.Value;
+                }
             }
 
             return result;

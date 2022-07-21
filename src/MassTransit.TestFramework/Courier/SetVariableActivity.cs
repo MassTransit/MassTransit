@@ -2,7 +2,6 @@
 {
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using MassTransit.Courier;
 
 
     public class SetVariableActivity :
@@ -13,7 +12,7 @@
             if (context.Arguments == null)
                 throw new RoutingSlipException("The arguments for execution were null");
 
-            return context.CompletedWithVariables(new Dictionary<string, object> {{context.Arguments.Key, context.Arguments.Value}});
+            return context.CompletedWithVariables(new Dictionary<string, object> { { context.Arguments.Key, context.Arguments.Value } });
         }
     }
 }
