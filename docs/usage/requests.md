@@ -122,9 +122,9 @@ The controller method will send the request and return the view once the respons
 
 To create a request and add a header to the `SendContext`, use the callback overload as shown below.
 
-```csharp
+```cs
 await client.GetResponse<OrderStatusResult>(new { OrderId = id }, 
-    context => context.Headers.Set("tenant-id", "some-value"));
+    x => x.UseExecute(context => context.Headers.Set("tenant-id", "some-value")));
 ```
 
 Calling the `GetResponse` method triggers the request to be sent, after which the caller awaits the response. To add additional response types, see below for the tuple syntax, or just add multiple `GetResponse` methods, passing _false_ for the _readyToSend_ parameter.
