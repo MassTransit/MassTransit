@@ -51,10 +51,6 @@
                 if (context.ReceiveContext.IsDelivered)
                     return;
 
-                // again, if it's already faulted, we don't want to fault it again
-                if (context.ReceiveContext.IsFaulted)
-                    return;
-
                 throw;
             }
         }
@@ -73,7 +69,7 @@
 
                 List<ConsumeContext<TMessage>> messages = GetMessageBatchInOrder();
 
-                return _dispatcher.Push(() => Deliver(messages[0], messages, BatchCompletionMode.Time));
+                return _dispatcher.Push(() => Deliver(messages[messages.Count - 1], messages, BatchCompletionMode.Time));
             }));
         }
 
@@ -111,7 +107,7 @@
             List<ConsumeContext<TMessage>> consumeContexts = GetMessageBatchInOrder();
             return consumeContexts.Count == 0
                 ? Task.CompletedTask
-                : _dispatcher.Push(() => Deliver(consumeContexts.Last(), consumeContexts, BatchCompletionMode.Forced));
+                : _dispatcher.Push(() => Deliver(consumeContexts[consumeContexts.Count - 1], consumeContexts, BatchCompletionMode.Forced));
         }
 
         async Task Deliver(ConsumeContext context, IReadOnlyList<ConsumeContext<TMessage>> messages, BatchCompletionMode batchCompletionMode)

@@ -162,6 +162,92 @@
 
 
     [TestFixture]
+    public class Receiving_a_single_message_in_a_batch_and_it_faults :
+        InMemoryTestFixture
+    {
+        public Receiving_a_single_message_in_a_batch_and_it_faults()
+        {
+            InMemoryTestHarness.TestTimeout = TimeSpan.FromSeconds(5);
+        }
+
+        [Test]
+        public async Task Should_move_the_message_to_the_error_queue()
+        {
+            await InputQueueSendEndpoint.Send(new PingMessage());
+
+            ConsumeContext<PingMessage> batch = await _errorHandler;
+        }
+
+        FailingBatchConsumer _consumer;
+        Task<ConsumeContext<PingMessage>> _errorHandler;
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.ReceiveEndpoint("input_queue_error", x =>
+            {
+                _errorHandler = Handled<PingMessage>(x);
+            });
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            _consumer = new FailingBatchConsumer();
+
+            configurator.Batch<PingMessage>(x =>
+            {
+                x.MessageLimit = 2;
+                x.TimeLimit = TimeSpan.FromMilliseconds(500);
+
+                x.Consumer(() => _consumer);
+            });
+        }
+    }
+
+
+    [TestFixture]
+    public class Receiving_a_single_message_in_a_single_message_batch_and_it_faults :
+        InMemoryTestFixture
+    {
+        public Receiving_a_single_message_in_a_single_message_batch_and_it_faults()
+        {
+            //InMemoryTestHarness.TestTimeout = TimeSpan.FromSeconds(5);
+        }
+
+        [Test]
+        public async Task Should_move_the_message_to_the_error_queue()
+        {
+            await InputQueueSendEndpoint.Send(new PingMessage());
+
+            ConsumeContext<PingMessage> batch = await _errorHandler;
+        }
+
+        FailingBatchConsumer _consumer;
+        Task<ConsumeContext<PingMessage>> _errorHandler;
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.ReceiveEndpoint("input_queue_error", x =>
+            {
+                _errorHandler = Handled<PingMessage>(x);
+            });
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            _consumer = new FailingBatchConsumer();
+
+            configurator.Batch<PingMessage>(x =>
+            {
+                x.MessageLimit = 1;
+                x.TimeLimit = TimeSpan.FromMilliseconds(500);
+
+                x.Consumer(() => _consumer);
+            });
+        }
+    }
+
+
+    [TestFixture]
     public class Receiving_a_single_message_in_a_batch_by_convention :
         InMemoryTestFixture
     {
