@@ -8,9 +8,9 @@ namespace MassTransit.MongoDbIntegration.Outbox
     public class InboxState
     {
         /// <summary>
-        /// The MessageId of the incoming message
+        /// Unique ID for the inbox state
         /// </summary>
-        public Guid MessageId { get; set; }
+        public Guid Id { get; set; }
 
         public ObjectId LockToken { get; set; }
 
@@ -18,6 +18,11 @@ namespace MassTransit.MongoDbIntegration.Outbox
         /// Version for updating
         /// </summary>
         public int Version { get; set; }
+
+        /// <summary>
+        /// The MessageId of the incoming message
+        /// </summary>
+        public Guid MessageId { get; set; }
 
         /// <summary>
         /// And MD5 hash of the endpoint name + consumer type

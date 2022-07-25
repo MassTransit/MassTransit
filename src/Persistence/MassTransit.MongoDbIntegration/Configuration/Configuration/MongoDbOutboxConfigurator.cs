@@ -95,7 +95,7 @@ namespace MassTransit.Configuration
                 BsonClassMap.RegisterClassMap(new BsonClassMap<InboxState>(cfg =>
                 {
                     cfg.AutoMap();
-                    cfg.MapIdProperty(x => x.MessageId);
+                    cfg.MapIdProperty(x => x.Id);
                 }));
             }
 

@@ -31,6 +31,8 @@ namespace MassTransit.MongoDbIntegration
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            await EnsureIndexCreated(stoppingToken);
+
             long removed = 0;
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -49,6 +51,31 @@ namespace MassTransit.MongoDbIntegration
                     _logger.LogError(exception, "CleanUpInboxState faulted");
                     removed = 0;
                 }
+            }
+        }
+
+        async Task EnsureIndexCreated(CancellationToken cancellationToken)
+        {
+            var scope = _provider.CreateScope();
+
+            try
+            {
+                var collection = scope.ServiceProvider.GetRequiredService<IMongoCollection<InboxState>>();
+
+                IndexKeysDefinitionBuilder<InboxState> builder = Builders<InboxState>.IndexKeys;
+                var indexModel = new CreateIndexModel<InboxState>(builder.Combine(builder.Ascending(x => x.MessageId), builder.Ascending(x => x.ConsumerId)),
+                    new CreateIndexOptions { Unique = true });
+
+                await collection.Indexes.CreateOneAsync(indexModel, new CreateOneIndexOptions { MaxTime = TimeSpan.FromSeconds(30) }, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            finally
+            {
+                // ReSharper disable once SuspiciousTypeConversion.Global
+                if (scope is IAsyncDisposable disposable)
+                    await disposable.DisposeAsync();
+                else
+                    scope.Dispose();
             }
         }
 
