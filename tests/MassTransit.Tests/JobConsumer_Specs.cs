@@ -112,16 +112,17 @@ namespace MassTransit.Tests
                 Job = new { Duration = TimeSpan.FromSeconds(10) }
             });
 
+            Assert.That(await harness.Published.Any<JobStarted>(x => x.Context.Message.JobId == previousJobId), Is.True);
+
             response = await client.GetResponse<JobSubmissionAccepted>(new
             {
                 JobId = jobId,
                 Job = new { Duration = TimeSpan.FromSeconds(10) }
             });
 
-            Assert.That(response.Message.JobId, Is.EqualTo(jobId));
-
-            Assert.That(await harness.Published.Any<JobStarted>(x => x.Context.Message.JobId == previousJobId), Is.True);
             Assert.That(await harness.Published.Any<JobSubmitted>(x => x.Context.Message.JobId == jobId), Is.True);
+
+            Assert.That(response.Message.JobId, Is.EqualTo(jobId));
 
             Assert.That(await harness.Sent.Any<JobSlotUnavailable>(x => x.Context.Message.JobId == jobId), Is.True);
 
