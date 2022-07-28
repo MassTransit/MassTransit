@@ -34,6 +34,8 @@ namespace MassTransit.Serialization
                 case string text when TypeConverterCache.TryGetTypeConverter(out ITypeConverter<T, string>? typeConverter)
                     && typeConverter.TryConvert(text, out var result):
                     return result;
+                case string json:
+                    return JsonConvert.DeserializeObject<T>(json, NewtonsoftJsonMessageSerializer.DeserializerSettings);
             }
 
             var token = value as JToken ?? JToken.FromObject(value);
@@ -58,6 +60,8 @@ namespace MassTransit.Serialization
                 case string text when TypeConverterCache.TryGetTypeConverter(out ITypeConverter<T, string>? typeConverter)
                     && typeConverter.TryConvert(text, out var result):
                     return result;
+                case string json:
+                    return JsonConvert.DeserializeObject<T>(json, NewtonsoftJsonMessageSerializer.DeserializerSettings);
             }
 
             var token = value as JToken ?? JToken.FromObject(value);

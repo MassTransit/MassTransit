@@ -1,5 +1,6 @@
 namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Logging;
@@ -93,7 +94,49 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
             }
         }
 
-        static ServiceProvider CreateServiceProvider()
+        [Test]
+        [Explicit]
+        public async Task Should_start_with_delay_successfully()
+        {
+            using var tracerProvider = TraceConfig.CreateTraceProvider("ef-core-tests");
+
+            await using var provider = CreateServiceProvider(x =>
+            {
+                x.UsingInMemory((context,cfg)=>
+                {
+                    cfg.UseDelayedMessageScheduler();
+                    cfg.UseNewtonsoftJsonSerializer();
+
+                    cfg.ConfigureEndpoints(context);
+                });
+            });
+
+            var harness = provider.GetTestHarness();
+
+            harness.TestInactivityTimeout = TimeSpan.FromSeconds(5);
+
+            await harness.Start();
+
+            try
+            {
+                IRequestClient<Start> client = harness.GetRequestClient<Start>();
+
+                var startTime = DateTime.UtcNow;
+
+                Response<StartupComplete> complete = await client.GetResponse<StartupComplete>(new Start() { Delay = TimeSpan.FromSeconds(3) },
+                    harness.CancellationToken);
+
+                var endTime = DateTime.UtcNow;
+
+                Assert.That(endTime - startTime, Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(2.9)));
+            }
+            finally
+            {
+                await harness.Stop();
+            }
+        }
+
+        static ServiceProvider CreateServiceProvider(Action<IBusRegistrationConfigurator> callback = null)
         {
             var services = new ServiceCollection();
 
@@ -110,6 +153,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
 
                     x.AddSagaStateMachine<ResponsibleStateMachine, ResponsibleState, ResponsibleStateDefinition>()
                         .EntityFrameworkRepository(r => r.ExistingDbContext<ResponsibleDbContext>());
+
+                    callback?.Invoke(x);
                 });
 
             services.AddOptions<TextWriterLoggerOptions>().Configure(options => options.Disable("Microsoft"));
@@ -157,15 +202,33 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
             {
                 InstanceState(x => x.CurrentState);
 
+                Schedule(() => DelayStart, x => x.DelayStartTokenId, x => x.Received = e => e.CorrelateById(m => m.Message.CorrelationId));
+
                 Initially(
                     When(Started, x => x.Data.FailToStart)
                         .Then(context => throw new IntentionalTestException()),
-                    When(Started, x => x.Data.FailToStart == false)
+                    When(Started, x => x.Data.FailToStart == false && x.Data.Delay.HasValue == false)
                         .Respond(new StartupComplete())
+                        .TransitionTo(Running),
+                    When(Started, x => x.Data.FailToStart == false && x.Data.Delay.HasValue)
+                        .Then(context =>
+                        {
+                            context.Saga.RequestId = context.RequestId;
+                            context.Saga.ResponseAddress = context.ResponseAddress;
+                        })
+                        .Schedule(DelayStart, x => new DelayStart { CorrelationId = x.Saga.CorrelationId }, x => x.Data.Delay.Value)
+                        .TransitionTo(Delayed));
+
+                During(Delayed,
+                    When(DelayStart.Received)
+                        .Send(x => x.Saga.ResponseAddress, x => new StartupComplete(), (context, x) => x.RequestId = context.Saga.RequestId)
                         .TransitionTo(Running));
             }
 
+            public Schedule<ResponsibleState, DelayStart> DelayStart { get; set; }
+
             public State Running { get; private set; }
+            public State Delayed { get; private set; }
             public Event<Start> Started { get; private set; }
         }
 
@@ -179,8 +242,16 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
             }
 
             public bool FailToStart { get; set; }
+            public TimeSpan? Delay { get; set; }
 
             public Guid CorrelationId { get; private set; }
+        }
+
+
+        public class DelayStart :
+            CorrelatedBy<Guid>
+        {
+            public Guid CorrelationId { get; set; }
         }
 
 
@@ -193,6 +264,10 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
             SagaStateMachineInstance
         {
             public string CurrentState { get; set; }
+
+            public Guid? RequestId { get; set; }
+            public Uri ResponseAddress { get; set; }
+            public Guid? DelayStartTokenId { get; set; }
             public Guid CorrelationId { get; set; }
         }
 
@@ -203,6 +278,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
             protected override void Configure(EntityTypeBuilder<ResponsibleState> entity, ModelBuilder model)
             {
                 entity.Property(x => x.CurrentState);
+                entity.Property(x => x.RequestId);
+                entity.Property(x => x.ResponseAddress);
+                entity.Property(x => x.DelayStartTokenId);
             }
         }
 

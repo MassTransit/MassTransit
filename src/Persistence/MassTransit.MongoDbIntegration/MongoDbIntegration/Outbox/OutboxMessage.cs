@@ -84,22 +84,18 @@ namespace MassTransit.MongoDbIntegration.Outbox
 
         Headers DeserializerHeaders(IObjectDeserializer deserializer)
         {
-            if (string.IsNullOrWhiteSpace(Headers))
-                return EmptyHeaders.Instance;
-
-            var dictionary = deserializer.DeserializeObject<Dictionary<string, object?>>(Headers);
-            if (dictionary != null && dictionary.Count > 0)
-                return new DictionarySendHeaders(dictionary);
+            Dictionary<string, object?>? headers = deserializer.DeserializeDictionary<object?>(Headers);
+            if (headers != null)
+                return new DictionarySendHeaders(headers);
 
             return EmptyHeaders.Instance;
         }
 
         IReadOnlyDictionary<string, object> DeserializerProperties(IObjectDeserializer deserializer)
         {
-            if (string.IsNullOrWhiteSpace(Properties))
-                return OutboxMessageStaticData.Empty;
+            Dictionary<string, object>? properties = deserializer.DeserializeDictionary<object>(Properties);
 
-            return deserializer.DeserializeObject<Dictionary<string, object>>(Properties) ?? OutboxMessageStaticData.Empty;
+            return properties ?? OutboxMessageStaticData.Empty;
         }
     }
 
