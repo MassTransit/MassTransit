@@ -35,13 +35,12 @@ namespace MassTransit.Logging
         StartedActivity? StartSendActivity<T>(SendTransportContext transportContext, SendContext<T> context, params (string Key, object Value)[] tags)
             where T : class;
 
-        StartedActivity? StartOutboxSendActivity<T>(SendContext<T> context, params (string Key, object Value)[] tags)
+        StartedActivity? StartOutboxSendActivity<T>(SendContext<T> context)
             where T : class;
 
         StartedActivity? StartOutboxDeliverActivity(OutboxMessageContext context);
 
-        StartedActivity? StartReceiveActivity(string name, string inputAddress, string endpointName, ReceiveContext context,
-            params (string Key, string Value)[] tags);
+        StartedActivity? StartReceiveActivity(string name, string inputAddress, string endpointName, ReceiveContext context);
 
         StartedActivity? StartConsumerActivity<TConsumer, T>(ConsumeContext<T> context)
             where T : class;

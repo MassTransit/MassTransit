@@ -81,10 +81,10 @@ namespace MassTransit.Logging
             activity.AddTag(DiagnosticHeaders.Messaging.Destination, transportContext.ActivityDestination);
             activity.AddTag(DiagnosticHeaders.Messaging.Operation, "send");
 
-            return PopulateSendActivity<T>(context, tags, activity);
+            return PopulateSendActivity<T>(context, activity, tags);
         }
 
-        public StartedActivity? StartOutboxSendActivity<T>(SendContext<T> context, params (string Key, object Value)[] tags)
+        public StartedActivity? StartOutboxSendActivity<T>(SendContext<T> context)
             where T : class
         {
             var parentActivityContext = System.Diagnostics.Activity.Current?.Context ?? default;
@@ -95,67 +95,7 @@ namespace MassTransit.Logging
 
             activity.AddTag(DiagnosticHeaders.Messaging.Operation, "send");
 
-            return PopulateSendActivity<T>(context, tags, activity);
-        }
-
-        static StartedActivity? PopulateSendActivity<T>(SendContext context, IList<(string Key, object Value)> tags, System.Diagnostics.Activity activity)
-            where T : class
-        {
-            var conversationId = context.ConversationId?.ToString("D");
-
-            if (context.CorrelationId.HasValue)
-                activity.AddBaggage(DiagnosticHeaders.CorrelationId, context.CorrelationId.Value.ToString("D"));
-            if (conversationId != null)
-                activity.AddBaggage(DiagnosticHeaders.Messaging.ConversationId, conversationId);
-
-            activity.Start();
-
-            if (activity.IsAllDataRequested)
-            {
-                if (context.MessageId.HasValue)
-                    activity.AddTag(DiagnosticHeaders.MessageId, context.MessageId.Value.ToString("D"));
-                if (conversationId != null)
-                    activity.AddTag(DiagnosticHeaders.Messaging.ConversationId, conversationId);
-                if (context.CorrelationId.HasValue)
-                    activity.AddTag(DiagnosticHeaders.CorrelationId, context.CorrelationId.Value.ToString("D"));
-                if (context.RequestId.HasValue)
-                    activity.AddTag(DiagnosticHeaders.RequestId, context.RequestId.Value.ToString("D"));
-                if (context.InitiatorId.HasValue)
-                    activity.AddTag(DiagnosticHeaders.InitiatorId, context.InitiatorId.Value.ToString("D"));
-                if (context.SourceAddress != null)
-                    activity.AddTag(DiagnosticHeaders.SourceAddress, context.SourceAddress.ToString());
-                if (context.DestinationAddress != null)
-                    activity.AddTag(DiagnosticHeaders.DestinationAddress, context.DestinationAddress.ToString());
-
-                activity.AddTag(DiagnosticHeaders.MessageTypes, string.Join(",", MessageTypeCache<T>.MessageTypeNames));
-
-                for (var i = 0; i < tags.Count; i++)
-                {
-                    if (tags[i].Value != null)
-                        activity.AddTag(tags[i].Key, tags[i].Value?.ToString());
-                }
-            }
-
-            if (activity.Id != null)
-                context.Headers.Set(DiagnosticHeaders.ActivityId, activity.Id);
-
-            IList<KeyValuePair<string, string?>>? baggage = null;
-            foreach (KeyValuePair<string, string?> pair in activity.Baggage)
-            {
-                if (pair.Key.Equals(DiagnosticHeaders.Messaging.ConversationId) || pair.Key.Equals(DiagnosticHeaders.CorrelationId))
-                    continue;
-
-                if (string.IsNullOrWhiteSpace(pair.Value))
-                    continue;
-
-                baggage ??= new List<KeyValuePair<string, string?>>();
-                baggage.Add(pair);
-            }
-
-            if (baggage != null)
-                context.Headers.Set(DiagnosticHeaders.ActivityCorrelationContext, baggage);
-
-            return new StartedActivity(activity);
+            return PopulateSendActivity<T>(context, activity);
         }
 
         public StartedActivity? StartOutboxDeliverActivity(OutboxMessageContext context)
@@ -171,8 +111,7 @@ namespace MassTransit.Logging
             return new StartedActivity(activity);
         }
 
-        public StartedActivity? StartReceiveActivity(string name, string inputAddress, string endpointName, ReceiveContext context,
-            params (string Key, string Value)[] tags)
+        public StartedActivity? StartReceiveActivity(string name, string inputAddress, string endpointName, ReceiveContext context)
         {
             var parentActivityContext = GetParentActivityContext(context.TransportHeaders);
 
@@ -192,12 +131,6 @@ namespace MassTransit.Logging
                         || context.TransportHeaders.TryGetHeader(MessageHeaders.MessageId, out messageIdHeader))
                     && messageIdHeader is string text)
                     activity.AddTag(DiagnosticHeaders.Messaging.TransportMessageId, text);
-
-                for (var i = 0; i < tags.Length; i++)
-                {
-                    if (tags[i].Value != null)
-                        activity.AddTag(tags[i].Key, tags[i].Value);
-                }
             }
 
             return new StartedActivity(activity);
@@ -269,6 +202,66 @@ namespace MassTransit.Logging
                 activity.AddTag(DiagnosticHeaders.ConsumerType, TypeCache<TActivity>.ShortName);
                 activity.AddTag(DiagnosticHeaders.PeerAddress, MessageTypeCache<TLog>.DiagnosticAddress);
             });
+        }
+
+        static StartedActivity? PopulateSendActivity<T>(SendContext context, System.Diagnostics.Activity activity, params (string Key, object Value)[] tags)
+            where T : class
+        {
+            var conversationId = context.ConversationId?.ToString("D");
+
+            if (context.CorrelationId.HasValue)
+                activity.SetBaggage(DiagnosticHeaders.CorrelationId, context.CorrelationId.Value.ToString("D"));
+            if (conversationId != null)
+                activity.SetBaggage(DiagnosticHeaders.Messaging.ConversationId, conversationId);
+
+            activity.Start();
+
+            if (activity.IsAllDataRequested)
+            {
+                if (context.MessageId.HasValue)
+                    activity.AddTag(DiagnosticHeaders.MessageId, context.MessageId.Value.ToString("D"));
+                if (conversationId != null)
+                    activity.AddTag(DiagnosticHeaders.Messaging.ConversationId, conversationId);
+                if (context.CorrelationId.HasValue)
+                    activity.AddTag(DiagnosticHeaders.CorrelationId, context.CorrelationId.Value.ToString("D"));
+                if (context.RequestId.HasValue)
+                    activity.AddTag(DiagnosticHeaders.RequestId, context.RequestId.Value.ToString("D"));
+                if (context.InitiatorId.HasValue)
+                    activity.AddTag(DiagnosticHeaders.InitiatorId, context.InitiatorId.Value.ToString("D"));
+                if (context.SourceAddress != null)
+                    activity.AddTag(DiagnosticHeaders.SourceAddress, context.SourceAddress.ToString());
+                if (context.DestinationAddress != null)
+                    activity.AddTag(DiagnosticHeaders.DestinationAddress, context.DestinationAddress.ToString());
+
+                activity.AddTag(DiagnosticHeaders.MessageTypes, string.Join(",", MessageTypeCache<T>.MessageTypeNames));
+
+                for (var i = 0; i < tags.Length; i++)
+                {
+                    if (tags[i].Value != null)
+                        activity.AddTag(tags[i].Key, tags[i].Value?.ToString());
+                }
+            }
+
+            if (activity.Id != null)
+                context.Headers.Set(DiagnosticHeaders.ActivityId, activity.Id);
+
+            IList<KeyValuePair<string, string?>>? baggage = null;
+            foreach (KeyValuePair<string, string?> pair in activity.Baggage)
+            {
+                if (pair.Key.Equals(DiagnosticHeaders.Messaging.ConversationId) || pair.Key.Equals(DiagnosticHeaders.CorrelationId))
+                    continue;
+
+                if (string.IsNullOrWhiteSpace(pair.Value))
+                    continue;
+
+                baggage ??= new List<KeyValuePair<string, string?>>();
+                baggage.Add(pair);
+            }
+
+            if (baggage != null)
+                context.Headers.Set(DiagnosticHeaders.ActivityCorrelationContext, baggage);
+
+            return new StartedActivity(activity);
         }
 
         StartedActivity? StartActivity(Action<System.Diagnostics.Activity> started)
