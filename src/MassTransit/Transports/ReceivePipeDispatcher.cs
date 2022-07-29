@@ -79,11 +79,21 @@ namespace MassTransit.Transports
                     try
                     {
                         await receiveLock.Faulted(ex).ConfigureAwait(false);
+
+                        activity?.RecordException(ex, escaped: true);
                     }
                     catch (Exception releaseLockException)
                     {
-                        throw new AggregateException("ReceiveLock.Faulted threw an exception", releaseLockException, ex);
+                        AggregateException aggregateException = new AggregateException("ReceiveLock.Faulted threw an exception", releaseLockException, ex);
+
+                        activity?.RecordException(aggregateException, escaped: true);
+
+                        throw aggregateException;
                     }
+                }
+                else
+                {
+                    activity?.RecordException(ex, escaped: true);
                 }
 
                 throw;

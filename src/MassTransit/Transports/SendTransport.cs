@@ -104,6 +104,8 @@ namespace MassTransit.Transports
                     if (_sendTransportContext.SendObservers.Count > 0)
                         await _sendTransportContext.SendObservers.SendFault(sendContext, ex).ConfigureAwait(false);
 
+                    activity?.RecordException(ex, escaped: true);
+
                     throw;
                 }
                 finally

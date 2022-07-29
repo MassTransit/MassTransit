@@ -177,6 +177,11 @@ namespace MassTransit.Middleware.Outbox
                 await _outboxContext.AddSend(context).ConfigureAwait(false);
                 activity?.Update(context);
             }
+            catch (Exception ex)
+            {
+                activity?.RecordException(ex, escaped: true);
+                throw;
+            }
             finally
             {
                 activity?.Stop();

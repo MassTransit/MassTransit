@@ -1,5 +1,6 @@
 namespace MassTransit.Middleware
 {
+    using System;
     using System.Threading.Tasks;
     using Logging;
 
@@ -28,6 +29,12 @@ namespace MassTransit.Middleware
                 await context.Saga.Consume(context).ConfigureAwait(false);
 
                 await next.Send(context).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                activity?.RecordException(ex, escaped: true);
+
+                throw;
             }
             finally
             {

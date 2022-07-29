@@ -248,6 +248,12 @@ namespace MassTransit.MongoDbIntegration
                         {
                             await endpoint.Send(new Outbox(), pipe, token.Token).ConfigureAwait(false);
                         }
+                        catch (Exception exception)
+                        {
+                            activity?.RecordException(exception, escaped: true);
+
+                            throw;
+                        }
                         finally
                         {
                             activity?.Stop();
