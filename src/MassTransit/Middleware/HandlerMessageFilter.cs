@@ -5,6 +5,7 @@ namespace MassTransit.Middleware
     using System.Threading;
     using System.Threading.Tasks;
     using Logging;
+    using Util;
 
 
     /// <summary>
@@ -53,18 +54,15 @@ namespace MassTransit.Middleware
             }
             catch (OperationCanceledException exception)
             {
-                await context.NotifyFaulted(timer.Elapsed, TypeCache<MessageHandler<TMessage>>.ShortName, exception).ConfigureAwait(false);
-
-                if (exception.CancellationToken == context.CancellationToken)
-                    throw;
-
-                throw new ConsumerCanceledException($"The operation was canceled by the consumer: {TypeCache<MessageHandler<TMessage>>.ShortName}");
+                await ThrowHelper.ConsumeFilter.ThrowOperationCancelled<MessageHandler<TMessage>, TMessage>(context, timer.Elapsed, exception, activity)
+                    .ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                await context.NotifyFaulted(timer.Elapsed, TypeCache<MessageHandler<TMessage>>.ShortName, ex).ConfigureAwait(false);
-
                 Interlocked.Increment(ref _faulted);
+
+                await ThrowHelper.ConsumeFilter.Throw<MessageHandler<TMessage>, TMessage>(context, timer.Elapsed, ex, activity).ConfigureAwait(false);
+
                 throw;
             }
             finally

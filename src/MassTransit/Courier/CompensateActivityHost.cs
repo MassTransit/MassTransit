@@ -5,6 +5,7 @@ namespace MassTransit.Courier
     using System.Threading.Tasks;
     using Contracts;
     using Logging;
+    using Util;
 
 
     public class CompensateActivityHost<TActivity, TLog> :
@@ -42,6 +43,8 @@ namespace MassTransit.Courier
                 }
                 catch (Exception ex)
                 {
+                    activity?.RecordException(ex, escaped: false);
+
                     await compensateContext.Failed(ex).Evaluate().ConfigureAwait(false);
                 }
 
@@ -51,15 +54,13 @@ namespace MassTransit.Courier
             }
             catch (OperationCanceledException exception)
             {
-                await context.NotifyFaulted(timer.Elapsed, TypeCache<TActivity>.ShortName, exception).ConfigureAwait(false);
-
-                if (exception.CancellationToken == context.CancellationToken)
-                    throw;
-
-                throw new ConsumerCanceledException($"The operation was canceled by the activity: {TypeCache<TActivity>.ShortName}");
+                await ThrowHelper.ConsumeFilter.ThrowOperationCancelled<TActivity, RoutingSlip>(context, timer.Elapsed, exception, activity)
+                    .ConfigureAwait(false);
             }
             catch (Exception ex)
             {
+                activity?.RecordException(ex, escaped: true);
+
                 await context.NotifyFaulted(timer.Elapsed, TypeCache<TActivity>.ShortName, ex).ConfigureAwait(false);
                 throw;
             }
