@@ -169,6 +169,8 @@ namespace MassTransit.EventHubIntegration
                     if (_context.SendObservers.Count > 0)
                         await _context.SendObservers.SendFault(sendContext, exception).ConfigureAwait(false);
 
+                    activity?.AddExceptionEvent(exception);
+
                     throw;
                 }
                 finally
@@ -287,6 +289,8 @@ namespace MassTransit.EventHubIntegration
 
                     if (_context.SendObservers.Count > 0)
                         await Task.WhenAll(contexts.Select(c => _context.SendObservers.SendFault(c, exception))).ConfigureAwait(false);
+
+                    activity?.AddExceptionEvent(exception);
 
                     throw;
                 }

@@ -1,7 +1,9 @@
 #nullable enable
 namespace MassTransit.Logging
 {
+    using System;
     using System.Diagnostics;
+    using Util;
 
 
     public readonly struct StartedActivity
@@ -26,6 +28,26 @@ namespace MassTransit.Logging
         {
             if (context.BodyLength.HasValue)
                 AddTag(DiagnosticHeaders.Messaging.BodyLength, context.BodyLength.Value.ToString());
+        }
+
+        public void AddExceptionEvent(Exception exception, bool escaped = true)
+        {
+            exception = exception.GetBaseException() ?? exception;
+
+            var exceptionMessage = ExceptionUtil.GetMessage(exception);
+
+            var tags = new ActivityTagsCollection
+            {
+                { DiagnosticHeaders.Exceptions.Escaped, escaped },
+                { DiagnosticHeaders.Exceptions.Message, exceptionMessage },
+                { DiagnosticHeaders.Exceptions.Type, TypeCache.GetShortName(exception.GetType()) },
+                { DiagnosticHeaders.Exceptions.Stacktrace, ExceptionUtil.GetStackTrace(exception) }
+            };
+
+            var activityEvent = new ActivityEvent(DiagnosticHeaders.Exceptions.EventName, DateTimeOffset.UtcNow, tags);
+
+            Activity.AddEvent(activityEvent);
+            Activity.SetStatus(ActivityStatusCode.Error);
         }
 
         public void Stop()

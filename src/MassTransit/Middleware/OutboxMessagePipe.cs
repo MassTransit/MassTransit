@@ -88,6 +88,12 @@ namespace MassTransit.Middleware
                     {
                         await endpoint.Send(new Outbox(), pipe, context.CancellationToken).ConfigureAwait(false);
                     }
+                    catch (Exception exception)
+                    {
+                        activity?.AddExceptionEvent(exception);
+
+                        throw;
+                    }
                     finally
                     {
                         activity?.Stop();

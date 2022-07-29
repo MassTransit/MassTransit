@@ -70,7 +70,18 @@ namespace MassTransit.Middleware
             {
                 State<TSaga> currentState = await _machine.Accessor.Get(behaviorContext).ConfigureAwait(false);
 
-                throw new NotAcceptedStateMachineException(typeof(TSaga), typeof(TMessage), context.CorrelationId ?? Guid.Empty, currentState.Name, ex);
+                NotAcceptedStateMachineException stateMachineException = new NotAcceptedStateMachineException(typeof(TSaga), typeof(TMessage),
+                    context.CorrelationId ?? Guid.Empty, currentState.Name, ex);
+
+                activity?.AddExceptionEvent(stateMachineException);
+
+                throw stateMachineException;
+            }
+            catch (Exception exception)
+            {
+                activity?.AddExceptionEvent(exception);
+
+                throw;
             }
             finally
             {

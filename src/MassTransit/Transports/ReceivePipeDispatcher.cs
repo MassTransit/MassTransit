@@ -12,15 +12,15 @@ namespace MassTransit.Transports
         IReceivePipeDispatcher
     {
         readonly string _activityName;
+        readonly string _endpointName;
         readonly IHostConfiguration _hostConfiguration;
+        readonly string _inputAddress;
         readonly ReceiveObservable _observers;
         readonly IReceivePipe _receivePipe;
 
         int _activeDispatchCount;
         long _dispatchCount;
         int _maxConcurrentDispatchCount;
-        readonly string _endpointName;
-        readonly string _inputAddress;
 
         public ReceivePipeDispatcher(IReceivePipe receivePipe, ReceiveObservable observers, IHostConfiguration hostConfiguration, Uri inputAddress)
         {
@@ -79,12 +79,20 @@ namespace MassTransit.Transports
                     try
                     {
                         await receiveLock.Faulted(ex).ConfigureAwait(false);
+
+                        activity?.AddExceptionEvent(ex);
                     }
                     catch (Exception releaseLockException)
                     {
-                        throw new AggregateException("ReceiveLock.Faulted threw an exception", releaseLockException, ex);
+                        var aggregateException = new AggregateException("ReceiveLock.Faulted threw an exception", releaseLockException, ex);
+
+                        activity?.AddExceptionEvent(aggregateException);
+
+                        throw aggregateException;
                     }
                 }
+                else
+                    activity?.AddExceptionEvent(ex);
 
                 throw;
             }

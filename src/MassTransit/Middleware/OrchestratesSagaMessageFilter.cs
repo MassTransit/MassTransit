@@ -30,6 +30,12 @@
 
                 await next.Send(context).ConfigureAwait(false);
             }
+            catch (Exception ex)
+            {
+                activity?.AddExceptionEvent(ex);
+
+                throw;
+            }
             finally
             {
                 activity?.Stop();

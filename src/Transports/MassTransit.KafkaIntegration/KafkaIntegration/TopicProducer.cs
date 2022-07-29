@@ -120,6 +120,8 @@ namespace MassTransit.KafkaIntegration
                     if (_context.SendObservers.Count > 0)
                         await _context.SendObservers.SendFault(sendContext, exception).ConfigureAwait(false);
 
+                    activity?.AddExceptionEvent(exception);
+
                     throw;
                 }
                 finally

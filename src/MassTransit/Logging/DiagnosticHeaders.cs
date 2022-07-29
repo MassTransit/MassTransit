@@ -29,6 +29,16 @@ namespace MassTransit.Logging
         public const string SagaId = "messaging.masstransit.saga_id";
 
 
+        public class Exceptions
+        {
+            public const string EventName = "exception";
+            public const string Type = "exception.type";
+            public const string Message = "exception.message";
+            public const string Escaped = "exception.escaped";
+            public const string Stacktrace = "exception.stacktrace";
+        }
+
+
         public static class Messaging
         {
             public const string BodyLength = "messaging.message_payload_size_bytes";
