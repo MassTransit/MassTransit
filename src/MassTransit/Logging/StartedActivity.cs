@@ -1,6 +1,7 @@
 #nullable enable
 namespace MassTransit.Logging
 {
+    using System;
     using System.Diagnostics;
 
 
@@ -26,6 +27,22 @@ namespace MassTransit.Logging
         {
             if (context.BodyLength.HasValue)
                 AddTag(DiagnosticHeaders.Messaging.BodyLength, context.BodyLength.Value.ToString());
+        }
+
+        public void RecordException(Exception exception, bool escaped)
+        {
+            var tags = new ActivityTagsCollection
+            {
+                { DiagnosticHeaders.Exceptions.Escaped, escaped },
+                { DiagnosticHeaders.Exceptions.Message, exception.Message },
+                { DiagnosticHeaders.Exceptions.Type, exception.GetType().Name },
+                { DiagnosticHeaders.Exceptions.Stacktrace, exception.ToString() }
+            };
+
+            var activityEvent = new ActivityEvent(DiagnosticHeaders.Exceptions.EventName, DateTimeOffset.UtcNow, tags);
+
+            Activity.AddEvent(activityEvent);
+            Activity.SetStatus(ActivityStatusCode.Error);
         }
 
         public void Stop()
