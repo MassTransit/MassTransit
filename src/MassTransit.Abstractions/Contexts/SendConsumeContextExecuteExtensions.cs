@@ -116,7 +116,7 @@ namespace MassTransit
         {
             var endpoint = await context.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
-            await endpoint.Send<T>(values, callback.ToPipe(), context.CancellationToken).ConfigureAwait(false);
+            await endpoint.Send(values, callback.ToPipe(), context.CancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -133,7 +133,7 @@ namespace MassTransit
         {
             var endpoint = await context.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
-            await endpoint.Send<T>(values, callback.ToPipe(), context.CancellationToken).ConfigureAwait(false);
+            await endpoint.Send(values, callback.ToPipe(), context.CancellationToken).ConfigureAwait(false);
         }
     }
 }

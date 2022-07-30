@@ -107,7 +107,7 @@ namespace MassTransit
         /// <param name="values">The values that map to the object</param>
         /// <param name="callback">The callback for the send context</param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        public static Task RespondAsync<T>(this ConsumeContext context, object values, Action<SendContext> callback)
+        public static Task RespondAsync<T>(this ConsumeContext context, object values, Action<SendContext<T>> callback)
             where T : class
         {
             return context.RespondAsync(values, callback.ToPipe());
