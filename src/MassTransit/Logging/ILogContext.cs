@@ -63,5 +63,7 @@ namespace MassTransit.Logging
         StartedActivity? StartCompensateActivity<TActivity, TLog>(ConsumeContext<RoutingSlip> context)
             where TActivity : ICompensateActivity<TLog>
             where TLog : class;
+
+        StartedActivity? StartGenericActivity(string operationName);
     }
 }

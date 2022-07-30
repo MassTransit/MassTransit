@@ -14,6 +14,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     using OpenTelemetry.Resources;
     using OpenTelemetry.Trace;
     using TestFramework.Courier;
+    using TestFramework.Messages;
 
 
     [TestFixture]
@@ -45,15 +46,25 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             IRequestClient<SubmitOrder> client = harness.GetRequestClient<SubmitOrder>();
 
-            await client.GetResponse<OrderSubmitted>(new
+            await harness.Bus.Publish(new PingMessage());
+
+            var activity = LogContext.Current?.StartGenericActivity("api process");
+
+            activity?.Activity.SetBaggage("MyBag", "IsFull");
+
+            var response = await client.GetResponse<OrderSubmitted>(new
             {
                 OrderId = InVar.Id,
                 OrderNumber = "123"
             });
 
+            activity?.Stop();
+
             Assert.IsTrue(await harness.Sent.Any<OrderSubmitted>());
 
             Assert.IsTrue(await harness.Consumed.Any<SubmitOrder>());
+
+            Assert.That(response.Headers.Get<string>("BaggageValue"), Is.EqualTo("IsFull"));
         }
 
         [Test]
@@ -258,7 +269,12 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             public Task Consume(ConsumeContext<SubmitOrder> context)
             {
-                return context.RespondAsync<OrderSubmitted>(context.Message);
+                var value = System.Diagnostics.Activity.Current?.GetBaggageItem("MyBag");
+
+                return context.RespondAsync<OrderSubmitted>(context.Message, x =>
+                {
+                    x.Headers.Set("BaggageValue", value);
+                });
             }
         }
 

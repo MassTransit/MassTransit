@@ -71,9 +71,7 @@ namespace MassTransit.Logging
         public StartedActivity? StartSendActivity<T>(SendTransportContext transportContext, SendContext<T> context, params (string Key, object Value)[] tags)
             where T : class
         {
-            var parentActivityContext = System.Diagnostics.Activity.Current?.Context ?? default;
-
-            var activity = _source.CreateActivity(transportContext.ActivityName, ActivityKind.Producer, parentActivityContext);
+            var activity = _source.CreateActivity(transportContext.ActivityName, ActivityKind.Producer);
             if (activity == null)
                 return null;
 
@@ -204,6 +202,17 @@ namespace MassTransit.Logging
             });
         }
 
+        public StartedActivity? StartGenericActivity(string operationName)
+        {
+            var activity = _source.CreateActivity(operationName, ActivityKind.Client);
+            if (activity == null)
+                return null;
+
+            activity.Start();
+
+            return new StartedActivity(activity);
+        }
+
         static StartedActivity? PopulateSendActivity<T>(SendContext context, System.Diagnostics.Activity activity, params (string Key, object Value)[] tags)
             where T : class
         {
@@ -280,7 +289,7 @@ namespace MassTransit.Logging
                 return currentActivity.OperationName;
             });
 
-            var activity = _source.CreateActivity(operationName, ActivityKind.Consumer, currentActivity.Context);
+            var activity = _source.CreateActivity(operationName, ActivityKind.Consumer);
             if (activity == null)
                 return null;
 
