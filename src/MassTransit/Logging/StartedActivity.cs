@@ -15,19 +15,19 @@ namespace MassTransit.Logging
             Activity = activity;
         }
 
-        public void AddTag(string key, string value)
+        public void SetTag(string key, string value)
         {
             if (string.IsNullOrWhiteSpace(value))
                 return;
 
-            Activity.AddTag(key, value);
+            Activity.SetTag(key, value);
         }
 
         public void Update<T>(SendContext<T> context)
             where T : class
         {
             if (context.BodyLength.HasValue)
-                AddTag(DiagnosticHeaders.Messaging.BodyLength, context.BodyLength.Value.ToString());
+                SetTag(DiagnosticHeaders.Messaging.BodyLength, context.BodyLength.Value.ToString());
         }
 
         public void AddExceptionEvent(Exception exception, bool escaped = true)

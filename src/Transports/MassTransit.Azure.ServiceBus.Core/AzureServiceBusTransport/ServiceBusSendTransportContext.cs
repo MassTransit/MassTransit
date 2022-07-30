@@ -75,9 +75,9 @@ namespace MassTransit.AzureServiceBusTransport
             if (Activity.Current?.IsAllDataRequested ?? false)
             {
                 if (!string.IsNullOrWhiteSpace(context.PartitionKey))
-                    Activity.Current.AddTag(nameof(context.PartitionKey), context.PartitionKey);
+                    Activity.Current.SetTag(nameof(context.PartitionKey), context.PartitionKey);
                 if (!string.IsNullOrWhiteSpace(context.SessionId))
-                    Activity.Current.AddTag(nameof(context.SessionId), context.SessionId);
+                    Activity.Current.SetTag(nameof(context.SessionId), context.SessionId);
             }
 
             if (IsCancelScheduledSend(context, out var tokenId, out var sequenceNumber))

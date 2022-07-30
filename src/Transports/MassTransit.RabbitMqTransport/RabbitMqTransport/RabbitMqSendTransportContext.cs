@@ -147,8 +147,12 @@ namespace MassTransit.RabbitMqTransport
             }
 
             var routingKey = context.RoutingKey ?? "";
-            if (!string.IsNullOrEmpty(routingKey))
-                Activity.Current?.AddTag(DiagnosticHeaders.Messaging.RabbitMq.RoutingKey, routingKey);
+
+            if (Activity.Current?.IsAllDataRequested ?? false)
+            {
+                if (!string.IsNullOrEmpty(routingKey))
+                    Activity.Current.SetTag(DiagnosticHeaders.Messaging.RabbitMq.RoutingKey, routingKey);
+            }
 
             var publishTask = transportContext.BasicPublishAsync(exchange, routingKey, context.Mandatory, context.BasicProperties, body,
                 context.AwaitAck);
