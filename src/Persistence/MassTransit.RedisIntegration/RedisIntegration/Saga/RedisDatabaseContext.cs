@@ -1,12 +1,10 @@
 namespace MassTransit.RedisIntegration.Saga
 {
     using System;
-    using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
     using Metadata;
     using RetryPolicies;
-    using Serialization;
     using StackExchange.Redis;
 
 
@@ -29,17 +27,17 @@ namespace MassTransit.RedisIntegration.Saga
         {
             var instance = context.Saga;
 
-            return Put(instance);
+            return Put(context.SerializerContext.SerializeObject(instance).GetString(), instance.CorrelationId);
         }
 
-        public Task Insert(TSaga instance)
+        public Task Insert(IObjectDeserializer deserializer, TSaga instance)
         {
-            return Put(instance);
+            return Put(deserializer.SerializeObject(instance).GetString(), instance.CorrelationId);
         }
 
-        public Task<TSaga> Load(Guid correlationId)
+        public Task<TSaga> Load(IObjectDeserializer deserializer, Guid correlationId)
         {
-            return Get(correlationId);
+            return Get(deserializer, correlationId);
         }
 
         public async Task Update(SagaConsumeContext<TSaga> context)
@@ -54,11 +52,13 @@ namespace MassTransit.RedisIntegration.Saga
             {
                 instance.Version++;
 
-                var existingInstance = await Get(instance.CorrelationId).ConfigureAwait(false);
+                var deserializer = context.SerializerContext;
+
+                var existingInstance = await Get(deserializer, instance.CorrelationId).ConfigureAwait(false);
                 if (existingInstance.Version >= instance.Version)
                     throw new RedisSagaConcurrencyException("Saga version conflict", typeof(TSaga), instance.CorrelationId);
 
-                await Put(instance).ConfigureAwait(false);
+                await Put(deserializer.SerializeObject(instance).GetString(), instance.CorrelationId).ConfigureAwait(false);
             }
             catch (Exception exception)
             {
@@ -104,17 +104,16 @@ namespace MassTransit.RedisIntegration.Saga
             return sagaLock.Lock(cancellationToken);
         }
 
-        public async Task<TSaga> Get(Guid correlationId)
+        async Task<TSaga> Get(IObjectDeserializer deserializer, Guid correlationId)
         {
             var value = await _database.StringGetAsync(_options.FormatSagaKey(correlationId)).ConfigureAwait(false);
 
-            return value.IsNullOrEmpty ? null : JsonSerializer.Deserialize<TSaga>(value, SystemTextJsonMessageSerializer.Options);
+            return value.IsNullOrEmpty ? null : deserializer.DeserializeObject<TSaga>(value.ToString());
         }
 
-        Task Put(TSaga instance)
+        Task Put(string instance, Guid correlationId)
         {
-            return _database.StringSetAsync(_options.FormatSagaKey(instance.CorrelationId),
-                JsonSerializer.Serialize(instance, SystemTextJsonMessageSerializer.Options), _options.Expiry);
+            return _database.StringSetAsync(_options.FormatSagaKey(correlationId), instance, _options.Expiry);
         }
 
         Task Delete(Guid correlationId)

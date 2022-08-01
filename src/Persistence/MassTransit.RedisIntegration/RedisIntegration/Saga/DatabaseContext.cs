@@ -10,9 +10,9 @@ namespace MassTransit.RedisIntegration.Saga
     {
         Task Add(SagaConsumeContext<TSaga> context);
 
-        Task Insert(TSaga instance);
+        Task Insert(IObjectDeserializer deserializer, TSaga instance);
 
-        Task<TSaga> Load(Guid correlationId);
+        Task<TSaga> Load(IObjectDeserializer deserializer, Guid correlationId);
 
         Task Update(SagaConsumeContext<TSaga> context);
 

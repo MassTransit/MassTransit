@@ -7,6 +7,7 @@ namespace MassTransit.RedisIntegration.Saga
     using Logging;
     using MassTransit.Saga;
     using Middleware;
+    using Serialization;
 
 
     public class RedisSagaRepositoryContext<TSaga, TMessage> :
@@ -16,42 +17,42 @@ namespace MassTransit.RedisIntegration.Saga
         where TSaga : class, ISagaVersion
         where TMessage : class
     {
-        readonly ConsumeContext<TMessage> _consumeContext;
-        readonly DatabaseContext<TSaga> _context;
+        readonly ConsumeContext<TMessage> _context;
+        readonly DatabaseContext<TSaga> _dbContext;
         readonly ISagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga> _factory;
 
-        public RedisSagaRepositoryContext(DatabaseContext<TSaga> context, ConsumeContext<TMessage> consumeContext,
+        public RedisSagaRepositoryContext(DatabaseContext<TSaga> dbContext, ConsumeContext<TMessage> context,
             ISagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga> factory)
-            : base(consumeContext)
+            : base(context)
         {
+            _dbContext = dbContext;
             _context = context;
-            _consumeContext = consumeContext;
             _factory = factory;
         }
 
         public ValueTask DisposeAsync()
         {
-            return _context.DisposeAsync();
+            return _dbContext.DisposeAsync();
         }
 
         public Task<SagaConsumeContext<TSaga, TMessage>> Add(TSaga instance)
         {
-            return _factory.CreateSagaConsumeContext(_context, _consumeContext, instance, SagaConsumeContextMode.Add);
+            return _factory.CreateSagaConsumeContext(_dbContext, _context, instance, SagaConsumeContextMode.Add);
         }
 
         public async Task<SagaConsumeContext<TSaga, TMessage>> Insert(TSaga instance)
         {
             try
             {
-                await _context.Insert(instance).ConfigureAwait(false);
+                await _dbContext.Insert(_context.SerializerContext, instance).ConfigureAwait(false);
 
-                _consumeContext.LogInsert<TSaga, TMessage>(instance.CorrelationId);
+                _context.LogInsert<TSaga, TMessage>(instance.CorrelationId);
 
-                return await _factory.CreateSagaConsumeContext(_context, _consumeContext, instance, SagaConsumeContextMode.Insert).ConfigureAwait(false);
+                return await _factory.CreateSagaConsumeContext(_dbContext, _context, instance, SagaConsumeContextMode.Insert).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                _consumeContext.LogInsertFault<TSaga, TMessage>(ex, instance.CorrelationId);
+                _context.LogInsertFault<TSaga, TMessage>(ex, instance.CorrelationId);
 
                 return default;
             }
@@ -59,26 +60,26 @@ namespace MassTransit.RedisIntegration.Saga
 
         public async Task<SagaConsumeContext<TSaga, TMessage>> Load(Guid correlationId)
         {
-            var instance = await _context.Load(correlationId).ConfigureAwait(false);
+            var instance = await _dbContext.Load(_context.SerializerContext, correlationId).ConfigureAwait(false);
             if (instance == null)
                 return default;
 
-            return await _factory.CreateSagaConsumeContext(_context, _consumeContext, instance, SagaConsumeContextMode.Load).ConfigureAwait(false);
+            return await _factory.CreateSagaConsumeContext(_dbContext, _context, instance, SagaConsumeContextMode.Load).ConfigureAwait(false);
         }
 
         public Task Save(SagaConsumeContext<TSaga> context)
         {
-            return _context.Add(context);
+            return _dbContext.Add(context);
         }
 
         public Task Update(SagaConsumeContext<TSaga> context)
         {
-            return _context.Update(context);
+            return _dbContext.Update(context);
         }
 
         public Task Delete(SagaConsumeContext<TSaga> context)
         {
-            return _context.Delete(context);
+            return _dbContext.Delete(context);
         }
 
         public Task Discard(SagaConsumeContext<TSaga> context)
@@ -94,7 +95,7 @@ namespace MassTransit.RedisIntegration.Saga
         public Task<SagaConsumeContext<TSaga, T>> CreateSagaConsumeContext<T>(ConsumeContext<T> consumeContext, TSaga instance, SagaConsumeContextMode mode)
             where T : class
         {
-            return _factory.CreateSagaConsumeContext(_context, consumeContext, instance, mode);
+            return _factory.CreateSagaConsumeContext(_dbContext, consumeContext, instance, mode);
         }
     }
 
@@ -125,7 +126,7 @@ namespace MassTransit.RedisIntegration.Saga
 
         public Task<TSaga> Load(Guid correlationId)
         {
-            return _context.Load(correlationId);
+            return _context.Load(SystemTextJsonMessageSerializer.Instance, correlationId);
         }
     }
 }
