@@ -26,7 +26,7 @@ namespace MassTransit.DependencyInjection
 
         async Task<ISendEndpoint> ISendEndpointProvider.GetSendEndpoint(Uri address)
         {
-            var endpoint = await _provider.GetSendEndpoint(_consumeContext, address, _consumeContext.RequestId).ConfigureAwait(false);
+            var endpoint = await _provider.GetSendEndpoint(_consumeContext, address, default).ConfigureAwait(false);
 
             return new ScopedSendEndpoint<TScope>(endpoint, _scope);
         }

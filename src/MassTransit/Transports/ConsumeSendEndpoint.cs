@@ -14,7 +14,7 @@ namespace MassTransit.Transports
         readonly ConsumeContext _context;
         readonly Guid? _requestId;
 
-        public ConsumeSendEndpoint(ISendEndpoint endpoint, ConsumeContext context, Guid? requestId)
+        public ConsumeSendEndpoint(ISendEndpoint endpoint, ConsumeContext context, Guid? requestId = default)
             : base(endpoint)
         {
             _context = context;

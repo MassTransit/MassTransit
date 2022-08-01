@@ -5,7 +5,6 @@ namespace MassTransit.Futures
     using System.Threading.Tasks;
     using Middleware;
     using SagaStateMachine;
-    using Transports;
 
 
     public class FutureRequest<TInput, TRequest> :
@@ -51,8 +50,7 @@ namespace MassTransit.Futures
 
             var endpoint = destinationAddress != null
                 ? await context.GetSendEndpoint(destinationAddress).ConfigureAwait(false)
-                : new ConsumeSendEndpoint(await context.ReceiveContext.PublishEndpointProvider.GetPublishSendEndpoint<TRequest>().ConfigureAwait(false),
-                    context, default);
+                : await context.ReceiveContext.PublishEndpointProvider.GetPublishEndpoint<TRequest>(context, default);
 
             await _factory.Use(context, async (ctx, s) =>
             {

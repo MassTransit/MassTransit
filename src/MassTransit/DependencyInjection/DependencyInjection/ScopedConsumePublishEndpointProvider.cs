@@ -26,7 +26,7 @@ namespace MassTransit.DependencyInjection
         async Task<ISendEndpoint> IPublishEndpointProvider.GetPublishSendEndpoint<T>()
             where T : class
         {
-            var endpoint = await _provider.GetPublishEndpoint<T>(_consumeContext, _consumeContext.RequestId).ConfigureAwait(false);
+            var endpoint = await _provider.GetPublishEndpoint<T>(_consumeContext, default).ConfigureAwait(false);
 
             return new ScopedSendEndpoint<TScope>(endpoint, _scope);
         }

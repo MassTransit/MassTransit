@@ -171,7 +171,7 @@ namespace MassTransit.Context
         {
             var sendEndpoint = await ReceiveContext.SendEndpointProvider.GetSendEndpoint(address).ConfigureAwait(false);
 
-            return new ConsumeSendEndpoint(sendEndpoint, this, RequestId);
+            return new ConsumeSendEndpoint(sendEndpoint, this);
         }
 
         public virtual Task NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
@@ -276,7 +276,7 @@ namespace MassTransit.Context
         {
             var publishSendEndpoint = await base.GetPublishSendEndpoint<T>().ConfigureAwait(false);
 
-            return new ConsumeSendEndpoint(publishSendEndpoint, this, RequestId);
+            return new ConsumeSendEndpoint(publishSendEndpoint, this);
         }
 
 

@@ -4,6 +4,8 @@
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using MassTransit.Testing;
+    using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;
@@ -178,6 +180,54 @@
                 await Task.Delay(2000);
                 await x.RespondAsync(new PongMessage(x.Message.CorrelationId));
             });
+        }
+    }
+
+
+    [TestFixture]
+    public class Publishing_from_a_request_consumer
+    {
+        [Test]
+        public async Task Should_not_include_the_request_id()
+        {
+            await using var provider = new ServiceCollection()
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.AddConsumer<PingConsumer>();
+                })
+                .BuildServiceProvider(true);
+
+            var harness = provider.GetTestHarness();
+
+            await harness.Start();
+
+            IRequestClient<PingMessage> client = harness.GetRequestClient<PingMessage>();
+
+            Response<PongMessage> response = await client.GetResponse<PongMessage>(new PingMessage());
+
+            Assert.That(response.RequestId, Is.Not.Null);
+
+            IPublishedMessage<PingHandled> published = await harness.Published.SelectAsync<PingHandled>().First();
+
+            Assert.That(published, Is.Not.Null);
+            Assert.That(published.Context.RequestId, Is.Null);
+        }
+
+
+        class PingHandled
+        {
+        }
+
+
+        class PingConsumer :
+            IConsumer<PingMessage>
+        {
+            public async Task Consume(ConsumeContext<PingMessage> context)
+            {
+                await context.Publish(new PingHandled());
+
+                await context.RespondAsync(new PongMessage(context.Message.CorrelationId));
+            }
         }
     }
 }

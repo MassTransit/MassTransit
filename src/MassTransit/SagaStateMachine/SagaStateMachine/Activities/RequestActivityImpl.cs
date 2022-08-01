@@ -3,7 +3,6 @@
     using System;
     using System.Threading.Tasks;
     using Contracts;
-    using Transports;
 
 
     public abstract class RequestActivityImpl<TInstance, TRequest, TResponse>
@@ -24,10 +23,9 @@
 
             var pipe = new SendRequestPipe(_request, context.ReceiveContext.InputAddress, requestId, sendTuple.Pipe);
 
-            var endpoint = serviceAddress == null
-                ? new ConsumeSendEndpoint(await context.ReceiveContext.PublishEndpointProvider.GetPublishSendEndpoint<TRequest>().ConfigureAwait
-                    (false), context, default)
-                : await context.GetSendEndpoint(serviceAddress).ConfigureAwait(false);
+            var endpoint = serviceAddress != null
+                ? await context.GetSendEndpoint(serviceAddress).ConfigureAwait(false)
+                : await context.ReceiveContext.PublishEndpointProvider.GetPublishEndpoint<TRequest>(context, default);
 
             await endpoint.Send(sendTuple.Message, pipe).ConfigureAwait(false);
 
