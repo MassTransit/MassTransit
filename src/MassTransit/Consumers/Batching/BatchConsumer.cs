@@ -2,10 +2,12 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
+    using Logging;
     using Util;
 
 
@@ -21,7 +23,9 @@
         readonly int _messageLimit;
         readonly SortedDictionary<Guid, ConsumeContext<TMessage>> _messages;
         readonly Timer _timer;
+        Activity _currentActivity;
         DateTime _lastMessage;
+        ILogContext _logContext;
 
         public BatchConsumer(int messageLimit, TimeSpan timeLimit, ChannelExecutor executor, ChannelExecutor dispatcher,
             IPipe<ConsumeContext<Batch<TMessage>>> consumerPipe)
@@ -73,8 +77,12 @@
             }));
         }
 
-        public Task Add(ConsumeContext<TMessage> context)
+        public Task Add(ConsumeContext<TMessage> context, Activity currentActivity)
         {
+            _logContext ??= LogContext.Current;
+            if (currentActivity != null)
+                _currentActivity = currentActivity;
+
             var messageId = context.MessageId ?? NewId.NextGuid();
             _messages.Add(messageId, context);
 
@@ -113,6 +121,10 @@
         async Task Deliver(ConsumeContext context, IReadOnlyList<ConsumeContext<TMessage>> messages, BatchCompletionMode batchCompletionMode)
         {
             _timer.Dispose();
+
+            LogContext.SetCurrentIfNull(_logContext);
+
+            Activity.Current = _currentActivity;
 
             Batch<TMessage> batch = new MessageBatch<TMessage>(_firstMessage, _lastMessage, batchCompletionMode, messages);
 
