@@ -36,7 +36,7 @@ namespace MassTransit.Middleware
             if (contextFactory == null)
                 throw new ConsumerException($"Unable to resolve outbox context factory for type '{TypeCache<TContext>.ShortName}'.");
 
-            var pipe = new OutboxMessagePipe<TMessage>(_options, next);
+            var pipe = new OutboxMessagePipe<TMessage>(_options, scope, next);
 
             await contextFactory.Send(scope.Context, _options, pipe).ConfigureAwait(false);
         }

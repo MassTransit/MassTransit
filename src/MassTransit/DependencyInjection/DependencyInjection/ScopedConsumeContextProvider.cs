@@ -1,6 +1,7 @@
 namespace MassTransit.DependencyInjection
 {
     using System;
+    using System.Threading;
     using Context;
 
 
@@ -37,6 +38,30 @@ namespace MassTransit.DependencyInjection
             }
         }
 
+        public IDisposable PushContext(ConsumeContext context)
+        {
+            if (_context == null)
+                throw new InvalidOperationException("Unable to push context when a context does not already exist");
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
+            if (!context.TryGetPayload<ScopedConsumeContext>(out _))
+                throw new ArgumentException("The consume context is not scoped", nameof(context));
+
+            lock (this)
+            {
+                var originalContext = _context;
+
+                _context = context;
+
+                return new PushedContext(this, context, originalContext);
+            }
+        }
+
+        void PopContext(ConsumeContext context, ConsumeContext originalContext)
+        {
+            Interlocked.CompareExchange(ref _context, originalContext, context);
+        }
+
         public ConsumeContext GetContext()
         {
             return _context;
@@ -45,6 +70,27 @@ namespace MassTransit.DependencyInjection
 
         class ScopedConsumeContext
         {
+        }
+
+
+        class PushedContext :
+            IDisposable
+        {
+            readonly ConsumeContext _context;
+            readonly ConsumeContext _originalContext;
+            readonly ScopedConsumeContextProvider _provider;
+
+            public PushedContext(ScopedConsumeContextProvider provider, ConsumeContext context, ConsumeContext originalContext)
+            {
+                _provider = provider;
+                _context = context;
+                _originalContext = originalContext;
+            }
+
+            public void Dispose()
+            {
+                _provider.PopContext(_context, _originalContext);
+            }
         }
     }
 }

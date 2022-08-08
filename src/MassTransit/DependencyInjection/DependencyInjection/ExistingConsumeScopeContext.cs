@@ -1,5 +1,6 @@
 ﻿namespace MassTransit.DependencyInjection
 {
+    using System;
     using System.Threading.Tasks;
     using Microsoft.Extensions.DependencyInjection;
 
@@ -48,6 +49,11 @@
             where T : class
         {
             return ActivatorUtilities.CreateInstance<T>(_scope.ServiceProvider, arguments);
+        }
+
+        public IDisposable PushConsumeContext(ConsumeContext context)
+        {
+            return _scope.ServiceProvider.GetRequiredService<ScopedConsumeContextProvider>().PushContext(context);
         }
 
         public ConsumeContext<TMessage> Context { get; }

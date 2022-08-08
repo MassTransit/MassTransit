@@ -190,6 +190,7 @@ namespace MassTransit.Tests.ReliableMessaging
         {
             services
                 .AddInMemoryInboxOutbox()
+                .AddScoped<IReliableService, ReliableService>()
                 .AddMassTransitTestHarness(x =>
                 {
                     x.AddConsumer<ReliableConsumer, ReliableInMemoryConsumerDefinition>();
@@ -206,6 +207,7 @@ namespace MassTransit.Tests.ReliableMessaging
         {
             services
                 .AddInMemoryInboxOutbox()
+                .AddScoped<IReliableService, ReliableService>()
                 .AddMassTransitTestHarness(x =>
                 {
                     x.AddConsumer<ReliableEventConsumer, ReliableEventConsumerDefinition>();

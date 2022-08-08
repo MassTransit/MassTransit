@@ -236,6 +236,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
                     ReliableDbContextFactory.Apply(builder);
                 })
                 .AddHostedService<MigrationHostedService<ReliableDbContext>>()
+                .AddScoped<IReliableService, ReliableService>()
                 .AddMassTransitTestHarness(x =>
                 {
                     x.AddEntityFrameworkOutbox<ReliableDbContext>();
@@ -257,6 +258,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
                     ReliableDbContextFactory.Apply(builder);
                 })
                 .AddHostedService<MigrationHostedService<ReliableDbContext>>()
+                .AddScoped<IReliableService, ReliableService>()
                 .AddMassTransitTestHarness(x =>
                 {
                     x.AddEntityFrameworkOutbox<ReliableDbContext>();

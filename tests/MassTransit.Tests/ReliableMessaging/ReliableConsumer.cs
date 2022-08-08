@@ -10,12 +10,12 @@ namespace MassTransit.Tests.ReliableMessaging
         IConsumer<Command>
     {
         readonly ILogger<ReliableConsumer> _logger;
-        readonly IBusTopology _topology;
+        readonly IReliableService _service;
 
-        public ReliableConsumer(ILogger<ReliableConsumer> logger, IBus bus)
+        public ReliableConsumer(ILogger<ReliableConsumer> logger, IReliableService service)
         {
             _logger = logger;
-            _topology = bus.Topology;
+            _service = service;
         }
 
         public async Task Consume(ConsumeContext<Command> context)
@@ -26,15 +26,38 @@ namespace MassTransit.Tests.ReliableMessaging
                 Text = "First"
             }, x => x.SetRoutingKey("alpha"));
 
-            await context.Publish<Event>(new
-            {
-                context.MessageId,
-                Text = "Second"
-            }, x => x.SetRoutingKey("beta"));
+            await _service.ProduceSecondEvent(context.MessageId.Value);
 
             if (context.Message.FailWhenConsuming && context.GetRetryAttempt() == 0)
                 throw new ApplicationException("You asked me to fail, so I failed");
         }
+    }
+
+
+    public class ReliableService :
+        IReliableService
+    {
+        readonly IPublishEndpoint _publishEndpoint;
+
+        public ReliableService(IPublishEndpoint publishEndpoint)
+        {
+            _publishEndpoint = publishEndpoint;
+        }
+
+        public async Task ProduceSecondEvent(Guid messageId)
+        {
+            await _publishEndpoint.Publish<Event>(new
+            {
+                messageId,
+                Text = "Second"
+            }, x => x.SetRoutingKey("beta"));
+        }
+    }
+
+
+    public interface IReliableService
+    {
+        Task ProduceSecondEvent(Guid messageId);
     }
 
 

@@ -4,6 +4,7 @@ namespace MassTransit.Middleware
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using DependencyInjection;
     using Logging;
 
 
@@ -13,15 +14,19 @@ namespace MassTransit.Middleware
     {
         readonly IPipe<ConsumeContext<TMessage>> _next;
         readonly OutboxConsumeOptions _options;
+        readonly IConsumeScopeContext<TMessage> _scopeContext;
 
-        public OutboxMessagePipe(OutboxConsumeOptions options, IPipe<ConsumeContext<TMessage>> next)
+        public OutboxMessagePipe(OutboxConsumeOptions options, IConsumeScopeContext<TMessage> scopeContext, IPipe<ConsumeContext<TMessage>> next)
         {
             _options = options;
+            _scopeContext = scopeContext;
             _next = next;
         }
 
         public async Task Send(OutboxConsumeContext<TMessage> context)
         {
+            using var pop = _scopeContext.PushConsumeContext(context);
+
             if (!context.IsMessageConsumed)
             {
                 await _next.Send(context).ConfigureAwait(false);

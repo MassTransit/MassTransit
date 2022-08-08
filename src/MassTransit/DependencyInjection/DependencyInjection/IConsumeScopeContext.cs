@@ -21,5 +21,7 @@
 
         T CreateInstance<T>(params object[] arguments)
             where T : class;
+
+        IDisposable PushConsumeContext(ConsumeContext context);
     }
 }
