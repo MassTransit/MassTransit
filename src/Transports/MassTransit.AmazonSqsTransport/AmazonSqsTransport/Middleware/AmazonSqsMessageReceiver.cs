@@ -25,6 +25,7 @@ namespace MassTransit.AmazonSqsTransport.Middleware
         readonly TaskCompletionSource<bool> _deliveryComplete;
         readonly IReceivePipeDispatcher _dispatcher;
         readonly ReceiveSettings _receiveSettings;
+        readonly MessagesHandler _messagesHandler;
 
         /// <summary>
         /// The basic consumer receives messages pushed from the broker.
@@ -42,6 +43,8 @@ namespace MassTransit.AmazonSqsTransport.Middleware
 
             _dispatcher = context.CreateReceivePipeDispatcher();
             _dispatcher.ZeroActivity += HandleDeliveryComplete;
+
+            _messagesHandler = new MessagesHandler(client, context, _dispatcher);
 
             var task = Task.Run(Consume);
             SetCompleted(task);
@@ -62,12 +65,20 @@ namespace MassTransit.AmazonSqsTransport.Middleware
                 RequestResultLimit = 10
             });
 
+            var window = new Window(_receiveSettings.PrefetchCount);
+
             SetReady();
 
             try
             {
                 while (!IsStopping)
                 {
+                    await window.WaitForOpen();
+
+                    var messages = await ReceiveMessages(window.RequestsToReceive, new CancellationToken()).ConfigureAwait(false);
+
+                    window.Close(messages.Count());
+
                     if (_receiveSettings.IsOrdered)
                     {
                         await algorithm.Run(ReceiveMessages, (m, t) => executor.Push(() => HandleMessage(m), t), GroupMessages, OrderMessages, Stopping)
@@ -75,7 +86,13 @@ namespace MassTransit.AmazonSqsTransport.Middleware
                     }
                     else
                     {
-                        await algorithm.Run(ReceiveMessages, (m, t) => executor.Push(() => HandleMessage(m), t), Stopping).ConfigureAwait(false);
+                        foreach(var message in messages)
+                        {
+                            _messagesHandler.Run(message, () => window.Open());
+                        }
+
+                        //await algorithm.Run(ReceiveMessages, (m, t) => executor.Push(() => HandleMessage(m), t), Stopping).ConfigureAwait(false);
+                        //await algorithm.Run(ReceiveMessages, (m, t) => HandleMessage(m), Stopping).ConfigureAwait(false);
                     }
                 }
             }
@@ -155,8 +172,13 @@ namespace MassTransit.AmazonSqsTransport.Middleware
         {
             try
             {
-                return await _client.ReceiveMessages(_receiveSettings.EntityName, messageLimit, _receiveSettings.WaitTimeSeconds, cancellationToken)
+                var messages = await _client.ReceiveMessages(_receiveSettings.EntityName, messageLimit, _receiveSettings.WaitTimeSeconds, cancellationToken)
                     .ConfigureAwait(false);
+
+                if(messages.Count > 0)
+                    LogContext.Warning?.Log("Message received from queue");
+
+                return messages;
             }
             catch (OperationCanceledException)
             {
