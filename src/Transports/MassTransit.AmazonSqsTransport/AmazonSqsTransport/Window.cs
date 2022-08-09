@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 
 namespace MassTransit.AmazonSqsTransport
 {
@@ -6,29 +7,35 @@ namespace MassTransit.AmazonSqsTransport
     {
         private volatile bool _isOpened = true;
 
-        private object _isOpenedLock = new object();
+        private object locker = new object();
 
-        private TaskCompletionSource<bool> _nextWindowEvent = new TaskCompletionSource<bool>();     
-        private Task _waitForOpen => _nextWindowEvent.Task;
+        private TaskCompletionSource<bool> _thisWindowEvent = new TaskCompletionSource<bool>();
+        private TaskCompletionSource<bool> _nextWindowEvent = new TaskCompletionSource<bool>();
+        
+        private Task _waitForOpen => _thisWindowEvent.Task;
 
         private readonly int _maxRequests;
         private volatile int _activeRequests = 0;
+
+        private readonly CancellationToken _cancellationToken;
 
         public int RequestsToReceive
         {
             get
             {
-                lock (_isOpenedLock)
+                lock (locker)
                 {
                     return _maxRequests - _activeRequests;
                 }
             }
         }
 
-        public Window(int maxRequests)
+        public Window(int maxRequests, CancellationToken cancellationToken)
         {
             _maxRequests = maxRequests;
-            _nextWindowEvent.SetResult(true);
+            _thisWindowEvent.SetResult(true);
+            _cancellationToken = cancellationToken;
+            _cancellationToken.Register(() => Dispose());
         }
 
         /// <summary>
@@ -36,7 +43,7 @@ namespace MassTransit.AmazonSqsTransport
         /// </summary>
         public void Open()
         {
-            lock (_isOpenedLock)
+            lock (locker)
             {
                 _activeRequests -= 1;
 
@@ -46,7 +53,7 @@ namespace MassTransit.AmazonSqsTransport
                 if(_activeRequests < _maxRequests)
                 {
                     _isOpened = true;
-                    _nextWindowEvent.SetResult(true);
+                    _thisWindowEvent.SetResult(true);
                 }
             }
         }
@@ -66,7 +73,7 @@ namespace MassTransit.AmazonSqsTransport
         /// <param name="requestsReceived"></param>
         public void Close(int requestsReceived)
         {
-            lock (_isOpenedLock)
+            lock (locker)
             {
                 _activeRequests += requestsReceived;
 
@@ -77,8 +84,14 @@ namespace MassTransit.AmazonSqsTransport
                 {
                     _isOpened = false;
                     _nextWindowEvent = new TaskCompletionSource<bool>();
+                    _thisWindowEvent = _nextWindowEvent;
                 }
             }
+        }
+
+        public void Dispose()
+        {
+            _thisWindowEvent.TrySetCanceled(_cancellationToken);
         }
     }
 }

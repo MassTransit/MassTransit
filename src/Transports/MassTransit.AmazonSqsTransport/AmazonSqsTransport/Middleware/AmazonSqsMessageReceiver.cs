@@ -59,14 +59,7 @@ namespace MassTransit.AmazonSqsTransport.Middleware
 
             await GetQueueAttributes().ConfigureAwait(false);
 
-            using var algorithm = new RequestRateAlgorithm(new RequestRateAlgorithmOptions()
-            {
-                PrefetchCount = _receiveSettings.PrefetchCount,
-                RequestResultLimit = 10
-            });
-
-            var window = new Window(_receiveSettings.PrefetchCount);
-
+            var window = new Window(_receiveSettings.PrefetchCount, Stopping);
             SetReady();
 
             try
@@ -75,25 +68,11 @@ namespace MassTransit.AmazonSqsTransport.Middleware
                 {
                     await window.WaitForOpen();
 
-                    var messages = await ReceiveMessages(window.RequestsToReceive, new CancellationToken()).ConfigureAwait(false);
+                    var messages = await ReceiveMessages(window.RequestsToReceive, Stopping).ConfigureAwait(false);
 
                     window.Close(messages.Count());
 
-                    if (_receiveSettings.IsOrdered)
-                    {
-                        await algorithm.Run(ReceiveMessages, (m, t) => executor.Push(() => HandleMessage(m), t), GroupMessages, OrderMessages, Stopping)
-                            .ConfigureAwait(false);
-                    }
-                    else
-                    {
-                        foreach(var message in messages)
-                        {
-                            _messagesHandler.Run(message, () => window.Open());
-                        }
-
-                        //await algorithm.Run(ReceiveMessages, (m, t) => executor.Push(() => HandleMessage(m), t), Stopping).ConfigureAwait(false);
-                        //await algorithm.Run(ReceiveMessages, (m, t) => HandleMessage(m), Stopping).ConfigureAwait(false);
-                    }
+                    _messagesHandler.Run(messages, () => window.Open());
                 }
             }
             catch (OperationCanceledException exception) when (exception.CancellationToken == Stopping)
@@ -135,39 +114,6 @@ namespace MassTransit.AmazonSqsTransport.Middleware
             }
         }
 
-        async Task HandleMessage(Message message)
-        {
-            if (IsStopping)
-                return;
-
-            var redelivered = message.Attributes.TryGetInt("ApproximateReceiveCount", out var receiveCount) && receiveCount > 1;
-
-            var context = new AmazonSqsReceiveContext(message, redelivered, _context, _client, _receiveSettings, _client.ConnectionContext);
-            try
-            {
-                await _dispatcher.Dispatch(context, context).ConfigureAwait(false);
-            }
-            catch (Exception exception)
-            {
-                context.LogTransportFaulted(exception);
-            }
-            finally
-            {
-                context.Dispose();
-            }
-        }
-
-        static IEnumerable<IGrouping<string, Message>> GroupMessages(IEnumerable<Message> messages)
-        {
-            return messages.GroupBy(x => x.Attributes.TryGetValue(MessageSystemAttributeName.MessageGroupId, out var groupId) ? groupId : "");
-        }
-
-        static IEnumerable<Message> OrderMessages(IEnumerable<Message> messages)
-        {
-            return messages.OrderBy(x => x.Attributes.TryGetValue("SequenceNumber", out var sequenceNumber) ? sequenceNumber : "",
-                SequenceNumberComparer.Instance);
-        }
-
         async Task<IEnumerable<Message>> ReceiveMessages(int messageLimit, CancellationToken cancellationToken)
         {
             try
@@ -206,27 +152,6 @@ namespace MassTransit.AmazonSqsTransport.Middleware
                 {
                     LogContext.Warning?.Log("Stop canceled waiting for message consumers to complete: {InputAddress}", _context.InputAddress);
                 }
-            }
-        }
-
-
-        class SequenceNumberComparer :
-            IComparer<string>
-        {
-            public static readonly SequenceNumberComparer Instance = new SequenceNumberComparer();
-
-            public int Compare(string x, string y)
-            {
-                if (string.IsNullOrWhiteSpace(x))
-                    throw new ArgumentNullException(nameof(x));
-
-                if (string.IsNullOrWhiteSpace(y))
-                    throw new ArgumentNullException(nameof(y));
-
-                if (x.Length != y.Length)
-                    return x.Length > y.Length ? 1 : -1;
-
-                return string.Compare(x, y, StringComparison.Ordinal);
             }
         }
     }
