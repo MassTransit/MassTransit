@@ -51,7 +51,7 @@
                 MessageTimeToLiveExpiredException _ => false,
                 MessageLockExpiredException _ => false,
                 ServiceBusException { Reason: ServiceBusFailureReason.MessageLockLost } => false,
-                ServiceBusException { Reason: ServiceBusFailureReason.SessionLockLost } => true,
+                ServiceBusException { Reason: ServiceBusFailureReason.SessionLockLost } => false,
                 ServiceBusException { Reason: ServiceBusFailureReason.ServiceCommunicationProblem } => true,
                 ServiceBusException { IsTransient: true } => false,
                 _ => true
