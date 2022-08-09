@@ -29,7 +29,7 @@ namespace MassTransit.Tests
                 return Enumerable.Range(0, resultLimit).Select(x => new Message());
             }
 
-            async Task ProcessMessage(Message result, CancellationToken cancellationToken)
+            async Task ProcessMessage(Message result, DateTime receiveTime, CancellationToken cancellationToken)
             {
                 await Task.Delay(5, cancellationToken);
             }
@@ -76,7 +76,7 @@ namespace MassTransit.Tests
                 });
             }
 
-            async Task ProcessMessage(Message result, CancellationToken cancellationToken)
+            async Task ProcessMessage(Message result, DateTime receiveTime, CancellationToken cancellationToken)
             {
                 await Task.Delay(5, cancellationToken);
             }

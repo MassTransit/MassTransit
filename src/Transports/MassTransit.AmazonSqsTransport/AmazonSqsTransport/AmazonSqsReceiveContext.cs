@@ -22,16 +22,18 @@
         readonly SqsReceiveEndpointContext _context;
         readonly Message _message;
         readonly ReceiveSettings _settings;
+        readonly DateTime _receiveTime;
         bool _locked;
 
         public AmazonSqsReceiveContext(Message message, bool redelivered, SqsReceiveEndpointContext context, ClientContext clientContext,
-            ReceiveSettings settings, ConnectionContext connectionContext)
+            ReceiveSettings settings, ConnectionContext connectionContext, DateTime receiveTime)
             : base(redelivered, context, settings, clientContext, connectionContext)
         {
             _context = context;
             _clientContext = clientContext;
             _message = message;
             _settings = settings;
+            _receiveTime = receiveTime;
 
             Body = new StringMessageBody(message?.Body);
 
@@ -80,7 +82,14 @@
         public Task ValidateLockStatus()
         {
             if (_locked)
+            {
+                if (_receiveTime + TimeSpan.FromSeconds(_settings.VisibilityTimeout) < DateTime.UtcNow)
+                {
+                    throw new AmazonSqsMessageVisibilityTimeoutExpiredException(_context.InputAddress, $"The message visibility timeout expired: {_message.MessageId}");
+                }
+
                 return Task.CompletedTask;
+            }
 
             throw new TransportException(_context.InputAddress, $"Message Lock Lost: {TransportMessage.ReceiptHandle}");
         }

@@ -70,12 +70,12 @@ namespace MassTransit.AmazonSqsTransport.Middleware
                 {
                     if (_receiveSettings.IsOrdered)
                     {
-                        await algorithm.Run(ReceiveMessages, (m, t) => executor.Push(() => HandleMessage(m), t), GroupMessages, OrderMessages, Stopping)
+                        await algorithm.Run(ReceiveMessages, (m, rt, t) => executor.Push(() => HandleMessage(m, rt), t), GroupMessages, OrderMessages, Stopping)
                             .ConfigureAwait(false);
                     }
                     else
                     {
-                        await algorithm.Run(ReceiveMessages, (m, t) => executor.Push(() => HandleMessage(m), t), Stopping).ConfigureAwait(false);
+                        await algorithm.Run(ReceiveMessages, (m, rt, t) => executor.Push(() => HandleMessage(m, rt), t), Stopping).ConfigureAwait(false);
                     }
                 }
             }
@@ -118,14 +118,14 @@ namespace MassTransit.AmazonSqsTransport.Middleware
             }
         }
 
-        async Task HandleMessage(Message message)
+        async Task HandleMessage(Message message, DateTime receiveTime)
         {
             if (IsStopping)
                 return;
 
             var redelivered = message.Attributes.TryGetInt("ApproximateReceiveCount", out var receiveCount) && receiveCount > 1;
 
-            var context = new AmazonSqsReceiveContext(message, redelivered, _context, _client, _receiveSettings, _client.ConnectionContext);
+            var context = new AmazonSqsReceiveContext(message, redelivered, _context, _client, _receiveSettings, _client.ConnectionContext, receiveTime);
             try
             {
                 await _dispatcher.Dispatch(context, context).ConfigureAwait(false);

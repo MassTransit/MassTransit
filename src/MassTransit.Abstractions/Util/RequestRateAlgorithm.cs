@@ -22,7 +22,7 @@ namespace MassTransit.Util
         public delegate Task<int> RequestCallback(int resultLimit, CancellationToken cancellationToken);
 
 
-        public delegate Task ResultCallback<in T>(T result, CancellationToken cancellationToken);
+        public delegate Task ResultCallback<in T>(T result, DateTime receiveTime, CancellationToken cancellationToken);
 
 
         readonly RequestRateAlgorithmOptions _options;
@@ -158,8 +158,10 @@ namespace MassTransit.Util
 
             try
             {
+                var receiveTime = DateTime.UtcNow;
+
                 foreach (var result in results)
-                    tasks.Add(resultCallback(result, cancellationToken));
+                    tasks.Add(resultCallback(result, receiveTime, cancellationToken));
             }
             catch (Exception)
             {
@@ -208,8 +210,10 @@ namespace MassTransit.Util
 
             try
             {
+                var receiveTime = DateTime.UtcNow;
+
                 foreach (IGrouping<TKey, T> result in resultSets)
-                    resultTasks.Add(RunResultSet(result, resultCallback, orderCallback, cancellationToken));
+                    resultTasks.Add(RunResultSet(result, resultCallback, orderCallback, receiveTime, cancellationToken));
             }
             catch (Exception)
             {
@@ -232,14 +236,14 @@ namespace MassTransit.Util
         }
 
         async Task RunResultSet<TKey, T>(IGrouping<TKey, T> results, ResultCallback<T> resultCallback, OrderCallback<T> orderCallback,
-            CancellationToken cancellationToken = default)
+            DateTime receiveTime, CancellationToken cancellationToken = default)
         {
             var tasks = new List<Task>(ResultLimit);
 
             try
             {
                 foreach (var result in orderCallback(results))
-                    tasks.Add(resultCallback(result, cancellationToken));
+                    tasks.Add(resultCallback(result, receiveTime, cancellationToken));
             }
             catch (Exception)
             {
