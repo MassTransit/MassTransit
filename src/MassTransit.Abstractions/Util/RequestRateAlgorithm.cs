@@ -22,7 +22,7 @@ namespace MassTransit.Util
         public delegate Task<int> RequestCallback(int resultLimit, CancellationToken cancellationToken);
 
 
-        public delegate Task ResultCallback<in T>(T result, DateTime receiveTime, CancellationToken cancellationToken);
+        public delegate Task ResultCallback<in T>(T result, DateTime resultsTimestamp, CancellationToken cancellationToken);
 
 
         readonly RequestRateAlgorithmOptions _options;
@@ -153,15 +153,14 @@ namespace MassTransit.Util
             using var activeRequest = await BeginRequest(cancellationToken).ConfigureAwait(false);
 
             IEnumerable<T> results = await requestCallback(ResultLimit, cancellationToken).ConfigureAwait(false);
+            var resultsTimeStamp = DateTime.UtcNow;
 
             var tasks = new List<Task>(ResultLimit);
 
             try
             {
-                var receiveTime = DateTime.UtcNow;
-
                 foreach (var result in results)
-                    tasks.Add(resultCallback(result, receiveTime, cancellationToken));
+                    tasks.Add(resultCallback(result, resultsTimeStamp, cancellationToken));
             }
             catch (Exception)
             {
@@ -205,15 +204,14 @@ namespace MassTransit.Util
             IReadOnlyList<T>[] results = await Task.WhenAll(tasks).ConfigureAwait(false);
 
             List<IGrouping<TKey, T>> resultSets = groupCallback(results.SelectMany(x => x)).ToList();
+            var resultsTimeStamp = DateTime.UtcNow;
 
             var resultTasks = new List<Task>(ResultLimit);
 
             try
             {
-                var receiveTime = DateTime.UtcNow;
-
                 foreach (IGrouping<TKey, T> result in resultSets)
-                    resultTasks.Add(RunResultSet(result, resultCallback, orderCallback, receiveTime, cancellationToken));
+                    resultTasks.Add(RunResultSet(result, resultCallback, orderCallback, resultsTimeStamp, cancellationToken));
             }
             catch (Exception)
             {
@@ -236,14 +234,14 @@ namespace MassTransit.Util
         }
 
         async Task RunResultSet<TKey, T>(IGrouping<TKey, T> results, ResultCallback<T> resultCallback, OrderCallback<T> orderCallback,
-            DateTime receiveTime, CancellationToken cancellationToken = default)
+            DateTime resultsTimestamp, CancellationToken cancellationToken = default)
         {
             var tasks = new List<Task>(ResultLimit);
 
             try
             {
                 foreach (var result in orderCallback(results))
-                    tasks.Add(resultCallback(result, receiveTime, cancellationToken));
+                    tasks.Add(resultCallback(result, resultsTimestamp, cancellationToken));
             }
             catch (Exception)
             {

@@ -125,7 +125,7 @@ namespace MassTransit.AmazonSqsTransport.Middleware
 
             var redelivered = message.Attributes.TryGetInt("ApproximateReceiveCount", out var receiveCount) && receiveCount > 1;
 
-            var context = new AmazonSqsReceiveContext(message, redelivered, _context, _client, _receiveSettings, _client.ConnectionContext, receiveTime);
+            var context = new AmazonSqsReceiveContext(message, redelivered, receiveTime, _context, _client, _receiveSettings, _client.ConnectionContext);
             try
             {
                 await _dispatcher.Dispatch(context, context).ConfigureAwait(false);

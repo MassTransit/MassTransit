@@ -21,26 +21,27 @@
         readonly ClientContext _clientContext;
         readonly SqsReceiveEndpointContext _context;
         readonly Message _message;
-        readonly ReceiveSettings _settings;
         readonly DateTime _receiveTime;
+        readonly ReceiveSettings _settings;
         bool _locked;
+        bool _initialVisibilityTimeoutChecked;
 
-        public AmazonSqsReceiveContext(Message message, bool redelivered, SqsReceiveEndpointContext context, ClientContext clientContext,
-            ReceiveSettings settings, ConnectionContext connectionContext, DateTime receiveTime)
+
+        public AmazonSqsReceiveContext(Message message, bool redelivered, DateTime receiveTime,
+            SqsReceiveEndpointContext context, ClientContext clientContext,
+            ReceiveSettings settings, ConnectionContext connectionContext)
             : base(redelivered, context, settings, clientContext, connectionContext)
         {
             _context = context;
             _clientContext = clientContext;
             _message = message;
-            _settings = settings;
             _receiveTime = receiveTime;
+            _settings = settings;
 
             Body = new StringMessageBody(message?.Body);
 
             _activeTokenSource = new CancellationTokenSource();
             _locked = true;
-
-            Task.Factory.StartNew(RenewMessageVisibility, _activeTokenSource.Token, TaskCreationOptions.None, TaskScheduler.Default);
         }
 
         protected override IHeaderProvider HeaderProvider => new AmazonSqsHeaderProvider(TransportMessage);
@@ -83,9 +84,19 @@
         {
             if (_locked)
             {
-                if (_receiveTime + TimeSpan.FromSeconds(_settings.VisibilityTimeout) < DateTime.UtcNow)
+                if (!_initialVisibilityTimeoutChecked)
                 {
-                    throw new AmazonSqsMessageVisibilityTimeoutExpiredException(_context.InputAddress, $"The message visibility timeout expired: {_message.MessageId}");
+                    _initialVisibilityTimeoutChecked = true;
+
+                    if (_receiveTime + TimeSpan.FromSeconds(_settings.VisibilityTimeout) <= DateTime.UtcNow)
+                    {
+                        _locked = false;
+
+                        throw new AmazonSqsMessageVisibilityTimeoutExpiredException(_context.InputAddress,
+                            $"The message visibility timeout expired: {_message.MessageId}");
+                    }
+
+                    Task.Factory.StartNew(RenewMessageVisibility, _activeTokenSource.Token, TaskCreationOptions.None, TaskScheduler.Default);
                 }
 
                 return Task.CompletedTask;
@@ -112,6 +123,16 @@
 
             var delay = CalculateDelay(visibilityTimeout);
 
+            var elapsedTimeSinceReceive = DateTime.UtcNow - _receiveTime;
+            if (elapsedTimeSinceReceive >= delay)
+            {
+                delay = TimeSpan.Zero;
+            }
+            else
+            {
+                delay = CalculateDelay((int)delay.TotalSeconds);
+            }
+
             visibilityTimeout = Math.Min(60, visibilityTimeout);
 
             while (_activeTokenSource.Token.IsCancellationRequested == false)
@@ -128,7 +149,7 @@
                         .ConfigureAwait(false);
 
                     // Max 12 hours, https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html
-                    if (ElapsedTime + TimeSpan.FromSeconds(visibilityTimeout) >= MaxVisibilityTimeout)
+                    if ((DateTime.UtcNow - _receiveTime) + TimeSpan.FromSeconds(visibilityTimeout) >= MaxVisibilityTimeout)
                         break;
 
                     delay = CalculateDelay(visibilityTimeout);
