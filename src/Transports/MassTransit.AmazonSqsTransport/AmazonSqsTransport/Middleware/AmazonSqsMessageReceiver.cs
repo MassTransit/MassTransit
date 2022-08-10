@@ -25,7 +25,7 @@ namespace MassTransit.AmazonSqsTransport.Middleware
         readonly TaskCompletionSource<bool> _deliveryComplete;
         readonly IReceivePipeDispatcher _dispatcher;
         readonly ReceiveSettings _receiveSettings;
-        readonly MessagesHandler _messagesHandler;
+        readonly Window _window;
 
         /// <summary>
         /// The basic consumer receives messages pushed from the broker.
@@ -44,7 +44,7 @@ namespace MassTransit.AmazonSqsTransport.Middleware
             _dispatcher = context.CreateReceivePipeDispatcher();
             _dispatcher.ZeroActivity += HandleDeliveryComplete;
 
-            _messagesHandler = new MessagesHandler(client, context, _dispatcher);
+            _window = new Window(_receiveSettings.PrefetchCount, Stopping);
 
             var task = Task.Run(Consume);
             SetCompleted(task);
@@ -59,20 +59,26 @@ namespace MassTransit.AmazonSqsTransport.Middleware
 
             await GetQueueAttributes().ConfigureAwait(false);
 
-            var window = new Window(_receiveSettings.PrefetchCount, Stopping);
             SetReady();
 
             try
             {
                 while (!IsStopping)
                 {
-                    await window.WaitForOpen();
+                    await _window.WaitForOpen();
 
-                    var messages = await ReceiveMessages(window.RequestsToReceive, Stopping).ConfigureAwait(false);
+                    var messages = await ReceiveMessages(_window.RequestsToReceive, Stopping).ConfigureAwait(false);
 
-                    window.Close(messages.Count());
+                    _window.Close(messages.Count());
 
-                    _messagesHandler.Run(messages, () => window.Open());
+                    if (_receiveSettings.IsOrdered)
+                    {
+                        await HandleOrderedMessages(executor, messages).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        await HandleMessages(executor, messages).ConfigureAwait(false);
+                    }
                 }
             }
             catch (OperationCanceledException exception) when (exception.CancellationToken == Stopping)
@@ -87,6 +93,25 @@ namespace MassTransit.AmazonSqsTransport.Middleware
             {
                 await executor.DisposeAsync().ConfigureAwait(false);
             }
+        }
+
+        private async Task HandleOrderedMessages(ChannelExecutor executor, IEnumerable<Message> messages)
+        {
+            IEnumerable<IGrouping<string, Message>> messageGroups = messages
+                .GroupBy(x => x.Attributes.TryGetValue(MessageSystemAttributeName.MessageGroupId, out var groupId)
+                    ? groupId
+                    : "")
+                .ToList();
+
+            foreach (var message in messages.OrderBy(x => x.Attributes.TryGetValue("SequenceNumber", out var sequenceNumber) ? sequenceNumber : "",
+                         SequenceNumberComparer.Instance))
+                await executor.Run(() => HandleMessage(message, () => _window.Open()), Stopping).ConfigureAwait(false);
+        }
+
+        private async Task HandleMessages(ChannelExecutor executor, IEnumerable<Message> messages)
+        {
+            foreach (var message in messages)
+                await executor.Push(() => HandleMessage(message, () => _window.Open()), Stopping).ConfigureAwait(false);
         }
 
         protected override async Task StopAgent(StopContext context)
@@ -114,17 +139,52 @@ namespace MassTransit.AmazonSqsTransport.Middleware
             }
         }
 
+        async Task HandleMessage(Message message, Action onCompletedCallback)
+        {
+            if (IsStopping)
+                return;
+
+            try
+            {
+                var redelivered = message.Attributes.TryGetInt("ApproximateReceiveCount", out var receiveCount) && receiveCount > 1;
+
+                var context = new AmazonSqsReceiveContext(message, redelivered, _context, _client, _receiveSettings, _client.ConnectionContext);
+                try
+                {
+                    await _dispatcher.Dispatch(context, context).ConfigureAwait(false);
+                }
+                catch (Exception exception)
+                {
+                    context.LogTransportFaulted(exception);
+                }
+                finally
+                {
+                    context.Dispose();
+                }
+            }
+            finally
+            {
+                onCompletedCallback();
+            }
+        }
+
+        static IEnumerable<IGrouping<string, Message>> GroupMessages(IEnumerable<Message> messages)
+        {
+            return messages.GroupBy(x => x.Attributes.TryGetValue(MessageSystemAttributeName.MessageGroupId, out var groupId) ? groupId : "");
+        }
+
+        static IEnumerable<Message> OrderMessages(IEnumerable<Message> messages)
+        {
+            return messages.OrderBy(x => x.Attributes.TryGetValue("SequenceNumber", out var sequenceNumber) ? sequenceNumber : "",
+                SequenceNumberComparer.Instance);
+        }
+
         async Task<IEnumerable<Message>> ReceiveMessages(int messageLimit, CancellationToken cancellationToken)
         {
             try
             {
-                var messages = await _client.ReceiveMessages(_receiveSettings.EntityName, messageLimit, _receiveSettings.WaitTimeSeconds, cancellationToken)
+                return await _client.ReceiveMessages(_receiveSettings.EntityName, messageLimit, _receiveSettings.WaitTimeSeconds, cancellationToken)
                     .ConfigureAwait(false);
-
-                if(messages.Count > 0)
-                    LogContext.Warning?.Log("Message received from queue");
-
-                return messages;
             }
             catch (OperationCanceledException)
             {
@@ -152,6 +212,27 @@ namespace MassTransit.AmazonSqsTransport.Middleware
                 {
                     LogContext.Warning?.Log("Stop canceled waiting for message consumers to complete: {InputAddress}", _context.InputAddress);
                 }
+            }
+        }
+
+
+        class SequenceNumberComparer :
+            IComparer<string>
+        {
+            public static readonly SequenceNumberComparer Instance = new SequenceNumberComparer();
+
+            public int Compare(string x, string y)
+            {
+                if (string.IsNullOrWhiteSpace(x))
+                    throw new ArgumentNullException(nameof(x));
+
+                if (string.IsNullOrWhiteSpace(y))
+                    throw new ArgumentNullException(nameof(y));
+
+                if (x.Length != y.Length)
+                    return x.Length > y.Length ? 1 : -1;
+
+                return string.Compare(x, y, StringComparison.Ordinal);
             }
         }
     }
