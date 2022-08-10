@@ -60,8 +60,9 @@
                 if (typeInfo.ClosesType(typeof(IDictionary<,>), out Type[] elementTypes)
                     || typeInfo.ClosesType(typeof(IReadOnlyDictionary<,>), out elementTypes)
                     || typeInfo.ClosesType(typeof(Dictionary<,>), out elementTypes)
-                    || typeInfo.ClosesType(typeof(IEnumerable<>), out Type[] enumerableType)
-                    && enumerableType[0].ClosesType(typeof(KeyValuePair<,>), out elementTypes))
+                    || (typeInfo.ClosesType(typeof(IEnumerable<>), out Type[] enumerableType)
+                        && enumerableType[0].ClosesType(typeof(KeyValuePair<,>), out elementTypes)
+                        && elementTypes[1] == typeof(object)))
                 {
                     var keyType = elementTypes[0];
                     var valueType = elementTypes[1];
@@ -115,7 +116,8 @@
                         || typeInfo.ClosesType(typeof(IReadOnlyDictionary<,>), out elementTypes)
                         || typeInfo.ClosesType(typeof(Dictionary<,>), out elementTypes)
                         || (typeInfo.ClosesType(typeof(IEnumerable<>), out Type[] enumerableTypes)
-                            && enumerableTypes[0].ClosesType(typeof(KeyValuePair<,>), out elementTypes)))
+                            && enumerableTypes[0].ClosesType(typeof(KeyValuePair<,>), out elementTypes)
+                            && elementTypes[1] == typeof(object)))
                     {
                         if (elementTypes[0] == typeof(string))
                         {

@@ -24,8 +24,8 @@ namespace MassTransit.Tests.Serialization
             {
                 Elements = new List<OuterClass>
                 {
-                    new OuterClass {Inner = new InnerClass {Name = "Chris"}},
-                    new OuterClass {Inner = new InnerClass {Name = "David"}}
+                    new OuterClass { Inner = new InnerClass { Name = "Chris" } },
+                    new OuterClass { Inner = new InnerClass { Name = "David" } }
                 }
             };
 
@@ -35,7 +35,7 @@ namespace MassTransit.Tests.Serialization
         [Test]
         public void A_dictionary_of_no_objects_should_be_properly_serialized()
         {
-            var message = new DictionaryContainerClass {Elements = new Dictionary<string, OuterClass>()};
+            var message = new DictionaryContainerClass { Elements = new Dictionary<string, OuterClass>() };
 
             TestSerialization(message);
         }
@@ -47,8 +47,8 @@ namespace MassTransit.Tests.Serialization
             {
                 Elements = new Dictionary<string, OuterClass>
                 {
-                    {"Chris", new OuterClass {Inner = new InnerClass {Name = "Chris"}}},
-                    {"David", new OuterClass {Inner = new InnerClass {Name = "David"}}}
+                    { "Chris", new OuterClass { Inner = new InnerClass { Name = "Chris" } } },
+                    { "David", new OuterClass { Inner = new InnerClass { Name = "David" } } }
                 }
             };
 
@@ -60,7 +60,7 @@ namespace MassTransit.Tests.Serialization
         {
             var message = new DictionaryContainerClass
             {
-                Elements = new Dictionary<string, OuterClass> {{"David", new OuterClass {Inner = new InnerClass {Name = "David"}}}}
+                Elements = new Dictionary<string, OuterClass> { { "David", new OuterClass { Inner = new InnerClass { Name = "David" } } } }
             };
 
             TestSerialization(message);
@@ -85,7 +85,7 @@ namespace MassTransit.Tests.Serialization
         [Test]
         public void A_nested_object_should_be_properly_serialized()
         {
-            var message = new OuterClass {Inner = new InnerClass {Name = "Chris"}};
+            var message = new OuterClass { Inner = new InnerClass { Name = "Chris" } };
 
             TestSerialization(message);
         }
@@ -93,7 +93,7 @@ namespace MassTransit.Tests.Serialization
         [Test]
         public void A_primitive_array_of_objects_should_be_properly_serialized()
         {
-            var message = new PrimitiveArrayClass {Values = new[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}};
+            var message = new PrimitiveArrayClass { Values = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 } };
 
             TestSerialization(message);
         }
@@ -101,7 +101,7 @@ namespace MassTransit.Tests.Serialization
         [Test]
         public void A_primitive_array_of_objects_with_no_elements_should_be_properly_serialized()
         {
-            var message = new PrimitiveArrayClass {Values = new int[] { }};
+            var message = new PrimitiveArrayClass { Values = new int[] { } };
 
             TestSerialization(message);
         }
@@ -109,7 +109,7 @@ namespace MassTransit.Tests.Serialization
         [Test]
         public void A_primitive_array_of_objects_with_one_element_should_be_properly_serialized()
         {
-            var message = new PrimitiveArrayClass {Values = new[] {1}};
+            var message = new PrimitiveArrayClass { Values = new[] { 1 } };
 
             TestSerialization(message);
         }
@@ -151,7 +151,7 @@ namespace MassTransit.Tests.Serialization
         [Test]
         public void An_array_of_objects_should_be_properly_serialized()
         {
-            var message = new GenericArrayClass<InnerClass> {Values = new[] {new InnerClass {Name = "Chris"}, new InnerClass {Name = "David"}}};
+            var message = new GenericArrayClass<InnerClass> { Values = new[] { new InnerClass { Name = "Chris" }, new InnerClass { Name = "David" } } };
 
             TestSerialization(message);
         }
@@ -159,7 +159,7 @@ namespace MassTransit.Tests.Serialization
         [Test]
         public void An_empty_array_of_objects_should_be_properly_serialized()
         {
-            var message = new PrimitiveArrayClass {Values = new int[] { }};
+            var message = new PrimitiveArrayClass { Values = new int[] { } };
 
             TestSerialization(message);
         }
@@ -175,7 +175,25 @@ namespace MassTransit.Tests.Serialization
         [Test]
         public void An_enumeration_should_be_serializable()
         {
-            var message = new EnumClass {Setting = SomeEnum.Second};
+            var message = new EnumClass { Setting = SomeEnum.Second };
+
+            TestSerialization(message);
+        }
+
+        [Test]
+        public void A_key_value_pair_list_should_be_serializable()
+        {
+            var filters = new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>("Key1", "Value1"),
+                new KeyValuePair<string, string>("Key2", "Value2")
+            };
+
+            var message = new ListMessage()
+            {
+                Text = $"The time is {DateTimeOffset.Now}",
+                Filters = filters
+            };
 
             TestSerialization(message);
         }
@@ -731,7 +749,7 @@ namespace MassTransit.Tests.Serialization
 
         public static IValidationResult Error(string key, string error)
         {
-            return new ValidationResult(null, new Dictionary<string, List<string>>(1) {[key] = new List<string>(1) {error}});
+            return new ValidationResult(null, new Dictionary<string, List<string>>(1) { [key] = new List<string>(1) { error } });
         }
     }
 
@@ -794,6 +812,42 @@ namespace MassTransit.Tests.Serialization
         {
             return !Equals(left, right);
         }
+    }
+
+
+    public class ListMessage :
+        IEquatable<ListMessage>
+    {
+        public bool Equals(ListMessage other)
+        {
+            if (ReferenceEquals(null, other))
+                return false;
+            if (ReferenceEquals(this, other))
+                return true;
+            return Text == other.Text && Filters.SequenceEqual(other.Filters);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+                return false;
+            if (ReferenceEquals(this, obj))
+                return true;
+            if (obj.GetType() != GetType())
+                return false;
+            return Equals((ListMessage)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return ((Text != null ? Text.GetHashCode() : 0) * 397) ^ (Filters != null ? Filters.GetHashCode() : 0);
+            }
+        }
+
+        public string Text { get; set; }
+        public List<KeyValuePair<string, string>> Filters { get; set; }
     }
 
 
