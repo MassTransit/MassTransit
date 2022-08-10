@@ -83,6 +83,9 @@
             if (_settings.PrefetchCount <= 0)
                 yield return this.Failure("PrefetchCount", "must be >= 1");
 
+            if (_settings.PrefetchCount > 10)
+                yield return this.Failure("PrefetchCount", "must be <= 10");
+
             var queueName = $"{_settings.EntityName}";
 
             if (!AmazonSqsEntityNameValidator.Validator.IsValidEntityName(_settings.EntityName))
