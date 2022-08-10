@@ -63,6 +63,9 @@
         {
             _activeTokenSource.Cancel();
 
+            if (!_locked)
+                return;
+
             try
             {
                 await _clientContext.ChangeMessageVisibility(_settings.QueueUrl, _message.ReceiptHandle, _settings.RedeliverVisibilityTimeout)
@@ -124,14 +127,8 @@
             var delay = CalculateDelay(visibilityTimeout);
 
             var elapsedTimeSinceReceive = DateTime.UtcNow - _receiveTime;
-            if (elapsedTimeSinceReceive >= delay)
-            {
-                delay = TimeSpan.Zero;
-            }
-            else
-            {
-                delay = CalculateDelay((int)delay.TotalSeconds);
-            }
+
+            delay = elapsedTimeSinceReceive >= delay ? TimeSpan.Zero : CalculateDelay((int)delay.TotalSeconds);
 
             visibilityTimeout = Math.Min(60, visibilityTimeout);
 
