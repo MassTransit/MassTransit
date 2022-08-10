@@ -85,13 +85,39 @@
 
         public Task ValidateLockStatus()
         {
+            LogContext.Debug?.Log(
+                "ValidateLockStatus against message {messageId}. locked={_locked}, " +
+                    "initialVisibilityTimeoutChecked={_initialVisibilityTimeoutChecked}, receiveTime={_receiveTime}, " +
+                    "settingsVisibilityTimeout={settingsVisibilityTimeout}.",
+                _message.MessageId,
+                _locked,
+                _initialVisibilityTimeoutChecked,
+                _receiveTime,
+                _settings.VisibilityTimeout
+                );
+
             if (_locked)
             {
                 if (!_initialVisibilityTimeoutChecked)
                 {
                     _initialVisibilityTimeoutChecked = true;
 
-                    if (_receiveTime + TimeSpan.FromSeconds(_settings.VisibilityTimeout) <= DateTime.UtcNow)
+                    var expectedExpiryTime = _receiveTime + TimeSpan.FromSeconds(_settings.VisibilityTimeout);
+                    var now = DateTime.UtcNow;
+
+                    LogContext.Debug?.Log(
+                        "ValidateLockStatus initial visibility timeout check on message {messageId}. " +
+                            "receiveTime={_receiveTime}, " +
+                            "expectedExpiryTime={expectedExpiryTime}, " +
+                            "now={now}, shouldThrow={shouldThrow}.",
+                        _message.MessageId,
+                        _receiveTime,
+                        expectedExpiryTime,
+                        now,
+                        expectedExpiryTime <= now
+                        );
+
+                    if (expectedExpiryTime <= now)
                     {
                         _locked = false;
 
@@ -131,6 +157,15 @@
             delay = elapsedTimeSinceReceive >= delay ? TimeSpan.Zero : CalculateDelay((int)delay.TotalSeconds);
 
             visibilityTimeout = Math.Min(60, visibilityTimeout);
+
+            LogContext.Debug?.Log(
+                "RenewMessageVisibility initial delay for message {messageId}. " +
+                    "elapsedTimeSinceReceive={elapsedTimeSinceReceive}, " +
+                    "delay={delay}.",
+                _message.MessageId,
+                elapsedTimeSinceReceive.ToFriendlyString(),
+                delay.ToFriendlyString()
+                );
 
             while (_activeTokenSource.Token.IsCancellationRequested == false)
             {
