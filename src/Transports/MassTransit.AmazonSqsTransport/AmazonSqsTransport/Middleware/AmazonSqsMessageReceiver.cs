@@ -6,7 +6,6 @@ namespace MassTransit.AmazonSqsTransport.Middleware
     using System.Threading;
     using System.Threading.Tasks;
     using Amazon.SQS;
-    using Amazon.SQS.Model;
     using Internals;
     using MassTransit.Middleware;
     using Transports;
@@ -70,12 +69,12 @@ namespace MassTransit.AmazonSqsTransport.Middleware
                 {
                     if (_receiveSettings.IsOrdered)
                     {
-                        await algorithm.Run(ReceiveMessages, (m, rt, t) => executor.Push(() => HandleMessage(m, rt), t), GroupMessages, OrderMessages, Stopping)
+                        await algorithm.Run(ReceiveMessages, (c, t) => executor.Push(() => HandleMessage(c), t), GroupMessages, OrderMessages, Stopping)
                             .ConfigureAwait(false);
                     }
                     else
                     {
-                        await algorithm.Run(ReceiveMessages, (m, rt, t) => executor.Push(() => HandleMessage(m, rt), t), Stopping).ConfigureAwait(false);
+                        await algorithm.Run(ReceiveMessages, (c, t) => executor.Push(() => HandleMessage(c), t), Stopping).ConfigureAwait(false);
                     }
                 }
             }
@@ -118,16 +117,13 @@ namespace MassTransit.AmazonSqsTransport.Middleware
             }
         }
 
-        async Task HandleMessage(Message message, DateTime receiveTime)
+        async Task HandleMessage(AmazonSqsReceiveContext context)
         {
-            if (IsStopping)
-                return;
-
-            var redelivered = message.Attributes.TryGetInt("ApproximateReceiveCount", out var receiveCount) && receiveCount > 1;
-
-            var context = new AmazonSqsReceiveContext(message, redelivered, receiveTime, _context, _client, _receiveSettings, _client.ConnectionContext);
             try
             {
+                if (IsStopping)
+                    return;
+
                 await _dispatcher.Dispatch(context, context).ConfigureAwait(false);
             }
             catch (Exception exception)
@@ -140,27 +136,39 @@ namespace MassTransit.AmazonSqsTransport.Middleware
             }
         }
 
-        static IEnumerable<IGrouping<string, Message>> GroupMessages(IEnumerable<Message> messages)
+        static IEnumerable<IGrouping<string, AmazonSqsReceiveContext>> GroupMessages(IEnumerable<AmazonSqsReceiveContext> messages)
         {
-            return messages.GroupBy(x => x.Attributes.TryGetValue(MessageSystemAttributeName.MessageGroupId, out var groupId) ? groupId : "");
+            return messages.GroupBy(x => x.TransportMessage.Attributes.TryGetValue(MessageSystemAttributeName.MessageGroupId, out var groupId) ? groupId : "");
         }
 
-        static IEnumerable<Message> OrderMessages(IEnumerable<Message> messages)
+        static IEnumerable<AmazonSqsReceiveContext> OrderMessages(IEnumerable<AmazonSqsReceiveContext> messages)
         {
-            return messages.OrderBy(x => x.Attributes.TryGetValue("SequenceNumber", out var sequenceNumber) ? sequenceNumber : "",
+            return messages.OrderBy(x => x.TransportMessage.Attributes.TryGetValue("SequenceNumber", out var sequenceNumber) ? sequenceNumber : "",
                 SequenceNumberComparer.Instance);
         }
 
-        async Task<IEnumerable<Message>> ReceiveMessages(int messageLimit, CancellationToken cancellationToken)
+        async Task<IEnumerable<AmazonSqsReceiveContext>> ReceiveMessages(int messageLimit, CancellationToken cancellationToken)
         {
             try
             {
-                return await _client.ReceiveMessages(_receiveSettings.EntityName, messageLimit, _receiveSettings.WaitTimeSeconds, cancellationToken)
+                var messages = await _client.ReceiveMessages(_receiveSettings.EntityName, messageLimit, _receiveSettings.WaitTimeSeconds, cancellationToken)
                     .ConfigureAwait(false);
+
+                var receiveTime = DateTime.UtcNow;
+
+                return messages.Select(message => new AmazonSqsReceiveContext(
+                    message,
+                    redelivered: message.Attributes.TryGetInt("ApproximateReceiveCount", out var receiveCount) && receiveCount > 1,
+                    receiveTime,
+                    _context,
+                    _client,
+                    _receiveSettings,
+                    _client.ConnectionContext)
+                );
             }
             catch (OperationCanceledException)
             {
-                return Array.Empty<Message>();
+                return Array.Empty<AmazonSqsReceiveContext>();
             }
         }
 

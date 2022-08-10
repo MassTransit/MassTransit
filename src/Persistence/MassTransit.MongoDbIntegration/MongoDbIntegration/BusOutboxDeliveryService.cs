@@ -94,7 +94,7 @@ namespace MassTransit.MongoDbIntegration
             }
         }
 
-        async Task DeliverOutbox(Guid outboxId, DateTime receiveTime, CancellationToken cancellationToken)
+        async Task DeliverOutbox(Guid outboxId, CancellationToken cancellationToken)
         {
             var scope = _provider.CreateScope();
 
