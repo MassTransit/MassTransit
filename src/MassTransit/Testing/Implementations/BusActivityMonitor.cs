@@ -3,7 +3,7 @@ namespace MassTransit.Testing.Implementations
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-
+    using Internals;
 
     /// <summary>
     /// Signalable resource which monitors bus activity.
@@ -12,20 +12,48 @@ namespace MassTransit.Testing.Implementations
         IBusActivityMonitor
     {
         readonly SemaphoreSlim _activityEvent = new SemaphoreSlim(0, 1);
+        readonly Func<bool> _busInactivePredicate;
+        readonly object _lockObj = new object();
+        Task _pendingAwaitTask = Task.CompletedTask;
 
-        Task IBusActivityMonitor.AwaitBusInactivity()
+        public BusActivityMonitor()
+        { }
+
+        public BusActivityMonitor(Func<bool> busInactivePredicate)
         {
-            return _activityEvent.WaitAsync();
+            _busInactivePredicate = busInactivePredicate;
         }
 
-        Task<bool> IBusActivityMonitor.AwaitBusInactivity(TimeSpan timeout)
+        public Task AwaitBusInactivity()
         {
-            return _activityEvent.WaitAsync(timeout);
+            return AwaitBusInactivity(CancellationToken.None);
         }
 
-        Task IBusActivityMonitor.AwaitBusInactivity(CancellationToken cancellationToken)
+        public async Task<bool> AwaitBusInactivity(TimeSpan timeout)
         {
-            return _activityEvent.WaitAsync(cancellationToken);
+            try
+            {
+                using (var cts = new CancellationTokenSource(timeout))
+                    await AwaitBusInactivity(cts.Token);
+                return true;
+            }
+            catch (OperationCanceledException)
+            {
+                return false;
+            }
+        }
+
+        public async Task AwaitBusInactivity(CancellationToken cancellationToken)
+        {
+            if (_busInactivePredicate is null)
+            {
+                // Don't wanted to break anything for people who used the class directly, so if _busInactive is null we falling back to the old implementation
+                await _activityEvent.WaitAsync(cancellationToken);
+                return;
+            }
+
+            while (!_busInactivePredicate())
+                await WaitSemaphoreInternal().OrCanceled(cancellationToken);
         }
 
         void ISignalResource.Signal()
@@ -36,6 +64,23 @@ namespace MassTransit.Testing.Implementations
             }
             catch (SemaphoreFullException)
             {
+            }
+        }
+
+        Task WaitSemaphoreInternal()
+        {
+            if (_busInactivePredicate is null)
+                return _activityEvent.WaitAsync();
+
+            lock (_lockObj)
+            {
+                if (!_busInactivePredicate() && _pendingAwaitTask.IsCompleted)
+                {
+                    // We don't want to call the semaphore wait function multiple times, so it's safe to call the monitor from multiple threads
+                    _pendingAwaitTask = _activityEvent.WaitAsync();
+                }
+
+                return _pendingAwaitTask;
             }
         }
     }

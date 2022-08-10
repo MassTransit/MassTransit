@@ -41,9 +41,12 @@ namespace MassTransit.Testing
             BusActivityConsumeIndicator consumeIndicator,
             BusActivitySendIndicator sendIndicator, BusActivityPublishIndicator publishIndicator)
         {
-            var activityMonitor = new BusActivityMonitor();
+            var predicateHelper = new BusInactivePredicateHelper();
+            var activityMonitor = new BusActivityMonitor(predicateHelper.BusInactive);
+
             var conditionExpression = new ConditionExpression(activityMonitor);
             conditionExpression.AddConditionBlock(receiveIndicator, consumeIndicator, sendIndicator, publishIndicator);
+            predicateHelper.BusInactivePredicate = conditionExpression.CheckCondition;
 
             bus.ConnectReceiveObserver(receiveIndicator);
             bus.ConnectConsumeObserver(consumeIndicator);
