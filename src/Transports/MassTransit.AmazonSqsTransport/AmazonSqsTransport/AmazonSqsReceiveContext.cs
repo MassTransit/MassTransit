@@ -85,17 +85,6 @@
 
         public Task ValidateLockStatus()
         {
-            LogContext.Debug?.Log(
-                "ValidateLockStatus against message {messageId}. locked={_locked}, " +
-                    "initialVisibilityTimeoutChecked={_initialVisibilityTimeoutChecked}, receiveTime={_receiveTime}, " +
-                    "settingsVisibilityTimeout={settingsVisibilityTimeout}.",
-                _message.MessageId,
-                _locked,
-                _initialVisibilityTimeoutChecked,
-                _receiveTime,
-                _settings.VisibilityTimeout
-                );
-
             if (_locked)
             {
                 if (!_initialVisibilityTimeoutChecked)
@@ -104,18 +93,6 @@
 
                     var expectedExpiryTime = _receiveTime + TimeSpan.FromSeconds(_settings.VisibilityTimeout);
                     var now = DateTime.UtcNow;
-
-                    LogContext.Debug?.Log(
-                        "ValidateLockStatus initial visibility timeout check on message {messageId}. " +
-                            "receiveTime={_receiveTime}, " +
-                            "expectedExpiryTime={expectedExpiryTime}, " +
-                            "now={now}, shouldThrow={shouldThrow}.",
-                        _message.MessageId,
-                        _receiveTime,
-                        expectedExpiryTime,
-                        now,
-                        expectedExpiryTime <= now
-                        );
 
                     if (expectedExpiryTime <= now)
                     {

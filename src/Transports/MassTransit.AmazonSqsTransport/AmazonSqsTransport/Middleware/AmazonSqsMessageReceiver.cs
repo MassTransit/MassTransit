@@ -212,6 +212,7 @@ namespace MassTransit.AmazonSqsTransport.Middleware
                 if (x.Length != y.Length)
                     return x.Length > y.Length ? 1 : -1;
 
+
                 return string.Compare(x, y, StringComparison.Ordinal);
             }
         }
