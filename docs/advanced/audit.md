@@ -63,6 +63,25 @@ There, the `auditStore` is the audit persistent store. Currently available store
 * [Entity Framework Core](../usage/sagas/efcore.md)
 * [Azure Tables](../usage/audit/azuretable.md)
 
+Example configuration for EntityFrameworkCore, SQLServer and RabbitMQ
+```csharp
+// dotnet core 6 startup
+var builder = WebApplication.CreateBuilder(args);
+
+// [...]
+builder.Services.AddMassTransit(bus =>
+    bus.UsingRabbitMq((ctx, cfg) =>
+    {
+        // configure RabbitMQ
+        
+        // initialize masstransit auditor
+        var dbContextOptionsBuilder = new DbContextOptionsBuilder<AuditDbContext>()
+            .UseSqlServer(builder.Configuration["ConnectionString"]);
+
+        cfg.UseEntityFrameworkCoreAuditStore(dbContextOptionsBuilder, "AuditTableName");
+    });
+```
+
 Please remember that observers need to be configured before the bus starts.
 
 ## Filters
