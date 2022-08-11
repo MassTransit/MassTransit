@@ -25,7 +25,7 @@ namespace MassTransit.AmazonSqsTransport.Middleware
         readonly TaskCompletionSource<bool> _deliveryComplete;
         readonly IReceivePipeDispatcher _dispatcher;
         readonly ReceiveSettings _receiveSettings;
-        readonly Window _window;
+        readonly SemaphoreSlim _semaphoreSlim;
 
         /// <summary>
         /// The basic consumer receives messages pushed from the broker.
@@ -44,7 +44,7 @@ namespace MassTransit.AmazonSqsTransport.Middleware
             _dispatcher = context.CreateReceivePipeDispatcher();
             _dispatcher.ZeroActivity += HandleDeliveryComplete;
 
-            _window = new Window(_receiveSettings.PrefetchCount);
+            _semaphoreSlim = new SemaphoreSlim(_receiveSettings.PrefetchCount, _receiveSettings.PrefetchCount);
 
             var task = Task.Run(Consume);
             SetCompleted(task);
@@ -65,10 +65,10 @@ namespace MassTransit.AmazonSqsTransport.Middleware
             {
                 while (!IsStopping)
                 {
-                    await _window.Wait();
-                    _window.Open();
+                    await _semaphoreSlim.WaitAsync();
+                    _semaphoreSlim.Release(1);
 
-                    var messages = await ReceiveMessages(_window.AvailableThreads, Stopping).ConfigureAwait(false);
+                    var messages = await ReceiveMessages(_semaphoreSlim.CurrentCount, Stopping).ConfigureAwait(false);
 
                     if (_receiveSettings.IsOrdered)
                     {
@@ -105,7 +105,7 @@ namespace MassTransit.AmazonSqsTransport.Middleware
             foreach (var message in messages.OrderBy(x => x.Attributes.TryGetValue("SequenceNumber", out var sequenceNumber) ? sequenceNumber : "",
                          SequenceNumberComparer.Instance))
             {
-                await _window.Wait();
+                await _semaphoreSlim.WaitAsync();
                 await executor.Run(() => HandleMessage(message), Stopping).ConfigureAwait(false);
             }
         }
@@ -114,7 +114,7 @@ namespace MassTransit.AmazonSqsTransport.Middleware
         {
             foreach (var message in messages)
             {
-                await _window.Wait();
+                await _semaphoreSlim.WaitAsync();
                 await executor.Push(() => HandleMessage(message), Stopping).ConfigureAwait(false);
             }
         }
@@ -169,7 +169,7 @@ namespace MassTransit.AmazonSqsTransport.Middleware
             }
             finally
             {
-                _window.Open();
+                _semaphoreSlim.Release(1);
             }
         }
 
