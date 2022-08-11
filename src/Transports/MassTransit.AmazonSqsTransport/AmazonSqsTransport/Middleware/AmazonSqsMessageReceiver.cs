@@ -44,7 +44,7 @@ namespace MassTransit.AmazonSqsTransport.Middleware
             _dispatcher = context.CreateReceivePipeDispatcher();
             _dispatcher.ZeroActivity += HandleDeliveryComplete;
 
-            _window = new Window(_receiveSettings.PrefetchCount, Stopping);
+            _window = new Window(_receiveSettings.PrefetchCount);
 
             var task = Task.Run(Consume);
             SetCompleted(task);
@@ -65,11 +65,10 @@ namespace MassTransit.AmazonSqsTransport.Middleware
             {
                 while (!IsStopping)
                 {
-                    await _window.WaitForOpen();
+                    await _window.Wait();
+                    _window.Open();
 
-                    var messages = await ReceiveMessages(_window.RequestsToReceive, Stopping).ConfigureAwait(false);
-
-                    _window.Close(messages.Count());
+                    var messages = await ReceiveMessages(_window.AvailableThreads, Stopping).ConfigureAwait(false);
 
                     if (_receiveSettings.IsOrdered)
                     {
@@ -105,13 +104,19 @@ namespace MassTransit.AmazonSqsTransport.Middleware
 
             foreach (var message in messages.OrderBy(x => x.Attributes.TryGetValue("SequenceNumber", out var sequenceNumber) ? sequenceNumber : "",
                          SequenceNumberComparer.Instance))
-                await executor.Run(() => HandleMessage(message, () => _window.Open()), Stopping).ConfigureAwait(false);
+            {
+                await _window.Wait();
+                await executor.Run(() => HandleMessage(message), Stopping).ConfigureAwait(false);
+            }
         }
 
         private async Task HandleMessages(ChannelExecutor executor, IEnumerable<Message> messages)
         {
             foreach (var message in messages)
-                await executor.Push(() => HandleMessage(message, () => _window.Open()), Stopping).ConfigureAwait(false);
+            {
+                await _window.Wait();
+                await executor.Push(() => HandleMessage(message), Stopping).ConfigureAwait(false);
+            }
         }
 
         protected override async Task StopAgent(StopContext context)
@@ -139,7 +144,7 @@ namespace MassTransit.AmazonSqsTransport.Middleware
             }
         }
 
-        async Task HandleMessage(Message message, Action onCompletedCallback)
+        async Task HandleMessage(Message message)
         {
             if (IsStopping)
                 return;
@@ -164,19 +169,8 @@ namespace MassTransit.AmazonSqsTransport.Middleware
             }
             finally
             {
-                onCompletedCallback();
+                _window.Open();
             }
-        }
-
-        static IEnumerable<IGrouping<string, Message>> GroupMessages(IEnumerable<Message> messages)
-        {
-            return messages.GroupBy(x => x.Attributes.TryGetValue(MessageSystemAttributeName.MessageGroupId, out var groupId) ? groupId : "");
-        }
-
-        static IEnumerable<Message> OrderMessages(IEnumerable<Message> messages)
-        {
-            return messages.OrderBy(x => x.Attributes.TryGetValue("SequenceNumber", out var sequenceNumber) ? sequenceNumber : "",
-                SequenceNumberComparer.Instance);
         }
 
         async Task<IEnumerable<Message>> ReceiveMessages(int messageLimit, CancellationToken cancellationToken)
