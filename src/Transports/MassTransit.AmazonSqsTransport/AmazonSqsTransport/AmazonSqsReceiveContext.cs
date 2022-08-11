@@ -150,11 +150,13 @@
 
             var visibilityTimeout = _settings.VisibilityTimeout;
 
-            var delay = CalculateDelay(visibilityTimeout);
-
+            var tentativeInitialDelay = CalculateDelay(visibilityTimeout);
             var elapsedTimeSinceReceive = DateTime.UtcNow - _receiveTime;
+            var remainingTimeToLive = visibilityTimeout - elapsedTimeSinceReceive.TotalSeconds;
 
-            delay = elapsedTimeSinceReceive >= delay ? TimeSpan.Zero : CalculateDelay((int)delay.TotalSeconds);
+            var delay = elapsedTimeSinceReceive >= tentativeInitialDelay
+                ? TimeSpan.Zero
+                : CalculateDelay((int)remainingTimeToLive);
 
             visibilityTimeout = Math.Min(60, visibilityTimeout);
 
