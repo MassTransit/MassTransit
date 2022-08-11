@@ -29,7 +29,6 @@ namespace MassTransit
         protected AmazonSqsMessageVisibilityTimeoutExpiredException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
-
         }
     }
 }
