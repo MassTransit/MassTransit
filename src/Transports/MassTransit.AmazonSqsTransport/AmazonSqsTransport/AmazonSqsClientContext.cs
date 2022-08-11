@@ -187,15 +187,6 @@ namespace MassTransit.AmazonSqsTransport
 
             response.EnsureSuccessfulResponse();
 
-            LogContext.Debug?.Log(
-                "Called ReceiveMessageAsync on {queueInfoUrl} with: " +
-                    "MaxNumberOfMessages={messageLimit}, WaitTimeSeconds={waitTime}. Got {messagesCount} messages.",
-                queueInfo.Url,
-                messageLimit,
-                waitTime,
-                response.Messages.Count
-                );
-
             return response.Messages;
         }
 
