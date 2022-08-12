@@ -21,7 +21,6 @@
         readonly ClientContext _clientContext;
         readonly SqsReceiveEndpointContext _context;
         readonly Message _message;
-        readonly DateTime _receiveTime;
         readonly ReceiveSettings _settings;
         bool _locked;
         DateTime _expireTime;
@@ -35,14 +34,13 @@
             _context = context;
             _clientContext = clientContext;
             _message = message;
-            _receiveTime = receiveTime;
             _settings = settings;
 
             Body = new StringMessageBody(message?.Body);
 
             _activeTokenSource = new CancellationTokenSource();
             _locked = true;
-            _expireTime = _receiveTime + TimeSpan.FromSeconds(_settings.VisibilityTimeout);
+            _expireTime = receiveTime + TimeSpan.FromSeconds(_settings.VisibilityTimeout);
 
             Task.Factory.StartNew(RenewMessageVisibility, _activeTokenSource.Token, TaskCreationOptions.None, TaskScheduler.Default);
         }
@@ -138,7 +136,7 @@
                         .ConfigureAwait(false);
 
                     // Max 12 hours, https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html
-                    if ((DateTime.UtcNow - _receiveTime) + TimeSpan.FromSeconds(visibilityTimeout) >= MaxVisibilityTimeout)
+                    if (ElapsedTime + TimeSpan.FromSeconds(visibilityTimeout) >= MaxVisibilityTimeout)
                         break;
 
                     _expireTime = DateTime.UtcNow + TimeSpan.FromSeconds(visibilityTimeout);
