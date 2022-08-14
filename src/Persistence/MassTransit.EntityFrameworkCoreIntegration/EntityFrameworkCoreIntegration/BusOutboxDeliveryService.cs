@@ -199,12 +199,15 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         {
             var messageLimit = _options.MessageDeliveryLimit;
 
+            bool hasLastSequenceNumber = outboxState.LastSequenceNumber.HasValue;
+
             var lastSequenceNumber = outboxState.LastSequenceNumber ?? 0;
 
             List<OutboxMessage> messages = await dbContext.Set<OutboxMessage>()
                 .Where(x => x.OutboxId == outboxState.OutboxId && x.SequenceNumber > lastSequenceNumber)
                 .OrderBy(x => x.SequenceNumber)
                 .Take(messageLimit)
+                .AsNoTracking()
                 .ToListAsync(cancellationToken).ConfigureAwait(false);
 
             var sentSequenceNumber = 0L;
@@ -275,8 +278,16 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
             if (messageIndex == messages.Count && messages.Count < messageLimit)
             {
-                outboxState.Delivered = DateTime.UtcNow;
-                dbContext.Update(outboxState);
+                if (hasLastSequenceNumber == false)
+                {
+                    dbContext.Remove(outboxState);
+                    dbContext.RemoveRange(messages);
+                }
+                else
+                {
+                    outboxState.Delivered = DateTime.UtcNow;
+                    dbContext.Update(outboxState);
+                }
 
                 saveChanges = true;
 
