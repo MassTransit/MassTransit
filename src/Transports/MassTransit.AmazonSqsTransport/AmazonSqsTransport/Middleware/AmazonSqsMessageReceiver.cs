@@ -70,7 +70,7 @@ namespace MassTransit.AmazonSqsTransport.Middleware
                 {
                     if (_receiveSettings.IsOrdered)
                     {
-                        await algorithm.Run(ReceiveMessages, (m, t) => executor.Push(() => HandleMessage(m), t), GroupMessages, OrderMessages, Stopping)
+                        await algorithm.Run(ReceiveMessages, (m, t) => executor.Run(() => HandleMessage(m), t), GroupMessages, OrderMessages, Stopping)
                             .ConfigureAwait(false);
                     }
                     else

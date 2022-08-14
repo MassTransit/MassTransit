@@ -151,7 +151,8 @@ namespace MassTransit.Util
 
                 while (await _channel.Reader.WaitToReadAsync().ConfigureAwait(false))
                 {
-                    if (!_channel.Reader.TryRead(out var future))
+                    // peek the first future in the channel, so the channel remains blocked if PrefetchCount = 1
+                    if (!_channel.Reader.TryPeek(out var future))
                         continue;
 
                     await _limit.WaitAsync().ConfigureAwait(false);
@@ -168,7 +169,16 @@ namespace MassTransit.Util
                             Monitor.PulseAll(_syncLock);
                     }
 
-                    pending.Add(Task.Run(() => RunFuture()));
+                    var task = Task.Run(() => RunFuture());
+
+                    // this will keep the channel blocked if trying to process a single future at a time
+                    if (_concurrencyLimit == 1)
+                        await task.ConfigureAwait(false);
+                    else
+                        pending.Add(task);
+
+                    // finally, read the future off the channel to make room for the next future
+                    await _channel.Reader.ReadAsync().ConfigureAwait(false);
                 }
 
                 await pending.Completed().ConfigureAwait(false);
