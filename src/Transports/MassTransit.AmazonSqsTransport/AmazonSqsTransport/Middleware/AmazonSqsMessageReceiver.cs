@@ -73,6 +73,10 @@ namespace MassTransit.AmazonSqsTransport.Middleware
                         await algorithm.Run(ReceiveMessages, (m, t) => executor.Run(() => HandleMessage(m), t), GroupMessages, OrderMessages, Stopping)
                             .ConfigureAwait(false);
                     }
+                    else if (_receiveSettings.PrefetchCount == 1 && _receiveSettings.ConcurrentMessageLimit == 1)
+                    {
+                        await algorithm.Run(ReceiveMessages, (m, t) => executor.Run(() => HandleMessage(m), t), Stopping).ConfigureAwait(false);
+                    }
                     else
                     {
                         await algorithm.Run(ReceiveMessages, (m, t) => executor.Push(() => HandleMessage(m), t), Stopping).ConfigureAwait(false);

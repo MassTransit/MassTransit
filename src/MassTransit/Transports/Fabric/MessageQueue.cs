@@ -149,6 +149,9 @@ namespace MassTransit.Transports.Fabric
                         if (receiver != null)
                             await receiver.Deliver(context.Message, Stopping).ConfigureAwait(false);
                     }
+                    catch (OperationCanceledException)
+                    {
+                    }
                     catch (Exception exception)
                     {
                         LogContext.Warning?.Log(exception, "Failed to dispatch message");
