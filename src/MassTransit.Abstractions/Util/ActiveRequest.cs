@@ -8,11 +8,13 @@ namespace MassTransit.Util
     public struct ActiveRequest :
         IDisposable
     {
+        public readonly int ResultLimit;
         readonly RequestRateAlgorithm _algorithm;
         bool _completed;
 
-        public ActiveRequest(RequestRateAlgorithm algorithm)
+        public ActiveRequest(RequestRateAlgorithm algorithm, int resultLimit)
         {
+            ResultLimit = resultLimit;
             _algorithm = algorithm;
             _completed = false;
         }
@@ -21,7 +23,7 @@ namespace MassTransit.Util
         {
             _completed = true;
 
-            return _algorithm.EndRequest(count, cancellationToken);
+            return _algorithm.EndRequest(count, ResultLimit, cancellationToken);
         }
 
         public void Dispose()
@@ -29,7 +31,7 @@ namespace MassTransit.Util
             if (_completed)
                 return;
 
-            _algorithm.CancelRequest();
+            _algorithm.CancelRequest(ResultLimit);
         }
     }
 }

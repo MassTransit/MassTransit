@@ -8,7 +8,12 @@ namespace MassTransit.Util
         /// <summary>
         /// The number of messages to keep in the pipeline at any given time
         /// </summary>
-        public int PrefetchCount { get; set; }
+        public int PrefetchCount { get; set; } = 1;
+
+        /// <summary>
+        /// The number of messages to dispatch concurrently
+        /// </summary>
+        public int? ConcurrentResultLimit { get; set; } = null;
 
         /// <summary>
         /// The maximum number of results that can be retrieved per request

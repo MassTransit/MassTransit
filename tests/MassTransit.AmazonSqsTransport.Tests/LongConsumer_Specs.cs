@@ -42,6 +42,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
         }
     }
 
+
     [Explicit]
     [TestFixture]
     public class When_a_slow_consumer_takes_one_message_out_of_many :
@@ -57,28 +58,26 @@ namespace MassTransit.AmazonSqsTransport.Tests
         {
             var message = new PingMessage();
 
-            await InputQueueSendEndpoint.Send(message);
-            await InputQueueSendEndpoint.Send(message);
-            await InputQueueSendEndpoint.Send(message);
-            await InputQueueSendEndpoint.Send(message);
-            await InputQueueSendEndpoint.Send(message);
-            await InputQueueSendEndpoint.Send(message);
-            await InputQueueSendEndpoint.Send(message);
-            await InputQueueSendEndpoint.Send(message);
-            await InputQueueSendEndpoint.Send(message);
-            await InputQueueSendEndpoint.Send(message);
-            await InputQueueSendEndpoint.Send(message);
-            await InputQueueSendEndpoint.Send(message);
+            for (int i = 0; i < 7; i++)
+            {
+                await InputQueueSendEndpoint.Send(message);
+            }
 
-            await AmazonSqsTestHarness.Consumed.Any<PingMessage>(x => x.Context.Message.CorrelationId == message.CorrelationId);
+            var lastMessage = new PingMessage();
+
+            await InputQueueSendEndpoint.Send(lastMessage);
+
+            await Task.Delay(TimeSpan.FromSeconds(30));
+            //            await AmazonSqsTestHarness.Consumed.SelectAsync<PingMessage>(x => x.Context.Message.CorrelationId == lastMessage.CorrelationId).Count();
 
             await AmazonSqsTestHarness.Stop();
         }
 
         protected override void ConfigureAmazonSqsReceiveEndpoint(IAmazonSqsReceiveEndpointConfigurator configurator)
         {
-            configurator.PrefetchCount = 5;
-            configurator.ConcurrentMessageLimit = 1;
+            configurator.PrefetchCount = 1;
+            configurator.ConcurrentMessageLimit = 2;
+            configurator.WaitTimeSeconds = 1;
 
             configurator.Consumer<Consumer>();
         }

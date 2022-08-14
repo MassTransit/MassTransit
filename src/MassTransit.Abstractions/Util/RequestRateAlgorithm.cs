@@ -25,29 +25,49 @@ namespace MassTransit.Util
         public delegate Task ResultCallback<in T>(T result, CancellationToken cancellationToken);
 
 
+        readonly int _concurrentResultLimit;
         readonly RequestRateAlgorithmOptions _options;
         readonly SemaphoreSlim? _rateLimitSemaphore;
         readonly Timer? _rateLimitTimer;
-        readonly SemaphoreSlim _requestCountSemaphore;
+        readonly int _refreshThreshold;
         readonly int _requestLimit;
+        readonly object _requestLock = new object();
+        readonly SemaphoreSlim _requestSemaphore;
         readonly int _resultLimit;
+        readonly SemaphoreSlim _resultSemaphore;
+        readonly Dictionary<long, Task> _tasks;
 
         int _activeRequestCount;
 
         int _count;
         int _maxRequestCount;
+        long _nextId;
+        int _pendingResultCount;
         int _rateLimit;
         int _requestCount;
 
         public RequestRateAlgorithm(RequestRateAlgorithmOptions options)
         {
+            if (options.PrefetchCount == 0)
+                throw new ArgumentException("PrefetchCount must be > 0", nameof(options));
+            if (options.RequestResultLimit == 0)
+                throw new ArgumentException("RequestResultLimit must be > 0", nameof(options));
+
             _options = options;
 
             _requestCount = 1;
-            _requestLimit = (_options.PrefetchCount + _options.RequestResultLimit - 1) / _options.RequestResultLimit;
-            _resultLimit = Math.Min(_options.PrefetchCount, _options.RequestResultLimit);
+            _requestSemaphore = new SemaphoreSlim(_requestCount);
 
-            _requestCountSemaphore = new SemaphoreSlim(_requestCount);
+            _requestLimit = (_options.PrefetchCount + _options.RequestResultLimit - 1) / _options.RequestResultLimit;
+
+            _resultLimit = Math.Min(_options.PrefetchCount, _options.RequestResultLimit);
+            _concurrentResultLimit = options.ConcurrentResultLimit ?? _requestLimit * _resultLimit;
+
+            _refreshThreshold = 1;
+
+            _resultSemaphore = new SemaphoreSlim(_concurrentResultLimit);
+
+            _tasks = new Dictionary<long, Task>(_resultLimit);
 
             if (options.RequestRateLimit.HasValue && options.RequestRateInterval.HasValue)
             {
@@ -79,12 +99,22 @@ namespace MassTransit.Util
         /// </summary>
         public int MaxActiveRequestCount => _maxRequestCount;
 
+        int ActiveResultCount
+        {
+            get
+            {
+                lock (_tasks)
+                    return _tasks.Count;
+            }
+        }
+
         public void Dispose()
         {
             _rateLimitTimer?.Dispose();
             _rateLimitSemaphore?.Dispose();
 
-            _requestCountSemaphore.Dispose();
+            _requestSemaphore.Dispose();
+            _resultSemaphore.Dispose();
         }
 
         /// <summary>
@@ -116,7 +146,7 @@ namespace MassTransit.Util
         {
             using var activeRequest = await BeginRequest(cancellationToken).ConfigureAwait(false);
 
-            var count = await requestCallback(ResultLimit, cancellationToken).ConfigureAwait(false);
+            var count = await requestCallback(activeRequest.ResultLimit, cancellationToken).ConfigureAwait(false);
 
             await activeRequest.Complete(count, CancellationToken.None).ConfigureAwait(false);
         }
@@ -152,24 +182,38 @@ namespace MassTransit.Util
         {
             using var activeRequest = await BeginRequest(cancellationToken).ConfigureAwait(false);
 
-            IEnumerable<T> results = await requestCallback(ResultLimit, cancellationToken).ConfigureAwait(false);
+            IEnumerable<T> results = await requestCallback(activeRequest.ResultLimit, cancellationToken).ConfigureAwait(false);
 
-            var tasks = new List<Task>(ResultLimit);
-
+            var count = 0;
             try
             {
                 foreach (var result in results)
-                    tasks.Add(resultCallback(result, cancellationToken));
+                {
+                    await _resultSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+
+                    async Task RunResultCallback()
+                    {
+                        try
+                        {
+                            await resultCallback(result, cancellationToken).ConfigureAwait(false);
+                        }
+                        finally
+                        {
+                            _resultSemaphore.Release();
+                        }
+                    }
+
+                    Add(RunResultCallback());
+                    count++;
+                }
             }
             catch (Exception)
             {
-                if (tasks.Count == 0)
+                if (count == 0)
                     throw;
             }
 
-            await Task.WhenAll(tasks).ConfigureAwait(false);
-
-            await activeRequest.Complete(tasks.Count, CancellationToken.None).ConfigureAwait(false);
+            await activeRequest.Complete(count, CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -224,7 +268,7 @@ namespace MassTransit.Util
         {
             using var activeRequest = await BeginRequest(cancellationToken).ConfigureAwait(false);
 
-            List<T> results = (await requestCallback(ResultLimit, cancellationToken).ConfigureAwait(false)).ToList();
+            List<T> results = (await requestCallback(activeRequest.ResultLimit, cancellationToken).ConfigureAwait(false)).ToList();
 
             await activeRequest.Complete(results.Count, CancellationToken.None).ConfigureAwait(false);
 
@@ -239,7 +283,23 @@ namespace MassTransit.Util
             try
             {
                 foreach (var result in orderCallback(results))
-                    tasks.Add(resultCallback(result, cancellationToken));
+                {
+                    await _resultSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+
+                    async Task RunResultCallback()
+                    {
+                        try
+                        {
+                            await resultCallback(result, cancellationToken).ConfigureAwait(false);
+                        }
+                        finally
+                        {
+                            _resultSemaphore.Release();
+                        }
+                    }
+
+                    tasks.Add(RunResultCallback());
+                }
             }
             catch (Exception)
             {
@@ -254,7 +314,7 @@ namespace MassTransit.Util
         {
             try
             {
-                await _requestCountSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+                await _requestSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
 
                 if (_rateLimitSemaphore != null)
                 {
@@ -267,21 +327,45 @@ namespace MassTransit.Util
                 while (current > _maxRequestCount)
                     Interlocked.CompareExchange(ref _maxRequestCount, current, _maxRequestCount);
 
-                return new ActiveRequest(this);
+                int resultLimit;
+                lock (_requestLock)
+                {
+                    resultLimit = Math.Min(_concurrentResultLimit - ActiveResultCount - _pendingResultCount, ResultLimit);
+                    while (resultLimit < _refreshThreshold)
+                    {
+                        Monitor.Wait(_requestLock, 100);
+
+                        if (cancellationToken.IsCancellationRequested)
+                            cancellationToken.ThrowIfCancellationRequested();
+
+                        resultLimit = Math.Min(_concurrentResultLimit - ActiveResultCount - _pendingResultCount, ResultLimit);
+                    }
+
+                    _pendingResultCount += resultLimit;
+                }
+
+                return new ActiveRequest(this, resultLimit);
             }
             catch (OperationCanceledException)
             {
-                _requestCountSemaphore.Release();
+                _requestSemaphore.Release();
 
                 throw;
             }
         }
 
-        internal Task EndRequest(int count, CancellationToken cancellationToken = default)
+        internal Task EndRequest(int count, int resultLimit, CancellationToken cancellationToken = default)
         {
             Interlocked.Decrement(ref _activeRequestCount);
 
-            _requestCountSemaphore.Release();
+            lock (_requestLock)
+            {
+                _pendingResultCount -= resultLimit;
+
+                Monitor.PulseAll(_requestLock);
+            }
+
+            _requestSemaphore.Release();
 
             var currentRequestCount = _requestCount;
 
@@ -300,11 +384,18 @@ namespace MassTransit.Util
             return Task.CompletedTask;
         }
 
-        internal void CancelRequest()
+        internal void CancelRequest(int resultLimit)
         {
             Interlocked.Decrement(ref _activeRequestCount);
 
-            _requestCountSemaphore.Release();
+            lock (_requestLock)
+            {
+                _pendingResultCount -= resultLimit;
+
+                Monitor.PulseAll(_requestLock);
+            }
+
+            _requestSemaphore.Release();
         }
 
         public async Task ChangeRateLimit(int newRateLimit, CancellationToken cancellationToken = default)
@@ -345,7 +436,7 @@ namespace MassTransit.Util
             {
                 var releaseCount = newRequestCount - previousRequestCount;
 
-                _requestCountSemaphore.Release(releaseCount);
+                _requestSemaphore.Release(releaseCount);
 
                 Interlocked.Add(ref _rateLimit, releaseCount);
             }
@@ -353,7 +444,7 @@ namespace MassTransit.Util
             {
                 for (; previousRequestCount > newRequestCount; previousRequestCount--)
                 {
-                    await _requestCountSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+                    await _requestSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
 
                     Interlocked.Decrement(ref _rateLimit);
                 }
@@ -365,6 +456,39 @@ namespace MassTransit.Util
             var processed = Interlocked.Exchange(ref _count, 0);
             if (processed > 0)
                 _rateLimitSemaphore!.Release(processed);
+        }
+
+        void Add(Task task)
+        {
+            if (task == null)
+                throw new ArgumentNullException(nameof(task));
+
+            if (task.Status == TaskStatus.RanToCompletion)
+                return;
+
+            var id = Interlocked.Increment(ref _nextId);
+
+            lock (_tasks)
+                _tasks.Add(id, task);
+
+            task.ContinueWith(x => Remove(id), TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously);
+        }
+
+        void Remove(long id)
+        {
+            int remaining;
+            lock (_tasks)
+            {
+                _tasks.Remove(id);
+
+                remaining = _tasks.Count;
+            }
+
+            if (remaining > 0)
+                return;
+
+            lock (_requestLock)
+                Monitor.PulseAll(_requestLock);
         }
     }
 }

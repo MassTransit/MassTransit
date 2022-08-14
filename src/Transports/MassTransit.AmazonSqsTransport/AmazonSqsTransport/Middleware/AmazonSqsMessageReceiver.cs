@@ -52,13 +52,12 @@ namespace MassTransit.AmazonSqsTransport.Middleware
 
         async Task Consume()
         {
-            var executor = new ChannelExecutor(_receiveSettings.PrefetchCount, _receiveSettings.ConcurrentMessageLimit);
-
             await GetQueueAttributes().ConfigureAwait(false);
 
-            using var algorithm = new RequestRateAlgorithm(new RequestRateAlgorithmOptions()
+            using var algorithm = new RequestRateAlgorithm(new RequestRateAlgorithmOptions
             {
                 PrefetchCount = _receiveSettings.PrefetchCount,
+                ConcurrentResultLimit = _receiveSettings.ConcurrentMessageLimit,
                 RequestResultLimit = 10
             });
 
@@ -70,17 +69,11 @@ namespace MassTransit.AmazonSqsTransport.Middleware
                 {
                     if (_receiveSettings.IsOrdered)
                     {
-                        await algorithm.Run(ReceiveMessages, (m, t) => executor.Run(() => HandleMessage(m), t), GroupMessages, OrderMessages, Stopping)
+                        await algorithm.Run(ReceiveMessages, (m, _) => HandleMessage(m), GroupMessages, OrderMessages, Stopping)
                             .ConfigureAwait(false);
                     }
-                    else if (_receiveSettings.PrefetchCount == 1 && _receiveSettings.ConcurrentMessageLimit == 1)
-                    {
-                        await algorithm.Run(ReceiveMessages, (m, t) => executor.Run(() => HandleMessage(m), t), Stopping).ConfigureAwait(false);
-                    }
                     else
-                    {
-                        await algorithm.Run(ReceiveMessages, (m, t) => executor.Push(() => HandleMessage(m), t), Stopping).ConfigureAwait(false);
-                    }
+                        await algorithm.Run(ReceiveMessages, (m, _) => HandleMessage(m), Stopping).ConfigureAwait(false);
                 }
             }
             catch (OperationCanceledException exception) when (exception.CancellationToken == Stopping)
@@ -90,10 +83,6 @@ namespace MassTransit.AmazonSqsTransport.Middleware
             {
                 LogContext.Error?.Log(exception, "Consume Loop faulted");
                 throw;
-            }
-            finally
-            {
-                await executor.DisposeAsync().ConfigureAwait(false);
             }
         }
 
@@ -159,7 +148,8 @@ namespace MassTransit.AmazonSqsTransport.Middleware
         {
             try
             {
-                return await _client.ReceiveMessages(_receiveSettings.EntityName, messageLimit, _receiveSettings.WaitTimeSeconds, cancellationToken)
+                return await _client
+                    .ReceiveMessages(_receiveSettings.EntityName, messageLimit, _receiveSettings.WaitTimeSeconds, cancellationToken)
                     .ConfigureAwait(false);
             }
             catch (OperationCanceledException)
