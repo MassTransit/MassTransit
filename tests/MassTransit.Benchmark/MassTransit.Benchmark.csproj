@@ -8,11 +8,16 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Persistence\MassTransit.EntityFrameworkCoreIntegration\MassTransit.EntityFrameworkCoreIntegration.csproj" />
     <ProjectReference Include="..\..\src\Transports\MassTransit.ActiveMqTransport\MassTransit.ActiveMqTransport.csproj" />
     <ProjectReference Include="..\..\src\Transports\MassTransit.AmazonSqsTransport\MassTransit.AmazonSqsTransport.csproj" />
     <ProjectReference Include="..\..\src\Transports\MassTransit.Azure.ServiceBus.Core\MassTransit.Azure.ServiceBus.Core.csproj" />
     <ProjectReference Include="..\..\src\Transports\MassTransit.GrpcTransport\MassTransit.GrpcTransport.csproj" />
     <ProjectReference Include="..\..\src\Transports\MassTransit.RabbitMqTransport\MassTransit.RabbitMqTransport.csproj" />
     <ProjectReference Include="..\..\src\MassTransit\MassTransit.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.8" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
   </ItemGroup>
 </Project>

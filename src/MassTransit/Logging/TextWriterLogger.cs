@@ -9,10 +9,12 @@ namespace MassTransit.Logging
         ILogger
     {
         readonly TextWriterLoggerFactory _factory;
+        readonly LogLevel _logLevel;
 
-        public TextWriterLogger(TextWriterLoggerFactory factory)
+        public TextWriterLogger(TextWriterLoggerFactory factory, LogLevel logLevel)
         {
             _factory = factory;
+            _logLevel = logLevel;
         }
 
         public IDisposable BeginScope<TState>(TState state)
@@ -43,7 +45,7 @@ namespace MassTransit.Logging
 
         public bool IsEnabled(LogLevel logLevel)
         {
-            return logLevel != LogLevel.None;
+            return logLevel >= _logLevel;
         }
 
 

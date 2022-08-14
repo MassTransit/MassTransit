@@ -16,7 +16,7 @@ namespace MassTransitBenchmark.Latency
         readonly ConcurrentBag<ConsumedMessage> _consumedMessages;
         readonly long _messageCount;
         readonly TaskCompletionSource<TimeSpan> _sendCompleted;
-        readonly ConcurrentBag<SentMessage> _sentMessages;
+        readonly ConcurrentDictionary<Guid, SentMessage> _sentMessages;
         readonly Stopwatch _stopwatch;
         long _consumed;
         long _sent;
@@ -26,7 +26,7 @@ namespace MassTransitBenchmark.Latency
             _messageCount = messageCount;
 
             _consumedMessages = new ConcurrentBag<ConsumedMessage>();
-            _sentMessages = new ConcurrentBag<SentMessage>();
+            _sentMessages = new ConcurrentDictionary<Guid, SentMessage>();
             _sendCompleted = new TaskCompletionSource<TimeSpan>();
             _consumeCompleted = new TaskCompletionSource<TimeSpan>();
 
@@ -55,7 +55,15 @@ namespace MassTransitBenchmark.Latency
 
             long ackTimestamp = _stopwatch.ElapsedTicks;
 
-            _sentMessages.Add(new SentMessage(messageId, sendTimestamp, ackTimestamp));
+            _sentMessages.TryAdd(messageId, new SentMessage(sendTimestamp, ackTimestamp));
+        }
+
+        public async Task PostSend(Guid messageId)
+        {
+            long ackTimestamp = _stopwatch.ElapsedTicks;
+
+            _sentMessages.AddOrUpdate(messageId, _ => new SentMessage().UpdateAck(ackTimestamp),
+                (_, existing) => new SentMessage(existing.SendTimestamp, ackTimestamp));
 
             long sent = Interlocked.Increment(ref _sent);
             if (sent == _messageCount)
@@ -64,25 +72,28 @@ namespace MassTransitBenchmark.Latency
 
         public MessageMetric[] GetMessageMetrics()
         {
-            return _sentMessages.Join(_consumedMessages, x => x.MessageId, x => x.MessageId,
-                    (sent, consumed) =>
-                        new MessageMetric(sent.MessageId, sent.AckTimestamp - sent.SendTimestamp,
-                            consumed.Timestamp - sent.SendTimestamp))
+            return _sentMessages.Join(_consumedMessages, x => x.Key, x => x.MessageId, (sent, consumed) =>
+                    new MessageMetric(sent.Key, sent.Value.AckTimestamp - sent.Value.SendTimestamp, consumed.Timestamp - sent.Value.SendTimestamp))
                 .ToArray();
         }
 
 
         struct SentMessage
         {
-            public readonly Guid MessageId;
             public readonly long SendTimestamp;
-            public readonly long AckTimestamp;
+            public long AckTimestamp;
 
-            public SentMessage(Guid messageId, long sendTimestamp, long ackTimestamp)
+            public SentMessage(long sendTimestamp, long ackTimestamp)
             {
-                MessageId = messageId;
                 SendTimestamp = sendTimestamp;
                 AckTimestamp = ackTimestamp;
+            }
+
+            public SentMessage UpdateAck(long ackTimestamp)
+            {
+                AckTimestamp = Math.Max(ackTimestamp, AckTimestamp);
+
+                return this;
             }
         }
 

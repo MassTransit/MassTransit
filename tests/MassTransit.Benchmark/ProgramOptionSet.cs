@@ -13,6 +13,7 @@ namespace MassTransitBenchmark
         {
             Latency = 1,
             Rpc = 2,
+            BusOutbox = 4,
         }
 
 
@@ -46,6 +47,7 @@ namespace MassTransitBenchmark
             Add<BenchmarkOptions>("run:", "Run benchmark (All, Latency, RPC)", value => Benchmark = value);
             Add("rpc", "Run the RPC benchmark", x => Benchmark = BenchmarkOptions.Rpc);
             Add("latency", "Run the Latency benchmark", x => Benchmark = BenchmarkOptions.Latency);
+            Add("busoutbox", "Run the Bus Outbox benchmark", x => Benchmark = BenchmarkOptions.BusOutbox);
 
             Benchmark = BenchmarkOptions.Latency | BenchmarkOptions.Rpc;
         }

@@ -22,7 +22,7 @@ namespace MassTransit.Logging
         public ILogger CreateLogger(string name)
         {
             if (_options.IsEnabled(name))
-                return new TextWriterLogger(this);
+                return new TextWriterLogger(this, _options.LogLevel);
 
             return NullLogger.Instance;
         }

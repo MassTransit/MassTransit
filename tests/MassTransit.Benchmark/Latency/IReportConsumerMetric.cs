@@ -10,5 +10,6 @@ namespace MassTransitBenchmark.Latency
             where T : class;
 
         Task Sent(Guid messageId, Task sendTask);
+        Task PostSend(Guid messageId);
     }
 }

@@ -3,6 +3,7 @@ namespace MassTransit.Logging
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Microsoft.Extensions.Logging;
 
 
     public class TextWriterLoggerOptions
@@ -20,6 +21,8 @@ namespace MassTransit.Logging
 
             return this;
         }
+
+        public LogLevel LogLevel { get; set; }
 
         public bool IsEnabled(string name)
         {
