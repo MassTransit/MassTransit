@@ -14,8 +14,6 @@ namespace MassTransit
 
         TimeSpan LockTimeout { set; }
 
-        TimeSpan LockRetryTimeout { set; }
-
         TimeSpan? Expiry { set; }
 
         /// <summary>

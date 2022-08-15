@@ -21,7 +21,7 @@ namespace MassTransit.Configuration
         {
             ConcurrencyMode = ConcurrencyMode.Optimistic;
             KeyPrefix = "";
-            LockRetryTimeout = LockTimeout = TimeSpan.FromSeconds(30);
+            LockTimeout = TimeSpan.FromSeconds(30);
 
             DatabaseConfiguration("127.0.0.1");
             _databaseSelector = SelectDefaultDatabase;
@@ -31,7 +31,6 @@ namespace MassTransit.Configuration
         public string KeyPrefix { get; set; }
         public string LockSuffix { get; set; }
         public TimeSpan LockTimeout { get; set; }
-        public TimeSpan LockRetryTimeout { get; set; }
         public TimeSpan? Expiry { get; set; }
 
         public void DatabaseConfiguration(string configuration)
@@ -67,8 +66,6 @@ namespace MassTransit.Configuration
                 yield return this.Failure("ConnectionFactory", "must be specified");
             if (LockTimeout <= TimeSpan.Zero)
                 yield return this.Failure("LockTimeout", "Must be > TimeSpan.Zero");
-            if (LockRetryTimeout <= TimeSpan.Zero)
-                yield return this.Failure("LockRetryTimeout", "Must be > TimeSpan.Zero");
         }
 
         public void Register<T>(ISagaRepositoryRegistrationConfigurator<T> configurator)
