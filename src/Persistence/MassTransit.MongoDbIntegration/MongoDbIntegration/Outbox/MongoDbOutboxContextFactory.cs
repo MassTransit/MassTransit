@@ -27,6 +27,8 @@ namespace MassTransit.MongoDbIntegration.Outbox
 
             FilterDefinitionBuilder<InboxState> builder = Builders<InboxState>.Filter;
             FilterDefinition<InboxState> filter = builder.Eq(x => x.MessageId, messageId) & builder.Eq(x => x.ConsumerId, options.ConsumerId);
+            var inboxStateCollection = _dbContext.GetCollection<InboxState>();
+            InboxState inboxState = null;
 
             async Task<bool> Execute()
             {
@@ -34,14 +36,9 @@ namespace MassTransit.MongoDbIntegration.Outbox
 
                 try
                 {
-                    MongoDbCollectionContext<InboxState> inboxStateCollection = _dbContext.GetCollection<InboxState>();
+                    inboxState ??= await inboxStateCollection.Find(filter).FirstOrDefaultAsync(context.CancellationToken).ConfigureAwait(false);
 
-                    UpdateDefinition<InboxState> update = Builders<InboxState>.Update.Set(x => x.LockToken, ObjectId.GenerateNewId());
-
-                    var inboxState = await inboxStateCollection.Lock(filter, update, context.CancellationToken).ConfigureAwait(false);
-
-                    bool continueProcessing;
-
+                    bool isInsert = false;
                     if (inboxState == null)
                     {
                         inboxState = new InboxState
@@ -51,38 +48,38 @@ namespace MassTransit.MongoDbIntegration.Outbox
                             Received = DateTime.UtcNow,
                             ReceiveCount = 0
                         };
-
-                        await inboxStateCollection.InsertOne(inboxState, context.CancellationToken).ConfigureAwait(false);
-
-                        continueProcessing = true;
+                        isInsert = true;
                     }
+
+                    inboxState.LockToken = ObjectId.GenerateNewId();
+
+                    if (updateReceiveCount)
+                    {
+                        inboxState.ReceiveCount++;
+                        updateReceiveCount = false;
+                    }
+
+                    var outboxContext = new MongoDbOutboxConsumeContext<T>(context, options, inboxState, _dbContext);
+
+                    await next.Send(outboxContext).ConfigureAwait(false);
+
+                    inboxState.Version++;
+
+                    if (isInsert)
+                        await inboxStateCollection.InsertOne(inboxState, context.CancellationToken).ConfigureAwait(false);
                     else
                     {
-                        if (updateReceiveCount)
-                        {
-                            inboxState.ReceiveCount++;
-                            await inboxStateCollection.FindOneAndReplace(filter, inboxState, context.CancellationToken).ConfigureAwait(false);
-                        }
-
-                        updateReceiveCount = false;
-
-                        var outboxContext = new MongoDbOutboxConsumeContext<T>(context, options, inboxState, _dbContext);
-
-                        await next.Send(outboxContext).ConfigureAwait(false);
-
-                        inboxState.Version++;
-
-                        FilterDefinition<InboxState> updateFilter = builder.Eq(x => x.MessageId, messageId) & builder.Eq(x => x.ConsumerId, options.ConsumerId)
+                        FilterDefinition<InboxState> updateFilter = builder.Eq(x => x.MessageId, messageId) &
+                            builder.Eq(x => x.ConsumerId, options.ConsumerId)
                             & builder.Lt(x => x.Version, inboxState.Version);
 
                         await inboxStateCollection.FindOneAndReplace(updateFilter, inboxState, context.CancellationToken).ConfigureAwait(false);
-
-                        continueProcessing = outboxContext.ContinueProcessing;
                     }
+
 
                     await _dbContext.CommitTransaction(context.CancellationToken).ConfigureAwait(false);
 
-                    return continueProcessing;
+                    return outboxContext.ContinueProcessing;
                 }
                 catch (MongoCommandException)
                 {
@@ -104,7 +101,7 @@ namespace MassTransit.MongoDbIntegration.Outbox
         public void Probe(ProbeContext context)
         {
             var scope = context.CreateFilterScope("outboxContextFactory");
-            scope.Add("provider", "entityFrameworkCore");
+            scope.Add("provider", "mongoDb");
         }
 
         async Task AbortTransaction()

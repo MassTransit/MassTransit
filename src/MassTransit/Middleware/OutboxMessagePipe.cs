@@ -113,7 +113,7 @@ namespace MassTransit.Middleware
                 }
             }
 
-            if (messageIndex == messages.Count && messages.Count < messageLimit)
+            if (messageIndex == messages.Count && messages.Count <= messageLimit)
                 await context.SetDelivered().ConfigureAwait(false);
         }
 
