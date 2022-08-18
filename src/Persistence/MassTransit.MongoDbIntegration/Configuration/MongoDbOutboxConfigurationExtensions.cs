@@ -9,7 +9,7 @@ namespace MassTransit
     public static class MongoDbOutboxConfigurationExtensions
     {
         /// <summary>
-        /// Configures the Entity Framework Outbox on the bus, which can subsequently be used to configure
+        /// Configures the MongoDb Outbox on the bus, which can subsequently be used to configure
         /// the transactional outbox on a receive endpoint.
         /// </summary>
         /// <param name="configurator"></param>
@@ -24,7 +24,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Configure the Entity Framework outbox on the receive endpoint
+        /// Configure the MongoDb outbox on the receive endpoint
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="provider">Configuration service provider</param>
