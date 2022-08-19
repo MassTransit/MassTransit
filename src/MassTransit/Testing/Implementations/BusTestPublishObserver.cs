@@ -29,14 +29,14 @@
         {
             _messages.Add(context);
 
-            return Task.CompletedTask;
+            return RestartTimer(false);
         }
 
         Task IPublishObserver.PublishFault<T>(PublishContext<T> context, Exception exception)
         {
             _messages.Add(context, exception);
 
-            return Task.CompletedTask;
+            return RestartTimer(false);
         }
     }
 }

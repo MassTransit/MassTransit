@@ -34,7 +34,7 @@ namespace MassTransit.Testing.Implementations
         {
             _messages.Add(context);
 
-            return Task.CompletedTask;
+            return RestartTimer(false);
         }
 
         public Task SendFault<T>(SendContext<T> context, Exception exception)
@@ -42,7 +42,7 @@ namespace MassTransit.Testing.Implementations
         {
             _messages.Add(context, exception);
 
-            return Task.CompletedTask;
+            return RestartTimer(false);
         }
     }
 }

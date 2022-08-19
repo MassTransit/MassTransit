@@ -12,13 +12,13 @@ namespace MassTransit.Util
         IDisposable
     {
         readonly TimerCallback _callback;
-        readonly TimeSpan _dueTime;
         readonly object _lock = new object();
         readonly object _state;
+        readonly TimeSpan _timeout;
         Timer _timer;
         int _triggered;
 
-        public RollingTimer(TimerCallback callback, TimeSpan dueTime, object state = default)
+        public RollingTimer(TimerCallback callback, TimeSpan timeout, object state = default)
         {
             void Callback(object obj)
             {
@@ -27,18 +27,16 @@ namespace MassTransit.Util
             }
 
             _callback = Callback;
-            _dueTime = dueTime;
+            _timeout = timeout;
             _state = state;
         }
 
-        public bool Triggered => Interlocked.CompareExchange(ref _triggered, int.MinValue, int.MinValue) == 1;
+        public bool Triggered => _triggered == 1;
 
         public void Dispose()
         {
             lock (_lock)
             {
-                Reset();
-
                 _timer?.Dispose();
                 _timer = null;
             }
@@ -76,7 +74,7 @@ namespace MassTransit.Util
                 else
                 {
                     Reset();
-                    _timer.Change(_dueTime, TimeSpan.FromMilliseconds(-1));
+                    _timer.Change(_timeout, TimeSpan.FromMilliseconds(-1));
                 }
             }
         }
@@ -84,7 +82,7 @@ namespace MassTransit.Util
         void StartInternal()
         {
             Reset();
-            _timer = new Timer(_callback, _state, _dueTime, TimeSpan.FromMilliseconds(-1));
+            _timer = new Timer(_callback, _state, _timeout, TimeSpan.FromMilliseconds(-1));
         }
 
         /// <summary>

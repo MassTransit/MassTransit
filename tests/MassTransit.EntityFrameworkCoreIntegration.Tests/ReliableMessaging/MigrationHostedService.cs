@@ -12,10 +12,10 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
         IHostedService
         where TDbContext : DbContext
     {
-        readonly IServiceScopeFactory _scopeFactory;
         readonly ILogger<MigrationHostedService<TDbContext>> _logger;
-        IServiceScope _scope;
+        readonly IServiceScopeFactory _scopeFactory;
         TDbContext _context;
+        IServiceScope _scope;
 
         public MigrationHostedService(IServiceScopeFactory scopeFactory, ILogger<MigrationHostedService<TDbContext>> logger)
         {
@@ -37,7 +37,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
 
         public async Task StopAsync(CancellationToken cancellationToken)
         {
-            await _context.Database.EnsureDeletedAsync(cancellationToken);
+            await _context.Database.EnsureDeletedAsync(CancellationToken.None);
         }
     }
 }

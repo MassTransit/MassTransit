@@ -28,7 +28,7 @@ namespace MassTransit.Testing.Implementations
             return handle;
         }
 
-        public virtual bool IsInactive => _inactivityTimer.Triggered || Interlocked.CompareExchange(ref _activityDetected, int.MinValue, int.MinValue) == 0;
+        public virtual bool IsInactive => _inactivityTimer.Triggered && _activityDetected == 0;
 
         protected void StartTimer(TimeSpan inactivityTimout)
         {
@@ -52,10 +52,10 @@ namespace MassTransit.Testing.Implementations
 
         void OnActivityTimeout(object state)
         {
-            Task.Run(() => NotifyInactive());
-
             _inactivityTimer.Stop();
             Interlocked.CompareExchange(ref _activityDetected, 0, 1);
+
+            Task.Run(() => NotifyInactive());
         }
     }
 }

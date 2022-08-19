@@ -5,6 +5,7 @@ namespace MassTransit.Testing.Implementations
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Internals;
     using Util;
 
 
@@ -19,12 +20,7 @@ namespace MassTransit.Testing.Implementations
         public AsyncInactivityObserver(TimeSpan timeout, CancellationToken cancellationToken)
         {
             _inactivityTaskSource = TaskUtil.GetTask();
-            _inactivityTask = new Lazy<Task>(() =>
-            {
-                SetupTimeout(timeout, cancellationToken);
-
-                return _inactivityTaskSource.Task;
-            });
+            _inactivityTask = new Lazy<Task>(() => TimeoutTask(timeout, cancellationToken));
 
             _sources = new HashSet<IInactivityObservationSource>();
             _inactivityTokenSource = new CancellationTokenSource();
@@ -41,13 +37,7 @@ namespace MassTransit.Testing.Implementations
 
         public Task NoActivity()
         {
-            if (_sources.All(x => x.IsInactive))
-            {
-                _inactivityTaskSource.TrySetResult(true);
-                _inactivityTokenSource.Cancel();
-            }
-
-            return Task.CompletedTask;
+            return CheckSourceActivity();
         }
 
         public void ForceInactive()
@@ -56,17 +46,37 @@ namespace MassTransit.Testing.Implementations
             _inactivityTokenSource.Cancel();
         }
 
-        async void SetupTimeout(TimeSpan timeout, CancellationToken cancellationToken)
+        Task<bool> CheckSourceActivity()
+        {
+            if (_sources.All(x => x.IsInactive))
+            {
+                _inactivityTaskSource.TrySetResult(true);
+                _inactivityTokenSource.Cancel();
+
+                return TaskUtil.True;
+            }
+
+            return TaskUtil.False;
+        }
+
+        async Task TimeoutTask(TimeSpan timeout, CancellationToken cancellationToken)
         {
             try
             {
-                await Task.Delay(timeout, cancellationToken).ConfigureAwait(false);
+                var inActive = false;
+                do
+                {
+                    await Task.Delay(timeout, cancellationToken).ConfigureAwait(false);
+
+                    inActive = await CheckSourceActivity().ConfigureAwait(false);
+                }
+                while (!inActive);
+
+                await _inactivityTaskSource.Task.OrCanceled(cancellationToken).ConfigureAwait(false);
             }
             catch (Exception)
             {
             }
-
-            _inactivityTaskSource.TrySetResult(true);
         }
     }
 }
