@@ -13,6 +13,7 @@ namespace MassTransit.MongoDbIntegration
     public interface MongoDbCollectionContext<T>
     {
         Task InsertOne(T instance, CancellationToken cancellationToken);
+        Task<ReplaceOneResult> ReplaceOne(FilterDefinition<T> filter, T instance, CancellationToken cancellationToken);
         Task<T> FindOneAndReplace(FilterDefinition<T> filter, T instance, CancellationToken cancellationToken);
         Task<DeleteResult> DeleteOne(FilterDefinition<T> filter, CancellationToken cancellationToken);
         Task<DeleteResult> DeleteMany(FilterDefinition<T> filter, CancellationToken cancellationToken);

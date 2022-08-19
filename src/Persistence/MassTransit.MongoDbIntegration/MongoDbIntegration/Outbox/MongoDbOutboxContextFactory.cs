@@ -27,8 +27,6 @@ namespace MassTransit.MongoDbIntegration.Outbox
 
             FilterDefinitionBuilder<InboxState> builder = Builders<InboxState>.Filter;
             FilterDefinition<InboxState> filter = builder.Eq(x => x.MessageId, messageId) & builder.Eq(x => x.ConsumerId, options.ConsumerId);
-            var inboxStateCollection = _dbContext.GetCollection<InboxState>();
-            InboxState inboxState = null;
 
             async Task<bool> Execute()
             {
@@ -36,9 +34,9 @@ namespace MassTransit.MongoDbIntegration.Outbox
 
                 try
                 {
-                    inboxState ??= await inboxStateCollection.Find(filter).FirstOrDefaultAsync(context.CancellationToken).ConfigureAwait(false);
+                    var inboxStateCollection = _dbContext.GetCollection<InboxState>();
+                    var inboxState = await inboxStateCollection.Find(filter).FirstOrDefaultAsync(context.CancellationToken).ConfigureAwait(false);
 
-                    bool isInsert = false;
                     if (inboxState == null)
                     {
                         inboxState = new InboxState
@@ -48,7 +46,7 @@ namespace MassTransit.MongoDbIntegration.Outbox
                             Received = DateTime.UtcNow,
                             ReceiveCount = 0
                         };
-                        isInsert = true;
+                        await inboxStateCollection.InsertOne(inboxState, context.CancellationToken).ConfigureAwait(false);
                     }
 
                     inboxState.LockToken = ObjectId.GenerateNewId();
@@ -65,17 +63,11 @@ namespace MassTransit.MongoDbIntegration.Outbox
 
                     inboxState.Version++;
 
-                    if (isInsert)
-                        await inboxStateCollection.InsertOne(inboxState, context.CancellationToken).ConfigureAwait(false);
-                    else
-                    {
-                        FilterDefinition<InboxState> updateFilter = builder.Eq(x => x.MessageId, messageId) &
-                            builder.Eq(x => x.ConsumerId, options.ConsumerId)
-                            & builder.Lt(x => x.Version, inboxState.Version);
+                    FilterDefinition<InboxState> updateFilter = builder.Eq(x => x.MessageId, messageId) &
+                        builder.Eq(x => x.ConsumerId, options.ConsumerId)
+                        & builder.Lt(x => x.Version, inboxState.Version);
 
-                        await inboxStateCollection.FindOneAndReplace(updateFilter, inboxState, context.CancellationToken).ConfigureAwait(false);
-                    }
-
+                    await inboxStateCollection.ReplaceOne(updateFilter, inboxState, context.CancellationToken).ConfigureAwait(false);
 
                     await _dbContext.CommitTransaction(context.CancellationToken).ConfigureAwait(false);
 

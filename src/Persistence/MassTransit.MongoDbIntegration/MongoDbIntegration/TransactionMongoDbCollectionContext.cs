@@ -11,6 +11,8 @@ namespace MassTransit.MongoDbIntegration
         MongoDbCollectionContext<T>
     {
         static readonly InsertOneOptions _insertOneOptions = new InsertOneOptions();
+        static readonly ReplaceOptions _replaceOneOptions = new ReplaceOptions();
+
         readonly IMongoCollection<T> _collection;
         readonly MongoDbContext _context;
 
@@ -25,6 +27,13 @@ namespace MassTransit.MongoDbIntegration
             return _context.Session != null
                 ? _collection.InsertOneAsync(_context.Session, instance, _insertOneOptions, cancellationToken)
                 : _collection.InsertOneAsync(instance, _insertOneOptions, cancellationToken);
+        }
+
+        public Task<ReplaceOneResult> ReplaceOne(FilterDefinition<T> filter, T instance, CancellationToken cancellationToken)
+        {
+            return _context.Session != null
+                ? _collection.ReplaceOneAsync(_context.Session, filter, instance, _replaceOneOptions, cancellationToken)
+                : _collection.ReplaceOneAsync(filter, instance, _replaceOneOptions, cancellationToken);
         }
 
         public Task<T> FindOneAndReplace(FilterDefinition<T> filter, T instance, CancellationToken cancellationToken)
