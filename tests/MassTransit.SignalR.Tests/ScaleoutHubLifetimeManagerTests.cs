@@ -18,7 +18,7 @@
             Assert.NotNull(message);
             Assert.AreEqual("Hello", message.Target);
             Assert.AreEqual(1, message.Arguments.Length);
-            Assert.AreEqual("World", (string)message.Arguments[0]);
+            Assert.AreEqual("World", message.Arguments[0].ToString());
         }
 
         [Test]

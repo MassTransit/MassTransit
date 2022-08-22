@@ -16,7 +16,7 @@
             Assert.NotNull(message);
             Assert.AreEqual("Hello", message.Target);
             Assert.AreEqual(1, message.Arguments.Length);
-            Assert.AreEqual("World", (string)message.Arguments[0]);
+            Assert.AreEqual("World", message.Arguments[0].ToString());
         }
 
         [Test]
@@ -41,13 +41,13 @@
                 Assert.NotNull(message);
                 Assert.AreEqual("Hello", message.Target);
                 Assert.AreEqual(1, message.Arguments.Length);
-                Assert.AreEqual("World", (string)message.Arguments[0]);
+                Assert.AreEqual("World", message.Arguments[0].ToString());
 
                 message = client2.TryRead() as InvocationMessage;
                 Assert.NotNull(message);
                 Assert.AreEqual("Hello", message.Target);
                 Assert.AreEqual(1, message.Arguments.Length);
-                Assert.AreEqual("World", (string)message.Arguments[0]);
+                Assert.AreEqual("World", message.Arguments[0].ToString());
             }
         }
 
@@ -75,7 +75,7 @@
                 Assert.NotNull(message);
                 Assert.AreEqual("Hello", message.Target);
                 Assert.AreEqual(1, message.Arguments.Length);
-                Assert.AreEqual("World", (string)message.Arguments[0]);
+                Assert.AreEqual("World", message.Arguments[0].ToString());
 
                 Assert.Null(client2.TryRead());
             }
@@ -108,7 +108,7 @@
                 Assert.NotNull(message);
                 Assert.AreEqual("Hello", message.Target);
                 Assert.AreEqual(1, message.Arguments.Length);
-                Assert.AreEqual("World", (string)message.Arguments[0]);
+                Assert.AreEqual("World", message.Arguments[0].ToString());
 
                 Assert.Null(client2.TryRead());
             }

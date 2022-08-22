@@ -14,7 +14,7 @@
     {
         public static HubConnectionContext Create(ConnectionContext connection, IHubProtocol protocol = null, string userIdentifier = null)
         {
-            return new HubConnectionContext(connection, TimeSpan.FromSeconds(15), NullLoggerFactory.Instance)
+            return new HubConnectionContext(connection, new HubConnectionContextOptions { KeepAliveInterval = TimeSpan.FromSeconds(15) }, NullLoggerFactory.Instance)
             {
                 Protocol = protocol ?? new JsonHubProtocol(),
                 UserIdentifier = userIdentifier
@@ -31,7 +31,7 @@
         {
             public MockHubConnectionContext(ConnectionContext connectionContext, TimeSpan keepAliveInterval, ILoggerFactory loggerFactory,
                 TimeSpan clientTimeoutInterval)
-                : base(connectionContext, keepAliveInterval, loggerFactory, clientTimeoutInterval)
+                : base(connectionContext, new HubConnectionContextOptions { KeepAliveInterval = keepAliveInterval, ClientTimeoutInterval = clientTimeoutInterval }, loggerFactory)
             {
             }
 
