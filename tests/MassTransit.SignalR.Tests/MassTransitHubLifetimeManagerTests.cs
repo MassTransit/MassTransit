@@ -1,12 +1,11 @@
 ﻿namespace MassTransit.SignalR.Tests
 {
     using System.Linq;
+    using System.Text.Json;
     using System.Threading.Tasks;
     using Contracts;
     using Microsoft.AspNetCore.SignalR;
     using Microsoft.AspNetCore.SignalR.Protocol;
-    using Newtonsoft.Json.Linq;
-    using Newtonsoft.Json.Serialization;
     using NUnit.Framework;
     using OfficialFramework;
     using Testing;
@@ -24,7 +23,7 @@
             var messagePackOptions = new MessagePackHubProtocolOptions();
 
             var jsonOptions = new JsonHubProtocolOptions();
-            jsonOptions.PayloadSerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+            jsonOptions.PayloadSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
             SignalRBackplaneConsumersTestHarness<MyHub> backplane1Harness = RegisterBusEndpoint("receiveEndpoint1");
             SignalRBackplaneConsumersTestHarness<MyHub> backplane2Harness = RegisterBusEndpoint("receiveEndpoint2");
 
@@ -53,12 +52,13 @@
                     var message = await client2.ReadAsync().OrTimeout() as InvocationMessage;
                     Assert.NotNull(message);
                     Assert.AreEqual("Hello", message.Target);
-                    CollectionAssert.AllItemsAreInstancesOfType(message.Arguments, typeof(JObject));
-                    var jObject = message.Arguments[0] as JObject;
-                    Assert.NotNull(jObject);
-                    var firstProperty = jObject.Properties().First();
-                    Assert.AreEqual("testProperty", firstProperty.Name);
-                    Assert.AreEqual("Foo", firstProperty.Value.Value<string>());
+                    CollectionAssert.AllItemsAreInstancesOfType(message.Arguments, typeof(JsonElement));
+                    var jsonElement = message.Arguments[0] as JsonElement?;
+                    Assert.NotNull(jsonElement);
+                    Assert.NotNull(jsonElement.Value);
+                    var testProperty = jsonElement.Value.GetProperty("testProperty");
+                    Assert.NotNull(testProperty);;
+                    Assert.AreEqual("Foo", testProperty.GetString());
                 }
             }
             finally
