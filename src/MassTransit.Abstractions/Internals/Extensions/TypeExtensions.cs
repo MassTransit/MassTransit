@@ -36,10 +36,12 @@ namespace MassTransit.Internals
                     yield return prop;
             }
 
-            List<PropertyInfo> properties = typeInfo.DeclaredMethods
+            var specialGetPropertyNames = typeInfo.DeclaredMethods
                 .Where(x => x.IsSpecialName && x.Name.StartsWith("get_") && !x.IsStatic)
-                .Select(x => typeInfo.GetDeclaredProperty(x.Name.Substring("get_".Length)))
-                .Cast<PropertyInfo>()
+                .Select(x => x.Name.Substring("get_".Length)).Distinct();
+
+            List<PropertyInfo> properties = typeInfo.DeclaredProperties
+                .Where(x => specialGetPropertyNames.Contains(x.Name))
                 .ToList();
 
             if (typeInfo.IsInterface)
