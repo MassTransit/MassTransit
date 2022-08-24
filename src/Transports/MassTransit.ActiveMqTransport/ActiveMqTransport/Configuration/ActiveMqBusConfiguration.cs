@@ -14,7 +14,7 @@
             : base(topologyConfiguration)
         {
             HostConfiguration = new ActiveMqHostConfiguration(this, topologyConfiguration);
-            BusEndpointConfiguration = CreateEndpointConfiguration();
+            BusEndpointConfiguration = CreateEndpointConfiguration(true);
 
             _busObservers = new BusObservable();
         }

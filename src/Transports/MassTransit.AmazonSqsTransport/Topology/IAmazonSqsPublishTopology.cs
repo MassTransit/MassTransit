@@ -1,6 +1,7 @@
 namespace MassTransit
 {
     using System.Collections.Generic;
+    using AmazonSqsTransport.Topology;
 
 
     public interface IAmazonSqsPublishTopology :
@@ -23,5 +24,7 @@ namespace MassTransit
 
         new IAmazonSqsMessagePublishTopology<T> GetMessageTopology<T>()
             where T : class;
+
+        BrokerTopology GetPublishBrokerTopology();
     }
 }

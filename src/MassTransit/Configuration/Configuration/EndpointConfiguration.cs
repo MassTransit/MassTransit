@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Net.Mime;
-    using Courier;
 
 
     public class EndpointConfiguration :
@@ -23,7 +22,7 @@
             Transport = new TransportConfiguration();
         }
 
-        protected EndpointConfiguration(IEndpointConfiguration parentConfiguration, ITopologyConfiguration topology)
+        protected EndpointConfiguration(IEndpointConfiguration parentConfiguration, ITopologyConfiguration topology, bool isBusEndpoint)
         {
             Topology = topology;
 
@@ -35,6 +34,8 @@
             Serialization = parentConfiguration.Serialization.CreateSerializationConfiguration();
 
             Transport = new TransportConfiguration(parentConfiguration.Transport);
+
+            IsBusEndpoint = parentConfiguration.IsBusEndpoint || isBusEndpoint;
         }
 
         protected EndpointConfiguration(IEndpointConfiguration endpointConfiguration)
@@ -49,6 +50,8 @@
             Serialization = endpointConfiguration.Serialization;
 
             Transport = endpointConfiguration.Transport;
+
+            IsBusEndpoint = endpointConfiguration.IsBusEndpoint;
         }
 
         public int? ConcurrentMessageLimit
@@ -72,6 +75,8 @@
         {
             set => Serialization.SerializerContentType = value;
         }
+
+        public bool IsBusEndpoint { get; }
 
         public bool AutoStart
         {

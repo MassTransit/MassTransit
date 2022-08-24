@@ -25,8 +25,10 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="configureTopology"></param>
-        void Publish<T>(Action<IServiceBusMessagePublishTopologyConfigurator<T>> configureTopology)
+        void Publish<T>(Action<IServiceBusMessagePublishTopologyConfigurator<T>>? configureTopology = null)
             where T : class;
+
+        void Publish(Type messageType, Action<IServiceBusMessagePublishTopologyConfigurator>? configure = null);
 
         /// <summary>
         /// In most cases, this is not needed and should not be used. However, if for any reason the default bus

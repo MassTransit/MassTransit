@@ -1,10 +1,15 @@
 ﻿namespace MassTransit
 {
+    using AzureServiceBusTransport.Topology;
+
+
     public interface IServiceBusPublishTopology :
         IPublishTopology
     {
         new IServiceBusMessagePublishTopology<T> GetMessageTopology<T>()
             where T : class;
+
+        BrokerTopology GetPublishBrokerTopology();
 
         /// <summary>
         /// Formats a subscription name to be 50 characters if it is greater than 50 characters.

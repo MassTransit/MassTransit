@@ -20,6 +20,8 @@ namespace MassTransit.Transports
     {
         Uri InputAddress { get; }
 
+        bool IsBusEndpoint { get; }
+
         IReceiveEndpointObserver EndpointObservers { get; }
 
         IReceiveObserver ReceiveObservers { get; }

@@ -27,8 +27,10 @@ namespace MassTransit
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="configureTopology"></param>
-        void Publish<T>(Action<IActiveMqMessagePublishTopologyConfigurator<T>> configureTopology)
+        void Publish<T>(Action<IActiveMqMessagePublishTopologyConfigurator<T>>? configureTopology = null)
             where T : class;
+
+        void Publish(Type messageType, Action<IActiveMqMessagePublishTopologyConfigurator>? configure = null);
 
         /// <summary>
         /// Configure a Host that can be connected. If only one host is specified, it is used as the default
@@ -57,7 +59,7 @@ namespace MassTransit
         public void SetConsumerEndpointQueueNameFormatter(IActiveMqConsumerEndpointQueueNameFormatter formatter);
 
         /// <summary>
-        /// Specify a temporary queue name formatter. Allows for the transformation of masstransit generated temporary queuenames
+        /// Specify a temporary queue name formatter. Allows for the transformation of masstransit generated temporary queue names
         /// e.g. adding a prefix
         /// </summary>
         /// <param name="formatter"></param>

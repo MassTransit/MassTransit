@@ -67,11 +67,18 @@ namespace MassTransit.AmazonSqsTransport.Configuration
             configureTopology?.Invoke(configurator);
         }
 
-        void IAmazonSqsBusFactoryConfigurator.Publish<T>(Action<IAmazonSqsMessagePublishTopologyConfigurator<T>> configureTopology)
+        void IAmazonSqsBusFactoryConfigurator.Publish<T>(Action<IAmazonSqsMessagePublishTopologyConfigurator<T>>? configureTopology)
         {
             IAmazonSqsMessagePublishTopologyConfigurator<T> configurator = _busConfiguration.Topology.Publish.GetMessageTopology<T>();
 
             configureTopology?.Invoke(configurator);
+        }
+
+        public void Publish(Type messageType, Action<IAmazonSqsMessagePublishTopologyConfigurator>? configure = null)
+        {
+            var configurator = _busConfiguration.Topology.Publish.GetMessageTopology(messageType);
+
+            configure?.Invoke(configurator);
         }
 
         public new IAmazonSqsSendTopologyConfigurator SendTopology => _busConfiguration.Topology.Send;

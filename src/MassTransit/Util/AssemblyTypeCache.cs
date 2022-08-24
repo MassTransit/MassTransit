@@ -70,6 +70,24 @@
             return ForAssembly(assembly).ContinueWith(t => query.Find(t.Result));
         }
 
+        public static IEnumerable<Type> FindTypesInNamespace(Type type, Func<Type, bool> typeFilter, TypeClassification typeClassification)
+        {
+            if (type.Namespace == null)
+                throw new ArgumentException("The type must have a valid namespace", nameof(type));
+
+            var dottedNamespace = type.Namespace + ".";
+
+            bool Filter(Type candidate)
+            {
+                return typeFilter(candidate)
+                    && candidate.Namespace != null
+                    && (candidate.Namespace.StartsWith(dottedNamespace, StringComparison.OrdinalIgnoreCase)
+                        || candidate.Namespace.Equals(type.Namespace, StringComparison.OrdinalIgnoreCase));
+            }
+
+            return FindTypes(type.Assembly, typeClassification, Filter).GetAwaiter().GetResult();
+        }
+
 
         static class Cached
         {

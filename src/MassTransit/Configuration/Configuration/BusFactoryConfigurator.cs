@@ -39,6 +39,11 @@ namespace MassTransit.Configuration
             set => _busConfiguration.HostConfiguration.DeployTopologyOnly = value;
         }
 
+        public bool DeployPublishTopology
+        {
+            set => _busConfiguration.HostConfiguration.DeployPublishTopology = value;
+        }
+
         public int? ConcurrentMessageLimit
         {
             set => _busConfiguration.Transport.Configurator.ConcurrentMessageLimit = value;

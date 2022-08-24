@@ -1,5 +1,8 @@
 namespace MassTransit
 {
+    using ActiveMqTransport.Topology;
+
+
     public interface IActiveMqPublishTopology :
         IPublishTopology
     {
@@ -7,5 +10,7 @@ namespace MassTransit
 
         new IActiveMqMessagePublishTopology<T> GetMessageTopology<T>()
             where T : class;
+
+        BrokerTopology GetPublishBrokerTopology();
     }
 }

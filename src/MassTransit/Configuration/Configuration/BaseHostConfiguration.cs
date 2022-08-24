@@ -44,6 +44,7 @@ namespace MassTransit.Configuration
         public abstract Uri HostAddress { get; }
 
         public bool DeployTopologyOnly { get; set; }
+        public bool DeployPublishTopology { get; set; }
 
         public ISendObserver SendObservers => _sendObservers;
 

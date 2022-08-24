@@ -1,7 +1,6 @@
 ﻿namespace MassTransit
 {
-    using AmazonSqsTransport.Topology;
-    using Topology;
+    using System;
 
 
     public interface IAmazonSqsPublishTopologyConfigurator :
@@ -10,5 +9,7 @@
     {
         new IAmazonSqsMessagePublishTopologyConfigurator<T> GetMessageTopology<T>()
             where T : class;
+
+        new IAmazonSqsMessagePublishTopologyConfigurator GetMessageTopology(Type messageType);
     }
 }

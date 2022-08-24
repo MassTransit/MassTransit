@@ -23,7 +23,7 @@
             Serialization.AddSerializer(factory);
             Serialization.AddDeserializer(factory, true);
 
-            BusEndpointConfiguration = CreateEndpointConfiguration();
+            BusEndpointConfiguration = CreateEndpointConfiguration(true);
 
             _busObservers = new BusObservable();
         }

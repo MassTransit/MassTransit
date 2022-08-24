@@ -15,7 +15,7 @@
         readonly bool _removeSubscriptions;
         readonly TSettings _settings;
 
-        public ConfigureServiceBusTopologyFilter(TSettings settings, BrokerTopology brokerTopology, bool removeSubscriptions,
+        public ConfigureServiceBusTopologyFilter(TSettings settings, BrokerTopology brokerTopology, bool removeSubscriptions = false,
             ServiceBusReceiveEndpointContext context = null)
         {
             _settings = settings;

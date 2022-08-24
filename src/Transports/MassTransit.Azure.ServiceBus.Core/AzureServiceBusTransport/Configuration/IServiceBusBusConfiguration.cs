@@ -13,6 +13,6 @@
 
         new IServiceBusTopologyConfiguration Topology { get; }
 
-        IServiceBusEndpointConfiguration CreateEndpointConfiguration();
+        IServiceBusEndpointConfiguration CreateEndpointConfiguration(bool isBusEndpoint = false);
     }
 }

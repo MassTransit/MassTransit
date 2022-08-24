@@ -1,6 +1,6 @@
 ﻿namespace MassTransit
 {
-    using RabbitMqTransport.Topology;
+    using System;
 
 
     public interface IRabbitMqPublishTopologyConfigurator :
@@ -14,5 +14,7 @@
 
         new IRabbitMqMessagePublishTopologyConfigurator<T> GetMessageTopology<T>()
             where T : class;
+
+        new IRabbitMqMessagePublishTopologyConfigurator GetMessageTopology(Type messageType);
     }
 }

@@ -14,7 +14,7 @@
             : base(topologyConfiguration)
         {
             HostConfiguration = new AmazonSqsHostConfiguration(this, topologyConfiguration);
-            BusEndpointConfiguration = CreateEndpointConfiguration();
+            BusEndpointConfiguration = CreateEndpointConfiguration(true);
 
             _busObservers = new BusObservable();
         }

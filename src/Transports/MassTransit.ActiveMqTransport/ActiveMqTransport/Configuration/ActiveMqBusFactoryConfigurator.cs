@@ -49,11 +49,18 @@ namespace MassTransit.ActiveMqTransport.Configuration
             configureTopology?.Invoke(configurator);
         }
 
-        void IActiveMqBusFactoryConfigurator.Publish<T>(Action<IActiveMqMessagePublishTopologyConfigurator<T>> configureTopology)
+        void IActiveMqBusFactoryConfigurator.Publish<T>(Action<IActiveMqMessagePublishTopologyConfigurator<T>>? configureTopology)
         {
             IActiveMqMessagePublishTopologyConfigurator<T> configurator = _busConfiguration.Topology.Publish.GetMessageTopology<T>();
 
             configureTopology?.Invoke(configurator);
+        }
+
+        public void Publish(Type messageType, Action<IActiveMqMessagePublishTopologyConfigurator>? configure = null)
+        {
+            var configurator = _busConfiguration.Topology.Publish.GetMessageTopology(messageType);
+
+            configure?.Invoke(configurator);
         }
 
         public new IActiveMqSendTopologyConfigurator SendTopology => _busConfiguration.Topology.Send;

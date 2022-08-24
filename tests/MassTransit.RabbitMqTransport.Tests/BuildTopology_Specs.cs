@@ -49,7 +49,7 @@
             await Bus.Publish<ThirdInterface>(new { });
             await Bus.Publish<AnotherThirdInterface>(new { });
 
-            ConsumeContext<FirstInterface> received = await _receivedA;
+            await _receivedA;
         }
 
         Task<ConsumeContext<FirstInterface>> _receivedA;
@@ -141,7 +141,6 @@
         public void Setup()
         {
             _nameFormatter = new RabbitMqMessageNameFormatter();
-            _entityNameFormatter = new MessageNameFormatterEntityNameFormatter(_nameFormatter);
             _consumeTopology = new RabbitMqConsumeTopology(RabbitMqBusFactory.MessageTopology, new RabbitMqPublishTopology(RabbitMqBusFactory.MessageTopology));
 
             _builder = new ReceiveEndpointBrokerTopologyBuilder();
@@ -155,7 +154,6 @@
         }
 
         RabbitMqMessageNameFormatter _nameFormatter;
-        MessageNameFormatterEntityNameFormatter _entityNameFormatter;
         IRabbitMqConsumeTopologyConfigurator _consumeTopology;
         ReceiveEndpointBrokerTopologyBuilder _builder;
         string _inputQueueName;
@@ -204,14 +202,12 @@
         public void Setup()
         {
             _nameFormatter = new RabbitMqMessageNameFormatter();
-            _entityNameFormatter = new MessageNameFormatterEntityNameFormatter(_nameFormatter);
             _publishTopology = new RabbitMqPublishTopology(RabbitMqBusFactory.MessageTopology);
 
             _builder = new PublishEndpointBrokerTopologyBuilder();
         }
 
         RabbitMqMessageNameFormatter _nameFormatter;
-        MessageNameFormatterEntityNameFormatter _entityNameFormatter;
         IRabbitMqPublishTopologyConfigurator _publishTopology;
         PublishEndpointBrokerTopologyBuilder _builder;
     }
@@ -286,14 +282,12 @@
         public void Setup()
         {
             _nameFormatter = new RabbitMqMessageNameFormatter();
-            _entityNameFormatter = new MessageNameFormatterEntityNameFormatter(_nameFormatter);
             _publishTopology = new RabbitMqPublishTopology(RabbitMqBusFactory.MessageTopology);
 
             _builder = new PublishEndpointBrokerTopologyBuilder(PublishBrokerTopologyOptions.MaintainHierarchy);
         }
 
         RabbitMqMessageNameFormatter _nameFormatter;
-        MessageNameFormatterEntityNameFormatter _entityNameFormatter;
         IRabbitMqPublishTopologyConfigurator _publishTopology;
         PublishEndpointBrokerTopologyBuilder _builder;
     }

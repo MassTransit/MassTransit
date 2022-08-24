@@ -63,6 +63,15 @@
             var transport = new ReceiveTransport<SessionContext>(_hostConfiguration, context,
                 () => context.SessionContextSupervisor, sessionPipe);
 
+            if (IsBusEndpoint)
+            {
+                var publishTopology = _hostConfiguration.Topology.PublishTopology;
+
+                var brokerTopology = publishTopology.GetPublishBrokerTopology();
+
+                transport.PreStartPipe = new ConfigureActiveMqTopologyFilter<IPublishTopology>(publishTopology, brokerTopology).ToPipe();
+            }
+
             var receiveEndpoint = new ReceiveEndpoint(transport, context);
 
             var queueName = _settings.EntityName ?? NewId.Next().ToString(FormatUtil.Formatter);

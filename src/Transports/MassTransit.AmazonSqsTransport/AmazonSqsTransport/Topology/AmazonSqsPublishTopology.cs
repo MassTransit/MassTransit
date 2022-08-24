@@ -29,6 +29,20 @@ namespace MassTransit.AmazonSqsTransport.Topology
             return GetMessageTopology<T>() as IAmazonSqsMessagePublishTopology<T>;
         }
 
+        IAmazonSqsMessagePublishTopologyConfigurator IAmazonSqsPublishTopologyConfigurator.GetMessageTopology(Type messageType)
+        {
+            return GetMessageTopology(messageType) as IAmazonSqsMessagePublishTopologyConfigurator;
+        }
+
+        public BrokerTopology GetPublishBrokerTopology()
+        {
+            var builder = new PublishEndpointBrokerTopologyBuilder();
+
+            ForEachMessageType<IAmazonSqsMessagePublishTopology>(x => x.Apply(builder));
+
+            return builder.BuildBrokerTopology();
+        }
+
         IAmazonSqsMessagePublishTopologyConfigurator<T> IAmazonSqsPublishTopologyConfigurator.GetMessageTopology<T>()
         {
             return GetMessageTopology<T>() as IAmazonSqsMessagePublishTopologyConfigurator<T>;

@@ -44,6 +44,13 @@ namespace MassTransit.GrpcTransport.Configuration
             configureTopology?.Invoke(configurator);
         }
 
+        public void Publish(Type messageType, Action<IGrpcMessagePublishTopologyConfigurator>? configure = null)
+        {
+            var configurator = _busConfiguration.Topology.Publish.GetMessageTopology(messageType);
+
+            configure?.Invoke(configurator);
+        }
+
         public void Host(Action<IGrpcHostConfigurator>? configure)
         {
             configure?.Invoke(_hostConfiguration.Configurator);

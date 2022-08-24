@@ -67,8 +67,7 @@ namespace MassTransit.Transports
 
         Uri HostAddress { get; }
 
-        IPublishPipe PublishPipe => _publishPipe.Value;
-        ISendPipe SendPipe => _sendPipe.Value;
+        public bool IsBusEndpoint { get; set; }
 
         public IReceiveObserver ReceiveObservers => _receiveObservers;
 
@@ -147,12 +146,12 @@ namespace MassTransit.Transports
 
         protected virtual ISendEndpointProvider CreateSendEndpointProvider()
         {
-            return new SendEndpointProvider(_sendTransportProvider.Value, _sendObservers, this, SendPipe);
+            return new SendEndpointProvider(_sendTransportProvider.Value, _sendObservers, this, _sendPipe.Value);
         }
 
         protected virtual IPublishEndpointProvider CreatePublishEndpointProvider()
         {
-            return new PublishEndpointProvider(_publishTransportProvider.Value, HostAddress, _publishObservers, this, PublishPipe, _publishTopology);
+            return new PublishEndpointProvider(_publishTransportProvider.Value, HostAddress, _publishObservers, this, _publishPipe.Value, _publishTopology);
         }
 
         protected abstract ISendTransportProvider CreateSendTransportProvider();

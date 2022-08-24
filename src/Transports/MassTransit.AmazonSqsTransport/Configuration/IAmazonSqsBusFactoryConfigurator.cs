@@ -1,4 +1,5 @@
-﻿namespace MassTransit
+﻿#nullable enable
+namespace MassTransit
 {
     using System;
 
@@ -24,8 +25,10 @@
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="configureTopology"></param>
-        void Publish<T>(Action<IAmazonSqsMessagePublishTopologyConfigurator<T>> configureTopology)
+        void Publish<T>(Action<IAmazonSqsMessagePublishTopologyConfigurator<T>>? configureTopology = null)
             where T : class;
+
+        void Publish(Type messageType, Action<IAmazonSqsMessagePublishTopologyConfigurator>? configure = null);
 
         /// <summary>
         /// In most cases, this is not needed and should not be used. However, if for any reason the default bus

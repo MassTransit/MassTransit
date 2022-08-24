@@ -7,6 +7,8 @@
         IReceivePipelineConfigurator,
         ISpecification
     {
+        bool IsBusEndpoint { get; }
+
         IConsumePipeConfiguration Consume { get; }
         ISendPipeConfiguration Send { get; }
         IPublishPipeConfiguration Publish { get; }

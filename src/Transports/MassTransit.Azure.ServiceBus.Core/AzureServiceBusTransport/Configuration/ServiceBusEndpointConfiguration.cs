@@ -13,19 +13,20 @@
             Topology = topologyConfiguration;
         }
 
-        ServiceBusEndpointConfiguration(IServiceBusEndpointConfiguration parentConfiguration, IServiceBusTopologyConfiguration topologyConfiguration)
-            : base(parentConfiguration, topologyConfiguration)
+        ServiceBusEndpointConfiguration(IServiceBusEndpointConfiguration parentConfiguration, IServiceBusTopologyConfiguration topologyConfiguration,
+            bool isBusEndpoint)
+            : base(parentConfiguration, topologyConfiguration, isBusEndpoint)
         {
             Topology = topologyConfiguration;
         }
 
         public new IServiceBusTopologyConfiguration Topology { get; }
 
-        public IServiceBusEndpointConfiguration CreateEndpointConfiguration()
+        public IServiceBusEndpointConfiguration CreateEndpointConfiguration(bool isBusEndpoint)
         {
             var topologyConfiguration = new ServiceBusTopologyConfiguration(Topology);
 
-            return new ServiceBusEndpointConfiguration(this, topologyConfiguration);
+            return new ServiceBusEndpointConfiguration(this, topologyConfiguration, isBusEndpoint);
         }
     }
 }

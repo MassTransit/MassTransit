@@ -53,6 +53,20 @@
             return FormatSubscriptionName(string.IsNullOrWhiteSpace(hostScope) ? entityName : $"{entityName}-{hostScope}");
         }
 
+        IServiceBusMessagePublishTopologyConfigurator IServiceBusPublishTopologyConfigurator.GetMessageTopology(Type messageType)
+        {
+            return GetMessageTopology(messageType) as IServiceBusMessagePublishTopologyConfigurator;
+        }
+
+        public BrokerTopology GetPublishBrokerTopology()
+        {
+            var builder = new PublishEndpointBrokerTopologyBuilder(this);
+
+            ForEachMessageType<IServiceBusMessagePublishTopology>(x => x.Apply(builder));
+
+            return builder.BuildBrokerTopology();
+        }
+
         IServiceBusMessagePublishTopologyConfigurator<T> IServiceBusPublishTopologyConfigurator.GetMessageTopology<T>()
         {
             return GetMessageTopology<T>() as IServiceBusMessagePublishTopologyConfigurator<T>;

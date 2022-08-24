@@ -104,10 +104,26 @@ namespace MassTransit.Topology
             return (IMessagePublishTopologyConfigurator<T>)topology;
         }
 
+        public IMessagePublishTopologyConfigurator GetMessageTopology(Type messageType)
+        {
+            if (MessageTypeCache.IsValidMessageType(messageType) == false)
+                throw new ArgumentException(MessageTypeCache.InvalidMessageTypeReason(messageType), nameof(messageType));
+
+            var topology = _messageTypes.GetOrAdd(messageType, CreateMessageType);
+
+            return topology;
+        }
+
         protected void OnMessageTopologyCreated<T>(IMessagePublishTopologyConfigurator<T> messageTopology)
             where T : class
         {
             _observers.MessageTopologyCreated(messageTopology);
+        }
+
+        protected void ForEachMessageType<T>(Action<T> callback)
+        {
+            foreach (T configurator in _messageTypes.Values)
+                callback(configurator);
         }
 
         void ApplyConventionsToMessageTopology<T>(IMessagePublishTopologyConfigurator<T> messageTopology)

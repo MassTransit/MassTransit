@@ -23,9 +23,9 @@ namespace MassTransit.AzureServiceBusTransport.Topology
         public IServiceBusQueueConfigurator QueueConfigurator => _queueConfigurator;
 
         public override bool RequiresSession => _queueConfigurator.RequiresSession ?? false;
-        public override int MaxConcurrentCallsPerSession => _queueConfigurator.MaxConcurrentCallsPerSession ?? 1;
 
         public bool RemoveSubscriptions { get; set; }
+        public override int MaxConcurrentCallsPerSession => _queueConfigurator.MaxConcurrentCallsPerSession ?? 1;
 
         public override string Path => _queueConfigurator.FullPath;
 

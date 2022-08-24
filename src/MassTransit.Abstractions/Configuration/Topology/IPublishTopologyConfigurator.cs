@@ -1,5 +1,6 @@
 namespace MassTransit
 {
+    using System;
     using Configuration;
 
 
@@ -14,6 +15,12 @@ namespace MassTransit
         /// <returns></returns>
         new IMessagePublishTopologyConfigurator<T> GetMessageTopology<T>()
             where T : class;
+
+        /// <summary>
+        /// Returns the specification for the message type
+        /// </summary>
+        /// <returns></returns>
+        IMessagePublishTopologyConfigurator GetMessageTopology(Type messageType);
 
         /// <summary>
         /// Adds a convention to the topology, which will be applied to every message type

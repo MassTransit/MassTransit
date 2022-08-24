@@ -15,5 +15,7 @@ namespace MassTransit
 
         new IRabbitMqMessagePublishTopology<T> GetMessageTopology<T>()
             where T : class;
+
+        BrokerTopology GetPublishBrokerTopology();
     }
 }

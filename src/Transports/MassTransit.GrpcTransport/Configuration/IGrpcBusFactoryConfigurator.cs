@@ -17,6 +17,8 @@ namespace MassTransit
         void Publish<T>(Action<IGrpcMessagePublishTopologyConfigurator<T>>? configureTopology)
             where T : class;
 
+        void Publish(Type messageType, Action<IGrpcMessagePublishTopologyConfigurator>? configure = null);
+
         /// <summary>
         /// Configure the base address for the host
         /// </summary>

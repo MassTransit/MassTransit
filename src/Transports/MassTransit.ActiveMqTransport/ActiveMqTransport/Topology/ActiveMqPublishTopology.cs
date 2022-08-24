@@ -25,6 +25,20 @@ namespace MassTransit.ActiveMqTransport.Topology
 
         public string VirtualTopicPrefix { get; set; }
 
+        IActiveMqMessagePublishTopologyConfigurator IActiveMqPublishTopologyConfigurator.GetMessageTopology(Type messageType)
+        {
+            return GetMessageTopology(messageType) as IActiveMqMessagePublishTopologyConfigurator;
+        }
+
+        public BrokerTopology GetPublishBrokerTopology()
+        {
+            var builder = new PublishEndpointBrokerTopologyBuilder();
+
+            ForEachMessageType<IActiveMqMessagePublishTopology>(x => x.Apply(builder));
+
+            return builder.BuildBrokerTopology();
+        }
+
         IActiveMqMessagePublishTopologyConfigurator<T> IActiveMqPublishTopologyConfigurator.GetMessageTopology<T>()
         {
             return GetMessageTopology<T>() as IActiveMqMessagePublishTopologyConfigurator<T>;

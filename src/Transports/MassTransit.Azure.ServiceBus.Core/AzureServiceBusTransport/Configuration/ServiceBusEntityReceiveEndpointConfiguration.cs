@@ -139,6 +139,15 @@
             var transport = new ReceiveTransport<ClientContext>(_hostConfiguration, receiveEndpointContext, () => receiveEndpointContext
                 .ClientContextSupervisor, clientPipe);
 
+            if (IsBusEndpoint)
+            {
+                var publishTopology = _hostConfiguration.Topology.PublishTopology;
+
+                var brokerTopology = publishTopology.GetPublishBrokerTopology();
+
+                transport.PreStartPipe = new ConfigureServiceBusTopologyFilter<IPublishTopology>(publishTopology, brokerTopology).ToPipe<ClientContext>();
+            }
+
             var receiveEndpoint = new ReceiveEndpoint(transport, receiveEndpointContext);
 
             var queueName = _settings.Path ?? NewId.Next().ToString(FormatUtil.Formatter);

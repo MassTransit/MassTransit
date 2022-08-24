@@ -12,10 +12,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         new IRabbitMqTopologyConfiguration Topology { get; }
 
-        /// <summary>
-        /// Create an endpoint configuration on the bus, which can later be turned into a receive endpoint
-        /// </summary>
-        /// <returns></returns>
-        IRabbitMqEndpointConfiguration CreateEndpointConfiguration();
+        IRabbitMqEndpointConfiguration CreateEndpointConfiguration(bool isBusEndpoint = false);
     }
 }

@@ -83,6 +83,15 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             var transport = new ReceiveTransport<ModelContext>(_hostConfiguration, context, () => context.ModelContextSupervisor, modelPipe);
 
+            if (IsBusEndpoint)
+            {
+                var publishTopology = _hostConfiguration.Topology.PublishTopology;
+
+                var brokerTopology = publishTopology.GetPublishBrokerTopology();
+
+                transport.PreStartPipe = new ConfigureRabbitMqTopologyFilter<IPublishTopology>(publishTopology, brokerTopology).ToPipe();
+            }
+
             var receiveEndpoint = new ReceiveEndpoint(transport, context);
 
             var queueName = _settings.QueueName ?? NewId.Next().ToString(FormatUtil.Formatter);

@@ -15,6 +15,6 @@
         /// Create an endpoint configuration on the bus, which can later be turned into a receive endpoint
         /// </summary>
         /// <returns></returns>
-        IGrpcEndpointConfiguration CreateEndpointConfiguration();
+        IGrpcEndpointConfiguration CreateEndpointConfiguration(bool isBusEndpoint = false);
     }
 }

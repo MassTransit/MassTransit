@@ -45,6 +45,9 @@ namespace MassTransit.ActiveMqTransport.Topology
 
         public void Apply(IPublishEndpointBrokerTopologyBuilder builder)
         {
+            if (Exclude)
+                return;
+
             builder.Topic = builder.CreateTopic(_topic.EntityName, _topic.Durable, _topic.AutoDelete);
 
             // this was disabled previously, so not sure if it can be added

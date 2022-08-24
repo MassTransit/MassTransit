@@ -26,6 +26,9 @@ namespace MassTransit.InMemoryTransport
 
         public void Apply(IMessageFabricPublishTopologyBuilder builder)
         {
+            if (Exclude)
+                return;
+
             var exchangeName = _messageTopology.EntityName;
 
             builder.ExchangeDeclare(exchangeName, ExchangeType);

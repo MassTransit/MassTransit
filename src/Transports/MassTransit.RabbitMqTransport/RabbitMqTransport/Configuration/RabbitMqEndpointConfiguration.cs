@@ -13,19 +13,19 @@ namespace MassTransit.RabbitMqTransport.Configuration
             Topology = topologyConfiguration;
         }
 
-        RabbitMqEndpointConfiguration(IEndpointConfiguration parentConfiguration, IRabbitMqTopologyConfiguration topologyConfiguration)
-            : base(parentConfiguration, topologyConfiguration)
+        RabbitMqEndpointConfiguration(IEndpointConfiguration parentConfiguration, IRabbitMqTopologyConfiguration topologyConfiguration, bool isBusEndpoint)
+            : base(parentConfiguration, topologyConfiguration, isBusEndpoint)
         {
             Topology = topologyConfiguration;
         }
 
         public new IRabbitMqTopologyConfiguration Topology { get; }
 
-        public IRabbitMqEndpointConfiguration CreateEndpointConfiguration()
+        public IRabbitMqEndpointConfiguration CreateEndpointConfiguration(bool isBusEndpoint)
         {
             var topologyConfiguration = new RabbitMqTopologyConfiguration(Topology);
 
-            return new RabbitMqEndpointConfiguration(this, topologyConfiguration);
+            return new RabbitMqEndpointConfiguration(this, topologyConfiguration, isBusEndpoint);
         }
     }
 }

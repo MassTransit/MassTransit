@@ -1,8 +1,7 @@
-﻿namespace MassTransit
+﻿#nullable enable
+namespace MassTransit
 {
     using System;
-    using RabbitMqTransport;
-    using RabbitMqTransport.Topology;
 
 
     public interface IRabbitMqBusFactoryConfigurator :
@@ -18,7 +17,7 @@
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="configureTopology"></param>
-        void Send<T>(Action<IRabbitMqMessageSendTopologyConfigurator<T>> configureTopology)
+        void Send<T>(Action<IRabbitMqMessageSendTopologyConfigurator<T>>? configureTopology = null)
             where T : class;
 
         /// <summary>
@@ -26,8 +25,10 @@
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="configureTopology"></param>
-        void Publish<T>(Action<IRabbitMqMessagePublishTopologyConfigurator<T>> configureTopology)
+        void Publish<T>(Action<IRabbitMqMessagePublishTopologyConfigurator<T>>? configureTopology = null)
             where T : class;
+
+        void Publish(Type messageType, Action<IRabbitMqMessagePublishTopologyConfigurator>? configure = null);
 
         /// <summary>
         /// In most cases, this is not needed and should not be used. However, if for any reason the default bus

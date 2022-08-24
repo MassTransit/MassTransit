@@ -2,7 +2,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
 {
     using System;
     using MassTransit.Configuration;
-    using Topology;
 
 
     public interface IRabbitMqHostConfiguration :

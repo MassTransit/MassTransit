@@ -25,6 +25,8 @@ namespace MassTransit.Transports
             _transportPipe = transportPipe;
         }
 
+        public IPipe<TContext> PreStartPipe { get; set; }
+
         public void Probe(ProbeContext context)
         {
             var scope = context.CreateScope("receiveTransport");
@@ -39,7 +41,7 @@ namespace MassTransit.Transports
         /// <returns>A task that is completed once the transport is shut down</returns>
         public ReceiveTransportHandle Start()
         {
-            return new ReceiveTransportAgent(_hostConfiguration.ReceiveTransportRetryPolicy, _context, _supervisorFactory, _transportPipe);
+            return new ReceiveTransportAgent(_hostConfiguration.ReceiveTransportRetryPolicy, _context, _supervisorFactory, _transportPipe, PreStartPipe);
         }
 
         public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
@@ -71,15 +73,17 @@ namespace MassTransit.Transports
             readonly IRetryPolicy _retryPolicy;
             readonly Func<ISupervisor<TContext>> _supervisorFactory;
             readonly IPipe<TContext> _transportPipe;
+            readonly IPipe<TContext> _preStartPipe;
             ISupervisor<TContext> _supervisor;
 
             public ReceiveTransportAgent(IRetryPolicy retryPolicy, ReceiveEndpointContext context, Func<ISupervisor<TContext>> supervisorFactory,
-                IPipe<TContext> transportPipe)
+                IPipe<TContext> transportPipe, IPipe<TContext> preStartPipe)
             {
                 _retryPolicy = retryPolicy;
                 _context = context;
                 _supervisorFactory = supervisorFactory;
                 _transportPipe = transportPipe;
+                _preStartPipe = preStartPipe;
 
                 var receiver = Task.Run(Run);
 
@@ -181,6 +185,9 @@ namespace MassTransit.Transports
                 try
                 {
                     _supervisor = _supervisorFactory();
+
+                    if (_preStartPipe.IsNotEmpty())
+                        await _supervisor.Send(_preStartPipe, Stopping).ConfigureAwait(false);
 
                     await _context.OnTransportStartup(_supervisor, Stopping).ConfigureAwait(false);
 

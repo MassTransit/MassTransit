@@ -1,6 +1,6 @@
 ﻿namespace MassTransit
 {
-    using ActiveMqTransport.Topology;
+    using System;
 
 
     public interface IActiveMqPublishTopologyConfigurator :
@@ -16,5 +16,7 @@
 
         new IActiveMqMessagePublishTopologyConfigurator<T> GetMessageTopology<T>()
             where T : class;
+
+        new IActiveMqMessagePublishTopologyConfigurator GetMessageTopology(Type messageType);
     }
 }

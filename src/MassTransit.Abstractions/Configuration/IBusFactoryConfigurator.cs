@@ -35,6 +35,11 @@ namespace MassTransit
         bool DeployTopologyOnly { set; }
 
         /// <summary>
+        /// Deploys defined Publish message types to the broker at startup
+        /// </summary>
+        bool DeployPublishTopology { set; }
+
+        /// <summary>
         /// Specify the number of messages to prefetch from the message broker
         /// </summary>
         /// <value>The limit</value>

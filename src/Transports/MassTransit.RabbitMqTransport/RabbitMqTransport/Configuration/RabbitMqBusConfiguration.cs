@@ -14,7 +14,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             : base(topologyConfiguration)
         {
             HostConfiguration = new RabbitMqHostConfiguration(this, topologyConfiguration);
-            BusEndpointConfiguration = CreateEndpointConfiguration();
+            BusEndpointConfiguration = CreateEndpointConfiguration(true);
 
             _busObservers = new BusObservable();
         }

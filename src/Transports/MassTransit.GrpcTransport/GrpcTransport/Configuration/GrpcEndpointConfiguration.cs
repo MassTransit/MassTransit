@@ -15,19 +15,19 @@
             _topologyConfiguration = topologyConfiguration;
         }
 
-        GrpcEndpointConfiguration(IGrpcEndpointConfiguration parentConfiguration, IGrpcTopologyConfiguration topologyConfiguration)
-            : base(parentConfiguration, topologyConfiguration)
+        GrpcEndpointConfiguration(IGrpcEndpointConfiguration parentConfiguration, IGrpcTopologyConfiguration topologyConfiguration, bool isBusEndpoint)
+            : base(parentConfiguration, topologyConfiguration, isBusEndpoint)
         {
             _topologyConfiguration = topologyConfiguration;
         }
 
         IGrpcTopologyConfiguration IGrpcEndpointConfiguration.Topology => _topologyConfiguration;
 
-        public IGrpcEndpointConfiguration CreateEndpointConfiguration()
+        public IGrpcEndpointConfiguration CreateEndpointConfiguration(bool isBusEndpoint)
         {
             var topologyConfiguration = new GrpcTopologyConfiguration(_topologyConfiguration);
 
-            return new GrpcEndpointConfiguration(this, topologyConfiguration);
+            return new GrpcEndpointConfiguration(this, topologyConfiguration, isBusEndpoint);
         }
     }
 }

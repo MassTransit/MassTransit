@@ -13,19 +13,19 @@
             Topology = topologyConfiguration;
         }
 
-        ActiveMqEndpointConfiguration(IEndpointConfiguration parentConfiguration, IActiveMqTopologyConfiguration topologyConfiguration)
-            : base(parentConfiguration, topologyConfiguration)
+        ActiveMqEndpointConfiguration(IEndpointConfiguration parentConfiguration, IActiveMqTopologyConfiguration topologyConfiguration, bool isBusEndpoint)
+            : base(parentConfiguration, topologyConfiguration, isBusEndpoint)
         {
             Topology = topologyConfiguration;
         }
 
         public new IActiveMqTopologyConfiguration Topology { get; }
 
-        public IActiveMqEndpointConfiguration CreateEndpointConfiguration()
+        public IActiveMqEndpointConfiguration CreateEndpointConfiguration(bool isBusEndpoint)
         {
             var topologyConfiguration = new ActiveMqTopologyConfiguration(Topology);
 
-            return new ActiveMqEndpointConfiguration(this, topologyConfiguration);
+            return new ActiveMqEndpointConfiguration(this, topologyConfiguration, isBusEndpoint);
         }
     }
 }

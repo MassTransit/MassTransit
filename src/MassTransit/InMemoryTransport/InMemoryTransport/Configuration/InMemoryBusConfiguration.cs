@@ -15,7 +15,7 @@
             : base(topologyConfiguration)
         {
             HostConfiguration = new InMemoryHostConfiguration(this, baseAddress, topologyConfiguration);
-            BusEndpointConfiguration = CreateEndpointConfiguration();
+            BusEndpointConfiguration = CreateEndpointConfiguration(true);
 
             _busObservers = new BusObservable();
         }
