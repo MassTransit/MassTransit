@@ -86,27 +86,6 @@ jobs:
         run: dotnet test -c Release -f ${{ matrix.framework }} --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.Abstractions.Tests
 
-  test-windows:
-    name: Unit Tests
-    runs-on: windows-latest
-    timeout-minutes: 10
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-
-      - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: '6.0.x'
-
-      - name: Unit Tests
-        run: dotnet test -c Release -f net461 --logger:"console;verbosity=normal" --filter Category!=Flaky
-        working-directory: tests/MassTransit.Tests
-
-      - name: Test Abstractions
-        run: dotnet test -c Release -f net461 --logger:"console;verbosity=normal" --filter Category!=Flaky
-        working-directory: tests/MassTransit.Abstractions.Tests
-
   test-containers:
     name: Container Tests
     runs-on: windows-latest
@@ -560,7 +539,6 @@ jobs:
     needs:
       - compile
       - test-ubuntu
-      - test-windows
       - test-containers
       - test-activemq
       # - test-azure-service-bus
