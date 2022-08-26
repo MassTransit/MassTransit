@@ -248,7 +248,7 @@ namespace MassTransit.Configuration
 
         public void AddDeserializer(ISerializerFactory factory, bool isDefault = false)
         {
-            _busConfiguration.Serialization.AddDeserializer(factory);
+            _busConfiguration.Serialization.AddDeserializer(factory, isDefault);
         }
 
         public void ClearSerialization()
