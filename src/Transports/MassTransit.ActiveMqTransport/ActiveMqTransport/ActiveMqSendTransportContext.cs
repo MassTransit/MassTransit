@@ -78,13 +78,13 @@ namespace MassTransit.ActiveMqTransport
 
             var transportMessage = sessionContext.CreateBytesMessage();
 
+            transportMessage.Content = context.Body.GetBytes();
+
             transportMessage.Properties.SetHeaders(context.Headers);
 
             transportMessage.Properties[MessageHeaders.ContentType] = context.ContentType.ToString();
 
             transportMessage.NMSDeliveryMode = context.Durable ? MsgDeliveryMode.Persistent : MsgDeliveryMode.NonPersistent;
-
-            transportMessage.Content = context.Body.GetBytes();
 
             if (context.MessageId.HasValue)
                 transportMessage.NMSMessageId = context.MessageId.ToString();
