@@ -2,7 +2,7 @@
   <Import Project="../../signing.props" />
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFrameworks>netcoreapp3.1;net6.0</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup>
