@@ -20,12 +20,12 @@ namespace MassTransit.Context
 
         public override Task NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
         {
-            return Task.CompletedTask;
+            return _context.NotifyConsumed(context, duration, consumerType);
         }
 
         public override Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
         {
-            return Task.CompletedTask;
+            return _context.NotifyFaulted(context, duration, consumerType, exception);
         }
 
         public Batch<TMessage> Message { get; }
