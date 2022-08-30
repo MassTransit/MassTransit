@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.ActiveMqTransport.Topology
 {
     using System;
-    using Configuration;
     using MassTransit.Topology;
 
 
@@ -29,7 +28,7 @@
 
         public ErrorSettings GetErrorSettings(EntitySettings settings)
         {
-            var errorSettings = new ActiveMqErrorSettings(settings, settings.EntityName + "_error");
+            var errorSettings = new ActiveMqErrorSettings(settings, ErrorQueueNameFormatter.FormatErrorQueueName(settings.EntityName));
 
             ConfigureErrorSettings?.Invoke(errorSettings);
 
@@ -38,7 +37,7 @@
 
         public DeadLetterSettings GetDeadLetterSettings(EntitySettings settings)
         {
-            var deadLetterSetting = new ActiveMqDeadLetterSettings(settings, settings.EntityName + "_skipped");
+            var deadLetterSetting = new ActiveMqDeadLetterSettings(settings, DeadLetterQueueNameFormatter.FormatDeadLetterQueueName(settings.EntityName));
 
             ConfigureDeadLetterSettings?.Invoke(deadLetterSetting);
 

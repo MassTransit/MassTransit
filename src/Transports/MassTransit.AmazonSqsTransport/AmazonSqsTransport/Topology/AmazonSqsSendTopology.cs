@@ -33,7 +33,7 @@
 
         public ErrorSettings GetErrorSettings(ReceiveSettings settings)
         {
-            var errorSettings = new QueueErrorSettings(settings, BuildEntityName(settings.EntityName, "_error"));
+            var errorSettings = new QueueErrorSettings(settings, BuildEntityName(settings.EntityName, x => ErrorQueueNameFormatter.FormatErrorQueueName(x)));
 
             ConfigureErrorSettings?.Invoke(errorSettings);
 
@@ -42,7 +42,8 @@
 
         public DeadLetterSettings GetDeadLetterSettings(ReceiveSettings settings)
         {
-            var deadLetterSetting = new QueueDeadLetterSettings(settings, BuildEntityName(settings.EntityName, "_skipped"));
+            var deadLetterSetting = new QueueDeadLetterSettings(settings,
+                BuildEntityName(settings.EntityName, x => DeadLetterQueueNameFormatter.FormatDeadLetterQueueName(x)));
 
             ConfigureDeadLetterSettings?.Invoke(deadLetterSetting);
 
@@ -58,14 +59,14 @@
             return messageTopology;
         }
 
-        static string BuildEntityName(string entityName, string suffix)
+        static string BuildEntityName(string entityName, Func<string, string> formatQueueName)
         {
             const string fifoSuffix = ".fifo";
 
             if (!entityName.EndsWith(fifoSuffix, true, CultureInfo.InvariantCulture))
-                return entityName + suffix;
+                return formatQueueName(entityName);
 
-            return entityName.Substring(0, entityName.Length - fifoSuffix.Length) + suffix + fifoSuffix;
+            return formatQueueName(entityName.Substring(0, entityName.Length - fifoSuffix.Length)) + fifoSuffix;
         }
     }
 }

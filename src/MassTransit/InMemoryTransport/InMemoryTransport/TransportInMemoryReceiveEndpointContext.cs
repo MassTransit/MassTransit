@@ -20,6 +20,7 @@
             _configuration = configuration;
         }
 
+        public ISendTopology Send => _configuration.Topology.Send;
         public IMessageFabric<InMemoryTransportContext, InMemoryTransportMessage> MessageFabric => _hostConfiguration.TransportProvider.MessageFabric;
         public InMemoryTransportContext TransportContext => _hostConfiguration.TransportProvider;
 

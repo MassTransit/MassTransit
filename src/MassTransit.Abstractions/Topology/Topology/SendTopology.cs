@@ -23,8 +23,15 @@
             _observers = new SendTopologyConfigurationObservable();
 
             _conventions = new List<IMessageSendTopologyConvention>();
+
+            DeadLetterQueueNameFormatter = DefaultDeadLetterQueueNameFormatter.Instance;
+            ErrorQueueNameFormatter = DefaultErrorQueueNameFormatter.Instance;
+
             _observers.Connect(this);
         }
+
+        public IDeadLetterQueueNameFormatter DeadLetterQueueNameFormatter { get; set; }
+        public IErrorQueueNameFormatter ErrorQueueNameFormatter { get; set; }
 
         void ISendTopologyConfigurationObserver.MessageTopologyCreated<T>(IMessageSendTopologyConfigurator<T> messageTopology)
         {

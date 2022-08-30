@@ -35,7 +35,7 @@
         // TODO this is a smell, send for error/dead-letter settings?
         public ErrorSettings GetErrorSettings(ReceiveSettings settings)
         {
-            var errorSettings = new RabbitMqErrorSettings(settings, settings.ExchangeName + "_error");
+            var errorSettings = new RabbitMqErrorSettings(settings, ErrorQueueNameFormatter.FormatErrorQueueName(settings.ExchangeName));
 
             ConfigureErrorSettings?.Invoke(errorSettings);
 
@@ -44,7 +44,7 @@
 
         public DeadLetterSettings GetDeadLetterSettings(ReceiveSettings settings)
         {
-            var deadLetterSetting = new RabbitMqDeadLetterSettings(settings, settings.ExchangeName + "_skipped");
+            var deadLetterSetting = new RabbitMqDeadLetterSettings(settings, DeadLetterQueueNameFormatter.FormatDeadLetterQueueName(settings.ExchangeName));
 
             ConfigureDeadLetterSettings?.Invoke(deadLetterSetting);
 

@@ -7,6 +7,8 @@ namespace MassTransit.InMemoryTransport
     public interface InMemoryReceiveEndpointContext :
         ReceiveEndpointContext
     {
+        ISendTopology Send { get; }
+
         IMessageFabric<InMemoryTransportContext, InMemoryTransportMessage> MessageFabric { get; }
 
         InMemoryTransportContext TransportContext { get; }

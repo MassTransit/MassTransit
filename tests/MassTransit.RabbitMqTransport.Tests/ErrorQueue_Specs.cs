@@ -102,7 +102,8 @@
 
         protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
-            configurator.ReceiveEndpoint("input_queue_error", x =>
+            var queueName = configurator.SendTopology.ErrorQueueNameFormatter.FormatErrorQueueName(RabbitMqTestHarness.InputQueueName);
+            configurator.ReceiveEndpoint(queueName, x =>
             {
                 x.PurgeOnStartup = true;
 

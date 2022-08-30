@@ -9,9 +9,6 @@
         SendTopology,
         IServiceBusSendTopologyConfigurator
     {
-        const string ErrorQueueSuffix = "_error";
-        const string DeadLetterQueueSuffix = "_skipped";
-
         public Action<IServiceBusEntityConfigurator> ConfigureErrorSettings { get; set; }
         public Action<IServiceBusEntityConfigurator> ConfigureDeadLetterSettings { get; set; }
 
@@ -45,7 +42,7 @@
         public SendSettings GetErrorSettings(IServiceBusQueueConfigurator configurator)
         {
             var createQueueOptions = configurator.GetCreateQueueOptions();
-            createQueueOptions.Name += ErrorQueueSuffix;
+            createQueueOptions.Name = ErrorQueueNameFormatter.FormatErrorQueueName(createQueueOptions.Name);
 
             var errorSettings = new QueueSendSettings(createQueueOptions);
 
@@ -57,7 +54,7 @@
         public SendSettings GetDeadLetterSettings(IServiceBusQueueConfigurator configurator)
         {
             var createQueueOptions = configurator.GetCreateQueueOptions();
-            createQueueOptions.Name += DeadLetterQueueSuffix;
+            createQueueOptions.Name = DeadLetterQueueNameFormatter.FormatDeadLetterQueueName(createQueueOptions.Name);
 
             var deadLetterSetting = new QueueSendSettings(createQueueOptions);
 

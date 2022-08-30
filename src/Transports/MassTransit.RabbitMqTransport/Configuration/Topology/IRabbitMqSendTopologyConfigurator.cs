@@ -1,7 +1,6 @@
 ﻿namespace MassTransit
 {
     using System;
-    using RabbitMqTransport.Topology;
 
 
     public interface IRabbitMqSendTopologyConfigurator :
