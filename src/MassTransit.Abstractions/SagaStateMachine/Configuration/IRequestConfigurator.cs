@@ -14,5 +14,11 @@ namespace MassTransit
         /// Sets the request timeout
         /// </summary>
         TimeSpan Timeout { set; }
+
+        /// <summary>
+        /// Set the time to live of the request message sent by the saga. If not specified, and the timeout
+        /// is > TimeSpan.Zero, the <see cref="Timeout"/> value is used.
+        /// </summary>
+        TimeSpan? TimeToLive { set; }
     }
 }

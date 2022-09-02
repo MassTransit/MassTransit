@@ -126,6 +126,7 @@
             public Uri ServiceAddress { get; }
 
             public TimeSpan Timeout { get; }
+            public TimeSpan? TimeToLive { get; }
         }
 
 

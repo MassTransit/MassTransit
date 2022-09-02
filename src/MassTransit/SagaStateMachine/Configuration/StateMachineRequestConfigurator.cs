@@ -26,5 +26,6 @@ namespace MassTransit.Configuration
 
         public Uri ServiceAddress { get; set; }
         public TimeSpan Timeout { get; set; }
+        public TimeSpan? TimeToLive { get; set; }
     }
 }

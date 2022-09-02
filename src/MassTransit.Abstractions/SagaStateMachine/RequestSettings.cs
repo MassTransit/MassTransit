@@ -18,5 +18,10 @@ namespace MassTransit
         /// The timeout period before the request times out
         /// </summary>
         TimeSpan Timeout { get; }
+
+        /// <summary>
+        /// If specified, the TimeToLive is set on the outgoing request
+        /// </summary>
+        TimeSpan? TimeToLive { get; }
     }
 }

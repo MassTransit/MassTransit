@@ -69,6 +69,9 @@ namespace MassTransit.SagaStateMachine
 
         public void SetSendContextHeaders(SendContext<TRequest> context)
         {
+            if (Settings.TimeToLive.HasValue && Settings.TimeToLive.Value > TimeSpan.Zero)
+                context.TimeToLive = Settings.TimeToLive.Value;
+
             context.Headers.Set(MessageHeaders.Request.Accept, _accept);
         }
 
