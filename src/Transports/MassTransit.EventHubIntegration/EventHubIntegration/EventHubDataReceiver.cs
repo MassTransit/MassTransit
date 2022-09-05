@@ -29,9 +29,7 @@
             _dispatcher = context.CreateReceivePipeDispatcher();
             _dispatcher.ZeroActivity += HandleDeliveryComplete;
 
-            var prefetchCount = Math.Max(1000, processorContext.ReceiveSettings.CheckpointMessageCount / 10);
-
-            _executor = new ChannelExecutor(prefetchCount, processorContext.ReceiveSettings.ConcurrentMessageLimit);
+            _executor = new ChannelExecutor(processorContext.ReceiveSettings.PrefetchCount, processorContext.ReceiveSettings.ConcurrentMessageLimit);
         }
 
         public long DeliveryCount => _dispatcher.DispatchCount;

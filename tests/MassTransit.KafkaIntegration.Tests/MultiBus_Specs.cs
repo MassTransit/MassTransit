@@ -1,15 +1,18 @@
 namespace MassTransit.KafkaIntegration.Tests
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using Confluent.Kafka;
     using Internals;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
     using NUnit.Framework;
     using TestFramework;
+    using Transports;
 
 
     public class MultiBus_Specs :
@@ -153,6 +156,144 @@ namespace MassTransit.KafkaIntegration.Tests
             {
                 _taskCompletionSource.TrySetResult(context);
             }
+        }
+    }
+
+
+    public class MultiBus_ReBalance_Specs :
+        InMemoryTestFixture
+    {
+        const string Topic = "long-receive-test-multi";
+
+        [Test]
+        public async Task Should_receive()
+        {
+            TaskCompletionSource<ConsumeContext<KafkaMessage>> taskCompletionSource = GetTask<ConsumeContext<KafkaMessage>>();
+
+            var config = new AdminClientConfig
+            {
+                BootstrapServers = "localhost:9092",
+            };
+
+            var adminClient = new AdminClientBuilder(config).Build();
+
+            var services = new ServiceCollection();
+            services.AddSingleton(taskCompletionSource);
+
+            services.TryAddSingleton<ILoggerFactory>(LoggerFactory);
+            services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
+
+            services.AddMassTransit(x =>
+            {
+                x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
+                x.AddRider(rider =>
+                {
+                    rider.AddConsumer<KafkaMessageConsumer>();
+                    rider.AddProducer<KafkaMessage>(Topic);
+
+                    rider.UsingKafka((context, k) =>
+                    {
+                        k.Host("localhost:9092");
+
+                        k.TopicEndpoint<KafkaMessage>(Topic, nameof(MultiBus_ReBalance_Specs), c =>
+                        {
+                            c.CreateIfMissing(t => t.NumPartitions = 6);
+                            c.ConfigureConsumer<KafkaMessageConsumer>(context);
+                        });
+                    });
+                });
+            });
+
+            services.AddMassTransit<ISecondBus>(x =>
+            {
+                x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
+                x.AddRider(rider =>
+                {
+                    rider.AddConsumer<KafkaMessageConsumer>();
+                    rider.AddProducer<KafkaMessage>(Topic);
+
+                    rider.UsingKafka((context, k) =>
+                    {
+                        k.Host("localhost:9092");
+
+                        k.TopicEndpoint<KafkaMessage>(Topic, nameof(MultiBus_ReBalance_Specs), c =>
+                        {
+                            c.ConfigureConsumer<KafkaMessageConsumer>(context);
+                        });
+                    });
+                });
+            });
+
+            var provider = services.BuildServiceProvider();
+
+            var busControl = provider.GetRequiredService<IBusControl>();
+
+            var scope = provider.CreateScope();
+
+            await busControl.StartAsync(TestCancellationToken);
+
+            var producer = scope.ServiceProvider.GetRequiredService<ITopicProducer<KafkaMessage>>();
+
+            try
+            {
+                var messageId = NewId.NextGuid();
+                await producer.Produce(new { }, Pipe.Execute<SendContext>(context => context.MessageId = messageId), TestCancellationToken);
+
+                var secondBus = provider.GetRequiredService<IBusInstance<ISecondBus>>();
+                await secondBus.BusControl.StartAsync(TestCancellationToken);
+
+                ConsumeContext<KafkaMessage> result = await taskCompletionSource.Task;
+
+                var groupInfo = adminClient.ListGroup(nameof(MultiBus_ReBalance_Specs), TimeSpan.FromSeconds(5));
+
+                while (groupInfo.State != "Stable")
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(10));
+                    groupInfo = adminClient.ListGroup(nameof(MultiBus_ReBalance_Specs), TimeSpan.FromSeconds(5));
+                }
+
+                Assert.AreEqual(messageId, result.MessageId);
+                Assert.AreEqual(groupInfo.Members.Count, 2); // this fails, second instance consumer assigned to all partitions
+
+                await secondBus.BusControl.StopAsync(TestCancellationToken);
+            }
+            finally
+            {
+                scope.Dispose();
+
+                await busControl.StopAsync(TestCancellationToken);
+
+                await provider.DisposeAsync();
+            }
+        }
+
+
+        class KafkaMessageConsumer :
+            IConsumer<KafkaMessage>
+        {
+            readonly TaskCompletionSource<ConsumeContext<KafkaMessage>> _taskCompletionSource;
+
+            public KafkaMessageConsumer(TaskCompletionSource<ConsumeContext<KafkaMessage>> taskCompletionSource)
+            {
+                _taskCompletionSource = taskCompletionSource;
+            }
+
+            public async Task Consume(ConsumeContext<KafkaMessage> context)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(20));
+                _taskCompletionSource.TrySetResult(context);
+            }
+        }
+
+
+        public interface ISecondBus :
+            IBus
+        {
+        }
+
+
+        public interface KafkaMessage
+        {
         }
     }
 }

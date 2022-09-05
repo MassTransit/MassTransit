@@ -61,8 +61,11 @@ namespace MassTransit.EventHubIntegration
         {
             LogContext.SetCurrentIfNull(_hostConfiguration.ReceiveLogContext);
 
-            if (_data.TryRemove(eventArgs.PartitionId, out var data))
+            if (_data.TryGetValue(eventArgs.PartitionId, out var data))
+            {
                 await data.Close(eventArgs).ConfigureAwait(false);
+                _data.TryRemove(eventArgs.PartitionId, out _);
+            }
         }
 
 

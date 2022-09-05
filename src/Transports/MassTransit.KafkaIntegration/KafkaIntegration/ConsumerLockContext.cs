@@ -2,6 +2,7 @@ namespace MassTransit.KafkaIntegration
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using Checkpoints;
     using Confluent.Kafka;
@@ -66,16 +67,19 @@ namespace MassTransit.KafkaIntegration
         {
             LogContext.SetCurrentIfNull(_hostConfiguration.ReceiveLogContext);
 
-            var tasks = new List<Task>();
-            foreach (var partition in partitions)
+            async Task<bool> CloseAndDelete(TopicPartitionOffset topicPartition)
             {
-                if (_data.TryRemove(partition.Partition, out var data))
-                    tasks.Add(data.Close(partition));
+                if (!_data.TryGetValue(topicPartition.Partition, out var data))
+                    return false;
+
+                await data.Close(topicPartition).ConfigureAwait(false);
+                return _data.TryRemove(topicPartition.Partition, out _);
+
             }
 
             async Task Close()
             {
-                await Task.WhenAll(tasks).ConfigureAwait(false);
+                await Task.WhenAll(partitions.Select(partition => CloseAndDelete(partition))).ConfigureAwait(false);
             }
 
             TaskUtil.Await(Close);

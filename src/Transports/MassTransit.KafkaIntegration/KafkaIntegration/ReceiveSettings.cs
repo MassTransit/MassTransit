@@ -8,6 +8,7 @@ namespace MassTransit.KafkaIntegration
         string Topic { get; }
         ushort MessageLimit { get; }
         ushort CheckpointMessageCount { get; }
+        int PrefetchCount { get; }
         int ConcurrencyLimit { get; }
         TimeSpan CheckpointInterval { get; }
     }
