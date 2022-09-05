@@ -41,6 +41,8 @@ namespace MassTransit.EventHubIntegration.Configuration
             CheckpointMessageCount = 5000;
             CheckpointMessageLimit = 10000;
 
+            PrefetchCount = Math.Max(1000, CheckpointMessageCount / 10);
+
             _processorConfigurator = new PipeConfigurator<ProcessorContext>();
         }
 

@@ -44,8 +44,7 @@
 
         async Task Consume()
         {
-            var prefetchCount = Math.Max(1000, _consumerContext.ReceiveSettings.CheckpointMessageCount / 10);
-            var executor = new ChannelExecutor(prefetchCount, _consumerContext.ReceiveSettings.ConcurrencyLimit);
+            var executor = new ChannelExecutor(_consumerContext.ReceiveSettings.PrefetchCount, _consumerContext.ReceiveSettings.ConcurrencyLimit);
 
             await _consumerContext.Subscribe().ConfigureAwait(false);
 

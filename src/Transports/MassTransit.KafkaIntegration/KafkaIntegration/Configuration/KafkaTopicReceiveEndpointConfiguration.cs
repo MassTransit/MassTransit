@@ -49,6 +49,7 @@ namespace MassTransit.KafkaIntegration.Configuration
             CheckpointMessageCount = 5000;
             MessageLimit = 10000;
             ConcurrencyLimit = 1;
+            PrefetchCount = Math.Max(1000, CheckpointMessageCount / 10);
 
             _consumerConfigurator = new PipeConfigurator<ConsumerContext<TKey, TValue>>();
         }
