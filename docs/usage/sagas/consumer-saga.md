@@ -68,7 +68,7 @@ public class OrderSaga :
     ISaga,
     InitiatedBy<SubmitOrder>,
     Orchestrates<OrderAccepted>,
-    Observes<OrderShipped>
+    Observes<OrderShipped, OrderSaga>
 {
     public Guid CorrelationId { get; set; }
 
