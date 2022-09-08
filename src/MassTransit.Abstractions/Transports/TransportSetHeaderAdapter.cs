@@ -53,6 +53,9 @@ namespace MassTransit.Transports
             if (key.StartsWith("MT-Host-"))
                 return _options.HasFlag(TransportHeaderOptions.IncludeHost);
 
+            if (key.Equals(MessageHeaders.FaultInputAddress))
+                return true;
+
             if (key.StartsWith("MT-Fault-"))
             {
                 if (_options.HasFlag(TransportHeaderOptions.IncludeFaultDetail))

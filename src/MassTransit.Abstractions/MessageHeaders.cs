@@ -16,6 +16,11 @@ namespace MassTransit
         public const string FaultExceptionType = "MT-Fault-ExceptionType";
 
         /// <summary>
+        /// The input address of the endpoint on which the fault occurred
+        /// </summary>
+        public const string FaultInputAddress = "MT-Fault-InputAddress";
+
+        /// <summary>
         /// The exception message from a Fault
         /// </summary>
         public const string FaultMessage = "MT-Fault-Message";

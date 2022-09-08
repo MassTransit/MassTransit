@@ -72,7 +72,15 @@
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
 
-            Assert.That(context.ReceiveContext.TransportHeaders.Get("MT-Reason", (string)null), Is.EqualTo("fault"));
+            Assert.That(context.ReceiveContext.TransportHeaders.Get(MessageHeaders.Reason, (string)null), Is.EqualTo("fault"));
+        }
+
+        [Test]
+        public async Task Should_have_the_error_queue_header()
+        {
+            ConsumeContext<PingMessage> context = await _errorHandler;
+
+            Assert.That(context.ReceiveContext.TransportHeaders.Get(MessageHeaders.FaultInputAddress, (Uri)null), Is.EqualTo(InputQueueAddress));
         }
 
         [Test]

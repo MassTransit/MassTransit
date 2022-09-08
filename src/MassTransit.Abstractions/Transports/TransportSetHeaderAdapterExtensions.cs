@@ -16,6 +16,13 @@ namespace MassTransit.Transports
         }
 
         public static void Set<TValueType>(this ITransportSetHeaderAdapter<TValueType> adapter, IDictionary<string, TValueType> dictionary, string key,
+            Uri? value)
+        {
+            if (value != null)
+                adapter.Set(dictionary, new HeaderValue<string>(key, value.ToString()));
+        }
+
+        public static void Set<TValueType>(this ITransportSetHeaderAdapter<TValueType> adapter, IDictionary<string, TValueType> dictionary, string key,
             Guid? value)
         {
             if (value.HasValue)
