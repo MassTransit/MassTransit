@@ -158,11 +158,11 @@
                         .ConfigureAwait(false);
                     if (rule.Name == ruleProperties.Name && (rule.Filter != ruleProperties.Filter || rule.Action != ruleProperties.Action))
                     {
-                        ruleProperties.Filter = rule.Filter;
-                        ruleProperties.Action = rule.Action;
-
                         LogContext.Debug?.Log("Updating subscription Rule: {Rule} ({DescriptionFilter} -> {Filter})", rule.Name,
                             ruleProperties.Filter.ToString(), rule.Filter.ToString());
+
+                        ruleProperties.Filter = rule.Filter;
+                        ruleProperties.Action = rule.Action;
 
                         await UpdateRuleAsync(createSubscriptionOptions.TopicName, createSubscriptionOptions.SubscriptionName, ruleProperties)
                             .ConfigureAwait(false);
