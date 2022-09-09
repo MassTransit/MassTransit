@@ -25,7 +25,7 @@ namespace MassTransit.MartenIntegration.Saga
         public async Task Send<T>(ConsumeContext<T> context, IPipe<SagaRepositoryContext<TSaga, T>> next)
             where T : class
         {
-            using var session = _documentStore.DirtyTrackedSession();
+            await using var session = _documentStore.DirtyTrackedSession();
 
             var sagaRepositoryContext = new MartenSagaRepositoryContext<TSaga, T>(session, context, _factory);
 
@@ -35,7 +35,7 @@ namespace MassTransit.MartenIntegration.Saga
         public async Task SendQuery<T>(ConsumeContext<T> context, ISagaQuery<TSaga> query, IPipe<SagaRepositoryQueryContext<TSaga, T>> next)
             where T : class
         {
-            using var session = _documentStore.DirtyTrackedSession();
+            await using var session = _documentStore.DirtyTrackedSession();
 
             var repositoryContext = new MartenSagaRepositoryContext<TSaga, T>(session, context, _factory);
 
