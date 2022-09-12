@@ -8,6 +8,7 @@ namespace MassTransit.Serialization
     using System.Text;
     using System.Xml;
     using System.Xml.Linq;
+    using Metadata;
     using Newtonsoft.Json;
 
 
@@ -57,7 +58,7 @@ namespace MassTransit.Serialization
                     var document = (XDocument?)NServiceBusXmlMessageSerializer.XmlSerializer.Value.Deserialize(jsonReader, typeof(XDocument));
 
                     if (document?.Root != null)
-                        document.Root.Name = typeof(TMessage).Name;
+                        document.Root.Name = (typeof(TMessage).IsGenericType ? TypeMetadataCache<TMessage>.ShortName : typeof(TMessage).Name).Replace('+', '_');
 
                     using (var writer = new StreamWriter(stream, MessageDefaults.Encoding, 1024, true))
                     using (var xmlWriter = XmlWriter.Create(writer, new XmlWriterSettings { CheckCharacters = false }))

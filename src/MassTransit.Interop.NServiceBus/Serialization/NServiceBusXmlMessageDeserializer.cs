@@ -4,6 +4,7 @@ namespace MassTransit.Serialization
     using System;
     using System.Globalization;
     using System.IO;
+    using System.Linq;
     using System.Net.Mime;
     using System.Runtime.Serialization;
     using System.Text;
@@ -55,6 +56,11 @@ namespace MassTransit.Serialization
                         position = stream.Position;
                     }
                 }
+
+                XNamespace ns = "http://www.w3.org/2001/XMLSchema-instance";
+                document.Descendants()
+                    .Where(node => (string)node.Attribute(ns + "nil") == "true")
+                    .Remove();
 
                 var json = new StringBuilder((int)position);
 
