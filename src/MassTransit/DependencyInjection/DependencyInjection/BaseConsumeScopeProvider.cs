@@ -2,6 +2,7 @@ namespace MassTransit.DependencyInjection
 {
     using System;
     using System.Threading.Tasks;
+    using Context;
     using Microsoft.Extensions.DependencyInjection;
     using Util;
 
@@ -36,6 +37,13 @@ namespace MassTransit.DependencyInjection
                 var scopeServiceProvider = new DependencyInjectionScopeServiceProvider(serviceScope.ServiceProvider);
 
                 var scopeContext = pipeContextFactory(context, serviceScope, scopeServiceProvider);
+
+                if (scopeContext.TryGetPayload(out MessageSchedulerContext schedulerContext))
+                {
+                    context.AddOrUpdatePayload<MessageSchedulerContext>(
+                        () => new ConsumeMessageSchedulerContext(scopeContext, schedulerContext.SchedulerFactory, context.ReceiveContext.InputAddress),
+                        existing => new ConsumeMessageSchedulerContext(scopeContext, existing.SchedulerFactory, context.ReceiveContext.InputAddress));
+                }
 
                 serviceScope.SetCurrentConsumeContext(scopeContext);
 

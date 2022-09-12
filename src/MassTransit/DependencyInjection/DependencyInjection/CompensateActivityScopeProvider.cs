@@ -3,7 +3,6 @@ namespace MassTransit.DependencyInjection
     using System;
     using System.Threading.Tasks;
     using Context;
-    using Courier;
     using Microsoft.Extensions.DependencyInjection;
 
 
