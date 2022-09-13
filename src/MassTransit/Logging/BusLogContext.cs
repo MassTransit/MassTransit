@@ -68,7 +68,7 @@ namespace MassTransit.Logging
 
         public EnabledLogger? Warning => Logger.IsEnabled(LogLevel.Warning) ? new EnabledLogger(Logger, LogLevel.Warning) : default(EnabledLogger?);
 
-        public StartedActivity? StartSendActivity<T>(SendTransportContext transportContext, SendContext<T> context, params (string Key, object Value)[] tags)
+        public StartedActivity? StartSendActivity<T>(SendTransportContext transportContext, SendContext<T> context, params (string Key, object? Value)[] tags)
             where T : class
         {
             var activity = _source.CreateActivity(transportContext.ActivityName, ActivityKind.Producer);
@@ -117,8 +117,6 @@ namespace MassTransit.Logging
             if (activity == null)
                 return null;
 
-            activity.Start();
-
             if (activity.IsAllDataRequested)
             {
                 activity.SetTag(DiagnosticHeaders.Messaging.Destination, endpointName);
@@ -130,6 +128,8 @@ namespace MassTransit.Logging
                     && messageIdHeader is string text)
                     activity.SetTag(DiagnosticHeaders.Messaging.TransportMessageId, text);
             }
+
+            activity.Start();
 
             return new StartedActivity(activity);
         }
@@ -213,7 +213,7 @@ namespace MassTransit.Logging
             return new StartedActivity(activity);
         }
 
-        static StartedActivity? PopulateSendActivity<T>(SendContext context, System.Diagnostics.Activity activity, params (string Key, object Value)[] tags)
+        static StartedActivity? PopulateSendActivity<T>(SendContext context, System.Diagnostics.Activity activity, params (string Key, object? Value)[] tags)
             where T : class
         {
             var conversationId = context.ConversationId?.ToString("D");
@@ -222,8 +222,6 @@ namespace MassTransit.Logging
                 activity.SetBaggage(DiagnosticHeaders.CorrelationId, context.CorrelationId.Value.ToString("D"));
             if (conversationId != null)
                 activity.SetBaggage(DiagnosticHeaders.Messaging.ConversationId, conversationId);
-
-            activity.Start();
 
             if (activity.IsAllDataRequested)
             {
@@ -251,8 +249,7 @@ namespace MassTransit.Logging
                 }
             }
 
-            if (activity.Id != null)
-                context.Headers.Set(DiagnosticHeaders.ActivityId, activity.Id);
+            activity.Start();
 
             IList<KeyValuePair<string, string?>>? baggage = null;
             foreach (KeyValuePair<string, string?> pair in activity.Baggage)
@@ -266,6 +263,9 @@ namespace MassTransit.Logging
                 baggage ??= new List<KeyValuePair<string, string?>>();
                 baggage.Add(pair);
             }
+
+            if (activity.Id != null)
+                context.Headers.Set(DiagnosticHeaders.ActivityId, activity.Id);
 
             if (baggage != null)
                 context.Headers.Set(DiagnosticHeaders.ActivityCorrelationContext, baggage);
@@ -293,12 +293,12 @@ namespace MassTransit.Logging
             if (activity == null)
                 return null;
 
-            activity.Start();
-
             activity.SetTag(DiagnosticHeaders.Messaging.Operation, "process");
 
             if (activity.IsAllDataRequested)
                 started(activity);
+
+            activity.Start();
 
             return new StartedActivity(activity);
         }

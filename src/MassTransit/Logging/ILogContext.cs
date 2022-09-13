@@ -32,7 +32,7 @@ namespace MassTransit.Logging
         /// <returns>The <see cref="T:Microsoft.Extensions.Logging.ILogger" />.</returns>
         ILogContext CreateLogContext(string categoryName);
 
-        StartedActivity? StartSendActivity<T>(SendTransportContext transportContext, SendContext<T> context, params (string Key, object Value)[] tags)
+        StartedActivity? StartSendActivity<T>(SendTransportContext transportContext, SendContext<T> context, params (string Key, object? Value)[] tags)
             where T : class;
 
         StartedActivity? StartOutboxSendActivity<T>(SendContext<T> context)

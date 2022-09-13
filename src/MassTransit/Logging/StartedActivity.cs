@@ -47,11 +47,14 @@ namespace MassTransit.Logging
             var activityEvent = new ActivityEvent(DiagnosticHeaders.Exceptions.EventName, DateTimeOffset.UtcNow, tags);
 
             Activity.AddEvent(activityEvent);
-            Activity.SetStatus(ActivityStatusCode.Error);
+            Activity.SetStatus(ActivityStatusCode.Error, exceptionMessage);
         }
 
         public void Stop()
         {
+            if (Activity.Status == ActivityStatusCode.Unset)
+                Activity.SetStatus(ActivityStatusCode.Ok);
+
             Activity.Stop();
         }
     }
