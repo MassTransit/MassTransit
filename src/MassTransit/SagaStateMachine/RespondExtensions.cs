@@ -128,8 +128,7 @@ namespace MassTransit
             where TMessage : class
             where TException : Exception
         {
-            return source.Add(new FaultedRespondActivity<TInstance, TData, TException, TMessage>(
-                MessageFactory<TMessage>.Create(messageFactory, callback)));
+            return source.Add(new FaultedRespondActivity<TInstance, TData, TException, TMessage>(MessageFactory<TMessage>.Create(messageFactory, callback)));
         }
 
         public static ExceptionActivityBinder<TInstance, TData, TException> RespondAsync<TInstance, TData, TException, TMessage>(
@@ -141,8 +140,7 @@ namespace MassTransit
             where TMessage : class
             where TException : Exception
         {
-            return source.Add(new FaultedRespondActivity<TInstance, TData, TException, TMessage>(
-                MessageFactory<TMessage>.Create(messageFactory, callback)));
+            return source.Add(new FaultedRespondActivity<TInstance, TData, TException, TMessage>(MessageFactory<TMessage>.Create(messageFactory, callback)));
         }
     }
 }

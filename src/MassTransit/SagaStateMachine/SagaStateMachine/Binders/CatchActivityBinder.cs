@@ -14,13 +14,14 @@ namespace MassTransit.SagaStateMachine
         where TException : Exception
     {
         readonly EventActivities<TInstance> _activities;
-        public Event Event { get; }
 
         public CatchActivityBinder(Event @event, EventActivities<TInstance> activities)
         {
             Event = @event;
             _activities = activities;
         }
+
+        public Event Event { get; }
 
         public bool IsStateTransitionEvent(State state)
         {
@@ -46,9 +47,6 @@ namespace MassTransit.SagaStateMachine
                 activity.Bind(compensateActivityBuilder);
 
             var compensateActivity = new CatchFaultActivity<TInstance, TException>(compensateActivityBuilder.Behavior);
-
-            foreach (IActivityBinder<TInstance> activity in _activities.GetStateActivityBinders())
-                activity.Bind(builder);
 
             builder.Add(compensateActivity);
         }

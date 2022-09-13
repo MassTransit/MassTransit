@@ -3,7 +3,6 @@
     using System;
     using System.Threading.Tasks;
     using FaultTestContracts;
-    using MassTransit.Saga;
     using MassTransit.Testing;
     using NUnit.Framework;
     using TestFramework;
@@ -11,6 +10,9 @@
 
     namespace FaultTestContracts
     {
+        using System;
+
+
         public class Start :
             CorrelatedBy<Guid>
         {
@@ -232,6 +234,5 @@
 
             public Event<Start> Started { get; }
         }
-
     }
 }

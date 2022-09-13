@@ -152,10 +152,7 @@ namespace MassTransit.SagaStateMachine
             EventActivityBinder<TInstance, TData> thenBinder = new DataEventActivityBinder<TInstance, TData>(_machine, _event, _activities);
             EventActivityBinder<TInstance, TData> elseBinder = new DataEventActivityBinder<TInstance, TData>(_machine, _event);
 
-            var conditionBinder = new ConditionalActivityBinder<TInstance, TData>(_event, context => _filter(context), thenBinder,
-                elseBinder);
-
-            return conditionBinder;
+            return new ConditionalActivityBinder<TInstance, TData>(_event, context => _filter(context), thenBinder, elseBinder);
         }
     }
 }
