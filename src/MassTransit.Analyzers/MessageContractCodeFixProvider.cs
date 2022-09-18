@@ -41,6 +41,9 @@ namespace MassTransit.Analyzers
             // Find the type declaration identified by the diagnostic.
             var anonymousObject = root.FindToken(diagnosticSpan.Start).Parent.AncestorsAndSelf().OfType<AnonymousObjectCreationExpressionSyntax>().First();
 
+            if (!diagnostic.Properties.TryGetKey("messageContractType", out var fullType))
+                return;
+
             // Register a code action that will invoke the fix.
             context.RegisterCodeFix(
                 CodeAction.Create(
@@ -51,7 +54,8 @@ namespace MassTransit.Analyzers
         }
 
         static async Task<Document> AddMissingProperties(Document document,
-            AnonymousObjectCreationExpressionSyntax anonymousObject, CancellationToken cancellationToken)
+                                                         AnonymousObjectCreationExpressionSyntax anonymousObject,
+                                                         CancellationToken cancellationToken)
         {
             var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
             var semanticModel = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
