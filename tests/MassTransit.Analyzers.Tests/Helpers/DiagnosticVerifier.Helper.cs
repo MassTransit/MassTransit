@@ -22,7 +22,11 @@ namespace MassTransit.Analyzers.Tests
         static readonly MetadataReference CSharpSymbolsReference = MetadataReference.CreateFromFile(typeof(CSharpCompilation).Assembly.Location);
         static readonly MetadataReference CodeAnalysisReference = MetadataReference.CreateFromFile(typeof(Compilation).Assembly.Location);
         static readonly MetadataReference CollectionsReference = MetadataReference.CreateFromFile(typeof(Stack<>).Assembly.Location);
+#if NET6_0
+    static readonly MetadataReference RuntimeReference = MetadataReference.CreateFromFile(Assembly.Load("System.Runtime, Version=6.0.0.0").Location);
+#else
         static readonly MetadataReference RuntimeReference = MetadataReference.CreateFromFile(typeof(ISet<>).Assembly.Location);
+#endif
         static readonly MetadataReference NetStandardReference = MetadataReference.CreateFromFile(Assembly.Load("netstandard, Version=2.0.0.0").Location);
         static readonly MetadataReference MassTransitReference = MetadataReference.CreateFromFile(typeof(Bus).Assembly.Location);
         static readonly MetadataReference GreenPipesReference = MetadataReference.CreateFromFile(typeof(IProbeSite).Assembly.Location);
