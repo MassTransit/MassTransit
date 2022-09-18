@@ -55,44 +55,86 @@ namespace MassTransit.Analyzers
 
             // TODO: Consider registering other actions that act on syntax instead of or in addition to symbols
             // See https://github.com/dotnet/roslyn/blob/master/docs/analyzers/Analyzer%20Actions%20Semantics.md for more information
-            context.RegisterSyntaxNodeAction(AnalyzeAnonymousObjectCreationNode, SyntaxKind.AnonymousObjectCreationExpression);
+            context.RegisterSyntaxNodeAction(AnalyzeAnonymousObjectCreationNode, SyntaxKind.InvocationExpression);
         }
 
         void AnalyzeAnonymousObjectCreationNode(SyntaxNodeAnalysisContext context)
         {
+            ITypeSymbol typeArgument;
+
+            var invocationExpression = (InvocationExpressionSyntax)context.Node;
+            if (!(invocationExpression.Expression is MemberAccessExpressionSyntax memberAccessExpr))
+                return;
+
+            var symbol = context.SemanticModel.GetSymbolInfo(memberAccessExpr);
+            if (symbol.Symbol?.Kind != SymbolKind.Method)
+                return;
+
+            var methodSymbol = (IMethodSymbol)symbol.Symbol;
+            if (!methodSymbol.IsProducerMethod(out var producerIndex))
+                return;
+
+            switch (producerIndex)
+            {
+                case -1:
+                {
+                    if (!(methodSymbol.ReceiverType is INamedTypeSymbol {IsGenericType: true} parentNamedType) || !parentNamedType.TypeArguments.Any())
+                        return;
+
+                    typeArgument = parentNamedType.TypeArguments.First();
+                    break;
+                }
+                case 0:
+                {
+                    if (!methodSymbol.IsGenericMethod || !methodSymbol.TypeArguments.Any())
+                        return;
+
+                    typeArgument = methodSymbol.TypeArguments.First();
+                    break;
+                }
+                default:
+                    throw new InvalidOperationException();
+            }
+
+            var argument = invocationExpression.ArgumentList.ChildNodes().FirstOrDefault();
+            if (!(argument is ArgumentSyntax argumentSyntax))
+                return;
+
+
+            SyntaxNode anonymousObject = argumentSyntax.Expression;
+
             var typeConverterHelper = new TypeConversionHelper(context.SemanticModel);
 
-            var anonymousObject = (AnonymousObjectCreationExpressionSyntax)context.Node;
-
-            if (anonymousObject.Parent is ArgumentSyntax argumentSyntax
-                && argumentSyntax.IsActivator(context.SemanticModel, out var typeArgument))
+            if (typeArgument.HasMessageContract(out var messageContractType))
             {
-                if (typeArgument.HasMessageContract(out var messageContractType))
-                {
-                    var anonymousType = context.SemanticModel.GetTypeInfo(anonymousObject).Type;
+                var anonymousType = context.SemanticModel.GetTypeInfo(anonymousObject).Type;
 
-                    var incompatibleProperties = new List<string>();
-                    if (!TypesAreStructurallyCompatible(typeConverterHelper, messageContractType, anonymousType, string.Empty, incompatibleProperties))
-                    {
-                        var diagnostic = Diagnostic.Create(StructurallyCompatibleRule, anonymousType.Locations[0],
-                            messageContractType.Name, string.Join(", ", incompatibleProperties));
-                        context.ReportDiagnostic(diagnostic);
-                    }
-
-                    var missingProperties = new List<string>();
-                    IEnumerable<ITypeSymbol> symbolPath = Enumerable.Empty<ITypeSymbol>();
-                    if (HasMissingProperties(anonymousType, messageContractType, string.Empty, symbolPath, missingProperties))
-                    {
-                        var diagnostic = Diagnostic.Create(MissingPropertiesRule, anonymousType.Locations[0],
-                            messageContractType.Name, string.Join(", ", missingProperties));
-                        context.ReportDiagnostic(diagnostic);
-                    }
-                }
-                else
+                var symbolDisplayFormat = new SymbolDisplayFormat(typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces);
+                var immutableDictionary = new Dictionary<string, string>
                 {
-                    var diagnostic = Diagnostic.Create(ValidMessageContractStructureRule, context.Node.GetLocation(), typeArgument.Name);
+                    { "messageContractType", messageContractType.ToDisplayString(symbolDisplayFormat) }
+                }.ToImmutableDictionary();
+
+                var incompatibleProperties = new List<string>();
+                if (!TypesAreStructurallyCompatible(typeConverterHelper, messageContractType, anonymousType, string.Empty, incompatibleProperties))
+                {
+                    var diagnostic = Diagnostic.Create(StructurallyCompatibleRule, anonymousType.Locations[0], immutableDictionary, messageContractType.Name, string.Join(", ", incompatibleProperties));
                     context.ReportDiagnostic(diagnostic);
                 }
+
+                var missingProperties = new List<string>();
+                IEnumerable<ITypeSymbol> symbolPath = Enumerable.Empty<ITypeSymbol>();
+                if (HasMissingProperties(anonymousType, messageContractType, string.Empty, symbolPath, missingProperties))
+                {
+                    var diagnostic = Diagnostic.Create(MissingPropertiesRule, anonymousType.Locations[0],immutableDictionary,
+                        messageContractType.Name, string.Join(", ", missingProperties));
+                    context.ReportDiagnostic(diagnostic);
+                }
+            }
+            else
+            {
+                var diagnostic = Diagnostic.Create(ValidMessageContractStructureRule, context.Node.GetLocation(), typeArgument.Name);
+                context.ReportDiagnostic(diagnostic);
             }
         }
 
