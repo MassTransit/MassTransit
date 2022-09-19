@@ -61,64 +61,47 @@ namespace MassTransit.Analyzers
         void AnalyzeAnonymousObjectCreationNode(SyntaxNodeAnalysisContext context)
         {
             ITypeSymbol typeArgument;
-            SyntaxNode anonymousObject;
-            switch (context.Node.Kind())
+
+            var invocationExpression = (InvocationExpressionSyntax)context.Node;
+            if (!(invocationExpression.Expression is MemberAccessExpressionSyntax memberAccessExpr))
+                return;
+
+            var symbol = context.SemanticModel.GetSymbolInfo(memberAccessExpr);
+            if (symbol.Symbol?.Kind != SymbolKind.Method)
+                return;
+
+            var methodSymbol = (IMethodSymbol)symbol.Symbol;
+            if (!methodSymbol.IsProducerMethod(out var producerIndex))
+                return;
+
+            switch (producerIndex)
             {
-                case SyntaxKind.AnonymousObjectCreationExpression:
-                    {
-                        anonymousObject = (AnonymousObjectCreationExpressionSyntax)context.Node;
-                        if (!(anonymousObject.Parent is ArgumentSyntax argumentSyntax)
-                         || !argumentSyntax.IsActivator(context.SemanticModel, out typeArgument))
-                            return;
-                        break;
-                    }
-                case SyntaxKind.InvocationExpression:
-                    {
-                        var invocationExpression = (InvocationExpressionSyntax)context.Node;
-                        if (!(invocationExpression.Expression is MemberAccessExpressionSyntax memberAccessExpr))
-                            return;
+                case -1:
+                {
+                    if (!(methodSymbol.ReceiverType is INamedTypeSymbol {IsGenericType: true} parentNamedType) || !parentNamedType.TypeArguments.Any())
+                        return;
 
-                        var symbol = context.SemanticModel.GetSymbolInfo(memberAccessExpr);
-                        if (symbol.Symbol?.Kind != SymbolKind.Method)
-                            return;
+                    typeArgument = parentNamedType.TypeArguments.First();
+                    break;
+                }
+                case 0:
+                {
+                    if (!methodSymbol.IsGenericMethod || !methodSymbol.TypeArguments.Any())
+                        return;
 
-                        var methodSymbol = (IMethodSymbol)symbol.Symbol;
-                        if (!methodSymbol.IsProducerMethod(out var producerIndex))
-                            return;
-
-                        switch (producerIndex)
-                        {
-                            case -1:
-                                {
-                                    if (!(methodSymbol.ReceiverType is INamedTypeSymbol { IsGenericType: true } parentNamedType) || !parentNamedType.TypeArguments.Any())
-                                        return;
-
-                                    typeArgument = parentNamedType.TypeArguments.First();
-                                    break;
-                                }
-                            case 0:
-                            {
-                                if (!methodSymbol.IsGenericMethod || !methodSymbol.TypeArguments.Any())
-                                    return;
-
-                                typeArgument = methodSymbol.TypeArguments.First();
-                                    break;
-                                }
-                            default:
-                                throw new InvalidOperationException();
-                        }
-
-                        var argument = invocationExpression.ArgumentList.ChildNodes().FirstOrDefault();
-                        if (!(argument is ArgumentSyntax argumentSyntax))
-                            return;
-
-
-                        anonymousObject = argumentSyntax.Expression;
-                        break;
-                    }
+                    typeArgument = methodSymbol.TypeArguments.First();
+                    break;
+                }
                 default:
-                    throw new NotImplementedException();
+                    throw new InvalidOperationException();
             }
+
+            var argument = invocationExpression.ArgumentList.ChildNodes().FirstOrDefault();
+            if (!(argument is ArgumentSyntax argumentSyntax))
+                return;
+
+
+            SyntaxNode anonymousObject = argumentSyntax.Expression;
 
             var typeConverterHelper = new TypeConversionHelper(context.SemanticModel);
 
