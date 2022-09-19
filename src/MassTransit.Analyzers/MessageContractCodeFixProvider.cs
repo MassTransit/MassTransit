@@ -41,28 +41,33 @@ namespace MassTransit.Analyzers
             // Find the type declaration identified by the diagnostic.
             var anonymousObject = root.FindToken(diagnosticSpan.Start).Parent.AncestorsAndSelf().OfType<AnonymousObjectCreationExpressionSyntax>().First();
 
-            if (!diagnostic.Properties.TryGetKey("messageContractType", out var fullType))
+            if (!diagnostic.Properties.TryGetValue("messageContractType", out var fullType))
                 return;
 
             // Register a code action that will invoke the fix.
             context.RegisterCodeFix(
                 CodeAction.Create(
                     Title,
-                    cancellationToken => AddMissingProperties(context.Document, anonymousObject, cancellationToken),
+                    cancellationToken => AddMissingProperties(context.Document, anonymousObject, fullType, cancellationToken),
                     Title),
                 diagnostic);
         }
 
         static async Task<Document> AddMissingProperties(Document document,
                                                          AnonymousObjectCreationExpressionSyntax anonymousObject,
+                                                         string fullType,
                                                          CancellationToken cancellationToken)
         {
             var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
             var semanticModel = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
 
-            if (anonymousObject.Parent is ArgumentSyntax argumentSyntax &&
-                argumentSyntax.IsActivator(semanticModel, out var typeArgument) &&
-                typeArgument.HasMessageContract(out var contractType))
+            var symbolDisplayFormat = new SymbolDisplayFormat(typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces);
+
+            // Find the interface identified by the diagnostic
+            var symbols = root.DescendantNodes().OfType<InterfaceDeclarationSyntax>().Select(i => semanticModel.GetDeclaredSymbol(i)).ToList();
+            ITypeSymbol contractType = symbols.FirstOrDefault(i => i?.ToDisplayString(symbolDisplayFormat) == fullType);
+            
+            if (contractType != null)
             {
                 var dictionary = new Dictionary<AnonymousObjectCreationExpressionSyntax, ITypeSymbol>();
 
