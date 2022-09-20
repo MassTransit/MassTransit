@@ -471,7 +471,7 @@
         /// <typeparam name="T">The event data type</typeparam>
         /// <param name="name">The event name (must be unique)</param>
         /// <param name="configure">Configuration callback method</param>
-        protected Event<T> Event<T>(string name, Action<IEventCorrelationConfigurator<TInstance, T>> configure)
+        protected internal Event<T> Event<T>(string name, Action<IEventCorrelationConfigurator<TInstance, T>> configure)
             where T : class
         {
             Event<T> @event = Event<T>(name);

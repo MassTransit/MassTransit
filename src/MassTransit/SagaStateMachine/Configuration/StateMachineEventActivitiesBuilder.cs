@@ -165,6 +165,12 @@
             return CommitActivities().Event(name, out @event);
         }
 
+        public IStateMachineModifier<TInstance> Event<T>(string name, Action<IEventCorrelationConfigurator<TInstance, T>> configure, out Event<T> @event)
+            where T : class
+        {
+            return CommitActivities().Event(name, configure, out @event);
+        }
+
         public IStateMachineModifier<TInstance> Event<TProperty, T>(Expression<Func<TProperty>> propertyExpression,
             Expression<Func<TProperty, Event<T>>> eventPropertyExpression)
             where TProperty : class
