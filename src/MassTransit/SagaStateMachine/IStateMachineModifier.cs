@@ -19,6 +19,9 @@
         IStateMachineModifier<TSaga> Event<T>(string name, out Event<T> @event)
             where T : class;
 
+        IStateMachineModifier<TSaga> Event<T>(string name, Action<IEventCorrelationConfigurator<TSaga, T>> configure, out Event<T> @event)
+            where T : class;
+
         IStateMachineModifier<TSaga> Event<TProperty, T>(Expression<Func<TProperty>> propertyExpression,
             Expression<Func<TProperty, Event<T>>> eventPropertyExpression)
             where TProperty : class

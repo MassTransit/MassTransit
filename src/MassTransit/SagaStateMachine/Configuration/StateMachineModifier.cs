@@ -125,6 +125,13 @@
             return this;
         }
 
+        public IStateMachineModifier<TSaga> Event<T>(string name, Action<IEventCorrelationConfigurator<TSaga, T>> configure, out Event<T> @event)
+            where T : class
+        {
+            @event = _machine.Event(name, configure);
+            return this;
+        }
+
         public IStateMachineModifier<TSaga> Event<TProperty, T>(Expression<Func<TProperty>> propertyExpression,
             Expression<Func<TProperty, Event<T>>> eventPropertyExpression)
             where TProperty : class
