@@ -17,7 +17,7 @@
     <PackageId>MassTransit.AmazonSQS</PackageId>
     <Title>MassTransit.AmazonSQS</Title>
     <PackageTags>MassTransit;AmazonSQS</PackageTags>
-    <Description>MassTransit ActiveMQ transport support; $(Description)</Description>
+    <Description>MassTransit Amazon SQS transport support; $(Description)</Description>
   </PropertyGroup>
 
   <ItemGroup>
