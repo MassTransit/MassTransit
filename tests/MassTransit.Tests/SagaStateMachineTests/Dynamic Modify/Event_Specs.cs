@@ -32,8 +32,15 @@
             Assert.IsInstanceOf<TriggerEvent>(Hello);
         }
 
+        [Test]
+        public void It_should_create_configured_events()
+        {
+            Assert.IsInstanceOf<TriggerEvent>(EventB);
+        }
+
         Event Hello;
         Event<A> EventA;
+        Event<B> EventB;
         StateMachine<Instance> _machine;
 
 
@@ -52,6 +59,7 @@
                 .New(builder => builder
                     .Event("Hello", out Hello)
                     .Event("EventA", out EventA)
+                    .Event("EventB", x => x.CorrelateById(ctx => ctx.Message.Id), out EventB)
                 );
         }
 
@@ -59,13 +67,9 @@
         class A
         {
         }
-
-
-        class TestStateMachine :
-            MassTransitStateMachine<Instance>
+        class B
         {
-            public Event Hello { get; private set; }
-            public Event<A> EventA { get; private set; }
+            public Guid Id { get; set; }
         }
     }
 }
