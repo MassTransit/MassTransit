@@ -139,7 +139,7 @@
             var transport = new ReceiveTransport<ClientContext>(_hostConfiguration, receiveEndpointContext, () => receiveEndpointContext
                 .ClientContextSupervisor, clientPipe);
 
-            if (IsBusEndpoint)
+            if (IsBusEndpoint && _hostConfiguration.DeployPublishTopology)
             {
                 var publishTopology = _hostConfiguration.Topology.PublishTopology;
 

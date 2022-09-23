@@ -62,7 +62,12 @@
         {
             var builder = new PublishEndpointBrokerTopologyBuilder(this);
 
-            ForEachMessageType<IServiceBusMessagePublishTopology>(x => x.Apply(builder));
+            ForEachMessageType<IServiceBusMessagePublishTopology>(x =>
+            {
+                x.Apply(builder);
+
+                builder.Topic = null;
+            });
 
             return builder.BuildBrokerTopology();
         }

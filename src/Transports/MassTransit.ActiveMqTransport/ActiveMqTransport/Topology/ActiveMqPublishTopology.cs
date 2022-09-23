@@ -34,7 +34,12 @@ namespace MassTransit.ActiveMqTransport.Topology
         {
             var builder = new PublishEndpointBrokerTopologyBuilder();
 
-            ForEachMessageType<IActiveMqMessagePublishTopology>(x => x.Apply(builder));
+            ForEachMessageType<IActiveMqMessagePublishTopology>(x =>
+            {
+                x.Apply(builder);
+
+                builder.Topic = null;
+            });
 
             return builder.BuildBrokerTopology();
         }

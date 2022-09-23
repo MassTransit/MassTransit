@@ -35,7 +35,12 @@
         {
             var builder = new PublishEndpointBrokerTopologyBuilder(BrokerTopologyOptions);
 
-            ForEachMessageType<IRabbitMqMessagePublishTopology>(x => x.Apply(builder));
+            ForEachMessageType<IRabbitMqMessagePublishTopology>(x =>
+            {
+                x.Apply(builder);
+
+                builder.Exchange = null;
+            });
 
             return builder.BuildBrokerTopology();
         }

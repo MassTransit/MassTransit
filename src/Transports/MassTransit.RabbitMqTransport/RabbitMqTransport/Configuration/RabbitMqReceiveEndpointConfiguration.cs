@@ -83,7 +83,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             var transport = new ReceiveTransport<ModelContext>(_hostConfiguration, context, () => context.ModelContextSupervisor, modelPipe);
 
-            if (IsBusEndpoint)
+            if (IsBusEndpoint && _hostConfiguration.DeployPublishTopology)
             {
                 var publishTopology = _hostConfiguration.Topology.PublishTopology;
 

@@ -63,7 +63,7 @@
             var transport = new ReceiveTransport<SessionContext>(_hostConfiguration, context,
                 () => context.SessionContextSupervisor, sessionPipe);
 
-            if (IsBusEndpoint)
+            if (IsBusEndpoint && _hostConfiguration.DeployPublishTopology)
             {
                 var publishTopology = _hostConfiguration.Topology.PublishTopology;
 

@@ -38,7 +38,12 @@ namespace MassTransit.AmazonSqsTransport.Topology
         {
             var builder = new PublishEndpointBrokerTopologyBuilder();
 
-            ForEachMessageType<IAmazonSqsMessagePublishTopology>(x => x.Apply(builder));
+            ForEachMessageType<IAmazonSqsMessagePublishTopology>(x =>
+            {
+                x.Apply(builder);
+
+                builder.Topic = null;
+            });
 
             return builder.BuildBrokerTopology();
         }
