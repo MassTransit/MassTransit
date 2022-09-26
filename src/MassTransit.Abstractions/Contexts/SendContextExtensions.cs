@@ -148,10 +148,10 @@ namespace MassTransit
         /// <returns></returns>
         public static SendContext ReplaceMessageId(this SendContext sendContext, ConsumeContext consumeContext)
         {
-            sendContext.Headers.Set(MessageHeaders.OriginalMessageId,
-                consumeContext.TryGetHeader(MessageHeaders.OriginalMessageId, out Guid? originalMessageId)
-                    ? originalMessageId.ToString()
-                    : consumeContext.MessageId.ToString());
+            if (consumeContext.TryGetHeader(MessageHeaders.OriginalMessageId, out Guid? originalMessageId) && originalMessageId.HasValue)
+                sendContext.Headers.Set(MessageHeaders.OriginalMessageId, originalMessageId.ToString());
+            else if (sendContext.MessageId.HasValue)
+                sendContext.Headers.Set(MessageHeaders.OriginalMessageId, sendContext.MessageId.ToString());
 
             sendContext.MessageId = NewId.NextGuid();
 
