@@ -16,12 +16,13 @@ namespace MassTransit.JobService
         IDisposable
         where TJob : class
     {
-        readonly ConsumeContext _context;
+        readonly ConsumeContext<StartJob> _context;
         readonly Uri _instanceAddress;
         readonly CancellationTokenSource _source;
         readonly Stopwatch _stopwatch;
 
-        public ConsumeJobContext(ConsumeContext context, Uri instanceAddress, Guid jobId, Guid attemptId, int retryAttempt, TJob job, TimeSpan jobTimeout)
+        public ConsumeJobContext(ConsumeContext<StartJob> context, Uri instanceAddress, Guid jobId, Guid attemptId, int retryAttempt, TJob job,
+            TimeSpan jobTimeout)
             : base(context)
         {
             _context = context;
@@ -38,16 +39,16 @@ namespace MassTransit.JobService
 
         public override CancellationToken CancellationToken => _source.Token;
 
-        TJob ConsumeContext<TJob>.Message => Job;
+        public TJob Message => Job;
 
-        Task ConsumeContext<TJob>.NotifyConsumed(TimeSpan duration, string consumerType)
+        public Task NotifyConsumed(TimeSpan duration, string consumerType)
         {
-            return _context.NotifyConsumed(this, duration, consumerType);
+            return _context.NotifyConsumed(_context, duration, consumerType);
         }
 
         public Task NotifyFaulted(TimeSpan duration, string consumerType, Exception exception)
         {
-            return _context.NotifyFaulted(this, duration, consumerType, exception);
+            return _context.NotifyFaulted(_context, duration, consumerType, exception);
         }
 
         public void Dispose()
@@ -123,7 +124,7 @@ namespace MassTransit.JobService
         {
             var endpoint = await _context.ReceiveContext.PublishEndpointProvider.GetPublishSendEndpoint<T>().ConfigureAwait(false);
 
-            await endpoint.Send<T>(values).ConfigureAwait(false);
+            await endpoint.Send<T>(values, CancellationToken.None).ConfigureAwait(false);
         }
 
         public void Cancel()

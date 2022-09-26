@@ -105,7 +105,7 @@ namespace MassTransit.Configuration
         ConnectHandle ConnectFinalizeJobConsumer(IConsumePipeConnector consumePipe, IConsumerSpecification<FinalizeJobConsumer<TJob>> specification,
             JobOptions<TJob> options, Guid jobTypeId, IJobService jobService)
         {
-            var consumerFactory = new DelegateConsumerFactory<FinalizeJobConsumer<TJob>>(() => new FinalizeJobConsumer<TJob>(jobService, options, jobTypeId,
+            var consumerFactory = new DelegateConsumerFactory<FinalizeJobConsumer<TJob>>(() => new FinalizeJobConsumer<TJob>(jobTypeId,
                 TypeCache<TConsumer>.ShortName));
 
             return _finalizeJobConsumerConnector.ConnectConsumer(consumePipe, consumerFactory, specification);

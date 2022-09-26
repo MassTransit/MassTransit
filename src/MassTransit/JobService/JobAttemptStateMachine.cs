@@ -1,6 +1,7 @@
 namespace MassTransit
 {
     using System;
+    using System.Linq;
     using Contracts.JobService;
     using Events;
 
@@ -232,7 +233,7 @@ namespace MassTransit
                 AttemptId = context.Saga.CorrelationId,
                 context.Saga.RetryAttempt,
                 context.Message.Timestamp,
-                context.Message.Exceptions
+                Exceptions = context.Message.Exceptions?.FirstOrDefault()
             }));
         }
 

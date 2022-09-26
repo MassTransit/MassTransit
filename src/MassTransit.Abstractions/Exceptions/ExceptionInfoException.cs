@@ -2,7 +2,6 @@ namespace MassTransit
 {
     using System;
     using System.Collections;
-    using System.Linq;
 
 
     [Serializable]
