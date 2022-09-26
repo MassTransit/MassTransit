@@ -10,7 +10,7 @@ namespace MassTransit.Serialization.JsonConverters
     public class CaseInsensitiveDictionaryJsonConverter :
         BaseJsonConverter
     {
-        public override void WriteJson(JsonWriter writer, object value, Newtonsoft.Json.JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             throw new NotSupportedException("This converter should not be used for writing as it can create loops");
         }
@@ -31,8 +31,8 @@ namespace MassTransit.Serialization.JsonConverters
                 if (typeInfo.ClosesType(typeof(IDictionary<,>), out Type[] elementTypes)
                     || typeInfo.ClosesType(typeof(IReadOnlyDictionary<,>), out elementTypes)
                     || typeInfo.ClosesType(typeof(Dictionary<,>), out elementTypes)
-                    || typeInfo.ClosesType(typeof(IEnumerable<>), out Type[] enumerableType)
-                    && enumerableType[0].ClosesType(typeof(KeyValuePair<,>), out elementTypes))
+                    || (typeInfo.ClosesType(typeof(IEnumerable<>), out Type[] enumerableType)
+                        && enumerableType[0].ClosesType(typeof(KeyValuePair<,>), out elementTypes)))
                 {
                     keyType = elementTypes[0];
                     valueType = elementTypes[1];
@@ -56,11 +56,20 @@ namespace MassTransit.Serialization.JsonConverters
         class CachedConverter<T> :
             IConverter
         {
-            object IConverter.Deserialize(JsonReader reader, Type objectType, Newtonsoft.Json.JsonSerializer serializer)
+            object IConverter.Deserialize(JsonReader reader, Type objectType, JsonSerializer serializer)
             {
                 if (reader.TokenType == JsonToken.StartObject)
                 {
                     object result = new CaseInsensitiveDictionary<T>();
+
+                    serializer.Populate(reader, result);
+
+                    return result;
+                }
+
+                if (reader.TokenType == JsonToken.StartArray)
+                {
+                    object result = new List<KeyValuePair<string, T>>();
 
                     serializer.Populate(reader, result);
 

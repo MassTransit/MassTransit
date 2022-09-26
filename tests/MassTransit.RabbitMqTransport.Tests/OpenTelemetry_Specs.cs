@@ -1,7 +1,6 @@
 namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
-    using System.Diagnostics;
     using System.Threading.Tasks;
     using Courier;
     using Courier.Contracts;
@@ -37,6 +36,54 @@ namespace MassTransit.RabbitMqTransport.Tests
 
                     x.UsingRabbitMq((context, cfg) =>
                     {
+                        cfg.ConfigureEndpoints(context);
+                    });
+                })
+                .BuildServiceProvider(true);
+
+            var harness = provider.GetTestHarness();
+
+            await harness.Start();
+
+            IRequestClient<SubmitOrder> client = harness.GetRequestClient<SubmitOrder>();
+
+            await harness.Bus.Publish(new PingMessage());
+
+            StartedActivity? activity = LogContext.Current?.StartGenericActivity("api process");
+
+            activity?.Activity.SetBaggage("MyBag", "IsFull");
+
+            Response<OrderSubmitted> response = await client.GetResponse<OrderSubmitted>(new
+            {
+                OrderId = InVar.Id,
+                OrderNumber = "123"
+            });
+
+            activity?.Stop();
+
+            Assert.IsTrue(await harness.Sent.Any<OrderSubmitted>());
+
+            Assert.IsTrue(await harness.Consumed.Any<SubmitOrder>());
+
+            Assert.That(response.Headers.Get<string>("BaggageValue"), Is.EqualTo("IsFull"));
+        }
+
+        [Test]
+        public async Task Should_carry_the_baggage_with_newtonsoft()
+        {
+            using var tracerProvider = CreateTraceProvider("order-api");
+
+            var services = new ServiceCollection();
+
+            await using var provider = services
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.AddConsumer<MonitoredSubmitOrderConsumer>();
+
+                    x.UsingRabbitMq((context, cfg) =>
+                    {
+                        cfg.UseNewtonsoftJsonSerializer();
+
                         cfg.ConfigureEndpoints(context);
                     });
                 })
