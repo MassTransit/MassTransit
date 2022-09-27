@@ -90,6 +90,16 @@ namespace MassTransit.AmazonSqsTransport
 
             attributesResponse.EnsureSuccessfulResponse();
 
+            foreach (var attribute in attributes)
+            {
+                if (!attributesResponse.Attributes.ContainsKey(attribute.Key) || attributesResponse.Attributes[attribute.Key] != attribute.Value)
+                {
+                    var setTopicAttributesResponse = await _client.SetTopicAttributesAsync(createResponse.TopicArn, attribute.Key, attribute.Value, _cancellationToken).ConfigureAwait(false);
+
+                    setTopicAttributesResponse.EnsureSuccessfulResponse();
+                }
+            }
+
             var missingTopic = new TopicInfo(topic.EntityName, createResponse.TopicArn);
 
             if (topic.Durable && topic.AutoDelete == false)
