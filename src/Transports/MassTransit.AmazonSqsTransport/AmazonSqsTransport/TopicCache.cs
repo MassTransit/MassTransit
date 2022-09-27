@@ -72,6 +72,7 @@ namespace MassTransit.AmazonSqsTransport
         {
             Dictionary<string, string> attributes = topic.TopicAttributes.ToDictionary(x => x.Key, x => x.Value.ToString());
 
+            // CreateTopicRequest is idempotent except for case when existing topic attributes are not matching the attributes provided in the request
             var request = new CreateTopicRequest(topic.EntityName)
             {
                 Tags = topic.TopicTags.Select(x => new Tag
