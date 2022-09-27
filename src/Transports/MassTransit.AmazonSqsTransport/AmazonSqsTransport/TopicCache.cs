@@ -74,7 +74,6 @@ namespace MassTransit.AmazonSqsTransport
 
             var request = new CreateTopicRequest(topic.EntityName)
             {
-                Attributes = attributes,
                 Tags = topic.TopicTags.Select(x => new Tag
                 {
                     Key = x.Key,
