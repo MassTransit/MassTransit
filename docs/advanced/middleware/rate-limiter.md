@@ -10,7 +10,7 @@ and keep the rate limits sane. Something like 1000 over 10 minutes is a bad idea
 adjust the values and see what works for you.
 :::
 
-There are two modes that a rate limiter can operate, but only of them is currently supported (the other may come later).
+There are two modes that a rate limiter can operate, but only one of them is currently supported (the other may come later).
 
 To add a rate limiter to a receive endpoint:
 
