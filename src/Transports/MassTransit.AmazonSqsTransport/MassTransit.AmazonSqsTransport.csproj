@@ -21,8 +21,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.3.57" />
-    <PackageReference Include="AWSSDK.SQS" Version="3.7.2.54" />
+    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.4.16" />
+    <PackageReference Include="AWSSDK.SQS" Version="3.7.2.113" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
   </ItemGroup>
 
