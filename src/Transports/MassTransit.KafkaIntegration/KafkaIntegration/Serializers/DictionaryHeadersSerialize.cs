@@ -47,6 +47,9 @@ namespace MassTransit.KafkaIntegration.Serializers
             {
                 var dictionary = new Dictionary<string, Header>();
 
+                foreach (var headerValue in context.Headers)
+                    _adapter.Set(dictionary, headerValue);
+
                 if (context.MessageId.HasValue)
                     _adapter.Set(dictionary, nameof(MessageContext.MessageId), context.MessageId.Value);
 
@@ -67,9 +70,6 @@ namespace MassTransit.KafkaIntegration.Serializers
 
                 if (context.ContentType != null)
                     _adapter.Set(dictionary, MessageHeaders.ContentType, context.ContentType.ToString());
-
-                foreach (var headerValue in context.Headers)
-                    _adapter.Set(dictionary, headerValue);
 
                 var headers = new Headers();
                 foreach (var value in dictionary.Values)
