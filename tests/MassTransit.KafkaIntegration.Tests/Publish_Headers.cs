@@ -133,22 +133,22 @@ namespace MassTransit.KafkaIntegration.Tests
         class OriginalMessageConsumer :
             IConsumer<OriginalMessage>
         {
-            readonly TaskCompletionSource<ConsumeContext<OriginalMessage>> _taskCompletionSource;
-            readonly ITopicProducer<FollowingMessage> _busPingTopicProducer;
+            readonly TaskCompletionSource<ConsumeContext<OriginalMessage>> _orginalMessageTaskCompletionSource;
+            readonly ITopicProducer<FollowingMessage> _followingMessageTopicProducer;
 
             public OriginalMessageConsumer(
-                TaskCompletionSource<ConsumeContext<OriginalMessage>> taskCompletionSource,
-                ITopicProducer<FollowingMessage> busPingTopicProducer)
+                TaskCompletionSource<ConsumeContext<OriginalMessage>> orginalMessageTaskCompletionSource,
+                ITopicProducer<FollowingMessage> followingMessageTopicProducer)
             {
-                _taskCompletionSource = taskCompletionSource;
-                _busPingTopicProducer = busPingTopicProducer;
+                _orginalMessageTaskCompletionSource = orginalMessageTaskCompletionSource;
+                _followingMessageTopicProducer = followingMessageTopicProducer;
             }
 
             public async Task Consume(ConsumeContext<OriginalMessage> context)
             {
-                _taskCompletionSource.TrySetResult(context);
+                _orginalMessageTaskCompletionSource.TrySetResult(context);
 
-                await _busPingTopicProducer.Produce(new { });
+                await _followingMessageTopicProducer.Produce(new { });
             }
         }
 
