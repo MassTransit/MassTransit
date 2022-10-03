@@ -216,6 +216,17 @@ services.AddMassTransit(x =>
 });
 ```
 
+## Publishing exceptions
+
+By default if the bus is stopped, if you publish the call will block until the publising is completed (successfully or failed). If you want to force finishing the await call then specify a TaskCompletionSource:
+
+```cs
+using var tcs = new CancellationTokenSource(_sendingTimeout);
+await _bus.Publish(@event, tcs.Token);
+
+```
+
+
 ### Configuring for a consumer or saga
 
 If there are multiple consumers (or saga) on the same endpoint (which could potentially get you on the _naughty list_), and the retry/redelivery behavior should only apply to a specific consumer or saga, the same configuration can be applied specifically to the consumer or saga.
