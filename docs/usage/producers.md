@@ -212,6 +212,19 @@ public class SubmitOrderConsumer : IConsumer<SubmitOrder>
 
 ```
 
+## Controlling publishing
+
+If the bus is stopped, the publish operation task will block (async) until the publising is completed (successfully or failed). If you want to force finishing the async  call, you can use the overload with a TaskCompletionSource:
+
+```cs
+using var tcs = new CancellationTokenSource(_sendingTimeout);
+await _bus.Publish(@event, tcs.Token);
+
+```
+
+This will throw an ```OperationCanceledException``` if the publishing did not succeed in the specified timeout. Catch this exception and throw specific to your application to denote the bus is busy or stopped. 
+
+
 ### Sending via interfaces
 
 Since the general recommendation is to use interfaces, there are convenience methods to initialize the interface without requiring the creation of a message class underneath. While versioning of messages still requires a class which supports multiple interfaces, a simple approach to send an interface message is shown below.
