@@ -58,9 +58,12 @@ namespace MassTransit.Middleware
 
                 throw new ConsumerCanceledException($"The operation was canceled by the consumer: {TypeCache<TConsumer>.ShortName}");
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                await context.NotifyFaulted(timer.Elapsed, TypeCache<TConsumer>.ShortName, ex).ConfigureAwait(false);
+                await context.NotifyFaulted(timer.Elapsed, TypeCache<TConsumer>.ShortName, exception).ConfigureAwait(false);
+
+                activity?.AddExceptionEvent(exception);
+
                 throw;
             }
             finally
