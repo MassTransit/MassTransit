@@ -90,6 +90,32 @@ await endpoint.Send<IndexDocumentContent>(new IndexDocumentContentMessage
 
 The message data is stored, and the reference added to the outbound message.
 
+::: tip NOTE
+In the event of message retries in consumer memory a reference to the stream is held.
+On the first attempt the message stream is read then you may need to rewind the stream to make it available to read from again on retries
+
+```cs
+ if (msg.Payload.HasValue)
+{
+    Stream s = await msg.Payload.Value;
+
+    using (StreamReader sr = new StreamReader(s, leaveOpen: true))
+    {
+        messageBody = await sr.ReadToEndAsync();
+
+        // In the case of retries, the Stream has likely already been read on previous attempts.
+        // The consumer doesn't put a message back on the queue if it is being retried and is held in memory by the consumer for retries
+        // so you will need to 'rewind' the stream to the beginning so it is ready to be read again on subsequent attempts
+        s.Seek(0, SeekOrigin.Begin);
+    }
+}
+```
+
+Note that in this example the StreamReader argument `leaveOpen` is set to true to avoid disposing of the stream.
+This means that you may need to manually disponse of the stream to avoid memory leaks when the message has been successful or faulted
+
+:::
+
 ## Configuration
 
 There are several configuration settings available to adjust message data behavior.
