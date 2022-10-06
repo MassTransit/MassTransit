@@ -1,5 +1,6 @@
 ﻿namespace MassTransit.Transports
 {
+    using System.Collections.Generic;
     using System.Threading;
 
 
@@ -32,6 +33,6 @@
         /// <returns></returns>
         HostReceiveEndpointHandle Start(string endpointName, CancellationToken cancellationToken = default);
 
-        BusHealthResult CheckHealth(BusState busState, string healthMessage);
+        IEnumerable<EndpointHealthResult> CheckEndpointHealth();
     }
 }

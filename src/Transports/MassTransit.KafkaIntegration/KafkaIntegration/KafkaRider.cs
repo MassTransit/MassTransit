@@ -81,6 +81,11 @@ namespace MassTransit.KafkaIntegration
             return new Handle(endpointsHandle, agent);
         }
 
+        public IEnumerable<EndpointHealthResult> CheckEndpointHealth()
+        {
+            return _endpoints.CheckEndpointHealth();
+        }
+
 
         class RiderAgent :
             Agent

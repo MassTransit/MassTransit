@@ -7,7 +7,6 @@ namespace MassTransit.EventHubIntegration
     using System.Threading.Tasks;
     using Configuration;
     using MassTransit.Middleware;
-    using Middleware;
     using Transports;
 
 
@@ -60,6 +59,11 @@ namespace MassTransit.EventHubIntegration
             var agent = new RiderAgent(_hostConfiguration.ConnectionContextSupervisor, _endpoints, ready);
 
             return new Handle(endpointsHandle, agent);
+        }
+
+        public IEnumerable<EndpointHealthResult> CheckEndpointHealth()
+        {
+            return _endpoints.CheckEndpointHealth();
         }
 
 

@@ -9,9 +9,12 @@ namespace MassTransit
         {
             Status = status;
             ReceiveEndpoint = receiveEndpoint;
+            InputAddress = receiveEndpoint.InputAddress;
             Description = description;
             Exception = exception;
         }
+
+        public readonly Uri InputAddress;
 
         public readonly BusHealthStatus Status;
 

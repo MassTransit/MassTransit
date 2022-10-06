@@ -34,6 +34,7 @@ namespace MassTransit.KafkaIntegration.Tests
                         k.Host("localhost:9092");
                         k.TopicEndpoint<Null, Ignore>("test", nameof(HealthCheck_Specs), c =>
                         {
+                            c.CreateIfMissing();
                         });
                     });
                 });

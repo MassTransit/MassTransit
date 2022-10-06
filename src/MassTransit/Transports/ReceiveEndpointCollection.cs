@@ -94,32 +94,9 @@
             return new MultipleConnectHandle(_endpoints.Values.Select(x => x.ConnectConsumeMessageObserver(observer)));
         }
 
-        public BusHealthResult CheckHealth(BusState busState, string healthMessage)
+        public IEnumerable<EndpointHealthResult> CheckEndpointHealth()
         {
-            var results = _endpoints.Values.Select(x => new
-            {
-                x.InputAddress,
-                Result = x.HealthResult
-            }).ToArray();
-
-            var unhealthy = results.Where(x => x.Result.Status == BusHealthStatus.Unhealthy).ToArray();
-            var degraded = results.Where(x => x.Result.Status == BusHealthStatus.Degraded).ToArray();
-
-            var unhappy = unhealthy.Union(degraded).ToArray();
-
-            var names = unhappy.Select(x => x.InputAddress.AbsolutePath.Split('/').LastOrDefault()).ToArray();
-
-            Dictionary<string, EndpointHealthResult> data = results.ToDictionary(x => x.InputAddress.ToString(), x => x.Result);
-
-            var exception = results.Where(x => x.Result.Exception != null).Select(x => x.Result.Exception).FirstOrDefault();
-
-            if (busState != BusState.Started || unhealthy.Any() && unhappy.Length == results.Length)
-                return BusHealthResult.Unhealthy($"Not ready: {healthMessage}", exception, data);
-
-            if (unhappy.Any())
-                return BusHealthResult.Degraded($"Degraded Endpoints: {string.Join(",", names)}", exception, data);
-
-            return BusHealthResult.Healthy("Ready", data);
+            return _endpoints.Values.Select(x => x.HealthResult).ToList();
         }
 
         protected override async Task StopAgent(StopContext context)

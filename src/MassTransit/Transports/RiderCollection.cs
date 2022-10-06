@@ -83,6 +83,11 @@ namespace MassTransit.Transports
             return StartRider(name, rider, cancellationToken);
         }
 
+        public IEnumerable<EndpointHealthResult> CheckEndpointHealth()
+        {
+            return _riders.Values.SelectMany(x => x.CheckEndpointHealth()).ToList();
+        }
+
         HostRiderHandle StartRider(string name, IRiderControl rider, CancellationToken cancellationToken)
         {
             try

@@ -1,6 +1,8 @@
 namespace MassTransit.Transports
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Configuration;
@@ -108,7 +110,28 @@ namespace MassTransit.Transports
 
         public BusHealthResult CheckHealth(BusState busState, string healthMessage)
         {
-            return ReceiveEndpoints.CheckHealth(busState, healthMessage);
+            EndpointHealthResult[] results = ReceiveEndpoints.CheckEndpointHealth()
+                .Concat(Riders.CheckEndpointHealth())
+                .ToArray();
+
+            EndpointHealthResult[] unhealthy = results.Where(x => x.Status == BusHealthStatus.Unhealthy).ToArray();
+            EndpointHealthResult[] degraded = results.Where(x => x.Status == BusHealthStatus.Degraded).ToArray();
+
+            EndpointHealthResult[] unhappy = unhealthy.Union(degraded).ToArray();
+
+            var names = unhappy.Select(x => x.InputAddress.AbsolutePath.Split('/').LastOrDefault()).ToArray();
+
+            Dictionary<string, EndpointHealthResult> data = results.ToDictionary(x => x.InputAddress.ToString(), x => x);
+
+            var exception = results.Where(x => x.Exception != null).Select(x => x.Exception).FirstOrDefault();
+
+            if (busState != BusState.Started || (unhealthy.Any() && unhappy.Length == results.Length))
+                return BusHealthResult.Unhealthy($"Not ready: {healthMessage}", exception, data);
+
+            if (unhappy.Any())
+                return BusHealthResult.Degraded($"Degraded Endpoints: {string.Join(",", names)}", exception, data);
+
+            return BusHealthResult.Healthy("Ready", data);
         }
 
         void IProbeSite.Probe(ProbeContext context)

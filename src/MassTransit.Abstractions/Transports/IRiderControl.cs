@@ -1,5 +1,6 @@
 namespace MassTransit.Transports
 {
+    using System.Collections.Generic;
     using System.Threading;
 
 
@@ -7,5 +8,7 @@ namespace MassTransit.Transports
         IRider
     {
         RiderHandle Start(CancellationToken cancellationToken = default);
+
+        IEnumerable<EndpointHealthResult> CheckEndpointHealth();
     }
 }
