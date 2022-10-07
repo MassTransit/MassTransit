@@ -217,7 +217,7 @@ public class SubmitOrderConsumer : IConsumer<SubmitOrder>
 If the bus is stopped, the publish operation task will block (async) until the publising is completed (successfully or failed). If you want to force finishing the async  call, you can use the overload with a TaskCompletionSource:
 
 ```cs
-using var tcs = new CancellationTokenSource(_sendingTimeout);
+using var tcs = new CancellationTokenSource(_sendTimeout);
 await _bus.Publish(@event, tcs.Token);
 
 ```
