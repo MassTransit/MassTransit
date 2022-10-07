@@ -222,7 +222,7 @@ await _bus.Publish(@event, tcs.Token);
 
 ```
 
-This will throw an ```OperationCanceledException``` if the publishing did not succeed in the specified timeout. Catch this exception and throw specific to your application to denote the bus is busy or stopped. 
+This will throw an ```OperationCanceledException``` if the publishing did not succeed in the specified timeout. Catch this exception and throw one specific to your application to denote that the bus is busy or stopped. 
 
 
 ### Sending via interfaces
