@@ -216,7 +216,6 @@ services.AddMassTransit(x =>
 });
 ```
 
-
 ### Configuring for a consumer or saga
 
 If there are multiple consumers (or saga) on the same endpoint (which could potentially get you on the _naughty list_), and the retry/redelivery behavior should only apply to a specific consumer or saga, the same configuration can be applied specifically to the consumer or saga.
