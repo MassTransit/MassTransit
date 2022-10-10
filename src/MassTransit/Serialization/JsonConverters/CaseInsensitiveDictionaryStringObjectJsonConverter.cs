@@ -111,7 +111,9 @@ namespace MassTransit.Serialization.JsonConverters
 
                 reader.Read();
 
-                dictionary.Add(propertyName, ReadPropertyValue(ref reader, options));
+                var value = ReadPropertyValue(ref reader, options);
+                if (value != null)
+                    dictionary[propertyName] = value;
             }
 
             return dictionary;
@@ -128,8 +130,9 @@ namespace MassTransit.Serialization.JsonConverters
                 if (reader.TokenType == JsonTokenType.StartObject)
                 {
                     Dictionary<string, object> elementDictionary = ReadObject(ref reader, options);
-                    if (elementDictionary.TryGetValue("Key", out string key) && elementDictionary.TryGetValue("Value", out var value))
-                        dictionary.Add(key, value);
+                    if (elementDictionary.TryGetValue("Key", out string key) && !string.IsNullOrWhiteSpace(key)
+                        && elementDictionary.TryGetValue("Value", out var value) && value != null)
+                        dictionary[key] = value;
                 }
                 else
                     throw new JsonException($"Expected object (key/value), found: {reader.TokenType}");
