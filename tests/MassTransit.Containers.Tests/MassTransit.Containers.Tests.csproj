@@ -1,11 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1;net6.0</TargetFrameworks>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(IsWindows)' == 'true' ">
-    <TargetFrameworks>$(TargetFrameworks);net461</TargetFrameworks>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup>
