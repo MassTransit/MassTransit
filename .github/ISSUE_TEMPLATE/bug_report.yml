@@ -1,0 +1,93 @@
+name: Bug Report
+description: Create a bug report for an issue found in MassTransit
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This bug report form is for submitting an issue found in MassTransit that can be reproduced using the most recent version.
+  - type: input
+    id: contact
+    attributes:
+      label: Contact Details
+      description: If you have an active support contract, enter the email associated with the account.
+      placeholder: email@example.com
+    validations:
+      required: false
+  - type: dropdown
+    id: version
+    attributes:
+      label: Version
+      description: In what version of MassTransit did you discover this issue?
+      multiple: true
+      options:
+        - 8.x (develop, pre-release)
+        - 8.x
+        - 7.x (no longer supported)
+        - 6.x (really no longer supported)
+        - Earlier version (seriously?)
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: On which operating system(s) are you experiencing the issue?
+      multiple: true
+      options:
+        - Windows
+        - MacOS
+        - Linux
+  - type: dropdown
+    id: broker
+    attributes:
+      label: Using which broker(s) did you encounter the issue?
+      multiple: true
+      options:
+        - RabbitMQ
+        - Azure Service Bus
+        - Amazon SQS
+        - ActiveMQ
+        - In-Memory
+        - Mediator
+        - Kafka
+        - Azure Event Hub
+  - type: textarea
+    id: steps
+    attributes:
+      label: What are the steps required to reproduce the issue?
+      description: Outline the steps to reproduce the issue, including any relevant source code snippets.
+      value: |
+        1.
+        2.
+        3.
+        ...
+      render: bash
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What is the expected behavior?
+      placeholder: It should work...
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What actually happened?
+      placeholder: Well, it's complicated...
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Related log output, including any exceptions
+      description: Please paste any log output related to the issue (automatically formatted into code, so no need for backticks). Logs are usually required, if you don't have them, [turn them on](https://masstransit-project.com/usage/logging.html) and capture them before creating an issue.
+      render: shell
+  - type: input
+    id: repositorty
+    attributes:
+      label: Link to repository that demonstrates/reproduces the issue
+      description: If you have a standalone repository that reproduces the issue, paste the link here (highly recommended).
+      placeholder: https://github.com/user/repo
+    validations:
+      required: false
