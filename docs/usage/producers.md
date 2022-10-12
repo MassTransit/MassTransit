@@ -56,6 +56,21 @@ public async Task SendOrder(ISendEndpointProvider sendEndpointProvider)
 
 There are many overloads for the `Send` method. Because MassTransit is built around filters and pipes, pipes are used to customize the message delivery behavior of Send. There are also some useful overloads (via extension methods) to make sending easier and less noisy due to the pipe construction, etc.
 
+#### Send with Timeout
+
+If there is a connectivity issue between the application and the broker, the _Send_ method will internally retry until the connection is restored blocking the returned _Task_ until the send operation completes. The _Send_ methods support passing a `CancellationToken` that can be used to cancel the operation.
+
+To specify a timeout, use a `CancellationTokenSource` as shown below.
+
+```cs
+var timeout = TimeSpan.FromSeconds(30);
+using var source = new CancellationTokenSource(timeout);
+
+await endpoint.Send(new SubmitOrder { OrderId = "123" }, source.Token);
+```
+
+Typically, the _Send_ call completes quickly, only taking a few milliseconds. If the token is canceled the send operation will throw an `OperationCanceledException`.
+
 ### Endpoint Address
 
 An endpoint address is a fully-qualified URI which may include transport-specific details. For example, an endpoint on a local RabbitMQ server would be:
@@ -187,6 +202,8 @@ public async Task NotifyOrderSubmitted(IPublishEndpoint publishEndpoint)
     });
 }
 ```
+
+> Publish also supports cancellation, including timeouts. See [the note above](#send-with-timeout) for details.
 
 If you are planning to publish messages from within your consumers, this example would suit better:
 
