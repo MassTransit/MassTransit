@@ -77,15 +77,12 @@ namespace MassTransit.SagaStateMachine
 
         public bool EventFilter(BehaviorContext<TInstance, RequestTimeoutExpired<TRequest>> context)
         {
-            if (!context.TryGetPayload(out ConsumeContext<RequestTimeoutExpired<TRequest>> consumeContext))
-                return false;
-
-            if (!consumeContext.RequestId.HasValue)
+            if (!context.RequestId.HasValue)
                 return false;
 
             Guid? requestId = GetRequestId(context.Saga);
 
-            return requestId.HasValue && requestId.Value == consumeContext.RequestId.Value;
+            return requestId.HasValue && requestId.Value == context.RequestId.Value;
         }
 
         protected void AcceptResponse<T>()

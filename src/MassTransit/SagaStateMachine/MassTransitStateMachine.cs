@@ -1710,20 +1710,20 @@
                     {
                         Guid? tokenId = schedule.GetTokenId(context.Saga);
 
-                        if (context.TryGetPayload(out ConsumeContext consumeContext))
+                        Guid? messageTokenId = context.GetSchedulingTokenId();
+                        if (messageTokenId.HasValue)
                         {
-                            Guid? messageTokenId = consumeContext.GetSchedulingTokenId();
-                            if (messageTokenId.HasValue)
+                            if (!tokenId.HasValue || messageTokenId.Value != tokenId.Value)
                             {
-                                if (!tokenId.HasValue || messageTokenId.Value != tokenId.Value)
-                                {
-                                    LogContext.Debug?.Log("SAGA: {CorrelationId} Scheduled message not current: {TokenId}", context.Saga.CorrelationId,
-                                        messageTokenId.Value);
+                                LogContext.Debug?.Log("SAGA: {CorrelationId} Scheduled message not current: {TokenId}", context.Saga.CorrelationId,
+                                    messageTokenId.Value);
 
-                                    return;
-                                }
+                                return;
                             }
                         }
+
+                        if (!tokenId.HasValue)
+                            return;
 
                         BehaviorContext<TInstance, TMessage> eventContext = context.CreateProxy(schedule.Received, context.Message);
 
