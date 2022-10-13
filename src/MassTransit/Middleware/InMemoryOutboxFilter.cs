@@ -2,7 +2,9 @@ namespace MassTransit.Middleware
 {
     using System;
     using System.Threading.Tasks;
+    using DependencyInjection;
     using InMemoryOutbox;
+    using Microsoft.Extensions.DependencyInjection;
 
 
     public class InMemoryOutboxFilter<TContext, TResult> :
@@ -23,6 +25,10 @@ namespace MassTransit.Middleware
         {
             var outboxContext = _contextFactory(context);
 
+            IDisposable pop = null;
+            if (context.TryGetPayload(out IServiceScope scope))
+                pop = scope.ServiceProvider.GetRequiredService<ScopedConsumeContextProvider>().PushContext(outboxContext);
+
             try
             {
                 await next.Send(outboxContext).ConfigureAwait(false);
@@ -36,6 +42,10 @@ namespace MassTransit.Middleware
                 await outboxContext.DiscardPendingActions().ConfigureAwait(false);
 
                 throw;
+            }
+            finally
+            {
+                pop?.Dispose();
             }
         }
 
