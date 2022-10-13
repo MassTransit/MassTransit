@@ -17,9 +17,11 @@ namespace MassTransit.Configuration
             ConcurrencyLimit = 1;
             MessageLimit = 10;
             TimeLimit = TimeSpan.FromSeconds(10);
+            TimeLimitStart = BatchTimeLimitStart.FromFirst;
         }
 
         public TimeSpan TimeLimit { private get; set; }
+        public BatchTimeLimitStart TimeLimitStart { private get; set; }
         public int MessageLimit { private get; set; }
         public int ConcurrencyLimit { private get; set; }
 
@@ -30,7 +32,8 @@ namespace MassTransit.Configuration
             var configurator = new ConsumerConfigurator<TConsumer>(consumerFactory, _configurator);
             configurator.ConnectConsumerConfigurationObserver(_configurator);
 
-            configurator.Options<BatchOptions>(options => options.SetMessageLimit(MessageLimit).SetTimeLimit(TimeLimit).SetConcurrencyLimit(ConcurrencyLimit));
+            configurator.Options<BatchOptions>(options => options.SetMessageLimit(MessageLimit).SetTimeLimit(TimeLimit).SetTimeLimitStart(TimeLimitStart)
+                .SetConcurrencyLimit(ConcurrencyLimit));
 
             configurator.ConsumerMessage(configure);
 

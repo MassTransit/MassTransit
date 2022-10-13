@@ -13,12 +13,13 @@
         readonly IBatchCollector<TMessage> _collector;
         readonly int _messageLimit;
         readonly TimeSpan _timeLimit;
+        readonly BatchTimeLimitStart _timeLimitStart;
 
-        public BatchConsumerFactory(int messageLimit, TimeSpan timeLimit, IBatchCollector<TMessage> collector)
+        public BatchConsumerFactory(int messageLimit, TimeSpan timeLimit, BatchTimeLimitStart timeLimitStart, IBatchCollector<TMessage> collector)
         {
             _messageLimit = messageLimit;
             _timeLimit = timeLimit;
-
+            _timeLimitStart = timeLimitStart;
             _collector = collector;
         }
 
@@ -52,6 +53,7 @@
             var scope = context.CreateConsumerFactoryScope<IConsumer<TMessage>>("batch");
 
             scope.Add("timeLimit", _timeLimit);
+            scope.Add("timeLimitStart", _timeLimitStart);
             scope.Add("messageLimit", _messageLimit);
 
             _collector.Probe(scope);

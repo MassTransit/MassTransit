@@ -17,6 +17,11 @@ namespace MassTransit
         TimeSpan TimeLimit { set; }
 
         /// <summary>
+        /// Sets the starting point for the <see cref="TimeLimit"/>
+        /// </summary>
+        BatchTimeLimitStart TimeLimitStart { set; }
+
+        /// <summary>
         /// Set the maximum number of messages which can be added to a single batch
         /// </summary>
         int MessageLimit { set; }

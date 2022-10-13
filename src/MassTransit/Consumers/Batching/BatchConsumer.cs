@@ -22,12 +22,14 @@
         readonly DateTime _firstMessage;
         readonly int _messageLimit;
         readonly SortedDictionary<Guid, ConsumeContext<TMessage>> _messages;
+        readonly TimeSpan _timeLimit;
+        readonly BatchTimeLimitStart _timeLimitStart;
         readonly Timer _timer;
         Activity _currentActivity;
         DateTime _lastMessage;
         ILogContext _logContext;
 
-        public BatchConsumer(int messageLimit, TimeSpan timeLimit, ChannelExecutor executor, ChannelExecutor dispatcher,
+        public BatchConsumer(int messageLimit, TimeSpan timeLimit, BatchTimeLimitStart timeLimitStart, ChannelExecutor executor, ChannelExecutor dispatcher,
             IPipe<ConsumeContext<Batch<TMessage>>> consumerPipe)
         {
             _messageLimit = messageLimit;
@@ -37,6 +39,8 @@
             _messages = new SortedDictionary<Guid, ConsumeContext<TMessage>>();
             _completed = TaskUtil.GetTask<DateTime>();
             _firstMessage = DateTime.UtcNow;
+            _timeLimit = timeLimit;
+            _timeLimitStart = timeLimitStart;
 
             _timer = new Timer(TimeLimitExpired, null, timeLimit, TimeSpan.FromMilliseconds(-1));
         }
@@ -85,6 +89,9 @@
 
             var messageId = context.MessageId ?? NewId.NextGuid();
             _messages.Add(messageId, context);
+
+            if (_timeLimitStart == BatchTimeLimitStart.FromLast)
+                _timer.Change(_timeLimit, TimeSpan.FromMilliseconds(-1));
 
             _lastMessage = DateTime.UtcNow;
 

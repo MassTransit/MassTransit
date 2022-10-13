@@ -26,6 +26,7 @@ namespace MassTransit.Configuration
 
             var messageLimit = options.MessageLimit;
             var timeLimit = options.TimeLimit;
+            var timeLimitStart = options.TimeLimitStart;
             var concurrencyLimit = options.ConcurrencyLimit;
 
             IConsumerMessageSpecification<TConsumer, Batch<TMessage>> batchMessageSpecification = specification.GetMessageSpecification<Batch<TMessage>>();
@@ -43,7 +44,7 @@ namespace MassTransit.Configuration
 
             IBatchCollector<TMessage> collector = null;
             if (options.GroupKeyProvider == null)
-                collector = new BatchCollector<TMessage>(messageLimit, timeLimit, concurrencyLimit, batchMessagePipe);
+                collector = new BatchCollector<TMessage>(messageLimit, timeLimit, timeLimitStart, concurrencyLimit, batchMessagePipe);
             else
             {
                 if (options.GroupKeyProvider.GetType().ClosesType(typeof(IGroupKeyProvider<,>), out Type[] types))
@@ -56,7 +57,7 @@ namespace MassTransit.Configuration
                     throw new ConfigurationException("The GroupKeyProvider does not implement IGroupKeyProvider<TMessage,TKey>");
             }
 
-            var factory = new BatchConsumerFactory<TMessage>(messageLimit, timeLimit, collector);
+            var factory = new BatchConsumerFactory<TMessage>(messageLimit, timeLimit, timeLimitStart, collector);
 
             IConsumerSpecification<BatchConsumer<TMessage>> messageConsumerSpecification =
                 ConsumerConnectorCache<BatchConsumer<TMessage>>.Connector.CreateConsumerSpecification<BatchConsumer<TMessage>>();

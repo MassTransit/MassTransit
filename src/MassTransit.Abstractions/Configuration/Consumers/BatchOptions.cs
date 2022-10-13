@@ -19,6 +19,7 @@ namespace MassTransit
             ConcurrencyLimit = 1;
             MessageLimit = 10;
             TimeLimit = TimeSpan.FromSeconds(1);
+            TimeLimitStart = BatchTimeLimitStart.FromFirst;
         }
 
         /// <summary>
@@ -35,6 +36,11 @@ namespace MassTransit
         /// The maximum time to wait before delivering a partial batch
         /// </summary>
         public TimeSpan TimeLimit { get; set; }
+
+        /// <summary>
+        /// The starting point for the <see cref="TimeLimit" />
+        /// </summary>
+        public BatchTimeLimitStart TimeLimitStart { get; set; }
 
         /// <summary>
         /// The property to group by
@@ -89,6 +95,16 @@ namespace MassTransit
         public BatchOptions SetTimeLimit(TimeSpan limit)
         {
             TimeLimit = limit;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the starting point for the <see cref="TimeLimit"/>
+        /// </summary>
+        /// <param name="timeLimitStart">The starting point</param>
+        public BatchOptions SetTimeLimitStart(BatchTimeLimitStart timeLimitStart)
+        {
+            TimeLimitStart = timeLimitStart;
             return this;
         }
 
