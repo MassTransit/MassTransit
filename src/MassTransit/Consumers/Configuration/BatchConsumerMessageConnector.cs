@@ -24,11 +24,6 @@ namespace MassTransit.Configuration
         {
             var options = specification.Options<BatchOptions>();
 
-            var messageLimit = options.MessageLimit;
-            var timeLimit = options.TimeLimit;
-            var timeLimitStart = options.TimeLimitStart;
-            var concurrencyLimit = options.ConcurrencyLimit;
-
             IConsumerMessageSpecification<TConsumer, Batch<TMessage>> batchMessageSpecification = specification.GetMessageSpecification<Batch<TMessage>>();
 
             var consumeFilter = new MethodConsumerMessageFilter<TConsumer, Batch<TMessage>>();
@@ -44,20 +39,20 @@ namespace MassTransit.Configuration
 
             IBatchCollector<TMessage> collector = null;
             if (options.GroupKeyProvider == null)
-                collector = new BatchCollector<TMessage>(messageLimit, timeLimit, timeLimitStart, concurrencyLimit, batchMessagePipe);
+                collector = new BatchCollector<TMessage>(options, batchMessagePipe);
             else
             {
                 if (options.GroupKeyProvider.GetType().ClosesType(typeof(IGroupKeyProvider<,>), out Type[] types))
                 {
                     var collectorType = typeof(BatchCollector<,>).MakeGenericType(typeof(TMessage), types[1]);
                     collector = (IBatchCollector<TMessage>)Activator.CreateInstance(collectorType,
-                        messageLimit, timeLimit, concurrencyLimit, batchMessagePipe, options.GroupKeyProvider);
+                        options, batchMessagePipe, options.GroupKeyProvider);
                 }
                 else
                     throw new ConfigurationException("The GroupKeyProvider does not implement IGroupKeyProvider<TMessage,TKey>");
             }
 
-            var factory = new BatchConsumerFactory<TMessage>(messageLimit, timeLimit, timeLimitStart, collector);
+            var factory = new BatchConsumerFactory<TMessage>(options, collector);
 
             IConsumerSpecification<BatchConsumer<TMessage>> messageConsumerSpecification =
                 ConsumerConnectorCache<BatchConsumer<TMessage>>.Connector.CreateConsumerSpecification<BatchConsumer<TMessage>>();

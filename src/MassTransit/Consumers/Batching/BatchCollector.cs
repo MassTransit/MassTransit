@@ -1,6 +1,5 @@
 namespace MassTransit.Batching
 {
-    using System;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Threading.Tasks;
@@ -14,21 +13,16 @@ namespace MassTransit.Batching
         readonly ChannelExecutor _collector;
         readonly IPipe<ConsumeContext<Batch<TMessage>>> _consumerPipe;
         readonly ChannelExecutor _dispatcher;
-        readonly int _messageLimit;
-        readonly TimeSpan _timeLimit;
-        readonly BatchTimeLimitStart _timeLimitStart;
+        readonly BatchOptions _options;
         BatchConsumer<TMessage> _currentConsumer;
 
-        public BatchCollector(int messageLimit, TimeSpan timeLimit, BatchTimeLimitStart timeLimitStart, int concurrencyLimit,
-            IPipe<ConsumeContext<Batch<TMessage>>> consumerPipe)
+        public BatchCollector(BatchOptions options, IPipe<ConsumeContext<Batch<TMessage>>> consumerPipe)
         {
-            _messageLimit = messageLimit;
-            _timeLimit = timeLimit;
-            _timeLimitStart = timeLimitStart;
+            _options = options;
             _consumerPipe = consumerPipe;
 
             _collector = new ChannelExecutor(1);
-            _dispatcher = new ChannelExecutor(concurrencyLimit);
+            _dispatcher = new ChannelExecutor(options.ConcurrencyLimit);
         }
 
         public async ValueTask DisposeAsync()
@@ -72,7 +66,7 @@ namespace MassTransit.Batching
             }
 
             if (_currentConsumer == null || _currentConsumer.IsCompleted)
-                _currentConsumer = new BatchConsumer<TMessage>(_messageLimit, _timeLimit, _timeLimitStart, _collector, _dispatcher, _consumerPipe);
+                _currentConsumer = new BatchConsumer<TMessage>(_options, _collector, _dispatcher, _consumerPipe);
 
             await _currentConsumer.Add(context, currentActivity).ConfigureAwait(false);
 
@@ -90,22 +84,17 @@ namespace MassTransit.Batching
         readonly IPipe<ConsumeContext<Batch<TMessage>>> _consumerPipe;
         readonly ChannelExecutor _dispatcher;
         readonly IGroupKeyProvider<TMessage, TKey> _keyProvider;
-        readonly int _messageLimit;
-        readonly TimeSpan _timeLimit;
-        readonly BatchTimeLimitStart _batchTimeLimitStart;
+        readonly BatchOptions _options;
         BatchConsumer<TMessage> _currentConsumer;
 
-        public BatchCollector(int messageLimit, TimeSpan timeLimit, BatchTimeLimitStart batchTimeLimitStart, int concurrencyLimit,
-            IPipe<ConsumeContext<Batch<TMessage>>> consumerPipe, IGroupKeyProvider<TMessage, TKey> keyProvider)
+        public BatchCollector(BatchOptions options, IPipe<ConsumeContext<Batch<TMessage>>> consumerPipe, IGroupKeyProvider<TMessage, TKey> keyProvider)
         {
-            _messageLimit = messageLimit;
-            _timeLimit = timeLimit;
-            _batchTimeLimitStart = batchTimeLimitStart;
+            _options = options;
             _consumerPipe = consumerPipe;
             _keyProvider = keyProvider;
 
             _collector = new ChannelExecutor(1);
-            _dispatcher = new ChannelExecutor(concurrencyLimit);
+            _dispatcher = new ChannelExecutor(options.ConcurrencyLimit);
             _collectors = new Dictionary<TKey, BatchConsumer<TMessage>>();
         }
 
@@ -158,7 +147,7 @@ namespace MassTransit.Batching
 
                 if (consumer == null || consumer.IsCompleted)
                 {
-                    consumer = new BatchConsumer<TMessage>(_messageLimit, _timeLimit, _batchTimeLimitStart, _collector, _dispatcher, _consumerPipe);
+                    consumer = new BatchConsumer<TMessage>(_options, _collector, _dispatcher, _consumerPipe);
                     _collectors[key] = consumer;
                 }
 
@@ -174,7 +163,7 @@ namespace MassTransit.Batching
             }
 
             if (_currentConsumer == null || _currentConsumer.IsCompleted)
-                _currentConsumer = new BatchConsumer<TMessage>(_messageLimit, _timeLimit, _batchTimeLimitStart, _collector, _dispatcher, _consumerPipe);
+                _currentConsumer = new BatchConsumer<TMessage>(_options, _collector, _dispatcher, _consumerPipe);
 
             await _currentConsumer.Add(context, currentActivity).ConfigureAwait(false);
 

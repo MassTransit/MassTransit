@@ -20,29 +20,24 @@
         readonly ChannelExecutor _dispatcher;
         readonly ChannelExecutor _executor;
         readonly DateTime _firstMessage;
-        readonly int _messageLimit;
         readonly SortedDictionary<Guid, ConsumeContext<TMessage>> _messages;
-        readonly TimeSpan _timeLimit;
-        readonly BatchTimeLimitStart _timeLimitStart;
+        readonly BatchOptions _options;
         readonly Timer _timer;
         Activity _currentActivity;
         DateTime _lastMessage;
         ILogContext _logContext;
 
-        public BatchConsumer(int messageLimit, TimeSpan timeLimit, BatchTimeLimitStart timeLimitStart, ChannelExecutor executor, ChannelExecutor dispatcher,
-            IPipe<ConsumeContext<Batch<TMessage>>> consumerPipe)
+        public BatchConsumer(BatchOptions options, ChannelExecutor executor, ChannelExecutor dispatcher, IPipe<ConsumeContext<Batch<TMessage>>> consumerPipe)
         {
-            _messageLimit = messageLimit;
             _executor = executor;
             _consumerPipe = consumerPipe;
             _dispatcher = dispatcher;
             _messages = new SortedDictionary<Guid, ConsumeContext<TMessage>>();
             _completed = TaskUtil.GetTask<DateTime>();
             _firstMessage = DateTime.UtcNow;
-            _timeLimit = timeLimit;
-            _timeLimitStart = timeLimitStart;
+            _options = options;
 
-            _timer = new Timer(TimeLimitExpired, null, timeLimit, TimeSpan.FromMilliseconds(-1));
+            _timer = new Timer(TimeLimitExpired, null, _options.TimeLimit, TimeSpan.FromMilliseconds(-1));
         }
 
         public bool IsCompleted { get; private set; }
@@ -90,8 +85,8 @@
             var messageId = context.MessageId ?? NewId.NextGuid();
             _messages.Add(messageId, context);
 
-            if (_timeLimitStart == BatchTimeLimitStart.FromLast)
-                _timer.Change(_timeLimit, TimeSpan.FromMilliseconds(-1));
+            if (_options.TimeLimitStart == BatchTimeLimitStart.FromLast)
+                _timer.Change(_options.TimeLimit, TimeSpan.FromMilliseconds(-1));
 
             _lastMessage = DateTime.UtcNow;
 
@@ -112,7 +107,7 @@
             if (context.GetRetryAttempt() > 0)
                 return true;
 
-            return _messages.Count == _messageLimit;
+            return _messages.Count == _options.MessageLimit;
         }
 
         public Task ForceComplete()
