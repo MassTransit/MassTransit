@@ -118,7 +118,15 @@ namespace MassTransit.AmazonSqsTransport
 
                     var topicName = topic.TopicArn.Substring(index + 1);
 
-                    await _nameIndex.Get(topicName, async key => new TopicInfo(topicName, topic.TopicArn)).ConfigureAwait(false);
+                    await _nameIndex.Get(topicName, async key =>
+                    {
+                        var topicInfo = new TopicInfo(topicName, topic.TopicArn);
+
+                        lock (_durableTopics)
+                            _durableTopics[topicInfo.EntityName] = topicInfo;
+
+                        return topicInfo;
+                    }).ConfigureAwait(false);
                 }
 
                 cursor = response.NextToken;
