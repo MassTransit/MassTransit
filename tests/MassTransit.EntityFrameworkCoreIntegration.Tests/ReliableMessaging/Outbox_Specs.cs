@@ -21,6 +21,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
             await using var provider = CreateServiceProvider();
 
             var harness = provider.GetTestHarness();
+            harness.TestInactivityTimeout = TimeSpan.FromSeconds(5);
 
             await harness.Start();
 
@@ -45,6 +46,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
             await using var provider = CreateServiceProvider();
 
             var harness = provider.GetTestHarness();
+            harness.TestInactivityTimeout = TimeSpan.FromSeconds(5);
 
             await harness.Start();
 

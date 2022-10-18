@@ -48,7 +48,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
             using var adjustment = new QuartzTimeAdjustment(provider);
 
             var harness = provider.GetTestHarness();
-            harness.TestInactivityTimeout = TimeSpan.FromSeconds(2);
+            harness.TestInactivityTimeout = TimeSpan.FromSeconds(5);
 
             await harness.Start();
 

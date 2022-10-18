@@ -3,7 +3,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
     using System;
     using System.Diagnostics;
     using System.Linq;
-    using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
     using Logging;
@@ -40,6 +39,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
                 .BuildServiceProvider(true);
 
             var harness = provider.GetTestHarness();
+            harness.TestInactivityTimeout = TimeSpan.FromSeconds(5);
 
             await harness.Start();
 

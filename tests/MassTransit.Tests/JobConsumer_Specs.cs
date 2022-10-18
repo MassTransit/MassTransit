@@ -41,6 +41,7 @@ namespace MassTransit.Tests
             await using var provider = SetupServiceCollection();
 
             var harness = provider.GetTestHarness();
+            harness.TestInactivityTimeout = TimeSpan.FromSeconds(5);
 
             await harness.Start();
 
@@ -100,6 +101,7 @@ namespace MassTransit.Tests
             var harness = provider.GetTestHarness();
 
             await harness.Start();
+            harness.TestInactivityTimeout = TimeSpan.FromSeconds(5);
 
             var jobId = NewId.NextGuid();
 
@@ -132,6 +134,7 @@ namespace MassTransit.Tests
             await using var provider = SetupServiceCollection();
 
             var harness = provider.GetTestHarness();
+            harness.TestInactivityTimeout = TimeSpan.FromSeconds(5);
 
             await harness.Start();
 
