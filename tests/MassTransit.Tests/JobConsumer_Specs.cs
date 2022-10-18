@@ -25,7 +25,8 @@ namespace MassTransit.Tests
         {
             public async Task Run(JobContext<OddJob> context)
             {
-                await Task.Delay(context.Job.Duration, context.CancellationToken);
+                if (context.RetryAttempt == 0)
+                    await Task.Delay(context.Job.Duration, context.CancellationToken);
             }
         }
     }
@@ -89,6 +90,40 @@ namespace MassTransit.Tests
             await harness.Bus.Publish<CancelJob>(new { JobId = jobId });
 
             Assert.That(await harness.Published.Any<JobCanceled>(), Is.True);
+        }
+
+        [Test]
+        public async Task Should_cancel_the_job_and_retry_it()
+        {
+            await using var provider = SetupServiceCollection();
+
+            var harness = provider.GetTestHarness();
+
+            await harness.Start();
+
+            var jobId = NewId.NextGuid();
+
+            IRequestClient<SubmitJob<OddJob>> client = harness.GetRequestClient<SubmitJob<OddJob>>();
+
+            Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new
+            {
+                JobId = jobId,
+                Job = new { Duration = TimeSpan.FromSeconds(10) }
+            });
+
+            Assert.That(response.Message.JobId, Is.EqualTo(jobId));
+
+            Assert.That(await harness.Published.Any<JobSubmitted>(), Is.True);
+            Assert.That(await harness.Published.Any<JobStarted>(), Is.True);
+
+            await harness.Bus.Publish<CancelJob>(new { JobId = jobId });
+
+            Assert.That(await harness.Published.Any<JobCanceled>(), Is.True);
+            Assert.That(await harness.Sent.Any<JobSlotReleased>(), Is.True);
+
+            await harness.Bus.Publish<RetryJob>(new { JobId = jobId });
+            Assert.That(await harness.Published.Any<JobCompleted>(), Is.True);
+            Assert.That(await harness.Published.Any<JobCompleted<OddJob>>(), Is.True);
         }
 
         [Test]
