@@ -45,5 +45,22 @@
 
             configurator.AddPipeSpecification(specification);
         }
+
+        /// <summary>
+        /// Specify a rate limit for message processing, so that only the specified number of messages are allowed
+        /// per interval.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="rateLimit">The number of messages allowed per interval</param>
+        /// <param name="interval">The reset interval for each set of messages</param>
+        public static void UseRateLimit(this IConsumePipeConfigurator configurator, int rateLimit, TimeSpan interval)
+        {
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+
+            var specification = new RateLimitPipeSpecification<ConsumeContext>(rateLimit, interval);
+
+            configurator.AddPrePipeSpecification(specification);
+        }
     }
 }
