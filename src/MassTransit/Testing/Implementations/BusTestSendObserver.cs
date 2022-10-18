@@ -5,9 +5,6 @@ namespace MassTransit.Testing.Implementations
     using System.Threading.Tasks;
 
 
-    /// <summary>
-    /// Observes sent messages for test fixtures
-    /// </summary>
     public class BusTestSendObserver :
         InactivityTestObserver,
         ISendObserver

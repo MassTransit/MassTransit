@@ -33,6 +33,7 @@ namespace MassTransit.Testing.Implementations
         protected void StartTimer(TimeSpan inactivityTimout)
         {
             _inactivityTimer = new RollingTimer(OnActivityTimeout, inactivityTimout);
+            _inactivityTimer.Start();
         }
 
         protected Task RestartTimer(bool activityDetected = true)

@@ -29,6 +29,7 @@
                 .BuildServiceProvider(true);
 
             var harness = provider.GetTestHarness();
+            harness.TestInactivityTimeout = TimeSpan.FromSeconds(5);
 
             await harness.Start();
 
