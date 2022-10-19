@@ -31,11 +31,17 @@ namespace MassTransit.Transports
                         if (retryContext?.Delay != null)
                             await Task.Delay(retryContext.Delay.Value, tokenSource.Token).ConfigureAwait(false);
 
-                        if (tokenSource.Token.IsCancellationRequested)
-                            throw new ConnectionException($"The connection is stopping and cannot be used: {description}", retryContext?.Exception);
+                        if (supervisor.Stopping.IsCancellationRequested)
+                            throw new ConnectionException($"The transport is stopping and cannot be used: {description}", retryContext?.Exception);
+                        if (cancellationToken.IsCancellationRequested)
+                            cancellationToken.ThrowIfCancellationRequested();
 
                         await factory().ConfigureAwait(false);
                         return;
+                    }
+                    catch (OperationCanceledException exception) when (exception.CancellationToken == supervisor.Stopping)
+                    {
+                        throw new ConnectionException($"The transport is stopping and cannot be used: {description}", retryContext?.Exception);
                     }
                     catch (OperationCanceledException)
                     {
@@ -67,7 +73,10 @@ namespace MassTransit.Transports
                     }
                 }
 
-                throw new ConnectionException($"The connection is stopping and cannot be used: {description}", retryContext?.Exception);
+                if (cancellationToken.IsCancellationRequested)
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                throw new ConnectionException($"The transport is stopping and cannot be used: {description}", retryContext?.Exception);
             }
             finally
             {
