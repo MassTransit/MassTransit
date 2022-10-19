@@ -134,7 +134,7 @@ namespace MassTransit.Tests
             await using var provider = SetupServiceCollection();
 
             var harness = provider.GetTestHarness();
-            harness.TestInactivityTimeout = TimeSpan.FromSeconds(5);
+            harness.TestInactivityTimeout = TimeSpan.FromSeconds(10);
 
             await harness.Start();
 
@@ -162,11 +162,14 @@ namespace MassTransit.Tests
 
             Assert.That(response.Message.JobId, Is.EqualTo(jobId));
 
-            Assert.That(await harness.Sent.Any<JobSlotUnavailable>(x => x.Context.Message.JobId == jobId), Is.True);
+            Assert.That(await harness.Sent.Any<JobSlotWaitElapsed>(x => x.Context.Message.JobId == jobId), Is.True);
 
             await harness.Bus.Publish<CancelJob>(new { JobId = jobId });
 
             Assert.That(await harness.Published.Any<JobCanceled>(x => x.Context.Message.JobId == jobId), Is.True);
+
+            await harness.Bus.Publish<CancelJob>(new { JobId = previousJobId });
+            Assert.That(await harness.Published.Any<JobCanceled>(x => x.Context.Message.JobId == previousJobId), Is.True);
         }
 
         static ServiceProvider SetupServiceCollection()

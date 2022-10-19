@@ -36,11 +36,6 @@ jobs:
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '3.1.x'
-
-      - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v3
-        with:
           dotnet-version: '6.0.x'
 
       - name: Restore NuGet packages
@@ -59,19 +54,9 @@ jobs:
     name: Unit Tests
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    strategy:
-      max-parallel: 2
-      matrix:
-        framework: ['netcoreapp3.1', 'net6.0']
     steps:
       - name: Check out code
         uses: actions/checkout@v3
-
-      - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v3
-        if: matrix.framework == 'netcoreapp3.1'
-        with:
-          dotnet-version: '3.1.x'
 
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v3
@@ -79,11 +64,11 @@ jobs:
           dotnet-version: '6.0.x'
 
       - name: Unit Tests
-        run: dotnet test -c Release -f ${{ matrix.framework }} --logger:"console;verbosity=normal" --filter Category!=Flaky
+        run: dotnet test -c Release -f net6.0 --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.Tests
 
       - name: Test Abstractions
-        run: dotnet test -c Release -f ${{ matrix.framework }} --logger:"console;verbosity=normal" --filter Category!=Flaky
+        run: dotnet test -c Release -f net6.0 --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.Abstractions.Tests
 
   test-containers:
@@ -303,16 +288,7 @@ jobs:
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '3.1.x'
-
-      - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v3
-        with:
           dotnet-version: '6.0.x'
-
-      - name: Test EntityFrameworkCore 6.0
-        run: dotnet test -c Release --logger:"console;verbosity=normal" -f netcoreapp3.1 --filter "Category!=Flaky&Category!=Integration"
-        working-directory: tests/MassTransit.EntityFrameworkCoreIntegration.Tests
 
       - name: Test EntityFrameworkCore 6.0
         run: dotnet test -c Release --logger:"console;verbosity=normal" -f net6.0 --filter "Category!=Flaky&Category!=Integration"
@@ -573,11 +549,6 @@ jobs:
 
       - name: Check out code
         uses: actions/checkout@v3
-
-      - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '3.1.x'
 
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v3
