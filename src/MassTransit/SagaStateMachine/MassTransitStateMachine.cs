@@ -1795,9 +1795,21 @@
 
         static EventRegistration GetEventRegistration(Event @event, Type messageType)
         {
-            var registrationType = messageType.HasInterface<CorrelatedBy<Guid>>()
-                ? typeof(CorrelatedEventRegistration<>).MakeGenericType(typeof(TInstance), messageType)
-                : typeof(UncorrelatedEventRegistration<>).MakeGenericType(typeof(TInstance), messageType);
+            var isFault = messageType.ClosesType(typeof(Fault<>), out Type[] faultMessageType);
+
+            Type registrationType;
+            if (messageType.HasInterface<CorrelatedBy<Guid>>())
+            {
+                registrationType = isFault
+                    ? typeof(CorrelatedFaultEventRegistration<>).MakeGenericType(typeof(TInstance), faultMessageType[0])
+                    : typeof(CorrelatedEventRegistration<>).MakeGenericType(typeof(TInstance), messageType);
+            }
+            else
+            {
+                registrationType = isFault
+                    ? typeof(UncorrelatedFaultEventRegistration<>).MakeGenericType(typeof(TInstance), faultMessageType[0])
+                    : typeof(UncorrelatedEventRegistration<>).MakeGenericType(typeof(TInstance), messageType);
+            }
 
             return (EventRegistration)Activator.CreateInstance(registrationType, @event);
         }
@@ -2046,8 +2058,27 @@
 
             public void RegisterCorrelation(MassTransitStateMachine<TInstance> machine)
             {
-                var builderType = typeof(CorrelatedByEventCorrelationBuilder<,>).MakeGenericType(typeof(TInstance), typeof(TData));
-                var builder = (IEventCorrelationBuilder)Activator.CreateInstance(builderType, machine, _event);
+                var builder = new CorrelatedByEventCorrelationBuilder<TInstance, TData>(machine, _event);
+
+                machine._eventCorrelations[_event] = builder.Build();
+            }
+        }
+
+
+        class CorrelatedFaultEventRegistration<TData> :
+            EventRegistration
+            where TData : class, CorrelatedBy<Guid>
+        {
+            readonly Event<Fault<TData>> _event;
+
+            public CorrelatedFaultEventRegistration(Event<Fault<TData>> @event)
+            {
+                _event = @event;
+            }
+
+            public void RegisterCorrelation(MassTransitStateMachine<TInstance> machine)
+            {
+                var builder = new CorrelatedByFaultEventCorrelationBuilder<TInstance, TData>(machine, _event);
 
                 machine._eventCorrelations[_event] = builder.Build();
             }
@@ -2070,17 +2101,41 @@
                 if (GlobalTopology.Send.GetMessageTopology<TData>().TryGetConvention(out ICorrelationIdMessageSendTopologyConvention<TData> convention)
                     && convention.TryGetMessageCorrelationId(out IMessageCorrelationId<TData> messageCorrelationId))
                 {
-                    var builderType = typeof(MessageCorrelationIdEventCorrelationBuilder<,>).MakeGenericType(typeof(TInstance), typeof(TData));
-                    var builder = (IEventCorrelationBuilder)Activator.CreateInstance(builderType, machine, _event, messageCorrelationId);
+                    var builder = new MessageCorrelationIdEventCorrelationBuilder<TInstance, TData>(machine, _event, messageCorrelationId);
 
                     machine._eventCorrelations[_event] = builder.Build();
                 }
                 else
                 {
-                    var correlationType = typeof(UncorrelatedEventCorrelation<,>).MakeGenericType(typeof(TInstance), typeof(TData));
-                    var correlation = (EventCorrelation<TInstance, TData>)Activator.CreateInstance(correlationType, _event);
+                    machine._eventCorrelations[_event] = new UncorrelatedEventCorrelation<TInstance, TData>(_event);
+                }
+            }
+        }
 
-                    machine._eventCorrelations[_event] = correlation;
+
+        class UncorrelatedFaultEventRegistration<TData> :
+            EventRegistration
+            where TData : class
+        {
+            readonly Event<Fault<TData>> _event;
+
+            public UncorrelatedFaultEventRegistration(Event<Fault<TData>> @event)
+            {
+                _event = @event;
+            }
+
+            public void RegisterCorrelation(MassTransitStateMachine<TInstance> machine)
+            {
+                if (GlobalTopology.Send.GetMessageTopology<TData>().TryGetConvention(out ICorrelationIdMessageSendTopologyConvention<TData> convention)
+                    && convention.TryGetMessageCorrelationId(out IMessageCorrelationId<TData> messageCorrelationId))
+                {
+                    var builder = new MessageCorrelationIdFaultEventCorrelationBuilder<TInstance, TData>(machine, _event, messageCorrelationId);
+
+                    machine._eventCorrelations[_event] = builder.Build();
+                }
+                else
+                {
+                    machine._eventCorrelations[_event] = new UncorrelatedEventCorrelation<TInstance, Fault<TData>>(_event);
                 }
             }
         }
