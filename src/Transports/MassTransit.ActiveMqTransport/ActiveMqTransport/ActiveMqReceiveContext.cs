@@ -3,6 +3,7 @@
     using System;
     using System.Threading.Tasks;
     using Apache.NMS;
+    using Apache.NMS.ActiveMQ.Commands;
     using Transports;
 
 
@@ -26,6 +27,10 @@
         public IMessage TransportMessage { get; }
 
         public IPrimitiveMap Properties => TransportMessage.Properties;
+
+        public string GroupId => TransportMessage is Message message ? message.GroupID : null;
+
+        public int GroupSequence => TransportMessage is Message message ? message.GroupSequence : default;
 
         public Task Complete()
         {

@@ -1,7 +1,5 @@
 ﻿namespace MassTransit.AmazonSqsTransport
 {
-    using MassTransit.Topology;
-    using Topology;
     using Transports;
 
 

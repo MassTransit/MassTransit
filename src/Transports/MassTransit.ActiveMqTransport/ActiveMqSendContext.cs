@@ -1,4 +1,4 @@
-﻿namespace MassTransit.ActiveMqTransport
+﻿namespace MassTransit
 {
     using Apache.NMS;
 
@@ -15,5 +15,7 @@
         SendContext
     {
         MsgPriority? Priority { set; }
+        string GroupId { set; }
+        int? GroupSequence { set; }
     }
 }

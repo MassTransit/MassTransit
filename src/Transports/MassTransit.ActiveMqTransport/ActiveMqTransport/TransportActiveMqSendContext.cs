@@ -16,6 +16,8 @@
         {
         }
 
+        public string GroupId { get; set; }
+        public int? GroupSequence { get; set; }
         public MsgPriority? Priority { get; set; }
 
         public override void ReadPropertiesFrom(IReadOnlyDictionary<string, object> properties)

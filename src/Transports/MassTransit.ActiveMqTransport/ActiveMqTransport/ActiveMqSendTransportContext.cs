@@ -5,6 +5,7 @@ namespace MassTransit.ActiveMqTransport
     using System.Threading;
     using System.Threading.Tasks;
     using Apache.NMS;
+    using Apache.NMS.ActiveMQ.Commands;
     using Configuration;
     using Internals;
     using Transports;
@@ -97,6 +98,15 @@ namespace MassTransit.ActiveMqTransport
 
             if (context.Priority.HasValue)
                 transportMessage.NMSPriority = context.Priority.Value;
+
+            if (transportMessage is Message message)
+            {
+                if (!string.IsNullOrWhiteSpace(context.GroupId))
+                    message.GroupID = context.GroupId;
+
+                if (context.GroupSequence.HasValue)
+                    message.GroupSequence = context.GroupSequence.Value;
+            }
 
             var delay = context.Delay?.TotalMilliseconds;
             if (delay > 0)

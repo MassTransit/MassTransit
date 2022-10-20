@@ -1,7 +1,6 @@
 namespace MassTransit
 {
     using System;
-    using ActiveMqTransport;
     using Apache.NMS;
 
 

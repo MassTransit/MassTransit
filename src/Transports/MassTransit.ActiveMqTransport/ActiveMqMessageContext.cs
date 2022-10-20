@@ -8,5 +8,8 @@
         IMessage TransportMessage { get; }
 
         IPrimitiveMap Properties { get; }
+
+        string GroupId { get; }
+        int GroupSequence { get; }
     }
 }
