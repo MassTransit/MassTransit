@@ -96,12 +96,25 @@ namespace MassTransit.Analyzers
                     throw new InvalidOperationException();
             }
 
-            var argument = invocationExpression.ArgumentList.ChildNodes().FirstOrDefault();
-            if (!(argument is ArgumentSyntax argumentSyntax))
+            int argumentIndex = -1;
+            for (int i = 0; i < methodSymbol.Parameters.Length; i++)
+            {
+                if(methodSymbol.Parameters[i].Type.SpecialType == SpecialType.System_Object)
+                {
+                    argumentIndex = i;
+                    break;
+                }
+            }
+
+            if(argumentIndex == -1)
                 return;
 
+            if(argumentIndex >= invocationExpression.ArgumentList.Arguments.Count)
+                return;
 
-            SyntaxNode anonymousObject = argumentSyntax.Expression;
+            var argument = invocationExpression.ArgumentList.Arguments[argumentIndex];
+
+            SyntaxNode anonymousObject = argument.Expression;
 
             var typeConverterHelper = new TypeConversionHelper(context.SemanticModel);
 

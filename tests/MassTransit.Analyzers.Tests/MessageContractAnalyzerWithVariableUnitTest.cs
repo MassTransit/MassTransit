@@ -672,7 +672,7 @@ namespace ConsoleApplication1
 
             var msg = new {};
             var response = await requestClient.GetResponse<OrderStatusResult>(msg);
-            var result = response.Message;            
+            var result = response.Message;
         }
     }
 }
@@ -1034,7 +1034,7 @@ namespace ConsoleApplication1
             var bus = Bus.Factory.CreateUsingInMemory(cfg => { });
 
             var msg = new
-            {                
+            {
             };
             await bus.Publish<OrderSubmitted>(msg);
         }
@@ -1046,6 +1046,41 @@ namespace ConsoleApplication1
                 Id = "MCA0003",
                 Message =
                     "Anonymous type is missing properties that are in the message contract 'OrderSubmitted'. The following properties are missing: Id, CustomerId, OrderItems.",
+                Severity = DiagnosticSeverity.Info,
+                Locations =
+                    new[] { new DiagnosticResultLocation("Test0.cs", 58, 23) }
+            };
+
+            VerifyCSharpDiagnostic(test, expected);
+        }
+
+        [Test]
+        public void WhenSendExtensionMethodUsedInConsumer_WithVariable_ShouldHaveDiagnostic()
+        {
+            var test = Usings + MessageContracts + @"
+namespace ConsoleApplication1
+{
+    class SubmitOrderConsumer :
+        IConsumer<SubmitOrder>
+    {
+        public async Task Consume(ConsumeContext<SubmitOrder> context)
+        {
+            Uri address = null;
+            var msg = new
+            {
+                Id = context.Message.Id,
+                CustomerId = context.Message.CustomerId,
+            };
+            await context.Send<OrderSubmitted>(address, msg);
+        }
+    }
+}
+";
+            var expected = new DiagnosticResult
+            {
+                Id = "MCA0003",
+                Message =
+                    "Anonymous type is missing properties that are in the message contract 'OrderSubmitted'. The following properties are missing: OrderItems.",
                 Severity = DiagnosticSeverity.Info,
                 Locations =
                     new[] { new DiagnosticResultLocation("Test0.cs", 58, 23) }

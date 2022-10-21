@@ -486,9 +486,9 @@ namespace ConsoleApplication1
         {
             var bus = Bus.Factory.CreateUsingInMemory(cfg => { });
             var requestClient = bus.CreateRequestClient<CheckOrderStatus>(null);
-                        
+
                 var response = await requestClient.GetResponse<OrderStatusResult>(new {});
-                var result = response.Message;            
+                var result = response.Message;
         }
     }
 }
@@ -842,7 +842,6 @@ namespace ConsoleApplication1
 
             await bus.Publish<OrderSubmitted>(new
             {
-                }
             });
         }
     }
@@ -856,6 +855,40 @@ namespace ConsoleApplication1
                 Severity = DiagnosticSeverity.Info,
                 Locations =
                     new[] { new DiagnosticResultLocation("Test0.cs", 58, 47) }
+            };
+
+            VerifyCSharpDiagnostic(test, expected);
+        }
+
+        [Test]
+        public void WhenSendExtensionMethodUsedInConsumer_ShouldHaveDiagnostic()
+        {
+            var test = Usings + MessageContracts + @"
+namespace ConsoleApplication1
+{
+    class SubmitOrderConsumer :
+        IConsumer<SubmitOrder>
+    {
+        public async Task Consume(ConsumeContext<SubmitOrder> context)
+        {
+            Uri address = null;
+            await context.Send<OrderSubmitted>(address, new
+            {
+                Id = context.Message.Id,
+                CustomerId = context.Message.CustomerId,
+            });
+        }
+    }
+}
+";
+            var expected = new DiagnosticResult
+            {
+                Id = "MCA0003",
+                Message =
+                    "Anonymous type is missing properties that are in the message contract 'OrderSubmitted'. The following properties are missing: OrderItems.",
+                Severity = DiagnosticSeverity.Info,
+                Locations =
+                    new[] { new DiagnosticResultLocation("Test0.cs", 58, 57) }
             };
 
             VerifyCSharpDiagnostic(test, expected);
