@@ -49,8 +49,19 @@ namespace MassTransit
             Event(() => AttemptStarted, x => x.CorrelateById(m => m.Message.JobId));
 
             Event(() => JobCompleted, x => x.CorrelateById(m => m.Message.JobId));
+
             Event(() => CancelJob, x => x.CorrelateById(m => m.Message.JobId));
             Event(() => RetryJob, x => x.CorrelateById(m => m.Message.JobId));
+
+            Event(() => GetJobState, x =>
+            {
+                x.CorrelateById(m => m.Message.JobId);
+                x.OnMissingInstance(i => i.ExecuteAsync(context => context.RespondAsync<JobState>(new
+                {
+                    context.Message.JobId,
+                    CurrentState = "NotFound"
+                })));
+            });
 
             Schedule(() => JobSlotWaitElapsed, instance => instance.JobSlotWaitToken, x =>
             {
@@ -222,6 +233,20 @@ namespace MassTransit
                 When(AttemptCanceled)
                     .PublishJobCanceled());
 
+            DuringAny(
+                When(GetJobState)
+                    .RespondAsync(x => x.Init<JobState>(new
+                    {
+                        x.Message.JobId,
+                        x.Saga.Submitted,
+                        x.Saga.Started,
+                        x.Saga.Completed,
+                        x.Saga.Faulted,
+                        x.Saga.Reason,
+                        LastRetryAttempt = x.Saga.RetryAttempt,
+                        CurrentState = Accessor.Get(x).ContinueWith(t => t.Result.Name)
+                    })));
+
             WhenEnter(Completed, x => x.SendJobSlotReleased(this, JobSlotDisposition.Completed));
             WhenEnter(Canceled, x => x.SendJobSlotReleased(this, JobSlotDisposition.Canceled));
             WhenEnter(Faulted, x => x.SendJobSlotReleased(this, JobSlotDisposition.Faulted));
@@ -265,6 +290,8 @@ namespace MassTransit
         public Event<JobCompleted> JobCompleted { get; }
         public Event<CancelJob> CancelJob { get; }
         public Event<RetryJob> RetryJob { get; }
+
+        public Event<GetJobState> GetJobState { get; }
 
         public Schedule<JobSaga, JobSlotWaitElapsed> JobSlotWaitElapsed { get; }
 

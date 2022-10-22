@@ -129,6 +129,66 @@ namespace MassTransit.Tests
         }
 
         [Test]
+        public async Task Should_cancel_the_job_and_get_the_status()
+        {
+            await using var provider = SetupServiceCollection();
+
+            var harness = provider.GetTestHarness();
+
+            await harness.Start();
+            harness.TestInactivityTimeout = TimeSpan.FromSeconds(10);
+
+            var jobId = NewId.NextGuid();
+
+            IRequestClient<SubmitJob<OddJob>> client = harness.GetRequestClient<SubmitJob<OddJob>>();
+
+            Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new
+            {
+                JobId = jobId,
+                Job = new { Duration = TimeSpan.FromSeconds(10) }
+            });
+
+            Assert.That(response.Message.JobId, Is.EqualTo(jobId));
+
+            Assert.That(await harness.Published.Any<JobSubmitted>(), Is.True);
+            Assert.That(await harness.Published.Any<JobStarted>(), Is.True);
+
+            IRequestClient<GetJobState> stateClient = harness.GetRequestClient<GetJobState>();
+
+            Response<JobState> jobState = await stateClient.GetResponse<JobState>(new { JobId = jobId });
+
+            Assert.That(jobState.Message.CurrentState, Is.EqualTo("Started"));
+
+            await harness.Bus.Publish<CancelJob>(new { JobId = jobId });
+
+            Assert.That(await harness.Published.Any<JobCanceled>(), Is.True);
+            Assert.That(await harness.Sent.Any<JobSlotReleased>(), Is.True);
+
+            jobState = await stateClient.GetResponse<JobState>(new { JobId = jobId });
+
+            Assert.That(jobState.Message.CurrentState, Is.EqualTo("Canceled"));
+        }
+
+        [Test]
+        public async Task Should_return_not_found()
+        {
+            await using var provider = SetupServiceCollection();
+
+            var harness = provider.GetTestHarness();
+
+            await harness.Start();
+            harness.TestInactivityTimeout = TimeSpan.FromSeconds(10);
+
+            var jobId = NewId.NextGuid();
+
+            IRequestClient<GetJobState> stateClient = harness.GetRequestClient<GetJobState>();
+
+            var jobState = await stateClient.GetJobState(jobId);
+
+            Assert.That(jobState.CurrentState, Is.EqualTo("NotFound"));
+        }
+
+        [Test]
         public async Task Should_cancel_the_job_while_waiting()
         {
             await using var provider = SetupServiceCollection();
