@@ -179,6 +179,26 @@ namespace MassTransit.Context
             return defaultValue;
         }
 
+        protected static int? ReadInt(IReadOnlyDictionary<string, object> properties, string key, int? defaultValue = null)
+        {
+            if (properties.TryGetValue(key, out var value))
+            {
+                if (value is int intValue)
+                    return intValue;
+
+                if (value is string text)
+                    return int.TryParse(text, out intValue) ? intValue : defaultValue;
+
+                if (value is byte[] bytes)
+                {
+                    text = Encoding.UTF8.GetString(bytes);
+                    return int.TryParse(text, out intValue) ? intValue : defaultValue;
+                }
+            }
+
+            return defaultValue;
+        }
+
         protected static bool ReadBoolean(IReadOnlyDictionary<string, object> properties, string key, bool defaultValue = default)
         {
             if (properties.TryGetValue(key, out var value))
