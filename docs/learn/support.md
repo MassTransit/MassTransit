@@ -1,8 +1,9 @@
-# Support
+# Commercial Support
 
-[![Improving Logo](/improving.png)][2]
+Commercial support services are available for MassTransit on either an annual or monthly basis.
 
-[Improving][2] is the official support partner for MassTransit. In addition to consulting around architecture, integration and development, they provide professional training, and even annual support contracts (both development and production support). For more information, contact them [via email][1].
+Consulting services are also available for architecture, development, and operational support.
 
-[1]: mailto://masstransit@improving.com
-[2]: http://improving.com/
+For more details and to get a quote, contact [MassTransit Support][1].
+
+[1]: mailto://support@masstransit.io

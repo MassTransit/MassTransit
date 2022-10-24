@@ -253,13 +253,13 @@ module.exports = {
         path: '/learn/',
         collapsable: true,
         children: [
+          '/learn/support',
           '/troubleshooting/common-gotchas',
           '/troubleshooting/show-config',
           '/learn/analyzers',
           '/learn/samples',
           '/learn/videos',
           '/learn/training',
-          '/learn/support',
           '/learn/loving-the-community',
           '/learn/contributing',
           '/getting-started/live-coding'
