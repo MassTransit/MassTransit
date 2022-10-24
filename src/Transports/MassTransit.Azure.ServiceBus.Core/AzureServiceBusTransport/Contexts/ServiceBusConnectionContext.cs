@@ -59,11 +59,16 @@
 
         public async Task<QueueProperties> CreateQueue(CreateQueueOptions createQueueOptions)
         {
-            QueueProperties queueProperties;
-            var queueExists = await QueueExistsAsync(createQueueOptions.Name).ConfigureAwait(false);
-            if (queueExists)
+            QueueProperties queueProperties = null;
+            try
+            {
                 queueProperties = await GetQueueAsync(createQueueOptions.Name).ConfigureAwait(false);
-            else
+            }
+            catch (ServiceBusException exception) when (exception.Reason == ServiceBusFailureReason.MessagingEntityNotFound)
+            {
+            }
+
+            if (queueProperties == null)
             {
                 try
                 {
@@ -94,11 +99,16 @@
 
         public async Task<TopicProperties> CreateTopic(CreateTopicOptions createTopicOptions)
         {
-            TopicProperties topicProperties;
-            var topicExists = await TopicExistsAsync(createTopicOptions.Name).ConfigureAwait(false);
-            if (topicExists)
+            TopicProperties topicProperties = null;
+            try
+            {
                 topicProperties = await GetTopicAsync(createTopicOptions.Name).ConfigureAwait(false);
-            else
+            }
+            catch (ServiceBusException exception) when (exception.Reason == ServiceBusFailureReason.MessagingEntityNotFound)
+            {
+            }
+
+            if (topicProperties == null)
             {
                 try
                 {
@@ -156,7 +166,7 @@
                 {
                     var ruleProperties = await GetRuleAsync(createSubscriptionOptions.TopicName, createSubscriptionOptions.SubscriptionName, rule.Name)
                         .ConfigureAwait(false);
-                    if (rule.Name == ruleProperties.Name && (rule.Filter != ruleProperties.Filter || rule.Action != ruleProperties.Action))
+                    if (rule.Name == ruleProperties.Name && (!rule.Filter.Equals(ruleProperties.Filter) || !rule.Action.Equals(ruleProperties.Action)))
                     {
                         LogContext.Debug?.Log("Updating subscription Rule: {Rule} ({DescriptionFilter} -> {Filter})", rule.Name,
                             ruleProperties.Filter.ToString(), rule.Filter.ToString());
@@ -176,7 +186,7 @@
                     {
                         var existingRule = rules[0];
 
-                        if (Guid.TryParse(existingRule.Name, out _) && existingRule.Filter != filter)
+                        if (Guid.TryParse(existingRule.Name, out _) && !existingRule.Filter.Equals(filter))
                         {
                             LogContext.Debug?.Log("Updating subscription filter: {Rule} ({DescriptionFilter} -> {Filter})", existingRule.Name,
                                 existingRule.Filter.ToString(), filter.ToString());
@@ -289,11 +299,6 @@
             return RunOperation(async () => (await _administrationClient.GetQueueAsync(path)).Value);
         }
 
-        Task<bool> QueueExistsAsync(string path)
-        {
-            return RunOperation(async () => (await _administrationClient.QueueExistsAsync(path)).Value);
-        }
-
         Task<QueueProperties> CreateQueueAsync(CreateQueueOptions createQueueOptions)
         {
             return RunOperation(async () => (await _administrationClient.CreateQueueAsync(createQueueOptions)).Value);
@@ -302,11 +307,6 @@
         Task<TopicProperties> GetTopicAsync(string path)
         {
             return RunOperation(async () => (await _administrationClient.GetTopicAsync(path)).Value);
-        }
-
-        Task<bool> TopicExistsAsync(string path)
-        {
-            return RunOperation(async () => (await _administrationClient.TopicExistsAsync(path)).Value);
         }
 
         Task<TopicProperties> CreateTopicAsync(CreateTopicOptions createTopicOptions)
@@ -360,16 +360,11 @@
             return RunOperation(async () => (await _administrationClient.CreateSubscriptionAsync(createSubscriptionOptions)).Value);
         }
 
-        async Task<T> RunOperation<T>(Func<Task<T>> operation)
+        static async Task<T> RunOperation<T>(Func<Task<T>> operation)
         {
             T result = default;
             result = await operation().ConfigureAwait(false);
             return result;
-        }
-
-        Task RunOperation(Func<Task> operation)
-        {
-            return operation();
         }
     }
 }
