@@ -59,7 +59,7 @@ namespace MassTransit
                     break;
 
                 case "topic":
-                    ParseLeft(hostAddress, out Scheme, out Host, out Scope);
+                    ParseLeft(new Uri(hostAddress.GetLeftPart(UriPartial.Authority)), out Scheme, out Host, out Scope);
 
                     Name = address.AbsolutePath;
                     Type = AddressType.Topic;
@@ -118,25 +118,6 @@ namespace MassTransit
             builder.Query += string.Join("&", address.GetQueryStringOptions());
 
             return builder.Uri;
-        }
-
-        public Uri TopicAddress
-        {
-            get
-            {
-                if (Type != AddressType.Topic)
-                    throw new ArgumentException("Address was not a topic");
-
-                var topicName = Scope == "/"
-                    ? $"{Name}"
-                    : $"{Scope}/{Name}";
-
-                var builder = new UriBuilder($"topic:{topicName}");
-
-                builder.Query += string.Join("&", GetQueryStringOptions());
-
-                return builder.Uri;
-            }
         }
 
         Uri DebuggerDisplay => this;

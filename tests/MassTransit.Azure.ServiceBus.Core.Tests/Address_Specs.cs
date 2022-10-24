@@ -58,5 +58,19 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
             Assert.That(normalizedAddress.AbsolutePath, Is.EqualTo(address.AbsolutePath));
         }
+
+        [Test]
+        public void Should_handle_a_topic_address()
+        {
+            var address = new ServiceBusEndpointAddress(AzureServiceBusTestHarness.HostAddress, new Uri("topic:private-topic"));
+
+            Assert.That(address.Type, Is.EqualTo(ServiceBusEndpointAddress.AddressType.Topic));
+
+            Uri uri = address;
+            Assert.That(uri.TryGetValueFromQueryString("type", out var type), Is.True);
+            Assert.That(type, Is.EqualTo("topic"));
+
+            Assert.That(uri.AbsolutePath, Is.EqualTo("/private-topic"));
+        }
     }
 }
