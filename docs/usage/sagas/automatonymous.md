@@ -240,7 +240,7 @@ To configure a saga state machine:
 services.AddMassTransit(x =>
 {
     x.AddSagaStateMachine<OrderStateMachine, OrderState>()
-        .InMemorySagaRepository();
+        .InMemoryRepository();
 });
 ```
 
