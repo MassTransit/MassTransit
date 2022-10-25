@@ -2,6 +2,7 @@
 {
     using System.Threading.Tasks;
     using Apache.NMS;
+    using Topology;
     using Transports;
 
 
@@ -9,7 +10,7 @@
         ActiveMqMoveTransport,
         IErrorTransport
     {
-        public ActiveMqErrorTransport(string destination, IFilter<SessionContext> topologyFilter)
+        public ActiveMqErrorTransport(Queue destination, IFilter<SessionContext> topologyFilter)
             : base(destination, topologyFilter)
         {
         }

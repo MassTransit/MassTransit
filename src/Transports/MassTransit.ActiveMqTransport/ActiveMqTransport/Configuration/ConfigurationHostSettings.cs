@@ -33,8 +33,8 @@ namespace MassTransit.ActiveMqTransport.Configuration
 
             TransportOptions = new Dictionary<string, string>
             {
-                {"wireFormat.tightEncodingEnabled", "true"},
-                {"nms.AsyncSend", "true"}
+                { "wireFormat.tightEncodingEnabled", "true" },
+                { "nms.AsyncSend", "true" }
             };
 
             _hostAddress = new Lazy<Uri>(FormatHostAddress);

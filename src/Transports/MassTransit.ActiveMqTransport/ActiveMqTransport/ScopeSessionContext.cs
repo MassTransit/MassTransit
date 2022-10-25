@@ -4,6 +4,7 @@ namespace MassTransit.ActiveMqTransport
     using System.Threading.Tasks;
     using Apache.NMS;
     using MassTransit.Middleware;
+    using Topology;
 
 
     public class ScopeSessionContext :
@@ -24,19 +25,19 @@ namespace MassTransit.ActiveMqTransport
         ISession SessionContext.Session => _context.Session;
         ConnectionContext SessionContext.ConnectionContext => _context.ConnectionContext;
 
-        Task<ITopic> SessionContext.GetTopic(string topicName)
+        Task<ITopic> SessionContext.GetTopic(Topic topic)
         {
-            return _context.GetTopic(topicName);
+            return _context.GetTopic(topic);
         }
 
-        Task<IQueue> SessionContext.GetQueue(string queueName)
+        Task<IQueue> SessionContext.GetQueue(Queue queue)
         {
-            return _context.GetQueue(queueName);
+            return _context.GetQueue(queue);
         }
 
-        Task<IDestination> SessionContext.GetDestination(string destination, DestinationType destinationType)
+        Task<IDestination> SessionContext.GetDestination(string destinationName, DestinationType destinationType)
         {
-            return _context.GetDestination(destination, destinationType);
+            return _context.GetDestination(destinationName, destinationType);
         }
 
         Task<IMessageProducer> SessionContext.CreateMessageProducer(IDestination destination)
@@ -62,6 +63,11 @@ namespace MassTransit.ActiveMqTransport
         Task SessionContext.DeleteQueue(string queueName)
         {
             return _context.DeleteQueue(queueName);
+        }
+
+        public IDestination GetTemporaryDestination(string name)
+        {
+            return _context.GetTemporaryDestination(name);
         }
     }
 }

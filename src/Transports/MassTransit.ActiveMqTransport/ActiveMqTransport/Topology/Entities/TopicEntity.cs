@@ -29,7 +29,7 @@ namespace MassTransit.ActiveMqTransport.Topology
         public override string ToString()
         {
             return string.Join(", ",
-                new[] {$"name: {EntityName}", Durable ? "durable" : "", AutoDelete ? "auto-delete" : ""}.Where(x => !string.IsNullOrWhiteSpace(x)));
+                new[] { $"name: {EntityName}", Durable ? "durable" : "", AutoDelete ? "auto-delete" : "" }.Where(x => !string.IsNullOrWhiteSpace(x)));
         }
 
 

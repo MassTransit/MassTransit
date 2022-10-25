@@ -8,6 +8,8 @@ namespace MassTransit
     {
         string VirtualTopicPrefix { get; }
 
+        string VirtualTopicConsumerPattern { get; }
+
         new IActiveMqMessagePublishTopology<T> GetMessageTopology<T>()
             where T : class;
 

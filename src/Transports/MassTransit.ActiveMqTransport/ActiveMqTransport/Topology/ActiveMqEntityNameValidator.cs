@@ -1,7 +1,6 @@
 namespace MassTransit.ActiveMqTransport.Topology
 {
     using System.Text.RegularExpressions;
-    using MassTransit.Topology;
 
 
     public class ActiveMqEntityNameValidator :

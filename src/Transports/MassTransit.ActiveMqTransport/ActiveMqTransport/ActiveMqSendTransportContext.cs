@@ -74,10 +74,12 @@ namespace MassTransit.ActiveMqTransport
 
             await _configureTopologyPipe.Send(sessionContext).ConfigureAwait(false);
 
-            var destination = await sessionContext.GetDestination(EntityName, _destinationType).ConfigureAwait(false);
+            var destination = context.ReplyDestination ?? await sessionContext.GetDestination(EntityName, _destinationType).ConfigureAwait(false);
             var producer = await sessionContext.CreateMessageProducer(destination).ConfigureAwait(false);
 
             var transportMessage = sessionContext.CreateBytesMessage();
+
+            SetResponseTo(transportMessage, context, sessionContext);
 
             transportMessage.Content = context.Body.GetBytes();
 
@@ -120,6 +122,19 @@ namespace MassTransit.ActiveMqTransport
             var publishTask = Task.Run(() => producer.Send(transportMessage), context.CancellationToken);
 
             await publishTask.OrCanceled(context.CancellationToken).ConfigureAwait(false);
+        }
+
+        static void SetResponseTo(IMessage transportMessage, SendContext context, SessionContext sessionContext)
+        {
+            if (context.ResponseAddress == null)
+                return;
+
+            var endpointName = context.ResponseAddress.GetEndpointName();
+
+            transportMessage.NMSReplyTo = sessionContext.GetTemporaryDestination(endpointName)
+                ?? (context.ResponseAddress.TryGetValueFromQueryString("temporary", out _)
+                    ? (IDestination)new ActiveMQTempQueue(endpointName)
+                    : new ActiveMQQueue(endpointName));
         }
     }
 }

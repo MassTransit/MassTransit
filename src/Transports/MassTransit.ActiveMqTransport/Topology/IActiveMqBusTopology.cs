@@ -2,7 +2,6 @@ namespace MassTransit
 {
     using System;
     using ActiveMqTransport;
-    using ActiveMqTransport.Topology;
 
 
     public interface IActiveMqBusTopology :

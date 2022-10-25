@@ -23,7 +23,7 @@ namespace MassTransit.ActiveMqTransport.Topology
         {
             var builder = new PublishEndpointBrokerTopologyBuilder();
 
-            builder.CreateQueue(EntityName, AutoDelete);
+            builder.CreateQueue(EntityName, Durable, AutoDelete);
 
             return builder.BuildBrokerTopology();
         }

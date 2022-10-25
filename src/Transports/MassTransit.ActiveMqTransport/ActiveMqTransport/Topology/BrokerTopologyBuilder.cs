@@ -33,11 +33,11 @@ namespace MassTransit.ActiveMqTransport.Topology
             return Topics.GetOrAdd(exchange);
         }
 
-        public QueueHandle CreateQueue(string name, bool autoDelete)
+        public QueueHandle CreateQueue(string name, bool durable, bool autoDelete)
         {
             var id = GetNextId();
 
-            var queue = new QueueEntity(id, name, autoDelete);
+            var queue = new QueueEntity(id, name, durable, autoDelete);
 
             return Queues.GetOrAdd(queue);
         }

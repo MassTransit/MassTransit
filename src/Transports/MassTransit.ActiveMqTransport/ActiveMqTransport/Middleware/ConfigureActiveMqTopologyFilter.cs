@@ -48,7 +48,7 @@ namespace MassTransit.ActiveMqTransport.Middleware
 
         async Task ConfigureTopology(SessionContext context)
         {
-            await Task.WhenAll(_brokerTopology.Topics.Select(topic => Declare(context, (Topic)topic))).ConfigureAwait(false);
+            await Task.WhenAll(_brokerTopology.Topics.Select(topic => Declare(context, topic))).ConfigureAwait(false);
 
             await Task.WhenAll(_brokerTopology.Queues.Select(queue => Declare(context, queue))).ConfigureAwait(false);
         }
@@ -78,14 +78,14 @@ namespace MassTransit.ActiveMqTransport.Middleware
         {
             LogContext.Debug?.Log("Get topic {Topic}", topic);
 
-            return context.GetTopic(topic.EntityName);
+            return context.GetTopic(topic);
         }
 
         Task Declare(SessionContext context, Queue queue)
         {
             LogContext.Debug?.Log("Get queue {Queue}", queue);
 
-            return context.GetQueue(queue.EntityName);
+            return context.GetQueue(queue);
         }
 
         Task Delete(SessionContext context, Topic topic)

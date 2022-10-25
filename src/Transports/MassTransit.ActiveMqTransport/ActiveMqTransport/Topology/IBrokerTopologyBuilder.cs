@@ -15,9 +15,10 @@ namespace MassTransit.ActiveMqTransport.Topology
         /// Declares a queue
         /// </summary>
         /// <param name="name"></param>
+        /// <param name="durable">A durable exchange survives a broker restart</param>
         /// <param name="autoDelete"></param>
         /// <returns></returns>
-        QueueHandle CreateQueue(string name, bool autoDelete);
+        QueueHandle CreateQueue(string name, bool durable, bool autoDelete);
 
         /// <summary>
         /// Binds an exchange to a queue, with the specified routing key and arguments

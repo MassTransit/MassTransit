@@ -32,5 +32,15 @@
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<ISession> CreateSession(CancellationToken cancellationToken);
+
+        bool IsVirtualTopicConsumer(string name);
+
+        IQueue GetTemporaryQueue(ISession session, string topicName);
+
+        ITopic GetTemporaryTopic(ISession session, string topicName);
+
+        bool TryGetTemporaryEntity(string name, out IDestination destination);
+
+        bool TryRemoveTemporaryEntity(ISession session, string name);
     }
 }

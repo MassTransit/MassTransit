@@ -1,7 +1,6 @@
 ﻿namespace MassTransit
 {
     using ActiveMqTransport;
-    using ActiveMqTransport.Topology;
 
 
     public interface IActiveMqSendTopology :

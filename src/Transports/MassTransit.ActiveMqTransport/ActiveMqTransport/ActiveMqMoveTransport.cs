@@ -3,14 +3,15 @@
     using System;
     using System.Threading.Tasks;
     using Apache.NMS;
+    using Topology;
 
 
     public class ActiveMqMoveTransport
     {
-        readonly string _destination;
+        readonly Queue _destination;
         readonly IFilter<SessionContext> _topologyFilter;
 
-        protected ActiveMqMoveTransport(string destination, IFilter<SessionContext> topologyFilter)
+        protected ActiveMqMoveTransport(Queue destination, IFilter<SessionContext> topologyFilter)
         {
             _topologyFilter = topologyFilter;
             _destination = destination;

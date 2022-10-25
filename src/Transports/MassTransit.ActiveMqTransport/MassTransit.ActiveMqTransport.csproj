@@ -20,11 +20,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Apache.NMS.ActiveMQ.NetStd" Version="1.8.0" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
+    <PackageReference Include="Apache.NMS.ActiveMQ.NetStd" Version="1.8.0"/>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
+    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj"/>
   </ItemGroup>
 </Project>

@@ -2,6 +2,7 @@
 {
     using System.Threading.Tasks;
     using Apache.NMS;
+    using Topology;
     using Transports;
 
 
@@ -9,7 +10,7 @@
         ActiveMqMoveTransport,
         IDeadLetterTransport
     {
-        public ActiveMqDeadLetterTransport(string destination, IFilter<SessionContext> topologyFilter)
+        public ActiveMqDeadLetterTransport(Queue destination, IFilter<SessionContext> topologyFilter)
             : base(destination, topologyFilter)
         {
         }

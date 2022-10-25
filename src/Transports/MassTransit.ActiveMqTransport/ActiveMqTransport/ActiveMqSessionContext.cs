@@ -6,6 +6,7 @@
     using Apache.NMS;
     using Apache.NMS.Util;
     using MassTransit.Middleware;
+    using Topology;
     using Transports;
     using Util;
 
@@ -58,19 +59,36 @@
 
         public ConnectionContext ConnectionContext { get; }
 
-        public Task<ITopic> GetTopic(string topicName)
+        public Task<ITopic> GetTopic(Topic topic)
         {
-            return _executor.Run(() => SessionUtil.GetTopic(_session, topicName), CancellationToken);
+            return _executor.Run(() =>
+            {
+                if (!topic.Durable && topic.AutoDelete
+                    && topic.EntityName.StartsWith(ConnectionContext.Topology.PublishTopology.VirtualTopicPrefix, StringComparison.InvariantCulture))
+                    return ConnectionContext.GetTemporaryTopic(_session, topic.EntityName);
+
+                return SessionUtil.GetTopic(_session, topic.EntityName);
+            }, CancellationToken);
         }
 
-        public Task<IQueue> GetQueue(string queueName)
+        public Task<IQueue> GetQueue(Queue queue)
         {
-            return _executor.Run(() => SessionUtil.GetQueue(_session, queueName), CancellationToken);
+            return _executor.Run(() =>
+            {
+                if (!queue.Durable && queue.AutoDelete && !ConnectionContext.IsVirtualTopicConsumer(queue.EntityName))
+                    return ConnectionContext.GetTemporaryQueue(_session, queue.EntityName);
+
+                return SessionUtil.GetQueue(_session, queue.EntityName);
+            }, CancellationToken);
         }
 
-        public Task<IDestination> GetDestination(string destination, DestinationType destinationType)
+        public Task<IDestination> GetDestination(string destinationName, DestinationType destinationType)
         {
-            return _executor.Run(() => SessionUtil.GetDestination(_session, destination, destinationType), CancellationToken);
+            if ((destinationType == DestinationType.Queue || destinationType == DestinationType.TemporaryQueue)
+                && ConnectionContext.TryGetTemporaryEntity(destinationName, out var destination))
+                return Task.FromResult(destination);
+
+            return _executor.Run(() => SessionUtil.GetDestination(_session, destinationName, destinationType), CancellationToken);
         }
 
         public Task<IMessageProducer> CreateMessageProducer(IDestination destination)
@@ -92,14 +110,28 @@
         {
             TransportLogMessages.DeleteTopic(topicName);
 
-            return _executor.Run(() => SessionUtil.DeleteTopic(_session, topicName), CancellationToken.None);
+            return _executor.Run(() =>
+            {
+                if (!ConnectionContext.TryRemoveTemporaryEntity(_session, topicName))
+                    SessionUtil.DeleteTopic(_session, topicName);
+            }, CancellationToken.None);
         }
 
         public Task DeleteQueue(string queueName)
         {
             TransportLogMessages.DeleteQueue(queueName);
 
-            return _executor.Run(() => SessionUtil.DeleteQueue(_session, queueName), CancellationToken.None);
+            return _executor.Run(() =>
+                {
+                    if (!ConnectionContext.TryRemoveTemporaryEntity(_session, queueName))
+                        SessionUtil.DeleteQueue(_session, queueName);
+                }
+                , CancellationToken.None);
+        }
+
+        public IDestination GetTemporaryDestination(string name)
+        {
+            return ConnectionContext.TryGetTemporaryEntity(name, out var destination) ? destination : null;
         }
     }
 }

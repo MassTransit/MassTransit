@@ -45,7 +45,7 @@ namespace MassTransit.ActiveMqTransport.Configuration
 
             var topic = builder.CreateTopic(EntityName, Durable, AutoDelete);
 
-            var queue = builder.CreateQueue(consumerEndpointQueueName, destinationQueue.AutoDelete);
+            var queue = builder.CreateQueue(consumerEndpointQueueName, destinationQueue.Durable, destinationQueue.AutoDelete);
 
             var consumer = builder.BindConsumer(topic, queue, Selector);
         }
