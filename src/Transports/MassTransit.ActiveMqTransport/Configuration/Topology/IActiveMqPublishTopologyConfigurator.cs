@@ -14,6 +14,14 @@
         /// </summary>
         new string VirtualTopicPrefix { set; }
 
+        /// <summary>
+        /// Regular expression to distinguish if a destination is for consuming data from a VirtualTopic.
+        /// Because bind is on server side and rely on names Virtual topics and connected consumers cannot be
+        /// created as temporary. A temporary destinations does not support custom names than we must use regular destinations.
+        /// </summary>
+        /// <seealso cref="https://activemq.apache.org/virtual-destinations"/>
+        new string VirtualTopicConsumerPattern { set; }
+
         new IActiveMqMessagePublishTopologyConfigurator<T> GetMessageTopology<T>()
             where T : class;
 

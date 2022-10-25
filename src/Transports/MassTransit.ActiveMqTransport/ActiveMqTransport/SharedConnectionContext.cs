@@ -1,10 +1,11 @@
 ﻿namespace MassTransit.ActiveMqTransport
 {
-    using System;
-    using System.Threading;
-    using System.Threading.Tasks;
     using Apache.NMS;
     using MassTransit.Middleware;
+    using System;
+    using System.Collections.Concurrent;
+    using System.Threading;
+    using System.Threading.Tasks;
 
 
     public class SharedConnectionContext :
@@ -26,6 +27,8 @@
         public string Description => _context.Description;
         public Uri HostAddress => _context.HostAddress;
         public IActiveMqBusTopology Topology => _context.Topology;
+
+        public ConcurrentDictionary<string, IDestination> TemporaryDestinationMap => _context.TemporaryDestinationMap;
 
         Task<ISession> ConnectionContext.CreateSession(CancellationToken cancellationToken)
         {

@@ -14,5 +14,10 @@ namespace MassTransit.ActiveMqTransport.Topology
         /// True if the queue should be deleted when the connection is closed
         /// </summary>
         bool AutoDelete { get; }
+
+        /// <summary>
+        /// True if queue is not persisted on disk
+        /// </summary>
+        bool Durable { get; }
     }
 }

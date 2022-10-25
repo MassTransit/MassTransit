@@ -1,11 +1,12 @@
 namespace MassTransit.ActiveMqTransport.Middleware
 {
+    using Apache.NMS.ActiveMQ;
+    using MassTransit.ActiveMqTransport.Topology;
+    using MassTransit.Middleware;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Apache.NMS.ActiveMQ;
-    using MassTransit.Middleware;
     using Transports;
     using Util;
 
@@ -35,11 +36,11 @@ namespace MassTransit.ActiveMqTransport.Middleware
 
             var consumers = new List<Task<ActiveMqConsumer>>
             {
-                CreateConsumer(context, receiveSettings.EntityName, receiveSettings.Selector, receiveSettings.PrefetchCount, executor)
+                CreateConsumer(context, new QueueEntity(0, receiveSettings.EntityName, receiveSettings.Durable, receiveSettings.AutoDelete), receiveSettings.Selector, executor)
             };
 
             consumers.AddRange(_context.BrokerTopology.Consumers.Select(x =>
-                CreateConsumer(context, x.Destination.EntityName, x.Selector, receiveSettings.PrefetchCount, executor)));
+                CreateConsumer(context, x.Destination, x.Selector, executor)));
 
             ActiveMqConsumer[] actualConsumers = await Task.WhenAll(consumers).ConfigureAwait(false);
 
@@ -92,15 +93,13 @@ namespace MassTransit.ActiveMqTransport.Middleware
             return supervisor;
         }
 
-        async Task<ActiveMqConsumer> CreateConsumer(SessionContext context, string entityName, string selector, int prefetchCount, ChannelExecutor executor)
+        async Task<ActiveMqConsumer> CreateConsumer(SessionContext context, Queue entity, string selector, ChannelExecutor executor)
         {
-            var queueName = $"{entityName}?consumer.prefetchSize={prefetchCount}";
-
-            var queue = await context.GetQueue(queueName).ConfigureAwait(false);
+            var queue = await context.GetQueue(entity).ConfigureAwait(false);
 
             var messageConsumer = await context.CreateMessageConsumer(queue, selector, false).ConfigureAwait(false);
 
-            LogContext.Debug?.Log("Created consumer for {InputAddress}: {Queue}", _context.InputAddress, queueName);
+            LogContext.Debug?.Log("Created consumer for {InputAddress}: {Queue}", _context.InputAddress, entity.EntityName);
 
             var consumer = new ActiveMqConsumer(context, (MessageConsumer)messageConsumer, _context, executor);
 

@@ -1,9 +1,10 @@
 ﻿namespace MassTransit.ActiveMqTransport
 {
+    using Apache.NMS;
     using System;
+    using System.Collections.Concurrent;
     using System.Threading;
     using System.Threading.Tasks;
-    using Apache.NMS;
 
 
     public interface ConnectionContext :
@@ -25,6 +26,11 @@
         Uri HostAddress { get; }
 
         IActiveMqBusTopology Topology { get; }
+
+        /// <summary>
+        /// Temporary destination are accessible per connection. This map between an queue/topic name and generated temporary name.
+        /// </summary>
+        ConcurrentDictionary<string, IDestination> TemporaryDestinationMap { get; }
 
         /// <summary>
         /// Create a model on the connection

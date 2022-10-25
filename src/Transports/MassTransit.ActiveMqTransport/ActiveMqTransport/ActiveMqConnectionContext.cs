@@ -1,11 +1,12 @@
 namespace MassTransit.ActiveMqTransport
 {
-    using System;
-    using System.Threading;
-    using System.Threading.Tasks;
     using Apache.NMS;
     using Configuration;
     using MassTransit.Middleware;
+    using System;
+    using System.Collections.Concurrent;
+    using System.Threading;
+    using System.Threading.Tasks;
     using Transports;
     using Util;
 
@@ -17,6 +18,10 @@ namespace MassTransit.ActiveMqTransport
     {
         readonly IConnection _connection;
         readonly ChannelExecutor _executor;
+        /// <summary>
+        /// Temporary queues/topic are visible only for the same connection. I cache temp destination map for each connection.
+        /// </summary>
+        readonly ConcurrentDictionary<string, IDestination> _tempDestinationMap;
 
         public ActiveMqConnectionContext(IConnection connection, IActiveMqHostConfiguration hostConfiguration, CancellationToken cancellationToken)
             : base(cancellationToken)
@@ -29,12 +34,15 @@ namespace MassTransit.ActiveMqTransport
             Topology = hostConfiguration.Topology;
 
             _executor = new ChannelExecutor(1);
+            _tempDestinationMap = new ConcurrentDictionary<string, IDestination>();
         }
 
         IConnection ConnectionContext.Connection => _connection;
         public string Description { get; }
         public Uri HostAddress { get; }
         public IActiveMqBusTopology Topology { get; }
+
+        public ConcurrentDictionary<string, IDestination> TemporaryDestinationMap => _tempDestinationMap;
 
         public async Task<ISession> CreateSession(CancellationToken cancellationToken)
         {

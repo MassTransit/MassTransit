@@ -1,9 +1,9 @@
 namespace MassTransit.ActiveMqTransport.Middleware
 {
+    using Apache.NMS.ActiveMQ;
     using System;
     using System.Linq;
     using System.Threading.Tasks;
-    using Apache.NMS.ActiveMQ;
     using Topology;
 
 
@@ -78,14 +78,14 @@ namespace MassTransit.ActiveMqTransport.Middleware
         {
             LogContext.Debug?.Log("Get topic {Topic}", topic);
 
-            return context.GetTopic(topic.EntityName);
+            return context.GetTopic(topic);
         }
 
         Task Declare(SessionContext context, Queue queue)
         {
             LogContext.Debug?.Log("Get queue {Queue}", queue);
 
-            return context.GetQueue(queue.EntityName);
+            return context.GetQueue(queue);
         }
 
         Task Delete(SessionContext context, Topic topic)

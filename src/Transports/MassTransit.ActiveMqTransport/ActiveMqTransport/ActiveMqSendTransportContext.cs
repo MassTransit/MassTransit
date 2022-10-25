@@ -1,14 +1,15 @@
 namespace MassTransit.ActiveMqTransport
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading;
-    using System.Threading.Tasks;
     using Apache.NMS;
     using Apache.NMS.ActiveMQ.Commands;
-    using Configuration;
-    using Internals;
-    using Transports;
+    using MassTransit.ActiveMqTransport.Configuration;
+    using MassTransit.Internals;
+    using MassTransit.Transports;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading;
+    using System.Threading.Tasks;
 
 
     public class ActiveMqSendTransportContext :
@@ -117,9 +118,41 @@ namespace MassTransit.ActiveMqTransport
                     transportMessage.Properties["AMQ_SCHEDULED_DELAY"] = (long)delay.Value;
             }
 
+            SetResponseTo(transportMessage, context, sessionContext);
+
             var publishTask = Task.Run(() => producer.Send(transportMessage), context.CancellationToken);
 
             await publishTask.OrCanceled(context.CancellationToken).ConfigureAwait(false);
+        }
+
+        public static void SetResponseTo(IMessage transportMessage, SendContext context, SessionContext sessionContext)
+        {
+            if (context.ResponseAddress == null)
+            {
+                return;
+            }
+            var physicalName = GetPhysicalName(context.ResponseAddress);
+            IDestination? responseAddress = sessionContext.GetTemporaryDestination(physicalName);
+            if (responseAddress == null)
+            {
+                if (context.ResponseAddress.SplitQueryString().Any(x => x.Item1 == "temporary"))
+                {
+                    responseAddress = new ActiveMQTempQueue(physicalName);
+                }
+                else
+                {
+                    responseAddress = new ActiveMQQueue(physicalName);
+                }
+            }
+            transportMessage.NMSReplyTo = responseAddress;
+        }
+
+        private static string GetPhysicalName(Uri address)
+        {
+            var path = address.PathAndQuery.Contains('?')
+                ? address.PathAndQuery.Substring(1, address.PathAndQuery.IndexOf("?", StringComparison.InvariantCulture) - 1)
+                : address.PathAndQuery;
+            return path;
         }
     }
 }

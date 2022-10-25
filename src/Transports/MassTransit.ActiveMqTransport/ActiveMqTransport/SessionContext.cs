@@ -1,7 +1,8 @@
 ﻿namespace MassTransit.ActiveMqTransport
 {
-    using System.Threading.Tasks;
     using Apache.NMS;
+    using MassTransit.ActiveMqTransport.Topology;
+    using System.Threading.Tasks;
 
 
     public interface SessionContext :
@@ -11,11 +12,11 @@
 
         ConnectionContext ConnectionContext { get; }
 
-        Task<ITopic> GetTopic(string topicName);
+        Task<ITopic> GetTopic(Topic topic);
 
-        Task<IQueue> GetQueue(string queueName);
+        Task<IQueue> GetQueue(Queue queue);
 
-        Task<IDestination> GetDestination(string destination, DestinationType destinationType);
+        Task<IDestination> GetDestination(string destinationName, DestinationType destinationType);
 
         Task<IMessageProducer> CreateMessageProducer(IDestination destination);
 
@@ -26,5 +27,7 @@
         Task DeleteTopic(string topicName);
 
         Task DeleteQueue(string queueName);
+
+        IDestination GetTemporaryDestination(string name);
     }
 }
