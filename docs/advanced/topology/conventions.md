@@ -7,9 +7,9 @@ A basic example of a convention is the default `CorrelationId` convention, which
 For example, the following message contains a property named `CorrelationId`, which is an obvious choice. Note that the `CorrelatedBy<Guid>` interface is not part of the message contract.
 
 ```csharp
-public interface OrderCreated
+public record OrderCreated
 {
-    Guid CorrelationId { get; }
+    public Guid CorrelationId { get; init; }
 }
 ```
 
@@ -20,10 +20,10 @@ If the message implements the `CorrelatedBy<Guid>` interface, that would be used
 During bus creation, it is possible to explicitly configure a message type (or any of the message type's inherited interfaces) to use a specific property for the `CorrelationId`. In the example below, the OrderId property is specified as the CorrelationId.
 
 ```csharp
-public interface OrderSubmitted
+public record OrderSubmitted
 {
-    Guid OrderId { get; }
-    Guid CustomerId { get; }
+    public Guid OrderId { get; init; }
+    public Guid CustomerId { get; init; }
 }
 
 Bus.Factory.CreateUsingRabbitMq(..., cfg =>

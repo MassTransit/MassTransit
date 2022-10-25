@@ -1,25 +1,24 @@
-namespace SchedulingAzure
+namespace SchedulingAzure;
+
+using MassTransit;
+using Microsoft.Extensions.DependencyInjection;
+
+public class Program
 {
-    using MassTransit;
-    using Microsoft.Extensions.DependencyInjection;
-
-    public class Program
+    public static void Main()
     {
-        public static void Main()
+        var services = new ServiceCollection();
+
+        services.AddMassTransit(x =>
         {
-            var services = new ServiceCollection();
+            x.AddServiceBusMessageScheduler();
 
-            services.AddMassTransit(x =>
+            x.UsingAzureServiceBus((context, cfg) =>
             {
-                x.AddServiceBusMessageScheduler();
+                cfg.UseServiceBusMessageScheduler();
 
-                x.UsingAzureServiceBus((context, cfg) =>
-                {
-                    cfg.UseServiceBusMessageScheduler();
-
-                    cfg.ConfigureEndpoints(context);
-                });
+                cfg.ConfigureEndpoints(context);
             });
-        }
+        });
     }
 }

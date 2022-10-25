@@ -1,37 +1,83 @@
 # Messages
 
-In MassTransit, a message contract is defined _code first_ by creating a .NET type. A message can be defined using a class or an interface, resulting in a strongly-typed contract. Messages should be limited to read-only properties and not include methods or behavior.
+In MassTransit, a message contract is defined _code first_ by creating a .NET type. A message can be defined using a record, class, or interface. Messages should only consist of properties, methods and other behavior should not be included.
 
 ::: warning Important
 MassTransit uses the full type name, including the _namespace_, for message contracts. When creating the same message *type* in two separate projects, the namespaces **must** match or the message will not be consumed.
 :::
 
-An example message to update a customer address is shown below.
+The message examples below show the same command to update a customer address using each of the supported contract types.
 
-```csharp
-	namespace Company.Application.Contracts
+### Using a record (recommended for .NET 5+)
+
+```cs
+namespace Company.Application.Contracts
+{
+	using System;
+
+	public record UpdateCustomerAddress
 	{
-		using System;
-
-		public interface UpdateCustomerAddress
-		{
-			Guid CommandId { get; }
-			DateTime Timestamp { get; }
-			string CustomerId { get; }
-			string HouseNumber { get; }
-			string Street { get; }
-			string City { get; }
-			string State { get; }
-			string PostalCode { get; }
-		}
+		public Guid CommandId { get; init; }
+		public DateTime Timestamp { get; init; }
+		public string CustomerId { get; init; }
+		public string HouseNumber { get; init; }
+		public string Street { get; init; }
+		public string City { get; init; }
+		public string State { get; init; }
+		public string PostalCode { get; init; }
 	}
+}
 ```
 
-::: tip
-It is strongly suggested to use interfaces for message contracts, based on experience over several years with varying levels of developer experience. MassTransit will create dynamic interface implementations for the messages, ensuring a clean separation of the message contract from the consumer.
-:::
+### Using an interface
 
+```cs
+namespace Company.Application.Contracts
+{
+	using System;
+
+	public interface UpdateCustomerAddress
+	{
+		Guid CommandId { get; }
+		DateTime Timestamp { get; }
+		string CustomerId { get; }
+		string HouseNumber { get; }
+		string Street { get; }
+		string City { get; }
+		string State { get; }
+		string PostalCode { get; }
+	}
+}
+```
+
+When defining a message type using an interface, MassTransit will create a dynamic class implementing the interface for serialization, allowing the interface with get-only properties to be presented to the consumer. To create an interface message, use a [message initializer](/usage/producers.md#message-initializers).
+
+### Using a class 
+
+```cs
+namespace Company.Application.Contracts
+{
+	using System;
+
+	public class UpdateCustomerAddress
+	{
+		public Guid CommandId { get; set; }
+		public DateTime Timestamp { get; set; }
+		public string CustomerId { get; set; }
+		public string HouseNumber { get; set; }
+		public string Street { get; set; }
+		public string City { get; set; }
+		public string State { get; set; }
+		public string PostalCode { get; set; }
+	}
+}
+```
+
+> Properties with `private set;` are not recommended as they are not serialized by default when using `System.Text.Json`.
+
+::: tip
 A common mistake when engineers are new to messaging is to create a base class for messages, and try to dispatch that base class in the consumer – including the behavior of the subclass. Ouch. This always leads to pain and suffering, so just say no to base classes.
+:::
 
 ## Message Names
 
@@ -39,7 +85,9 @@ There are two main message types, _events_ and _commands_. When choosing a name 
 
 ### Commands
 
-A command tells a service to do something. Commands are [sent](producers.md#send) (using `Send`) to an endpoint, as it is expected that a single service instance performs the command action. A command should never be published.
+A command tells _a_ service to do something, and typically a command should only be consumed by a single consumer. If you have a command, such as `SubmitOrder`, then you should have only one consumer that implements `IConsumer<SubmitOrder>` or one saga state machine with the `Event<SubmitOrder>` configured. By maintaining the one-to-one relationship of a command to a consumer, commands may by _published_ and they will be automatically routed to the consumer. 
+
+When using RabbitMQ, there is _no additional overhead_ using this approach. However, both Azure Service Bus and Amazon SQS have a more complicated routing structure and because of that structure, additional charges may be incurred since messages need to be forwarded from topics to queues. For low- to medium-volume message loads this isn't a major concern, but for larger high-volume loads it may be preferable to _[send](producers.md#send)_ (using `Send`) commands directly to the queue to reduce latency and cost.
 
 Commands should be expressed in a verb-noun sequence, following the _tell_ style.
 
@@ -51,7 +99,7 @@ Example Commands:
 
 ### Events
 
-An event signifies that something has happened. Events are [published](producers.md#publish) (using `Publish`) via either `IBus` (standalone) or `ConsumeContext` (within a message consumer). An event should not be sent directly to an endpoint.
+An event signifies that something has happened. Events are [published](producers.md#publish) (using `Publish`) via either `ConsumeContext` (within a message consumer), `IPublishEndpoint` (within a container scope), or `IBus` (standalone).
 
 Events should be expressed in a noun-verb (past tense) sequence, indicating that something happened.
 

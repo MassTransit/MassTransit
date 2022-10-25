@@ -1,12 +1,11 @@
-namespace PersistedSaga
-{
-    using MassTransit;
+namespace PersistedSaga;
 
-    public class OrderStateMachine :
-        MassTransitStateMachine<OrderState>
+using MassTransit;
+
+public class OrderStateMachine :
+    MassTransitStateMachine<OrderState>
+{
+    public OrderStateMachine()
     {
-        public OrderStateMachine()
-        {
-        }
     }
 }

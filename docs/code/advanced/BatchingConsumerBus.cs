@@ -1,23 +1,21 @@
-namespace BatchingConsumerBus
+namespace BatchingConsumerBus;
+
+using System.Threading.Tasks;
+using BatchingConsumer;
+using MassTransit;
+using Microsoft.Extensions.DependencyInjection;
+
+public class Program
 {
-    using System;
-    using System.Threading.Tasks;
-    using BatchingConsumer;
-    using MassTransit;
-    using Microsoft.Extensions.DependencyInjection;
-
-    public class Program
+    public static async Task Main()
     {
-        public static async Task Main()
+        var services = new ServiceCollection();
+
+        services.AddMassTransit(x =>
         {
-            var services = new ServiceCollection();
+            x.AddConsumer<OrderAuditConsumer>(typeof(OrderAuditConsumerDefinition));
 
-            services.AddMassTransit(x =>
-            {
-                x.AddConsumer<OrderAuditConsumer>(typeof(OrderAuditConsumerDefinition));
-
-                x.UsingRabbitMq((context, cfg) => cfg.ConfigureEndpoints(context));
-            });
-        }
+            x.UsingRabbitMq((context, cfg) => cfg.ConfigureEndpoints(context));
+        });
     }
 }

@@ -1,26 +1,24 @@
-namespace SchedulingAmazonSQS
+namespace SchedulingAmazonSQS;
+
+using MassTransit;
+using Microsoft.Extensions.DependencyInjection;
+
+public class Program
 {
-    using System;
-    using MassTransit;
-    using Microsoft.Extensions.DependencyInjection;
-
-    public class Program
+    public static void Main()
     {
-        public static void Main()
+        var services = new ServiceCollection();
+
+        services.AddMassTransit(x =>
         {
-            var services = new ServiceCollection();
+            x.AddDelayedMessageScheduler();
 
-            services.AddMassTransit(x =>
+            x.UsingAmazonSqs((context, cfg) =>
             {
-                x.AddDelayedMessageScheduler();
+                cfg.UseDelayedMessageScheduler();
 
-                x.UsingAmazonSqs((context, cfg) => 
-                {
-                    cfg.UseDelayedMessageScheduler();
-
-                    cfg.ConfigureEndpoints(context);
-                });
+                cfg.ConfigureEndpoints(context);
             });
-        }
+        });
     }
 }

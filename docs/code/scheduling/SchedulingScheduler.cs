@@ -1,46 +1,45 @@
-namespace SchedulingScheduler
+namespace SchedulingScheduler;
+
+using System;
+using System.Threading.Tasks;
+using MassTransit;
+using Microsoft.Extensions.DependencyInjection;
+
+public class Program
 {
-    using System;
-    using System.Threading.Tasks;
-    using MassTransit;
-    using Microsoft.Extensions.DependencyInjection;
-
-    public class Program
+    public static async Task Main()
     {
-        public static async Task Main()
+        var services = new ServiceCollection();
+
+        Uri schedulerEndpoint = new Uri("queue:scheduler");
+
+        services.AddMassTransit(x =>
         {
-            var services = new ServiceCollection();
+            x.AddMessageScheduler(schedulerEndpoint);
 
-            Uri schedulerEndpoint = new Uri("queue:scheduler");
-
-            services.AddMassTransit(x =>
+            x.UsingRabbitMq((context, cfg) =>
             {
-                x.AddMessageScheduler(schedulerEndpoint);
+                cfg.UseMessageScheduler(schedulerEndpoint);
 
-                x.UsingRabbitMq((context, cfg) => 
-                {
-                    cfg.UseMessageScheduler(schedulerEndpoint);
-
-                    cfg.ConfigureEndpoints(context);
-                });
+                cfg.ConfigureEndpoints(context);
             });
+        });
 
-            var provider = services.BuildServiceProvider();
+        var provider = services.BuildServiceProvider();
 
-            var scheduler = provider.GetRequiredService<IMessageScheduler>();
+        var scheduler = provider.GetRequiredService<IMessageScheduler>();
 
-            await scheduler.SchedulePublish<SendNotification>(
-                DateTime.UtcNow + TimeSpan.FromSeconds(30), new 
-                {
-                    EmailAddress = "frank@nul.org",
-                    Body =  "Thank you for signing up for our awesome newsletter!"
-                });
-        }
+        await scheduler.SchedulePublish<SendNotification>(
+            DateTime.UtcNow + TimeSpan.FromSeconds(30), new()
+            {
+                EmailAddress = "frank@nul.org",
+                Body = "Thank you for signing up for our awesome newsletter!"
+            });
     }
+}
 
-    public interface SendNotification
-    {
-        string EmailAddress { get; }
-        string Body { get; }
-    }
+public record SendNotification
+{
+    public string EmailAddress { get; init; }
+    public string Body { get; init; }
 }

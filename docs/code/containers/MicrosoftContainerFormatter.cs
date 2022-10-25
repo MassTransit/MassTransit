@@ -1,24 +1,22 @@
-namespace MicrosoftContainerFormatter
+namespace MicrosoftContainerFormatter;
+
+using System.Threading.Tasks;
+using MassTransit;
+using Microsoft.Extensions.DependencyInjection;
+
+public class Program
 {
-    using System;
-    using System.Threading.Tasks;
-    using MassTransit;
-    using Microsoft.Extensions.DependencyInjection;
-
-    public class Program
+    public static async Task Main()
     {
-        public static async Task Main()
+        var services = new ServiceCollection();
+
+        services.AddMassTransit(x =>
         {
-            var services = new ServiceCollection();
+            x.SetKebabCaseEndpointNameFormatter();
 
-            services.AddMassTransit(x =>
-            {
-                x.SetKebabCaseEndpointNameFormatter();
+            x.SetSnakeCaseEndpointNameFormatter();
 
-                x.SetSnakeCaseEndpointNameFormatter();
-
-                x.UsingRabbitMq((context, cfg) => cfg.ConfigureEndpoints(context));
-            });
-        }
+            x.UsingRabbitMq((context, cfg) => cfg.ConfigureEndpoints(context));
+        });
     }
 }

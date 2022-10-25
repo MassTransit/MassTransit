@@ -1,68 +1,60 @@
-namespace SchedulingConsumeContext
+namespace SchedulingConsumeContext;
+
+using System;
+using System.Threading.Tasks;
+using MassTransit;
+using Microsoft.Extensions.DependencyInjection;
+
+public class Program
 {
-    using System;
-    using System.Threading.Tasks;
-    using MassTransit;
-    using Microsoft.Extensions.DependencyInjection;
-
-    public class Program
+    public static void Main()
     {
-        public static void Main()
+        var services = new ServiceCollection();
+
+        Uri schedulerEndpoint = new Uri("queue:scheduler");
+
+        services.AddMassTransit(x =>
         {
-            var services = new ServiceCollection();
+            x.AddMessageScheduler(schedulerEndpoint);
 
-            Uri schedulerEndpoint = new Uri("queue:scheduler");
+            x.AddConsumer<ScheduleNotificationConsumer>();
 
-            services.AddMassTransit(x =>
+            x.UsingRabbitMq((context, cfg) =>
             {
-                x.AddMessageScheduler(schedulerEndpoint);
+                cfg.UseMessageScheduler(schedulerEndpoint);
 
-                x.AddConsumer<ScheduleNotificationConsumer>();
-
-                x.UsingRabbitMq((context, cfg) => 
-                {
-                    cfg.UseMessageScheduler(schedulerEndpoint);
-
-                    cfg.ConfigureEndpoints(context);
-                });
+                cfg.ConfigureEndpoints(context);
             });
-        }
+        });
     }
+}
 
-    public class ScheduleNotificationConsumer :
-        IConsumer<ScheduleNotification>
+public class ScheduleNotificationConsumer :
+    IConsumer<ScheduleNotification>
+{
+    public async Task Consume(ConsumeContext<ScheduleNotification> context)
     {
-        public async Task Consume(ConsumeContext<ScheduleNotification> context)
-        {
-            Uri notificationService = new Uri("queue:notification-service");
+        Uri notificationService = new Uri("queue:notification-service");
 
-            await context.ScheduleSend<SendNotification>(notificationService,
-                context.Message.DeliveryTime,
-                new 
-                {
-                    EmailAddress = context.Message.EmailAddress,
-                    Body =  context.Message.Body
-                });
-        }
-
-        class SendNotificationCommand :
-            SendNotification
-        {
-            public string EmailAddress { get; set; }
-            public string Body { get; set; }
-        }
+        await context.ScheduleSend<SendNotification>(notificationService,
+            context.Message.DeliveryTime,
+            new()
+            {
+                EmailAddress = context.Message.EmailAddress,
+                Body = context.Message.Body
+            });
     }
+}
 
-    public interface ScheduleNotification
-    {
-        DateTime DeliveryTime { get; }
-        string EmailAddress { get; }
-        string Body { get; }
-    }
+public record ScheduleNotification
+{
+    public DateTime DeliveryTime { get; init; }
+    public string EmailAddress { get; init; }
+    public string Body { get; init; }
+}
 
-    public interface SendNotification
-    {
-        string EmailAddress { get; }
-        string Body { get; }
-    }
+public record SendNotification
+{
+    public string EmailAddress { get; init; }
+    public string Body { get; init; }
 }

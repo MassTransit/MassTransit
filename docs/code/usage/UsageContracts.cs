@@ -1,19 +1,18 @@
-namespace UsageContracts
+namespace UsageContracts;
+
+using System;
+
+public record SubmitOrder
 {
-    using System;
+    public Guid OrderId { get; init; }
+}
 
-    public interface SubmitOrder
-    {
-        Guid OrderId { get; }
-    }
+public record OrderSubmitted
+{
+    public Guid OrderId { get; init; }
+}
 
-    public interface OrderSubmitted
-    {
-        Guid OrderId { get; }
-    }
-
-    public interface SubmitOrderAcknowledged
-    {
-        Guid OrderId { get; }
-    }
+public record SubmitOrderAcknowledged
+{
+    public Guid OrderId { get; init; }
 }

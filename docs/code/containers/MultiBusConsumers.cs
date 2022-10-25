@@ -1,17 +1,17 @@
-namespace ContainerConsumers
+namespace ContainerConsumers;
+
+using System.Threading.Tasks;
+using MassTransit;
+
+public record AllocateInventory
 {
-    using System.Threading.Tasks;
-    using MassTransit;
+    public string Sku { get; init; }
+}
 
-    public interface AllocateInventory
+class AllocateInventoryConsumer :
+    IConsumer<AllocateInventory>
+{
+    public async Task Consume(ConsumeContext<AllocateInventory> context)
     {
-    }
-
-    class AllocateInventoryConsumer :
-        IConsumer<AllocateInventory>
-    {
-        public async Task Consume(ConsumeContext<AllocateInventory> context)
-        {
-        }
     }
 }

@@ -1,41 +1,40 @@
-namespace MultiBusThreeContainer
+namespace MultiBusThreeContainer;
+
+using MassTransit;
+using Microsoft.Extensions.DependencyInjection;
+
+public interface IThirdBus :
+    IBus
 {
-    using MassTransit;
-    using Microsoft.Extensions.DependencyInjection;
+}
 
-    public interface IThirdBus :
-        IBus
+class ThirdBus :
+    BusInstance<IThirdBus>,
+    IThirdBus
+{
+    public ThirdBus(IBusControl busControl, ISomeService someService)
+        : base(busControl)
     {
+        SomeService = someService;
     }
 
-    class ThirdBus :
-        BusInstance<IThirdBus>,
-        IThirdBus
-    {
-        public ThirdBus(IBusControl busControl, ISomeService someService)
-            : base(busControl)
-        {
-            SomeService = someService;
-        }
+    public ISomeService SomeService { get; }
+}
 
-        public ISomeService SomeService { get; }
-    }
-
-    public class Startup
+public class Startup
+{
+    public void ConfigureServices(IServiceCollection services)
     {
-        public void ConfigureServices(IServiceCollection services)
+        services.AddMassTransit<IThirdBus>(x =>
         {
-            services.AddMassTransit<IThirdBus>(x =>
+            x.UsingRabbitMq((context, cfg) =>
             {
-                x.UsingRabbitMq((context, cfg) =>
-                {
-                    cfg.Host("third-host");
-                });
+                cfg.Host("third-host");
             });
-        }
+        });
     }
+}
 
-    public interface ISomeService
-    {
-    }
+public interface ISomeService
+{
 }

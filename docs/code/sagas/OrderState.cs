@@ -1,17 +1,16 @@
-namespace PersistedSaga
+namespace PersistedSaga;
+
+using System;
+using MassTransit;
+
+public class OrderState :
+    SagaStateMachineInstance,
+    ISagaVersion
 {
-    using System;
-    using MassTransit;
+    public Guid CorrelationId { get; set; }
+    public string CurrentState { get; set; }
 
-    public class OrderState :
-        SagaStateMachineInstance,
-        ISagaVersion
-    {
-        public Guid CorrelationId { get; set; }
-        public string CurrentState { get; set; }
+    public DateTime? OrderDate { get; set; }
 
-        public DateTime? OrderDate { get; set; }
-
-        public int Version { get; set; }
-    }
+    public int Version { get; set; }
 }

@@ -1,25 +1,23 @@
-namespace MongoDbSagaContainer
+namespace MongoDbSagaContainer;
+
+using MassTransit;
+using Microsoft.Extensions.DependencyInjection;
+using PersistedSaga;
+
+public class Program
 {
-    using System;
-    using MassTransit;
-    using Microsoft.Extensions.DependencyInjection;
-    using PersistedSaga;
-
-    public class Program
+    public static void Main()
     {
-        public static void Main()
-        {
-            var services = new ServiceCollection();
+        var services = new ServiceCollection();
 
-            services.AddMassTransit(x =>
-            {
-                x.AddSagaStateMachine<OrderStateMachine, OrderState>()
-                    .MongoDbRepository(r =>
-                    {
-                        r.Connection = "mongodb://127.0.0.1";
-                        r.DatabaseName = "orderdb";
-                    });
-            });
-        }
+        services.AddMassTransit(x =>
+        {
+            x.AddSagaStateMachine<OrderStateMachine, OrderState>()
+                .MongoDbRepository(r =>
+                {
+                    r.Connection = "mongodb://127.0.0.1";
+                    r.DatabaseName = "orderdb";
+                });
+        });
     }
 }

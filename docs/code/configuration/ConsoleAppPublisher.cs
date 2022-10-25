@@ -1,52 +1,43 @@
-﻿namespace EventContracts
-{
-    public interface ValueEntered
-    {
-        string Value { get; }
-    }
-}
+﻿namespace ConsoleEventPublisher;
 
-namespace ConsoleEventPublisher
-{
-    using System;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using EventContracts;
-    using MassTransit;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using EventContracts;
+using MassTransit;
 
-    public class Program
+public class Program
+{
+    public static async Task Main()
     {
-        public static async Task Main()
+        var busControl = Bus.Factory.CreateUsingRabbitMq();
+
+        var source = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+
+        await busControl.StartAsync(source.Token);
+        try
         {
-            var busControl = Bus.Factory.CreateUsingRabbitMq();
-
-            var source = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-
-            await busControl.StartAsync(source.Token);
-            try
+            while (true)
             {
-                while (true)
+                string value = await Task.Run(() =>
                 {
-                    string value = await Task.Run(() =>
-                    {
-                        Console.WriteLine("Enter message (or quit to exit)");
-                        Console.Write("> ");
-                        return Console.ReadLine();
-                    });
+                    Console.WriteLine("Enter message (or quit to exit)");
+                    Console.Write("> ");
+                    return Console.ReadLine();
+                });
 
-                    if("quit".Equals(value, StringComparison.OrdinalIgnoreCase))
-                        break;
+                if("quit".Equals(value, StringComparison.OrdinalIgnoreCase))
+                    break;
 
-                    await busControl.Publish<ValueEntered>(new
-                    {
-                        Value = value
-                    });
-                }
+                await busControl.Publish<ValueEntered>(new()
+                {
+                    Value = value
+                });
             }
-            finally
-            {
-                await busControl.StopAsync();
-            }
+        }
+        finally
+        {
+            await busControl.StopAsync();
         }
     }
 }

@@ -1,44 +1,42 @@
-namespace AspNetCoreListener
+namespace AspNetCoreListener;
+
+using System.Threading.Tasks;
+using EventContracts;
+using MassTransit;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+
+public class Startup
 {
-    using System;
-    using System.Threading.Tasks;
-    using EventContracts;
-    using MassTransit;
-    using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Logging;
-
-    public class Startup
+    public void ConfigureServices(IServiceCollection services)
     {
-        public void ConfigureServices(IServiceCollection services)
+        services.AddMassTransit(x =>
         {
-            services.AddMassTransit(x =>
-            {
-                x.AddConsumer<EventConsumer>();
+            x.AddConsumer<EventConsumer>();
 
-                x.UsingRabbitMq((context, cfg) =>
+            x.UsingRabbitMq((context, cfg) =>
+            {
+                cfg.ReceiveEndpoint("event-listener", e =>
                 {
-                    cfg.ReceiveEndpoint("event-listener", e =>
-                    {
-                        e.ConfigureConsumer<EventConsumer>(context);
-                    });
+                    e.ConfigureConsumer<EventConsumer>(context);
                 });
             });
-        }
+        });
+    }
+}
+
+class EventConsumer :
+    IConsumer<ValueEntered>
+{
+    ILogger<EventConsumer> _logger;
+
+    public EventConsumer(ILogger<EventConsumer> logger)
+    {
+        _logger = logger;
     }
 
-    class EventConsumer :
-        IConsumer<ValueEntered>
+    public async Task Consume(ConsumeContext<ValueEntered> context)
     {
-        ILogger<EventConsumer> _logger;
-
-        public EventConsumer(ILogger<EventConsumer> logger)
-        {
-            _logger = logger;
-        }
-
-        public async Task Consume(ConsumeContext<ValueEntered> context)
-        {
-            _logger.LogInformation("Value: {Value}", context.Message.Value);
-        }
+        _logger.LogInformation("Value: {Value}", context.Message.Value);
     }
 }

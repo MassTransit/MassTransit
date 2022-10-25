@@ -2,13 +2,13 @@ namespace ContainerContracts
 {
     using System;
 
-    public interface SubmitOrder
+    public record SubmitOrder
     {
-        Guid OrderId { get; }
+        public Guid OrderId { get; init; }
     }
 
-    public interface OrderSubmitted
+    public record OrderSubmitted
     {
-        Guid OrderId { get; }
+        public Guid OrderId { get; init; }
     }
 }

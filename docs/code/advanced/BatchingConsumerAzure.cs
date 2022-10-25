@@ -1,30 +1,29 @@
-namespace BatchingConsumerAzure
+namespace BatchingConsumerAzure;
+
+using System;
+using System.Threading.Tasks;
+using BatchingConsumer;
+using MassTransit;
+
+public class Program
 {
-    using System;
-    using System.Threading.Tasks;
-    using BatchingConsumer;
-    using MassTransit;
-
-    public class Program
+    public static async Task Main()
     {
-        public static async Task Main()
+        var busControl = Bus.Factory.CreateUsingAzureServiceBus(cfg =>
         {
-            var busControl = Bus.Factory.CreateUsingAzureServiceBus(cfg =>
+            cfg.ReceiveEndpoint("audit-service", e =>
             {
-                cfg.ReceiveEndpoint("audit-service", e =>
+                e.PrefetchCount = 100;
+                e.MaxConcurrentCalls = 100;
+
+                e.Batch<OrderAudit>(b =>
                 {
-                    e.PrefetchCount = 100;
-                    e.MaxConcurrentCalls = 100;
+                    b.MessageLimit = 100;
+                    b.TimeLimit = TimeSpan.FromSeconds(3);
 
-                    e.Batch<OrderAudit>(b =>
-                    {
-                        b.MessageLimit = 100;
-                        b.TimeLimit = TimeSpan.FromSeconds(3);
-
-                        b.Consumer(() => new OrderAuditConsumer());
-                    });
+                    b.Consumer(() => new OrderAuditConsumer());
                 });
             });
-        }
+        });
     }
 }

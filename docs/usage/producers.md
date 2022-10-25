@@ -40,10 +40,10 @@ This cannot be stressed enough -- always obtain an `ISendEndpoint` from the clos
 
 To obtain a send endpoint from a send endpoint provider, call the `GetSendEndpoint` method as shown below. The method is _async_, so be sure to _await_ the result.
 
-```csharp
-public class SubmitOrder
+```cs
+public record SubmitOrder
 {
-    public string OrderId { get; set; }
+    public string OrderId { get; init; }
 }
 
 public async Task SendOrder(ISendEndpointProvider sendEndpointProvider)
@@ -111,20 +111,21 @@ Each transport has a specific set of supported short addresses.
 
 ### Address Conventions
 
+> While these conventions are available, the author tends to dislike them [based upon this Stack Overflow answer](https://stackoverflow.com/questions/62713786/masstransit-endpointconvention-azure-service-bus/62714778#62714778).
+
 Using send endpoints might seem too verbose, because before sending any message, you need to get the send endpoint and to do that you need to have an endpoint address. Usually, addresses are kept in the configuration and accessing the configuration from all over the application is not a good practice.
 
 Endpoint conventions solve this issue by allowing you to configure the mapping between message types and endpoint addresses. A potential downside here that you will not be able to send messages of the same type to different endpoints by using conventions. If you need to do this, keep using the `GetSendEndpoint` method.
 
 Conventions are configured like this:
 
-```csharp
-EndpointConvention.Map<SubmitOrder>(
-    new Uri("rabbitmq://mq.acme.com/order/order_processing"));
+```cs
+EndpointConvention.Map<SubmitOrder>(new Uri("rabbitmq://mq.acme.com/order/order_processing"));
 ```
 
 Now, you don't need to get the send endpoint anymore for this type of message and can send it like this:
 
-```csharp
+```cs
 public async Task Post(SubmitOrderRequest request)
 {
     if (AllGoodWith(request))
@@ -134,11 +135,11 @@ public async Task Post(SubmitOrderRequest request)
 
 Also, from inside the consumer, you can do the same using the `ConsumeContext.Send` overload:
 
-```csharp
+```cs
 EndpointConvention.Map<StartDelivery>(new Uri(ConfigurationManager.AppSettings["deliveryServiceQueue"]));
 ```
 
-```csharp
+```cs
 public class SubmitOrderConsumer : 
     IConsumer<SubmitOrder>
 {
@@ -159,6 +160,8 @@ public class SubmitOrderConsumer :
 The `EndpointConvention.Map<T>` method is static, so it can be called from everywhere. It is important to remember that you cannot configure conventions for the same message twice. If you try to do this - the `Map` method will throw an exception. This is also important when writing tests, so you need to configure the conventions at the same time as you configure your test bus (harness).
 
 It is better to configure send conventions before you start the bus.
+
+
 
 ## Publish
 
@@ -186,16 +189,16 @@ The same guidelines apply for publishing messages, the closest object should be 
 
 To publish a message, see the code below:
 
-```csharp
-public interface OrderSubmitted
+```cs
+public record OrderSubmitted
 {
-    string OrderId { get; }
-    DateTime OrderDate { get; }
+    public string OrderId { get; init; }
+    public DateTime OrderDate { get; init; }
 }
 
 public async Task NotifyOrderSubmitted(IPublishEndpoint publishEndpoint)
 {
-    await publishEndpoint.Publish<OrderSubmitted>(new
+    await publishEndpoint.Publish<OrderSubmitted>(new()
     {
         OrderId = "27",
         OrderDate = DateTime.UtcNow,
@@ -219,7 +222,7 @@ public class SubmitOrderConsumer : IConsumer<SubmitOrder>
     {
         await _orderSubmitter.Process(context.Message);
 
-        await context.Publish<OrderSubmitted>(new
+        await context.Publish<OrderSubmitted>(new()
         {
             OrderId = context.Message.OrderId,
             OrderDate = DateTime.UtcNow
@@ -234,16 +237,16 @@ public class SubmitOrderConsumer : IConsumer<SubmitOrder>
 Since the general recommendation is to use interfaces, there are convenience methods to initialize the interface without requiring the creation of a message class underneath. While versioning of messages still requires a class which supports multiple interfaces, a simple approach to send an interface message is shown below.
 
 ```csharp
-public interface SubmitOrder
+public record SubmitOrder
 {
-    string OrderId { get; }
-    DateTime OrderDate { get; }
-    decimal OrderAmount { get; }
+    public string OrderId { get; init; }
+    public DateTime OrderDate { get; init; }
+    public decimal OrderAmount { get; init; }
 }
 
 public async Task SendOrder(ISendEndpoint endpoint)
 {
-    await endpoint.Send<SubmitOrder>(new
+    await endpoint.Send<SubmitOrder>(new()
     {
         OrderId = "27",
         OrderDate = DateTime.UtcNow,
@@ -252,9 +255,9 @@ public async Task SendOrder(ISendEndpoint endpoint)
 }
 ```
 
-## Message Initializers
+## Message Initialization
 
-MassTransit continues to encourage and support the use of interfaces for message contracts, and initializers make it easy to produce interface messages.
+Messages can be initialized by MassTransit using an anonymous object passed as an _object_ to the _publish_ or _send_ methods. While originally designed to support the initialization of interface-based message types, anonymous objects can also be used to initialize message types defined using classes or records.
 
 ### Anonymous object values
 
@@ -262,20 +265,20 @@ MassTransit continues to encourage and support the use of interfaces for message
 
 Consider this example message contract to submit an order.
 
-```csharp
-public interface SubmitOrder
+```cs
+public record SubmitOrder
 {
-    Guid OrderId { get; }
-    DateTime OrderDate { get; }
-    string OrderNumber { get; }
-    decimal OrderAmount { get; }
+    public Guid OrderId { get; init; }
+    public DateTime OrderDate { get; init; }
+    public string OrderNumber { get; init; }
+    public decimal OrderAmount { get; init; }
 }
 ```
 
 To send this message to an endpoint:
 
-```csharp
-await endpoint.Send<SubmitOrder>(new
+```cs
+await endpoint.Send<SubmitOrder>(new  // <-- notice no ()
 {
     OrderId = NewId.NextGuid(),
     OrderDate = DateTime.UtcNow,
@@ -284,7 +287,7 @@ await endpoint.Send<SubmitOrder>(new
 });
 ```
 
-The anonymous object is loosely typed, the properties are matched by name, and there is an extensive set of type conversions that may occur to obtain match the types defined by the interface. Most numeric, string, and date/time conversions are supported, as well as several advanced conversions (including variables, and asynchronous `Task<T>` results).
+The anonymous object properties are matched by name and there is an extensive set of type conversions that may be used to match the types defined by the interface. Most numeric, string, and date/time conversions are supported, as well as several advanced conversions (including variables, and asynchronous `Task<T>` results).
 
 Collections, including arrays, lists, and dictionaries, are broadly supported, including the conversion of list elements, as well as dictionary keys and values. For instance, a dictionary of (int,decimal) could be converted on the fly to (long, string) using the default format conversions.
 
@@ -294,10 +297,10 @@ Nested objects are also supported, for instance, if a property was of type `Addr
 
 Header values can be specified in the anonymous object using a double-underscore (pronounced 'dunder' apparently) property name. For instance, to set the message time-to-live, specify a property with the duration. Remember, any value that can be converted to a `TimeSpan` works!
 
-```csharp
-public interface GetOrderStatus
+```cs
+public record GetOrderStatus
 {
-    Guid OrderId { get; }
+    public Guid OrderId { get; init; }
 }
 
 var response = await requestClient.GetResponse<OrderStatus>(new 
@@ -311,7 +314,7 @@ var response = await requestClient.GetResponse<OrderStatus>(new
 
 To add a custom header value, a special property name format is used. In the name, underscores are converted to dashes, and double underscores are converted to underscores. In the following example:
 
-```csharp
+```cs
 var response = await requestClient.GetResponse<OrderStatus>(new 
 {
     __Header_X_B3_TraceId = zipkinTraceId,
@@ -327,19 +330,19 @@ This would include set the headers used by open tracing (or Zipkin, as shown abo
 MassTransit also supports variables, which are special types added to the anonymous object. Following the example above, the initialization could be changed to use variables for the `OrderId` and `OrderDate`. Variables are consistent throughout the message creation, using the same variable multiple times returns the value. For instance, the Id created to set the _OrderId_ would be the same used to set the _OrderId_ in each item.
 
 ```csharp
-public interface OrderItem
+public record OrderItem
 {
-    Guid OrderId { get; }
-    string ItemNumber { get; }
+    public Guid OrderId { get; init; }
+    public string ItemNumber { get; init; }
 }
 
-public interface SubmitOrder
+public record SubmitOrder
 {
-    Guid OrderId { get; }
-    DateTime OrderDate { get; }
-    string OrderNumber { get; }
-    decimal OrderAmount { get; }
-    OrderItem[] OrderItems { get; }
+    public Guid OrderId { get; init; }
+    public DateTime OrderDate { get; init; }
+    public string OrderNumber { get; init; }
+    public decimal OrderAmount { get; init; }
+    public OrderItem[] OrderItems { get; init; }
 }
 
 await endpoint.Send<SubmitOrder>(new
@@ -360,13 +363,13 @@ await endpoint.Send<SubmitOrder>(new
 
 Message initializers are now asynchronous, which makes it possible to do some pretty cool things, including waiting for Task input properties to complete and use the result to initialize the property. An example is shown below.
 
-```csharp
-public interface OrderUpdated
+```cs
+public record OrderUpdated
 {
-    Guid CorrelationId { get; }
-    DateTime Timestamp { get; }
-    Guid OrderId { get; }
-    Customer Customer { get; }
+    public Guid CorrelationId { get; init; }
+    public DateTime Timestamp { get; init; }
+    public Guid OrderId { get; init; }
+    public Customer Customer { get; init; }
 }
 
 public async Task<CustomerInfo> LoadCustomer(Guid orderId)
@@ -393,11 +396,11 @@ The property initializer will wait for the task result and then use it to initia
 There are a variety of message headers available which are used for correlation and tracking of messages. It is also possible to override some of the default behaviors of MassTransit when a fault occurs. For instance, a fault is normally *published* when a consumer throws an exception. If instead the application wants faults delivered to a specific address, the ``FaultAddress`` can be specified via a header. How this is done is shown below.
 
 ```csharp
-public interface SubmitOrder
+public record SubmitOrder
 {
-    string OrderId { get; }
-    DateTime OrderDate { get; }
-    decimal OrderAmount { get; }
+    public string OrderId { get; init; }
+    public DateTime OrderDate { get; init; }
+    public decimal OrderAmount { get; init; }
 }
 
 public async Task SendOrder(ISendEndpoint endpoint)

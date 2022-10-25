@@ -1,49 +1,48 @@
-namespace JobSystemClient
+namespace JobSystemClient;
+
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using JobSystem.Jobs;
+using MassTransit;
+using MassTransit.Contracts.JobService;
+
+public class Program
 {
-    using System;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using JobSystem.Jobs;
-    using MassTransit;
-    using MassTransit.Contracts.JobService;
-
-    public class Program
+    public static async Task Main()
     {
-        public static async Task Main()
+        var busControl = Bus.Factory.CreateUsingRabbitMq();
+
+        var source = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+
+        await busControl.StartAsync(source.Token);
+        try
         {
-            var busControl = Bus.Factory.CreateUsingRabbitMq();
+            var requestClient = busControl.CreateRequestClient<ConvertVideo>();
 
-            var source = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-
-            await busControl.StartAsync(source.Token);
-            try
+            do
             {
-                var requestClient = busControl.CreateRequestClient<ConvertVideo>();
-
-                do
+                string value = await Task.Run(() =>
                 {
-                    string value = await Task.Run(() =>
-                    {
-                        Console.WriteLine("Enter video format (or quit to exit)");
-                        Console.Write("> ");
-                        return Console.ReadLine();
-                    });
+                    Console.WriteLine("Enter video format (or quit to exit)");
+                    Console.Write("> ");
+                    return Console.ReadLine();
+                });
 
-                    if("quit".Equals(value, StringComparison.OrdinalIgnoreCase))
-                        break;
+                if("quit".Equals(value, StringComparison.OrdinalIgnoreCase))
+                    break;
 
-                    var response = await requestClient.GetResponse<JobSubmissionAccepted>(new
-                    {
-                        VideoId = NewId.NextGuid(),
-                        Format = value
-                    });
-                }
-                while (true);
+                var response = await requestClient.GetResponse<JobSubmissionAccepted>(new
+                {
+                    VideoId = NewId.NextGuid(),
+                    Format = value
+                });
             }
-            finally
-            {
-                await busControl.StopAsync();
-            }
+            while (true);
+        }
+        finally
+        {
+            await busControl.StopAsync();
         }
     }
 }

@@ -1,21 +1,20 @@
-namespace BusHostTopologyMatch
+namespace BusHostTopologyMatch;
+
+using System.Threading.Tasks;
+using MassTransit;
+
+public class Program
 {
-    using System.Threading.Tasks;
-    using MassTransit;
-
-    public class Program
+    public static async Task Main()
     {
-        public static async Task Main()
+        var busControl = Bus.Factory.CreateUsingAzureServiceBus(cfg =>
         {
-            var busControl = Bus.Factory.CreateUsingAzureServiceBus(cfg =>
-            {
-                cfg.Host("connection-string");
-            });
+            cfg.Host("connection-string");
+        });
 
-            if (busControl.Topology is IServiceBusBusTopology serviceBusTopology)
-            {
+        if (busControl.Topology is IServiceBusBusTopology serviceBusTopology)
+        {
 
-            }
         }
     }
 }

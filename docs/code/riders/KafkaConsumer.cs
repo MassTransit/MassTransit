@@ -1,49 +1,47 @@
-namespace KafkaConsumer
+namespace KafkaConsumer;
+
+using System.Threading.Tasks;
+using MassTransit;
+using Microsoft.Extensions.DependencyInjection;
+
+public class Program
 {
-    using System;
-    using System.Threading.Tasks;
-    using MassTransit;
-    using Microsoft.Extensions.DependencyInjection;
-
-    public class Program
+    public static async Task Main()
     {
-        public static async Task Main()
+        var services = new ServiceCollection();
+
+        services.AddMassTransit(x =>
         {
-            var services = new ServiceCollection();
+            x.UsingRabbitMq((context, cfg) => cfg.ConfigureEndpoints(context));
 
-            services.AddMassTransit(x =>
+            x.AddRider(rider =>
             {
-                x.UsingRabbitMq((context, cfg) => cfg.ConfigureEndpoints(context));
+                rider.AddConsumer<KafkaMessageConsumer>();
 
-                x.AddRider(rider =>
+                rider.UsingKafka((context, k) =>
                 {
-                    rider.AddConsumer<KafkaMessageConsumer>();
+                    k.Host("localhost:9092");
 
-                    rider.UsingKafka((context, k) =>
+                    k.TopicEndpoint<KafkaMessage>("topic-name", "consumer-group-name", e =>
                     {
-                        k.Host("localhost:9092");
-
-                        k.TopicEndpoint<KafkaMessage>("topic-name", "consumer-group-name", e =>
-                        {
-                            e.ConfigureConsumer<KafkaMessageConsumer>(context);
-                        });
+                        e.ConfigureConsumer<KafkaMessageConsumer>(context);
                     });
                 });
             });
-        }
+        });
+    }
 
-        class KafkaMessageConsumer :
-            IConsumer<KafkaMessage>
+    class KafkaMessageConsumer :
+        IConsumer<KafkaMessage>
+    {
+        public Task Consume(ConsumeContext<KafkaMessage> context)
         {
-            public Task Consume(ConsumeContext<KafkaMessage> context)
-            {
-                return Task.CompletedTask;
-            }
+            return Task.CompletedTask;
         }
+    }
 
-        public interface KafkaMessage
-        {
-            string Text { get; }
-        }
+    public record KafkaMessage
+    {
+        public string Text { get; init; }
     }
 }

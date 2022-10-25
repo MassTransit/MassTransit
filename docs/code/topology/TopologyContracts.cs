@@ -1,18 +1,17 @@
-namespace TopologyContracts
+namespace TopologyContracts;
+
+using System;
+
+public record SubmitOrder
 {
-    using System;
+    public Guid OrderId { get; init; }
+}
 
-    public interface SubmitOrder
-    {
-        Guid OrderId { get; }
-    }
+public record OrderSubmitted
+{
+    public Guid OrderId { get; init; }
+}
 
-    public interface OrderSubmitted
-    {
-        Guid OrderId { get; }
-    }
-
-    public interface OrderEvent
-    {
-    }
+public interface OrderEvent
+{
 }

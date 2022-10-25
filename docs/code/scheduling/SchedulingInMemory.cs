@@ -1,26 +1,25 @@
-namespace SchedulingInMemory
+namespace SchedulingInMemory;
+
+using System;
+using MassTransit;
+using Microsoft.Extensions.DependencyInjection;
+
+public class Program
 {
-    using System;
-    using MassTransit;
-    using Microsoft.Extensions.DependencyInjection;
-
-    public class Program
+    public static void Main()
     {
-        public static void Main()
+        var services = new ServiceCollection();
+
+        services.AddMassTransit(x =>
         {
-            var services = new ServiceCollection();
+            x.AddMessageScheduler(new Uri("queue:scheduler"));
 
-            services.AddMassTransit(x =>
+            x.UsingRabbitMq((context, cfg) =>
             {
-                x.AddMessageScheduler(new Uri("queue:scheduler"));
+                cfg.UseInMemoryScheduler("scheduler");
 
-                x.UsingRabbitMq((context, cfg) => 
-                {
-                    cfg.UseInMemoryScheduler("scheduler");
-
-                    cfg.ConfigureEndpoints(context);
-                });
+                cfg.ConfigureEndpoints(context);
             });
-        }
+        });
     }
 }

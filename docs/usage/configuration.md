@@ -2,8 +2,6 @@
 
 MassTransit can be used in most .NET application types. Commonly used application types are documented below, including the package references used, and show the minimal configuration required. More thorough configuration details can be found throughout the documentation.
 
-> The configuration examples all use the `EventContracts.ValueEntered` message type. The message type is only included in the first example's source code.
-
 ## Configuration
 
 > Uses [MassTransit](https://nuget.org/packages/MassTransit/), [MassTransit.RabbitMQ](https://nuget.org/packages/MassTransit.RabbitMQ/) 
@@ -27,6 +25,8 @@ To configure MassTransit so that it can be used to send/publish messages, the co
 In this example, MassTransit is configured to connect to RabbitMQ (which should be accessible on localhost) and publish messages. The messages can be published from a controller as shown below.
 
 <<< @/docs/code/configuration/AspNetCorePublisherController.cs
+
+> The configuration examples all use the `EventContracts.ValueEntered` message type. The message type is only included in the first example's source code.
 
 ## Consumers
 
@@ -196,26 +196,20 @@ An ASP.NET Core application can also configure receive endpoints. The consumer, 
 
 <<< @/docs/code/configuration/AspNetCoreListener.cs
 
-To configure health checks, which MassTransit will produce when using the _MassTransitHostedService_, add the health checks to the container and map the readiness and liveness endpoints. The following example also separates the readiness from the liveness health check.
+## Health Checks
+
+The _AddMassTransit_ method adds bus health checks to the service collection. To configure health checks, map the ready and live endpoints in your ASP.NET application. 
 
 <<< @/docs/code/configuration/AspNetCorePublisherHealthCheck.cs
 
-::: tip Optional
-MassTransit does not require a container. If you aren't already using a container, you can get started without having adopt one. However, when you're ready to use a container, perhaps to deploy your service using the .NET Generic Host, MassTransit is ready with fully integrated support for Microsoft.Extensions.DependencyInjection.
-:::
-
-Regardless of which container is used, supported containers have a consistent registration syntax used to add consumers, sagas, and activities, as well as configure the bus. Behind the scenes, MassTransit is configuring the container, including container-specific features such as scoped lifecycles, consistently and correctly. Use of the registration syntax has drastically reduced container configuration support questions.
-
-
-## .NET Generic Host
+## Console Applications
 
 > Uses [MassTransit.RabbitMQ](https://nuget.org/packages/MassTransit.RabbitMQ/)
 
-The .NET Generic Host is the preferred way to create standalone services and can be easily using `dotnet new worker`. In this example, MassTransit is configured to connect to RabbitMQ (which should be accessible on _localhost_) and publish messages. As each value is entered, the value is published as a `ValueEntered` message. No consumers are configured in this example.
+For environments where the generic host is unavailable, MassTransit can be configured without a container. In this example, MassTransit is configured in a simple console application to connect to RabbitMQ (which should be accessible on _localhost_) and publish messages. As each value is entered, the value is published as a `ValueEntered` message. No consumers are configured in this example.
 
 <<< @/docs/code/configuration/ConsoleAppPublisher.cs
 
 Another console application can be created to consume the published events. In this application, the receive endpoint is configured with a consumer that consumes the `ValueEntered` event. The message contract from the example above, in the same namespace, should be copied to this program as well (it isn't shown below).
 
 <<< @/docs/code/configuration/ConsoleAppListener.cs
-

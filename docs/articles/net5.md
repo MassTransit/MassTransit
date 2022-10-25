@@ -11,10 +11,10 @@ This article summarizes some of the new features and how they relate to MassTran
 One of the coolest new features in .NET 5, a record is a read-only (immutable) data structure. A record is a reference type, which makes it a great message type. For example, consider the following message contract.
 
 ```cs
-public interface OrderSubmitted
+public record OrderSubmitted
 {
-    string OrderId { get; }
-    DateTime OrderDate { get; }
+    public string OrderId { get; init; }
+    public DateTime OrderDate { get; init; }
 }
 ```
 
@@ -63,15 +63,15 @@ Since a record is a reference type, and under the covers a record has private se
 I recently commented during one of the [Season 2](https://www.youtube.com/playlist?list=PLx8uyNNs1ri1UA_Nerr7Ej3g9nT2PxbbH) episodes on YouTube that I wished C# had module initializers. Well, sure as s--t, they're now part of C# 9. And one of the other clever tricks is the ability to include a method in an interface, in this case, a static internal method, that is marked with the `[ModuleInitializer]` attribute. In this method, MassTransit's global topology is being used to configure the `CorrelationId` for the message contract.
 
 ```cs
-public interface OrderSubmitted
+public record OrderSubmitted
 {
-    Guid OrderId { get; }
-    DateTime OrderDate { get; }
+    public Guid OrderId { get; init; }
+    public DateTime OrderDate { get; init; }
 
     [ModuleInitializer]
     internal static void Init()
     {
-        GlobalTopology.Send.UseCorrelationId<OrderSubmitted>(x => x.OrderId);
+        MessageCorrelation.UseCorrelationId<OrderSubmitted>(x => x.OrderId);
     }
 }
 ```

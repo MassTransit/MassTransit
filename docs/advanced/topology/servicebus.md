@@ -1,8 +1,6 @@
 # Azure Service Bus
 
-
 The send and publish topologies are extended to support the Azure Service Bus features, and make it possible to configure how topics are created.
-
 
 ## Topics
 
@@ -25,11 +23,10 @@ The PartitionKey on published/sent messages can be configured by convention, all
 When configuring a bus, the send topology can be used to specify a routing key formatter for a particular message type.
 
 ```csharp
-public interface SubmitOrder
+public record SubmitOrder
 {
-    string CustomerId { get; }
-    Guid TransactionId { get; }
-    // ...
+    public string CustomerId { get; init; }
+    public Guid TransactionId { get; init; }
 }
 
 Bus.Factory.CreateUsingAzureServiceBus(cfg =>
@@ -48,10 +45,10 @@ The SessionId on published/sent messages can be configured by convention, allowi
 When configuring a bus, the send topology can be used to specify a routing key formatter for a particular message type.
 
 ```csharp
-public interface UpdateUserStatus
+public record UpdateUserStatus
 {
-    Guid UserId { get; }
-    string Status { get; }
+    public Guid UserId { get; init; }
+    public string Status { get; init; }
 }
 
 Bus.Factory.CreateUsingAzureServiceBus(cfg =>

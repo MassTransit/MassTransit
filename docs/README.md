@@ -9,7 +9,7 @@ actionLink: /getting-started/
 transports:
 - text: RabbitMQ
   link: /quick-starts/rabbitmq
-  description: RabbitMQ is an Open Source project that provides a highly available 
+  description: RabbitMQ is a high performance, highly available freely available open source message broker
 - text: Azure Service Bus 
   link: /quick-starts/azure-service-bus
   description: Want to play in the Azure Cloud, use this transport to keep everything in Azure
@@ -18,17 +18,17 @@ transports:
   description: Prefer the AWS cloud? Utilize the Serverless SNS + SQS model
 features:
 - title: Simple yet Sophisticated
-  details: Easy to use and understand API allowing you to focus on solving business problems
+  details: Easy to use and understand, allowing you to focus on solving business problems
 - title: Transport Liquidity
-  details: Deploy your solution using RabbitMQ, Azure Service Bus, ActiveMQ, and Amazon SQS/SNS without having to rewrite it
+  details: Deploy using RabbitMQ, Azure Service Bus, ActiveMQ, and Amazon SQS/SNS without having to rewrite it
 - title: Powerful Message Patterns
-  details: Including message consumers, persistent sagas and event-driven state machines, and routing-slip based distributed transactions with compensation
+  details: Consumers, sagas, state machines, and choreography-based distributed transactions with compensation
 - title: End-to-End Solution
-  details: Handles message serialization, headers, broker topology, message routing, exceptions, retries, concurrency, connection and consumer lifecycle management
+  details: Handles message serialization, headers, and routing, broker topology, exceptions, retries, concurrency, connection and consumer lifecycle management
 - title: Unit Testable
-  details: In memory test harness for creating fast unit tests with comprehensive integration test level verification
+  details: Fast in-memory test harness to simplify unit testing, including sent, published, and consumed message observers
 - title: Monitoring
-  details: Modern support for distributed tracing and service health and liveliness checks
+  details: Modern support for distributed tracing, service health and liveliness checks
 footer: Apache 2.0 Licensed | Copyright © 2007-2022 Chris Patterson
 ---
 

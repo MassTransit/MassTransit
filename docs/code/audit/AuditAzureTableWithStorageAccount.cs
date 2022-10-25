@@ -1,25 +1,24 @@
-namespace AuditAzureTableWithStorageAccount
+namespace AuditAzureTableWithStorageAccount;
+
+using MassTransit;
+using Microsoft.Azure.Cosmos.Table;
+using Microsoft.Extensions.DependencyInjection;
+
+public class Program
 {
-    using MassTransit;
-    using Microsoft.Azure.Cosmos.Table;
-    using Microsoft.Extensions.DependencyInjection;
-
-    class Program
+    static void Main(string[] args)
     {
-        static void Main(string[] args)
+        var services = new ServiceCollection();
+
+        CloudStorageAccount storageAccount = CloudStorageAccount.Parse("INSERT STORAGE ACCOUNT CONNECTION STRING");
+        string auditTableName = "messageaudittable";
+
+        services.AddMassTransit(x =>
         {
-            var services = new ServiceCollection();
-
-            CloudStorageAccount storageAccount = CloudStorageAccount.Parse("INSERT STORAGE ACCOUNT CONNECTION STRING");
-            string auditTableName = "messageaudittable";
-
-            services.AddMassTransit(x =>
+            x.UsingInMemory((context, cfg) =>
             {
-                x.UsingInMemory((context, cfg) =>
-                {
-                    cfg.UseAzureTableAuditStore(storageAccount, auditTableName);
-                });
+                cfg.UseAzureTableAuditStore(storageAccount, auditTableName);
             });
-        }
+        });
     }
 }

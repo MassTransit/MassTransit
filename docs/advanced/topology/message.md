@@ -87,7 +87,7 @@ _EntityName_ is an optional attribute used to override the default entity name f
 
 ```cs
 [EntityName("order-submitted")]
-public interface LegacyOrderSubmittedEvent
+public record LegacyOrderSubmittedEvent
 {
 }
 ```
@@ -98,7 +98,7 @@ _ConfigureConsumeTopology_ is an optional attribute that may be specified on a m
 
 ```cs
 [ConfigureConsumeTopology(false)]
-public interface DeleteRecord
+public record DeleteRecord
 {
 }
 ```
@@ -113,7 +113,7 @@ public interface ICommand
 {
 }
 
-public interface ReformatHardDrive :
+public record ReformatHardDrive :
     ICommand
 {
 }

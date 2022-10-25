@@ -1,42 +1,41 @@
-namespace MultiBusTwoContainer
+namespace MultiBusTwoContainer;
+
+using ContainerContracts;
+using ContainerConsumers;
+using MassTransit;
+using Microsoft.Extensions.DependencyInjection;
+
+public interface ISecondBus :
+    IBus
 {
-    using ContainerContracts;
-    using ContainerConsumers;
-    using MassTransit;
-    using Microsoft.Extensions.DependencyInjection;
+}
 
-    public interface ISecondBus :
-        IBus
+public class Startup
+{
+    public void ConfigureServices(IServiceCollection services)
     {
-    }
-
-    public class Startup
-    {
-        public void ConfigureServices(IServiceCollection services)
+        services.AddMassTransit(x =>
         {
-            services.AddMassTransit(x =>
+            x.AddConsumer<SubmitOrderConsumer>();
+            x.AddRequestClient<SubmitOrder>();
+
+            x.UsingRabbitMq((context, cfg) =>
             {
-                x.AddConsumer<SubmitOrderConsumer>();
-                x.AddRequestClient<SubmitOrder>();
-
-                x.UsingRabbitMq((context, cfg) =>
-                {
-                    cfg.ConfigureEndpoints(context);
-                });
+                cfg.ConfigureEndpoints(context);
             });
+        });
 
-            services.AddMassTransit<ISecondBus>(x =>
+        services.AddMassTransit<ISecondBus>(x =>
+        {
+            x.AddConsumer<AllocateInventoryConsumer>();
+            x.AddRequestClient<AllocateInventory>();
+
+            x.UsingRabbitMq((context, cfg) =>
             {
-                x.AddConsumer<AllocateInventoryConsumer>();
-                x.AddRequestClient<AllocateInventory>();
+                cfg.Host("remote-host");
 
-                x.UsingRabbitMq((context, cfg) =>
-                {
-                    cfg.Host("remote-host");
-
-                    cfg.ConfigureEndpoints(context);
-                });
+                cfg.ConfigureEndpoints(context);
             });
-        }
+        });
     }
 }

@@ -1,22 +1,21 @@
-namespace MicrosoftContainerFormatterInline
+namespace MicrosoftContainerFormatterInline;
+
+using System.Threading.Tasks;
+using MassTransit;
+using Microsoft.Extensions.DependencyInjection;
+
+public class Program
 {
-    using System.Threading.Tasks;
-    using MassTransit;
-    using Microsoft.Extensions.DependencyInjection;
-
-    public class Program
+    public static async Task Main()
     {
-        public static async Task Main()
-        {
-            var services = new ServiceCollection();
+        var services = new ServiceCollection();
 
-            services.AddMassTransit(x =>
+        services.AddMassTransit(x =>
+        {
+            x.UsingRabbitMq((context, cfg) =>
             {
-                x.UsingRabbitMq((context, cfg) =>
-                {
-                    cfg.ConfigureEndpoints(context, KebabCaseEndpointNameFormatter.Instance);
-                });
+                cfg.ConfigureEndpoints(context, KebabCaseEndpointNameFormatter.Instance);
             });
-        }
+        });
     }
 }

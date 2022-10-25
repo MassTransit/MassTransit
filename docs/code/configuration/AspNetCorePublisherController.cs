@@ -1,6 +1,13 @@
+namespace EventContracts
+{
+    public record ValueEntered
+    {
+        public string Value { get; init; }
+    }
+}
+
 namespace AspNetCorePublisher
 {
-    using System;
     using System.Threading.Tasks;
     using EventContracts;
     using MassTransit;
@@ -19,7 +26,7 @@ namespace AspNetCorePublisher
         [HttpPost]
         public async Task<ActionResult> Post(string value)
         {
-            await _publishEndpoint.Publish<ValueEntered>(new
+            await _publishEndpoint.Publish<ValueEntered>(new()
             {
                 Value = value
             });

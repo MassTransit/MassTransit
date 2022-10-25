@@ -1,30 +1,29 @@
-namespace UsageMediatorConsumer
+namespace UsageMediatorConsumer;
+
+using System;
+using System.Threading.Tasks;
+using MassTransit;
+
+public record GetOrderStatus
 {
-    using System;
-    using System.Threading.Tasks;
-    using MassTransit;
+    public Guid OrderId { get; init; }
+}
 
-    public interface GetOrderStatus
-    {
-        Guid OrderId { get; }
-    }
+public record OrderStatus
+{
+    public Guid OrderId { get; init; }
+    public string Status { get; init; }
+}
 
-    public interface OrderStatus
+class OrderStatusConsumer :
+    IConsumer<GetOrderStatus>
+{
+    public async Task Consume(ConsumeContext<GetOrderStatus> context)
     {
-        Guid OrderId { get; }
-        string Status { get; }
-    }
-
-    class OrderStatusConsumer :
-        IConsumer<GetOrderStatus>
-    {
-        public async Task Consume(ConsumeContext<GetOrderStatus> context)
+        await context.RespondAsync<OrderStatus>(new
         {
-            await context.RespondAsync<OrderStatus>(new 
-                { 
-                    context.Message.OrderId, 
-                    Status = "Pending" 
-                });
-        }
+            context.Message.OrderId,
+            Status = "Pending"
+        });
     }
 }

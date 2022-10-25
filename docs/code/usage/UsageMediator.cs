@@ -1,19 +1,17 @@
-namespace UsageMediator
-{
-    using System;
-    using System.Threading.Tasks;
-    using UsageConsumer;
-    using MassTransit;
-    using MassTransit.Mediator;
+namespace UsageMediator;
 
-    public class Program
+using System.Threading.Tasks;
+using UsageConsumer;
+using MassTransit;
+using MassTransit.Mediator;
+
+public class Program
+{
+    public static async Task Main()
     {
-        public static async Task Main()
+        IMediator mediator = Bus.Factory.CreateMediator(cfg =>
         {
-            IMediator mediator = Bus.Factory.CreateMediator(cfg =>
-            {
-                cfg.Consumer<SubmitOrderConsumer>();
-            });
-        }
+            cfg.Consumer<SubmitOrderConsumer>();
+        });
     }
 }

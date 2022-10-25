@@ -1,7 +1,8 @@
-namespace ConfigureBatchConsoleListener;
-
+using System;
 using System.Threading.Tasks;
 using MassTransit;
+
+namespace ConfigureBatchConsoleListener;
 
 public class Program
 {

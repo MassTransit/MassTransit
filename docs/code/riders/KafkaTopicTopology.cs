@@ -1,41 +1,41 @@
-namespace KafkaTopicTopology
+namespace KafkaTopicTopology;
+
+using System.Threading.Tasks;
+using MassTransit;
+using Microsoft.Extensions.DependencyInjection;
+
+public class Program
 {
-    using System.Threading.Tasks;
-    using MassTransit;
-    using Microsoft.Extensions.DependencyInjection;
-
-    public class Program
+    public static async Task Main()
     {
-        public static async Task Main()
+        var services = new ServiceCollection();
+
+        services.AddMassTransit(x =>
         {
-            var services = new ServiceCollection();
+            x.UsingRabbitMq((context, cfg) => cfg.ConfigureEndpoints(context));
 
-            services.AddMassTransit(x =>
+            x.AddRider(rider =>
             {
-                x.UsingRabbitMq((context, cfg) => cfg.ConfigureEndpoints(context));
-
-                x.AddRider(rider =>
+                rider.UsingKafka((context, k) =>
                 {
-                    rider.UsingKafka((context, k) =>
-                    {
-                        k.Host("localhost:9092");
+                    k.Host("localhost:9092");
 
-                        k.TopicEndpoint<KafkaMessage>("topic-name", "consumer-group-name", e =>
+                    k.TopicEndpoint<KafkaMessage>("topic-name", "consumer-group-name", e =>
+                    {
+                        e.CreateIfMissing(t =>
                         {
-                            e.CreateIfMissing(t =>
-                            {
-                                t.NumPartitions = 2; //number of partitions
-                                t.ReplicationFactor = 1; //number of replicas
-                            });
+                            t.NumPartitions = 2; //number of partitions
+                            t.ReplicationFactor = 1; //number of replicas
                         });
                     });
                 });
             });
-        }
+        });
+    }
 
 
-        public interface KafkaMessage
-        {
-        }
+    public record KafkaMessage
+    {
+        public string Text { get; init; }
     }
 }

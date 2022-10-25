@@ -2,9 +2,7 @@ namespace ServiceBusManagedIdentityConsoleListener;
 
 using System;
 using System.Threading.Tasks;
-using Azure.Identity;
 using MassTransit;
-using MassTransit.AzureServiceBusTransport.Configuration;
 using Microsoft.Extensions.Hosting;
 
 public class Program

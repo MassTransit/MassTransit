@@ -1,46 +1,45 @@
-namespace MicrosoftDeployTopology
+namespace MicrosoftDeployTopology;
+
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using ContainerConsumers;
+using MassTransit;
+using Microsoft.Extensions.DependencyInjection;
+
+public class Program
 {
-    using System;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using ContainerConsumers;
-    using MassTransit;
-    using Microsoft.Extensions.DependencyInjection;
-
-    public class Program
+    public static async Task Main()
     {
-        public static async Task Main()
+        var services = new ServiceCollection();
+
+        services.AddMassTransit(x =>
         {
-            var services = new ServiceCollection();
+            x.AddConsumer<SubmitOrderConsumer>(typeof(SubmitOrderConsumerDefinition));
 
-            services.AddMassTransit(x =>
+            x.SetKebabCaseEndpointNameFormatter();
+
+            x.UsingRabbitMq((context, cfg) =>
             {
-                x.AddConsumer<SubmitOrderConsumer>(typeof(SubmitOrderConsumerDefinition));
+                cfg.DeployTopologyOnly = true;
 
-                x.SetKebabCaseEndpointNameFormatter();
-
-                x.UsingRabbitMq((context, cfg) =>
-                {
-                    cfg.DeployTopologyOnly = true;
-
-                    cfg.ConfigureEndpoints(context);
-                });
+                cfg.ConfigureEndpoints(context);
             });
+        });
 
-            var provider = services.BuildServiceProvider();
+        var provider = services.BuildServiceProvider();
 
-            var busControl = provider.GetRequiredService<IBusControl>();
+        var busControl = provider.GetRequiredService<IBusControl>();
 
-            try
-            {
-                await busControl.DeployAsync(new CancellationTokenSource(TimeSpan.FromMinutes(2)).Token);
+        try
+        {
+            await busControl.DeployAsync(new CancellationTokenSource(TimeSpan.FromMinutes(2)).Token);
 
-                Console.WriteLine("Topology Deployed");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Failed to deploy topology: {0}", ex);
-            }
+            Console.WriteLine("Topology Deployed");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Failed to deploy topology: {0}", ex);
         }
     }
 }

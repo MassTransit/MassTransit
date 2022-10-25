@@ -1,26 +1,23 @@
-namespace MultiBusContainer
+namespace MultiBusContainer;
+
+using ContainerContracts;
+using ContainerConsumers;
+using MassTransit;
+using Microsoft.Extensions.DependencyInjection;
+
+public class Startup
 {
-    using System;
-    using System.Threading.Tasks;
-    using ContainerContracts;
-    using ContainerConsumers;
-    using MassTransit;
-    using Microsoft.Extensions.DependencyInjection;
-
-    public class Startup
+    public void ConfigureServices(IServiceCollection services)
     {
-        public void ConfigureServices(IServiceCollection services)
+        services.AddMassTransit(x =>
         {
-            services.AddMassTransit(x =>
-            {
-                x.AddConsumer<SubmitOrderConsumer>();
-                x.AddRequestClient<SubmitOrder>();
+            x.AddConsumer<SubmitOrderConsumer>();
+            x.AddRequestClient<SubmitOrder>();
 
-                x.UsingRabbitMq((context, cfg) =>
-                {
-                    cfg.ConfigureEndpoints(context);
-                });
+            x.UsingRabbitMq((context, cfg) =>
+            {
+                cfg.ConfigureEndpoints(context);
             });
-        }
+        });
     }
 }

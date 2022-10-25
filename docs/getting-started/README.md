@@ -22,10 +22,10 @@ Next up, the `AddMassTransit` extension is used to configure the bus in the cont
 
 ### Quick note on terminology
 
-A `Message` in MassTransit is just a Plain Old CLR Object or `POCO` for short. In MassTransit these can be a Class, Interface, or a Record. A Record is the currently recommended best practice.
+A _message_ in MassTransit is just a Plain Old CLR Object or `POCO` for short. In MassTransit this can be a _class_, an _interface_, or a _record_. Records are currently recommended when using .NET 5 or greater.
 
-A `Consumer` is a .Net class that implements `IConsumer<T>` and is some what similar to an ASP.Net Controller but with only a single action. These are registered using the `AddConsumer` method on the MassTransit Configuration Builder. The consumer is added as a Scoped Lifetime.
+A _consumer_ is a .NET class that implements `IConsumer<TMessage>` for one or more message types and is similar to an ASP.NET controller . Consumers are registered using the `AddConsumer` method within the `AddMassTransit` service collection extension method. Consumers are added by MassTransit to the underlying service collection as _scoped_.
 
 ## Let's Get Started
 
-If you aren't sure which transport you are going to want to use yet, we'd recommend trying the [in-memory](/quick-starts/in-memory)! It has no dependencies and can easily be upgraded to the others thanks to the MassTransit abstractions.
+If you aren't sure which transport you are going to want to use yet, we'd recommend trying the [in-memory](/quick-starts/in-memory)! It has no dependencies and can easily be upgraded to another transport thanks to MassTransit's abstractions.

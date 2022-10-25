@@ -35,13 +35,13 @@ To create a custom event subscription, use the overload shown below.
 
 ```csharp
 // first, define the event type in your assembly
-public interface OrderProcessingCompleted
+public record OrderProcessingCompleted
 {
-    Guid TrackingNumber { get; }
-    DateTime Timestamp { get; }
+    public Guid TrackingNumber { get; init; }
+    public DateTime Timestamp { get; init; }
 
-    string OrderId { get; }
-    string OrderApproval { get; }
+    public string OrderId { get; init; }
+    public string OrderApproval { get; init; }
 }
 
 // then, add the subscription with the custom properties

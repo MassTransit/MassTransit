@@ -1,22 +1,21 @@
-namespace RedisSagaContainer
+namespace RedisSagaContainer;
+
+using MassTransit;
+using Microsoft.Extensions.DependencyInjection;
+using PersistedSaga;
+
+public class Program
 {
-    using MassTransit;
-    using Microsoft.Extensions.DependencyInjection;
-    using PersistedSaga;
-
-    public class Program
+    public static void Main()
     {
-        public static void Main()
+        var services = new ServiceCollection();
+
+        services.AddMassTransit(x =>
         {
-            var services = new ServiceCollection();
+            const string configurationString = "127.0.0.1";
 
-            services.AddMassTransit(x =>
-            {
-                const string configurationString = "127.0.0.1";
-
-                x.AddSagaStateMachine<OrderStateMachine, OrderState>()
-                    .RedisRepository(configurationString);
-            });
-        }
+            x.AddSagaStateMachine<OrderStateMachine, OrderState>()
+                .RedisRepository(configurationString);
+        });
     }
 }

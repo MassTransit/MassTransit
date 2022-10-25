@@ -59,10 +59,10 @@ The routing key on published/sent messages can be configured by convention, allo
 When configuring a bus, the send topology can be used to specify a routing key formatter for a particular message type.
 
 ```csharp
-public interface SubmitOrder
+public record SubmitOrder
 {
-    string CustomerType { get; }
-    Guid TransactionId { get; }
+    public string CustomerType { get; init; }
+    public Guid TransactionId { get; init; }
     // ...
 }
 
@@ -156,14 +156,14 @@ In this example topology, two commands and events are used.
 First, the event contracts that are supported by an endpoint that receives files from a customer.
 
 ```csharp
-interface FileReceived
+public interface FileReceived
 {
     Guid FileId { get; }
     DateTime Timestamp { get; }
     Uri Location { get; }
 }
 
-interface CustomerDataReceived
+public interface CustomerDataReceived
 {
     DateTime Timestamp { get; }
     string CustomerId { get; }
@@ -175,7 +175,7 @@ interface CustomerDataReceived
 Second, the command contract for processing a file that was received.
 
 ```csharp
-interface ProcessFile
+public interface ProcessFile
 {
     Guid FileId { get; }
     Uri Location { get; }
@@ -185,26 +185,26 @@ interface ProcessFile
 The above contracts are used by the consumers to receive messages. From a publishing or sending perspective, two classes are created by the event producer and the command sender which implement these interfaces.
 
 ```csharp
-class FileReceivedEvent :
+public record FileReceivedEvent :
     FileReceived,
     CustomerDataReceived
 {
-    public Guid FileId { get; set; }
-    public DateTime Timestamp { get; set; }
-    public Uri Location { get; set; }
-    public string CustomerId { get; set; }
-    public string SourceAddress { get; set; }
+    public Guid FileId { get; init; }
+    public DateTime Timestamp { get; init; }
+    public Uri Location { get; init; }
+    public string CustomerId { get; init; }
+    public string SourceAddress { get; init; }
 }
 ```
 
 And the command class.
 
 ```csharp
-class ProcessFileCommand :
+public record ProcessFileCommand :
     ProcessFile
 {
-    public Guid FileId { get; set; }   
-    public Uri Location { get; set; }
+    public Guid FileId { get; init; }   
+    public Uri Location { get; init; }
 }
 ```
 

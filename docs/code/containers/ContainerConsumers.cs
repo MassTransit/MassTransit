@@ -1,52 +1,51 @@
-namespace ContainerConsumers
+namespace ContainerConsumers;
+
+using System.Threading.Tasks;
+using ContainerContracts;
+using MassTransit;
+using Microsoft.Extensions.Logging;
+
+class SubmitOrderConsumer :
+    IConsumer<SubmitOrder>
 {
-    using System.Threading.Tasks;
-    using ContainerContracts;
-    using MassTransit;
-    using Microsoft.Extensions.Logging;
+    readonly ILogger<SubmitOrderConsumer> _logger;
 
-    class SubmitOrderConsumer :
-        IConsumer<SubmitOrder>
+    public SubmitOrderConsumer(ILogger<SubmitOrderConsumer> logger)
     {
-        readonly ILogger<SubmitOrderConsumer> _logger;
-
-        public SubmitOrderConsumer(ILogger<SubmitOrderConsumer> logger)
-        {
-            _logger = logger;
-        }
-
-        public async Task Consume(ConsumeContext<SubmitOrder> context)
-        {
-            _logger.LogInformation("Order Submitted: {OrderId}", context.Message.OrderId);
-
-            await context.Publish<OrderSubmitted>(new
-            {
-                context.Message.OrderId
-            });
-        }
+        _logger = logger;
     }
 
-    class SubmitOrderConsumerDefinition :
-        ConsumerDefinition<SubmitOrderConsumer>
+    public async Task Consume(ConsumeContext<SubmitOrder> context)
     {
-        public SubmitOrderConsumerDefinition()
+        _logger.LogInformation("Order Submitted: {OrderId}", context.Message.OrderId);
+
+        await context.Publish<OrderSubmitted>(new
         {
-            // override the default endpoint name
-            EndpointName = "order-service";
+            context.Message.OrderId
+        });
+    }
+}
 
-            // limit the number of messages consumed concurrently
-            // this applies to the consumer only, not the endpoint
-            ConcurrentMessageLimit = 8;
-        }
+class SubmitOrderConsumerDefinition :
+    ConsumerDefinition<SubmitOrderConsumer>
+{
+    public SubmitOrderConsumerDefinition()
+    {
+        // override the default endpoint name
+        EndpointName = "order-service";
 
-        protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,
-            IConsumerConfigurator<SubmitOrderConsumer> consumerConfigurator)
-        {
-            // configure message retry with millisecond intervals
-            endpointConfigurator.UseMessageRetry(r => r.Intervals(100,200,500,800,1000));
+        // limit the number of messages consumed concurrently
+        // this applies to the consumer only, not the endpoint
+        ConcurrentMessageLimit = 8;
+    }
 
-            // use the outbox to prevent duplicate events from being published
-            endpointConfigurator.UseInMemoryOutbox();
-        }
+    protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,
+        IConsumerConfigurator<SubmitOrderConsumer> consumerConfigurator)
+    {
+        // configure message retry with millisecond intervals
+        endpointConfigurator.UseMessageRetry(r => r.Intervals(100,200,500,800,1000));
+
+        // use the outbox to prevent duplicate events from being published
+        endpointConfigurator.UseInMemoryOutbox();
     }
 }

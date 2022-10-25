@@ -1,29 +1,27 @@
-namespace MicrosoftContainerConfigureConsumer
+namespace MicrosoftContainerConfigureConsumer;
+
+using System.Threading.Tasks;
+using ContainerConsumers;
+using MassTransit;
+using Microsoft.Extensions.DependencyInjection;
+
+public class Program
 {
-    using System;
-    using System.Threading.Tasks;
-    using ContainerConsumers;
-    using MassTransit;
-    using Microsoft.Extensions.DependencyInjection;
-
-    public class Program
+    public static async Task Main()
     {
-        public static async Task Main()
+        var services = new ServiceCollection();
+
+        services.AddMassTransit(x =>
         {
-            var services = new ServiceCollection();
+            x.AddConsumer<SubmitOrderConsumer>(typeof(SubmitOrderConsumerDefinition));
 
-            services.AddMassTransit(x =>
+            x.UsingRabbitMq((context, cfg) =>
             {
-                x.AddConsumer<SubmitOrderConsumer>(typeof(SubmitOrderConsumerDefinition));
-
-                x.UsingRabbitMq((context, cfg) =>
+                cfg.ReceiveEndpoint("order-service", e =>
                 {
-                    cfg.ReceiveEndpoint("order-service", e =>
-                    {
-                        e.ConfigureConsumer<SubmitOrderConsumer>(context);
-                    }); 
+                    e.ConfigureConsumer<SubmitOrderConsumer>(context);
                 });
             });
-        }
+        });
     }
 }
