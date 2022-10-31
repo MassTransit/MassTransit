@@ -25,7 +25,7 @@
         /// Regular expression to distinguish if a destination is not for consuming data from a VirtualTopic. If yes we must get a standard destination because the name of the destination must match specific
         /// pattern. A temporary destination has generated name. 
         /// </summary>
-        /// <seealso cref="https://activemq.apache.org/virtual-destinations"/>
+        /// <seealso href="https://activemq.apache.org/virtual-destinations">Virtual Destinations</seealso>
         readonly Regex _virtualTopicConsumerPattern;
 
         public ActiveMqSessionContext(ConnectionContext connectionContext, ISession session, CancellationToken cancellationToken)

@@ -132,7 +132,7 @@ namespace MassTransit.ActiveMqTransport
                 return;
             }
             var physicalName = GetPhysicalName(context.ResponseAddress);
-            IDestination? responseAddress = sessionContext.GetTemporaryDestination(physicalName);
+            IDestination responseAddress = sessionContext.GetTemporaryDestination(physicalName);
             if (responseAddress == null)
             {
                 if (context.ResponseAddress.SplitQueryString().Any(x => x.Item1 == "temporary"))
