@@ -53,18 +53,19 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
                     await next.Send(repositoryContext).ConfigureAwait(false);
                 }
 
-                Task SendAsync()
-                {
-                    return context.TryGetPayload(out DbTransactionContext _)
-                        ? SendAsyncCallback()
-                        : WithinTransaction(dbContext, context.CancellationToken, SendAsyncCallback);
-                }
-
-                var executionStrategy = dbContext.Database.CreateExecutionStrategy();
-                if (executionStrategy is ExecutionStrategy)
-                    await executionStrategy.ExecuteAsync(() => SendAsync()).ConfigureAwait(false);
+                if (context.TryGetPayload(out DbTransactionContext _))
+                    await SendAsyncCallback().ConfigureAwait(false);
                 else
-                    await SendAsync().ConfigureAwait(false);
+                {
+                    var executionStrategy = dbContext.Database.CreateExecutionStrategy();
+                    if (executionStrategy is ExecutionStrategy)
+                    {
+                        await executionStrategy.ExecuteAsync(() => WithinTransaction(dbContext, context.CancellationToken, SendAsyncCallback))
+                            .ConfigureAwait(false);
+                    }
+                    else
+                        await WithinTransaction(dbContext, context.CancellationToken, SendAsyncCallback).ConfigureAwait(false);
+                }
             }
             finally
             {
