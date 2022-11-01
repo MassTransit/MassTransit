@@ -3,6 +3,7 @@ namespace MassTransit.Configuration
     using System;
     using DependencyInjection;
     using JobService;
+    using Metadata;
     using Middleware;
     using Transports;
 
@@ -64,7 +65,8 @@ namespace MassTransit.Configuration
 
             var options = new OutboxConsumeOptions
             {
-                ConsumerId = JobMetadataCache<T, TMessage>.GenerateJobTypeId(_configurator.InputAddress.GetEndpointName())
+                ConsumerId = JobMetadataCache<T, TMessage>.GenerateJobTypeId(_configurator.InputAddress.GetEndpointName()),
+                ConsumerType = TypeMetadataCache<T>.ShortName
             };
 
             var filter = new OutboxConsumeFilter<TContext, TMessage>(scopeProvider, options);

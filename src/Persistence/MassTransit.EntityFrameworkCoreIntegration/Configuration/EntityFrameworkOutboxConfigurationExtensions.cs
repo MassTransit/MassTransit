@@ -91,11 +91,12 @@ namespace MassTransit
 
             inbox.Property(p => p.MessageId);
             inbox.Property(p => p.ConsumerId);
-            inbox.HasIndex(p => new
+
+            inbox.HasAlternateKey(p => new
             {
                 p.MessageId,
                 p.ConsumerId
-            }).IsUnique();
+            });
 
             inbox.Property(p => p.Received);
             inbox.Property(p => p.ReceiveCount);
@@ -106,7 +107,6 @@ namespace MassTransit
             inbox.HasIndex(p => p.Delivered);
 
             inbox.Property(p => p.LastSequenceNumber);
-
 
             callback?.Invoke(inbox);
         }

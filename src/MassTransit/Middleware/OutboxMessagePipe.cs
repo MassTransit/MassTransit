@@ -3,6 +3,7 @@ namespace MassTransit.Middleware
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Threading.Tasks;
     using DependencyInjection;
     using Logging;
@@ -27,6 +28,8 @@ namespace MassTransit.Middleware
         {
             using var pop = _scopeContext.PushConsumeContext(context);
 
+            var timer = Stopwatch.StartNew();
+
             if (!context.IsMessageConsumed)
             {
                 await _next.Send(context).ConfigureAwait(false);
@@ -48,6 +51,9 @@ namespace MassTransit.Middleware
             await context.RemoveOutboxMessages().ConfigureAwait(false);
 
             LogContext.Debug?.Log("Outbox Completed: {MessageId} ({ReceiveCount})", context.MessageId, context.ReceiveCount);
+
+            if (!context.ReceiveContext.IsDelivered && !context.ReceiveContext.IsDelivered)
+                await context.NotifyConsumed(context, timer.Elapsed, _options.ConsumerType).ConfigureAwait(false);
 
             context.ContinueProcessing = false;
         }

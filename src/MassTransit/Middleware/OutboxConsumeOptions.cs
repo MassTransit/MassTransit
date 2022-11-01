@@ -11,6 +11,11 @@ namespace MassTransit.Middleware
         public Guid ConsumerId { get; set; }
 
         /// <summary>
+        /// The display name of the consumer type
+        /// </summary>
+        public string ConsumerType { get; set; }
+
+        /// <summary>
         /// The number of message to deliver at a time from the outbox
         /// </summary>
         public int MessageDeliveryLimit { get; set; } = 1;
