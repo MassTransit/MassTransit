@@ -1,5 +1,6 @@
 namespace MassTransit.Transports
 {
+    using System.Threading;
     using System.Threading.Tasks;
     using Agents;
     using Middleware;
@@ -19,6 +20,9 @@ namespace MassTransit.Transports
             _consumeSupervisor = new Supervisor();
             _sendSupervisor = new Supervisor();
         }
+
+        public CancellationToken ConsumeStopping => _consumeSupervisor.Stopping;
+        public CancellationToken SendStopping => _sendSupervisor.Stopping;
 
         public void AddSendAgent<TAgent>(TAgent agent)
             where TAgent : IAgent

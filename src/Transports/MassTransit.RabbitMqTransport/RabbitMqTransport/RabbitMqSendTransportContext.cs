@@ -50,7 +50,7 @@ namespace MassTransit.RabbitMqTransport
 
         public Task Send(IPipe<ModelContext> pipe, CancellationToken cancellationToken = default)
         {
-            return _hostConfiguration.Retry(() => _supervisor.Send(pipe, cancellationToken), _supervisor, cancellationToken);
+            return _hostConfiguration.Retry(() => _supervisor.Send(pipe, cancellationToken), cancellationToken, _supervisor.SendStopping);
         }
 
         public void Probe(ProbeContext context)

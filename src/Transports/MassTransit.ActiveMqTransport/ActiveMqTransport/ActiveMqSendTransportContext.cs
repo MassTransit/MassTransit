@@ -37,7 +37,7 @@ namespace MassTransit.ActiveMqTransport
 
         public Task Send(IPipe<SessionContext> pipe, CancellationToken cancellationToken = default)
         {
-            return _hostConfiguration.Retry(() => _supervisor.Send(pipe, cancellationToken), _supervisor, cancellationToken);
+            return _hostConfiguration.Retry(() => _supervisor.Send(pipe, cancellationToken), cancellationToken, _supervisor.SendStopping);
         }
 
         public void Probe(ProbeContext context)

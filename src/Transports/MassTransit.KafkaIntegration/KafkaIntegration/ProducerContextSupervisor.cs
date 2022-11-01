@@ -70,7 +70,7 @@ namespace MassTransit.KafkaIntegration
 
             public Task Send(IPipe<ProducerContext<TKey, TValue>> pipe, CancellationToken cancellationToken)
             {
-                return _hostConfiguration.Retry(() => _supervisor.Send(pipe, cancellationToken), _supervisor, cancellationToken);
+                return _hostConfiguration.Retry(() => _supervisor.Send(pipe, cancellationToken), cancellationToken, _supervisor.SendStopping);
             }
 
             public override string EntityName => TopicAddress.Topic;

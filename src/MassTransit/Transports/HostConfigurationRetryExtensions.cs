@@ -9,12 +9,12 @@ namespace MassTransit.Transports
 
     public static class HostConfigurationRetryExtensions
     {
-        public static async Task Retry(this IHostConfiguration hostConfiguration, Func<Task> factory, ISupervisor supervisor,
-            CancellationToken cancellationToken)
+        public static async Task Retry(this IHostConfiguration hostConfiguration, Func<Task> factory, CancellationToken cancellationToken,
+            CancellationToken stoppingToken)
         {
             var description = hostConfiguration.HostAddress;
 
-            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, supervisor.Stopping);
+            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, stoppingToken);
 
             var stoppingContext = new SupervisorStoppingContext(tokenSource.Token);
 
@@ -31,7 +31,7 @@ namespace MassTransit.Transports
                         if (retryContext?.Delay != null)
                             await Task.Delay(retryContext.Delay.Value, tokenSource.Token).ConfigureAwait(false);
 
-                        if (supervisor.Stopping.IsCancellationRequested)
+                        if (stoppingToken.IsCancellationRequested)
                             throw new ConnectionException($"The transport is stopping and cannot be used: {description}", retryContext?.Exception);
                         if (cancellationToken.IsCancellationRequested)
                             cancellationToken.ThrowIfCancellationRequested();
@@ -39,7 +39,7 @@ namespace MassTransit.Transports
                         await factory().ConfigureAwait(false);
                         return;
                     }
-                    catch (OperationCanceledException exception) when (exception.CancellationToken == supervisor.Stopping)
+                    catch (OperationCanceledException exception) when (exception.CancellationToken == stoppingToken)
                     {
                         throw new ConnectionException($"The transport is stopping and cannot be used: {description}", retryContext?.Exception);
                     }

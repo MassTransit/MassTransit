@@ -35,7 +35,7 @@ namespace MassTransit.AzureServiceBusTransport
 
         public Task Send(IPipe<SendEndpointContext> pipe, CancellationToken cancellationToken = default)
         {
-            return _hostConfiguration.Retry(() => _supervisor.Send(pipe, cancellationToken), _supervisor, cancellationToken);
+            return _hostConfiguration.Retry(() => _supervisor.Send(pipe, cancellationToken), cancellationToken, _supervisor.SendStopping);
         }
 
         public void Probe(ProbeContext context)

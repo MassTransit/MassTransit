@@ -39,7 +39,7 @@ namespace MassTransit.EventHubIntegration
         {
             var supervisor = _producerContextSupervisor.Supervisor;
 
-            return _configuration.Retry(() => supervisor.Send(pipe, cancellationToken), supervisor, cancellationToken);
+            return _configuration.Retry(() => supervisor.Send(pipe, cancellationToken), cancellationToken, supervisor.SendStopping);
         }
 
         public override string EntityName => EndpointAddress.EventHubName;

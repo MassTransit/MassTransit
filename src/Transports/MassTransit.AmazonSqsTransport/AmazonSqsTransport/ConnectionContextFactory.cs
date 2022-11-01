@@ -20,7 +20,7 @@
             _hostConfiguration = hostConfiguration;
         }
 
-        IPipeContextAgent<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateContext(ISupervisor supervisor)
+        public IPipeContextAgent<ConnectionContext> CreateContext(ISupervisor supervisor)
         {
             Task<ConnectionContext> context = Task.Run(() => CreateConnection(supervisor), supervisor.Stopping);
 
@@ -29,7 +29,7 @@
             return contextHandle;
         }
 
-        IActivePipeContextAgent<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateActiveContext(ISupervisor supervisor,
+        public IActivePipeContextAgent<ConnectionContext> CreateActiveContext(ISupervisor supervisor,
             PipeContextHandle<ConnectionContext> context, CancellationToken cancellationToken)
         {
             return supervisor.AddActiveContext(context, CreateSharedConnection(context.Context, cancellationToken));

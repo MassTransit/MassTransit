@@ -1,7 +1,10 @@
 namespace MassTransit.AzureServiceBusTransport
 {
+    using Transports;
+
+
     public interface ISendEndpointContextSupervisor :
-        ISupervisor<SendEndpointContext>
+        ITransportSupervisor<SendEndpointContext>
     {
     }
 }
