@@ -14,51 +14,55 @@ Get started by [reading through the documentation](https://masstransit-project.c
 Build Status
 ------------
 
-Branch | Status
---- | :---:
-master | [![master](https://github.com/MassTransit/MassTransit/actions/workflows/build.yml/badge.svg?branch=master&event=push)](https://github.com/MassTransit/MassTransit/actions/workflows/build.yml)
-develop | [![develop](https://github.com/MassTransit/MassTransit/actions/workflows/build.yml/badge.svg?branch=develop&event=push)](https://github.com/MassTransit/MassTransit/actions/workflows/build.yml)
-documentation | [![documentation](https://github.com/MassTransit/MassTransit/actions/workflows/docs.yml/badge.svg?branch=develop&event=push)](https://github.com/MassTransit/MassTransit/actions/workflows/docs.yml)
+| Branch        |                                                                                                Status                                                                                                |
+|---------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| master        |    [![master](https://github.com/MassTransit/MassTransit/actions/workflows/build.yml/badge.svg?branch=master&event=push)](https://github.com/MassTransit/MassTransit/actions/workflows/build.yml)    |
+| develop       |   [![develop](https://github.com/MassTransit/MassTransit/actions/workflows/build.yml/badge.svg?branch=develop&event=push)](https://github.com/MassTransit/MassTransit/actions/workflows/build.yml)   |
+| documentation | [![documentation](https://github.com/MassTransit/MassTransit/actions/workflows/docs.yml/badge.svg?branch=develop&event=push)](https://github.com/MassTransit/MassTransit/actions/workflows/docs.yml) |
 
 MassTransit NuGet Packages
 ---------------------------
 
-| Package Name | .NET Standard | .NET Core App |
-| ------------ | :-----------: | :----------: |
-| **Main** |
-| [MassTransit][MassTransit.nuget] | 2.0 |
-| [MassTransit.Abstractions][MassTransitAbstractions.nuget] | 2.0 |
-| **Other** |
-| [MassTransit.Analyzers][Analyzers.nuget] | 2.0 |
-| [MassTransit.Templates][Templates.nuget] | 5.0 |
-| [MassTransit.SignalR][SignalR.nuget] | 2.0 |
-| [MassTransit.TestFramework][TestFramework.nuget] | 2.0 |
-| **Monitoring** |
-| [MassTransit.Prometheus][Prometheus.nuget] | 2.0 |
-| **Persistence** |
-| [MassTransit.Azure.Cosmos][Cosmos.nuget] | 2.0 |
-| [MassTransit.Azure.Storage][AzureStorage.nuget] | 2.0 |
-| [MassTransit.Dapper][Dapper.nuget] | 2.0 |
-| [MassTransit.EntityFrameworkCore][EFCore.nuget] | 2.0 or 6.0 |
-| [MassTransit.EntityFramework][EF.nuget] | 2.1 |
-| [MassTransit.Marten][Marten.nuget] | 2.0 |
-| [MassTransit.MongoDb][MongoDb.nuget] | 2.0 |
-| [MassTransit.NHibernate][NHibernate.nuget] | 2.0 |
-| [MassTransit.Redis][Redis.nuget] | 2.0 |
-| **Scheduling** |
-| [MassTransit.Hangfire][Hangfire.nuget] | 2.0 |
-| [MassTransit.Quartz][Quartz.nuget] | 2.0 |
-| **Transports** |
-| [MassTransit.ActiveMQ][ActiveMQ.nuget] | 2.0 |
-| [MassTransit.AmazonSQS][AmazonSQS.nuget] | 2.0 |
-| [MassTransit.Azure.ServiceBus.Core][AzureSbCore.nuget] | 2.0 |
-| [MassTransit.Grpc][Grpc.nuget] | 2.0 |
-| [MassTransit.RabbitMQ][RabbitMQ.nuget] | 2.0 |
-| [MassTransit.WebJobs.EventHubs][EventHubs.nuget] | 2.0 |
-| [MassTransit.WebJobs.ServiceBus][AzureFunc.nuget] | 2.0 |
-| **Riders** |
-| [MassTransit.Kafka][Kafka.nuget] | 2.0 |
-| [MassTransit.EventHub][EventHub.nuget] | 2.0 |
+| Package Name                                                    | .NET | .NET Standard | .NET Framework |
+|-----------------------------------------------------------------|:----:|:-------------:|:--------------:|
+| **Main**                                                        |      |               |                |
+| [MassTransit][MassTransit.nuget]                                | 6.0  |   2.0, 2.1    |     4.6.1      |
+| [MassTransit.Abstractions][MassTransitAbstractions.nuget]       | 6.0  |   2.0, 2.1    |     4.6.1      |
+| [MassTransit.Newtonsoft][MassTransitNewtonsoft.nuget]           | 6.0  |      2.0      |     4.6.1      |
+| **Other**                                                       |      |               |                |
+| [MassTransit.Analyzers][Analyzers.nuget]                        |      |      2.0      |                |
+| [MassTransit.Templates][Templates.nuget]                        | 5.0  |               |                |
+| [MassTransit.SignalR][SignalR.nuget]                            | 6.0  |               |     4.6.1      |
+| [MassTransit.Interop.NServiceBus][MassTransitNServiceBus.nuget] | 6.0  |      2.0      |     4.6.1      |
+| [MassTransit.TestFramework][TestFramework.nuget]                | 6.0  |   2.0, 2.1    |     4.6.1      |
+| **Monitoring**                                                  |      |               |                |
+| [MassTransit.Prometheus][Prometheus.nuget]                      | 6.0  |      2.0      |     4.6.2      |
+| **Persistence**                                                 |      |               |                |
+| [MassTransit.Azure.Cosmos][Cosmos.nuget]                        | 6.0  |   2.0, 2.1    |     4.6.1      |
+| [MassTransit.Azure.Storage][AzureStorage.nuget]                 | 6.0  |   2.0, 2.1    |     4.6.1      |
+| [MassTransit.Azure.Table][AzureTable.nuget]                     | 6.0  |   2.0, 2.1    |     4.6.1      |
+| [MassTransit.Dapper][Dapper.nuget]                              | 6.0  |   2.0, 2.1    |     4.6.1      |
+| [MassTransit.DynamoDb][DynamoDb.nuget]                          | 6.0  |      2.0      |     4.6.1      |
+| [MassTransit.EntityFrameworkCore][EFCore.nuget]                 | 6.0  |      2.0      |                |
+| [MassTransit.EntityFramework][EF.nuget]                         |      |      2.1      |     4.6.1      |     
+| [MassTransit.Marten][Marten.nuget]                              | 6.0  |   2.0, 2.1    |     4.6.1      |
+| [MassTransit.MongoDb][MongoDb.nuget]                            | 6.0  |   2.0, 2.1    |     4.6.1      |
+| [MassTransit.NHibernate][NHibernate.nuget]                      | 6.0  |   2.0, 2.1    |     4.6.1      |
+| [MassTransit.Redis][Redis.nuget]                                | 6.0  |   2.0, 2.1    |     4.6.1      |
+| **Scheduling**                                                  |      |               |                |
+| [MassTransit.Hangfire][Hangfire.nuget]                          | 6.0  |   2.0, 2.1    |     4.6.1      |
+| [MassTransit.Quartz][Quartz.nuget]                              | 6.0  |   2.0, 2.1    |     4.6.1      |
+| **Transports**                                                  |      |               |                |
+| [MassTransit.ActiveMQ][ActiveMQ.nuget]                          | 6.0  |   2.0, 2.1    |     4.6.1      |
+| [MassTransit.AmazonSQS][AmazonSQS.nuget]                        | 6.0  |      2.0      |     4.6.1      |
+| [MassTransit.Azure.ServiceBus.Core][AzureSbCore.nuget]          | 6.0  |   2.0, 2.1    |     4.6.1      |
+| [MassTransit.Grpc][Grpc.nuget]                                  | 6.0  |   2.0, 2.1    |     4.6.1      |
+| [MassTransit.RabbitMQ][RabbitMQ.nuget]                          | 6.0  |   2.0, 2.1    |     4.6.1      |
+| [MassTransit.WebJobs.EventHubs][EventHubs.nuget]                | 6.0  |   2.0, 2.1    |     4.6.1      |
+| [MassTransit.WebJobs.ServiceBus][AzureFunc.nuget]               | 6.0  |   2.0, 2.1    |     4.6.1      |
+| **Riders**                                                      |      |               |                |
+| [MassTransit.Kafka][Kafka.nuget]                                | 6.0  |   2.0, 2.1    |     4.6.1      |
+| [MassTransit.EventHub][EventHub.nuget]                          | 6.0  |   2.0, 2.1    |     4.6.1      |
 
 ## Discord 
 
@@ -80,11 +84,11 @@ enhancements and calls for help from people who forget to check back if they get
 ## Building from Source
 
  1. Install the latest [.NET 6 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
- 1. Clone the source down to your machine<br/>
+ 2. Clone the source down to your machine<br/>
     ```bash
     git clone git://github.com/MassTransit/MassTransit.git
     ```
- 1. Run `dotnet build`
+ 3. Run `dotnet build`
 
 ## Contributing
 
@@ -92,8 +96,8 @@ enhancements and calls for help from people who forget to check back if they get
     ```bash
     git config core.autocrlf false
     ```
- 1. Hack!
- 1. Make a pull request
+ 2. Hack!
+ 3. Make a pull request
  
 # REQUIREMENTS
 * .NET 6 SDK
@@ -103,6 +107,8 @@ Logo Design by _The Agile Badger_
 
 [MassTransit.nuget]: https://www.nuget.org/packages/MassTransit
 [MassTransitAbstractions.nuget]: https://www.nuget.org/packages/MassTransit.Abstractions
+[MassTransitNewtonsoft.nuget]: https://www.nuget.org/packages/MassTransit.Newtonsoft
+[MassTransitNServiceBus.nuget]: https://www.nuget.org/packages/MassTransit.Interop.NServiceBus
 [Analyzers.nuget]: https://www.nuget.org/packages/MassTransit.Analyzers
 [Templates.nuget]: https://www.nuget.org/packages/MassTransit.Templates
 [SignalR.nuget]: https://www.nuget.org/packages/MassTransit.SignalR
@@ -112,7 +118,9 @@ Logo Design by _The Agile Badger_
 
 [Cosmos.nuget]: https://www.nuget.org/packages/MassTransit.Azure.Cosmos
 [AzureStorage.nuget]: https://www.nuget.org/packages/MassTransit.Azure.Storage
+[AzureTable.nuget]: https://www.nuget.org/packages/MassTransit.Azure.Table
 [Dapper.nuget]: https://www.nuget.org/packages/MassTransit.DapperIntegration
+[DynamoDb.nuget]: https://www.nuget.org/packages/MassTransit.DynamoDb
 [EFCore.nuget]: https://www.nuget.org/packages/MassTransit.EntityFrameworkCore
 [EF.nuget]: https://www.nuget.org/packages/MassTransit.EntityFramework
 [Marten.nuget]: https://www.nuget.org/packages/MassTransit.Marten
