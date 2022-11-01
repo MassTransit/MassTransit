@@ -22,6 +22,16 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         public Guid ConsumerId { get; set; }
 
         /// <summary>
+        /// Lock token to ensure row is locked within the transaction
+        /// </summary>
+        public Guid LockId { get; set; }
+
+        /// <summary>
+        /// EF RowVersion
+        /// </summary>
+        public byte[]? RowVersion { get; set; }
+
+        /// <summary>
         /// When the message was first received
         /// </summary>
         public DateTime Received { get; set; }

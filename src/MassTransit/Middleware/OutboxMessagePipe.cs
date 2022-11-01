@@ -4,6 +4,7 @@ namespace MassTransit.Middleware
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Threading;
     using System.Threading.Tasks;
     using DependencyInjection;
     using Logging;
@@ -86,6 +87,9 @@ namespace MassTransit.Middleware
                 }
                 else
                 {
+                    using var sendToken = new CancellationTokenSource(_options.MessageDeliveryTimeout);
+                    using var token = CancellationTokenSource.CreateLinkedTokenSource(context.CancellationToken, sendToken.Token);
+
                     var pipe = new OutboxMessageSendPipe(message, message.DestinationAddress);
 
                     var endpoint = await context.CapturedContext.GetSendEndpoint(message.DestinationAddress).ConfigureAwait(false);
@@ -97,7 +101,7 @@ namespace MassTransit.Middleware
                     StartedActivity? activity = LogContext.Current?.StartOutboxDeliverActivity(message);
                     try
                     {
-                        await endpoint.Send(new Outbox(), pipe, context.CancellationToken).ConfigureAwait(false);
+                        await endpoint.Send(new Outbox(), pipe, token.Token).ConfigureAwait(false);
                     }
                     catch (Exception exception)
                     {

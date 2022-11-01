@@ -98,6 +98,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
                 async Task<int> Execute()
                 {
+                    var lockId = NewId.NextGuid();
+
                     using var timeoutToken = new CancellationTokenSource(_options.QueryTimeout);
 
                     await using var transaction = await dbContext.Database.BeginTransactionAsync(_isolationLevel, timeoutToken.Token)
@@ -112,9 +114,14 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                         if (outboxState == null)
                             return -1;
 
+                        outboxState.LockId = lockId;
+
+                        dbContext.Update(outboxState);
+                        await dbContext.SaveChangesAsync(timeoutToken.Token).ConfigureAwait(false);
+
                         int continueProcessing;
 
-                        if (outboxState.Delivered != null)
+                        if (outboxState.Delivered.HasValue)
                         {
                             await RemoveOutbox(dbContext, outboxState, cancellationToken).ConfigureAwait(false);
 

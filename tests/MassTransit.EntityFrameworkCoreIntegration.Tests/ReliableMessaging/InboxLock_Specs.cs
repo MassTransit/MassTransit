@@ -1,6 +1,7 @@
 namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Logging;
     using MassTransit.Tests.ReliableMessaging;
@@ -40,6 +41,13 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
             var count = await harness.Consumed.SelectAsync<Event>().Count();
 
             Assert.That(count, Is.EqualTo(100));
+
+            var sentCount = await harness.Sent.SelectAsync(x => true).Count();
+            Assert.That(sentCount, Is.EqualTo(100));
+
+            var events = provider.GetRequiredService<IList<Event>>();
+
+            Assert.That(events.Count, Is.EqualTo(100));
         }
     }
 
@@ -53,18 +61,21 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
                 {
                     ReliableDbContextFactory.Apply(builder);
                 })
+                .AddSingleton<IList<Event>, List<Event>>()
                 .AddHostedService<MigrationHostedService<ReliableDbContext>>()
                 .AddMassTransitTestHarness(x =>
                 {
                     x.AddEntityFrameworkOutbox<ReliableDbContext>();
 
-                    x.AddHandler(async (Event message) =>
+                    x.AddHandler(async (Event message, IList<Event> events) =>
                     {
+                        lock (events)
+                            events.Add(message);
                     });
                     x.AddConsumer<InboxLockConsumer, InboxLockEntityFrameworkConsumerDefinition>();
                 });
 
-            services.AddOptions<TextWriterLoggerOptions>().Configure(options => options.Disable("Microsoft"));
+           services.AddOptions<TextWriterLoggerOptions>().Configure(options => options.Disable("Microsoft"));
 
             return services;
         }

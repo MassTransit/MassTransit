@@ -83,7 +83,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             _inboxState.LastSequenceNumber = message.SequenceNumber;
             _dbContext.Update(_inboxState);
 
-            return _dbContext.SaveChangesAsync(CancellationToken);
+            return Task.CompletedTask;
         }
 
         public override async Task RemoveOutboxMessages()

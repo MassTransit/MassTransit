@@ -28,7 +28,9 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="provider">Configuration service provider</param>
-        public static void UseMongoDbOutbox(this IReceiveEndpointConfigurator configurator, IServiceProvider provider)
+        /// <param name="configure"></param>
+        public static void UseMongoDbOutbox(this IReceiveEndpointConfigurator configurator, IServiceProvider provider,
+            Action<IOutboxOptionsConfigurator>? configure = null)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
@@ -36,6 +38,8 @@ namespace MassTransit
                 throw new ArgumentNullException(nameof(provider));
 
             var observer = new OutboxConsumePipeSpecificationObserver<MongoDbContext>(configurator, provider);
+
+            configure?.Invoke(observer);
 
             configurator.ConnectConsumerConfigurationObserver(observer);
             configurator.ConnectSagaConfigurationObserver(observer);

@@ -37,7 +37,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
 
         public async Task StopAsync(CancellationToken cancellationToken)
         {
-            await _context.Database.EnsureDeletedAsync(CancellationToken.None);
         }
     }
 }

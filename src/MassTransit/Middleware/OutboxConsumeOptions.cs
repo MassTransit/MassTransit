@@ -18,6 +18,11 @@ namespace MassTransit.Middleware
         /// <summary>
         /// The number of message to deliver at a time from the outbox
         /// </summary>
-        public int MessageDeliveryLimit { get; set; } = 1;
+        public int MessageDeliveryLimit { get; set; }
+
+        /// <summary>
+        /// The time to wait when delivering a message to the broker
+        /// </summary>
+        public TimeSpan MessageDeliveryTimeout { get; set; }
     }
 }

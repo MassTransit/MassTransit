@@ -29,14 +29,14 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         public async Task Send<T>(ConsumeContext<T> context, OutboxConsumeOptions options, IPipe<OutboxConsumeContext<T>> next)
             where T : class
         {
-            var updateReceiveCount = true;
-
             var messageId = context.GetOriginalMessageId() ?? throw new MessageException(typeof(T), "MessageId required to use the outbox");
 
             _lockStatement ??= _lockStatementProvider.GetRowLockStatement<InboxState>(_dbContext, nameof(InboxState.MessageId), nameof(InboxState.ConsumerId));
 
             async Task<bool> Execute()
             {
+                var lockId = NewId.NextGuid();
+
                 await using var transaction = await _dbContext.Database.BeginTransactionAsync(_isolationLevel, context.CancellationToken)
                     .ConfigureAwait(false);
 
@@ -55,6 +55,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                             MessageId = messageId,
                             ConsumerId = options.ConsumerId,
                             Received = DateTime.UtcNow,
+                            LockId = lockId,
                             ReceiveCount = 0
                         };
 
@@ -65,17 +66,17 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                     }
                     else
                     {
-                        if (updateReceiveCount)
-                        {
-                            inboxState.ReceiveCount++;
-                            _dbContext.Update(inboxState);
-                        }
+                        inboxState.LockId = lockId;
+                        inboxState.ReceiveCount++;
 
-                        updateReceiveCount = false;
+                        _dbContext.Update(inboxState);
+                        await _dbContext.SaveChangesAsync().ConfigureAwait(false);
 
                         var outboxContext = new DbContextOutboxConsumeContext<TDbContext, T>(context, options, _dbContext, transaction, inboxState);
 
                         await next.Send(outboxContext).ConfigureAwait(false);
+
+                        await _dbContext.SaveChangesAsync().ConfigureAwait(false);
 
                         continueProcessing = outboxContext.ContinueProcessing;
                     }

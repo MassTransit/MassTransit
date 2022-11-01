@@ -16,6 +16,16 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         public Guid OutboxId { get; set; }
 
         /// <summary>
+        /// Lock token to ensure row is locked within the transaction
+        /// </summary>
+        public Guid LockId { get; set; }
+
+        /// <summary>
+        /// EF RowVersion
+        /// </summary>
+        public byte[]? RowVersion { get; set; }
+
+        /// <summary>
         /// The point at which the outbox was created
         /// </summary>
         public DateTime Created { get; set; }

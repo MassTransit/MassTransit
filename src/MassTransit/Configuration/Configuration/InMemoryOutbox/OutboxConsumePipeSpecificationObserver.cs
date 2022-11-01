@@ -10,7 +10,8 @@ namespace MassTransit.Configuration
 
     public class OutboxConsumePipeSpecificationObserver<TContext> :
         IConsumerConfigurationObserver,
-        ISagaConfigurationObserver
+        ISagaConfigurationObserver,
+        IOutboxOptionsConfigurator
         where TContext : class
     {
         readonly IReceiveEndpointConfigurator _configurator;
@@ -20,6 +21,9 @@ namespace MassTransit.Configuration
         {
             _configurator = configurator;
             _provider = provider;
+
+            MessageDeliveryLimit = 1;
+            MessageDeliveryTimeout = TimeSpan.FromSeconds(30);
         }
 
         public void ConsumerConfigured<TConsumer>(IConsumerConfigurator<TConsumer> configurator)
@@ -36,6 +40,9 @@ namespace MassTransit.Configuration
 
             AddScopedFilter<TConsumer, TMessage>(messageConfigurator);
         }
+
+        public int MessageDeliveryLimit { get; set; } = 1;
+        public TimeSpan MessageDeliveryTimeout { get; set; } = TimeSpan.FromSeconds(10);
 
         public void SagaConfigured<TSaga>(ISagaConfigurator<TSaga> configurator)
             where TSaga : class, ISaga
@@ -66,7 +73,9 @@ namespace MassTransit.Configuration
             var options = new OutboxConsumeOptions
             {
                 ConsumerId = JobMetadataCache<T, TMessage>.GenerateJobTypeId(_configurator.InputAddress.GetEndpointName()),
-                ConsumerType = TypeMetadataCache<T>.ShortName
+                ConsumerType = TypeMetadataCache<T>.ShortName,
+                MessageDeliveryLimit = MessageDeliveryLimit,
+                MessageDeliveryTimeout = MessageDeliveryTimeout
             };
 
             var filter = new OutboxConsumeFilter<TContext, TMessage>(scopeProvider, options);

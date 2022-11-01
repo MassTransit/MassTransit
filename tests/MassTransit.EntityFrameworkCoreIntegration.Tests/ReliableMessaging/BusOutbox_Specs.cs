@@ -101,6 +101,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
                 .BuildServiceProvider(true);
 
             var harness = provider.GetTestHarness();
+            harness.TestInactivityTimeout = TimeSpan.FromSeconds(10);
 
             await harness.Start();
 

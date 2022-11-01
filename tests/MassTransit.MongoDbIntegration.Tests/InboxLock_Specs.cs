@@ -1,6 +1,7 @@
 namespace MassTransit.MongoDbIntegration.Tests
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using InboxLock;
     using Logging;
@@ -40,6 +41,13 @@ namespace MassTransit.MongoDbIntegration.Tests
             var count = await harness.Consumed.SelectAsync<Event>().Count();
 
             Assert.That(count, Is.EqualTo(100));
+
+            var sentCount = await harness.Sent.SelectAsync(x => true).Count();
+            Assert.That(sentCount, Is.EqualTo(100));
+
+            var events = provider.GetRequiredService<IList<Event>>();
+
+            Assert.That(events.Count, Is.EqualTo(100));
         }
     }
 
@@ -101,6 +109,7 @@ namespace MassTransit.MongoDbIntegration.Tests
         public static IServiceCollection AddEntityFrameworkInMemoryTestHarness(this IServiceCollection services)
         {
             services
+                .AddSingleton<IList<Event>, List<Event>>()
                 .AddMassTransitTestHarness(x =>
                 {
                     x.AddMongoDbOutbox(r =>
@@ -109,8 +118,10 @@ namespace MassTransit.MongoDbIntegration.Tests
                         r.DatabaseName = "sagaTest";
                     });
 
-                    x.AddHandler(async (Event message) =>
+                    x.AddHandler(async (Event message, IList<Event> events) =>
                     {
+                        lock (events)
+                            events.Add(message);
                     });
                     x.AddConsumer<InboxLockConsumer, InboxLockEntityFrameworkConsumerDefinition>();
                 });

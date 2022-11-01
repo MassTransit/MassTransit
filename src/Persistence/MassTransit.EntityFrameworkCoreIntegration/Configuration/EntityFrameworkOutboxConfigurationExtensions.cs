@@ -32,7 +32,9 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="provider">Configuration service provider</param>
-        public static void UseEntityFrameworkOutbox<TDbContext>(this IReceiveEndpointConfigurator configurator, IServiceProvider provider)
+        /// <param name="configure"></param>
+        public static void UseEntityFrameworkOutbox<TDbContext>(this IReceiveEndpointConfigurator configurator, IServiceProvider provider,
+            Action<IOutboxOptionsConfigurator>? configure = null)
             where TDbContext : DbContext
         {
             if (configurator == null)
@@ -41,6 +43,8 @@ namespace MassTransit
                 throw new ArgumentNullException(nameof(provider));
 
             var observer = new OutboxConsumePipeSpecificationObserver<TDbContext>(configurator, provider);
+
+            configure?.Invoke(observer);
 
             configurator.ConnectConsumerConfigurationObserver(observer);
             configurator.ConnectSagaConfigurationObserver(observer);
@@ -98,6 +102,10 @@ namespace MassTransit
                 p.ConsumerId
             });
 
+            inbox.Property(p => p.LockId);
+
+            inbox.Property(p => p.RowVersion).IsRowVersion();
+
             inbox.Property(p => p.Received);
             inbox.Property(p => p.ReceiveCount);
             inbox.Property(p => p.ExpirationTime);
@@ -117,6 +125,10 @@ namespace MassTransit
 
             outbox.Property(p => p.OutboxId);
             outbox.HasKey(p => p.OutboxId);
+
+            outbox.Property(p => p.LockId);
+
+            outbox.Property(p => p.RowVersion).IsRowVersion();
 
             outbox.Property(p => p.Created);
             outbox.HasIndex(p => p.Created);
