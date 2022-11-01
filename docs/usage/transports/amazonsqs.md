@@ -57,8 +57,11 @@ Because there is only ever one "SQS/SNS" per AWS account it can be helpful to "S
                 "sqs:SendMessage",
                 "sqs:GetQueueUrl",
                 "sqs:GetQueueAttributes",
-                "sqs:ChangeMessageVisibility"
-                ],
+                "sqs:ChangeMessageVisibility",
+                "sqs:PurgeQueue",
+                "sqs:DeleteQueue",
+                "sqs:TagQueue"
+            ],
             "Resource": "arn:aws:sqs:*:YOUR_ACCOUNT_ID:*"
         },{
             "Sid": "SnsAccess",

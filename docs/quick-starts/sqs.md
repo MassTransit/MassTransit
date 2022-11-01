@@ -50,7 +50,10 @@ This example requires the following:
                 "sqs:SendMessage",
                 "sqs:GetQueueUrl",
                 "sqs:GetQueueAttributes",
-                "sqs:ChangeMessageVisibility"
+                "sqs:ChangeMessageVisibility",
+                "sqs:PurgeQueue",
+                "sqs:DeleteQueue",
+                "sqs:TagQueue"
             ],
             "Resource": "arn:aws:sqs:*:YOUR_ACCOUNT_ID:*"
         },{
