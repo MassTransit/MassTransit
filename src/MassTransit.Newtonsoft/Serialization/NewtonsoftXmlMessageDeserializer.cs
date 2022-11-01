@@ -51,7 +51,7 @@ namespace MassTransit.Serialization
 
                 XNamespace ns = "http://www.w3.org/2001/XMLSchema-instance";
                 document.Descendants()
-                    .Where(node => (string)node.Attribute(ns + "nil") == "true")
+                    .Where(node => (string)node.Attribute(ns + "nil")! == "true")
                     .Remove();
 
                 var json = new StringBuilder(1024);
