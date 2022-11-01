@@ -10,6 +10,7 @@ namespace MassTransit.MongoDbIntegration.Tests
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class When_multiple_deliveries_of_the_same_message_occur
     {
         [Test]
