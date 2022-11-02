@@ -37,7 +37,9 @@ namespace MassTransit.Middleware
                     return _finalPipe.Send(context);
             }
 
-            MessageRedeliveryContext redeliveryContext = new ScheduleMessageRedeliveryContext<TMessage>(context, _options);
+            var redeliveryContext = _options.HasFlag(RedeliveryOptions.UseMessageScheduler)
+                ? (MessageRedeliveryContext)new ScheduleMessageRedeliveryContext<TMessage>(context, _options)
+                : new DelayedMessageRedeliveryContext<TMessage>(context, _options);
 
             var delay = retryContext.Delay ?? TimeSpan.Zero;
 

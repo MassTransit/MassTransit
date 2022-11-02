@@ -40,6 +40,7 @@ namespace MassTransit.Configuration
         }
 
         public bool ReplaceMessageId { get; set; } = true;
+        public bool UseMessageScheduler { get; set; } = true;
 
         public IEnumerable<ValidationResult> Validate()
         {
@@ -52,6 +53,8 @@ namespace MassTransit.Configuration
             var retryPolicy = _policyFactory(Filter);
 
             var options = ReplaceMessageId ? RedeliveryOptions.ReplaceMessageId : RedeliveryOptions.None;
+            if (UseMessageScheduler)
+                options |= RedeliveryOptions.UseMessageScheduler;
 
             return new MissingInstanceRedeliveryPipe<TSaga, TMessage>(retryPolicy, _finalPipe, options);
         }

@@ -15,6 +15,11 @@ namespace MassTransit
         /// Generate a new MessageId for the redelivered message (typically to avoid
         /// broker deduplication logic)
         /// </summary>
-        ReplaceMessageId = 1
+        ReplaceMessageId = 1,
+
+        /// <summary>
+        /// If specified, use the message scheduler context instead of the redelivery context (only use when transport-level redelivery is not available)
+        /// </summary>
+        UseMessageScheduler = 2,
     }
 }

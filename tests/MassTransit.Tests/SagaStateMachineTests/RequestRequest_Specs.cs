@@ -50,6 +50,13 @@ namespace MassTransit.Tests.SagaStateMachineTests
         {
             base.ConfigureInMemoryBus(configurator);
 
+            RequestStateMachine.RedeliverOnMissingInstance(x =>
+            {
+                x.UseMessageScheduler = false;
+
+                x.Interval(10, 200);
+            });
+
             _machine = new RequestStateMachine();
 
             configurator.ReceiveEndpoint("request-state", endpoint =>

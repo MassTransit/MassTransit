@@ -1,5 +1,7 @@
 namespace MassTransit.Components
 {
+    using System;
+    using Configuration;
     using Contracts;
     using SagaStateMachine;
 
@@ -18,17 +20,22 @@ namespace MassTransit.Components
             Event(() => Started, x =>
             {
                 x.CorrelateById(m => m.Message.RequestId);
-                x.SelectId(m => m.Message.RequestId);
             });
 
             Event(() => Completed, x =>
             {
                 x.CorrelateById(m => m.SagaCorrelationId, i => i.Message.CorrelationId);
+
+                if (_missingInstanceConfigurator != null)
+                    x.OnMissingInstance(m => _missingInstanceConfigurator.Apply(m));
             });
 
             Event(() => Faulted, x =>
             {
                 x.CorrelateById(m => m.SagaCorrelationId, i => i.Message.CorrelationId);
+
+                if (_missingInstanceConfigurator != null)
+                    x.OnMissingInstance(m => _missingInstanceConfigurator.Apply(m));
             });
 
             Initially(
@@ -65,6 +72,20 @@ namespace MassTransit.Components
 
             context.Saga.SagaCorrelationId = context.Message.CorrelationId;
             context.Saga.SagaAddress = context.SourceAddress;
+        }
+
+        static IRequestStateMachineMissingInstanceConfigurator _missingInstanceConfigurator;
+
+        /// <summary>
+        /// Configure the state machine to redeliver <see cref="RequestCompleted" /> and <see cref="RequestFaulted" /> events
+        /// in the scenario where they arrive prior to the <see cref="RequestStarted" /> event.
+        /// </summary>
+        /// <param name="configure">A redelivery configuration callback</param>
+        public static void RedeliverOnMissingInstance(Action<IMissingInstanceRedeliveryConfigurator> configure)
+        {
+            var configurator = new RedeliverRequestStateMachineSpecification(configure);
+
+            _missingInstanceConfigurator = configurator;
         }
     }
 }
