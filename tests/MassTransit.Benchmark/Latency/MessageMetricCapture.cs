@@ -47,7 +47,7 @@ namespace MassTransitBenchmark.Latency
             return TaskUtil.Completed;
         }
 
-        public async Task Sent(Guid messageId, Task sendTask)
+        public async Task Sent(Guid messageId, Task sendTask, bool postSend = false)
         {
             long sendTimestamp = _stopwatch.ElapsedTicks;
 
@@ -56,6 +56,13 @@ namespace MassTransitBenchmark.Latency
             long ackTimestamp = _stopwatch.ElapsedTicks;
 
             _sentMessages.TryAdd(messageId, new SentMessage(sendTimestamp, ackTimestamp));
+
+            if (postSend)
+                return;
+
+            long sent = Interlocked.Increment(ref _sent);
+            if (sent == _messageCount)
+                _sendCompleted.TrySetResult(_stopwatch.Elapsed);
         }
 
         public async Task PostSend(Guid messageId)

@@ -1,7 +1,6 @@
 ﻿namespace MassTransitBenchmark.BusOutbox
 {
     using System;
-    using System.Data;
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
@@ -10,7 +9,6 @@
     using Latency;
     using MassTransit;
     using MassTransit.Logging;
-    using MassTransit.Testing;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -50,7 +48,7 @@
                 .AddTextLogger(Console.Out)
                 .AddHostedService<MigrationHostedService<BusOutboxDbContext>>()
                 .AddSingleton<IReportConsumerMetric>(_capture)
-                .AddSingleton<ISendObserver,MetricSendObserver>()
+                .AddSingleton<ISendObserver, MetricSendObserver>()
                 .AddMassTransit(x =>
                 {
                     x.AddConsumer<BusOutboxMessageConsumer>();
@@ -201,7 +199,7 @@
                 var sendEndpoint = await scope.ServiceProvider.GetService<ISendEndpointProvider>().GetSendEndpoint(address);
                 var task = sendEndpoint.Send(new BusOutboxMessage(messageId, _payload), x => x.MessageId = messageId);
 
-                await _capture.Sent(messageId, task).ConfigureAwait(false);
+                await _capture.Sent(messageId, task, true).ConfigureAwait(false);
 
                 await dbContext.SaveChangesAsync();
             }

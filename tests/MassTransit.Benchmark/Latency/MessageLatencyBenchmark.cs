@@ -127,11 +127,15 @@
 
             var stripes = new Task[_settings.Clients];
 
+            var messageCount = _settings.MessageCount / _settings.Clients;
+            if(messageCount > int.MaxValue)
+                throw new IndexOutOfRangeException("Too many messages");
+
             for (var i = 0; i < _settings.Clients; i++)
             {
                 ISendEndpoint targetEndpoint = await _transport.TargetEndpoint;
 
-                stripes[i] = RunStripe(targetEndpoint, _settings.MessageCount / _settings.Clients);
+                stripes[i] = RunStripe(targetEndpoint, (int)messageCount);
             }
 
             await Task.WhenAll(stripes).ConfigureAwait(false);
@@ -141,13 +145,15 @@
             _consumeDuration = await _capture.ConsumeCompleted.ConfigureAwait(false);
         }
 
-        async Task RunStripe(ISendEndpoint targetEndpoint, long messageCount)
+        async Task RunStripe(ISendEndpoint targetEndpoint, int messageCount)
         {
             await Task.Yield();
 
+            NewId[] ids = NewId.Next(messageCount);
+
             for (long i = 0; i < messageCount; i++)
             {
-                Guid messageId = NewId.NextGuid();
+                Guid messageId = ids[i].ToGuid();
                 Task task = targetEndpoint.Send(new LatencyTestMessage(messageId, _payload));
 
                 await _capture.Sent(messageId, task).ConfigureAwait(false);

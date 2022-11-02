@@ -9,7 +9,7 @@ namespace MassTransitBenchmark.Latency
         Task Consumed<T>(Guid messageId)
             where T : class;
 
-        Task Sent(Guid messageId, Task sendTask);
+        Task Sent(Guid messageId, Task sendTask, bool postSend = false);
         Task PostSend(Guid messageId);
     }
 }
