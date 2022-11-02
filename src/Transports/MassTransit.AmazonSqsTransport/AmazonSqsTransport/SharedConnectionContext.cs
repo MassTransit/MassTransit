@@ -36,9 +36,9 @@
             return _context.GetQueueByName(name);
         }
 
-        public void RemoveQueueByName(string name)
+        public Task<bool> RemoveQueueByName(string name)
         {
-            _context.RemoveQueueByName(name);
+            return _context.RemoveQueueByName(name);
         }
 
         public Task<TopicInfo> GetTopic(Topic topic)
@@ -51,9 +51,9 @@
             return _context.GetTopicByName(name);
         }
 
-        public void RemoveTopicByName(string name)
+        public Task<bool> RemoveTopicByName(string name)
         {
-            _context.RemoveTopicByName(name);
+            return _context.RemoveTopicByName(name);
         }
 
         public ClientContext CreateClientContext(CancellationToken cancellationToken)

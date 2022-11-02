@@ -2,7 +2,7 @@
 {
     using System.Threading.Tasks;
     using Apache.NMS;
-    using Caching;
+    using Internals.Caching;
     using MassTransit.Middleware;
     using Transports;
 
@@ -13,22 +13,19 @@
         public delegate Task<IMessageProducer> MessageProducerFactory(IDestination destination);
 
 
-        readonly GreenCache<CachedMessageProducer> _cache;
-
-        readonly IIndex<IDestination, CachedMessageProducer> _index;
+        readonly ICache<IDestination, CachedMessageProducer, ITimeToLiveCacheValue<CachedMessageProducer>> _cache;
 
         public MessageProducerCache()
         {
-            var cacheSettings = new CacheSettings(SendEndpointCacheDefaults.Capacity, SendEndpointCacheDefaults.MinAge, SendEndpointCacheDefaults.MaxAge);
-            _cache = new GreenCache<CachedMessageProducer>(cacheSettings);
-            _cache.Connect(new CloseAndDisposeOnRemoveObserver());
+            var options = new CacheOptions { Capacity = SendEndpointCacheDefaults.Capacity };
+            var policy = new TimeToLiveCachePolicy<CachedMessageProducer>(SendEndpointCacheDefaults.MaxAge);
 
-            _index = _cache.AddIndex("destination", x => x.Destination);
+            _cache = new MassTransitCache<IDestination, CachedMessageProducer, ITimeToLiveCacheValue<CachedMessageProducer>>(policy, options);
         }
 
         public async Task<IMessageProducer> GetMessageProducer(IDestination key, MessageProducerFactory factory)
         {
-            var messageProducer = await _index.Get(key, x => GetMessageProducerFromFactory(x, factory)).ConfigureAwait(false);
+            var messageProducer = await _cache.GetOrAdd(key, x => GetMessageProducerFromFactory(x, factory)).ConfigureAwait(false);
 
             return messageProducer;
         }
@@ -42,31 +39,7 @@
 
         protected override Task StopAgent(StopContext context)
         {
-            foreach (Task<CachedMessageProducer> producer in _cache.GetAll())
-                producer.Dispose();
-
-            _cache.Clear();
-
-            return Task.CompletedTask;
-        }
-
-
-        class CloseAndDisposeOnRemoveObserver :
-            ICacheValueObserver<CachedMessageProducer>
-        {
-            public void ValueAdded(INode<CachedMessageProducer> node, CachedMessageProducer value)
-            {
-            }
-
-            public void ValueRemoved(INode<CachedMessageProducer> node, CachedMessageProducer value)
-            {
-                value.Close();
-                value.Dispose();
-            }
-
-            public void CacheCleared()
-            {
-            }
+            return _cache.Clear();
         }
     }
 }

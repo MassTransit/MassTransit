@@ -23,11 +23,11 @@
 
         Task<QueueInfo> GetQueue(Queue queue);
         Task<QueueInfo> GetQueueByName(string name);
-        void RemoveQueueByName(string name);
+        Task<bool> RemoveQueueByName(string name);
 
         Task<TopicInfo> GetTopic(Topic topic);
         Task<TopicInfo> GetTopicByName(string name);
-        void RemoveTopicByName(string name);
+        Task<bool> RemoveTopicByName(string name);
 
         ClientContext CreateClientContext(CancellationToken cancellationToken);
     }

@@ -45,9 +45,9 @@ namespace MassTransit.AmazonSqsTransport
             return _queueCache.GetByName(name);
         }
 
-        public void RemoveQueueByName(string name)
+        public Task<bool> RemoveQueueByName(string name)
         {
-            _queueCache.RemoveByName(name);
+            return _queueCache.RemoveByName(name);
         }
 
         public Task<TopicInfo> GetTopic(Topic topic)
@@ -60,9 +60,9 @@ namespace MassTransit.AmazonSqsTransport
             return _topicCache.GetByName(name);
         }
 
-        public void RemoveTopicByName(string name)
+        public Task<bool> RemoveTopicByName(string name)
         {
-            _topicCache.RemoveByName(name);
+            return _topicCache.RemoveByName(name);
         }
 
         public ClientContext CreateClientContext(CancellationToken cancellationToken)
@@ -74,7 +74,7 @@ namespace MassTransit.AmazonSqsTransport
         {
             await _queueCache.DisposeAsync().ConfigureAwait(false);
 
-            _topicCache.Clear();
+            await _topicCache.DisposeAsync().ConfigureAwait(false);
 
             Connection?.Dispose();
         }

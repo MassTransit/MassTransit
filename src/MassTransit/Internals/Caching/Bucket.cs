@@ -45,5 +45,15 @@ namespace MassTransit.Internals.Caching
 
             return Task.CompletedTask;
         }
+
+        public async Task Clear()
+        {
+            while (_values.TryDequeue(out var cacheValue))
+            {
+                Interlocked.Decrement(ref _count);
+
+                await cacheValue.Evict().ConfigureAwait(false);
+            }
+        }
     }
 }

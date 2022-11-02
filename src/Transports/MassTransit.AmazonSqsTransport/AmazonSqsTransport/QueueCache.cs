@@ -7,7 +7,7 @@ namespace MassTransit.AmazonSqsTransport
     using System.Threading.Tasks;
     using Amazon.SQS;
     using Amazon.SQS.Model;
-    using Caching;
+    using Internals.Caching;
     using Topology;
 
 
@@ -16,18 +16,20 @@ namespace MassTransit.AmazonSqsTransport
     {
         static readonly List<string> AllAttributes = new List<string> { QueueAttributeName.All };
 
-        readonly ICache<QueueInfo> _cache;
+        readonly ICache<string, QueueInfo, ITimeToLiveCacheValue<QueueInfo>> _cache;
         readonly CancellationToken _cancellationToken;
         readonly IAmazonSQS _client;
         readonly IDictionary<string, QueueInfo> _durableQueues;
-        readonly IIndex<string, QueueInfo> _nameIndex;
 
         public QueueCache(IAmazonSQS client, CancellationToken cancellationToken)
         {
             _client = client;
             _cancellationToken = cancellationToken;
-            _cache = new GreenCache<QueueInfo>(ClientContextCacheDefaults.GetCacheSettings());
-            _nameIndex = _cache.AddIndex("entityName", x => x.EntityName);
+
+            var options = new CacheOptions { Capacity = ClientContextCacheDefaults.Capacity };
+            var policy = new TimeToLiveCachePolicy<QueueInfo>(ClientContextCacheDefaults.MaxAge);
+
+            _cache = new MassTransitCache<string, QueueInfo, ITimeToLiveCacheValue<QueueInfo>>(policy, options);
 
             _durableQueues = new Dictionary<string, QueueInfo>();
         }
@@ -45,7 +47,7 @@ namespace MassTransit.AmazonSqsTransport
             foreach (var queueInfo in queueInfos)
                 await queueInfo.DisposeAsync().ConfigureAwait(false);
 
-            _cache.Clear();
+            await _cache.Clear().ConfigureAwait(false);
         }
 
         public Task<QueueInfo> Get(Queue queue)
@@ -56,7 +58,7 @@ namespace MassTransit.AmazonSqsTransport
                     return Task.FromResult(queueInfo);
             }
 
-            return _nameIndex.Get(queue.EntityName, async key =>
+            return _cache.GetOrAdd(queue.EntityName, async key =>
             {
                 try
                 {
@@ -77,15 +79,15 @@ namespace MassTransit.AmazonSqsTransport
                     return Task.FromResult(queueInfo);
             }
 
-            return _nameIndex.Get(entityName, queueName => GetExistingQueue(queueName));
+            return _cache.GetOrAdd(entityName, queueName => GetExistingQueue(queueName));
         }
 
-        public void RemoveByName(string entityName)
+        public Task<bool> RemoveByName(string entityName)
         {
             lock (_durableQueues)
                 _durableQueues.Remove(entityName);
 
-            _nameIndex.Remove(entityName);
+            return _cache.Remove(entityName);
         }
 
         async Task<QueueInfo> CreateMissingQueue(Queue queue)

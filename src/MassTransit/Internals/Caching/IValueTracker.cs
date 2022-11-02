@@ -12,5 +12,7 @@ namespace MassTransit.Internals.Caching
         Task Add(TCacheValue value);
 
         Task ReBucket(IBucket<TValue, TCacheValue> source, TCacheValue value);
+
+        Task Clear();
     }
 }

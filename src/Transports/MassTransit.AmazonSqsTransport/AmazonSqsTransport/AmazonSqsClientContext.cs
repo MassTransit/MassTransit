@@ -111,7 +111,7 @@ namespace MassTransit.AmazonSqsTransport
 
             response.EnsureSuccessfulResponse();
 
-            ConnectionContext.RemoveTopicByName(topic.EntityName);
+            await ConnectionContext.RemoveTopicByName(topic.EntityName).ConfigureAwait(false);
         }
 
         public async Task DeleteQueue(Queue queue)
@@ -131,7 +131,7 @@ namespace MassTransit.AmazonSqsTransport
 
             response.EnsureSuccessfulResponse();
 
-            ConnectionContext.RemoveQueueByName(queue.EntityName);
+            await ConnectionContext.RemoveQueueByName(queue.EntityName).ConfigureAwait(false);
         }
 
         public async Task<PublishRequest> CreatePublishRequest(string topicName, string body)

@@ -33,6 +33,8 @@ namespace MassTransit.Internals.Caching
 
         public double HitRatio => _metrics.HitRatio;
 
+        public Task<IEnumerable<TValue>> Values => GetValues();
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Task<TValue> Get(TKey key)
         {
@@ -73,6 +75,26 @@ namespace MassTransit.Internals.Caching
             }
 
             return Added();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public async Task<bool> Remove(TKey key)
+        {
+            if (!TryGetValue(key, out var cacheValue))
+                return false;
+
+            await cacheValue.Evict().ConfigureAwait(false);
+            return true;
+        }
+
+        public Task Clear()
+        {
+            return _tracker.Clear();
+        }
+
+        async Task<IEnumerable<TValue>> GetValues()
+        {
+            return await Task.WhenAll(_values.Values.Select(x => x.Value));
         }
 
         bool TryGetValue(TKey key, out TCacheValue value)

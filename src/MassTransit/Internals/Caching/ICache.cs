@@ -1,5 +1,6 @@
 namespace MassTransit.Internals.Caching
 {
+    using System.Collections.Generic;
     using System.Threading.Tasks;
 
 
@@ -18,8 +19,14 @@ namespace MassTransit.Internals.Caching
 
         double HitRatio { get; }
 
+        Task<IEnumerable<TValue>> Values { get; }
+
         Task<TValue> GetOrAdd(TKey key, MissingValueFactory<TKey, TValue> missingValueFactory);
 
         Task<TValue> Get(TKey key);
+
+        Task<bool> Remove(TKey key);
+
+        Task Clear();
     }
 }

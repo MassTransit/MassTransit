@@ -13,6 +13,7 @@ namespace MassTransit.AmazonSqsTransport
     {
         readonly IBatcher<DeleteMessageBatchRequestEntry> _batchDeleter;
         readonly IBatcher<SendMessageBatchRequestEntry> _batchSender;
+        bool _disposed;
 
         public QueueInfo(string entityName, string url, IDictionary<string, string> attributes, IAmazonSQS client, CancellationToken cancellationToken)
         {
@@ -38,6 +39,11 @@ namespace MassTransit.AmazonSqsTransport
 
         public async ValueTask DisposeAsync()
         {
+            if (_disposed)
+                return;
+
+            _disposed = true;
+
             await _batchSender.DisposeAsync().ConfigureAwait(false);
             await _batchDeleter.DisposeAsync().ConfigureAwait(false);
         }

@@ -33,6 +33,11 @@ namespace MassTransit.Internals.Caching
             return _new.Add(value);
         }
 
+        public Task Clear()
+        {
+            return Task.WhenAll(_unused.Clear(), _used.Clear(), _new.Clear());
+        }
+
         public Task ReBucket(IBucket<TValue, TCacheValue> source, TCacheValue value)
         {
             var usage = _policy.CheckValue(value);
