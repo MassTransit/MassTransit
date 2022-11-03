@@ -8,13 +8,16 @@ namespace MassTransit.Transports
 
     public static class TransportStartExtensions
     {
-        public static async Task OnTransportStartup<T>(this ReceiveEndpointContext context, ISupervisor<T> supervisor, CancellationToken cancellationToken)
+        public static async Task OnTransportStartup<T>(this ReceiveEndpointContext context, ITransportSupervisor<T> supervisor,
+            CancellationToken cancellationToken)
             where T : class, PipeContext
         {
             // Nothing connected to the pipe, so signal early we are available
             if (!context.ReceivePipe.Connected.IsCompleted)
             {
-                var pipe = new WaitForConnectionPipe<T>(context, cancellationToken);
+                using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, supervisor.ConsumeStopping);
+
+                var pipe = new WaitForConnectionPipe<T>(context, tokenSource.Token);
 
                 await supervisor.Send(pipe, cancellationToken).ConfigureAwait(false);
             }

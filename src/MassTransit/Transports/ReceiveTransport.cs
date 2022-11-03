@@ -13,10 +13,10 @@ namespace MassTransit.Transports
     {
         readonly ReceiveEndpointContext _context;
         readonly IHostConfiguration _hostConfiguration;
-        readonly Func<ISupervisor<TContext>> _supervisorFactory;
+        readonly Func<ITransportSupervisor<TContext>> _supervisorFactory;
         readonly IPipe<TContext> _transportPipe;
 
-        public ReceiveTransport(IHostConfiguration hostConfiguration, ReceiveEndpointContext context, Func<ISupervisor<TContext>> supervisorFactory,
+        public ReceiveTransport(IHostConfiguration hostConfiguration, ReceiveEndpointContext context, Func<ITransportSupervisor<TContext>> supervisorFactory,
             IPipe<TContext> transportPipe)
         {
             _hostConfiguration = hostConfiguration;
@@ -70,13 +70,13 @@ namespace MassTransit.Transports
             ReceiveTransportHandle
         {
             readonly ReceiveEndpointContext _context;
-            readonly IRetryPolicy _retryPolicy;
-            readonly Func<ISupervisor<TContext>> _supervisorFactory;
-            readonly IPipe<TContext> _transportPipe;
             readonly IPipe<TContext> _preStartPipe;
-            ISupervisor<TContext> _supervisor;
+            readonly IRetryPolicy _retryPolicy;
+            readonly Func<ITransportSupervisor<TContext>> _supervisorFactory;
+            readonly IPipe<TContext> _transportPipe;
+            ITransportSupervisor<TContext> _supervisor;
 
-            public ReceiveTransportAgent(IRetryPolicy retryPolicy, ReceiveEndpointContext context, Func<ISupervisor<TContext>> supervisorFactory,
+            public ReceiveTransportAgent(IRetryPolicy retryPolicy, ReceiveEndpointContext context, Func<ITransportSupervisor<TContext>> supervisorFactory,
                 IPipe<TContext> transportPipe, IPipe<TContext> preStartPipe)
             {
                 _retryPolicy = retryPolicy;
