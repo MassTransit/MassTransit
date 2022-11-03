@@ -86,7 +86,7 @@ enhancements and calls for help from people who forget to check back if they get
  1. Install the latest [.NET 6 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
  2. Clone the source down to your machine<br/>
     ```bash
-    git clone git://github.com/MassTransit/MassTransit.git
+    git clone https://github.com/MassTransit/MassTransit.git
     ```
  3. Run `dotnet build`
 
