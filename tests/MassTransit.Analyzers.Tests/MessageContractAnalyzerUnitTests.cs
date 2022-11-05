@@ -2245,6 +2245,88 @@ namespace ConsoleApplication1
             VerifyCSharpFix(test, fixtest);
         }
 
+        [Test]
+        public void WhenActivatingGenericContractAreStructurallyCompatibleAndMissingProperty_ShouldHaveDiagnosticAndCodeFix_1()
+        {
+            var test = Usings + @"
+namespace ConsoleApplication1
+{
+    public interface INotification
+    {
+        public Guid StreamId { get; }
+    }
+
+    public interface IProjectionUpdatedNotification : INotification
+    {
+    }
+
+    class Program
+    {
+        static async Task Main()
+        {
+            var message = new { StreamId = Guid.NewGuid() };
+
+            await PublishNotification<IProjectionUpdatedNotification>(message);
+        }
+
+        private static Task PublishNotification<T>(object message) where T : class, INotification
+        {
+            var bus = Bus.Factory.CreateUsingInMemory(cfg => { });
+
+            return bus.Publish<T>(message);
+        }
+    }
+";
+
+            var expected = new DiagnosticResult
+            {
+                Id = "MCA0003",
+                Message =
+                    "Anonymous type is missing properties that are in the message contract 'INotification'. The following properties are missing: StreamId.",
+                Severity = DiagnosticSeverity.Info,
+                Locations =
+                    new[] { new DiagnosticResultLocation("Test0.cs", 30, 35) }
+            };
+
+            VerifyCSharpDiagnostic(test, expected);
+        }
+
+        [Test]
+        public void WhenActivatingGenericContractAreStructurallyCompatibleAndMissingProperty_ShouldHaveDiagnosticAndCodeFix_2()
+        {
+            var test = Usings + @"
+namespace ConsoleApplication1
+{
+    public interface INotification
+    {
+        public Guid StreamId { get; }
+    }
+
+    public interface INotificated {}
+
+    public class NotificationConsumer : IConsumer<INotification>
+    {
+        public Task Consume(ConsumeContext context)
+        {
+            var message = new {};
+
+            return context.PublishBack<INotificated>(message);
+        }
+    }
+
+    public static class Extensions
+    {
+        public static Task PublishBack<TMessage>(this ConsumeContext context, object message) where TMessage : class
+        {
+            return context.Publish<TMessage>(message);
+        }
+    }
+";
+
+            VerifyCSharpDiagnostic(test);
+        }
+
+
         readonly string Usings = @"
 using System;
 using System.Collections.Generic;
