@@ -52,6 +52,14 @@ namespace MassTransit.DependencyInjection.Registration
             foreach (Action<ISagaConfigurator<TInstance>> action in _configureActions)
                 action(stateMachineConfigurator);
 
+            IEnumerable<IEventObserver<TInstance>> eventObservers = provider.GetServices<IEventObserver<TInstance>>();
+            foreach (IEventObserver<TInstance> eventObserver in eventObservers)
+                stateMachine.ConnectEventObserver(eventObserver);
+
+            IEnumerable<IStateObserver<TInstance>> stateObservers = provider.GetServices<IStateObserver<TInstance>>();
+            foreach (IStateObserver<TInstance> stateObserver in stateObservers)
+                stateMachine.ConnectStateObserver(stateObserver);
+
             LogContext.Info?.Log("Configured endpoint {Endpoint}, Saga: {SagaType}, State Machine: {StateMachineType}",
                 configurator.InputAddress.GetEndpointName(),
                 TypeCache<TInstance>.ShortName, TypeCache.GetShortName(stateMachine.GetType()));
