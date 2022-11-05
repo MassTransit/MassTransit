@@ -122,6 +122,9 @@ namespace MassTransit.Analyzers
             {
                 var anonymousType = context.SemanticModel.GetTypeInfo(anonymousObject).Type;
 
+                if(anonymousType.SpecialType == SpecialType.System_Object)
+                    return;
+
                 var symbolDisplayFormat = new SymbolDisplayFormat(typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces);
                 var immutableDictionary = new Dictionary<string, string>
                 {
@@ -143,11 +146,6 @@ namespace MassTransit.Analyzers
                         messageContractType.Name, string.Join(", ", missingProperties));
                     context.ReportDiagnostic(diagnostic);
                 }
-            }
-            else
-            {
-                var diagnostic = Diagnostic.Create(ValidMessageContractStructureRule, context.Node.GetLocation(), typeArgument.Name);
-                context.ReportDiagnostic(diagnostic);
             }
         }
 
