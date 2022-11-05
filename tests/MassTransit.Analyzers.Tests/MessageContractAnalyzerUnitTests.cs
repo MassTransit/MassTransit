@@ -2278,17 +2278,7 @@ namespace ConsoleApplication1
     }
 ";
 
-            var expected = new DiagnosticResult
-            {
-                Id = "MCA0003",
-                Message =
-                    "Anonymous type is missing properties that are in the message contract 'INotification'. The following properties are missing: StreamId.",
-                Severity = DiagnosticSeverity.Info,
-                Locations =
-                    new[] { new DiagnosticResultLocation("Test0.cs", 30, 35) }
-            };
-
-            VerifyCSharpDiagnostic(test, expected);
+            VerifyCSharpDiagnostic(test);
         }
 
         [Test]
