@@ -8,8 +8,69 @@
         using AzureCosmos.Saga;
         using Internals;
         using Microsoft.Azure.Cosmos;
+        using Microsoft.Extensions.DependencyInjection;
         using NUnit.Framework;
         using TestFramework;
+        using Testing;
+
+
+        class InstanceNotFound
+        {
+            public InstanceNotFound(string serviceName)
+            {
+                ServiceName = serviceName;
+            }
+
+            public string ServiceName { get; set; }
+        }
+
+
+        class Status
+        {
+            public Status(string statusDescription, string serviceName)
+            {
+                StatusDescription = statusDescription;
+                ServiceName = serviceName;
+            }
+
+            public string ServiceName { get; set; }
+            public string StatusDescription { get; set; }
+        }
+
+
+        public class CheckStatus
+        {
+            public CheckStatus(string serviceName)
+            {
+                ServiceName = serviceName;
+            }
+
+            public CheckStatus()
+            {
+            }
+
+            public string ServiceName { get; set; }
+        }
+
+
+        public class Start
+        {
+            public Start(string serviceName, Guid serviceId)
+            {
+                ServiceName = serviceName;
+                ServiceId = serviceId;
+            }
+
+            public string ServiceName { get; set; }
+            public Guid ServiceId { get; set; }
+        }
+
+
+        class StartupComplete
+        {
+            public Guid ServiceId { get; set; }
+            public string ServiceName { get; set; }
+        }
 
 
         public class MissingInstance :
@@ -27,6 +88,132 @@
             public string CurrentState { get; set; }
             public string ServiceName { get; set; }
             public Guid CorrelationId { get; set; }
+        }
+
+
+        public class MissingInstanceStateMachine :
+            MassTransitStateMachine<MissingInstance>
+        {
+            public MissingInstanceStateMachine()
+            {
+                InstanceState(x => x.CurrentState);
+
+                Event(() => Started, x => x
+                    .CorrelateBy(instance => instance.ServiceName, context => context.Message.ServiceName)
+                    .SelectId(context => context.Message.ServiceId));
+
+                Event(() => CheckStatus, x =>
+                {
+                    x.CorrelateBy(instance => instance.ServiceName, context => context.Message.ServiceName);
+
+                    x.OnMissingInstance(m =>
+                    {
+                        return m.ExecuteAsync(context => context.RespondAsync(new InstanceNotFound(context.Message.ServiceName)));
+                    });
+                });
+
+                Initially(
+                    When(Started)
+                        .Then(context => context.Instance.ServiceName = context.Data.ServiceName)
+                        .Respond(context => new StartupComplete
+                        {
+                            ServiceId = context.Instance.CorrelationId,
+                            ServiceName = context.Instance.ServiceName
+                        })
+                        .Then(context => Console.WriteLine("Started: {0} - {1}", context.Instance.CorrelationId, context.Instance.ServiceName))
+                        .TransitionTo(Running));
+
+                During(Running,
+                    When(CheckStatus)
+                        .Then(context => Console.WriteLine("Status check!"))
+                        .Respond(context => new Status("Running", context.Instance.ServiceName)));
+            }
+
+            public State Running { get; private set; }
+            public Event<Start> Started { get; private set; }
+            public Event<CheckStatus> CheckStatus { get; private set; }
+        }
+
+
+        [TestFixture]
+        public class Testing_with_the_container_and_query_linq
+        {
+            [Test]
+            public async Task Should_work_as_expected()
+            {
+                await using var provider = new ServiceCollection()
+                    .AddMassTransitTestHarness(x =>
+                    {
+                        x.AddSagaStateMachine<MissingInstanceStateMachine, MissingInstance>()
+                            .CosmosRepository(r =>
+                            {
+                                r.EndpointUri = Configuration.EndpointUri;
+                                r.Key = Configuration.Key;
+
+                                r.DatabaseId = "sagaTest";
+                                r.CollectionId = "TestInstance";
+                            });
+
+                        x.AddConfigureEndpointsCallback((name, configurator) =>
+                        {
+                            configurator.UseInMemoryOutbox();
+                        });
+                    })
+                    .BuildServiceProvider(true);
+
+                var harness = provider.GetTestHarness();
+
+                await harness.Start();
+
+                var correlationId = NewId.NextGuid();
+
+                IRequestClient<Start> startClient = harness.GetRequestClient<Start>();
+
+                await startClient.GetResponse<StartupComplete>(new Start("A", correlationId));
+
+                IRequestClient<CheckStatus> statusClient = harness.GetRequestClient<CheckStatus>();
+
+                Response<Status, InstanceNotFound> response = await statusClient.GetResponse<Status, InstanceNotFound>(new CheckStatus("A"));
+
+                Assert.That(response.Is(out MassTransit.Response<Status> status), Is.True);
+
+                Assert.AreEqual("A", status.Message.ServiceName);
+            }
+
+            readonly string _databaseName;
+            readonly string _collectionName;
+            readonly CosmosClient _cosmosClient;
+            Database _database;
+            Container _container;
+
+            public Testing_with_the_container_and_query_linq()
+            {
+                _databaseName = "sagaTest";
+                _collectionName = "TestInstance";
+                _cosmosClient = new CosmosClient(Configuration.EndpointUri, Configuration.Key,
+                    new CosmosClientOptions
+                    {
+                        Serializer = new SystemTextJsonCosmosSerializer(AzureCosmosSerializerExtensions.GetSerializerOptions<MissingInstance>())
+                    });
+            }
+
+            [OneTimeSetUp]
+            public async Task Setup()
+            {
+                var dbResponse = await _cosmosClient.CreateDatabaseIfNotExistsAsync(_databaseName).ConfigureAwait(false);
+                _database = dbResponse.Database;
+                var cResponse = await _database
+                    .CreateContainerIfNotExistsAsync(_collectionName, "/id")
+                    .ConfigureAwait(false);
+                _container = cResponse.Container;
+            }
+
+            [OneTimeTearDown]
+            public async Task Teardown()
+            {
+                await _container.DeleteContainerAsync().ConfigureAwait(false);
+                await _database.DeleteAsync().ConfigureAwait(false);
+            }
         }
 
 
@@ -113,117 +300,14 @@
 
             protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
-                _machine = new TestStateMachine();
+                _machine = new MissingInstanceStateMachine();
 
                 configurator.UseMessageRetry(r => r.Intervals(1000, 2000));
                 configurator.UseInMemoryOutbox();
                 configurator.StateMachineSaga(_machine, _repository.Value);
             }
 
-            TestStateMachine _machine;
-
-
-            class TestStateMachine :
-                MassTransitStateMachine<MissingInstance>
-            {
-                public TestStateMachine()
-                {
-                    InstanceState(x => x.CurrentState);
-
-                    Event(() => Started, x => x
-                        .CorrelateBy(instance => instance.ServiceName, context => context.Message.ServiceName)
-                        .SelectId(context => context.Message.ServiceId));
-
-                    Event(() => CheckStatus, x =>
-                    {
-                        x.CorrelateBy(instance => instance.ServiceName, context => context.Message.ServiceName);
-
-                        x.OnMissingInstance(m =>
-                        {
-                            return m.ExecuteAsync(context => context.RespondAsync(new InstanceNotFound(context.Message.ServiceName)));
-                        });
-                    });
-
-                    Initially(
-                        When(Started)
-                            .Then(context => context.Instance.ServiceName = context.Data.ServiceName)
-                            .Respond(context => new StartupComplete
-                            {
-                                ServiceId = context.Instance.CorrelationId,
-                                ServiceName = context.Instance.ServiceName
-                            })
-                            .Then(context => Console.WriteLine("Started: {0} - {1}", context.Instance.CorrelationId, context.Instance.ServiceName))
-                            .TransitionTo(Running));
-
-                    During(Running,
-                        When(CheckStatus)
-                            .Then(context => Console.WriteLine("Status check!"))
-                            .Respond(context => new Status("Running", context.Instance.ServiceName)));
-                }
-
-                public State Running { get; private set; }
-                public Event<Start> Started { get; private set; }
-                public Event<CheckStatus> CheckStatus { get; private set; }
-            }
-
-
-            class InstanceNotFound
-            {
-                public InstanceNotFound(string serviceName)
-                {
-                    ServiceName = serviceName;
-                }
-
-                public string ServiceName { get; set; }
-            }
-
-
-            class Status
-            {
-                public Status(string statusDescription, string serviceName)
-                {
-                    StatusDescription = statusDescription;
-                    ServiceName = serviceName;
-                }
-
-                public string ServiceName { get; set; }
-                public string StatusDescription { get; set; }
-            }
-
-
-            class CheckStatus
-            {
-                public CheckStatus(string serviceName)
-                {
-                    ServiceName = serviceName;
-                }
-
-                public CheckStatus()
-                {
-                }
-
-                public string ServiceName { get; set; }
-            }
-
-
-            class Start
-            {
-                public Start(string serviceName, Guid serviceId)
-                {
-                    ServiceName = serviceName;
-                    ServiceId = serviceId;
-                }
-
-                public string ServiceName { get; set; }
-                public Guid ServiceId { get; set; }
-            }
-
-
-            class StartupComplete
-            {
-                public Guid ServiceId { get; set; }
-                public string ServiceName { get; set; }
-            }
+            MissingInstanceStateMachine _machine;
         }
     }
 }

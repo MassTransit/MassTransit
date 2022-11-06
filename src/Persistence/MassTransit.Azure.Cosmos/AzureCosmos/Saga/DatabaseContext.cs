@@ -11,5 +11,7 @@ namespace MassTransit.AzureCosmos.Saga
         Action<QueryRequestOptions> QueryRequestOptions { get; }
 
         ItemRequestOptions GetItemRequestOptions();
+
+        CosmosLinqSerializerOptions GetLinqSerializerOptions();
     }
 }

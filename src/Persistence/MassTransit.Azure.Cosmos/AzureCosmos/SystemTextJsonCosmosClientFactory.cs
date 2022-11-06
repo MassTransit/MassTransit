@@ -3,10 +3,7 @@ namespace MassTransit.AzureCosmos
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Text.Json;
-    using System.Text.Json.Serialization;
-    using Internals;
     using Microsoft.Azure.Cosmos;
     using Saga;
     using Serialization;
@@ -23,8 +20,9 @@ namespace MassTransit.AzureCosmos
         readonly ConcurrentDictionary<Type, Lazy<CosmosClient>> _clients;
         readonly string _endpoint;
         readonly string _key;
+        readonly JsonNamingPolicy _namingPolicy;
 
-        public SystemTextJsonCosmosClientFactory(string endpoint, string key)
+        public SystemTextJsonCosmosClientFactory(string endpoint, string key, JsonNamingPolicy namingPolicy)
         {
             if (string.IsNullOrWhiteSpace(endpoint))
                 throw new ArgumentNullException(nameof(endpoint));
@@ -33,6 +31,7 @@ namespace MassTransit.AzureCosmos
 
             _endpoint = endpoint;
             _key = key;
+            _namingPolicy = namingPolicy;
 
             _clients = new ConcurrentDictionary<Type, Lazy<CosmosClient>>();
         }
@@ -67,16 +66,13 @@ namespace MassTransit.AzureCosmos
             });
         }
 
-        static JsonSerializerOptions GetSerializerOptions<T>()
+        JsonSerializerOptions GetSerializerOptions<T>()
             where T : class, ISaga
         {
-            var correlationId = MessageTypeCache<T>.Properties.Single(x => x.Name == nameof(ISaga.CorrelationId));
-
-            if (correlationId.GetAttribute<JsonPropertyNameAttribute>().Any(x => x.Name == "id"))
-                return SystemTextJsonMessageSerializer.Options;
-
-            var options = new JsonSerializerOptions(SystemTextJsonMessageSerializer.Options);
-            options.PropertyNamingPolicy = new SagaRenamePropertyNamingPolicy(options.PropertyNamingPolicy);
+            var options = new JsonSerializerOptions(SystemTextJsonMessageSerializer.Options)
+            {
+                PropertyNamingPolicy = new SagaRenamePropertyNamingPolicy(_namingPolicy)
+            };
 
             return options;
         }

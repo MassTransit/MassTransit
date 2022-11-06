@@ -4,6 +4,7 @@ namespace MassTransit
     using AzureCosmos;
     using Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Serialization;
 
 
     public static class CosmosRepositoryConfigurationExtensions
@@ -90,14 +91,15 @@ namespace MassTransit
         /// <summary>
         /// Add the MassTransit Cosmos Client Factory to the service collection, using the specified parameters. This is option when using configuring the
         /// saga repository using the AddSaga methods. This also uses the System.Text.Json serializer. If you need to use Newtonsoft,
-        /// call <see cref="AddNewtonsoftCosmosClientFactory"/> instead.
+        /// call <see cref="AddNewtonsoftCosmosClientFactory" /> instead.
         /// </summary>
         /// <param name="collection"></param>
         /// <param name="accountEndpoint">The account endpoint of the database</param>
         /// <param name="authKeyOrResourceToken">The authentication key or resource token for the database</param>
         public static IServiceCollection AddCosmosClientFactory(this IServiceCollection collection, string accountEndpoint, string authKeyOrResourceToken)
         {
-            return collection.AddSingleton<ICosmosClientFactory>(provider => new SystemTextJsonCosmosClientFactory(accountEndpoint, authKeyOrResourceToken));
+            return collection.AddSingleton<ICosmosClientFactory>(provider => new SystemTextJsonCosmosClientFactory(accountEndpoint, authKeyOrResourceToken,
+                SystemTextJsonMessageSerializer.Options.PropertyNamingPolicy));
         }
 
         /// <summary>

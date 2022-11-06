@@ -13,6 +13,8 @@ namespace MassTransit.AzureCosmos
             _policy = policy;
         }
 
+        public JsonNamingPolicy Policy => _policy;
+
         public override string ConvertName(string name)
         {
             if (name.Equals(nameof(ISaga.CorrelationId)))

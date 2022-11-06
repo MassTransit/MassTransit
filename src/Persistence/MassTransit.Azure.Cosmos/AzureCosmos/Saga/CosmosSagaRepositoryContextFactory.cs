@@ -38,7 +38,7 @@ namespace MassTransit.AzureCosmos.Saga
         public async Task SendQuery<T>(ConsumeContext<T> context, ISagaQuery<TSaga> query, IPipe<SagaRepositoryQueryContext<TSaga, T>> next)
             where T : class
         {
-            IEnumerable<TSaga> sagas = await _context.Container.GetItemLinqQueryable<TSaga>()
+            IEnumerable<TSaga> sagas = await _context.Container.GetItemLinqQueryable<TSaga>(linqSerializerOptions: _context.GetLinqSerializerOptions())
                 .Where(query.FilterExpression)
                 .QueryAsync(context.CancellationToken)
                 .ConfigureAwait(false);

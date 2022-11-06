@@ -200,7 +200,8 @@ namespace MassTransit.AzureCosmos.Saga
 
             // This will not work for Document Db because the .Where needs to look for [JsonProperty("id")],
             // and if you pass in CorrelationId property, the ISaga doesn't have that property. Can we .Select() it out?
-            IEnumerable<TSaga> instances = await _context.Container.GetItemLinqQueryable<TSaga>(requestOptions: queryOptions)
+            IEnumerable<TSaga> instances = await _context.Container.GetItemLinqQueryable<TSaga>(requestOptions: queryOptions,
+                    linqSerializerOptions: _context.GetLinqSerializerOptions())
                 .Where(query.FilterExpression)
                 .QueryAsync(cancellationToken)
                 .ConfigureAwait(false);

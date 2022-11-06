@@ -7,13 +7,11 @@ namespace MassTransit.AzureCosmos.Saga
 
 
     /// <summary>
-    /// The default Cosmos JSON.NET serializer.
+    /// The default serializer, using System.Text.Json
     /// </summary>
     public class SystemTextJsonCosmosSerializer :
         CosmosSerializer
     {
-        readonly JsonSerializerOptions _options;
-
         /// <summary>
         /// Create a serializer that uses the JSON.net serializer
         /// </summary>
@@ -23,8 +21,10 @@ namespace MassTransit.AzureCosmos.Saga
         /// </remarks>
         public SystemTextJsonCosmosSerializer(JsonSerializerOptions options)
         {
-            _options = options ?? throw new ArgumentNullException(nameof(options));
+            Options = options ?? throw new ArgumentNullException(nameof(options));
         }
+
+        public JsonSerializerOptions Options { get; }
 
         /// <summary>
         /// Convert a Stream to the passed in type.
@@ -39,7 +39,7 @@ namespace MassTransit.AzureCosmos.Saga
 
             using (stream)
             {
-                return JsonSerializer.Deserialize<T>(stream, _options);
+                return JsonSerializer.Deserialize<T>(stream, Options);
             }
         }
 
@@ -53,7 +53,7 @@ namespace MassTransit.AzureCosmos.Saga
         {
             var stream = new MemoryStream();
 
-            JsonSerializer.Serialize(stream, input, _options);
+            JsonSerializer.Serialize(stream, input, Options);
 
             stream.Position = 0;
             return stream;

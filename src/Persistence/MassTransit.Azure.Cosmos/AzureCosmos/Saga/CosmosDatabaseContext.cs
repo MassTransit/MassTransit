@@ -9,11 +9,15 @@ namespace MassTransit.AzureCosmos.Saga
         where TSaga : class, ISaga
     {
         readonly Action<ItemRequestOptions> _itemRequestOptions;
+        readonly Action<CosmosLinqSerializerOptions> _linqSerializerOptions;
 
-        public CosmosDatabaseContext(Container container, Action<ItemRequestOptions> itemRequestOptions = null,
-            Action<QueryRequestOptions> queryRequestOptions = null)
+        public CosmosDatabaseContext(Container container,
+            Action<QueryRequestOptions> queryRequestOptions = null,
+            Action<ItemRequestOptions> itemRequestOptions = null,
+            Action<CosmosLinqSerializerOptions> linqSerializerOptions = null)
         {
             _itemRequestOptions = itemRequestOptions;
+            _linqSerializerOptions = linqSerializerOptions;
 
             QueryRequestOptions = queryRequestOptions;
 
@@ -31,6 +35,17 @@ namespace MassTransit.AzureCosmos.Saga
 
             var options = new ItemRequestOptions();
             _itemRequestOptions(options);
+
+            return options;
+        }
+
+        public CosmosLinqSerializerOptions GetLinqSerializerOptions()
+        {
+            if (_linqSerializerOptions == null)
+                return default;
+
+            var options = new CosmosLinqSerializerOptions();
+            _linqSerializerOptions?.Invoke(options);
 
             return options;
         }

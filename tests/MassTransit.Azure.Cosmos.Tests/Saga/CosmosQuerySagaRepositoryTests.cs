@@ -14,12 +14,15 @@
     public class CosmosQuerySagaRepositoryTests
     {
         [Test]
+        [Order(1)]
         public async Task Query_Fails_With_Json_Resolver_Rename()
         {
+            await Data.SagaRepository<SimpleSaga>.Instance.Initialize();
+
             var correlationId = Guid.NewGuid();
             _ids.Add(correlationId);
 
-            await Data.SagaRepository<SimpleSaga>.Instance.InsertSaga(new SimpleSaga {CorrelationId = correlationId});
+            await Data.SagaRepository<SimpleSaga>.Instance.InsertSaga(new SimpleSaga { CorrelationId = correlationId });
 
             ISagaRepository<SimpleSaga> repository = CosmosSagaRepository<SimpleSaga>.Create(Data.SagaRepository<SimpleSaga>.Instance.Client,
                 Data.SagaRepository<SimpleSaga>.DatabaseName, Data.SagaRepository<SimpleSaga>.CollectionName);
@@ -32,6 +35,7 @@
         }
 
         [Test]
+        [Order(2)]
         public async Task Query_Other_Property_Passes_With_Json_Resolver_Rename()
         {
             var correlationId = Guid.NewGuid();
