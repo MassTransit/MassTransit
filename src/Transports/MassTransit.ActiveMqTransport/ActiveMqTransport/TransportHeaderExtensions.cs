@@ -1,9 +1,10 @@
 ﻿namespace MassTransit.ActiveMqTransport
 {
-    using System;
-    using System.Collections.Generic;
     using Apache.NMS;
     using Initializers.TypeConverters;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
 
     public static class TransportHeaderExtensions
@@ -13,7 +14,7 @@
 
         public static void SetHeaders(this IPrimitiveMap dictionary, SendHeaders headers)
         {
-            foreach (KeyValuePair<string, object> header in headers.GetAll())
+            foreach (KeyValuePair<string, object> header in headers.GetAll().Where(h => h.Key != MessageHeaders.ResponseAddress))
             {
                 if (header.Value == null)
                 {
