@@ -3,6 +3,7 @@ namespace MassTransit.ActiveMqTransport
     using Apache.NMS;
     using Apache.NMS.ActiveMQ.Commands;
     using MassTransit.ActiveMqTransport.Configuration;
+    using MassTransit.ActiveMqTransport.Topology;
     using MassTransit.Internals;
     using MassTransit.Transports;
     using System;
@@ -118,14 +119,14 @@ namespace MassTransit.ActiveMqTransport
                     transportMessage.Properties["AMQ_SCHEDULED_DELAY"] = (long)delay.Value;
             }
 
-            SetResponseTo(transportMessage, context, sessionContext);
+            await SetResponseTo(transportMessage, context, sessionContext);
 
             var publishTask = Task.Run(() => producer.Send(transportMessage), context.CancellationToken);
 
             await publishTask.OrCanceled(context.CancellationToken).ConfigureAwait(false);
         }
 
-        public static void SetResponseTo(IMessage transportMessage, SendContext context, SessionContext sessionContext)
+        public static async Task SetResponseTo(IMessage transportMessage, SendContext context, SessionContext sessionContext)
         {
             if (context.ResponseAddress == null)
             {
@@ -137,11 +138,11 @@ namespace MassTransit.ActiveMqTransport
             {
                 if (context.ResponseAddress.SplitQueryString().Any(x => x.Item1 == "temporary"))
                 {
-                    responseAddress = new ActiveMQTempQueue(physicalName);
+                    responseAddress = await sessionContext.GetQueue(new QueueEntity(1, context.ResponseAddress.PathAndQuery, false, true));
                 }
                 else
                 {
-                    responseAddress = new ActiveMQQueue(physicalName);
+                    responseAddress = await sessionContext.GetQueue(new QueueEntity(1, context.ResponseAddress.PathAndQuery, true, false));
                 }
             }
             transportMessage.NMSReplyTo = responseAddress;
