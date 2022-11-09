@@ -1,9 +1,9 @@
 ﻿namespace MassTransit.ActiveMqTransport
 {
-    using System.Collections.Generic;
-    using System.Threading;
     using Apache.NMS;
     using Context;
+    using System.Collections.Generic;
+    using System.Threading;
 
 
     public class TransportActiveMqSendContext<T> :
@@ -19,6 +19,7 @@
         public string GroupId { get; set; }
         public int? GroupSequence { get; set; }
         public MsgPriority? Priority { get; set; }
+        public IDestination ReplyDestination { get; set; }
 
         public override void ReadPropertiesFrom(IReadOnlyDictionary<string, object> properties)
         {

@@ -75,7 +75,7 @@ namespace MassTransit.ActiveMqTransport
 
             await _configureTopologyPipe.Send(sessionContext).ConfigureAwait(false);
 
-            var destination = await sessionContext.GetDestination(EntityName, _destinationType).ConfigureAwait(false);
+            IDestination destination = context.ReplyDestination ?? await sessionContext.GetDestination(EntityName, _destinationType).ConfigureAwait(false);
             var producer = await sessionContext.CreateMessageProducer(destination).ConfigureAwait(false);
 
             var transportMessage = sessionContext.CreateBytesMessage();

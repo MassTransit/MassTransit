@@ -17,5 +17,7 @@
         MsgPriority? Priority { set; }
         string GroupId { set; }
         int? GroupSequence { set; }
+
+        IDestination ReplyDestination { get; set; }
     }
 }

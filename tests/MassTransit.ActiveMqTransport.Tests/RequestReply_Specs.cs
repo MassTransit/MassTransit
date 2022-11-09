@@ -1,5 +1,6 @@
 ﻿using MassTransit.TestFramework.Messages;
 using NUnit.Framework;
+using NUnit.Framework.Internal;
 using System;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -15,10 +16,14 @@ namespace MassTransit.ActiveMqTransport.Tests
         {
             var clientFactory = Bus.CreateClientFactory();
             RequestHandle<PingMessage> request = clientFactory.CreateRequest(new PingMessage());
-            _ = await request.GetResponse<PongMessage>();
+            Response<PongMessage> response = await request.GetResponse<PongMessage>();
 
+            TestExecutionContext.CurrentContext.OutWriter.Flush();
+
+            Assert.IsNotNull(response);
             Assert.NotNull(_replyToAddress);
-            Assert.IsTrue(_replyAddressPattern.IsMatch(_replyToAddress?.ToString()), "Reply address '{0}' does not match desired pattern", _replyToAddress);
+            Assert.AreEqual(_replyToAddress, response.DestinationAddress);
+            //Assert.IsTrue(_replyAddressPattern.IsMatch(_replyToAddress?.ToString()), "Reply address '{0}' does not match desired pattern", _replyToAddress);
         }
 
         Uri _replyToAddress;
@@ -44,8 +49,9 @@ namespace MassTransit.ActiveMqTransport.Tests
         {
             var clientFactory = Bus.CreateClientFactory();
             RequestHandle<PingMessage> request = clientFactory.CreateRequest(new PingMessage());
-            _ = await request.GetResponse<PongMessage>();
+            Response<PongMessage> response = await request.GetResponse<PongMessage>();
 
+            Assert.IsNotNull(response);
             Assert.NotNull(_replyToAddress);
             Assert.IsTrue(_replyAddressPattern.IsMatch(_replyToAddress?.ToString()), "Reply address '{0}' does not match desired pattern", _replyToAddress);
         }
