@@ -27,7 +27,7 @@ namespace MassTransit.ActiveMqTransport.Tests
         }
 
         Uri _replyToAddress;
-        readonly Regex _replyAddressPattern = new Regex("ID:[^:]*:.:.", RegexOptions.Compiled);
+        readonly Regex _replyAddressPattern = new Regex("ID:[^:]*:[^:]*:[^:]*", RegexOptions.Compiled);
 
         protected override void ConfigureActiveMqReceiveEndpoint(IActiveMqReceiveEndpointConfigurator configurator)
         {
@@ -57,7 +57,7 @@ namespace MassTransit.ActiveMqTransport.Tests
         }
 
         Uri _replyToAddress;
-        readonly Regex _replyAddressPattern = new Regex("ID:[^:]*:.:.", RegexOptions.Compiled);
+        readonly Regex _replyAddressPattern = new Regex("ID:[^:]*:[^:]*:[^:]*", RegexOptions.Compiled);
 
         protected override void ConfigureActiveMqReceiveEndpoint(IActiveMqReceiveEndpointConfigurator configurator)
         {
