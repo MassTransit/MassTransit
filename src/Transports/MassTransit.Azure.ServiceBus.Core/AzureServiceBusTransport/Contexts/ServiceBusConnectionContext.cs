@@ -166,10 +166,10 @@
                 {
                     var ruleProperties = await GetRuleAsync(createSubscriptionOptions.TopicName, createSubscriptionOptions.SubscriptionName, rule.Name)
                         .ConfigureAwait(false);
-                    if (rule.Name == ruleProperties.Name && (!rule.Filter.Equals(ruleProperties.Filter) || !rule.Action.Equals(ruleProperties.Action)))
+                    if (rule.Name == ruleProperties.Name && (!(rule.Filter?.Equals(ruleProperties.Filter) ?? ruleProperties.Filter == null) || !(rule.Action?.Equals(ruleProperties.Action) ?? ruleProperties.Action == null)))
                     {
                         LogContext.Debug?.Log("Updating subscription Rule: {Rule} ({DescriptionFilter} -> {Filter})", rule.Name,
-                            ruleProperties.Filter.ToString(), rule.Filter.ToString());
+                            ruleProperties.Filter?.ToString(), rule.Filter?.ToString());
 
                         ruleProperties.Filter = rule.Filter;
                         ruleProperties.Action = rule.Action;
@@ -186,10 +186,10 @@
                     {
                         var existingRule = rules[0];
 
-                        if (Guid.TryParse(existingRule.Name, out _) && !existingRule.Filter.Equals(filter))
+                        if (Guid.TryParse(existingRule.Name, out _) && !(existingRule.Filter?.Equals(filter) ?? filter == null))
                         {
                             LogContext.Debug?.Log("Updating subscription filter: {Rule} ({DescriptionFilter} -> {Filter})", existingRule.Name,
-                                existingRule.Filter.ToString(), filter.ToString());
+                                existingRule.Filter?.ToString(), filter?.ToString());
 
                             existingRule.Filter = filter;
 
