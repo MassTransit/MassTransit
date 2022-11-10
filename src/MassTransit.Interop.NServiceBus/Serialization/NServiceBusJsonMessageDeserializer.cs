@@ -48,7 +48,7 @@ namespace MassTransit.Serialization
                 var messageContext = new NServiceBusHeaderAdapter(headers);
 
                 return new NewtonsoftRawJsonSerializerContext(_deserializer, _objectDeserializer, messageContext, messageToken, headers.GetMessageTypes(),
-                    RawSerializerOptions.Default, ContentType);
+                    RawSerializerOptions.AddTransportHeaders, ContentType);
             }
             catch (JsonSerializationException ex)
             {
