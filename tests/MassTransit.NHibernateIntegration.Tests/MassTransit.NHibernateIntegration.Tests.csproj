@@ -10,7 +10,7 @@
     <PackageReference Include="NUnit" Version="3.13.3" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
     <PackageReference Include="Shouldly" Version="4.0.3" />
-    <PackageReference Include="System.Data.SqlClient" Version="4.8.1" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
     <PackageReference Include="System.Data.SQLite" Version="1.0.115" />
     <ProjectReference Include="..\..\src\MassTransit.TestFramework\MassTransit.TestFramework.csproj" />
     <ProjectReference Include="..\..\src\Persistence\MassTransit.NHibernateIntegration\MassTransit.NHibernateIntegration.csproj" />
