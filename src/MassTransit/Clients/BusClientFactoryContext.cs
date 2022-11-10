@@ -39,15 +39,13 @@ namespace MassTransit.Clients
         public IRequestSendEndpoint<T> GetRequestEndpoint<T>(ConsumeContext? consumeContext = default)
             where T : class
         {
-            return new PublishRequestSendEndpoint<T>(consumeContext != null
-                ? consumeContext.ReceiveContext.PublishEndpointProvider
-                : _bus, consumeContext);
+            return new PublishRequestSendEndpoint<T>(_bus, consumeContext);
         }
 
         public IRequestSendEndpoint<T> GetRequestEndpoint<T>(Uri destinationAddress, ConsumeContext? consumeContext = default)
             where T : class
         {
-            return new SendRequestSendEndpoint<T>(consumeContext as ISendEndpointProvider ?? _bus, destinationAddress, consumeContext);
+            return new SendRequestSendEndpoint<T>(_bus, destinationAddress, consumeContext);
         }
 
         public RequestTimeout DefaultTimeout { get; }
