@@ -1,27 +1,26 @@
 ﻿namespace MassTransit.Scheduling
 {
     using System;
-    using System.Threading.Tasks;
+    using Transports;
 
 
     /// <summary>
     /// For transport-based schedulers, used to invoke the <see cref="SendContext{T}" /> pipe and
     /// manage the ScheduledMessageId, as well as set the transport delay property
     /// </summary>
-    /// <typeparam name="T">The message type</typeparam>
-    public class ScheduleSendPipe<T> :
-        IPipe<SendContext<T>>
-        where T : class
+    /// <typeparam name="TMessage">The message type</typeparam>
+    public class ScheduleSendPipe<TMessage> :
+        SendContextPipeAdapter<TMessage>
+        where TMessage : class
     {
-        readonly IPipe<SendContext<T>> _pipe;
         readonly DateTime _scheduledTime;
         SendContext _context;
 
         Guid? _scheduledMessageId;
 
-        public ScheduleSendPipe(IPipe<SendContext<T>> pipe, DateTime scheduledTime)
+        public ScheduleSendPipe(IPipe<SendContext<TMessage>> pipe, DateTime scheduledTime)
+            : base(pipe)
         {
-            _pipe = pipe;
             _scheduledTime = scheduledTime;
         }
 
@@ -31,12 +30,7 @@
             set => _scheduledMessageId = value;
         }
 
-        void IProbeSite.Probe(ProbeContext context)
-        {
-            _pipe?.Probe(context);
-        }
-
-        public virtual async Task Send(SendContext<T> context)
+        protected override void Send(SendContext<TMessage> context)
         {
             _context = context;
             _context.ScheduledMessageId = _scheduledMessageId;
@@ -50,9 +44,10 @@
 
             if (ScheduledMessageId.HasValue)
                 context.Headers.Set(MessageHeaders.SchedulingTokenId, ScheduledMessageId.Value.ToString("D"));
+        }
 
-            if (_pipe.IsNotEmpty())
-                await _pipe.Send(context).ConfigureAwait(false);
+        protected override void Send<T>(SendContext<T> context)
+        {
         }
     }
 }
