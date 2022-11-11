@@ -1,4 +1,5 @@
-﻿using MassTransit.TestFramework.Messages;
+﻿using MassTransit.Serialization;
+using MassTransit.TestFramework.Messages;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
 using System;
@@ -22,8 +23,8 @@ namespace MassTransit.ActiveMqTransport.Tests
 
             Assert.IsNotNull(response);
             Assert.NotNull(_replyToAddress);
-            Assert.AreEqual(_replyToAddress, response.DestinationAddress);
-            //Assert.IsTrue(_replyAddressPattern.IsMatch(_replyToAddress?.ToString()), "Reply address '{0}' does not match desired pattern", _replyToAddress);
+            Assert.IsTrue(_replyAddressPattern.IsMatch(_replyToAddress?.ToString()), "Reply address '{0}' does not match desired pattern", _replyToAddress);
+            Assert.IsTrue(_replyAddressPattern.IsMatch(response.DestinationAddress?.ToString()), "DestinationAddress address '{0}' does not match desired pattern", response.DestinationAddress);
         }
 
         Uri _replyToAddress;
@@ -31,6 +32,7 @@ namespace MassTransit.ActiveMqTransport.Tests
 
         protected override void ConfigureActiveMqReceiveEndpoint(IActiveMqReceiveEndpointConfigurator configurator)
         {
+            TestTimeout = TimeSpan.FromMinutes(5);
             base.ConfigureActiveMqReceiveEndpoint(configurator);
             configurator.Handler<PingMessage>(async context =>
             {
@@ -54,6 +56,7 @@ namespace MassTransit.ActiveMqTransport.Tests
             Assert.IsNotNull(response);
             Assert.NotNull(_replyToAddress);
             Assert.IsTrue(_replyAddressPattern.IsMatch(_replyToAddress?.ToString()), "Reply address '{0}' does not match desired pattern", _replyToAddress);
+            Assert.IsTrue(_replyAddressPattern.IsMatch(response.DestinationAddress?.ToString()), "DestinationAddress address '{0}' does not match desired pattern", response.DestinationAddress);
         }
 
         Uri _replyToAddress;
@@ -73,7 +76,7 @@ namespace MassTransit.ActiveMqTransport.Tests
         {
             base.ConfigureActiveMqBus(configurator);
 
-            configurator.UseRawJsonSerializer(isDefault: true);
+            configurator.UseRawJsonSerializer(RawSerializerOptions.AddTransportHeaders, isDefault: true);
         }
     }
 

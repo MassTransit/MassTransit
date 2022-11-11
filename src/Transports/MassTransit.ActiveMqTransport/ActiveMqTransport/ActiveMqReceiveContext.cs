@@ -10,6 +10,7 @@
     public sealed class ActiveMqReceiveContext :
         BaseReceiveContext,
         ActiveMqMessageContext,
+        ReceiveContext,
         ReceiveLockContext
     {
         public ActiveMqReceiveContext(IMessage transportMessage, ActiveMqReceiveEndpointContext context, params object[] payloads)
@@ -31,6 +32,8 @@
         public string GroupId => TransportMessage is Message message ? message.GroupID : null;
 
         public int GroupSequence => TransportMessage is Message message ? message.GroupSequence : default;
+
+        public Uri InputAddress => TransportMessage.NMSDestination.ToUri();
 
         public Task Complete()
         {

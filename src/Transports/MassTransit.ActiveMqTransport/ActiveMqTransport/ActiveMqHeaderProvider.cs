@@ -20,7 +20,7 @@
         {
             yield return new KeyValuePair<string, object>(MessageHeaders.TransportMessageId, _message.NMSMessageId);
             yield return new KeyValuePair<string, object>(nameof(MessageContext.CorrelationId), _message.NMSCorrelationID);
-            yield return new KeyValuePair<string, object>(MessageHeaders.ResponseAddress, GetResponseAddress(_message.NMSReplyTo));
+            yield return new KeyValuePair<string, object>(MessageHeaders.ResponseAddress, _message.NMSReplyTo.ToUri());
 
             foreach (string key in _message.Properties.Keys)
             {
@@ -46,7 +46,7 @@
 
             if (MessageHeaders.ResponseAddress.Equals(key, StringComparison.OrdinalIgnoreCase))
             {
-                value = GetResponseAddress(_message.NMSReplyTo);
+                value = _message.NMSReplyTo.ToUri();
                 return true;
             }
 
@@ -59,17 +59,6 @@
 
             value = null;
             return false;
-        }
-
-        private static Uri GetResponseAddress(IDestination replyTo)
-        {
-            return replyTo switch
-            {
-                null => null,
-                IQueue queue => new Uri($"queue:{queue.QueueName}"),
-                ITopic topic => new Uri($"topic:{topic.TopicName}"),
-                _ => null
-            };
         }
     }
 }

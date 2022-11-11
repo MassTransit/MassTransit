@@ -81,6 +81,8 @@ namespace MassTransit.ActiveMqTransport
 
             var transportMessage = sessionContext.CreateBytesMessage();
 
+            await SetResponseTo(transportMessage, context, sessionContext);
+
             transportMessage.Content = context.Body.GetBytes();
 
             transportMessage.Properties.SetHeaders(context.Headers);
@@ -119,8 +121,6 @@ namespace MassTransit.ActiveMqTransport
                     transportMessage.Properties["AMQ_SCHEDULED_DELAY"] = (long)delay.Value;
             }
 
-            await SetResponseTo(transportMessage, context, sessionContext);
-
             var publishTask = Task.Run(() => producer.Send(transportMessage), context.CancellationToken);
 
             await publishTask.OrCanceled(context.CancellationToken).ConfigureAwait(false);
@@ -146,6 +146,7 @@ namespace MassTransit.ActiveMqTransport
                 }
             }
             transportMessage.NMSReplyTo = responseAddress;
+            context.ResponseAddress = new Uri($"queue:{((IQueue)responseAddress).QueueName}");
         }
 
         private static string GetPhysicalName(Uri address)
