@@ -29,5 +29,15 @@ namespace MassTransit
         {
             return context.Headers.Get(MessageHeaders.Quartz.PreviousSent, default(DateTimeOffset?));
         }
+
+        public static string? GetQuartzScheduleId(this ConsumeContext context)
+        {
+            return context.Headers.Get(MessageHeaders.Quartz.ScheduleId, default(string?));
+        }
+
+        public static string? GetQuartzScheduleGroup(this ConsumeContext context)
+        {
+            return context.Headers.Get(MessageHeaders.Quartz.ScheduleGroup, default(string?));
+        }
     }
 }

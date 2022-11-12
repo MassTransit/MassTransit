@@ -60,6 +60,25 @@
 
         [Test]
         [Explicit]
+        public async Task Should_contain_additional_headers_that_provide_schedule_key_context()
+        {
+            var scheduleId = Guid.NewGuid().ToString();
+
+            await Scheduler.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(10), new Done { Name = "Joe" });
+            ScheduledRecurringMessage<Interval> scheduledRecurringMessage =
+                await QuartzEndpoint.ScheduleRecurringSend(InputQueueAddress, new MySchedule(), new Interval { Name = "Joe" });
+
+            await _done;
+
+            Assert.Greater(_count, 0, "Expected to see at least one interval");
+
+
+            Assert.IsNotNull(_lastInterval.Headers.Get<string>(MessageHeaders.Quartz.ScheduleId, null));
+            Assert.IsNotNull(_lastInterval.Headers.Get<string>(MessageHeaders.Quartz.ScheduleGroup, null));
+        }
+
+        [Test]
+        [Explicit]
         public async Task Should_handle_now_properly()
         {
             await Scheduler.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(20), new Done {Name = "Joe"});
