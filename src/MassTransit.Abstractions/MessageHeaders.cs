@@ -197,6 +197,16 @@ namespace MassTransit
             /// When the previous message was sent
             /// </summary>
             public const string PreviousSent = "MT-Quartz-PreviousSent";
+
+            /// <summary>
+            /// Schedule identifier
+            /// </summary>
+            public const string ScheduleId = "MT-Quartz-ScheduleId";
+
+            /// <summary>
+            /// Schedule group
+            /// </summary>
+            public const string ScheduleGroup = "MT-Quartz-ScheduleGroup";
         }
     }
 }
