@@ -154,8 +154,11 @@ namespace MassTransit.QuartzIntegration
             if (_jobDataMap.TryGetValue("TokenId", out var tokenId))
                 headers.Set(MessageHeaders.SchedulingTokenId, tokenId);
 
-            headers.Set(MessageHeaders.Quartz.ScheduleId, _executionContext.JobDetail.Key.Name);
-            headers.Set(MessageHeaders.Quartz.ScheduleGroup, _executionContext.JobDetail.Key.Group);
+            if(!string.IsNullOrWhiteSpace(_executionContext.JobDetail.Key.Name))
+                headers.Set(MessageHeaders.Quartz.ScheduleId, _executionContext.JobDetail.Key.Name);
+
+            if(!string.IsNullOrWhiteSpace(_executionContext.JobDetail.Key.Group))
+                headers.Set(MessageHeaders.Quartz.ScheduleGroup, _executionContext.JobDetail.Key.Group);
 
             return headers;
         }
