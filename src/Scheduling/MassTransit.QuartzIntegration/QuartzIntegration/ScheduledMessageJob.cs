@@ -40,7 +40,7 @@ namespace MassTransit.QuartzIntegration
 
                 await endpoint.Send(scheduled, pipe, context.CancellationToken).ConfigureAwait(false);
 
-                LogContext.Debug?.Log("Schedule Executed: {Key} {Schedule}", context.JobDetail.Key, context.Trigger.GetNextFireTimeUtc());
+                LogContext.Debug?.Log("Schedule Executed: {Key} {Schedule}", context.Trigger.Key, context.Trigger.GetNextFireTimeUtc());
             }
             catch (Exception ex)
             {

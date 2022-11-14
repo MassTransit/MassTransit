@@ -4,6 +4,7 @@ namespace MassTransit.QuartzIntegration
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.Json;
+    using System.Threading;
     using System.Threading.Tasks;
     using Context;
     using Quartz;
@@ -16,7 +17,10 @@ namespace MassTransit.QuartzIntegration
         IConsumer<ScheduleMessage>,
         IConsumer<ScheduleRecurringMessage>
     {
+        const string ScheduleMessageJobId = "MassTransitScheduleMessageJob";
+
         readonly ISchedulerFactory _schedulerFactory;
+        JobKey? _jobKey;
 
         public ScheduleMessageConsumer(ISchedulerFactory schedulerFactory)
         {
@@ -25,65 +29,49 @@ namespace MassTransit.QuartzIntegration
 
         public async Task Consume(ConsumeContext<ScheduleMessage> context)
         {
-            var correlationId = context.Message.CorrelationId.ToString("N");
-
-            var jobKey = new JobKey(correlationId);
+            var jobKey = await EnsureJobExists(context.CancellationToken).ConfigureAwait(false);
 
             var messageBody = context.SerializerContext.GetMessageSerializer(context.Message.Payload, context.Message.PayloadType)
                 .GetMessageBody(new MessageSendContext<ScheduleMessage>(context.Message));
 
-            var jobDetail = await CreateJobDetail(context, context.Message.Destination, jobKey, messageBody, context.MessageId, context.Message.CorrelationId)
-                .ConfigureAwait(false);
-
+            var correlationId = context.Message.CorrelationId.ToString("N");
             var triggerKey = new TriggerKey(correlationId);
-            var trigger = TriggerBuilder.Create()
-                .ForJob(jobDetail)
+
+            var builder = TriggerBuilder.Create()
+                .ForJob(jobKey)
                 .StartAt(context.Message.ScheduledTime)
                 .WithSchedule(SimpleScheduleBuilder.Create().WithMisfireHandlingInstructionFireNow())
-                .WithIdentity(triggerKey)
-                .Build();
+                .WithIdentity(triggerKey);
+
+            var trigger = await PopulateTrigger(context, builder, messageBody, context.Message.Destination, context.MessageId, context.Message.CorrelationId)
+                .ConfigureAwait(false);
 
             var scheduler = await _schedulerFactory.GetScheduler(context.CancellationToken).ConfigureAwait(false);
 
             if (await scheduler.CheckExists(trigger.Key, context.CancellationToken).ConfigureAwait(false))
                 await scheduler.UnscheduleJob(trigger.Key, context.CancellationToken).ConfigureAwait(false);
 
-            await scheduler.ScheduleJob(jobDetail, trigger, context.CancellationToken).ConfigureAwait(false);
+            await scheduler.ScheduleJob(trigger, context.CancellationToken).ConfigureAwait(false);
 
-            LogContext.Debug?.Log("Scheduled: {Key} {Schedule}", jobKey, trigger.GetNextFireTimeUtc());
+            LogContext.Debug?.Log("Scheduled: {Key} {Schedule}", trigger.Key, trigger.GetNextFireTimeUtc());
         }
 
         public async Task Consume(ConsumeContext<ScheduleRecurringMessage> context)
         {
-            var jobKey = new JobKey(context.Message.Schedule.ScheduleId, context.Message.Schedule.ScheduleGroup);
+            var jobKey = await EnsureJobExists(context.CancellationToken).ConfigureAwait(false);
 
             var messageBody = context.SerializerContext.GetMessageSerializer(context.Message.Payload, context.Message.PayloadType)
                 .GetMessageBody(new MessageSendContext<ScheduleRecurringMessage>(context.Message));
 
-            var jobDetail = await CreateJobDetail(context, context.Message.Destination, jobKey, messageBody).ConfigureAwait(false);
+            var schedule = context.Message.Schedule;
+            var triggerKey = new TriggerKey("Recurring.Trigger." + schedule.ScheduleId, schedule.ScheduleGroup);
 
-            var triggerKey = new TriggerKey("Recurring.Trigger." + context.Message.Schedule.ScheduleId, context.Message.Schedule.ScheduleGroup);
-
-            var trigger = CreateTrigger(context.Message.Schedule, jobDetail, triggerKey);
-
-            var scheduler = await _schedulerFactory.GetScheduler(context.CancellationToken).ConfigureAwait(false);
-
-            if (await scheduler.CheckExists(triggerKey, context.CancellationToken).ConfigureAwait(false))
-                await scheduler.UnscheduleJob(triggerKey, context.CancellationToken).ConfigureAwait(false);
-
-            await scheduler.ScheduleJob(jobDetail, trigger, context.CancellationToken).ConfigureAwait(false);
-
-            LogContext.Debug?.Log("Scheduled: {Key} {Schedule}", jobKey, trigger.GetNextFireTimeUtc());
-        }
-
-        static ITrigger CreateTrigger(RecurringSchedule schedule, IJobDetail jobDetail, TriggerKey triggerKey)
-        {
             var tz = TimeZoneInfo.Local;
             if (!string.IsNullOrWhiteSpace(schedule.TimeZoneId) && schedule.TimeZoneId != tz.Id)
                 tz = TimeZoneUtil.FindTimeZoneById(schedule.TimeZoneId);
 
             var triggerBuilder = TriggerBuilder.Create()
-                .ForJob(jobDetail)
+                .ForJob(jobKey)
                 .WithIdentity(triggerKey)
                 .StartAt(schedule.StartTime)
                 .WithDescription(schedule.Description)
@@ -105,22 +93,26 @@ namespace MassTransit.QuartzIntegration
             if (schedule.EndTime.HasValue)
                 triggerBuilder.EndAt(schedule.EndTime);
 
-            return triggerBuilder.Build();
+            var trigger = await PopulateTrigger(context, triggerBuilder, messageBody, context.Message.Destination, context.MessageId,
+                context.Message.CorrelationId).ConfigureAwait(false);
+
+            var scheduler = await _schedulerFactory.GetScheduler(context.CancellationToken).ConfigureAwait(false);
+
+            if (await scheduler.CheckExists(triggerKey, context.CancellationToken).ConfigureAwait(false))
+                await scheduler.UnscheduleJob(triggerKey, context.CancellationToken).ConfigureAwait(false);
+
+            await scheduler.ScheduleJob(trigger, context.CancellationToken).ConfigureAwait(false);
+
+            LogContext.Debug?.Log("Scheduled: {Key} {Schedule}", triggerKey, trigger.GetNextFireTimeUtc());
         }
 
-        static async Task<IJobDetail> CreateJobDetail(ConsumeContext context, Uri destination, JobKey jobKey, MessageBody messageBody,
+        static async Task<ITrigger> PopulateTrigger(ConsumeContext context, TriggerBuilder builder, MessageBody messageBody, Uri destination,
             Guid? messageId = default, Guid? tokenId = default)
         {
-            var body = messageBody.GetString();
-
-            var contentType = context.ReceiveContext.ContentType.ToString();
-
-            var builder = JobBuilder.Create<ScheduledMessageJob>()
-                .RequestRecovery()
-                .WithIdentity(jobKey)
+            builder = builder
                 .UsingJobData("Destination", ToString(destination))
-                .UsingJobData("Body", body)
-                .UsingJobData("ContentType", contentType);
+                .UsingJobData("Body", messageBody.GetString())
+                .UsingJobData("ContentType", context.ReceiveContext.ContentType.ToString());
 
             if (messageId.HasValue)
                 builder = builder.UsingJobData("MessageId", messageId.Value.ToString());
@@ -156,10 +148,37 @@ namespace MassTransit.QuartzIntegration
             if (headers.Any())
                 builder = builder.UsingJobData("HeadersAsJson", JsonSerializer.Serialize(headers, SystemTextJsonMessageSerializer.Options));
 
-            var jobDetail = builder
+            var trigger = builder
                 .Build();
 
-            return jobDetail;
+            return trigger;
+        }
+
+        async Task<JobKey> EnsureJobExists(CancellationToken cancellationToken)
+        {
+            var jobKey = Volatile.Read(ref _jobKey);
+            if (jobKey != null)
+                return jobKey;
+
+            jobKey = new JobKey(ScheduleMessageJobId);
+
+            var scheduler = await _schedulerFactory.GetScheduler(cancellationToken).ConfigureAwait(false);
+
+            if (await scheduler.CheckExists(jobKey, cancellationToken).ConfigureAwait(false))
+                return jobKey;
+
+            var jobDetail = JobBuilder.Create<ScheduledMessageJob>()
+                .RequestRecovery()
+                .StoreDurably()
+                .WithIdentity(jobKey)
+                .WithDescription("MassTransit Scheduled Message Job")
+                .Build();
+
+            await scheduler.AddJob(jobDetail, true, cancellationToken).ConfigureAwait(false);
+
+            Interlocked.CompareExchange(ref _jobKey, jobKey, null);
+
+            return jobKey;
         }
 
         static string ToString(Uri? uri)
