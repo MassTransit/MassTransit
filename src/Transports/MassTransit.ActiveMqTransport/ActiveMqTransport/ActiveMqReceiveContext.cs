@@ -33,7 +33,7 @@
 
         public int GroupSequence => TransportMessage is Message message ? message.GroupSequence : default;
 
-        public Uri InputAddress => TransportMessage.NMSDestination.ToUri();
+        public Uri InputAddress => TransportMessage.NMSDestination.ToEndpointAddress();
 
         public Task Complete()
         {

@@ -20,7 +20,7 @@
         {
             yield return new KeyValuePair<string, object>(MessageHeaders.TransportMessageId, _message.NMSMessageId);
             yield return new KeyValuePair<string, object>(nameof(MessageContext.CorrelationId), _message.NMSCorrelationID);
-            yield return new KeyValuePair<string, object>(MessageHeaders.ResponseAddress, _message.NMSReplyTo.ToUri());
+            yield return new KeyValuePair<string, object>(MessageHeaders.ResponseAddress, _message.NMSReplyTo.ToEndpointAddress());
 
             foreach (string key in _message.Properties.Keys)
             {
@@ -46,7 +46,7 @@
 
             if (MessageHeaders.ResponseAddress.Equals(key, StringComparison.OrdinalIgnoreCase))
             {
-                value = _message.NMSReplyTo.ToUri();
+                value = _message.NMSReplyTo.ToEndpointAddress();
                 return true;
             }
 

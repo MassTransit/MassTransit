@@ -5,7 +5,7 @@
 
     public static class DestinationExtensions
     {
-        public static Uri? ToUri(this IDestination destination)
+        public static Uri? ToEndpointAddress(this IDestination destination)
         {
             return destination switch
             {
