@@ -172,16 +172,35 @@ namespace MassTransit.Analyzers.Helpers
 
                         if (sourceSymbol.SpecialType == SpecialType.System_String)
                             return true;
+
+                        return false;
                     }
 
-                    if (messageDataType.SpecialType == SpecialType.System_String && sourceSymbol.SpecialType == SpecialType.System_String)
-                        return true;
+                    if (messageDataType.SpecialType == SpecialType.System_String)
+                    {
+                        if (sourceSymbol.SpecialType == SpecialType.System_String)
+                            return true;
+
+                        return false;
+                    }
 
                     INamedTypeSymbol streamType = _semanticModel.Compilation.GetTypeByMetadataName(typeof(Stream).FullName);
-                    if (SymbolEqualityComparer.Default.Equals(messageDataType, streamType) && sourceSymbol.ImplementsType(streamType))
-                        return true;
+                    if (SymbolEqualityComparer.Default.Equals(messageDataType, streamType))
+                    {
+                        if (sourceSymbol.ImplementsType(streamType))
+                            return true;
 
-                    return false;
+                        return false;
+                    }
+
+                    if (messageDataType.IsReferenceType)
+                    {
+                        symbol = messageDataType;
+                        if (IsMessageData(sourceSymbol, out messageDataType))
+                            sourceSymbol = messageDataType;
+                    }
+
+                    continue;
                 }
 
                 if (sourceSymbol.InheritsFromType(symbol))
@@ -210,7 +229,7 @@ namespace MassTransit.Analyzers.Helpers
             return false;
         }
 
-        static bool IsMessageData(ITypeSymbol symbol, out ITypeSymbol result)
+        public static bool IsMessageData(ITypeSymbol symbol, out ITypeSymbol result)
         {
             if (symbol.TypeKind == TypeKind.Interface
                 && symbol.Name == "MessageData"

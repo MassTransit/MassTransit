@@ -1031,6 +1031,51 @@ namespace ConsoleApplication1
         }
 
         [Test]
+        public void WhenMessageDataTypesAreStructurallyCompatible_ShouldHaveNoDiagnostics()
+        {
+            var test = Usings + @"
+namespace ConsoleApplication1
+{
+    public class DataMessage
+    {
+        public Guid CorrelationId { get; set; }
+        public MessageData<DataDictionary> Dictionary { get; set; }
+    }
+
+    public class DataDictionary
+    {
+        public Dictionary<string, string> Values { get; set; }
+    }
+
+    class Program
+    {
+        static async Task Main()
+        {
+            var bus = Bus.Factory.CreateUsingInMemory(cfg => { });
+
+            var dataDictionary = new DataDictionary()
+            {
+                Values = new Dictionary<string, string>()
+                {
+                    { ""First"", ""1st"" },
+                    { ""Second"", ""2nd"" }
+                }
+            };
+
+            await bus.Publish<DataMessage>(new
+            {
+                CorrelationId = NewId.NextGuid(),
+                Dictionary = dataDictionary
+            });
+        }
+    }
+}
+";
+
+            VerifyCSharpDiagnostic(test);
+        }
+
+        [Test]
         public void WhenSimpleArrayTypesAreStructurallyIncompatibleAndNoMissingProperties_ShouldHaveDiagnostic()
         {
             var test = Usings + @"
