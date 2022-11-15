@@ -26,8 +26,8 @@ namespace MassTransit.Middleware.Outbox
             if (context.TryGetPayload(out MessageSchedulerContext schedulerContext))
             {
                 context.AddOrUpdatePayload<MessageSchedulerContext>(
-                    () => new ConsumeMessageSchedulerContext(this, schedulerContext.SchedulerFactory, context.ReceiveContext.InputAddress),
-                    existing => new ConsumeMessageSchedulerContext(this, existing.SchedulerFactory, context.ReceiveContext.InputAddress));
+                    () => new ConsumeMessageSchedulerContext(this, schedulerContext.SchedulerFactory),
+                    existing => new ConsumeMessageSchedulerContext(this, existing.SchedulerFactory));
             }
         }
 

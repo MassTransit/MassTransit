@@ -11,9 +11,9 @@
         readonly Uri _inputAddress;
         readonly Lazy<IMessageScheduler> _scheduler;
 
-        public ConsumeMessageSchedulerContext(ConsumeContext consumeContext, MessageSchedulerFactory schedulerFactory, Uri inputAddress)
+        public ConsumeMessageSchedulerContext(ConsumeContext consumeContext, MessageSchedulerFactory schedulerFactory)
         {
-            _inputAddress = inputAddress ?? throw new ArgumentNullException(nameof(inputAddress));
+            _inputAddress = consumeContext.ReceiveContext.InputAddress;
 
             SchedulerFactory = schedulerFactory;
 

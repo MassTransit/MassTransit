@@ -3,6 +3,7 @@ namespace MassTransit.Scheduling
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Middleware;
 
 
     public class ServiceBusScheduleMessageProvider :
@@ -13,6 +14,13 @@ namespace MassTransit.Scheduling
         public ServiceBusScheduleMessageProvider(ISendEndpointProvider sendEndpointProvider)
         {
             _sendEndpointProvider = sendEndpointProvider;
+        }
+
+        public ServiceBusScheduleMessageProvider(ConsumeContext consumeContext)
+        {
+            var context = InternalOutboxExtensions.SkipOutbox(consumeContext);
+
+            _sendEndpointProvider = context;
         }
 
         public async Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, IPipe<SendContext<T>> pipe,

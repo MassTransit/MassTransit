@@ -7,6 +7,7 @@ namespace MassTransit.Context
     using System.Threading.Tasks;
     using Events;
     using Metadata;
+    using Middleware;
     using Transports;
 
 
@@ -257,7 +258,7 @@ namespace MassTransit.Context
 
                 var faultPipe = new FaultPipe<T>(context);
 
-                var faultContext = context.SkipOutbox();
+                var faultContext = InternalOutboxExtensions.SkipOutbox(context);
 
                 var faultEndpoint = await faultContext.GetFaultEndpoint<T>().ConfigureAwait(false);
 

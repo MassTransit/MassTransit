@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.Clients
 {
     using System.Threading.Tasks;
+    using Middleware;
 
 
     public class PublishRequestSendEndpoint<TRequest> :

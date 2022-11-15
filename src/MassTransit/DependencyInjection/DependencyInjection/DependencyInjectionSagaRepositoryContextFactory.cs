@@ -74,9 +74,9 @@ namespace MassTransit.DependencyInjection
 
                     if (scopeContext.TryGetPayload(out MessageSchedulerContext schedulerContext))
                     {
-                        context.AddOrUpdatePayload<MessageSchedulerContext>(
-                            () => new ConsumeMessageSchedulerContext(scopeContext, schedulerContext.SchedulerFactory, context.ReceiveContext.InputAddress),
-                            existing => new ConsumeMessageSchedulerContext(scopeContext, existing.SchedulerFactory, context.ReceiveContext.InputAddress));
+                        scopeContext.AddOrUpdatePayload<MessageSchedulerContext>(
+                            () => new ConsumeMessageSchedulerContext(scopeContext, schedulerContext.SchedulerFactory),
+                            existing => new ConsumeMessageSchedulerContext(scopeContext, existing.SchedulerFactory));
                     }
 
                     serviceScope.SetCurrentConsumeContext(scopeContext);

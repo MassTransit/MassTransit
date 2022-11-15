@@ -1,11 +1,10 @@
-namespace MassTransit
+namespace MassTransit.Middleware
 {
-    using Middleware;
-    using Middleware.InMemoryOutbox;
+    using InMemoryOutbox;
     using Transports;
 
 
-    static class InternalOutboxExtensions
+    public static class InternalOutboxExtensions
     {
         internal static ISendEndpoint SkipOutbox(this ISendEndpoint endpoint)
         {
@@ -21,7 +20,7 @@ namespace MassTransit
             return endpoint;
         }
 
-        internal static ConsumeContext SkipOutbox(this ConsumeContext context)
+        public static ConsumeContext SkipOutbox(ConsumeContext context)
         {
             while (context.TryGetPayload<InMemoryOutboxConsumeContext>(out var outboxConsumeContext))
                 context = outboxConsumeContext.CapturedContext;

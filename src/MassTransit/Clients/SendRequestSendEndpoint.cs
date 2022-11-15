@@ -2,6 +2,7 @@
 {
     using System;
     using System.Threading.Tasks;
+    using Middleware;
 
 
     public class SendRequestSendEndpoint<TRequest> :

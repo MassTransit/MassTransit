@@ -31,8 +31,9 @@ namespace MassTransit.Middleware.InMemoryOutbox
 
             if (context.TryGetPayload(out MessageSchedulerContext schedulerContext))
             {
-                _outboxSchedulerContext = new InMemoryOutboxMessageSchedulerContext(schedulerContext, _clearToSend.Task);
-                context.AddOrUpdatePayload(() => _outboxSchedulerContext, _ => _outboxSchedulerContext);
+                _outboxSchedulerContext = (InMemoryOutboxMessageSchedulerContext)context.AddOrUpdatePayload<MessageSchedulerContext>(
+                    () => new InMemoryOutboxMessageSchedulerContext(context, schedulerContext.SchedulerFactory, _clearToSend.Task),
+                    existing => new InMemoryOutboxMessageSchedulerContext(context, existing.SchedulerFactory, _clearToSend.Task));
             }
         }
 

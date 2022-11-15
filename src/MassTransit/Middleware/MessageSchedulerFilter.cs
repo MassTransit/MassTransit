@@ -19,20 +19,24 @@ namespace MassTransit.Middleware
             _schedulerAddress = schedulerAddress;
         }
 
-        void IProbeSite.Probe(ProbeContext context)
+        public void Probe(ProbeContext context)
         {
             var scope = context.CreateFilterScope("scheduler");
             scope.Add("type", "send");
             scope.Add("address", _schedulerAddress);
         }
 
-        Task IFilter<ConsumeContext>.Send(ConsumeContext context, IPipe<ConsumeContext> next)
+        public Task Send(ConsumeContext context, IPipe<ConsumeContext> next)
         {
-            context.GetOrAddPayload<MessageSchedulerContext>(() => new ConsumeMessageSchedulerContext(context,
-                x => new MessageScheduler(new EndpointScheduleMessageProvider(() => x.GetSendEndpoint(_schedulerAddress)), x.GetPayload<IBusTopology>()),
-                context.ReceiveContext.InputAddress));
+            context.GetOrAddPayload<MessageSchedulerContext>(() => new ConsumeMessageSchedulerContext(context, SchedulerFactory));
 
             return next.Send(context);
+        }
+
+        IMessageScheduler SchedulerFactory(ConsumeContext context)
+        {
+            return new MessageScheduler(new EndpointScheduleMessageProvider(() => context.GetSendEndpoint(_schedulerAddress)),
+                context.GetPayload<IBusTopology>());
         }
     }
 }
