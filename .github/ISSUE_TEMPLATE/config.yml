@@ -1,11 +1,14 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Live Chat (on Discord)
-    url: https://discord.gg/rNpQgYn
-    about: Live chat room for questions and conversation
+  - name: Commercial Support
+    url: https://masstransit-project.com/learn/support.html
+    about: For commerial support services, including architectural guidance, code review, and troubleshooting
   - name: GitHub Discussions
     url: https://github.com/MassTransit/MassTransit/discussions
     about: Submit questions, ideas, or general conversation topics
+  - name: Live Chat (on Discord)
+    url: https://discord.gg/rNpQgYn
+    about: Live chat room for questions and conversation
   - name: Stack Overflow
     url: https://stackoverflow.com/questions/tagged/masstransit
     about: Questions and answers, search to see if your question has already been answered
