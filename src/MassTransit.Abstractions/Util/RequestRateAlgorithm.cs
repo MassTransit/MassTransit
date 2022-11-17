@@ -26,6 +26,7 @@ namespace MassTransit.Util
 
 
         readonly int _concurrentResultLimit;
+        readonly CancellationTokenSource _disposeToken;
         readonly RequestRateAlgorithmOptions _options;
         readonly SemaphoreSlim? _rateLimitSemaphore;
         readonly Timer? _rateLimitTimer;
@@ -38,8 +39,8 @@ namespace MassTransit.Util
         readonly Dictionary<long, Task> _tasks;
 
         int _activeRequestCount;
-
         int _count;
+        bool _disposed;
         int _maxRequestCount;
         long _nextId;
         int _pendingResultCount;
@@ -55,6 +56,8 @@ namespace MassTransit.Util
 
             _options = options;
 
+
+            _disposeToken = new CancellationTokenSource();
             _requestCount = 1;
             _requestSemaphore = new SemaphoreSlim(_requestCount);
 
@@ -110,6 +113,11 @@ namespace MassTransit.Util
 
         public void Dispose()
         {
+            if (_disposed)
+                return;
+
+            _disposed = true;
+
             _rateLimitTimer?.Dispose();
             _rateLimitSemaphore?.Dispose();
 
@@ -314,11 +322,13 @@ namespace MassTransit.Util
         {
             try
             {
-                await _requestSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+                using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _disposeToken.Token);
+
+                await _requestSemaphore.WaitAsync(linked.Token).ConfigureAwait(false);
 
                 if (_rateLimitSemaphore != null)
                 {
-                    await _rateLimitSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+                    await _rateLimitSemaphore.WaitAsync(linked.Token).ConfigureAwait(false);
 
                     Interlocked.Increment(ref _count);
                 }
@@ -348,7 +358,8 @@ namespace MassTransit.Util
             }
             catch (OperationCanceledException)
             {
-                _requestSemaphore.Release();
+                if (!_disposed)
+                    _requestSemaphore.Release();
 
                 throw;
             }
@@ -364,6 +375,9 @@ namespace MassTransit.Util
 
                 Monitor.PulseAll(_requestLock);
             }
+
+            if (_disposed)
+                return Task.CompletedTask;
 
             _requestSemaphore.Release();
 
@@ -395,6 +409,9 @@ namespace MassTransit.Util
                 Monitor.PulseAll(_requestLock);
             }
 
+            if (_disposed)
+                return;
+
             _requestSemaphore.Release();
         }
 
@@ -405,6 +422,9 @@ namespace MassTransit.Util
 
             if (_rateLimitSemaphore == null)
                 throw new InvalidOperationException("Rate limit can only be changed when an original rate limit was specified.");
+
+            if (_disposed)
+                throw new ObjectDisposedException("The RequestRateAlgorithm was disposed");
 
             var previousLimit = _rateLimit;
             if (newRateLimit > previousLimit)
@@ -417,9 +437,11 @@ namespace MassTransit.Util
             }
             else
             {
+                using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _disposeToken.Token);
+
                 for (; previousLimit > newRateLimit; previousLimit--)
                 {
-                    await _rateLimitSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+                    await _rateLimitSemaphore.WaitAsync(linked.Token).ConfigureAwait(false);
 
                     Interlocked.Decrement(ref _rateLimit);
                 }
@@ -442,9 +464,11 @@ namespace MassTransit.Util
             }
             else
             {
+                using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _disposeToken.Token);
+
                 for (; previousRequestCount > newRequestCount; previousRequestCount--)
                 {
-                    await _requestSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+                    await _requestSemaphore.WaitAsync(linked.Token).ConfigureAwait(false);
 
                     Interlocked.Decrement(ref _rateLimit);
                 }
