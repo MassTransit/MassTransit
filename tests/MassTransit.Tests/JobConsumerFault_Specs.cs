@@ -69,6 +69,8 @@ namespace MassTransit.Tests
             var provider = new ServiceCollection()
                 .AddMassTransitTestHarness(x =>
                 {
+                    x.SetTestTimeouts(testInactivityTimeout: TimeSpan.FromSeconds(10));
+
                     x.SetKebabCaseEndpointNameFormatter();
 
                     x.AddConsumer<OddJobFaultConsumer>();
@@ -92,10 +94,6 @@ namespace MassTransit.Tests
                     });
                 })
                 .BuildServiceProvider(true);
-
-            var harness = provider.GetTestHarness();
-
-            harness.TestInactivityTimeout = TimeSpan.FromSeconds(10);
 
             return provider;
         }

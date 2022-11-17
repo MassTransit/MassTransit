@@ -49,6 +49,7 @@ namespace MassTransit
                 new TextWriterLoggerFactory(textWriter, provider.GetRequiredService<IOptions<TextWriterLoggerOptions>>()));
             services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
 
+            services.AddOptions<TestHarnessOptions>();
             services.AddBusObserver<ContainerTestHarnessBusObserver>();
             services.TryAddSingleton<ITestHarness>(provider => provider.GetService<ContainerTestHarness>());
             services.TryAddSingleton<ContainerTestHarness>();
@@ -95,6 +96,28 @@ namespace MassTransit
                     });
                 }
             });
+        }
+
+        /// <summary>
+        /// Specify the test and/or the test inactivity timeouts that should be used by the test harness.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="testTimeout">If specified, changes the test timeout</param>
+        /// <param name="testInactivityTimeout">If specified, changes the test inactivity timeout</param>
+        /// <returns></returns>
+        public static IBusRegistrationConfigurator SetTestTimeouts(this IBusRegistrationConfigurator configurator, TimeSpan? testTimeout = default,
+            TimeSpan? testInactivityTimeout = default)
+        {
+            configurator.AddOptions<TestHarnessOptions>()
+                .Configure(options =>
+                {
+                    if (testTimeout.HasValue)
+                        options.TestTimeout = testTimeout.Value;
+                    if (testInactivityTimeout.HasValue)
+                        options.TestInactivityTimeout = testInactivityTimeout.Value;
+                });
+
+            return configurator;
         }
 
         static void RegisterConsumerTestHarnesses(IServiceCollection services)

@@ -31,8 +31,6 @@ namespace MassTransit.Tests
 
             var harness = provider.GetTestHarness();
 
-            harness.TestInactivityTimeout = TimeSpan.FromSeconds(1);
-
             await harness.Start();
 
             IRequestClient<PingMessage> client = harness.GetRequestClient<PingMessage>();
