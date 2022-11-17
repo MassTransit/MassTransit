@@ -52,6 +52,15 @@ services.Configure<MassTransitHostOptions>(options =>
 });
 ```
 
+::: tip Generic Host
+The .NET Generic Host has its own internal timers for shutdown, etc. that may also need to be adjusted:
+
+```cs
+services.Configure<HostOptions>(
+        opts => opts.ShutdownTimeout = TimeSpan.FromMinutes(1));
+```
+:::
+
 > In addition to the hosted service, .NET health checks are added as well, and may be included on health check endpoints.
 
 ### Observers
