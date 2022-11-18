@@ -21,6 +21,7 @@ namespace MassTransit
         const string AlternateExchangeKey = "alternateexchange";
         const string BindExchangeKey = "bindexchange";
         const string DelayedTypeKey = "delayedtype";
+        const string SingleActiveConsumerKey = "singleactiveconsumer";
 
         const string DelayedMessageExchangeType = "x-delayed-message";
 
@@ -34,6 +35,7 @@ namespace MassTransit
         public readonly bool Durable;
         public readonly bool AutoDelete;
         public readonly bool BindToQueue;
+        public readonly bool SingleActiveConsumer;
         public readonly string QueueName;
         public readonly string DelayedType;
         public readonly string[] BindExchanges;
@@ -48,6 +50,7 @@ namespace MassTransit
 
             Durable = true;
             AutoDelete = false;
+            SingleActiveConsumer = false;
             ExchangeType = RabbitMQ.Client.ExchangeType.Fanout;
 
             BindToQueue = false;
@@ -133,6 +136,10 @@ namespace MassTransit
                     case BindExchangeKey when !string.IsNullOrWhiteSpace(value):
                         bindExchanges.Add(value);
                         break;
+
+                    case SingleActiveConsumerKey when bool.TryParse(value, out var result):
+                        SingleActiveConsumer = result;
+                        break;
                 }
             }
 
@@ -142,7 +149,7 @@ namespace MassTransit
 
         public RabbitMqEndpointAddress(Uri hostAddress, string exchangeName, string exchangeType = default, bool durable = true, bool autoDelete = false,
             bool bindToQueue = false, string queueName = default, string delayedType = default, string[] bindExchanges = default,
-            string alternateExchange = default)
+            string alternateExchange = default, bool singleActiveConsumer = false)
         {
             ParseLeft(hostAddress, out Scheme, out Host, out Port, out VirtualHost);
 
@@ -151,6 +158,7 @@ namespace MassTransit
 
             Durable = durable;
             AutoDelete = autoDelete;
+            SingleActiveConsumer = singleActiveConsumer;
             BindToQueue = bindToQueue;
             QueueName = queueName;
             DelayedType = delayedType;
@@ -159,7 +167,8 @@ namespace MassTransit
         }
 
         RabbitMqEndpointAddress(string scheme, string host, int? port, string virtualHost, string name, string exchangeType, bool durable,
-            bool autoDelete, bool bindToQueue, string queueName, string delayedType, string[] bindExchanges, string alternateExchange)
+            bool autoDelete, bool bindToQueue, string queueName, string delayedType, string[] bindExchanges, string alternateExchange,
+            bool singleActiveConsumer)
         {
             Scheme = scheme;
             Host = host;
@@ -169,6 +178,7 @@ namespace MassTransit
             ExchangeType = exchangeType;
             Durable = durable;
             AutoDelete = autoDelete;
+            SingleActiveConsumer = singleActiveConsumer;
             BindToQueue = bindToQueue;
             QueueName = queueName;
             DelayedType = delayedType;
@@ -181,7 +191,7 @@ namespace MassTransit
             var name = $"{Name}_delay";
 
             return new RabbitMqEndpointAddress(Scheme, Host, Port, VirtualHost, name, DelayedMessageExchangeType, Durable, AutoDelete, false,
-                default, ExchangeType, BindExchanges, AlternateExchange);
+                default, ExchangeType, BindExchanges, AlternateExchange, SingleActiveConsumer);
         }
 
         public Uri ToShortAddress()
@@ -261,6 +271,9 @@ namespace MassTransit
                 foreach (var binding in BindExchanges)
                     yield return $"{BindExchangeKey}={binding}";
             }
+
+            if (SingleActiveConsumer)
+                yield return $"{SingleActiveConsumerKey}=true";
         }
     }
 }
