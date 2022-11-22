@@ -2,6 +2,7 @@ namespace MassTransit.Serialization.JsonConverters
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Text.Json;
     using System.Text.Json.Serialization;
 
@@ -45,49 +46,64 @@ namespace MassTransit.Serialization.JsonConverters
 
         static void WriteValue(Utf8JsonWriter writer, string key, object objectValue, JsonSerializerOptions options)
         {
-            if (key != null)
-                writer.WritePropertyName(key);
+            if (key == null || objectValue == null)
+                return;
 
             switch (objectValue)
             {
-                case string stringValue:
-                    writer.WriteStringValue(stringValue);
+                case string value:
+                    writer.WriteString(key, value);
                     break;
-                case DateTime dateTime:
-                    writer.WriteStringValue(dateTime);
+                case DateTime value:
+                    if (value != default)
+                        writer.WriteString(key, value);
                     break;
-                case DateTimeOffset dateTime:
-                    writer.WriteStringValue(dateTime);
+                case DateTimeOffset value:
+                    if (value != default)
+                        writer.WriteString(key, value);
                     break;
-                case Guid guid:
-                    writer.WriteStringValue(guid.ToString("D"));
+                case Guid value:
+                    if (value != default)
+                        writer.WriteString(key, value.ToString("D"));
                     break;
-                case long longValue:
-                    writer.WriteNumberValue(longValue);
+                case long value:
+                    if (value != default)
+                        writer.WriteNumber(key, value);
                     break;
-                case int intValue:
-                    writer.WriteNumberValue(intValue);
+                case int value:
+                    if (value != default)
+                        writer.WriteNumber(key, value);
                     break;
-                case short shortValue:
-                    writer.WriteNumberValue(shortValue);
+                case short value:
+                    if (value != default)
+                        writer.WriteNumber(key, value);
                     break;
-                case byte byteValue:
-                    writer.WriteNumberValue(byteValue);
+                case byte value:
+                    if (value != default)
+                        writer.WriteNumber(key, value);
                     break;
-                case float floatValue:
-                    writer.WriteNumberValue(floatValue);
+                case float value:
+                    writer.WriteNumber(key, value);
                     break;
-                case double doubleValue:
-                    writer.WriteNumberValue(doubleValue);
+                case double value:
+                    writer.WriteNumber(key, value);
                     break;
-                case decimal decimalValue:
-                    writer.WriteNumberValue(decimalValue);
+                case decimal value:
+                    if (value != default)
+                    {
+                        var text = Convert.ToString(value, CultureInfo.InvariantCulture);
+                        if (!string.IsNullOrWhiteSpace(text))
+                            writer.WriteString(key, text);
+                    }
+
                     break;
-                case bool boolValue:
-                    writer.WriteBooleanValue(boolValue);
+                case bool value:
+                    if (value)
+                        writer.WriteBoolean(key, value);
                     break;
 
                 default:
+                    writer.WritePropertyName(key);
                     JsonSerializer.Serialize(writer, objectValue, options);
                     break;
             }
