@@ -249,11 +249,14 @@ module.exports = {
         ]
       },
       {
+        title: 'Support',
+        path: '/support'
+      },
+      {
         title: 'Getting Help',
         path: '/learn/',
         collapsable: true,
         children: [
-          '/learn/support',
           '/troubleshooting/common-gotchas',
           '/troubleshooting/show-config',
           '/learn/analyzers',
