@@ -2,7 +2,6 @@ namespace MassTransit.DependencyInjection.Registration
 {
     using System;
     using Configuration;
-    using Util.Scanning;
 
 
     class RegistrationFilter :
@@ -36,6 +35,11 @@ namespace MassTransit.DependencyInjection.Registration
         }
 
         public bool Matches(IFutureRegistration registration)
+        {
+            return _filter.Matches(registration.Type);
+        }
+
+        public bool Matches(IEndpointRegistration registration)
         {
             return _filter.Matches(registration.Type);
         }

@@ -10,5 +10,6 @@ namespace MassTransit.DependencyInjection.Registration
         bool Matches(IExecuteActivityRegistration registration);
         bool Matches(IActivityRegistration registration);
         bool Matches(IFutureRegistration registration);
+        bool Matches(IEndpointRegistration registration);
     }
 }

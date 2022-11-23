@@ -3,7 +3,6 @@ namespace MassTransit.DependencyInjection.Registration
     using System;
     using System.Linq;
     using Configuration;
-    using Util.Scanning;
 
 
     public class RegistrationFilterConfigurator :

@@ -78,6 +78,7 @@ namespace MassTransit.Configuration
                 .ToList();
 
             var endpointsWithName = Selector.GetRegistrations<IEndpointRegistration>(this)
+                .Where(x => registrationFilter.Matches(x) && !WasConfigured(x.Type))
                 .Select(x => x.GetDefinition(this))
                 .Select(x => new
                 {

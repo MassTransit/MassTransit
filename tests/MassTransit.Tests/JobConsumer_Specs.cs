@@ -29,6 +29,16 @@ namespace MassTransit.Tests
                     await Task.Delay(context.Job.Duration, context.CancellationToken);
             }
         }
+
+
+        public class OddJobCompletedConsumer :
+            IConsumer<JobCompleted<OddJob>>
+        {
+            public Task Consume(ConsumeContext<JobCompleted<OddJob>> context)
+            {
+                return Task.CompletedTask;
+            }
+        }
     }
 
 
@@ -62,6 +72,8 @@ namespace MassTransit.Tests
 
             Assert.That(await harness.Published.Any<JobCompleted>(), Is.True);
             Assert.That(await harness.Published.Any<JobCompleted<OddJob>>(), Is.True);
+
+            await harness.Stop();
         }
 
         [Test]
@@ -91,6 +103,9 @@ namespace MassTransit.Tests
             await harness.Bus.Publish<CancelJob>(new { JobId = jobId });
 
             Assert.That(await harness.Published.Any<JobCanceled>(), Is.True);
+
+            await harness.Stop();
+
         }
 
         [Test]
@@ -126,6 +141,8 @@ namespace MassTransit.Tests
             await harness.Bus.Publish<RetryJob>(new { JobId = jobId });
             Assert.That(await harness.Published.Any<JobCompleted>(), Is.True);
             Assert.That(await harness.Published.Any<JobCompleted<OddJob>>(), Is.True);
+
+            await harness.Stop();
         }
 
         [Test]
@@ -167,6 +184,8 @@ namespace MassTransit.Tests
             jobState = await stateClient.GetResponse<JobState>(new { JobId = jobId });
 
             Assert.That(jobState.Message.CurrentState, Is.EqualTo("Canceled"));
+
+            await harness.Stop();
         }
 
         [Test]
@@ -186,6 +205,8 @@ namespace MassTransit.Tests
             var jobState = await stateClient.GetJobState(jobId);
 
             Assert.That(jobState.CurrentState, Is.EqualTo("NotFound"));
+
+            await harness.Stop();
         }
 
         [Test]
@@ -230,6 +251,8 @@ namespace MassTransit.Tests
 
             await harness.Bus.Publish<CancelJob>(new { JobId = previousJobId });
             Assert.That(await harness.Published.Any<JobCanceled>(x => x.Context.Message.JobId == previousJobId), Is.True);
+
+            await harness.Stop();
         }
 
         static ServiceProvider SetupServiceCollection()
@@ -240,6 +263,8 @@ namespace MassTransit.Tests
                     x.SetKebabCaseEndpointNameFormatter();
 
                     x.AddConsumer<OddJobConsumer>();
+                    x.AddConsumer<OddJobCompletedConsumer>()
+                        .Endpoint(e => e.ConcurrentMessageLimit = 1);
 
                     x.UsingInMemory((context, cfg) =>
                     {
