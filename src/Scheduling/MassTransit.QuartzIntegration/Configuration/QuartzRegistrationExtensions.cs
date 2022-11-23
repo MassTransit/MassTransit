@@ -28,6 +28,8 @@ namespace MassTransit
 
             configurator.AddConsumer<ScheduleMessageConsumer, ScheduleMessageConsumerDefinition>();
             configurator.AddConsumer<CancelScheduledMessageConsumer, CancelScheduledMessageConsumerDefinition>();
+            configurator.AddConsumer<PauseScheduledMessageConsumer, PauseScheduledMessageConsumerDefinition>();
+            configurator.AddConsumer<ResumeScheduledMessageConsumer, ResumeScheduledMessageConsumerDefinition>();
         }
 
         /// <summary>
@@ -39,6 +41,8 @@ namespace MassTransit
         {
             configurator.ConfigureConsumer<ScheduleMessageConsumer>(context);
             configurator.ConfigureConsumer<CancelScheduledMessageConsumer>(context);
+            configurator.ConfigureConsumer<PauseScheduledMessageConsumer>(context);
+            configurator.ConfigureConsumer<ResumeScheduledMessageConsumer>(context);
         }
     }
 }

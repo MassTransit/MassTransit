@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using Saga;
 
 
     [TestFixture]
@@ -23,7 +22,7 @@
 
                 tasks.Add(await ConnectPublishHandler<Stopped>(context => context.Message.CorrelationId == correlationId));
 
-                await InputQueueSendEndpoint.Send(new Start {CorrelationId = correlationId});
+                await InputQueueSendEndpoint.Send(new Start { CorrelationId = correlationId });
             }
 
             await Task.WhenAll(tasks.ToArray());
@@ -76,13 +75,13 @@
 
                 Initially(
                     When(Started)
-                        .Schedule(StopSchedule, context => new Stop {CorrelationId = context.Instance.CorrelationId})
+                        .Schedule(StopSchedule, context => new Stop { CorrelationId = context.Instance.CorrelationId })
                         .Then(context => Console.WriteLine($"Started: {context.Instance.CorrelationId}"))
                         .TransitionTo(Running));
 
                 During(Running,
                     When(Stopped)
-                        .Publish(context => new Stopped {CorrelationId = context.Instance.CorrelationId})
+                        .Publish(context => new Stopped { CorrelationId = context.Instance.CorrelationId })
                         .Then(context => Console.WriteLine($"Stopped: {context.Instance.CorrelationId}"))
                         .Finalize());
 

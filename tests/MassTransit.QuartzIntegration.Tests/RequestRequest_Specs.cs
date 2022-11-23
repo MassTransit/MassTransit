@@ -6,7 +6,6 @@ namespace MassTransit.QuartzIntegration.Tests
     using Contracts;
     using LongRunningRequestTest;
     using NUnit.Framework;
-    using Saga;
 
 
     [TestFixture]

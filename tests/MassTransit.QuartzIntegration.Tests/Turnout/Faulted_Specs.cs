@@ -3,7 +3,6 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
     using System;
     using System.Threading.Tasks;
     using Contracts.JobService;
-    using JobService;
     using NUnit.Framework;
     using Scheduling;
     using TestFramework;
@@ -29,7 +28,7 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
             Response<JobSubmissionAccepted> response = await requestClient.GetResponse<JobSubmissionAccepted>(new
             {
                 JobId = _jobId,
-                Job = new {Duration = TimeSpan.FromSeconds(1)}
+                Job = new { Duration = TimeSpan.FromSeconds(1) }
             });
 
             Assert.That(response.Message.JobId, Is.EqualTo(_jobId));
@@ -126,7 +125,7 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
             Response<JobSubmissionAccepted> response = await requestClient.GetResponse<JobSubmissionAccepted>(new
             {
                 JobId = _jobId,
-                Job = new {Duration = TimeSpan.FromSeconds(1)}
+                Job = new { Duration = TimeSpan.FromSeconds(1) }
             });
 
             Assert.That(response.Message.JobId, Is.EqualTo(_jobId));
@@ -234,7 +233,7 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
             Response<JobSubmissionAccepted> response = await requestClient.GetResponse<JobSubmissionAccepted>(new
             {
                 JobId = _jobId,
-                Job = new {Duration = TimeSpan.FromSeconds(1)}
+                Job = new { Duration = TimeSpan.FromSeconds(1) }
             });
 
             Assert.That(response.Message.JobId, Is.EqualTo(_jobId));
@@ -349,7 +348,7 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
             Response<JobSubmissionAccepted> response = await requestClient.GetResponse<JobSubmissionAccepted>(new
             {
                 JobId = _jobId,
-                Job = new {Duration = TimeSpan.FromSeconds(1)}
+                Job = new { Duration = TimeSpan.FromSeconds(1) }
             });
 
             Assert.That(response.Message.JobId, Is.EqualTo(_jobId));

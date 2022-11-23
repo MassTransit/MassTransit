@@ -53,6 +53,8 @@
                 });
                 e.Consumer(() =>
                     new ScheduleRecurringMessageConsumer(options.ComponentResolver.RecurringJobManager, options.ComponentResolver.TimeZoneResolver));
+                e.Consumer(() => new PauseScheduledRecurringMessageConsumer(options.ComponentResolver.RecurringJobManager, options.ComponentResolver.JobStorage));
+                e.Consumer(() => new ResumeScheduledRecurringMessageConsumer(options.ComponentResolver.RecurringJobManager, options.ComponentResolver.JobStorage));
 
                 var observer = new SchedulerBusObserver(options);
                 configurator.ConnectBusObserver(observer);

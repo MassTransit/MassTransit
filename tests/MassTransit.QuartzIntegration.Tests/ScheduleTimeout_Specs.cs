@@ -5,7 +5,6 @@
         using System;
         using System.Threading.Tasks;
         using NUnit.Framework;
-        using Saga;
         using Testing;
 
 
@@ -20,13 +19,13 @@
 
                 var memberNumber = NewId.NextGuid().ToString();
 
-                await InputQueueSendEndpoint.Send<CartItemAdded>(new {MemberNumber = memberNumber});
+                await InputQueueSendEndpoint.Send<CartItemAdded>(new { MemberNumber = memberNumber });
 
                 Guid? saga = await _repository.ShouldContainSagaInState(x => x.MemberNumber == memberNumber, _machine, _machine.Active, TestTimeout);
 
                 Assert.IsTrue(saga.HasValue);
 
-                await InputQueueSendEndpoint.Send<OrderSubmitted>(new {MemberNumber = memberNumber});
+                await InputQueueSendEndpoint.Send<OrderSubmitted>(new { MemberNumber = memberNumber });
 
                 ConsumeContext<CartRemoved> removed = await handler;
 
@@ -40,7 +39,7 @@
 
                 var memberNumber = NewId.NextGuid().ToString();
 
-                await InputQueueSendEndpoint.Send<CartItemAdded>(new {MemberNumber = memberNumber});
+                await InputQueueSendEndpoint.Send<CartItemAdded>(new { MemberNumber = memberNumber });
 
                 ConsumeContext<CartRemoved> removed = await handler;
             }
@@ -52,13 +51,13 @@
 
                 var memberNumber = NewId.NextGuid().ToString();
 
-                await InputQueueSendEndpoint.Send<CartItemAdded>(new {MemberNumber = memberNumber});
+                await InputQueueSendEndpoint.Send<CartItemAdded>(new { MemberNumber = memberNumber });
 
                 Guid? saga = await _repository.ShouldContainSagaInState(x => x.MemberNumber == memberNumber, _machine, _machine.Active, TestTimeout);
 
                 Assert.IsTrue(saga.HasValue);
 
-                await InputQueueSendEndpoint.Send<CartItemAdded>(new {MemberNumber = memberNumber});
+                await InputQueueSendEndpoint.Send<CartItemAdded>(new { MemberNumber = memberNumber });
 
                 ConsumeContext<CartRemoved> removed = await handler;
             }

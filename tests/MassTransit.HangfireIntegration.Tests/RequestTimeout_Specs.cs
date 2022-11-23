@@ -4,7 +4,6 @@ namespace MassTransit.HangfireIntegration.Tests
     using System.Threading.Tasks;
     using NUnit.Framework;
     using Request_Specs;
-    using Saga;
     using Testing;
 
 

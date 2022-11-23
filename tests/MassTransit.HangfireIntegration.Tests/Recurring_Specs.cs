@@ -17,9 +17,9 @@
         {
             var scheduleId = Guid.NewGuid().ToString();
 
-            await Scheduler.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(11), new Done {Name = "Joe"});
+            await Scheduler.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(11), new Done { Name = "Joe" });
             ScheduledRecurringMessage<Interval> scheduledRecurringMessage =
-                await HangfireEndpoint.ScheduleRecurringSend(InputQueueAddress, new MyCancelableSchedule(scheduleId), new Interval {Name = "Joe"});
+                await HangfireEndpoint.ScheduleRecurringSend(InputQueueAddress, new MyCancelableSchedule(scheduleId), new Interval { Name = "Joe" });
 
             await _done;
 
@@ -28,7 +28,7 @@
 
             await Bus.CancelScheduledRecurringSend(scheduledRecurringMessage);
 
-            await Scheduler.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(11), new DoneAgain {Name = "Joe"});
+            await Scheduler.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(11), new DoneAgain { Name = "Joe" });
 
             await _doneAgain;
 
@@ -40,12 +40,36 @@
         public async Task Should_handle_now_properly()
         {
             var scheduleId = NewId.NextGuid().ToString("N");
-            await Scheduler.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(20), new Done {Name = "Joe"});
-            await HangfireEndpoint.ScheduleRecurringSend(InputQueueAddress, new MySchedule(scheduleId), new Interval {Name = "Joe"});
+            await Scheduler.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(20), new Done { Name = "Joe" });
+            await HangfireEndpoint.ScheduleRecurringSend(InputQueueAddress, new MySchedule(scheduleId), new Interval { Name = "Joe" });
 
             await _done;
 
             Assert.AreEqual(8, _count, "Expected to see 8 interval messages");
+        }
+
+        [Test]
+        [Explicit]
+        public async Task Should_pause_recurring_schedule()
+        {
+            var scheduleId = Guid.NewGuid().ToString();
+
+            await Scheduler.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(11), new Done { Name = "Joe" });
+            ScheduledRecurringMessage<Interval> scheduledRecurringMessage =
+                await HangfireEndpoint.ScheduleRecurringSend(InputQueueAddress, new MyCancelableSchedule(scheduleId), new Interval { Name = "Joe" });
+
+            await _done;
+
+            var countBeforeCancel = _count;
+            Assert.AreEqual(8, _count, "Expected to see 8 interval messages");
+
+            await Bus.PauseScheduledRecurringSend(scheduledRecurringMessage);
+
+            await Scheduler.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(11), new DoneAgain { Name = "Joe" });
+
+            await _doneAgain;
+
+            Assert.AreEqual(countBeforeCancel, _count, "Expected to see the count matches.");
         }
 
         Task<ConsumeContext<Done>> _done;

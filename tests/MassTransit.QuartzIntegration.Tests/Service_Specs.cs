@@ -16,7 +16,7 @@
             Task<ConsumeContext<A>> handlerA = SubscribeHandler<A>();
             Task<ConsumeContext<IA>> handlerIA = SubscribeHandler<IA>();
 
-            await Scheduler.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromSeconds(1), new A {Name = "Joe"});
+            await Scheduler.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromSeconds(1), new A { Name = "Joe" });
 
             await handlerA;
             await handlerIA;
@@ -46,7 +46,7 @@
             Task<ConsumeContext<A>> handlerA = SubscribeHandler<A>();
             Task<ConsumeContext<IA>> handlerIA = SubscribeHandler<IA>();
 
-            await Scheduler.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromSeconds(1), new A {Name = "Joe"});
+            await Scheduler.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromSeconds(1), new A { Name = "Joe" });
 
             await handlerA;
 
@@ -87,7 +87,7 @@
             Task<ConsumeContext<A>> handlerA = SubscribeHandler<A>();
 
             ScheduledMessage<A> scheduledMessage =
-                await Scheduler.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromSeconds(3), new A {Name = "Joe"});
+                await Scheduler.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromSeconds(3), new A { Name = "Joe" });
 
             await Task.Delay(1000);
 

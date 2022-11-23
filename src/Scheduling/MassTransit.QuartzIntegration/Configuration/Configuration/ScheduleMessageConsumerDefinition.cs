@@ -22,6 +22,11 @@ namespace MassTransit.Configuration
             endpointConfigurator.UseMessageRetry(r => r.Interval(5, 250));
 
             consumerConfigurator.Message<ScheduleMessage>(m => m.UsePartitioner(_endpointDefinition.Partition, p => p.Message.CorrelationId));
+
+            consumerConfigurator.Message<ScheduleRecurringMessage>(m =>
+            {
+                m.UsePartitioner(_endpointDefinition.Partition, p => $"{p.Message.Schedule?.ScheduleGroup},{p.Message.Schedule?.ScheduleId}");
+            });
         }
     }
 }

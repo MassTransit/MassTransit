@@ -5,7 +5,6 @@
         using System;
         using System.Threading.Tasks;
         using NUnit.Framework;
-        using Saga;
         using Testing;
 
 
@@ -105,7 +104,7 @@
                 {
                     Console.WriteLine("Name validated: {0}", context.Message.CorrelationId);
 
-                    await context.RespondAsync<NameValidated>(new {RequestName = context.Message.Name});
+                    await context.RespondAsync<NameValidated>(new { RequestName = context.Message.Name });
                 });
             }
         }
@@ -257,9 +256,7 @@
                     When(ValidateName.TimeoutExpired)
                         .ThenAsync(async context => await Console.Out.WriteLineAsync("Request timed out"))
                         .TransitionTo(NameValidationTimeout));
-            }
-
-            // ReSharper disable UnassignedGetOnlyAutoProperty
+            } // ReSharper disable UnassignedGetOnlyAutoProperty
             public Request<TestState, ValidateAddress, AddressValidated> ValidateAddress { get; }
             public Request<TestState, ValidateName, NameValidated> ValidateName { get; }
 

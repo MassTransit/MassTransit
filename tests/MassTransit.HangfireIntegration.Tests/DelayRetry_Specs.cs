@@ -6,7 +6,6 @@
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
-    using Util;
 
 
     [TestFixture]
@@ -287,7 +286,7 @@
             ConsumeContext<PingMessage> context = await _received.Task;
 
             Assert.GreaterOrEqual(_receivedTimeSpan, TimeSpan.FromSeconds(1));
-            int? customHeaderValue = context.Headers.Get(customHeader, default(int?));
+            var customHeaderValue = context.Headers.Get(customHeader, default(int?));
             Assert.AreEqual(2, customHeaderValue);
         }
 

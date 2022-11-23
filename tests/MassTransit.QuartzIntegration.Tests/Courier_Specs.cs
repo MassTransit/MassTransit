@@ -2,7 +2,6 @@ namespace MassTransit.QuartzIntegration.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Courier;
     using Courier.Contracts;
     using NUnit.Framework;
     using TestFramework.Courier;
@@ -24,7 +23,7 @@ namespace MassTransit.QuartzIntegration.Tests
                 context => context.Message.ActivityName.Equals(testActivity.Name));
 
             var builder = new RoutingSlipBuilder(Guid.NewGuid());
-            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new {Value = "Hello"});
+            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new { Value = "Hello" });
             builder.AddActivity(faultActivity.Name, faultActivity.ExecuteUri, new { });
 
             await Bus.Execute(builder.Build());
@@ -44,7 +43,7 @@ namespace MassTransit.QuartzIntegration.Tests
             Task<ConsumeContext<RoutingSlipCompleted>> completed = await ConnectPublishHandler<RoutingSlipCompleted>();
 
             var builder = new RoutingSlipBuilder(Guid.NewGuid());
-            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new {Value = "Hello"});
+            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new { Value = "Hello" });
             builder.AddActivity(faultActivity.Name, faultActivity.ExecuteUri, new { });
 
             await Bus.Execute(builder.Build());
@@ -85,7 +84,7 @@ namespace MassTransit.QuartzIntegration.Tests
                 context => context.Message.ActivityName.Equals(testActivity.Name));
 
             var builder = new RoutingSlipBuilder(Guid.NewGuid());
-            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new {Value = "Hello"});
+            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new { Value = "Hello" });
             builder.AddActivity(faultActivity.Name, faultActivity.ExecuteUri, new { });
 
             await Bus.Execute(builder.Build());
@@ -105,7 +104,7 @@ namespace MassTransit.QuartzIntegration.Tests
             Task<ConsumeContext<RoutingSlipCompleted>> completed = await ConnectPublishHandler<RoutingSlipCompleted>();
 
             var builder = new RoutingSlipBuilder(Guid.NewGuid());
-            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new {Value = "Hello"});
+            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new { Value = "Hello" });
             builder.AddActivity(faultActivity.Name, faultActivity.ExecuteUri, new { });
 
             await Bus.Execute(builder.Build());

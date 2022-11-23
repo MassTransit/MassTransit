@@ -91,6 +91,10 @@
                 e.Consumer(() => new CancelScheduledMessageConsumer(options.SchedulerFactory), x =>
                     x.Message<CancelScheduledMessage>(m => m.UsePartitioner(partitioner, p => p.Message.TokenId)));
 
+                e.Consumer(() => new PauseScheduledMessageConsumer(options.SchedulerFactory));
+
+                e.Consumer(() => new ResumeScheduledMessageConsumer(options.SchedulerFactory));
+
                 configurator.UseMessageScheduler(e.InputAddress);
 
                 configurator.ConnectBusObserver(observer);

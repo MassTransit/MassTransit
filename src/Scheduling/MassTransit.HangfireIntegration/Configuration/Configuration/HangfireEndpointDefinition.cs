@@ -7,7 +7,9 @@ namespace MassTransit.Configuration
 
     public class HangfireEndpointDefinition :
         IEndpointDefinition<ScheduleMessageConsumer>,
-        IEndpointDefinition<ScheduleRecurringMessageConsumer>
+        IEndpointDefinition<ScheduleRecurringMessageConsumer>,
+        IEndpointDefinition<PauseScheduledRecurringMessageConsumer>,
+        IEndpointDefinition<ResumeScheduledRecurringMessageConsumer>
     {
         readonly HangfireEndpointOptions _options;
 

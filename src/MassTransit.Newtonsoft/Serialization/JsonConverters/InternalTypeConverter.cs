@@ -37,6 +37,14 @@ namespace MassTransit.Serialization.JsonConverters
                     return new CachedConverter<ScheduleMessageCommand>();
                 if (objectType == typeof(ScheduleRecurringMessage))
                     return new CachedConverter<ScheduleRecurringMessageCommand>();
+                if (objectType == typeof(CancelScheduledMessage))
+                    return new CachedConverter<CancelScheduledMessageCommand>();
+                if (objectType == typeof(CancelScheduledRecurringMessage))
+                    return new CachedConverter<CancelScheduledRecurringMessageCommand>();
+                if (objectType == typeof(PauseScheduledRecurringMessage))
+                    return new CachedConverter<PauseScheduledRecurringMessageCommand>();
+                if (objectType == typeof(ResumeScheduledRecurringMessage))
+                    return new CachedConverter<ResumeScheduledRecurringMessageCommand>();
                 if (objectType == typeof(MessageEnvelope))
                     return new CachedConverter<JsonMessageEnvelope>();
 

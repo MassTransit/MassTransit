@@ -155,5 +155,19 @@
         /// <param name="scheduleId">The scheduleId from the recurring schedule</param>
         /// <param name="scheduleGroup">The scheduleGroup from the recurring schedule</param>
         Task CancelScheduledRecurringSend(string scheduleId, string scheduleGroup);
+
+        /// <summary>
+        /// Pause a scheduled message by ScheduleId and ScheduleGroup.
+        /// </summary>
+        /// <param name="scheduleId">The scheduleId from the recurring schedule</param>
+        /// <param name="scheduleGroup">The scheduleGroup from the recurring schedule</param>
+        Task PauseScheduledRecurringSend(string scheduleId, string scheduleGroup);
+
+        /// <summary>
+        /// Resume a scheduled message by ScheduleId and ScheduleGroup.
+        /// </summary>
+        /// <param name="scheduleId">The scheduleId from the recurring schedule</param>
+        /// <param name="scheduleGroup">The scheduleGroup from the recurring schedule</param>
+        Task ResumeScheduledRecurringSend(string scheduleId, string scheduleGroup);
     }
 }

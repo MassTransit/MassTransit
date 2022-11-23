@@ -3,7 +3,6 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
     using System;
     using System.Threading.Tasks;
     using Contracts.JobService;
-    using JobService;
     using NUnit.Framework;
 
 
@@ -21,7 +20,7 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
             Response<JobSubmissionAccepted> response = await requestClient.GetResponse<JobSubmissionAccepted>(new
             {
                 JobId = _jobId,
-                Job = new {Duration = TimeSpan.FromSeconds(30)}
+                Job = new { Duration = TimeSpan.FromSeconds(30) }
             });
 
             Assert.That(response.Message.JobId, Is.EqualTo(_jobId));

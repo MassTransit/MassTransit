@@ -21,7 +21,7 @@ namespace MassTransit.HangfireIntegration
 
         public async Task Consume(ConsumeContext<CancelScheduledRecurringMessage> context)
         {
-            var jobKey = GetJobKey(context.Message.ScheduleId, context.Message.ScheduleGroup);
+            var jobKey = JobKey.Create(context.Message.ScheduleId, context.Message.ScheduleGroup);
             _recurringJobManager.RemoveIfExists(jobKey);
 
             LogContext.Debug?.Log("Canceled Recurring Message: {Key}", jobKey);
@@ -29,7 +29,7 @@ namespace MassTransit.HangfireIntegration
 
         public async Task Consume(ConsumeContext<ScheduleRecurringMessage> context)
         {
-            var jobKey = GetJobKey(context.Message.Schedule.ScheduleId, context.Message.Schedule.ScheduleGroup);
+            var jobKey = JobKey.Create(context.Message.Schedule.ScheduleId, context.Message.Schedule.ScheduleGroup);
             var message = HangfireRecurringScheduledMessageData.Create(context, jobKey);
 
             var tz = TimeZoneInfo.Local;
@@ -43,13 +43,6 @@ namespace MassTransit.HangfireIntegration
                 tz);
 
             LogContext.Debug?.Log("Scheduled: {Key}", jobKey);
-        }
-
-        static string GetJobKey(string scheduleId, string scheduleGroup)
-        {
-            return string.IsNullOrEmpty(scheduleGroup)
-                ? scheduleId
-                : $"{scheduleId}-{scheduleGroup}";
         }
     }
 }

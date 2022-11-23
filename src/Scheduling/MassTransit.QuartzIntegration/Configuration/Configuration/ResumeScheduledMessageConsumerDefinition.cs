@@ -1,15 +1,15 @@
-namespace MassTransit.Configuration
+﻿namespace MassTransit.Configuration
 {
     using QuartzIntegration;
     using Scheduling;
 
 
-    public class CancelScheduledMessageConsumerDefinition :
-        ConsumerDefinition<CancelScheduledMessageConsumer>
+    public class ResumeScheduledMessageConsumerDefinition :
+        ConsumerDefinition<ResumeScheduledMessageConsumer>
     {
         readonly QuartzEndpointDefinition _endpointDefinition;
 
-        public CancelScheduledMessageConsumerDefinition(QuartzEndpointDefinition endpointDefinition)
+        public ResumeScheduledMessageConsumerDefinition(QuartzEndpointDefinition endpointDefinition)
         {
             _endpointDefinition = endpointDefinition;
 
@@ -17,13 +17,11 @@ namespace MassTransit.Configuration
         }
 
         protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,
-            IConsumerConfigurator<CancelScheduledMessageConsumer> consumerConfigurator)
+            IConsumerConfigurator<ResumeScheduledMessageConsumer> consumerConfigurator)
         {
             endpointConfigurator.UseMessageRetry(r => r.Interval(5, 250));
 
-            consumerConfigurator.Message<CancelScheduledMessage>(m => m.UsePartitioner(_endpointDefinition.Partition, p => p.Message.TokenId));
-
-            consumerConfigurator.Message<CancelScheduledRecurringMessage>(m =>
+            consumerConfigurator.Message<ResumeScheduledRecurringMessage>(m =>
             {
                 m.UsePartitioner(_endpointDefinition.Partition, p => $"{p.Message.ScheduleGroup},{p.Message.ScheduleId}");
             });

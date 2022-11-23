@@ -3,7 +3,6 @@ namespace MassTransit.QuartzIntegration.Tests
     using System;
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using Saga;
 
 
     [TestFixture]
@@ -19,7 +18,7 @@ namespace MassTransit.QuartzIntegration.Tests
             Task<ConsumeContext<AccountDefaulted>> defaulted = await ConnectPublishHandler<AccountDefaulted>(x => x.Message.AccountId == accountId);
             Task<ConsumeContext<AccountClosed>> closed = await ConnectPublishHandler<AccountClosed>(x => x.Message.AccountId == accountId);
 
-            await InputQueueSendEndpoint.Send<OpenAccount>(new {AccountId = accountId});
+            await InputQueueSendEndpoint.Send<OpenAccount>(new { AccountId = accountId });
 
             await opened;
             await Task.Delay(1000);
@@ -116,25 +115,25 @@ namespace MassTransit.QuartzIntegration.Tests
 
                 Initially(
                     When(Opened)
-                        .Schedule(GracePeriod, context => context.Init<GracePeriodElapsed>(new {AccountId = context.Instance.CorrelationId}))
-                        .Schedule(PaymentTimeFrame, context => context.Init<PaymentTimeFrameElapsed>(new {AccountId = context.Instance.CorrelationId}))
-                        .PublishAsync(context => context.Init<AccountOpened>(new {AccountId = context.Instance.CorrelationId}))
+                        .Schedule(GracePeriod, context => context.Init<GracePeriodElapsed>(new { AccountId = context.Instance.CorrelationId }))
+                        .Schedule(PaymentTimeFrame, context => context.Init<PaymentTimeFrameElapsed>(new { AccountId = context.Instance.CorrelationId }))
+                        .PublishAsync(context => context.Init<AccountOpened>(new { AccountId = context.Instance.CorrelationId }))
                         .Then(context => Console.WriteLine("PaymentTimeFrame: {0}, GracePeriod: {1}", context.Instance.PaymentTimeFrameToken, context
                             .Instance.GracePeriodToken))
                         .TransitionTo(Open));
 
                 During(Open,
                     When(GracePeriod.Received)
-                        .PublishAsync(context => context.Init<AccountDefaulted>(new {AccountId = context.Instance.CorrelationId}))
+                        .PublishAsync(context => context.Init<AccountDefaulted>(new { AccountId = context.Instance.CorrelationId }))
                         .TransitionTo(Defaulted),
                     When(PaymentTimeFrame.Received)
-                        .PublishAsync(context => context.Init<AccountClosed>(new {AccountId = context.Instance.CorrelationId}))
+                        .PublishAsync(context => context.Init<AccountClosed>(new { AccountId = context.Instance.CorrelationId }))
                         .Unschedule(GracePeriod)
                         .TransitionTo(Closed));
 
                 During(Defaulted,
                     When(PaymentTimeFrame.Received)
-                        .PublishAsync(context => context.Init<AccountClosed>(new {AccountId = context.Instance.CorrelationId}))
+                        .PublishAsync(context => context.Init<AccountClosed>(new { AccountId = context.Instance.CorrelationId }))
                         .TransitionTo(Closed));
             }
 

@@ -1,16 +1,16 @@
-namespace MassTransit.Scheduling
+﻿namespace MassTransit.Scheduling
 {
     using System;
 
 
-    public class CancelScheduledRecurringMessageCommand :
-        CancelScheduledRecurringMessage
+    public class ResumeScheduledRecurringMessageCommand :
+        ResumeScheduledRecurringMessage
     {
-        public CancelScheduledRecurringMessageCommand()
+        public ResumeScheduledRecurringMessageCommand()
         {
         }
 
-        public CancelScheduledRecurringMessageCommand(string scheduleId, string scheduleGroup)
+        public ResumeScheduledRecurringMessageCommand(string scheduleId, string scheduleGroup)
         {
             CorrelationId = NewId.NextGuid();
             Timestamp = DateTime.UtcNow;

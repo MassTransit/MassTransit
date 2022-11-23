@@ -6,7 +6,6 @@ namespace MassTransit.HangfireIntegration.Tests
     using Contracts;
     using LongRunningRequestTest;
     using NUnit.Framework;
-    using Saga;
 
 
     [TestFixture]
@@ -19,7 +18,7 @@ namespace MassTransit.HangfireIntegration.Tests
             IRequestClient<CreateShortLink> client = Bus.CreateRequestClient<CreateShortLink>(RequestTimeout.After(s: 30));
 
             Assert.That(async () =>
-                await client.GetResponse<ShortLinkCreated>(new {Link = new Uri("http://www.google.com")}), Throws.TypeOf<RequestFaultException>());
+                await client.GetResponse<ShortLinkCreated>(new { Link = new Uri("http://www.google.com") }), Throws.TypeOf<RequestFaultException>());
         }
 
         [Test]
@@ -27,7 +26,7 @@ namespace MassTransit.HangfireIntegration.Tests
         {
             IRequestClient<CreateShortLink> client = Bus.CreateRequestClient<CreateShortLink>(RequestTimeout.After(s: 30));
 
-            Response<ShortLinkCreated> response = await client.GetResponse<ShortLinkCreated>(new {Link = new Uri("http://www.microsoft.com")});
+            Response<ShortLinkCreated> response = await client.GetResponse<ShortLinkCreated>(new { Link = new Uri("http://www.microsoft.com") });
 
             Console.WriteLine("Link: {0}, Short Link: {1}", response.Message.Link, response.Message.ShortLink);
         }
@@ -37,7 +36,7 @@ namespace MassTransit.HangfireIntegration.Tests
         {
             IRequestClient<CreateShortLink> client = Bus.CreateRequestClient<CreateShortLink>(RequestTimeout.After(s: 30));
 
-            Response<ShortLinkCreated> response = await client.GetResponse<ShortLinkCreated>(new {Link = new Uri("http://www.microsoft.com")});
+            Response<ShortLinkCreated> response = await client.GetResponse<ShortLinkCreated>(new { Link = new Uri("http://www.microsoft.com") });
 
             Console.WriteLine("Link: {0}, Short Link: {1}", response.Message.Link, response.Message.ShortLink);
         }
@@ -135,7 +134,7 @@ namespace MassTransit.HangfireIntegration.Tests
                 During(Initial,
                     When(CreateRequested)
                         .Then(context => context.Instance.Link = context.Data.Link)
-                        .Request(LinkRequest, x => x.Init<RequestShortLink>(new {x.Data.Link}))
+                        .Request(LinkRequest, x => x.Init<RequestShortLink>(new { x.Data.Link }))
                         .RequestStarted()
                         .TransitionTo(LinkRequest.Pending));
 

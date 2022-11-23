@@ -3,14 +3,14 @@ namespace MassTransit.Scheduling
     using System;
 
 
-    public class CancelScheduledRecurringMessageCommand :
-        CancelScheduledRecurringMessage
+    public class PauseScheduledRecurringMessageCommand :
+        PauseScheduledRecurringMessage
     {
-        public CancelScheduledRecurringMessageCommand()
+        public PauseScheduledRecurringMessageCommand()
         {
         }
 
-        public CancelScheduledRecurringMessageCommand(string scheduleId, string scheduleGroup)
+        public PauseScheduledRecurringMessageCommand(string scheduleId, string scheduleGroup)
         {
             CorrelationId = NewId.NextGuid();
             Timestamp = DateTime.UtcNow;

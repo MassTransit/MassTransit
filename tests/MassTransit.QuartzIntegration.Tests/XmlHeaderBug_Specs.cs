@@ -13,7 +13,7 @@
         [Test]
         public async Task Should_not_get_junk_headers()
         {
-            await Bus.Publish<IMyMessage>(new {Description = "hi!"});
+            await Bus.Publish<IMyMessage>(new { Description = "hi!" });
 
             await _consumer.Completed;
         }

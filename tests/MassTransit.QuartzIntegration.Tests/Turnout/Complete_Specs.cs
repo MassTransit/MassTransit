@@ -4,9 +4,7 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
     using System.Linq;
     using System.Threading.Tasks;
     using Contracts.JobService;
-    using JobService;
     using NUnit.Framework;
-    using Util;
 
 
     public interface CrunchTheNumbers
@@ -39,7 +37,7 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
             Response<JobSubmissionAccepted> response = await requestClient.GetResponse<JobSubmissionAccepted>(new
             {
                 JobId = _jobId,
-                Job = new {Duration = TimeSpan.FromSeconds(1)}
+                Job = new { Duration = TimeSpan.FromSeconds(1) }
             });
 
             Assert.That(response.Message.JobId, Is.EqualTo(_jobId));
@@ -120,7 +118,7 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
             Response<JobSubmissionAccepted> response = await requestClient.GetResponse<JobSubmissionAccepted>(new
             {
                 JobId = _jobId,
-                Job = new {Duration = TimeSpan.FromSeconds(1)}
+                Job = new { Duration = TimeSpan.FromSeconds(1) }
             });
 
             Assert.That(response.Message.JobId, Is.EqualTo(_jobId));
@@ -210,7 +208,7 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
                 Response<JobSubmissionAccepted> response = await requestClient.GetResponse<JobSubmissionAccepted>(new
                 {
                     JobId = _jobIds[i],
-                    Job = new {Duration = TimeSpan.FromSeconds(1)}
+                    Job = new { Duration = TimeSpan.FromSeconds(1) }
                 });
             }
 
@@ -331,12 +329,6 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
     public class Submitting_a_job_to_turnout_with_status_checks :
         QuartzInMemoryTestFixture
     {
-        public Submitting_a_job_to_turnout_with_status_checks()
-        {
-            TestTimeout = TimeSpan.FromMinutes(5);
-            TestInactivityTimeout = TimeSpan.FromMinutes(1);
-        }
-
         [Test]
         [Order(1)]
         public async Task Should_get_the_job_accepted()
@@ -346,7 +338,7 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
             Response<JobSubmissionAccepted> response = await requestClient.GetResponse<JobSubmissionAccepted>(new
             {
                 JobId = _jobId,
-                Job = new {Duration = TimeSpan.FromMinutes(3.5)}
+                Job = new { Duration = TimeSpan.FromMinutes(3.5) }
             });
 
             Assert.That(response.Message.JobId, Is.EqualTo(_jobId));
@@ -373,6 +365,12 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
         public async Task Should_have_published_the_job_submitted_event()
         {
             ConsumeContext<JobSubmitted> submitted = await _submitted;
+        }
+
+        public Submitting_a_job_to_turnout_with_status_checks()
+        {
+            TestTimeout = TimeSpan.FromMinutes(5);
+            TestInactivityTimeout = TimeSpan.FromMinutes(1);
         }
 
         Guid _jobId;
