@@ -28,7 +28,11 @@ namespace MassTransit.KafkaIntegration.Serializers
         {
             public IHeaderProvider Deserialize(Headers headers)
             {
-                return new DictionaryHeaderProvider(headers.ToDictionary(x => x.Key, x => (object)MessageDefaults.Encoding.GetString(x.GetValueBytes())));
+                return new DictionaryHeaderProvider(headers.ToDictionary(x => x.Key, x =>
+                {
+                    var valueBytes = x.GetValueBytes();
+                    return valueBytes != null ? (object)MessageDefaults.Encoding.GetString(valueBytes) : null;
+                }));
             }
         }
 
