@@ -141,15 +141,22 @@ namespace MassTransit
         static ITopicProducer<TKey, T> GetProducer<TKey, T>(Uri address, IKafkaRider rider, IServiceProvider provider)
             where T : class
         {
-            var contextProvider = provider.GetService<ScopedConsumeContextProvider>();
-            if (contextProvider != null)
+            ITopicProducer<TKey, T> GetProducerFromRider()
             {
-                return contextProvider.HasContext
-                    ? rider.GetProducer<TKey, T>(address, contextProvider.GetContext())
-                    : rider.GetProducer<TKey, T>(address);
+                var contextProvider = provider.GetService<ScopedConsumeContextProvider>();
+                if (contextProvider != null)
+                {
+                    return contextProvider.HasContext
+                        ? rider.GetProducer<TKey, T>(address, contextProvider.GetContext())
+                        : rider.GetProducer<TKey, T>(address);
+                }
+
+                return rider.GetProducer<TKey, T>(address, provider.GetService<ConsumeContext>());
             }
 
-            return rider.GetProducer<TKey, T>(address, provider.GetService<ConsumeContext>());
+            ITopicProducer<TKey, T> result = GetProducerFromRider();
+
+            return new ScopedTopicProducer<TKey, T>(result, provider);
         }
     }
 }

@@ -55,18 +55,21 @@ namespace MassTransit.KafkaIntegration
             readonly KafkaSendTransportContext<TKey, TValue> _context;
             readonly TKey _key;
             readonly IPipe<KafkaSendContext<TKey, TValue>> _pipe;
-            readonly IPipe<SendContext<TValue>> _sendPipe;
+            readonly ISendContextPipe _sendContextPipe;
+            readonly IPipe<SendContext<TValue>> _initializerPipe;
             readonly TValue _value;
 
             public SendPipe(KafkaSendTransportContext<TKey, TValue> context, TKey key, TValue value, IPipe<KafkaSendContext<TKey, TValue>> pipe,
-                CancellationToken cancellationToken, IPipe<SendContext<TValue>> sendPipe = null)
+                CancellationToken cancellationToken, IPipe<SendContext<TValue>> initializerPipe = null)
             {
                 _context = context;
                 _key = key;
                 _value = value;
                 _pipe = pipe;
+                _sendContextPipe = pipe as ISendContextPipe;
+
                 _cancellationToken = cancellationToken;
-                _sendPipe = sendPipe;
+                _initializerPipe = initializerPipe;
             }
 
             public async Task Send(ProducerContext<TKey, TValue> context)
@@ -75,10 +78,14 @@ namespace MassTransit.KafkaIntegration
 
                 var sendContext = new KafkaMessageSendContext<TKey, TValue>(_key, _value, _cancellationToken) { DestinationAddress = _context.TopicAddress };
 
+                if (_sendContextPipe != null)
+                    await _sendContextPipe.Send(sendContext).ConfigureAwait(false);
+
                 await _context.SendPipe.Send(sendContext).ConfigureAwait(false);
 
-                if (_sendPipe.IsNotEmpty())
-                    await _sendPipe.Send(sendContext).ConfigureAwait(false);
+                if (_initializerPipe.IsNotEmpty())
+                    await _initializerPipe.Send(sendContext).ConfigureAwait(false);
+
                 if (_pipe.IsNotEmpty())
                     await _pipe.Send(sendContext).ConfigureAwait(false);
 

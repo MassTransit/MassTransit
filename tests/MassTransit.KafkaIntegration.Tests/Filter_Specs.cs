@@ -5,6 +5,7 @@ namespace MassTransit.KafkaIntegration.Tests
     using System.Threading.Tasks;
     using Confluent.Kafka;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Logging;
     using NUnit.Framework;
     using Testing;
 
@@ -12,6 +13,10 @@ namespace MassTransit.KafkaIntegration.Tests
     public class Using_a_consumer_filter
     {
         const string Topic = "producer";
+
+        static int _attempts;
+        static int _lastAttempt;
+        static int _lastCount;
 
         [Test]
         public async Task Should_properly_configure_the_filter()
@@ -65,10 +70,6 @@ namespace MassTransit.KafkaIntegration.Tests
             Assert.That(_lastAttempt, Is.EqualTo(3));
         }
 
-        static int _attempts;
-        static int _lastAttempt;
-        static int _lastCount;
-
 
         class KafkaMessageConsumer :
             IConsumer<KafkaMessage>
@@ -102,6 +103,122 @@ namespace MassTransit.KafkaIntegration.Tests
         public interface KafkaMessage
         {
             string Text { get; }
+        }
+    }
+
+
+    [TestFixture]
+    public class Using_a_scoped_send_filter
+    {
+        [Test]
+        public async Task Should_properly_configure_the_filter()
+        {
+            await using var provider = new ServiceCollection()
+                .AddScoped<ScopedContext>()
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.AddTaskCompletionSource<ConsumeContext<KafkaMessage>>();
+
+                    x.AddRider(r =>
+                    {
+                        r.AddConsumer<KafkaMessageConsumer>();
+
+                        r.AddProducer<KafkaMessage>(Topic);
+
+                        r.UsingKafka((context, k) =>
+                        {
+                            k.Host("localhost:9092");
+
+                            k.UseSendFilter(typeof(ScopedContextSendFilter<>), context);
+
+                            k.TopicEndpoint<KafkaMessage>(Topic, nameof(Using_a_scoped_send_filter), c =>
+                            {
+                                c.AutoOffsetReset = AutoOffsetReset.Earliest;
+                                c.CreateIfMissing();
+
+                                c.ConfigureConsumer<KafkaMessageConsumer>(context);
+                            });
+                        });
+                    });
+                })
+                .BuildServiceProvider(true);
+
+            var harness = provider.GetTestHarness();
+
+            await harness.Start();
+
+            var scopedContext = harness.Scope.ServiceProvider.GetRequiredService<ScopedContext>();
+
+            scopedContext.Value = "Hello, World";
+
+            ITopicProducer<KafkaMessage> producer = harness.GetProducer<KafkaMessage>();
+
+            await producer.Produce(new { Text = "text" }, harness.CancellationToken);
+
+            var result = await provider.GetRequiredService<TaskCompletionSource<ConsumeContext<KafkaMessage>>>().Task;
+
+            Assert.That(result.Headers.Get<string>("Scoped-Value"), Is.EqualTo("Hello, World"));
+        }
+
+        const string Topic = "producer";
+
+
+        public class ScopedContext
+        {
+            public string Value { get; set; }
+        }
+
+
+        public class ScopedContextSendFilter<T> :
+            IFilter<SendContext<T>>
+            where T : class
+        {
+            readonly ILogger<ScopedContext> _logger;
+            readonly ScopedContext _scopedContext;
+
+            public ScopedContextSendFilter(ScopedContext scopedContext, ILogger<ScopedContext> logger)
+            {
+                _logger = logger;
+                _scopedContext = scopedContext;
+            }
+
+            public void Probe(ProbeContext context)
+            {
+            }
+
+            public Task Send(SendContext<T> context, IPipe<SendContext<T>> next)
+            {
+                _logger.LogInformation("Send Scoped Filter: {Value}", _scopedContext.Value);
+
+                context.Headers.Set("Scoped-Value", _scopedContext.Value);
+
+                return next.Send(context);
+            }
+        }
+
+
+        class KafkaMessageConsumer :
+            IConsumer<KafkaMessage>
+        {
+            readonly TaskCompletionSource<ConsumeContext<KafkaMessage>> _taskCompletionSource;
+
+            public KafkaMessageConsumer(TaskCompletionSource<ConsumeContext<KafkaMessage>> taskCompletionSource)
+            {
+                _taskCompletionSource = taskCompletionSource;
+            }
+
+            public Task Consume(ConsumeContext<KafkaMessage> context)
+            {
+                _taskCompletionSource.TrySetResult(context);
+
+                return Task.CompletedTask;
+            }
+        }
+
+
+        public record KafkaMessage
+        {
+            public string Text { get; init; }
         }
     }
 }

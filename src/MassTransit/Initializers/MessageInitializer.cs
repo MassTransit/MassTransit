@@ -7,6 +7,7 @@ namespace MassTransit.Initializers
     using System.Threading.Tasks;
     using Contexts;
     using Conventions;
+    using Transports;
 
 
     public static class MessageInitializer
@@ -140,7 +141,8 @@ namespace MassTransit.Initializers
 
 
         class InitializerSendContextPipe :
-            IPipe<SendContext<TMessage>>
+            IPipe<SendContext<TMessage>>,
+            ISendPipe
         {
             readonly InitializeContext<TMessage, TInput> _context;
             readonly IHeaderInitializer<TMessage, TInput>[] _initializers;
@@ -165,6 +167,14 @@ namespace MassTransit.Initializers
 
                 if (_pipe != null && _pipe.IsNotEmpty())
                     await _pipe.Send(context).ConfigureAwait(false);
+            }
+
+            public Task Send<T>(SendContext<T> context)
+                where T : class
+            {
+                return _pipe is ISendContextPipe sendContextPipe
+                    ? sendContextPipe.Send(context)
+                    : Task.CompletedTask;
             }
         }
     }
