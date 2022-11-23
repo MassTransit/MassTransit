@@ -7,7 +7,9 @@ namespace MassTransit.Configuration
 
     public class QuartzEndpointDefinition :
         IEndpointDefinition<ScheduleMessageConsumer>,
-        IEndpointDefinition<CancelScheduledMessageConsumer>
+        IEndpointDefinition<CancelScheduledMessageConsumer>,
+        IEndpointDefinition<PauseScheduledMessageConsumer>,
+        IEndpointDefinition<ResumeScheduledMessageConsumer>
     {
         readonly QuartzEndpointOptions _options;
 

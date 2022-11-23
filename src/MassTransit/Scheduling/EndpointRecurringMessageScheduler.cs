@@ -193,6 +193,24 @@
             await endpoint.Send<CancelScheduledRecurringMessage>(command).ConfigureAwait(false);
         }
 
+        public async Task PauseScheduledRecurringSend(string scheduleId, string scheduleGroup)
+        {
+            var command = new PauseScheduledRecurringMessageCommand(scheduleId, scheduleGroup);
+
+            var endpoint = await _schedulerEndpoint().ConfigureAwait(false);
+
+            await endpoint.Send<PauseScheduledRecurringMessage>(command).ConfigureAwait(false);
+        }
+
+        public async Task ResumeScheduledRecurringSend(string scheduleId, string scheduleGroup)
+        {
+            var command = new ResumeScheduledRecurringMessageCommand(scheduleId, scheduleGroup);
+
+            var endpoint = await _schedulerEndpoint().ConfigureAwait(false);
+
+            await endpoint.Send<ResumeScheduledRecurringMessage>(command).ConfigureAwait(false);
+        }
+
         async Task<ScheduledRecurringMessage<T>> Schedule<T>(Uri destinationAddress, RecurringSchedule schedule, T message,
             CancellationToken cancellationToken)
             where T : class
@@ -242,7 +260,6 @@
 
             return new ScheduleRecurringMessageCommand<T>(schedule, destinationAddress, message);
         }
-
 
         class ScheduleRecurringMessageContextPipe<T> :
             IPipe<SendContext<ScheduleRecurringMessage>>

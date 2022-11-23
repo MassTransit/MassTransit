@@ -227,5 +227,59 @@
 
             return scheduler.CancelScheduledRecurringSend(scheduleId, scheduleGroup);
         }
+
+        /// <summary>
+        /// Pause a scheduled message using the scheduled message instance
+        /// </summary>
+        /// <param name="endpoint">The endpoint of the scheduling service</param>
+        /// <param name="message">The schedule message reference</param>
+        public static Task PauseScheduledRecurringSend<T>(this IPublishEndpoint endpoint, ScheduledRecurringMessage<T> message)
+            where T : class
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            return PauseScheduledRecurringSend(endpoint, message.Schedule.ScheduleId, message.Schedule.ScheduleGroup);
+        }
+
+        /// <summary>
+        /// Pause a scheduled message using the scheduleId and scheduleGroup that was returned when the message was scheduled.
+        /// </summary>
+        /// <param name="endpoint">The endpoint of the scheduling service</param>
+        /// <param name="scheduleId">The scheduleId from the recurring schedule</param>
+        /// <param name="scheduleGroup">The scheduleGroup from the recurring schedule</param>
+        public static Task PauseScheduledRecurringSend(this IPublishEndpoint endpoint, string scheduleId, string scheduleGroup)
+        {
+            IRecurringMessageScheduler scheduler = new PublishRecurringMessageScheduler(endpoint);
+
+            return scheduler.PauseScheduledRecurringSend(scheduleId, scheduleGroup);
+        }
+
+        /// <summary>
+        /// Resume a scheduled message using the scheduled message instance
+        /// </summary>
+        /// <param name="endpoint">The endpoint of the scheduling service</param>
+        /// <param name="message">The schedule message reference</param>
+        public static Task ResumeScheduledRecurringSend<T>(this IPublishEndpoint endpoint, ScheduledRecurringMessage<T> message)
+            where T : class
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            return ResumeScheduledRecurringSend(endpoint, message.Schedule.ScheduleId, message.Schedule.ScheduleGroup);
+        }
+
+        /// <summary>
+        /// Resume a scheduled message using the scheduleId and scheduleGroup that was returned when the message was scheduled.
+        /// </summary>
+        /// <param name="endpoint">The endpoint of the scheduling service</param>
+        /// <param name="scheduleId">The scheduleId from the recurring schedule</param>
+        /// <param name="scheduleGroup">The scheduleGroup from the recurring schedule</param>
+        public static Task ResumeScheduledRecurringSend(this IPublishEndpoint endpoint, string scheduleId, string scheduleGroup)
+        {
+            IRecurringMessageScheduler scheduler = new PublishRecurringMessageScheduler(endpoint);
+
+            return scheduler.ResumeScheduledRecurringSend(scheduleId, scheduleGroup);
+        }
     }
 }

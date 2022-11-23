@@ -184,6 +184,20 @@
             return _publishEndpoint.Publish<CancelScheduledRecurringMessage>(command);
         }
 
+        public Task PauseScheduledRecurringSend(string scheduleId, string scheduleGroup)
+        {
+            var command = new PauseScheduledRecurringMessageCommand(scheduleId, scheduleGroup);
+
+            return _publishEndpoint.Publish<PauseScheduledRecurringMessage>(command);
+        }
+
+        public Task ResumeScheduledRecurringSend(string scheduleId, string scheduleGroup)
+        {
+            var command = new ResumeScheduledRecurringMessageCommand(scheduleId, scheduleGroup);
+
+            return _publishEndpoint.Publish<ResumeScheduledRecurringMessage>(command);
+        }
+
         async Task<ScheduledRecurringMessage<T>> Schedule<T>(Uri destinationAddress, RecurringSchedule schedule, T message, CancellationToken cancellationToken)
             where T : class
         {
@@ -226,7 +240,6 @@
 
             return new ScheduleRecurringMessageCommand<T>(schedule, destinationAddress, message);
         }
-
 
         class ScheduleRecurringMessageContextPipe<T> :
             IPipe<PublishContext<ScheduleRecurringMessage>>
