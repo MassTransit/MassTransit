@@ -64,7 +64,7 @@ namespace MassTransit.QuartzIntegration
                 .GetMessageBody(new MessageSendContext<ScheduleRecurringMessage>(context.Message));
 
             var schedule = context.Message.Schedule;
-            var triggerKey = new TriggerKey("Recurring.Trigger." + schedule.ScheduleId, schedule.ScheduleGroup);
+            var triggerKey = new TriggerKey(QuartzConstants.RecurringTriggerPrefix + schedule.ScheduleId, schedule.ScheduleGroup);
 
             var tz = TimeZoneInfo.Local;
             if (!string.IsNullOrWhiteSpace(schedule.TimeZoneId) && schedule.TimeZoneId != tz.Id)

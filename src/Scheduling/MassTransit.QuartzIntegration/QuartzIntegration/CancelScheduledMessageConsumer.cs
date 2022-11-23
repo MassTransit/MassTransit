@@ -33,12 +33,10 @@ namespace MassTransit.QuartzIntegration
 
         public async Task Consume(ConsumeContext<CancelScheduledRecurringMessage> context)
         {
-            const string prependedValue = "Recurring.Trigger.";
-
             var scheduleId = context.Message.ScheduleId;
 
-            if (!scheduleId.StartsWith(prependedValue))
-                scheduleId = string.Concat(prependedValue, scheduleId);
+            if (!scheduleId.StartsWith(QuartzConstants.RecurringTriggerPrefix))
+                scheduleId = string.Concat(QuartzConstants.RecurringTriggerPrefix, scheduleId);
 
             var scheduler = await _schedulerFactory.GetScheduler(context.CancellationToken).ConfigureAwait(false);
 
