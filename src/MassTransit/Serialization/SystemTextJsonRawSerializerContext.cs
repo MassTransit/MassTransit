@@ -19,6 +19,11 @@ namespace MassTransit.Serialization
             _rawOptions = rawOptions;
         }
 
+        public override IMessageSerializer GetMessageSerializer()
+        {
+            return new SystemTextJsonBodyMessageSerializer(Message, ContentType, Options, _rawOptions);
+        }
+
         public override bool IsSupportedMessageType<T>()
         {
             var typeUrn = MessageUrn.ForTypeString<T>();

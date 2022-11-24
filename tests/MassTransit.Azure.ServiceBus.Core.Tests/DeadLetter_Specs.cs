@@ -3,6 +3,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
     using System;
     using System.Threading.Tasks;
     using NUnit.Framework;
+    using Serialization;
     using TestFramework;
     using TestFramework.Messages;
 
@@ -154,6 +155,48 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
                 return Task.CompletedTask;
             }
+        }
+    }
+
+
+    public class Using_delayed_redelivery_with_dead_letter_queue :
+        AzureServiceBusTestFixture
+    {
+        Task<ConsumeContext<Fault<PongMessage>>> _fault;
+
+        [Test]
+        public async Task Should_redeliver_with_all_headers_intact()
+        {
+            var endpoint = await Bus.GetSendEndpoint(new Uri("queue:input_queue_dl"));
+
+            var conversationId = NewId.NextGuid();
+
+            await endpoint.Send(new PongMessage(), x => x.ConversationId = conversationId);
+
+            ConsumeContext<Fault<PongMessage>> context = await _fault;
+
+            Assert.That(context.ConversationId, Is.EqualTo(conversationId));
+        }
+
+        protected override void ConfigureServiceBusBus(IServiceBusBusFactoryConfigurator configurator)
+        {
+            configurator.UseRawJsonSerializer(RawSerializerOptions.AddTransportHeaders | RawSerializerOptions.CopyHeaders);
+
+            configurator.ReceiveEndpoint("input_queue_dl_fault", x =>
+            {
+                _fault = Handled<Fault<PongMessage>>(x);
+            });
+
+            configurator.ReceiveEndpoint("input_queue_dl", x =>
+            {
+                x.ConfigureConsumeTopology = false;
+
+                x.ConfigureDeadLetterQueueErrorTransport();
+
+                x.UseDelayedRedelivery(r => r.Intervals(500, 500));
+
+                x.Handler<PongMessage>(async context => throw new IntentionalTestException());
+            });
         }
     }
 }

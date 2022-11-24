@@ -3,16 +3,18 @@ namespace MassTransit.Serialization
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using Transports;
 
 
-    public class ForwardMessagePipe<T> :
-        IPipe<SendContext<T>>
-        where T : class
+    public class ForwardMessagePipe<TMessage> :
+        IPipe<SendContext<TMessage>>,
+        ISendPipe
+        where TMessage : class
     {
-        readonly ConsumeContext<T> _context;
-        readonly IPipe<SendContext<T>> _pipe;
+        readonly ConsumeContext<TMessage> _context;
+        readonly IPipe<SendContext<TMessage>> _pipe;
 
-        public ForwardMessagePipe(ConsumeContext<T> context, IPipe<SendContext<T>> pipe = default)
+        public ForwardMessagePipe(ConsumeContext<TMessage> context, IPipe<SendContext<TMessage>> pipe = default)
         {
             _context = context;
             _pipe = pipe;
@@ -23,7 +25,7 @@ namespace MassTransit.Serialization
             _pipe.Probe(context);
         }
 
-        public async Task Send(SendContext<T> context)
+        public async Task Send(SendContext<TMessage> context)
         {
             context.MessageId = _context.MessageId;
             context.RequestId = _context.RequestId;
@@ -51,6 +53,14 @@ namespace MassTransit.Serialization
                 context.Serializer = _context.SerializerContext.GetMessageSerializer();
             else
                 context.Serializer = new CopyBodySerializer(_context.ReceiveContext.ContentType, _context.ReceiveContext.Body);
+        }
+
+        public Task Send<T>(SendContext<T> context)
+            where T : class
+        {
+            return _pipe is ISendContextPipe sendContextPipe
+                ? sendContextPipe.Send(context)
+                : Task.CompletedTask;
         }
     }
 }

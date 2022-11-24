@@ -12,10 +12,12 @@ namespace MassTransit.Serialization
     /// Used to serialize an existing deserialized message when a message is forwarded, scheduled, etc.
     /// </summary>
     public class SystemTextJsonBodyMessageSerializer :
+        RawMessageSerializer,
         IMessageSerializer
     {
         readonly JsonMessageEnvelope? _envelope;
         readonly JsonSerializerOptions _options;
+        readonly RawSerializerOptions _rawOptions;
         object? _message;
 
         public SystemTextJsonBodyMessageSerializer(MessageEnvelope envelope, ContentType contentType, JsonSerializerOptions options)
@@ -28,10 +30,11 @@ namespace MassTransit.Serialization
             ContentType = contentType;
         }
 
-        public SystemTextJsonBodyMessageSerializer(object message, ContentType contentType, JsonSerializerOptions options)
+        public SystemTextJsonBodyMessageSerializer(object message, ContentType contentType, JsonSerializerOptions options, RawSerializerOptions rawOptions)
         {
             _message = message;
             _options = options;
+            _rawOptions = rawOptions;
 
             ContentType = contentType;
         }
@@ -47,6 +50,9 @@ namespace MassTransit.Serialization
 
                 return new SystemTextJsonMessageBody<T>(context, _options, _envelope);
             }
+
+            if (_rawOptions.HasFlag(RawSerializerOptions.AddTransportHeaders))
+                SetRawMessageHeaders<T>(context);
 
             return new SystemTextJsonRawMessageBody<T>(context, _options, _message);
         }
