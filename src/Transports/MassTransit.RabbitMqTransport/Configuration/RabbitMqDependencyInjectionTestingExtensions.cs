@@ -1,51 +1,36 @@
+#nullable enable
 namespace MassTransit
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
-    using Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
     using Testing;
-    using Testing.Implementations;
-    using Transports;
 
 
     public static class RabbitMqDependencyInjectionTestingExtensions
     {
         /// <summary>
-        /// Add the In-Memory test harness to the container, and configure it using the callback specified.
+        /// Specify the test and/or the test inactivity timeouts that should be used by the test harness.
         /// </summary>
-        public static IServiceCollection AddMassTransitRabbitMqTestHarness(this IServiceCollection services,
-            Action<IBusRegistrationConfigurator> configure = null)
+        /// <param name="services"></param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        public static IServiceCollection ConfigureRabbitMqTestOptions(this IServiceCollection services, Action<RabbitMqTestHarnessOptions>? configure)
         {
-            services.AddMassTransit(cfg =>
-            {
-                configure?.Invoke(cfg);
+            var descriptor = services.FirstOrDefault(x => x.ServiceType == typeof(IHostedService) && x.ImplementationType == typeof(MassTransitHostedService));
+            if (descriptor != null)
+                throw new ConfigurationException("RabbitMQ Test Options must be configured before calling AddMassTransit");
 
-                cfg.SetBusFactory(new InMemoryTestHarnessRegistrationBusFactory());
-            });
-            services.AddSingleton(provider =>
-            {
-                var busInstances = provider.GetService<IEnumerable<IBusInstance>>();
-                if (busInstances == null)
+            services.AddOptions<RabbitMqTestHarnessOptions>()
+                .Configure(options =>
                 {
-                    var busInstance = provider.GetService<IBusInstance>();
-                    busInstances = new[] { busInstance };
-                }
+                    configure?.Invoke(options);
+                });
 
-                if (busInstances == null)
-                    throw new ConfigurationException("No bus instances found");
-
-                var testHarnessBusInstance = busInstances.FirstOrDefault(x => x is InMemoryTestHarnessBusInstance);
-                if (testHarnessBusInstance is InMemoryTestHarnessBusInstance testInstance)
-                    return testInstance.Harness;
-
-                throw new ConfigurationException("Test Harness configuration is invalid");
-            });
-            services.AddSingleton<BusTestHarness>(provider => provider.GetRequiredService<InMemoryTestHarness>());
+            services.AddHostedService<RabbitMqTestHarnessHostedService>();
 
             return services;
         }
-
     }
 }
