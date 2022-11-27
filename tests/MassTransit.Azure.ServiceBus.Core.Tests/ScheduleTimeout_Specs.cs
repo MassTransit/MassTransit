@@ -90,10 +90,6 @@
             [Test, Explicit]
             public async Task Should_not_interfere_with_message_cancellation()
             {
-                ServiceBusTokenProviderSettings settings = new TestAzureServiceBusAccountSettings();
-
-                var serviceUri = AzureServiceBusEndpointUriCreator.Create(Configuration.ServiceNamespace);
-
                 await using var provider = new ServiceCollection()
                     .AddScoped<SetScopedValueActivity>()
                     .AddScoped<ScopedService>()
@@ -104,16 +100,11 @@
                         });
                         x.AddSagaStateMachine<TestStateMachineContainer, TestState>();
 
-                        x.UsingAzureServiceBus((context, cfg) =>
+                        x.UsingTestAzureServiceBus((context, cfg) =>
                         {
-                            cfg.Host(serviceUri, h => h.NamedKey(s => s.NamedKeyCredential = settings.NamedKeyCredential));
-
-                            cfg.UseServiceBusMessageScheduler();
-
                             cfg.UseMessageScope(context);
                             cfg.UseSendFilter(typeof(SendFilter<>), context);
                             cfg.UseInMemoryOutbox();
-                            cfg.ConfigureEndpoints(context);
                         });
                     }).BuildServiceProvider(true);
 

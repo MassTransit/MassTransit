@@ -34,10 +34,7 @@
         {
             _messages.Add(context);
 
-            if (Interlocked.Decrement(ref _activeCount) == 0)
-                NotifyInactive();
-
-            return Task.CompletedTask;
+            return Interlocked.Decrement(ref _activeCount) == 0 ? NotifyInactive() : Task.CompletedTask;
         }
 
         public Task ConsumeFault<T>(ConsumeContext<T> context, Exception exception)
@@ -45,10 +42,7 @@
         {
             _messages.Add(context, exception);
 
-            if (Interlocked.Decrement(ref _activeCount) == 0)
-                NotifyInactive();
-
-            return Task.CompletedTask;
+            return Interlocked.Decrement(ref _activeCount) == 0 ? NotifyInactive() : Task.CompletedTask;
         }
     }
 }

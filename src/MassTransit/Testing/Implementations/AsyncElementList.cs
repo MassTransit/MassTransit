@@ -7,13 +7,14 @@ namespace MassTransit.Testing.Implementations
     using System.Threading;
     using System.Threading.Channels;
     using System.Threading.Tasks;
+    using Util;
 
 
     public abstract class AsyncElementList<TElement> :
         IAsyncElementList<TElement>
         where TElement : class, IAsyncListElement
     {
-        readonly IList<Channel<TElement>> _listeners;
+        readonly Connectable<Channel<TElement>> _channels;
         readonly IList<TElement> _messages;
         readonly TimeSpan _timeout;
         CancellationToken _testCompleted;
@@ -22,73 +23,78 @@ namespace MassTransit.Testing.Implementations
         {
             _timeout = timeout;
             _testCompleted = testCompleted;
+
             _messages = new List<TElement>();
-            _listeners = new List<Channel<TElement>>();
+            _channels = new Connectable<Channel<TElement>>();
         }
 
         public async IAsyncEnumerable<TElement> SelectAsync(FilterDelegate<TElement> filter,
             [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
-            Channel<TElement> channel;
-            lock (_messages)
+            var channel = Channel.CreateUnbounded<TElement>(new UnboundedChannelOptions
             {
-                foreach (var entry in _messages)
+                SingleReader = true,
+                SingleWriter = false,
+                AllowSynchronousContinuations = false
+            });
+
+            var handle = _channels.Connect(channel);
+
+            var returned = new HashSet<Guid>();
+
+            try
+            {
+                TElement[] messages;
+                lock (_messages)
+                    messages = _messages.ToArray();
+
+                foreach (var entry in messages)
                 {
-                    if (filter(entry))
+                    if (filter(entry) && !returned.Contains(entry.ElementId.Value))
+                    {
+                        returned.Add(entry.ElementId.Value);
                         yield return entry;
+                    }
                 }
 
                 if (cancellationToken.IsCancellationRequested || _testCompleted.IsCancellationRequested)
                     yield break;
 
-                channel = Channel.CreateUnbounded<TElement>(new UnboundedChannelOptions
-                {
-                    SingleReader = true,
-                    SingleWriter = false,
-                    AllowSynchronousContinuations = false
-                });
+                using var timeout = new CancellationTokenSource(_timeout);
 
-                lock (_listeners)
-                    _listeners.Add(channel);
-            }
+                using var linked = CancellationTokenSource.CreateLinkedTokenSource(timeout.Token, _testCompleted, cancellationToken);
 
-            var timeoutTokenSource = new CancellationTokenSource(_timeout);
-
-            CancellationTokenRegistration cancellationTokenRegistration = default;
-            if (cancellationToken.CanBeCanceled)
-                cancellationTokenRegistration = cancellationToken.Register(timeoutTokenSource.Cancel);
-
-            CancellationTokenRegistration testCompletedTokenRegistration = default;
-            if (_testCompleted.CanBeCanceled)
-                testCompletedTokenRegistration = _testCompleted.Register(timeoutTokenSource.Cancel);
-
-            try
-            {
-                var more = true;
-                while (more)
+                while (!linked.IsCancellationRequested)
                 {
                     try
                     {
-                        more = await channel.Reader.WaitToReadAsync(timeoutTokenSource.Token).ConfigureAwait(false);
+                        await channel.Reader.WaitToReadAsync(linked.Token).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException)
                     {
-                        more = false;
+                        break;
                     }
 
-                    if (more)
+                    if (!channel.Reader.TryRead(out _))
+                        break;
+
+                    lock (_messages)
+                        messages = _messages.ToArray();
+
+                    foreach (var entry in messages)
                     {
-                        if (channel.Reader.TryRead(out var entry) && filter(entry))
+                        if (filter(entry) && !returned.Contains(entry.ElementId.Value))
+                        {
+                            returned.Add(entry.ElementId.Value);
                             yield return entry;
+                        }
                     }
                 }
             }
             finally
             {
-                cancellationTokenRegistration.Dispose();
-                testCompletedTokenRegistration.Dispose();
-
-                timeoutTokenSource.Dispose();
+                handle.Disconnect();
+                channel.Writer.Complete();
             }
         }
 
@@ -169,6 +175,9 @@ namespace MassTransit.Testing.Implementations
 
         protected void Add(TElement context)
         {
+            if (!context.ElementId.HasValue)
+                return;
+
             lock (_messages)
             {
                 if (_messages.Any(x => x.ElementId == context.ElementId))
@@ -177,13 +186,9 @@ namespace MassTransit.Testing.Implementations
                 _messages.Add(context);
 
                 Monitor.PulseAll(_messages);
-
-                lock (_listeners)
-                {
-                    foreach (Channel<TElement> channel in _listeners)
-                        channel.Writer.TryWrite(context);
-                }
             }
+
+            _channels.ForEach(channel => channel.Writer.TryWrite(context));
         }
     }
 }

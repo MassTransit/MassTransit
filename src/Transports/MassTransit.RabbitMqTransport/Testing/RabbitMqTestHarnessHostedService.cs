@@ -97,14 +97,14 @@ namespace MassTransit.Testing
                 var exchangeCount = 0;
                 var queueCount = 0;
 
-                IList<string> exchanges = await GetVirtualHostEntities("exchanges").ConfigureAwait(false);
+                IList<string> exchanges = await GetVirtualHostEntities("exchanges");
                 foreach (var exchange in exchanges)
                 {
                     model.ExchangeDelete(exchange);
                     exchangeCount++;
                 }
 
-                IList<string> queues = await GetVirtualHostEntities("queues").ConfigureAwait(false);
+                IList<string> queues = await GetVirtualHostEntities("queues");
                 foreach (var queue in queues)
                 {
                     model.QueueDelete(queue);

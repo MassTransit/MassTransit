@@ -1,29 +1,31 @@
-﻿namespace MassTransit.Azure.ServiceBus.Core.Tests
+﻿#nullable enable
+namespace MassTransit.Azure.ServiceBus.Core.Tests
 {
     using System;
     using global::Azure.Messaging.ServiceBus.Administration;
     using MassTransit.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
 
 
     static class Configuration
     {
-        public static string KeyName =>
+        public static string? KeyName =>
             TestContext.Parameters.Exists(nameof(KeyName))
                 ? TestContext.Parameters.Get(nameof(KeyName))
                 : Environment.GetEnvironmentVariable("MT_ASB_KEYNAME") ?? "MassTransitBuild";
 
-        public static string ServiceNamespace =>
+        public static string? ServiceNamespace =>
             TestContext.Parameters.Exists(nameof(ServiceNamespace))
                 ? TestContext.Parameters.Get(nameof(ServiceNamespace))
                 : Environment.GetEnvironmentVariable("MT_ASB_NAMESPACE") ?? "masstransit-build";
 
-        public static string SharedAccessKey =>
+        public static string? SharedAccessKey =>
             TestContext.Parameters.Exists(nameof(SharedAccessKey))
                 ? TestContext.Parameters.Get(nameof(SharedAccessKey))
                 : Environment.GetEnvironmentVariable("MT_ASB_KEYVALUE") ?? "YfN2b8jT84759bZy5sMhd0P+3K/qHqO81I5VrNrJYkI=";
 
-        public static string StorageAccount =>
+        public static string? StorageAccount =>
             TestContext.Parameters.Exists(nameof(StorageAccount))
                 ? TestContext.Parameters.Get(nameof(StorageAccount))
                 : Environment.GetEnvironmentVariable("MT_AZURE_STORAGE_ACCOUNT") ?? "";
@@ -45,6 +47,33 @@
             var managementClient = new ServiceBusAdministrationClient(endpoint, hostConfigurator.Settings.NamedKeyCredential);
 
             return managementClient;
+        }
+
+        public static string CreateConnectionString(string? ns, string? keyName, string? key)
+        {
+            return $"Endpoint=sb://{ns}.servicebus.windows.net/;SharedAccessKeyName={keyName};SharedAccessKey={key}";
+        }
+
+        public static void UsingTestAzureServiceBus(this IBusRegistrationConfigurator configurator,
+            Action<IBusRegistrationContext, IServiceBusBusFactoryConfigurator>? configure = null)
+        {
+            configurator.AddOptions<AzureServiceBusTransportOptions>()
+                .Configure(options => options.ConnectionString = CreateConnectionString(ServiceNamespace, KeyName, SharedAccessKey));
+
+            configurator.UsingAzureServiceBus((context, cfg) =>
+            {
+                cfg.UseServiceBusMessageScheduler();
+
+                configure?.Invoke(context, cfg);
+
+                cfg.ConfigureEndpoints(context);
+            });
+
+            configurator.AddOptions<TestHarnessOptions>()
+                .Configure(options =>
+                {
+                    options.TestInactivityTimeout = TimeSpan.FromSeconds(10);
+                });
         }
     }
 }
