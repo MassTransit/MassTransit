@@ -164,6 +164,59 @@
             return new ArraySegment<NewId>(ids, index, count);
         }
 
+        public ArraySegment<Guid> NextGuid(Guid[] ids, int index, int count)
+        {
+            if (index + count > ids.Length)
+                throw new ArgumentOutOfRangeException(nameof(count));
+
+            var ticks = _tickProvider.Ticks;
+
+            var a = _a;
+            var b = (short)(_b >> 16);
+            var c = (short)_b;
+
+            var lockTaken = false;
+            _spinLock.Enter(ref lockTaken);
+
+            if (ticks > _lastTick)
+                UpdateTimestamp(ticks);
+
+            var d = (byte)(_gc >> 8);
+            var e = (byte)_gc;
+            var f = (byte)(_gb >> 8);
+            var g = (byte)_gb;
+
+            var limit = index + count;
+            for (var offset = index; offset < limit; offset++)
+            {
+                if (_sequence == 65535) // we are about to rollover, so we need to increment ticks
+                {
+                    UpdateTimestamp(_lastTick + 1);
+
+                    a = _a;
+                    b = (short)(_b >> 16);
+                    c = (short)_b;
+                }
+
+                var sequence = _sequence++;
+
+                // swapping high and low byte, because SQL-server is doing the wrong ordering otherwise
+                var sequenceSwapped = ((sequence << 8) | ((sequence >> 8) & 0x00FF)) & 0xFFFF;
+
+                var h = (byte)((_d | sequenceSwapped) >> 24);
+                var i = (byte)((_d | sequenceSwapped) >> 16);
+                var j = (byte)((_d | sequenceSwapped) >> 8);
+                var k = (byte)(_d | sequenceSwapped);
+
+                ids[offset] = new Guid(a, b, c, d, e, f, g, h, i, j, k);
+            }
+
+            if (lockTaken)
+                _spinLock.Exit();
+
+            return new ArraySegment<Guid>(ids, index, count);
+        }
+
         void UpdateTimestamp(long tick)
         {
             _b = (int)(tick & 0xFFFFFFFF);

@@ -410,6 +410,33 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Generate an array of NewIds
+        /// </summary>
+        /// <param name="count">The number of NewIds to generate</param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Guid[] NextGuid(int count)
+        {
+            var ids = new Guid[count];
+
+            _getGenerator().NextGuid(ids, 0, count);
+
+            return ids;
+        }
+
+        /// <summary>
+        /// Generate an array of NewIds
+        /// </summary>
+        /// <param name="index">The starting offset for the newly generated ids</param>
+        /// <param name="count">The number of NewIds to generate</param>
+        /// <param name="ids">An existing array</param>
+        /// <returns></returns>
+        public static ArraySegment<Guid> NextGuid(Guid[] ids, int index, int count)
+        {
+            return _getGenerator().NextGuid(ids, index, count);
+        }
+
+        /// <summary>
         /// Generate a NewId, and return it as a Guid
         /// </summary>
         /// <returns></returns>

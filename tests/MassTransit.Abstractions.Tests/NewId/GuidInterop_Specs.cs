@@ -34,6 +34,17 @@
         }
 
         [Test]
+        public void Should_convert_to_guid_quickly_from_guid()
+        {
+            var g = NewId.NextGuid(2)[1]; // ensure sequence number is not 0x0000
+
+            var ns = g.ToNewId().ToString();
+            var gs = g.ToString();
+
+            Assert.AreEqual(ns, gs);
+        }
+
+        [Test]
         public void Should_display_sequentially_for_newid()
         {
             var id = NewId.Next(2)[1]; // ensure sequence number is not 0x0000
