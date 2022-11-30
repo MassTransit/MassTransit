@@ -55,7 +55,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         }
 
         public static void UsingTestAzureServiceBus(this IBusRegistrationConfigurator configurator,
-            Action<IBusRegistrationContext, IServiceBusBusFactoryConfigurator>? configure = null)
+            Action<IBusRegistrationContext, IServiceBusBusFactoryConfigurator>? configure = null, bool configureEndpoints = true)
         {
             configurator.AddOptions<AzureServiceBusTransportOptions>()
                 .Configure(options => options.ConnectionString = CreateConnectionString(ServiceNamespace, KeyName, SharedAccessKey));
@@ -66,7 +66,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
                 configure?.Invoke(context, cfg);
 
-                cfg.ConfigureEndpoints(context);
+                if (configureEndpoints)
+                    cfg.ConfigureEndpoints(context);
             });
 
             configurator.AddOptions<TestHarnessOptions>()

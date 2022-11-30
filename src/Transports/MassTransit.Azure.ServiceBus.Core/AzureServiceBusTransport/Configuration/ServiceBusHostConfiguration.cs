@@ -124,7 +124,6 @@
 
             var settings = new ReceiveEndpointSettings(endpointConfiguration, queueName, new ServiceBusQueueConfigurator(queueName));
 
-
             return CreateReceiveEndpointConfiguration(settings, endpointConfiguration, configure);
         }
 

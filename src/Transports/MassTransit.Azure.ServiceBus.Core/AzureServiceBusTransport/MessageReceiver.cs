@@ -1,12 +1,11 @@
-namespace MassTransit.ServiceBusIntegration
+namespace MassTransit.AzureServiceBusTransport
 {
     using System;
     using System.Collections.Concurrent;
     using System.Threading;
     using System.Threading.Tasks;
     using Azure.Messaging.ServiceBus;
-    using AzureServiceBusTransport;
-    using AzureServiceBusTransport.Configuration;
+    using Configuration;
     using Transports;
 
 

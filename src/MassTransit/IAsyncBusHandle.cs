@@ -4,7 +4,7 @@ namespace MassTransit
 
 
     public interface IAsyncBusHandle :
-        IDisposable
+        IAsyncDisposable
     {
     }
 }

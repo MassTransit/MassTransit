@@ -3,19 +3,19 @@ namespace MassTransit
     using System;
     using Azure.Identity;
     using Azure.Messaging.ServiceBus;
+    using AzureServiceBusTransport;
     using Microsoft.ApplicationInsights.DependencyCollector;
     using Microsoft.Azure.WebJobs.ServiceBus;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
-    using ServiceBusIntegration;
 
 
     public static class AzureFunctionsBusConfigurationExtensions
     {
         /// <summary>
         /// Add the Azure Function support for MassTransit, which uses Azure Service Bus, and configures
-        /// <see cref="IMessageReceiver" /> for use by functions to handle messages.
+        /// <see cref="MassTransit.IMessageReceiver" /> for use by functions to handle messages.
         /// </summary>
         /// <param name="services"></param>
         /// <param name="configure">
