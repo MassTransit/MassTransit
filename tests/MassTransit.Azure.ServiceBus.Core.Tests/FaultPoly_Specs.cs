@@ -1,44 +1,16 @@
 namespace MassTransit.Tests
 {
     using System.Threading.Tasks;
+    using Azure.ServiceBus.Core.Tests;
     using FaultMessages;
     using NUnit.Framework;
     using TestFramework;
 
 
     [TestFixture]
-    public class A_fault_message
-    {
-        [Test]
-        public void Should_have_the_fault_base_message_class_type()
-        {
-            Assert.That(MessageTypeCache<Fault<MemberAddressUpdated>>.MessageTypeNames, Contains.Item(MessageUrn.ForType(typeof(Fault<MemberUpdateEvent>))));
-        }
-
-        [Test]
-        public void Should_have_the_fault_base_message_type()
-        {
-            Assert.That(MessageTypeCache<Fault<UpdateMemberAddress>>.MessageTypeNames, Contains.Item(MessageUrn.ForType(typeof(Fault<MemberUpdateCommand>))));
-        }
-
-        [Test]
-        public void Should_have_the_fault_message_class_type()
-        {
-            Assert.That(MessageTypeCache<Fault<MemberAddressUpdated>>.MessageTypeNames,
-                Contains.Item(MessageUrn.ForType(typeof(Fault<MemberAddressUpdated>))));
-        }
-
-        [Test]
-        public void Should_have_the_fault_message_type()
-        {
-            Assert.That(MessageTypeCache<Fault<UpdateMemberAddress>>.MessageTypeNames, Contains.Item(MessageUrn.ForType(typeof(Fault<UpdateMemberAddress>))));
-        }
-    }
-
-
-    [TestFixture]
+    [Explicit]
     public class Publishing_a_fault_message :
-        InMemoryTestFixture
+        AzureServiceBusTestFixture
     {
         [Test]
         public async Task Should_support_the_base_fault_type()
@@ -54,7 +26,7 @@ namespace MassTransit.Tests
             await handler;
         }
 
-        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
             configurator.Handler<UpdateMemberAddress>(async context => throw new IntentionalTestException());
         }
@@ -64,6 +36,7 @@ namespace MassTransit.Tests
     namespace FaultMessages
     {
         [ExcludeFromTopology]
+        [ExcludeFromImplementedTypes]
         public interface ICommand
         {
         }
