@@ -37,6 +37,30 @@
 
         [Test]
         [Explicit]
+        public async Task Should_pause_recurring_schedule()
+        {
+            var scheduleId = Guid.NewGuid().ToString();
+
+            await Scheduler.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(10), new Done { Name = "Joe" });
+            ScheduledRecurringMessage<Interval> scheduledRecurringMessage =
+                await QuartzEndpoint.ScheduleRecurringSend(InputQueueAddress, new MyCancelableSchedule(scheduleId), new Interval { Name = "Joe" });
+
+            await _done;
+
+            var countBeforeCancel = _count;
+            Assert.AreEqual(8, _count, "Expected to see 8 interval messages");
+
+            await Bus.PauseScheduledRecurringSend(scheduledRecurringMessage);
+
+            await Scheduler.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(10), new DoneAgain { Name = "Joe" });
+
+            await _doneAgain;
+
+            Assert.AreEqual(countBeforeCancel, _count, "Expected to see the count matches.");
+        }
+
+        [Test]
+        [Explicit]
         public async Task Should_contain_additional_headers_that_provide_time_domain_context()
         {
             var scheduleId = Guid.NewGuid().ToString();
