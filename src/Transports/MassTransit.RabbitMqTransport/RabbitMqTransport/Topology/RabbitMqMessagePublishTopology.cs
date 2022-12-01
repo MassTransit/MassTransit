@@ -20,6 +20,7 @@ namespace MassTransit.RabbitMqTransport.Topology
 
         public RabbitMqMessagePublishTopology(IRabbitMqPublishTopology publishTopology, IMessageTopology<TMessage> messageTopology,
             IMessageExchangeTypeSelector<TMessage> exchangeTypeSelector)
+            : base(publishTopology)
         {
             _publishTopology = publishTopology;
             ExchangeTypeSelector = exchangeTypeSelector;

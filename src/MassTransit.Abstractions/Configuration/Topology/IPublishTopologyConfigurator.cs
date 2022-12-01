@@ -20,7 +20,7 @@ namespace MassTransit
         /// Returns the specification for the message type
         /// </summary>
         /// <returns></returns>
-        IMessagePublishTopologyConfigurator GetMessageTopology(Type messageType);
+        new IMessagePublishTopologyConfigurator GetMessageTopology(Type messageType);
 
         /// <summary>
         /// Adds a convention to the topology, which will be applied to every message type

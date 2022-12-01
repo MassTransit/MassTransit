@@ -17,6 +17,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
         readonly IAmazonSqsPublishTopology _publishTopology;
 
         public AmazonSqsMessagePublishTopology(IAmazonSqsPublishTopology publishTopology, IMessageTopology<TMessage> messageTopology)
+            : base(publishTopology)
         {
             _publishTopology = publishTopology;
 

@@ -41,6 +41,8 @@ namespace MassTransit.Configuration
                 _topology.Apply(sendBuilder);
             }
 
+            public bool Exclude => false;
+
             public bool TryGetPublishAddress(Uri baseAddress, out Uri? publishAddress)
             {
                 publishAddress = null;

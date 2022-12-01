@@ -15,16 +15,13 @@ namespace MassTransit.Topology
         readonly IList<IMessagePublishTopology<TMessage>> _delegateTopologies;
         readonly IList<IMessagePublishTopology<TMessage>> _topologies;
 
-        public MessagePublishTopology()
+        public MessagePublishTopology(IPublishTopology publishTopology)
         {
             _conventions = new List<IMessagePublishTopologyConvention<TMessage>>();
             _topologies = new List<IMessagePublishTopology<TMessage>>();
             _delegateTopologies = new List<IMessagePublishTopology<TMessage>>();
 
-            if (typeof(TMessage).GetCustomAttributes(typeof(ExcludeFromTopologyAttribute), false).Any()
-                || typeof(TMessage).ClosesType(typeof(Fault<>), out Type[] types)
-                && types[0].GetCustomAttributes(typeof(ExcludeFromTopologyAttribute), false).Any())
-                Exclude = true;
+            Exclude = IsMessageTypeExcluded(publishTopology);
         }
 
         public bool Exclude { get; set; }
@@ -91,6 +88,17 @@ namespace MassTransit.Topology
         public virtual IEnumerable<ValidationResult> Validate()
         {
             return Enumerable.Empty<ValidationResult>();
+        }
+
+        static bool IsMessageTypeExcluded(IPublishTopology publishTopology)
+        {
+            if (typeof(TMessage).GetCustomAttributes(typeof(ExcludeFromTopologyAttribute), false).Any())
+                return true;
+
+            if (typeof(TMessage).ClosesType(typeof(Fault<>), out Type[] types) && publishTopology.GetMessageTopology(types[0]).Exclude)
+                return true;
+
+            return false;
         }
     }
 }

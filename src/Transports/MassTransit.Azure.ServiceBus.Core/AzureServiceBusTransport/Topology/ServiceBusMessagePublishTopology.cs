@@ -18,7 +18,8 @@ namespace MassTransit.AzureServiceBusTransport.Topology
         readonly IServiceBusPublishTopology _publishTopology;
         readonly ServiceBusTopicConfigurator _topicConfigurator;
 
-        public ServiceBusMessagePublishTopology(IMessageTopology<TMessage> messageTopology, IServiceBusPublishTopology publishTopology)
+        public ServiceBusMessagePublishTopology(IServiceBusPublishTopology publishTopology, IMessageTopology<TMessage> messageTopology)
+            : base(publishTopology)
         {
             _publishTopology = publishTopology;
 

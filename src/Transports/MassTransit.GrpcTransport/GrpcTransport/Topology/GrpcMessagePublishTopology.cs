@@ -16,7 +16,8 @@ namespace MassTransit.GrpcTransport.Topology
         readonly IList<IGrpcMessagePublishTopology> _implementedMessageTypes;
         readonly IMessageTopology<TMessage> _messageTopology;
 
-        public GrpcMessagePublishTopology(IMessageTopology<TMessage> messageTopology)
+        public GrpcMessagePublishTopology(IPublishTopology publishTopology, IMessageTopology<TMessage> messageTopology)
+            : base(publishTopology)
         {
             _messageTopology = messageTopology;
             _implementedMessageTypes = new List<IGrpcMessagePublishTopology>();

@@ -14,6 +14,7 @@ namespace MassTransit.ActiveMqTransport.Topology
         readonly ActiveMqTopicConfigurator _topic;
 
         public ActiveMqMessagePublishTopology(IActiveMqPublishTopology publishTopology, IMessageTopology<TMessage> messageTopology)
+            : base(publishTopology)
         {
             var topicName = $"{publishTopology.VirtualTopicPrefix}{messageTopology.EntityName}";
 

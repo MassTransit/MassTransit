@@ -49,6 +49,6 @@ namespace MassTransit
         /// <summary>
         /// Exclude the message type from being created as a topic/exchange.
         /// </summary>
-        bool Exclude { set; }
+        new bool Exclude { set; }
     }
 }

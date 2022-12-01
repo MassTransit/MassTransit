@@ -16,6 +16,12 @@
             where T : class;
 
         /// <summary>
+        /// Returns the specification for the message type
+        /// </summary>
+        /// <returns></returns>
+        IMessagePublishTopology GetMessageTopology(Type messageType);
+
+        /// <summary>
         /// Returns the publish address for the message, using the topology rules. This cannot use
         /// a PublishContext because the transport isn't available yet.
         /// </summary>

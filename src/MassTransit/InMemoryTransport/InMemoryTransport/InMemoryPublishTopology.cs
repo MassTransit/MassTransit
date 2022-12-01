@@ -33,7 +33,7 @@ namespace MassTransit.InMemoryTransport
 
         protected override IMessagePublishTopologyConfigurator CreateMessageTopology<T>(Type type)
         {
-            var topology = new InMemoryMessagePublishTopology<T>(_messageTopology.GetMessageTopology<T>());
+            var topology = new InMemoryMessagePublishTopology<T>(this, _messageTopology.GetMessageTopology<T>());
 
             var connector = new ImplementedMessageTypeConnector<T>(this, topology);
 

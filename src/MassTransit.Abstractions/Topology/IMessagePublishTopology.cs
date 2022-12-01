@@ -20,6 +20,11 @@
     public interface IMessagePublishTopology
     {
         /// <summary>
+        /// True if the message type should be excluded from the broker topology
+        /// </summary>
+        bool Exclude { get; }
+
+        /// <summary>
         /// Returns the publish address for the message, using the topology rules. This cannot use
         /// a PublishContext because the transport isn't available yet.
         /// </summary>
