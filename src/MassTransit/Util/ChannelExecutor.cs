@@ -14,6 +14,7 @@ namespace MassTransit.Util
         readonly SemaphoreSlim _limit;
         readonly Task _readerTask;
         readonly object _syncLock;
+        bool _disposed;
 
         public ChannelExecutor(int prefetchCount, int concurrencyLimit)
         {
@@ -56,11 +57,16 @@ namespace MassTransit.Util
 
         public async ValueTask DisposeAsync()
         {
+            if (_disposed)
+                return;
+
             _channel.Writer.Complete();
 
             await _readerTask.ConfigureAwait(false);
 
             _limit.Dispose();
+
+            _disposed = true;
         }
 
         public void PushWithWait(Func<Task> method, CancellationToken cancellationToken = default)
