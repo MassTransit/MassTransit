@@ -31,7 +31,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
             if (_queryCustomization != null)
                 queryable = _queryCustomization(queryable);
 
-            return queryable.SingleOrDefaultAsync(cancellationToken);
+            return queryable.AsTracking().SingleOrDefaultAsync(cancellationToken);
         }
 
         string GetLockStatement(DbContext dbContext)

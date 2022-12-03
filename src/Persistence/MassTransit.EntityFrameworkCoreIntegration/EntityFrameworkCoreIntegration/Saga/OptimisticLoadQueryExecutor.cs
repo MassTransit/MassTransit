@@ -19,7 +19,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 
         public Task<TSaga> Load(DbContext dbContext, Guid correlationId, CancellationToken cancellationToken)
         {
-            return _provider.GetQueryable(dbContext).SingleOrDefaultAsync(x => x.CorrelationId == correlationId, cancellationToken);
+            return _provider.GetQueryable(dbContext).AsTracking().SingleOrDefaultAsync(x => x.CorrelationId == correlationId, cancellationToken);
         }
     }
 }

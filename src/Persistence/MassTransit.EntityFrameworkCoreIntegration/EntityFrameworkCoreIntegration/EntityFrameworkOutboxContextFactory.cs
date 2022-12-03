@@ -44,6 +44,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                 {
                     var inboxState = await _dbContext.Set<InboxState>()
                         .FromSqlRaw(_lockStatement, messageId, options.ConsumerId)
+                        .AsTracking()
                         .SingleOrDefaultAsync(context.CancellationToken).ConfigureAwait(false);
 
                     bool continueProcessing;
