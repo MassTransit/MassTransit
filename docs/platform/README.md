@@ -97,3 +97,8 @@ public class OrderServicePlatformStartup :
 ```        
 
 This example configures Serilog to log to the console with Debug messages - you could also load the logger configuration by using the .ReadFrom.Configuration() method.
+
+::: tip NOTE
+Platform is deprecated and not supported by .Net core 6.
+:::
+
