@@ -1,19 +1,19 @@
 namespace MassTransit.DependencyInjection
 {
+    using System;
     using System.Threading.Tasks;
 
 
-    public class ScopedPublishEndpointProvider<TScope> :
+    public class ScopedPublishEndpointProvider :
         IPublishEndpointProvider
-        where TScope : class
     {
         readonly IPublishEndpointProvider _provider;
-        readonly TScope _scope;
+        readonly IServiceProvider _serviceProvider;
 
-        public ScopedPublishEndpointProvider(IPublishEndpointProvider provider, TScope scope)
+        public ScopedPublishEndpointProvider(IPublishEndpointProvider provider, IServiceProvider serviceProvider)
         {
             _provider = provider;
-            _scope = scope;
+            _serviceProvider = serviceProvider;
         }
 
         ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
@@ -26,7 +26,7 @@ namespace MassTransit.DependencyInjection
         {
             var endpoint = await _provider.GetPublishSendEndpoint<T>().ConfigureAwait(false);
 
-            return new ScopedSendEndpoint<TScope>(endpoint, _scope);
+            return new ScopedSendEndpoint(endpoint, _serviceProvider);
         }
     }
 }

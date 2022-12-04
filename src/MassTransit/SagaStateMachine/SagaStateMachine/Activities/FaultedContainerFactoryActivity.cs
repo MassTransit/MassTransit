@@ -31,9 +31,7 @@ namespace MassTransit.SagaStateMachine
         {
             if (context is BehaviorExceptionContext<TSaga, TException> exceptionContext)
             {
-                var factory = context.GetStateMachineActivityFactory();
-
-                var activity = factory.GetService<TActivity>(context);
+                var activity = context.GetServiceOrCreateInstance<TActivity>();
 
                 await activity.Faulted(exceptionContext, next).ConfigureAwait(false);
             }
@@ -47,9 +45,7 @@ namespace MassTransit.SagaStateMachine
         {
             if (context is BehaviorExceptionContext<TSaga, TException> exceptionContext)
             {
-                var factory = context.GetStateMachineActivityFactory();
-
-                var activity = factory.GetService<TActivity>(context);
+                var activity = context.GetServiceOrCreateInstance<TActivity>();
 
                 var widenBehavior = new WidenBehavior<TSaga, T>(next, context);
 
@@ -88,9 +84,7 @@ namespace MassTransit.SagaStateMachine
         {
             if (context is BehaviorExceptionContext<TSaga, TMessage, TException> exceptionContext)
             {
-                var factory = context.GetStateMachineActivityFactory();
-
-                var activity = factory.GetService<TActivity>(context);
+                var activity = context.GetServiceOrCreateInstance<TActivity>();
 
                 return activity.Faulted(exceptionContext, next);
             }

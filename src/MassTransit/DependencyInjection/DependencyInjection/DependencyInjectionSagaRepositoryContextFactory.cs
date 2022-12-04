@@ -55,9 +55,6 @@ namespace MassTransit.DependencyInjection
             {
                 existingScope.SetCurrentConsumeContext(context);
 
-                context.GetOrAddPayload(() => existingScope.ServiceProvider.GetService<IStateMachineActivityFactory>()
-                    ?? DependencyInjectionStateMachineActivityFactory.Instance);
-
                 var factory = existingScope.ServiceProvider.GetRequiredService<ISagaRepositoryContextFactory<TSaga>>();
 
                 return send(context, factory);
@@ -68,9 +65,7 @@ namespace MassTransit.DependencyInjection
                 var serviceScope = serviceProvider.CreateScope();
                 try
                 {
-                    var scopeServiceProvider = new DependencyInjectionScopeServiceProvider(serviceScope.ServiceProvider);
-
-                    var scopeContext = new ConsumeContextScope<T>(context, serviceScope, serviceScope.ServiceProvider, scopeServiceProvider);
+                    var scopeContext = new ConsumeContextScope<T>(context, serviceScope, serviceScope.ServiceProvider);
 
                     if (scopeContext.TryGetPayload(out MessageSchedulerContext schedulerContext))
                     {
@@ -81,10 +76,7 @@ namespace MassTransit.DependencyInjection
 
                     serviceScope.SetCurrentConsumeContext(scopeContext);
 
-                    var activityFactory = serviceScope.ServiceProvider.GetService<IStateMachineActivityFactory>()
-                        ?? DependencyInjectionStateMachineActivityFactory.Instance;
-
-                    var consumeContextScope = new ConsumeContextScope<T>(scopeContext, activityFactory);
+                    var consumeContextScope = new ConsumeContextScope<T>(scopeContext);
 
                     var factory = serviceScope.ServiceProvider.GetRequiredService<ISagaRepositoryContextFactory<TSaga>>();
 

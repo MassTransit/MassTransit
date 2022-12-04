@@ -6,9 +6,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using TestFramework;
 
 
-    public class Common_Registration<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_Registration :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_come_from_the_default_address()

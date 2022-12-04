@@ -41,7 +41,7 @@ namespace MassTransit.Configuration
 
             return consumeContext != null
                 ? new ScopedClientFactory(clientFactory, consumeContext)
-                : new ScopedClientFactory(new ClientFactory(new ScopedClientFactoryContext<IServiceProvider>(clientFactory, provider)), null);
+                : new ScopedClientFactory(new ClientFactory(new ScopedClientFactoryContext(clientFactory, provider)), null);
         }
     }
 }

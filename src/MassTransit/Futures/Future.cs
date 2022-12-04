@@ -8,7 +8,6 @@ namespace MassTransit
     using Courier.Contracts;
     using Futures;
     using Futures.Contracts;
-    using Serialization;
 
 
     /// <summary>

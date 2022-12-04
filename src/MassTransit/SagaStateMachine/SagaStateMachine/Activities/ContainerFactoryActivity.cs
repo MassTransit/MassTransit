@@ -16,9 +16,7 @@
 
         public Task Execute(BehaviorContext<TSaga> context, IBehavior<TSaga> next)
         {
-            var factory = context.GetStateMachineActivityFactory();
-
-            var activity = factory.GetService<TActivity>(context);
+            var activity = context.GetServiceOrCreateInstance<TActivity>();
 
             return activity.Execute(context, next);
         }
@@ -26,9 +24,7 @@
         public Task Execute<T>(BehaviorContext<TSaga, T> context, IBehavior<TSaga, T> next)
             where T : class
         {
-            var factory = context.GetStateMachineActivityFactory();
-
-            var activity = factory.GetService<TActivity>(context);
+            var activity = context.GetServiceOrCreateInstance<TActivity>();
 
             var widenBehavior = new WidenBehavior<TSaga, T>(next, context);
 
@@ -68,9 +64,7 @@
 
         public Task Execute(BehaviorContext<TSaga, TMessage> context, IBehavior<TSaga, TMessage> next)
         {
-            var factory = context.GetStateMachineActivityFactory();
-
-            var activity = factory.GetService<TActivity>(context);
+            var activity = context.GetServiceOrCreateInstance<TActivity>();
 
             return activity.Execute(context, next);
         }

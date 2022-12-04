@@ -26,12 +26,12 @@ namespace MassTransit.DependencyInjection
 
         public ISendEndpointProvider SendEndpointProvider
         {
-            get { return _sendEndpointProvider ??= new ScopedSendEndpointProvider<IServiceProvider>(_bus, _provider); }
+            get { return _sendEndpointProvider ??= new ScopedSendEndpointProvider(_bus, _provider); }
         }
 
         public IPublishEndpoint PublishEndpoint
         {
-            get { return _publishEndpoint ??= new PublishEndpoint(new ScopedPublishEndpointProvider<IServiceProvider>(_bus, _provider)); }
+            get { return _publishEndpoint ??= new PublishEndpoint(new ScopedPublishEndpointProvider(_bus, _provider)); }
         }
 
         public IScopedClientFactory ClientFactory
@@ -39,7 +39,7 @@ namespace MassTransit.DependencyInjection
             get
             {
                 return _scopedClientFactory ??=
-                    new ScopedClientFactory(new ClientFactory(new ScopedClientFactoryContext<IServiceProvider>(_clientFactory, _provider)), null);
+                    new ScopedClientFactory(new ClientFactory(new ScopedClientFactoryContext(_clientFactory, _provider)), null);
             }
         }
     }

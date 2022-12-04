@@ -9,9 +9,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using Testing;
 
 
-    public class Common_Saga<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_Saga :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_handle_first_message()
@@ -84,9 +83,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     }
 
 
-    public class Common_Saga_Endpoint<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_Saga_Endpoint :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_handle_the_message()

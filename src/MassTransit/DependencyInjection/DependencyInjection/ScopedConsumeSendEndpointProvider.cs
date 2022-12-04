@@ -4,15 +4,14 @@ namespace MassTransit.DependencyInjection
     using System.Threading.Tasks;
 
 
-    public class ScopedConsumeSendEndpointProvider<TScope> :
+    public class ScopedConsumeSendEndpointProvider :
         ISendEndpointProvider
-        where TScope : class
     {
         readonly ConsumeContext _consumeContext;
         readonly ISendEndpointProvider _provider;
-        readonly TScope _scope;
+        readonly IServiceProvider _scope;
 
-        public ScopedConsumeSendEndpointProvider(ISendEndpointProvider provider, ConsumeContext consumeContext, TScope scope)
+        public ScopedConsumeSendEndpointProvider(ISendEndpointProvider provider, ConsumeContext consumeContext, IServiceProvider scope)
         {
             _provider = provider;
             _consumeContext = consumeContext;
@@ -28,7 +27,7 @@ namespace MassTransit.DependencyInjection
         {
             var endpoint = await _provider.GetSendEndpoint(_consumeContext, address, default).ConfigureAwait(false);
 
-            return new ScopedSendEndpoint<TScope>(endpoint, _scope);
+            return new ScopedSendEndpoint(endpoint, _scope);
         }
     }
 }

@@ -17,7 +17,7 @@ namespace MassTransit.ActiveMqTransport
             _destination = destination;
         }
 
-        protected override IPipe<SendContext<T>> GetPipeProxy<T>(IPipe<SendContext<T>> pipe = default)
+        protected override IPipe<SendContext<T>> GetPipeProxy<T>(IPipe<SendContext<T>>? pipe = default)
         {
             return new ReplyToPipe<T>(_destination, pipe);
         }
@@ -29,7 +29,7 @@ namespace MassTransit.ActiveMqTransport
         {
             readonly IDestination _destination;
 
-            public ReplyToPipe(IDestination destination, IPipe<SendContext<TMessage>> pipe)
+            public ReplyToPipe(IDestination destination, IPipe<SendContext<TMessage>>? pipe)
                 : base(pipe)
             {
                 _destination = destination;

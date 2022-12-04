@@ -9,9 +9,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using TestFramework;
 
 
-    public class Common_JobConsumer<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_JobConsumer :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_resolve_an_use_the_service()

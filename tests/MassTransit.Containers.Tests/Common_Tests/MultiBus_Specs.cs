@@ -14,10 +14,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using Transports;
 
 
-    [TestFixture(typeof(DependencyInjectionTestFixtureContainerFactory))]
-    public class Using_MultiBus<TContainer> :
-        InMemoryContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Using_MultiBus :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_receive()

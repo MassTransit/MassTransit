@@ -4,7 +4,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Courier;
     using Courier.Contracts;
     using Discovery;
     using NUnit.Framework;
@@ -241,9 +240,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     }
 
 
-    public class Common_Discovery<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_Discovery :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_complete_the_routing_slip()

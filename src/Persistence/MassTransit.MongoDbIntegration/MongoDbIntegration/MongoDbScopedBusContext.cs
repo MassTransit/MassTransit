@@ -57,15 +57,14 @@ namespace MassTransit.MongoDbIntegration
 
         public ISendEndpointProvider SendEndpointProvider
         {
-            get { return _sendEndpointProvider ??= new OutboxSendEndpointProvider(this, new ScopedSendEndpointProvider<IServiceProvider>(_bus, _provider)); }
+            get { return _sendEndpointProvider ??= new OutboxSendEndpointProvider(this, new ScopedSendEndpointProvider(_bus, _provider)); }
         }
 
         public IPublishEndpoint PublishEndpoint
         {
             get
             {
-                return _publishEndpoint ??= new PublishEndpoint(new OutboxPublishEndpointProvider(this,
-                    new ScopedPublishEndpointProvider<IServiceProvider>(_bus, _provider)));
+                return _publishEndpoint ??= new PublishEndpoint(new OutboxPublishEndpointProvider(this, new ScopedPublishEndpointProvider(_bus, _provider)));
             }
         }
 
@@ -74,7 +73,7 @@ namespace MassTransit.MongoDbIntegration
             get
             {
                 return _scopedClientFactory ??=
-                    new ScopedClientFactory(new ClientFactory(new ScopedClientFactoryContext<IServiceProvider>(_clientFactory, _provider)), null);
+                    new ScopedClientFactory(new ClientFactory(new ScopedClientFactoryContext(_clientFactory, _provider)), null);
             }
         }
 

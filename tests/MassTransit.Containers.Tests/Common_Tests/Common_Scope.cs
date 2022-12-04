@@ -7,9 +7,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using TestFramework.Messages;
 
 
-    public class Resolving_a_scoped_interface_without_a_scope<TContainer> :
-        InMemoryContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Resolving_a_scoped_interface_without_a_scope :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_resolve_the_publish_endpoint()

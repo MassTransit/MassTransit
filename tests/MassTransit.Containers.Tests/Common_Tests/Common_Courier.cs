@@ -2,7 +2,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Courier;
     using Courier.Contracts;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
@@ -10,9 +9,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using TestFramework.Courier;
 
 
-    public class Courier_ExecuteActivity<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Courier_ExecuteActivity :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_register_and_execute_the_activity()
@@ -58,9 +56,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     }
 
 
-    public class Courier_ExecuteActivity_Endpoint<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Courier_ExecuteActivity_Endpoint :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_register_and_execute_the_activity()
@@ -96,9 +93,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     }
 
 
-    public class Courier_Activity<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Courier_Activity :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_register_and_execute_the_activity()
@@ -143,9 +139,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     }
 
 
-    public class Common_Activity_Filter<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_Activity_Filter :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_use_scope()
@@ -272,9 +267,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     }
 
 
-    public class Courier_Activity_Endpoint<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Courier_Activity_Endpoint :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_register_and_execute_the_activity()

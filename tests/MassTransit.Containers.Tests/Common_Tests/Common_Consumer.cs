@@ -3,7 +3,6 @@
     using System;
     using System.Threading.Tasks;
     using Configuration;
-    using DependencyInjection.Registration;
     using Internals;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
@@ -14,9 +13,8 @@
     using Testing;
 
 
-    public class Common_Consumer<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_Consumer :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_receive_using_the_first_consumer()
@@ -59,9 +57,8 @@
         }
     }
 
-    public class Common_Consumer_Service_Scope<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_Consumer_Service_Scope :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_receive_using_the_first_consumer()
@@ -114,9 +111,8 @@
     }
 
 
-    public class Registering_a_consumer_directly_in_the_container<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Registering_a_consumer_directly_in_the_container :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_receive_using_the_first_consumer()
@@ -157,9 +153,8 @@
     }
 
 
-    public class Common_Consumer_Retry<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_Consumer_Retry :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_only_produce_one_fault()
@@ -195,9 +190,8 @@
     }
 
 
-    public class Common_Consumer_ConfigureEndpoint<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_Consumer_ConfigureEndpoint :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_only_produce_one_fault()
@@ -244,9 +238,8 @@
     }
 
 
-    public class Common_Consume_Filter<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_Consume_Filter :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_use_scope()
@@ -312,9 +305,8 @@
     }
 
 
-    public class Common_Consume_FilterScope<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_Consume_FilterScope :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_use_the_same_scope_for_consume_and_send()
@@ -482,9 +474,8 @@
     }
 
 
-    public class Common_Consumer_Endpoint<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_Consumer_Endpoint :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_receive_on_the_custom_endpoint()
@@ -515,9 +506,8 @@
     }
 
 
-    public class Common_Consumers_Endpoint<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_Consumers_Endpoint :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_receive_on_the_custom_endpoint()
@@ -610,9 +600,8 @@
     }
 
 
-    public class Common_Consumer_ServiceEndpoint<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_Consumer_ServiceEndpoint :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_handle_the_request()
@@ -643,9 +632,8 @@
     }
 
 
-    public class Common_Consumer_Connect<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_Consumer_Connect :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_consume_on_connected_receive_endpoint()
@@ -683,9 +671,8 @@
     }
 
 
-    public class Common_Consumer_FilterOrder<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_Consumer_FilterOrder :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_include_container_scope()
@@ -730,9 +717,9 @@
             return collection.AddSingleton(_messageCompletion)
                 .AddSingleton(_consumerCompletion)
                 .AddSingleton(_consumerMessageCompletion)
-                .AddSingleton<IFilter<ConsumeContext<EasyMessage>>, MessageFilter<EasyMessage, IServiceProvider>>()
-                .AddSingleton<IFilter<ConsumerConsumeContext<EasyConsumer>>, ConsumerFilter<EasyConsumer, IServiceProvider>>()
-                .AddSingleton<IFilter<ConsumerConsumeContext<EasyConsumer, EasyMessage>>, ConsumerMessageFilter<EasyConsumer, EasyMessage, IServiceProvider>>();
+                .AddSingleton<IFilter<ConsumeContext<EasyMessage>>, MessageFilter<EasyMessage>>()
+                .AddSingleton<IFilter<ConsumerConsumeContext<EasyConsumer>>, ConsumerFilter<EasyConsumer>>()
+                .AddSingleton<IFilter<ConsumerConsumeContext<EasyConsumer, EasyMessage>>, ConsumerMessageFilter<EasyConsumer, EasyMessage>>();
         }
 
         protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
@@ -753,10 +740,9 @@
         }
 
 
-        protected class ConsumerFilter<TConsumer, TScope> :
+        protected class ConsumerFilter<TConsumer> :
             IFilter<ConsumerConsumeContext<TConsumer>>
             where TConsumer : class, IConsumer
-            where TScope : class
         {
             readonly TaskCompletionSource<ConsumerConsumeContext<TConsumer>> _taskCompletionSource;
 
@@ -767,7 +753,7 @@
 
             public Task Send(ConsumerConsumeContext<TConsumer> context, IPipe<ConsumerConsumeContext<TConsumer>> next)
             {
-                if (context.TryGetPayload(out TScope _))
+                if (context.TryGetPayload(out IServiceProvider _))
                     _taskCompletionSource.TrySetResult(context);
                 else
                     _taskCompletionSource.TrySetException(new PayloadException("Service Provider not found"));
@@ -781,11 +767,10 @@
         }
 
 
-        protected class ConsumerMessageFilter<TConsumer, TMessage, TScope> :
+        protected class ConsumerMessageFilter<TConsumer, TMessage> :
             IFilter<ConsumerConsumeContext<TConsumer, TMessage>>
             where TConsumer : class
             where TMessage : class
-            where TScope : class
         {
             readonly TaskCompletionSource<ConsumerConsumeContext<TConsumer, TMessage>> _taskCompletionSource;
 
@@ -796,7 +781,7 @@
 
             public Task Send(ConsumerConsumeContext<TConsumer, TMessage> context, IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
             {
-                if (context.TryGetPayload(out TScope _))
+                if (context.TryGetPayload(out IServiceProvider _))
                     _taskCompletionSource.TrySetResult(context);
                 else
                     _taskCompletionSource.TrySetException(new PayloadException("Service Provider not found"));
@@ -810,10 +795,9 @@
         }
 
 
-        protected class MessageFilter<TMessage, TScope> :
+        protected class MessageFilter<TMessage> :
             IFilter<ConsumeContext<TMessage>>
             where TMessage : class
-            where TScope : class
         {
             readonly TaskCompletionSource<ConsumeContext<TMessage>> _taskCompletionSource;
 
@@ -824,7 +808,7 @@
 
             public Task Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)
             {
-                if (context.TryGetPayload(out TScope _))
+                if (context.TryGetPayload(out IServiceProvider _))
                     _taskCompletionSource.TrySetException(new PayloadException("Service Provider should not be present"));
                 else
                     _taskCompletionSource.TrySetResult(context);
@@ -839,9 +823,8 @@
     }
 
 
-    public class Common_Consumer_ScopedFilterOrder<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_Consumer_ScopedFilterOrder :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_include_container_scope()

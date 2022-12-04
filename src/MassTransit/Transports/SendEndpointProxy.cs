@@ -1,3 +1,4 @@
+#nullable enable
 namespace MassTransit.Transports
 {
     using System;
@@ -14,7 +15,7 @@ namespace MassTransit.Transports
         ITransportSendEndpoint
     {
         readonly ISendEndpoint _endpoint;
-        readonly ITransportSendEndpoint _transportEndpoint;
+        readonly ITransportSendEndpoint? _transportEndpoint;
 
         protected SendEndpointProxy(ISendEndpoint endpoint)
         {
@@ -32,7 +33,7 @@ namespace MassTransit.Transports
         public Task<SendContext<T>> CreateSendContext<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
             where T : class
         {
-            return _transportEndpoint.CreateSendContext(message, GetPipeProxy(pipe), cancellationToken)
+            return _transportEndpoint?.CreateSendContext(message, GetPipeProxy(pipe), cancellationToken)
                 ?? throw new InvalidOperationException("The endpoint does not have a valid transport");
         }
 
@@ -153,7 +154,7 @@ namespace MassTransit.Transports
             await _endpoint.Send(message, sendPipe, cancellationToken).ConfigureAwait(false);
         }
 
-        protected abstract IPipe<SendContext<T>> GetPipeProxy<T>(IPipe<SendContext<T>> pipe = default)
+        protected abstract IPipe<SendContext<T>> GetPipeProxy<T>(IPipe<SendContext<T>>? pipe = default)
             where T : class;
     }
 }

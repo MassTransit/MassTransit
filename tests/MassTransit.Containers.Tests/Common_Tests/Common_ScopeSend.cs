@@ -8,10 +8,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using TestFramework;
 
 
-    [TestFixture(typeof(DependencyInjectionTestFixtureContainerFactory))]
-    public class Common_ScopeSend<TContainer> :
-        InMemoryContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_ScopeSend :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_contains_scope_on_send()
@@ -69,9 +67,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     }
 
 
-    public class Common_Send_Filter<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_Send_Filter :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_use_scope()

@@ -6,9 +6,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using TestFramework.Messages;
 
 
-    public class When_a_dependency_is_missing<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class When_a_dependency_is_missing :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_receive_using_the_first_consumer()

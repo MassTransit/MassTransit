@@ -4,17 +4,16 @@ namespace MassTransit.DependencyInjection
     using System.Threading.Tasks;
 
 
-    public class ScopedSendEndpointProvider<TScope> :
+    public class ScopedSendEndpointProvider :
         ISendEndpointProvider
-        where TScope : class
     {
         readonly ISendEndpointProvider _provider;
-        readonly TScope _scope;
+        readonly IServiceProvider _serviceProvider;
 
-        public ScopedSendEndpointProvider(ISendEndpointProvider provider, TScope scope)
+        public ScopedSendEndpointProvider(ISendEndpointProvider provider, IServiceProvider serviceProvider)
         {
             _provider = provider;
-            _scope = scope;
+            _serviceProvider = serviceProvider;
         }
 
         ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
@@ -26,7 +25,7 @@ namespace MassTransit.DependencyInjection
         {
             var endpoint = await _provider.GetSendEndpoint(address).ConfigureAwait(false);
 
-            return new ScopedSendEndpoint<TScope>(endpoint, _scope);
+            return new ScopedSendEndpoint(endpoint, _serviceProvider);
         }
     }
 }

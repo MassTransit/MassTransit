@@ -33,9 +33,9 @@ namespace MassTransit.DependencyInjection
         }
 
         static ExecuteContext<TArguments> PipeContextFactory(ExecuteContext<TArguments> consumeContext, IServiceScope serviceScope,
-            IScopeServiceProvider scopeServiceProvider)
+            IServiceProvider serviceProvider)
         {
-            return new ExecuteContextScope<TArguments>(consumeContext, serviceScope, serviceScope.ServiceProvider, scopeServiceProvider);
+            return new ExecuteContextScope<TArguments>(consumeContext, serviceScope, serviceScope.ServiceProvider, serviceProvider);
         }
 
         static IExecuteScopeContext<TArguments> ExistingScopeContextFactory(ExecuteContext<TArguments> consumeContext, IServiceScope serviceScope)

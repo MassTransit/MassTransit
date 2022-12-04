@@ -12,9 +12,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using Testing;
 
 
-    public class Using_mediator_alongside_the_bus<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Using_mediator_alongside_the_bus :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_dispatch_to_the_consumer()
@@ -43,9 +42,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     }
 
 
-    public class Publishing_a_message_from_a_mediator_consumer<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Publishing_a_message_from_a_mediator_consumer :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_not_transfer_message_headers()
@@ -109,9 +107,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     }
 
 
-    public class Common_Mediator_Request<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_Mediator_Request :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_receive_the_response()
@@ -212,9 +209,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     }
 
 
-    public class Common_Mediator_Request_Filter<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_Mediator_Request_Filter :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_receive_the_response()
@@ -282,9 +278,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     }
 
 
-    public class Common_Mediator_Saga<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_Mediator_Saga :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_receive_the_response()
@@ -361,9 +356,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     }
 
 
-    public class Common_Mediator_FilterScope<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_Mediator_FilterScope :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_use_the_same_scope_for_consume_and_send()

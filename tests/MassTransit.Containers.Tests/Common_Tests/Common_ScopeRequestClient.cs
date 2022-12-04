@@ -8,9 +8,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using TestFramework.Messages;
 
 
-    public class Using_the_request_client_to_publish_within_a_scope<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Using_the_request_client_to_publish_within_a_scope :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_contains_scope_on_publish()
@@ -50,9 +49,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     }
 
 
-    public class Using_the_request_client_to_send_within_a_scope<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Using_the_request_client_to_send_within_a_scope :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_contains_scope_on_send()

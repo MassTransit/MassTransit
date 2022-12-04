@@ -8,9 +8,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using TestFramework;
 
 
-    public class Using_the_request_client_across_consumers<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Using_the_request_client_across_consumers :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_receive_the_response()
@@ -100,9 +99,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     }
 
 
-    public class Using_the_generic_request_client_provider<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Using_the_generic_request_client_provider :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_receive_the_response()
@@ -168,9 +166,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     }
 
 
-    public class Using_the_scoped_client_factory_in_a_consumer<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Using_the_scoped_client_factory_in_a_consumer :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_receive_the_response()

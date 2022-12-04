@@ -32,10 +32,9 @@ namespace MassTransit.DependencyInjection
             context.Add("provider", "dependencyInjection");
         }
 
-        static CompensateContext<TLog> PipeContextFactory(CompensateContext<TLog> consumeContext, IServiceScope serviceScope,
-            IScopeServiceProvider scopeServiceProvider)
+        static CompensateContext<TLog> PipeContextFactory(CompensateContext<TLog> consumeContext, IServiceScope serviceScope, IServiceProvider serviceProvider)
         {
-            return new CompensateContextScope<TLog>(consumeContext, serviceScope, serviceScope.ServiceProvider, scopeServiceProvider);
+            return new CompensateContextScope<TLog>(consumeContext, serviceScope, serviceScope.ServiceProvider, serviceProvider);
         }
 
         static ICompensateScopeContext<TLog> ExistingScopeContextFactory(CompensateContext<TLog> consumeContext, IServiceScope serviceScope)

@@ -4,17 +4,16 @@ namespace MassTransit.DependencyInjection
     using System;
 
 
-    public class ScopedClientFactoryContext<TScope> :
+    public class ScopedClientFactoryContext :
         ClientFactoryContext
-        where TScope : class
     {
         readonly IClientFactory _clientFactory;
-        readonly TScope _scope;
+        readonly IServiceProvider _serviceProvider;
 
-        public ScopedClientFactoryContext(IClientFactory clientFactory, TScope scope)
+        public ScopedClientFactoryContext(IClientFactory clientFactory, IServiceProvider serviceProvider)
         {
             _clientFactory = clientFactory;
-            _scope = scope;
+            _serviceProvider = serviceProvider;
         }
 
         public ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
@@ -43,14 +42,14 @@ namespace MassTransit.DependencyInjection
             where T : class
         {
             IRequestSendEndpoint<T> endpoint = _clientFactory.Context.GetRequestEndpoint<T>(consumeContext);
-            return new ScopedRequestSendEndpoint<TScope, T>(endpoint, _scope);
+            return new ScopedRequestSendEndpoint<T>(endpoint, _serviceProvider);
         }
 
         public IRequestSendEndpoint<T> GetRequestEndpoint<T>(Uri destinationAddress, ConsumeContext? consumeContext = default)
             where T : class
         {
             IRequestSendEndpoint<T> endpoint = _clientFactory.Context.GetRequestEndpoint<T>(destinationAddress, consumeContext);
-            return new ScopedRequestSendEndpoint<TScope, T>(endpoint, _scope);
+            return new ScopedRequestSendEndpoint<T>(endpoint, _serviceProvider);
         }
     }
 }

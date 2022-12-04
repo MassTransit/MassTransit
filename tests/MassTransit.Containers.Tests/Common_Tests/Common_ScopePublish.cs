@@ -10,9 +10,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using Util;
 
 
-    public class Common_ScopePublish<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_ScopePublish :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_contains_scope_on_publish()
@@ -69,9 +68,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     }
 
 
-    public class Common_Publish_Filter<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_Publish_Filter :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_use_scope()
@@ -143,9 +141,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     }
 
 
-    public class Common_Publish_Filter_Outbox<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_Publish_Filter_Outbox :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_use_scope()
@@ -248,9 +245,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     }
 
 
-    public class Common_Publish_Filter_Fault<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_Publish_Filter_Fault :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_not_use_scoped_filter_to_publish_fault()

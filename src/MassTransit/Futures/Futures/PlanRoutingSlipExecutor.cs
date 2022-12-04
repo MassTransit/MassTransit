@@ -1,9 +1,7 @@
 namespace MassTransit.Futures
 {
     using System.Threading.Tasks;
-    using Courier;
     using Courier.Contracts;
-    using SagaStateMachine;
 
 
     public class PlanRoutingSlipExecutor<TInput> :
@@ -12,9 +10,7 @@ namespace MassTransit.Futures
     {
         public async Task Execute(BehaviorContext<FutureState, TInput> context)
         {
-            var factory = context.GetStateMachineActivityFactory();
-
-            var itineraryPlanner = factory.GetService<IItineraryPlanner<TInput>>(context);
+            var itineraryPlanner = context.GetServiceOrCreateInstance<IItineraryPlanner<TInput>>();
 
             var trackingNumber = NewId.NextGuid();
 

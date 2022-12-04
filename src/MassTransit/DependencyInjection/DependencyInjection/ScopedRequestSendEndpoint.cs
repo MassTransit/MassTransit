@@ -5,28 +5,27 @@ namespace MassTransit.DependencyInjection
     using System.Threading.Tasks;
 
 
-    public class ScopedRequestSendEndpoint<TScope, TRequest> :
+    public class ScopedRequestSendEndpoint<TRequest> :
         IRequestSendEndpoint<TRequest>
         where TRequest : class
-        where TScope : class
     {
         readonly IRequestSendEndpoint<TRequest> _endpoint;
-        readonly TScope _scope;
+        readonly IServiceProvider _serviceProvider;
 
-        public ScopedRequestSendEndpoint(IRequestSendEndpoint<TRequest> endpoint, TScope scope)
+        public ScopedRequestSendEndpoint(IRequestSendEndpoint<TRequest> endpoint, IServiceProvider serviceProvider)
         {
             _endpoint = endpoint;
-            _scope = scope;
+            _serviceProvider = serviceProvider;
         }
 
         public Task<TRequest> Send(Guid requestId, object values, IPipe<SendContext<TRequest>> pipe, CancellationToken cancellationToken)
         {
-            return _endpoint.Send(requestId, values, new ScopedSendPipeAdapter<TScope, TRequest>(_scope, pipe), cancellationToken);
+            return _endpoint.Send(requestId, values, new ScopedSendPipeAdapter<TRequest>(_serviceProvider, pipe), cancellationToken);
         }
 
         public Task Send(Guid requestId, TRequest message, IPipe<SendContext<TRequest>> pipe, CancellationToken cancellationToken)
         {
-            return _endpoint.Send(requestId, message, new ScopedSendPipeAdapter<TScope, TRequest>(_scope, pipe), cancellationToken);
+            return _endpoint.Send(requestId, message, new ScopedSendPipeAdapter<TRequest>(_serviceProvider, pipe), cancellationToken);
         }
     }
 }

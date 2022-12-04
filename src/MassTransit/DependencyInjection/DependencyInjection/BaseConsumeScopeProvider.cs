@@ -19,7 +19,7 @@ namespace MassTransit.DependencyInjection
         protected ValueTask<TScopeContext> GetScopeContext<TScopeContext, TPipeContext>(TPipeContext context,
             Func<TPipeContext, IServiceScope, TScopeContext> existingScopeContextFactory,
             Func<TPipeContext, IServiceScope, TScopeContext> createdScopeContextFactory,
-            Func<TPipeContext, IServiceScope, IScopeServiceProvider, TPipeContext> pipeContextFactory)
+            Func<TPipeContext, IServiceScope, IServiceProvider, TPipeContext> pipeContextFactory)
             where TPipeContext : ConsumeContext
         {
             if (context.TryGetPayload<IServiceScope>(out var existingServiceScope))
@@ -34,9 +34,7 @@ namespace MassTransit.DependencyInjection
             var serviceScope = serviceProvider.CreateScope();
             try
             {
-                var scopeServiceProvider = new DependencyInjectionScopeServiceProvider(serviceScope.ServiceProvider);
-
-                var scopeContext = pipeContextFactory(context, serviceScope, scopeServiceProvider);
+                var scopeContext = pipeContextFactory(context, serviceScope, serviceScope.ServiceProvider);
 
                 if (scopeContext.TryGetPayload(out MessageSchedulerContext schedulerContext))
                 {

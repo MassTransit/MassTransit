@@ -57,13 +57,13 @@ namespace MassTransit.KafkaIntegration.Activities
             context.CreateScope("produce-faulted");
         }
 
-        Task Faulted(PipeContext context)
+        Task Faulted(ConsumeContext context)
         {
             if (context is BehaviorExceptionContext<TSaga, TException> exceptionContext)
             {
                 return _messageFactory.Use(exceptionContext, (ctx, s) =>
                 {
-                    ITopicProducer<TMessage> producer = ctx.GetProducer<TMessage>();
+                    var producer = context.GetServiceOrCreateInstance<ITopicProducer<TMessage>>();
 
                     return producer.Produce(s.Message, s.Pipe, ctx.CancellationToken);
                 });
@@ -111,7 +111,7 @@ namespace MassTransit.KafkaIntegration.Activities
             {
                 await _messageFactory.Use(exceptionContext, (ctx, s) =>
                 {
-                    ITopicProducer<TMessage> producer = ctx.GetProducer<TMessage>();
+                    var producer = context.GetServiceOrCreateInstance<ITopicProducer<TMessage>>();
 
                     return producer.Produce(s.Message, s.Pipe, ctx.CancellationToken);
                 }).ConfigureAwait(false);

@@ -64,7 +64,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
         public ISendEndpointProvider SendEndpointProvider
         {
-            get { return _sendEndpointProvider ??= new OutboxSendEndpointProvider(this, new ScopedSendEndpointProvider<IServiceProvider>(_bus, _provider)); }
+            get { return _sendEndpointProvider ??= new OutboxSendEndpointProvider(this, new ScopedSendEndpointProvider(_bus, _provider)); }
         }
 
         public IPublishEndpoint PublishEndpoint
@@ -72,7 +72,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             get
             {
                 return _publishEndpoint ??= new PublishEndpoint(new OutboxPublishEndpointProvider(this,
-                    new ScopedPublishEndpointProvider<IServiceProvider>(_bus, _provider)));
+                    new ScopedPublishEndpointProvider(_bus, _provider)));
             }
         }
 
@@ -81,7 +81,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             get
             {
                 return _scopedClientFactory ??=
-                    new ScopedClientFactory(new ClientFactory(new ScopedClientFactoryContext<IServiceProvider>(_clientFactory, _provider)), null);
+                    new ScopedClientFactory(new ClientFactory(new ScopedClientFactoryContext(_clientFactory, _provider)), null);
             }
         }
     }

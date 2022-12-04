@@ -14,9 +14,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using UnitOfWorkComponents;
 
 
-    public class Common_ConsumeContext<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_ConsumeContext :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_provide_the_consume_context()
@@ -63,9 +62,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     }
 
 
-    public class Common_ConsumeContext_Outbox<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_ConsumeContext_Outbox :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_provide_the_outbox()
@@ -126,9 +124,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     }
 
 
-    public class Common_ConsumeContext_Outbox_Batch<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_ConsumeContext_Outbox_Batch :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_provide_the_outbox()
@@ -196,9 +193,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     }
 
 
-    public class Common_ConsumeContext_Filter_Batch<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_ConsumeContext_Filter_Batch :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_provide_the_outbox()
@@ -264,9 +260,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     }
 
 
-    public class Common_ConsumeContext_Outbox_Solo<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_ConsumeContext_Outbox_Solo :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_provide_the_outbox_to_the_consumer()

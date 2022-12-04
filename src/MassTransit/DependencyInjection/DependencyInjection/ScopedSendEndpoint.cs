@@ -1,15 +1,15 @@
 namespace MassTransit.DependencyInjection
 {
+    using System;
     using Transports;
 
 
-    public class ScopedSendEndpoint<TScope> :
+    public class ScopedSendEndpoint :
         SendEndpointProxy
-        where TScope : class
     {
-        readonly TScope _scope;
+        readonly IServiceProvider _scope;
 
-        public ScopedSendEndpoint(ISendEndpoint endpoint, TScope scope)
+        public ScopedSendEndpoint(ISendEndpoint endpoint, IServiceProvider scope)
             : base(endpoint)
         {
             _scope = scope;
@@ -17,7 +17,7 @@ namespace MassTransit.DependencyInjection
 
         protected override IPipe<SendContext<T>> GetPipeProxy<T>(IPipe<SendContext<T>> pipe = default)
         {
-            return new ScopedSendPipeAdapter<TScope, T>(_scope, pipe);
+            return new ScopedSendPipeAdapter<T>(_scope, pipe);
         }
     }
 }

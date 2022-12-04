@@ -1,24 +1,24 @@
 namespace MassTransit.DependencyInjection
 {
+    using System;
     using Transports;
 
 
-    public class ScopedSendPipeAdapter<TScope, TMessage> :
+    public class ScopedSendPipeAdapter<TMessage> :
         SendContextPipeAdapter<TMessage>
-        where TScope : class
         where TMessage : class
     {
-        readonly TScope _payload;
+        readonly IServiceProvider _provider;
 
-        public ScopedSendPipeAdapter(TScope payload, IPipe<SendContext<TMessage>> pipe)
+        public ScopedSendPipeAdapter(IServiceProvider provider, IPipe<SendContext<TMessage>> pipe)
             : base(pipe)
         {
-            _payload = payload;
+            _provider = provider;
         }
 
         protected override void Send<T>(SendContext<T> context)
         {
-            context.GetOrAddPayload(() => _payload);
+            context.GetOrAddPayload(() => _provider);
         }
 
         protected override void Send(SendContext<TMessage> context)

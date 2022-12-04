@@ -1,4 +1,5 @@
-﻿namespace MassTransit.ActiveMqTransport
+﻿#nullable enable
+namespace MassTransit.ActiveMqTransport.Tests
 {
     using System;
     using Apache.NMS;

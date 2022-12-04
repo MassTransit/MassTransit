@@ -3,15 +3,13 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using System;
     using System.Threading.Tasks;
     using Contracts;
-    using Courier;
     using Courier.Contracts;
     using NUnit.Framework;
     using TestFramework;
 
 
-    public class Using_the_outbox_with_the_request_client<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Using_the_outbox_with_the_request_client :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_receive_the_response()
@@ -68,9 +66,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     }
 
 
-    public class Using_the_outbox_with_a_routing_slip_request<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Using_the_outbox_with_a_routing_slip_request :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_receive_the_response()

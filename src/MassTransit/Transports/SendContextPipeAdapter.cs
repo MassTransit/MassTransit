@@ -1,3 +1,4 @@
+#nullable enable
 namespace MassTransit.Transports
 {
     using System.Threading.Tasks;
@@ -8,9 +9,9 @@ namespace MassTransit.Transports
         ISendPipe
         where TMessage : class
     {
-        readonly IPipe<SendContext<TMessage>> _pipe;
+        readonly IPipe<SendContext<TMessage>>? _pipe;
 
-        protected SendContextPipeAdapter(IPipe<SendContext<TMessage>> pipe)
+        protected SendContextPipeAdapter(IPipe<SendContext<TMessage>>? pipe)
         {
             _pipe = pipe;
         }
@@ -24,7 +25,7 @@ namespace MassTransit.Transports
         {
             Send(context);
 
-            return _pipe.IsNotEmpty() ? _pipe.Send(context) : Task.CompletedTask;
+            return _pipe.IsNotEmpty() ? _pipe!.Send(context) : Task.CompletedTask;
         }
 
         Task ISendContextPipe.Send<T>(SendContext<T> context)

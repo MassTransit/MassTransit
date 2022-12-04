@@ -59,7 +59,7 @@ namespace MassTransit.KafkaIntegration.Activities
         {
             return _messageFactory.Use(context, (ctx, s) =>
             {
-                ITopicProducer<TMessage> producer = ctx.GetProducer<TMessage>();
+                var producer = context.GetServiceOrCreateInstance<ITopicProducer<TMessage>>();
 
                 return producer.Produce(s.Message, s.Pipe, ctx.CancellationToken);
             });
@@ -94,7 +94,7 @@ namespace MassTransit.KafkaIntegration.Activities
         {
             await _messageFactory.Use(context, (ctx, s) =>
             {
-                ITopicProducer<T> producer = ctx.GetProducer<T>();
+                var producer = context.GetServiceOrCreateInstance<ITopicProducer<T>>();
 
                 return producer.Produce(s.Message, s.Pipe, ctx.CancellationToken);
             }).ConfigureAwait(false);

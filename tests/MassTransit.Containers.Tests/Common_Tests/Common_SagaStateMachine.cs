@@ -8,9 +8,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using TestFramework.Sagas;
 
 
-    public class Common_SagaStateMachine<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_SagaStateMachine :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_handle_the_first_event()
@@ -50,9 +49,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     }
 
 
-    public class Common_StateMachine_Filter<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_StateMachine_Filter :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_use_scope()
@@ -100,9 +98,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     }
 
 
-    public class Common_StateMachine_FilterOrder<TContainer> :
-        CommonContainerTestFixture<TContainer>
-        where TContainer : ITestFixtureContainerFactory, new()
+    public class Common_StateMachine_FilterOrder :
+        InMemoryContainerTestFixture
     {
         [Test]
         public async Task Should_include_container_scope()
@@ -151,9 +148,9 @@ namespace MassTransit.Containers.Tests.Common_Tests
             return collection.AddSingleton(_messageCompletion)
                 .AddSingleton(_sagaCompletion)
                 .AddSingleton(_sagaMessageCompletion)
-                .AddSingleton<IFilter<ConsumeContext<StartTest>>, MessageFilter<StartTest, IServiceProvider>>()
-                .AddSingleton<IFilter<SagaConsumeContext<TestInstance>>, SagaFilter<TestInstance, IServiceProvider>>()
-                .AddSingleton<IFilter<SagaConsumeContext<TestInstance, StartTest>>, SagaMessageFilter<TestInstance, StartTest, IServiceProvider>>();
+                .AddSingleton<IFilter<ConsumeContext<StartTest>>, MessageFilter<StartTest>>()
+                .AddSingleton<IFilter<SagaConsumeContext<TestInstance>>, SagaFilter<TestInstance>>()
+                .AddSingleton<IFilter<SagaConsumeContext<TestInstance, StartTest>>, SagaMessageFilter<TestInstance, StartTest>>();
         }
 
         protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
@@ -175,10 +172,9 @@ namespace MassTransit.Containers.Tests.Common_Tests
         }
 
 
-        protected class SagaFilter<TInstance, TScope> :
+        protected class SagaFilter<TInstance> :
             IFilter<SagaConsumeContext<TInstance>>
             where TInstance : class, ISaga
-            where TScope : class
         {
             readonly TaskCompletionSource<SagaConsumeContext<TInstance>> _taskCompletionSource;
 
@@ -189,7 +185,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             public Task Send(SagaConsumeContext<TInstance> context, IPipe<SagaConsumeContext<TInstance>> next)
             {
-                if (context.TryGetPayload(out TScope _))
+                if (context.TryGetPayload(out IServiceProvider _))
                     _taskCompletionSource.TrySetResult(context);
                 else
                     _taskCompletionSource.TrySetException(new PayloadException("Service Provider not found"));
@@ -203,11 +199,10 @@ namespace MassTransit.Containers.Tests.Common_Tests
         }
 
 
-        protected class SagaMessageFilter<TInstance, TMessage, TScope> :
+        protected class SagaMessageFilter<TInstance, TMessage> :
             IFilter<SagaConsumeContext<TInstance, TMessage>>
             where TInstance : class, ISaga
             where TMessage : class
-            where TScope : class
         {
             readonly TaskCompletionSource<SagaConsumeContext<TInstance, TMessage>> _taskCompletionSource;
 
@@ -218,7 +213,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             public Task Send(SagaConsumeContext<TInstance, TMessage> context, IPipe<SagaConsumeContext<TInstance, TMessage>> next)
             {
-                if (context.TryGetPayload(out TScope _))
+                if (context.TryGetPayload(out IServiceProvider _))
                     _taskCompletionSource.TrySetResult(context);
                 else
                     _taskCompletionSource.TrySetException(new PayloadException("Service Provider not found"));
@@ -232,10 +227,9 @@ namespace MassTransit.Containers.Tests.Common_Tests
         }
 
 
-        protected class MessageFilter<TMessage, TScope> :
+        protected class MessageFilter<TMessage> :
             IFilter<ConsumeContext<TMessage>>
             where TMessage : class
-            where TScope : class
         {
             readonly TaskCompletionSource<ConsumeContext<TMessage>> _taskCompletionSource;
 
@@ -246,7 +240,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             public Task Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)
             {
-                if (context.TryGetPayload(out TScope _))
+                if (context.TryGetPayload(out IServiceProvider _))
                     _taskCompletionSource.TrySetException(new PayloadException("Service Provider should not be present"));
                 else
                     _taskCompletionSource.TrySetResult(context);

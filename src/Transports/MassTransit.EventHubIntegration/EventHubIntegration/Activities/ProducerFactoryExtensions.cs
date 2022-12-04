@@ -1,7 +1,6 @@
 namespace MassTransit.EventHubIntegration.Activities
 {
     using System.Threading.Tasks;
-    using SagaStateMachine;
 
 
     static class ProducerFactoryExtensions
@@ -9,13 +8,9 @@ namespace MassTransit.EventHubIntegration.Activities
         internal static Task<IEventHubProducer> GetProducer<T>(this BehaviorContext<T> context, ConsumeContext consumeContext, string eventHubName)
             where T : class, ISaga
         {
-            var factory = context.GetStateMachineActivityFactory();
-
-            var rider = factory.GetService<IEventHubRider>(context) ?? throw new ProduceException("EventHubRider not found");
-
-            var producerProvider = rider.GetProducerProvider(consumeContext);
-
-            return producerProvider.GetProducer(eventHubName);
+            return context.GetServiceOrCreateInstance<IEventHubRider>()
+                .GetProducerProvider(consumeContext)
+                .GetProducer(eventHubName);
         }
     }
 }
