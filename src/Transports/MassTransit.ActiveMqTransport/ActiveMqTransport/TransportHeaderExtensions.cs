@@ -23,6 +23,9 @@
                     continue;
                 }
 
+                if (header.Key == MessageHeaders.TransportMessageId)
+                    continue;
+
                 if (dictionary.Contains(header.Key))
                     continue;
 

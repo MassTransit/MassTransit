@@ -172,6 +172,12 @@ namespace MassTransit.RabbitMqTransport
                     continue;
                 }
 
+                if (header.Key == RabbitMqHeaders.Exchange
+                    || header.Key == RabbitMqHeaders.RoutingKey
+                    || header.Key == RabbitMqHeaders.DeliveryTag
+                    || header.Key == RabbitMqHeaders.ConsumerTag)
+                    continue;
+
                 if (dictionary.ContainsKey(header.Key))
                     continue;
 

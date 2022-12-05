@@ -3,6 +3,7 @@
     using System;
     using System.Threading.Tasks;
     using NUnit.Framework;
+    using Serialization;
     using Shouldly;
     using TestFramework.Messages;
 
@@ -72,7 +73,7 @@
         {
             base.ConfigureRabbitMqBus(configurator);
 
-            configurator.UseRawJsonSerializer();
+            configurator.UseRawJsonSerializer(RawSerializerOptions.All);
         }
 
         [OneTimeSetUp]
