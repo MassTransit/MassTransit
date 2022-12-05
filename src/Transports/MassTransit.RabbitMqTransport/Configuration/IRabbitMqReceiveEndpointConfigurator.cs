@@ -22,12 +22,6 @@
         string DeadLetterExchange { set; }
 
         /// <summary>
-        /// Configure a management endpoint for this receive endpoint
-        /// </summary>
-        /// <param name="management"></param>
-        void ConnectManagementEndpoint(IReceiveEndpointConfigurator management);
-
-        /// <summary>
         /// Bind an exchange to the receive endpoint exchange
         /// </summary>
         /// <param name="exchangeName">The exchange name</param>

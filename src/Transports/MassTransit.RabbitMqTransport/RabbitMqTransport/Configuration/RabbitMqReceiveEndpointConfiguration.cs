@@ -2,8 +2,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
 {
     using System;
     using System.Collections.Generic;
-    using Components;
-    using JunkDrawer;
     using MassTransit.Configuration;
     using MassTransit.Middleware;
     using Middleware;
@@ -22,7 +20,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
         readonly IRabbitMqEndpointConfiguration _endpointConfiguration;
         readonly IRabbitMqHostConfiguration _hostConfiguration;
         readonly Lazy<Uri> _inputAddress;
-        readonly IManagementPipe _managementPipe;
         readonly IBuildPipeConfigurator<ModelContext> _modelConfigurator;
         readonly RabbitMqReceiveSettings _settings;
 
@@ -35,7 +32,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             _endpointConfiguration = endpointConfiguration;
 
-            _managementPipe = new ManagementPipe();
             _connectionConfigurator = new PipeConfigurator<ConnectionContext>();
             _modelConfigurator = new PipeConfigurator<ModelContext>();
 
@@ -74,8 +70,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
                 if (_settings.PurgeOnStartup)
                     _modelConfigurator.UseFilter(new PurgeOnStartupFilter(_settings.QueueName));
 
-                _modelConfigurator.UseFilter(new PrefetchCountFilter(_managementPipe, _settings.PrefetchCount));
-
+                _modelConfigurator.UseFilter(new PrefetchCountFilter(_settings.PrefetchCount));
                 _modelConfigurator.UseFilter(new RabbitMqConsumerFilter(context));
             }
 
@@ -218,12 +213,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
         public void SetQuorumQueue(int? replicationFactor = default)
         {
             _settings.SetQuorumQueue(replicationFactor);
-        }
-
-        public void ConnectManagementEndpoint(IReceiveEndpointConfigurator management)
-        {
-            var consumer = new SetPrefetchCountConsumer(_managementPipe, _settings.QueueName);
-            management.Instance(consumer);
         }
 
         public void Bind(string exchangeName, Action<IRabbitMqExchangeBindingConfigurator> callback)
