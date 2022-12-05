@@ -5,6 +5,7 @@ namespace MassTransit.ActiveMqTransport.Tests
     using System.Threading.Tasks;
     using NUnit.Framework;
     using TestFramework;
+    using Testing;
 
 
     [Category("Flaky")]

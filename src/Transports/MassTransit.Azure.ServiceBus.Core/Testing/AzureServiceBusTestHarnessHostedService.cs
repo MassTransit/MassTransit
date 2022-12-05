@@ -5,6 +5,7 @@ namespace MassTransit.Testing
     using System.Threading.Tasks;
     using Azure;
     using Azure.Messaging.ServiceBus.Administration;
+    using Internals;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;

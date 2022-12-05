@@ -8,6 +8,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 {
     using System;
     using System.Threading.Tasks;
+    using Internals;
+
 
     [SetUpFixture]
     public class AzureServiceBusTestSetUpFixture

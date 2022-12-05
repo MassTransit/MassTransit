@@ -1,22 +1,14 @@
-namespace MassTransit
+namespace MassTransit.Testing
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
 
 
-    public static class AsyncMessageListExtensions
+    public static class AsyncElementListExtensions
     {
-        public static async Task<IList<TElement>> ToListAsync<TElement>(this IAsyncEnumerable<TElement> elements)
-            where TElement : class
-        {
-            var elementsList = new List<TElement>();
-            await foreach (var element in elements.ConfigureAwait(false))
-                elementsList.Add(element);
-
-            return elementsList;
-        }
-
         public static async Task<TElement> First<TElement>(this IAsyncEnumerable<TElement> elements)
             where TElement : class
         {
@@ -34,6 +26,12 @@ namespace MassTransit
                 count++;
 
             return count;
+        }
+
+        public static int Count<TElement>(this IAsyncElementList<TElement> elements, CancellationToken cancellationToken = default)
+            where TElement : class, IAsyncListElement
+        {
+            return elements.Select(x => true, cancellationToken).Count();
         }
 
         public static async IAsyncEnumerable<TElement> Take<TElement>(this IAsyncEnumerable<TElement> elements, int quantity)
@@ -83,6 +81,19 @@ namespace MassTransit
                 if (entry is TResult result)
                     yield return result;
             }
+        }
+
+        public static void Deconstruct(this ISentMessage sent, out object message, out SendContext context)
+        {
+            context = sent.Context;
+            message = sent.MessageObject;
+        }
+
+        public static void Deconstruct<TMessage>(this ISentMessage<TMessage> sent, out TMessage message, out SendContext context)
+            where TMessage : class
+        {
+            context = sent.Context;
+            message = sent.Context.Message;
         }
     }
 }
