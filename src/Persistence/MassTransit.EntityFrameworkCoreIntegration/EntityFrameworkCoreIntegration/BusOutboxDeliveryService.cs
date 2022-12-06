@@ -249,7 +249,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                         StartedActivity? activity = LogContext.Current?.StartOutboxDeliverActivity(message);
                         try
                         {
-                            await endpoint.Send(new Outbox(), pipe, token.Token).ConfigureAwait(false);
+                            await endpoint.Send(new SerializedMessageBody(), pipe, token.Token).ConfigureAwait(false);
                         }
                         finally
                         {
@@ -318,11 +318,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             {
                 LogContext.Warning?.Log(innerException, "Transaction rollback failed");
             }
-        }
-
-
-        class Outbox
-        {
         }
     }
 }

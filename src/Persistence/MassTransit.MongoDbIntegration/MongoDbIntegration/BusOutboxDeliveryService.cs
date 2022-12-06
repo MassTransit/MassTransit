@@ -246,7 +246,7 @@ namespace MassTransit.MongoDbIntegration
                         StartedActivity? activity = LogContext.Current?.StartOutboxDeliverActivity(message);
                         try
                         {
-                            await endpoint.Send(new Outbox(), pipe, token.Token).ConfigureAwait(false);
+                            await endpoint.Send(new SerializedMessageBody(), pipe, token.Token).ConfigureAwait(false);
                         }
                         catch (Exception exception)
                         {
@@ -301,11 +301,6 @@ namespace MassTransit.MongoDbIntegration
             {
                 LogContext.Warning?.Log(innerException, "Transaction rollback failed");
             }
-        }
-
-
-        class Outbox
-        {
         }
     }
 }

@@ -1,7 +1,6 @@
 namespace MassTransit.Configuration
 {
     using System;
-    using Courier;
     using DependencyInjection;
     using Internals;
     using Middleware;

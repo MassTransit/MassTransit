@@ -36,9 +36,7 @@ namespace MassTransit.QuartzIntegration
 
                 var endpoint = await _bus.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
-                var scheduled = new Scheduled();
-
-                await endpoint.Send(scheduled, pipe, context.CancellationToken).ConfigureAwait(false);
+                await endpoint.Send(new SerializedMessageBody(), pipe, context.CancellationToken).ConfigureAwait(false);
 
                 LogContext.Debug?.Log("Schedule Executed: {Key} {Schedule}", context.Trigger.Key, context.Trigger.GetNextFireTimeUtc());
             }
@@ -48,11 +46,6 @@ namespace MassTransit.QuartzIntegration
 
                 throw new JobExecutionException(ex, context.RefireCount < 5);
             }
-        }
-
-
-        class Scheduled
-        {
         }
 
 

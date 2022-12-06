@@ -32,9 +32,7 @@ namespace MassTransit.HangfireIntegration
 
                 var endpoint = await _bus.GetSendEndpoint(messageData.Destination).ConfigureAwait(false);
 
-                var scheduled = new Scheduled();
-
-                await endpoint.Send(scheduled, pipe, performContext.CancellationToken.ShutdownToken).ConfigureAwait(false);
+                await endpoint.Send(new SerializedMessageBody(), pipe, performContext.CancellationToken.ShutdownToken).ConfigureAwait(false);
 
                 LogContext.Debug?.Log("Schedule Executed: {JobId}, created at: {CreatedAt}", performContext.BackgroundJob.Id,
                     performContext.BackgroundJob.CreatedAt);
@@ -61,9 +59,7 @@ namespace MassTransit.HangfireIntegration
 
                 var endpoint = await _bus.GetSendEndpoint(messageData.Destination).ConfigureAwait(false);
 
-                var scheduled = new Scheduled();
-
-                await endpoint.Send(scheduled, pipe, performContext.CancellationToken.ShutdownToken).ConfigureAwait(false);
+                await endpoint.Send(new SerializedMessageBody(), pipe, performContext.CancellationToken.ShutdownToken).ConfigureAwait(false);
 
                 LogContext.Debug?.Log("Schedule Executed: {JobId}, created at: {CreatedAt}, with range: {StartTime}-{EndTime}", performContext.BackgroundJob.Id,
                     performContext.BackgroundJob.CreatedAt, messageData.StartTime, messageData.EndTime);
@@ -125,11 +121,6 @@ namespace MassTransit.HangfireIntegration
             public void Probe(ProbeContext context)
             {
             }
-        }
-
-
-        class Scheduled
-        {
         }
     }
 }

@@ -8,6 +8,7 @@ namespace MassTransit.Middleware
     using System.Threading.Tasks;
     using DependencyInjection;
     using Logging;
+    using Serialization;
 
 
     public class OutboxMessagePipe<TMessage> :
@@ -101,7 +102,7 @@ namespace MassTransit.Middleware
                     StartedActivity? activity = LogContext.Current?.StartOutboxDeliverActivity(message);
                     try
                     {
-                        await endpoint.Send(new Outbox(), pipe, token.Token).ConfigureAwait(false);
+                        await endpoint.Send(new SerializedMessageBody(), pipe, token.Token).ConfigureAwait(false);
                     }
                     catch (Exception exception)
                     {
@@ -125,11 +126,6 @@ namespace MassTransit.Middleware
 
             if (messageIndex == messages.Count && messages.Count < messageLimit)
                 await context.SetDelivered().ConfigureAwait(false);
-        }
-
-
-        class Outbox
-        {
         }
     }
 }

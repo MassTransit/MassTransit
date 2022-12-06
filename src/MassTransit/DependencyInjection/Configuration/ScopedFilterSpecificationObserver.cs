@@ -4,6 +4,7 @@ namespace MassTransit.Configuration
     using DependencyInjection;
     using Internals;
     using Middleware;
+    using Serialization;
 
 
     public class ScopedFilterSpecificationObserver :
@@ -40,6 +41,10 @@ namespace MassTransit.Configuration
 
             if (!_filterType.IsGenericType || !_filterType.IsGenericTypeDefinition)
                 throw new ConfigurationException("The scoped filter must be a generic type definition");
+
+            // do not create filters for scheduled/outbox messages
+            if (typeof(T) == typeof(SerializedMessageBody))
+                return;
 
             var filterType = _filterType.MakeGenericType(typeof(T));
 
