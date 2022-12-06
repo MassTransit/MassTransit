@@ -22,6 +22,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
 
             await using var provider = new ServiceCollection()
                 .AddBusOutboxServices()
+                .AddTelemetryListener()
                 .AddMassTransitTestHarness(x =>
                 {
                     x.AddEntityFrameworkOutbox<ReliableDbContext>(o =>

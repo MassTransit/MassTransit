@@ -14,6 +14,7 @@ namespace MassTransit.Tests.SagaStateMachineTests
         public async Task Should_work_as_expected()
         {
             await using var provider = new ServiceCollection()
+                .AddTelemetryListener()
                 .AddMassTransitTestHarness(x =>
                 {
                     x.AddSagaStateMachine<ChoirStateMachine, ChoirState>();

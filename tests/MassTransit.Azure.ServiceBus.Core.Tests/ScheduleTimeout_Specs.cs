@@ -93,6 +93,7 @@
                 await using var provider = new ServiceCollection()
                     .AddScoped<SetScopedValueActivity>()
                     .AddScoped<ScopedService>()
+                    .AddTelemetryListener()
                     .AddMassTransitTestHarness(x =>
                     {
                         x.AddHandler(async (CartRemoved _) =>

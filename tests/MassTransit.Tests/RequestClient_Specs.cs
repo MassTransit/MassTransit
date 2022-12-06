@@ -191,6 +191,7 @@
         public async Task Should_not_include_the_request_id()
         {
             await using var provider = new ServiceCollection()
+                .AddTelemetryListener()
                 .AddMassTransitTestHarness(x =>
                 {
                     x.AddConsumer<PingConsumer>();

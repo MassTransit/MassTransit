@@ -1,7 +1,9 @@
+#nullable enable
 namespace MassTransit
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using Configuration;
@@ -28,7 +30,7 @@ namespace MassTransit
         /// configuration (by default, unless another UsingXxx transport method is specified), and saga repositories are
         /// replaced with in-memory as well.
         /// </summary>
-        public static IServiceCollection AddMassTransitTestHarness(this IServiceCollection services, Action<IBusRegistrationConfigurator> configure = null)
+        public static IServiceCollection AddMassTransitTestHarness(this IServiceCollection services, Action<IBusRegistrationConfigurator>? configure = null)
         {
             return AddMassTransitTestHarness(services, Console.Out, configure);
         }
@@ -42,7 +44,7 @@ namespace MassTransit
         /// replaced with in-memory as well.
         /// </summary>
         public static IServiceCollection AddMassTransitTestHarness(this IServiceCollection services, TextWriter textWriter,
-            Action<IBusRegistrationConfigurator> configure = null)
+            Action<IBusRegistrationConfigurator>? configure = null)
         {
             services.AddOptions<TextWriterLoggerOptions>();
             services.TryAddSingleton<ILoggerFactory>(provider =>
@@ -68,7 +70,6 @@ namespace MassTransit
                 services.RemoveMassTransit();
                 services.RemoveSagaRepositories();
             }
-
 
             return services.AddMassTransit(x =>
             {
@@ -96,6 +97,31 @@ namespace MassTransit
                     });
                 }
             });
+        }
+
+        /// <summary>
+        /// Adds a telemetry listener to the test harness, which outputs a timeline view of the unit test
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="includeDetails">If true, additional details from each span are shown</param>
+        public static IServiceCollection AddTelemetryListener(this IServiceCollection services, bool includeDetails = false)
+        {
+            return services.AddTelemetryListener(Console.Out);
+        }
+
+        /// <summary>
+        /// Adds a telemetry listener to the test harness, which outputs a timeline view of the unit test
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="textWriter">Override the default Console.Out TextWriter</param>
+        /// <param name="includeDetails">If true, additional details from each span are shown</param>
+        public static IServiceCollection AddTelemetryListener(this IServiceCollection services, TextWriter textWriter, bool includeDetails = false)
+        {
+            var (methodName, className) = GetTestMethodInfo();
+
+            services.TryAddSingleton(provider => new TestActivityListener(textWriter, methodName, className, includeDetails));
+
+            return services;
         }
 
         /// <summary>
@@ -164,7 +190,7 @@ namespace MassTransit
         /// Add the In-Memory test harness to the container, and configure it using the callback specified.
         /// </summary>
         public static IServiceCollection AddMassTransitInMemoryTestHarness(this IServiceCollection services,
-            Action<IBusRegistrationConfigurator> configure = null)
+            Action<IBusRegistrationConfigurator>? configure = null)
         {
             services.AddMassTransit(cfg =>
             {
@@ -178,11 +204,11 @@ namespace MassTransit
                 if (busInstances == null)
                 {
                     var busInstance = provider.GetService<IBusInstance>();
+                    if (busInstance == null)
+                        throw new ConfigurationException("No bus instances found");
+
                     busInstances = new[] { busInstance };
                 }
-
-                if (busInstances == null)
-                    throw new ConfigurationException("No bus instances found");
 
                 var testHarnessBusInstance = busInstances.FirstOrDefault(x => x is InMemoryTestHarnessBusInstance);
                 if (testHarnessBusInstance is InMemoryTestHarnessBusInstance testInstance)
@@ -193,6 +219,30 @@ namespace MassTransit
             services.AddSingleton<BusTestHarness>(provider => provider.GetRequiredService<InMemoryTestHarness>());
 
             return services;
+        }
+
+        static (string? methodName, string? className) GetTestMethodInfo()
+        {
+            var stackTrace = new StackTrace(2);
+            var frameCount = stackTrace.FrameCount;
+            for (var i = 0; i < frameCount; i++)
+            {
+                var frame = stackTrace.GetFrame(i);
+
+                if (!frame.HasMethod())
+                    continue;
+
+                var method = frame.GetMethod();
+
+                if (method.GetCustomAttributes(false).Any(x =>
+                    {
+                        var name = x.GetType().Name;
+                        return name.ToLower().Contains("test") || name.ToLower().Contains("fact");
+                    }))
+                    return (method.Name, method.DeclaringType.Name);
+            }
+
+            return (null, null);
         }
 
         /// <summary>

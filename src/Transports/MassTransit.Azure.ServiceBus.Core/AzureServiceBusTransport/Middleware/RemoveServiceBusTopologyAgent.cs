@@ -40,7 +40,7 @@ namespace MassTransit.AzureServiceBusTransport.Middleware
             await Task.WhenAll(_brokerTopology.QueueSubscriptions.Select(subscription => Delete(context, subscription))).ConfigureAwait(false);
         }
 
-        Task Delete(ConnectionContext context, QueueSubscription subscription)
+        static Task Delete(ConnectionContext context, QueueSubscription subscription)
         {
             return context.DeleteTopicSubscription(subscription.Subscription.CreateSubscriptionOptions);
         }

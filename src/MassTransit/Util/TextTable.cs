@@ -131,11 +131,14 @@ namespace MassTransit.Util
 
             builder.AppendLine(top);
             builder.AppendLine(columnHeaders);
+            builder.AppendLine(rowSeparator);
 
             foreach (var row in formattedRows)
             {
-                builder.AppendLine(rowSeparator);
                 builder.AppendLine(row);
+
+                if (Options.ShowRowSeparator)
+                    builder.AppendLine(rowSeparator);
             }
 
             builder.AppendLine(bottom);
@@ -189,6 +192,12 @@ namespace MassTransit.Util
             return this;
         }
 
+        public TextTable HideRowSeparator()
+        {
+            Options.ShowRowSeparator = false;
+            return this;
+        }
+
         public TextTable EnableCount(bool enabled)
         {
             Options.EnableCount = enabled;
@@ -230,6 +239,8 @@ namespace MassTransit.Util
         /// The <see cref="System.IO.TextWriter" /> to write to. Defaults to <see cref="System.Console.Out" />.
         /// </summary>
         public TextWriter Out { get; set; } = Console.Out;
+
+        public bool ShowRowSeparator { get; set; }
     }
 
 

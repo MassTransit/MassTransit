@@ -15,6 +15,7 @@ namespace MassTransit.Tests
         public async Task Should_handle_responses_properly()
         {
             await using var provider = new ServiceCollection()
+                .AddTelemetryListener()
                 .AddMassTransitTestHarness(x =>
                 {
                     x.AddRequestClient<RequestA>();

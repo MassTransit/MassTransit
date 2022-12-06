@@ -48,6 +48,8 @@ namespace MassTransit.DependencyInjection.Testing
             _sent = new Lazy<BusTestSendObserver>(() => new BusTestSendObserver(TestTimeout, TestInactivityTimeout, InactivityToken));
 
             _scope = new Lazy<IServiceScope>(() => _provider.CreateScope());
+
+            provider.GetService<TestActivityListener>();
         }
 
         public async ValueTask DisposeAsync()
