@@ -39,6 +39,12 @@ namespace MassTransit.Serialization
 
             if (IsSupportedMessageType<T>())
             {
+                if (Message is T messageOfT)
+                {
+                    message = messageOfT;
+                    return true;
+                }
+
                 message = jsonElement.Deserialize<T>(Options);
                 return message != null;
             }
