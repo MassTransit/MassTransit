@@ -33,6 +33,13 @@ namespace MassTransit.Serialization
                 return message != null;
             }
 
+            // Remove this: Empty object is used
+            if (typeof(T) == _message?.GetType())
+            {
+                message = (T)_message;
+                return true;
+            }
+
             if (IsSupportedMessageType<T>())
             {
                 using var json = messageToken.CreateReader();
