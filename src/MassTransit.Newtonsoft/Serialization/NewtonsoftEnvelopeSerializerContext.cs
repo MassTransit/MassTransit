@@ -35,6 +35,12 @@ namespace MassTransit.Serialization
 
             if (IsSupportedMessageType<T>())
             {
+                if (_message is T messageOfT)
+                {
+                    message = messageOfT;
+                    return true;
+                }
+
                 using var json = messageToken.CreateReader();
                 message = _deserializer.Deserialize<T>(json);
 

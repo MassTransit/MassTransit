@@ -1,13 +1,15 @@
 namespace MassTransit.Tests.Testing
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Threading.Tasks;
-    using MassTransit.Saga;
     using MassTransit.Testing;
+    using Newtonsoft.Json;
     using NUnit.Framework;
     using Shouldly;
+    using TestFramework;
 
 
     public class When_a_saga_is_being_tested
@@ -24,6 +26,26 @@ namespace MassTransit.Tests.Testing
             _testValueA = "TestValueA";
 
             _harness = new InMemoryTestHarness();
+            _harness.TestTimeout = TimeSpan.FromMinutes(10);
+
+            _harness.OnConfigureInMemoryBus += e =>
+            {
+                BusTestFixture.ConfigureBusDiagnostics(e);
+
+                e.UseNewtonsoftJsonSerializer();
+                e.ConfigureNewtonsoftJsonDeserializer(x =>
+                {
+                    x.TypeNameHandling = TypeNameHandling.Auto;
+                    x.TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Full;
+                    return x;
+                });
+                e.ConfigureNewtonsoftJsonSerializer(x =>
+                {
+                    x.TypeNameHandling = TypeNameHandling.Auto;
+                    x.TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Full;
+                    return x;
+                });
+            };
             _saga = _harness.Saga<TestSaga>();
 
             await _harness.Start();
@@ -31,7 +53,12 @@ namespace MassTransit.Tests.Testing
             await _harness.InputQueueSendEndpoint.Send(new A
             {
                 CorrelationId = _sagaId,
-                Value = _testValueA
+                Value = _testValueA,
+                Xs = new List<X>
+                {
+                    new X { Foo = "Foo" },
+                    new Y { Bar = "Bar" }
+                }
             });
         }
 
@@ -101,7 +128,7 @@ namespace MassTransit.Tests.Testing
             public async Task Consume(ConsumeContext<A> context)
             {
                 ValueA = context.Message.Value;
-                await context.Publish(new Aa {CorrelationId = CorrelationId});
+                await context.Publish(new Aa { CorrelationId = CorrelationId });
             }
 
             public Guid CorrelationId { get; set; }
@@ -121,11 +148,23 @@ namespace MassTransit.Tests.Testing
         }
 
 
-        class A :
-            CorrelatedBy<Guid>
+        class A : CorrelatedBy<Guid>
         {
             public string Value { get; set; }
             public Guid CorrelationId { get; set; }
+            public List<X> Xs { get; set; } // NEW List with X's
+        }
+
+
+        class X // NEW
+        {
+            public string Foo { get; set; }
+        }
+
+
+        class Y : X // NEW
+        {
+            public string Bar { get; set; }
         }
 
 
