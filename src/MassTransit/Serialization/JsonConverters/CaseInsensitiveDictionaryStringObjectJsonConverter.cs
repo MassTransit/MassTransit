@@ -46,11 +46,20 @@ namespace MassTransit.Serialization.JsonConverters
 
         static void WriteValue(Utf8JsonWriter writer, string key, object objectValue, JsonSerializerOptions options)
         {
-            if (key == null || objectValue == null)
+            if (key == null)
+                return;
+
+            var ignoreDefault = options.DefaultIgnoreCondition.HasFlag(JsonIgnoreCondition.WhenWritingDefault);
+            var ignoreNull = ignoreDefault || options.DefaultIgnoreCondition.HasFlag(JsonIgnoreCondition.WhenWritingNull);
+
+            if (objectValue == null && ignoreNull)
                 return;
 
             switch (objectValue)
             {
+                case null:
+                    writer.WriteNull(key);
+                    break;
                 case string value:
                     writer.WriteString(key, value);
                     break;
@@ -67,19 +76,19 @@ namespace MassTransit.Serialization.JsonConverters
                         writer.WriteString(key, value.ToString("D"));
                     break;
                 case long value:
-                    if (value != default)
+                    if (value != default || !ignoreDefault)
                         writer.WriteNumber(key, value);
                     break;
                 case int value:
-                    if (value != default)
+                    if (value != default || !ignoreDefault)
                         writer.WriteNumber(key, value);
                     break;
                 case short value:
-                    if (value != default)
+                    if (value != default || !ignoreDefault)
                         writer.WriteNumber(key, value);
                     break;
                 case byte value:
-                    if (value != default)
+                    if (value != default || !ignoreDefault)
                         writer.WriteNumber(key, value);
                     break;
                 case float value:
@@ -89,7 +98,7 @@ namespace MassTransit.Serialization.JsonConverters
                     writer.WriteNumber(key, value);
                     break;
                 case decimal value:
-                    if (value != default)
+                    if (value != default || !ignoreDefault)
                     {
                         var text = Convert.ToString(value, CultureInfo.InvariantCulture);
                         if (!string.IsNullOrWhiteSpace(text))
@@ -98,7 +107,7 @@ namespace MassTransit.Serialization.JsonConverters
 
                     break;
                 case bool value:
-                    if (value)
+                    if (value || !ignoreDefault)
                         writer.WriteBoolean(key, value);
                     break;
 
