@@ -19,8 +19,6 @@
         protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,
             IConsumerConfigurator<PauseScheduledRecurringMessageConsumer> consumerConfigurator)
         {
-            endpointConfigurator.UseMessageRetry(r => r.Interval(5, 250));
-
             consumerConfigurator.Message<PauseScheduledRecurringMessage>(m =>
             {
                 m.UsePartitioner(_endpointDefinition.Partition, p => $"{p.Message.ScheduleGroup},{p.Message.ScheduleId}");

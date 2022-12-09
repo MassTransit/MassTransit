@@ -19,8 +19,6 @@ namespace MassTransit.Configuration
         protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,
             IConsumerConfigurator<ScheduleRecurringMessageConsumer> consumerConfigurator)
         {
-            endpointConfigurator.UseMessageRetry(r => r.Interval(5, 250));
-
             consumerConfigurator.Message<ScheduleRecurringMessage>(m =>
             {
                 m.UsePartitioner(_endpointDefinition.Partition, p => $"{p.Message.Schedule?.ScheduleGroup},{p.Message.Schedule?.ScheduleId}");
