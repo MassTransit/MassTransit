@@ -63,7 +63,7 @@ namespace MassTransit.Internals.Caching
             cacheValue = _policy.CreateValue(RemoveValue);
 
             if (!_values.TryAdd(key, cacheValue))
-                return GetOrAdd(key, missingValueFactory);
+                return Get(key);
 
             _metrics.Miss();
 
