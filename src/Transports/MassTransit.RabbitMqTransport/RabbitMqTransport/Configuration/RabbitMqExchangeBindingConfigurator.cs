@@ -39,5 +39,14 @@ namespace MassTransit.RabbitMqTransport.Configuration
         }
 
         public string RoutingKey { get; set; }
+
+        public IRabbitMqExchangeBindingConfigurator ExchangeBindingConfigurator { get; set; }
+
+        public void Bind(string exchangeName, Action<IRabbitMqExchangeBindingConfigurator> configure)
+        {
+            ExchangeBindingConfigurator = new RabbitMqExchangeBindingConfigurator(exchangeName, ExchangeType);
+
+            configure?.Invoke(ExchangeBindingConfigurator);
+        }
     }
 }

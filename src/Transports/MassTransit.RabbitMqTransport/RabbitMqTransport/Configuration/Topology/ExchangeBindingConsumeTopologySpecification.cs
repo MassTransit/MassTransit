@@ -28,9 +28,19 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         public void Apply(IReceiveEndpointBrokerTopologyBuilder builder)
         {
-            var exchangeHandle = builder.ExchangeDeclare(ExchangeName, ExchangeType, Durable, AutoDelete, ExchangeArguments);
+            RabbitMqExchangeBindingConfigurator exchangeBindingConfigurator = this;
+            ExchangeHandle destination = builder.Exchange;
+            do
+            {
+                var source = builder.ExchangeDeclare(exchangeBindingConfigurator.ExchangeName, exchangeBindingConfigurator.ExchangeType, exchangeBindingConfigurator.Durable, exchangeBindingConfigurator.AutoDelete, exchangeBindingConfigurator.ExchangeArguments);
 
-            var bindingHandle = builder.ExchangeBind(exchangeHandle, builder.Exchange, RoutingKey, BindingArguments);
+                var bindingHandle = builder.ExchangeBind(source, destination, exchangeBindingConfigurator.RoutingKey, exchangeBindingConfigurator.BindingArguments);
+
+                destination = source;
+
+                exchangeBindingConfigurator = exchangeBindingConfigurator.ExchangeBindingConfigurator as RabbitMqExchangeBindingConfigurator;
+            }
+            while (exchangeBindingConfigurator != null);
         }
     }
 }

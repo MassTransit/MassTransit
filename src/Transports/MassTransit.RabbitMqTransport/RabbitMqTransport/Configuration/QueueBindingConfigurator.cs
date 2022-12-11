@@ -35,5 +35,10 @@ namespace MassTransit.RabbitMqTransport.Configuration
             AutoDelete = true;
             QueueExpiration = duration;
         }
+
+        public void Bind(string exchangeName, Action<IRabbitMqExchangeBindingConfigurator> configure)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
