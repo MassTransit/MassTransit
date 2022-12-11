@@ -26,8 +26,16 @@ _ReSharper*
 *.DotSettings.user
 
 docs/.vuepress/dist
-/node_modules
 .vscode
 .idea
 appsettings.Development.json
 
+node_modules
+*.iml
+*.log*
+.nuxt
+coverage
+dist
+sw.*
+.env
+.output

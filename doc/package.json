@@ -1,0 +1,30 @@
+{
+  "name": "masstransit-docus",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "nuxi dev",
+    "build": "nuxi build",
+    "generate": "nuxi generate",
+    "preview": "nuxi preview"
+  },
+  "devDependencies": {
+    "@nuxt-themes/docus": "^1.0.2",
+    "@nuxtjs/algolia": "^1.5.0",
+    "@types/chai": "^4.3.4",
+    "@types/jest": "^29.2.4",
+    "babel-jest": "^29.3.1",
+    "chai": "^4.3.7",
+    "jest": "^29.3.1",
+    "nuxt": "^3.0.0",
+    "ts-jest": "^29.0.3",
+    "vue-gtag-next": "^1.14.0"
+  },
+  "dependencies": {
+    "@docsearch/js": "3",
+    "autoprefixer": "^10.4.13",
+    "mermaid": "^9.2.2",
+    "postcss": "^8.4.20",
+    "tailwindcss": "^3.2.4"
+  }
+}
