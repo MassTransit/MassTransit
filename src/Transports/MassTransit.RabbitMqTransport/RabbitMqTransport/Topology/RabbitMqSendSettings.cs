@@ -80,11 +80,11 @@ namespace MassTransit.RabbitMqTransport.Topology
 
         public void BindToExchange(string exchangeName, Action<IRabbitMqExchangeBindingConfigurator> configure = null)
         {
-            var configurator = new RabbitMqExchangeBindingConfigurator(exchangeName, RabbitMQ.Client.ExchangeType.Fanout, Durable, AutoDelete, "");
+            var specification = new ExchangeBindingPublishTopologySpecification(exchangeName, RabbitMQ.Client.ExchangeType.Fanout, Durable, AutoDelete);
 
-            configure?.Invoke(configurator);
+            configure?.Invoke(specification);
 
-            _exchangeBindings.Add(new ExchangeBindingPublishTopologySpecification(configurator));
+            _exchangeBindings.Add(specification);
         }
 
         public void SetQueueArgument(string key, object value)

@@ -52,7 +52,7 @@ namespace MassTransit.RabbitMqTransport.Topology
             ForEach<IRabbitMqMessageConsumeTopologyConfigurator>(x => x.Apply(builder));
         }
 
-        public void Bind(string exchangeName, Action<IRabbitMqExchangeBindingConfigurator> configure = null)
+        public void Bind(string exchangeName, Action<IRabbitMqExchangeToExchangeBindingConfigurator> configure = null)
         {
             if (string.IsNullOrWhiteSpace(exchangeName))
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(exchangeName));

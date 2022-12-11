@@ -17,5 +17,10 @@ namespace MassTransit.RabbitMqTransport.Topology
         /// A handle to the exchange which is bound directly to the consuming queue
         /// </summary>
         ExchangeHandle Exchange { get; }
+
+        /// <summary>
+        /// A handle to an exchange bound to the receive endpoint exchange
+        /// </summary>
+        ExchangeHandle BoundExchange { get; set; }
     }
 }

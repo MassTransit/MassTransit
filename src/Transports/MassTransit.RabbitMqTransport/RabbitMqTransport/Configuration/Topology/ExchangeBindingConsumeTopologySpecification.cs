@@ -1,5 +1,6 @@
 namespace MassTransit.RabbitMqTransport.Configuration
 {
+    using System;
     using System.Collections.Generic;
     using Topology;
 
@@ -9,16 +10,21 @@ namespace MassTransit.RabbitMqTransport.Configuration
     /// </summary>
     public class ExchangeBindingConsumeTopologySpecification :
         RabbitMqExchangeBindingConfigurator,
+        IRabbitMqExchangeToExchangeBindingConfigurator,
         IRabbitMqConsumeTopologySpecification
     {
+        readonly IList<IRabbitMqConsumeTopologySpecification> _specifications;
+
         public ExchangeBindingConsumeTopologySpecification(string exchangeName, string exchangeType, bool durable = true, bool autoDelete = false)
             : base(exchangeName, exchangeType, durable, autoDelete)
         {
+            _specifications = new List<IRabbitMqConsumeTopologySpecification>();
         }
 
         public ExchangeBindingConsumeTopologySpecification(Exchange exchange)
             : base(exchange)
         {
+            _specifications = new List<IRabbitMqConsumeTopologySpecification>();
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -30,7 +36,25 @@ namespace MassTransit.RabbitMqTransport.Configuration
         {
             var exchangeHandle = builder.ExchangeDeclare(ExchangeName, ExchangeType, Durable, AutoDelete, ExchangeArguments);
 
-            var bindingHandle = builder.ExchangeBind(exchangeHandle, builder.Exchange, RoutingKey, BindingArguments);
+            builder.ExchangeBind(exchangeHandle, builder.Exchange, RoutingKey, BindingArguments);
+
+            builder.BoundExchange = exchangeHandle;
+
+            foreach (var specification in _specifications)
+                specification.Apply(builder);
+        }
+
+        public void Bind(string exchangeName, Action<IRabbitMqExchangeToExchangeBindingConfigurator> configure)
+        {
+            if (string.IsNullOrWhiteSpace(exchangeName))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(exchangeName));
+
+            var specification =
+                new ExchangeToExchangeBindingConsumeTopologySpecification(exchangeName, ExchangeType, Durable, AutoDelete) { RoutingKey = RoutingKey };
+
+            configure?.Invoke(specification);
+
+            _specifications.Add(specification);
         }
     }
 }

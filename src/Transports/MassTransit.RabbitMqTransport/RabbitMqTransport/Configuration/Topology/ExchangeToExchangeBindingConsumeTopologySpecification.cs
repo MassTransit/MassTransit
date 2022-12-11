@@ -1,5 +1,6 @@
 namespace MassTransit.RabbitMqTransport.Configuration
 {
+    using System;
     using System.Collections.Generic;
     using Topology;
 
@@ -8,13 +9,16 @@ namespace MassTransit.RabbitMqTransport.Configuration
     /// Used to bind an exchange to the consuming queue's exchange
     /// </summary>
     public class ExchangeToExchangeBindingConsumeTopologySpecification :
+        RabbitMqExchangeBindingConfigurator,
+        IRabbitMqExchangeToExchangeBindingConfigurator,
         IRabbitMqConsumeTopologySpecification
     {
-        readonly ExchangeToExchangeBinding _binding;
+        readonly IList<IRabbitMqConsumeTopologySpecification> _specifications;
 
-        public ExchangeToExchangeBindingConsumeTopologySpecification(ExchangeToExchangeBinding binding)
+        public ExchangeToExchangeBindingConsumeTopologySpecification(string exchangeName, string exchangeType, bool durable = true, bool autoDelete = false)
+            : base(exchangeName, exchangeType, durable, autoDelete)
         {
-            _binding = binding;
+            _specifications = new List<IRabbitMqConsumeTopologySpecification>();
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -24,16 +28,35 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         public void Apply(IReceiveEndpointBrokerTopologyBuilder builder)
         {
-            var source = _binding.Source;
+            if (builder.BoundExchange == null)
+                throw new ArgumentException("The builder should have an already bound exchange", nameof(builder));
 
-            var sourceHandle = builder.ExchangeDeclare(source.ExchangeName, source.ExchangeType, source.Durable, source.AutoDelete, source.ExchangeArguments);
+            // save this, since it must be restored on exit
+            var boundExchange = builder.BoundExchange;
 
-            var destination = _binding.Destination;
+            var exchangeHandle = builder.ExchangeDeclare(ExchangeName, ExchangeType, Durable, AutoDelete, ExchangeArguments);
 
-            var destinationHandle = builder.ExchangeDeclare(destination.ExchangeName, destination.ExchangeType, destination.Durable, destination.AutoDelete,
-                destination.ExchangeArguments);
+            builder.ExchangeBind(exchangeHandle, boundExchange, RoutingKey, BindingArguments);
 
-            var bindingHandle = builder.ExchangeBind(sourceHandle, destinationHandle, _binding.RoutingKey, _binding.Arguments);
+            builder.BoundExchange = exchangeHandle;
+
+            foreach (var specification in _specifications)
+                specification.Apply(builder);
+
+            builder.BoundExchange = boundExchange;
+        }
+
+        public void Bind(string exchangeName, Action<IRabbitMqExchangeToExchangeBindingConfigurator> configure)
+        {
+            if (string.IsNullOrWhiteSpace(exchangeName))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(exchangeName));
+
+            var specification =
+                new ExchangeToExchangeBindingConsumeTopologySpecification(exchangeName, ExchangeType, Durable, AutoDelete) { RoutingKey = RoutingKey };
+
+            configure?.Invoke(specification);
+
+            _specifications.Add(specification);
         }
     }
 }

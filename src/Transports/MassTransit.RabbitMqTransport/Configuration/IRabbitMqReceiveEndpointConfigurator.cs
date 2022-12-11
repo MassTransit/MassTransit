@@ -26,7 +26,7 @@
         /// </summary>
         /// <param name="exchangeName">The exchange name</param>
         /// <param name="callback">Configure the exchange and binding</param>
-        void Bind(string exchangeName, Action<IRabbitMqExchangeBindingConfigurator> callback = null);
+        void Bind(string exchangeName, Action<IRabbitMqExchangeToExchangeBindingConfigurator> callback = null);
 
         /// <summary>
         /// Bind an exchange to the receive endpoint exchange

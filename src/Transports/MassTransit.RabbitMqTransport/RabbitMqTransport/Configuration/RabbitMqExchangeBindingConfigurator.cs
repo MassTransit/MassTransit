@@ -5,11 +5,12 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using Topology;
 
 
-    public class RabbitMqExchangeBindingConfigurator :
+    public abstract class RabbitMqExchangeBindingConfigurator :
         RabbitMqExchangeConfigurator,
         IRabbitMqExchangeBindingConfigurator
     {
-        public RabbitMqExchangeBindingConfigurator(string exchangeName, string exchangeType, bool durable = true, bool autoDelete = false, string routingKey = null)
+        protected RabbitMqExchangeBindingConfigurator(string exchangeName, string exchangeType, bool durable = true, bool autoDelete = false,
+            string routingKey = null)
             : base(exchangeName, exchangeType, durable, autoDelete)
         {
             RoutingKey = routingKey ?? "";
@@ -17,7 +18,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             BindingArguments = new Dictionary<string, object>();
         }
 
-        public RabbitMqExchangeBindingConfigurator(Exchange exchange, string routingKey = null)
+        protected RabbitMqExchangeBindingConfigurator(Exchange exchange, string routingKey = null)
             : base(exchange)
         {
             RoutingKey = routingKey ?? "";

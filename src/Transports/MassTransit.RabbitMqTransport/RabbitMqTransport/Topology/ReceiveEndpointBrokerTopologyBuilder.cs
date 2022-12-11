@@ -7,5 +7,7 @@ namespace MassTransit.RabbitMqTransport.Topology
         public QueueHandle Queue { get; set; }
 
         public ExchangeHandle Exchange { get; set; }
+
+        public ExchangeHandle BoundExchange { get; set; }
     }
 }

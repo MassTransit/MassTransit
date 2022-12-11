@@ -20,7 +20,7 @@
         /// </summary>
         /// <param name="exchangeName"></param>
         /// <param name="configure"></param>
-        void Bind(string exchangeName, Action<IRabbitMqExchangeBindingConfigurator> configure = null);
+        void Bind(string exchangeName, Action<IRabbitMqExchangeToExchangeBindingConfigurator> configure = null);
 
         /// <summary>
         /// Bind an exchange to a queue, both of which are declared if they do not exist. Useful

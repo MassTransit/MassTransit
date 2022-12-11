@@ -215,7 +215,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _settings.SetQuorumQueue(replicationFactor);
         }
 
-        public void Bind(string exchangeName, Action<IRabbitMqExchangeBindingConfigurator> callback)
+        public void Bind(string exchangeName, Action<IRabbitMqExchangeToExchangeBindingConfigurator> callback)
         {
             if (exchangeName == null)
                 throw new ArgumentNullException(nameof(exchangeName));
