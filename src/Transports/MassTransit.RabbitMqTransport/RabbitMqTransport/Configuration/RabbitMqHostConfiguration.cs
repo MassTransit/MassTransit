@@ -141,7 +141,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
                     yield return this.Failure("BatchTimeout", "must be >= 0 and <= 1s");
 
                 if (_hostSettings.BatchSettings.MessageLimit <= 1 || _hostSettings.BatchSettings.MessageLimit > 100)
-                    yield return this.Failure("BatchMessageLimit", "must be >= 1 and <= 100");
+                    yield return this.Failure("BatchMessageLimit", "must be > 1 and <= 100");
 
                 if (_hostSettings.BatchSettings.SizeLimit < 1024 || _hostSettings.BatchSettings.MessageLimit > 256 * 1024)
                     yield return this.Failure("BatchSizeLimit", "must be >= 1K and <= 256K");
