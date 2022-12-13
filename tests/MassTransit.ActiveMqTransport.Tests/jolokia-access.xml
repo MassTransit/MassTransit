@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<restrict>
+    <cors>
+        <allow-origin>*://*</allow-origin>
+        <strict-checking/>
+    </cors>
+</restrict>
