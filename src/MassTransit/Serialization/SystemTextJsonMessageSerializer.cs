@@ -114,7 +114,7 @@ namespace MassTransit.Serialization
                     && typeConverter.TryConvert(text, out var result):
                     return result;
                 case string text:
-                    return GetObject<T>(JsonSerializer.Deserialize<JsonElement>(text));
+                    return GetObject<T>(JsonSerializer.Deserialize<JsonElement>(text, Options));
                 case JsonElement jsonElement:
                     return GetObject<T>(jsonElement);
             }
