@@ -61,7 +61,8 @@ namespace MassTransit.Serialization
                 ContractResolver = deserializerContractResolver,
                 TypeNameHandling = TypeNameHandling.None,
                 DateParseHandling = DateParseHandling.None,
-                DateTimeZoneHandling = DateTimeZoneHandling.RoundtripKind
+                DateTimeZoneHandling = DateTimeZoneHandling.RoundtripKind,
+                Formatting = Formatting.Indented
             };
 
             SerializerSettings = new JsonSerializerSettings
@@ -74,7 +75,8 @@ namespace MassTransit.Serialization
                 ContractResolver = serializerContractResolver,
                 TypeNameHandling = TypeNameHandling.None,
                 DateParseHandling = DateParseHandling.None,
-                DateTimeZoneHandling = DateTimeZoneHandling.RoundtripKind
+                DateTimeZoneHandling = DateTimeZoneHandling.RoundtripKind,
+                Formatting = Formatting.Indented
             };
 
             _deserializer = new Lazy<JsonSerializer>(() => JsonSerializer.Create(DeserializerSettings));

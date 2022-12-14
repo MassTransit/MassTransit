@@ -40,7 +40,7 @@ namespace MassTransit.Serialization
             {
                 using var stream = new MemoryStream();
                 using var writer = new StreamWriter(stream, MessageDefaults.Encoding, 1024, true);
-                using var jsonWriter = new JsonTextWriter(writer) { Formatting = Formatting.Indented };
+                using var jsonWriter = new JsonTextWriter(writer) { Formatting = NewtonsoftJsonMessageSerializer.SerializerSettings.Formatting };
 
                 if (_message != null)
                     NewtonsoftJsonMessageSerializer.Serializer.Serialize(jsonWriter, _message);

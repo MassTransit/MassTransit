@@ -15,6 +15,7 @@
         CosmosSerializer
     {
         readonly JsonSerializer _serializer;
+        readonly JsonSerializerSettings _settings;
 
         /// <summary>
         /// Create a serializer that uses the JSON.net serializer
@@ -26,6 +27,8 @@
         public NewtonsoftJsonCosmosSerializer(JsonSerializerSettings jsonSerializerSettings)
         {
             _serializer = JsonSerializer.Create(jsonSerializerSettings ?? throw new ArgumentNullException(nameof(jsonSerializerSettings)));
+
+            _settings = jsonSerializerSettings;
         }
 
         /// <summary>
@@ -57,7 +60,7 @@
         {
             var stream = new MemoryStream();
             using (var streamWriter = new StreamWriter(stream, MessageDefaults.Encoding, 1024, true))
-            using (var writer = new JsonTextWriter(streamWriter) { Formatting = Formatting.None })
+            using (var writer = new JsonTextWriter(streamWriter) { Formatting = _settings.Formatting })
             {
                 _serializer.Serialize(writer, input);
 
