@@ -63,14 +63,14 @@ namespace MassTransit.ActiveMqTransport
             return _virtualTopicConsumerPattern.IsMatch(name);
         }
 
-        public IQueue GetTemporaryQueue(ISession session, string topicName)
+        public IQueue GetTemporaryQueue(ISession session, string queueName)
         {
-            return (IQueue)_temporaryEntities.GetOrAdd(topicName, x => (IQueue)SessionUtil.GetDestination(session, topicName, DestinationType.TemporaryQueue));
+            return (IQueue)_temporaryEntities.GetOrAdd(queueName, x => new CustomTempQueue(queueName));
         }
 
         public ITopic GetTemporaryTopic(ISession session, string topicName)
         {
-            return (ITopic)_temporaryEntities.GetOrAdd(topicName, x => (ITopic)SessionUtil.GetDestination(session, topicName, DestinationType.TemporaryTopic));
+            return (ITopic)_temporaryEntities.GetOrAdd(topicName, x => SessionUtil.GetDestination(session, topicName, DestinationType.TemporaryTopic));
         }
 
         public bool TryGetTemporaryEntity(string name, out IDestination destination)

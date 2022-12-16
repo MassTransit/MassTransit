@@ -37,9 +37,9 @@
             return _context.IsVirtualTopicConsumer(name);
         }
 
-        public IQueue GetTemporaryQueue(ISession session, string topicName)
+        public IQueue GetTemporaryQueue(ISession session, string queueName)
         {
-            return _context.GetTemporaryQueue(session, topicName);
+            return _context.GetTemporaryQueue(session, queueName);
         }
 
         public ITopic GetTemporaryTopic(ISession session, string topicName)

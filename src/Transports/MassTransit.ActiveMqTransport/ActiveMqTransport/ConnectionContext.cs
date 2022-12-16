@@ -35,7 +35,7 @@
 
         bool IsVirtualTopicConsumer(string name);
 
-        IQueue GetTemporaryQueue(ISession session, string topicName);
+        IQueue GetTemporaryQueue(ISession session, string queueName);
 
         ITopic GetTemporaryTopic(ISession session, string topicName);
 

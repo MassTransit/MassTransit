@@ -75,7 +75,7 @@
         {
             return _executor.Run(() =>
             {
-                if (!queue.Durable && queue.AutoDelete && !ConnectionContext.IsVirtualTopicConsumer(queue.EntityName))
+                if (!queue.Durable && queue.AutoDelete)
                     return ConnectionContext.GetTemporaryQueue(_session, queue.EntityName);
 
                 return SessionUtil.GetQueue(_session, queue.EntityName);
