@@ -207,7 +207,8 @@ namespace MassTransit.Util
                         }
                         finally
                         {
-                            _resultSemaphore.Release();
+                            if (!_disposed)
+                                _resultSemaphore.Release();
                         }
                     }
 
