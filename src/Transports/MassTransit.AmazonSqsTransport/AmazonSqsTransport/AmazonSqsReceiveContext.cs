@@ -62,8 +62,11 @@
 
             try
             {
-                await _clientContext.ChangeMessageVisibility(_settings.QueueUrl, _message.ReceiptHandle, _settings.RedeliverVisibilityTimeout)
-                    .ConfigureAwait(false);
+                if (!_clientContext.CancellationToken.IsCancellationRequested)
+                {
+                    await _clientContext.ChangeMessageVisibility(_settings.QueueUrl, _message.ReceiptHandle, _settings.RedeliverVisibilityTimeout)
+                        .ConfigureAwait(false);
+                }
 
                 _locked = false;
             }
