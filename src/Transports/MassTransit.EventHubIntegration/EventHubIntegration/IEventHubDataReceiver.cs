@@ -1,6 +1,5 @@
 ﻿namespace MassTransit.EventHubIntegration
 {
-    using System.Threading.Tasks;
     using Transports;
 
 
@@ -8,6 +7,5 @@
         IAgent,
         DeliveryMetrics
     {
-        Task Start();
     }
 }

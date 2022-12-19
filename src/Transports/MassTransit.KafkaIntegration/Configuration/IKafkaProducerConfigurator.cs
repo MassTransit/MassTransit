@@ -205,7 +205,7 @@ namespace MassTransit
         /// Local_KeyDeserialization and thrown by the initiating call to
         /// Consume.
         /// </remarks>
-        void SetKeySerializer(ISerializer<TKey> serializer);
+        void SetKeySerializer(IAsyncSerializer<TKey> serializer);
 
         /// <summary>
         /// Set the serializer to use to serialize values.
@@ -216,6 +216,6 @@ namespace MassTransit
         /// Local_ValueDeserialization and thrown by the initiating call to
         /// Consume.
         /// </remarks>
-        void SetValueSerializer(ISerializer<TValue> serializer);
+        void SetValueSerializer(IAsyncSerializer<TValue> serializer);
     }
 }

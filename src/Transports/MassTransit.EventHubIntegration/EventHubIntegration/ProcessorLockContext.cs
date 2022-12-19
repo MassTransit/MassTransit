@@ -1,6 +1,7 @@
 namespace MassTransit.EventHubIntegration
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Azure.Messaging.EventHubs.Processor;
     using Checkpoints;
@@ -53,7 +54,9 @@ namespace MassTransit.EventHubIntegration
         {
             LogContext.SetCurrentIfNull(_hostConfiguration.ReceiveLogContext);
 
-            _data.TryAdd(eventArgs.PartitionId, _ => new PartitionCheckpointData(_receiveSettings));
+            if (!_data.TryAdd(eventArgs.PartitionId, _ => new PartitionCheckpointData(_receiveSettings)))
+                return;
+
             LogContext.Info?.Log("Partition: {PartitionId} was initialized", eventArgs.PartitionId);
         }
 
@@ -61,11 +64,11 @@ namespace MassTransit.EventHubIntegration
         {
             LogContext.SetCurrentIfNull(_hostConfiguration.ReceiveLogContext);
 
-            if (_data.TryGetValue(eventArgs.PartitionId, out var data))
-            {
-                await data.Close(eventArgs).ConfigureAwait(false);
-                _data.TryRemove(eventArgs.PartitionId, out _);
-            }
+            if (!_data.TryGetValue(eventArgs.PartitionId, out var data))
+                return;
+
+            await data.Close(eventArgs).ConfigureAwait(false);
+            _data.TryRemove(eventArgs.PartitionId, out _);
         }
 
 
@@ -73,19 +76,21 @@ namespace MassTransit.EventHubIntegration
         {
             readonly ChannelExecutor _executor;
             readonly PendingConfirmationCollection _pending;
-            readonly ICheckpointer _receiver;
+            readonly ICheckpointer _checkpointer;
+            readonly CancellationTokenSource _cancellationTokenSource;
 
             public PartitionCheckpointData(ReceiveSettings settings)
             {
-                _executor = new ChannelExecutor(1);
-                _receiver = new BatchCheckpointer(_executor, settings);
+                _cancellationTokenSource = new CancellationTokenSource();
+                _executor = new ChannelExecutor(settings.PrefetchCount, settings.ConcurrentMessageLimit);
+                _checkpointer = new BatchCheckpointer(settings, _cancellationTokenSource.Token);
                 _pending = new PendingConfirmationCollection(settings.EventHubName);
             }
 
             public Task Pending(ProcessEventArgs eventArgs)
             {
                 var pendingConfirmation = _pending.Add(eventArgs);
-                return _receiver.Pending(pendingConfirmation);
+                return _checkpointer.Pending(pendingConfirmation);
             }
 
             public void Complete(ProcessEventArgs eventArgs)
@@ -100,11 +105,42 @@ namespace MassTransit.EventHubIntegration
 
             public async Task Close(PartitionClosingEventArgs args)
             {
-                await _receiver.Close(args.Reason).ConfigureAwait(false);
+                if (args.Reason != ProcessingStoppedReason.Shutdown)
+                    _cancellationTokenSource.Cancel();
+
                 await _executor.DisposeAsync().ConfigureAwait(false);
+                await _checkpointer.DisposeAsync().ConfigureAwait(false);
 
                 LogContext.Info?.Log("Partition: {PartitionId} was closed, reason: {Reason}", args.PartitionId, args.Reason);
+
+                _cancellationTokenSource.Cancel();
+                _cancellationTokenSource.Dispose();
             }
+
+            public Task Push(Func<Task> method)
+            {
+                return _executor.Push(method, _cancellationTokenSource.Token);
+            }
+
+            public Task Run(Func<Task> method)
+            {
+                return _executor.Run(method, _cancellationTokenSource.Token);
+            }
+        }
+
+
+        public async ValueTask DisposeAsync()
+        {
+        }
+
+        public Task Push(ProcessEventArgs partition, Func<Task> method, CancellationToken cancellationToken = default)
+        {
+            return _data[partition.Partition.PartitionId].Push(method);
+        }
+
+        public Task Run(ProcessEventArgs partition, Func<Task> method, CancellationToken cancellationToken = default)
+        {
+            return _data[partition.Partition.PartitionId].Run(method);
         }
     }
 }

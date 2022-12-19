@@ -2,7 +2,6 @@ namespace MassTransit.EventHubIntegration
 {
     using System.Threading;
     using Azure.Messaging.EventHubs.Producer;
-    using Configuration;
     using MassTransit.Middleware;
 
 
@@ -20,10 +19,6 @@ namespace MassTransit.EventHubIntegration
         }
 
         public override CancellationToken CancellationToken { get; }
-
-        public IHostSettings HostSettings => _context.HostSettings;
-
-        public IStorageSettings StorageSettings => _context.StorageSettings;
 
         public EventHubProducerClient CreateEventHubClient(string eventHubName)
         {

@@ -62,7 +62,8 @@ namespace MassTransit.EventHubIntegration.Configuration
             var endpointConfiguration = busInstance.HostConfiguration.CreateReceiveEndpointConfiguration(EndpointName);
             endpointConfiguration.ConnectReceiveEndpointObserver(_endpointObservers);
 
-            var configurator = new EventHubReceiveEndpointConfigurator(_hostConfiguration, busInstance, endpointConfiguration, _eventHubName, _consumerGroup);
+            var configurator = new EventHubReceiveEndpointConfigurator(_hostConfiguration, busInstance, endpointConfiguration, _hostSettings,
+                _storageSettings, _eventHubName, _consumerGroup);
             _configure?.Invoke(configurator);
 
             IReadOnlyList<ValidationResult> result = Validate().Concat(configurator.Validate())

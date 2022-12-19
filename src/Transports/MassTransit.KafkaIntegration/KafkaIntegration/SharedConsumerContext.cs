@@ -5,17 +5,15 @@ namespace MassTransit.KafkaIntegration
     using System.Threading.Tasks;
     using Confluent.Kafka;
     using MassTransit.Middleware;
-    using Serializers;
 
 
-    public class SharedConsumerContext<TKey, TValue> :
+    public class SharedConsumerContext :
         ProxyPipeContext,
-        ConsumerContext<TKey, TValue>
-        where TValue : class
+        ConsumerContext
     {
-        readonly ConsumerContext<TKey, TValue> _context;
+        readonly ConsumerContext _context;
 
-        public SharedConsumerContext(ConsumerContext<TKey, TValue> context, CancellationToken cancellationToken)
+        public SharedConsumerContext(ConsumerContext context, CancellationToken cancellationToken)
             : base(context)
         {
             _context = context;
@@ -24,49 +22,45 @@ namespace MassTransit.KafkaIntegration
 
         public override CancellationToken CancellationToken { get; }
 
-        public event Action<IConsumer<TKey, TValue>, Error> ErrorHandler
+        public event Action<Error> ErrorHandler
         {
             add => _context.ErrorHandler += value;
             remove => _context.ErrorHandler -= value;
         }
 
-        public ReceiveSettings ReceiveSettings => _context.ReceiveSettings;
-
-        public IHeadersDeserializer HeadersDeserializer => _context.HeadersDeserializer;
-
-        public Task Subscribe()
+        public IConsumer<byte[], byte[]> CreateConsumer(Action<IConsumer<byte[], byte[]>, Error> onError)
         {
-            return _context.Subscribe();
+            return _context.CreateConsumer(onError);
         }
 
-        public Task Close()
+        public Task Pending(ConsumeResult<byte[], byte[]> result)
         {
-            return _context.Close();
+            return _context.Pending(result);
         }
 
-        public Task<ConsumeResult<TKey, TValue>> Consume(CancellationToken cancellationToken)
+        public Task Complete(ConsumeResult<byte[], byte[]> result)
         {
-            return _context.Consume(cancellationToken);
+            return _context.Complete(result);
+        }
+
+        public Task Faulted(ConsumeResult<byte[], byte[]> result, Exception exception)
+        {
+            return _context.Faulted(result, exception);
+        }
+
+        public Task Push(ConsumeResult<byte[], byte[]> result, Func<Task> method, CancellationToken cancellationToken = default)
+        {
+            return _context.Push(result, method, cancellationToken);
+        }
+
+        public Task Run(ConsumeResult<byte[], byte[]> result, Func<Task> method, CancellationToken cancellationToken = default)
+        {
+            return _context.Run(result, method, cancellationToken);
         }
 
         public ValueTask DisposeAsync()
         {
             return _context.DisposeAsync();
-        }
-
-        public Task Pending(ConsumeResult<TKey, TValue> result)
-        {
-            return _context.Pending(result);
-        }
-
-        public Task Complete(ConsumeResult<TKey, TValue> result)
-        {
-            return _context.Complete(result);
-        }
-
-        public Task Faulted(ConsumeResult<TKey, TValue> result, Exception exception)
-        {
-            return _context.Faulted(result, exception);
         }
     }
 }

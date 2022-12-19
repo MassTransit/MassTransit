@@ -103,7 +103,7 @@ namespace MassTransit.Transports
         }
 
         public TimeSpan ElapsedTime => _receiveTimer.Elapsed;
-        public Uri InputAddress { get; }
+        public Uri InputAddress { get; protected set; }
         public ContentType ContentType => _contentType.Value;
 
         protected virtual ISendEndpointProvider GetSendEndpointProvider()

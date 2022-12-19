@@ -4,7 +4,6 @@ namespace MassTransit.EventHubIntegration
     using System.Threading.Tasks;
     using Azure.Messaging.EventHubs;
     using Azure.Messaging.EventHubs.Processor;
-    using Azure.Storage.Blobs;
     using Configuration;
     using MassTransit.Configuration;
     using Transports;
@@ -20,16 +19,15 @@ namespace MassTransit.EventHubIntegration
 
         public EventHubReceiveEndpointContext(IEventHubHostConfiguration hostConfiguration, IBusInstance busInstance,
             IReceiveEndpointConfiguration endpointConfiguration, ReceiveSettings receiveSettings,
-            Func<IStorageSettings, BlobContainerClient> blobContainerClientFactory,
-            Func<IHostSettings, BlobContainerClient, EventProcessorClient> clientFactory,
+            Func<EventProcessorClient> clientFactory,
             Func<PartitionClosingEventArgs, Task> partitionClosingHandler,
             Func<PartitionInitializingEventArgs, Task> partitionInitializingHandler)
             : base(busInstance.HostConfiguration, endpointConfiguration)
         {
             _busInstance = busInstance;
             _contextSupervisor = new Recycle<IProcessorContextSupervisor>(() =>
-                new ProcessorContextSupervisor(hostConfiguration.ConnectionContextSupervisor, busInstance.HostConfiguration, receiveSettings,
-                    blobContainerClientFactory, clientFactory, partitionClosingHandler, partitionInitializingHandler));
+                new ProcessorContextSupervisor(hostConfiguration.ConnectionContextSupervisor, busInstance.HostConfiguration, receiveSettings, clientFactory,
+                    partitionClosingHandler, partitionInitializingHandler));
         }
 
         public override void AddSendAgent(IAgent agent)

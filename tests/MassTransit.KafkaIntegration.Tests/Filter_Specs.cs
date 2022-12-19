@@ -12,7 +12,7 @@ namespace MassTransit.KafkaIntegration.Tests
 
     public class Using_a_consumer_filter
     {
-        const string Topic = "producer";
+        const string Topic = "filter";
 
         static int _attempts;
         static int _lastAttempt;
@@ -110,6 +110,8 @@ namespace MassTransit.KafkaIntegration.Tests
     [TestFixture]
     public class Using_a_scoped_send_filter
     {
+        const string Topic = "scoped-filter-producer";
+
         [Test]
         public async Task Should_properly_configure_the_filter()
         {
@@ -159,9 +161,6 @@ namespace MassTransit.KafkaIntegration.Tests
 
             Assert.That(result.Headers.Get<string>("Scoped-Value"), Is.EqualTo("Hello, World"));
         }
-
-        const string Topic = "producer";
-
 
         public class ScopedContext
         {

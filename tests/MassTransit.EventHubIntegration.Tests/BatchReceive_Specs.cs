@@ -46,6 +46,7 @@ namespace MassTransit.EventHubIntegration.Tests
                         {
                             c.ConfigureConsumer<EventHubMessageConsumer>(context);
 
+                            c.ConcurrentDeliveryLimit = batchSize;
                             c.CheckpointMessageCount = batchSize;
                             c.CheckpointInterval = checkpointInterval;
                         });

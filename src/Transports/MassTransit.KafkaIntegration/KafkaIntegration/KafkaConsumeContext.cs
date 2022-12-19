@@ -12,13 +12,18 @@ namespace MassTransit.KafkaIntegration
         ConsumeContext<TValue>
         where TValue : class
     {
+        readonly IDeserializer<TValue> _deserializer;
         readonly MessageContext _adapter;
+        readonly ConsumeResult<byte[], byte[]> _result;
+        readonly Lazy<TValue> _messageLazy;
 
-        public KafkaConsumeContext(ReceiveContext receiveContext, ConsumeResult<TKey, TValue> result)
+        public KafkaConsumeContext(ReceiveContext receiveContext, ConsumeResult<byte[], byte[]> result, IDeserializer<TValue> deserializer)
             : base(receiveContext)
         {
-            Message = result.Message.Value;
-            _adapter = new KafkaHeaderAdapter<TKey, TValue>(result, receiveContext);
+            _deserializer = deserializer;
+            _result = result;
+            _adapter = new KafkaHeaderAdapter(result, receiveContext);
+            _messageLazy = new Lazy<TValue>(Deserialize);
         }
 
         public override bool HasMessageType(Type messageType)
@@ -54,7 +59,7 @@ namespace MassTransit.KafkaIntegration
 
         public override IEnumerable<string> SupportedMessageTypes => MessageTypeCache<TValue>.MessageTypeNames;
 
-        public TValue Message { get; }
+        public TValue Message => _messageLazy.Value;
 
         public Task NotifyConsumed(TimeSpan duration, string consumerType)
         {
@@ -69,6 +74,13 @@ namespace MassTransit.KafkaIntegration
         protected override Task GenerateFault<T>(ConsumeContext<T> context, Exception exception)
         {
             return Task.CompletedTask;
+        }
+
+        TValue Deserialize()
+        {
+            ReadOnlySpan<byte> span = _result.Message.Value?.Length > 0 ? new ReadOnlySpan<byte>(_result.Message.Value) : ReadOnlySpan<byte>.Empty;
+            var context = new SerializationContext(MessageComponentType.Value, _result.Topic, _result.Message.Headers);
+            return _deserializer.Deserialize(span, span.IsEmpty, context);
         }
     }
 }

@@ -60,7 +60,7 @@ namespace MassTransit.KafkaIntegration.Tests
 
             try
             {
-                var config = new ProducerConfig {BootstrapServers = "localhost:9092"};
+                var config = new ProducerConfig { BootstrapServers = "localhost:9092" };
 
                 using IProducer<Null, KafkaMessage> p = new ProducerBuilder<Null, KafkaMessage>(config)
                     .SetValueSerializer(new MassTransitJsonSerializer<KafkaMessage>())
@@ -136,7 +136,7 @@ namespace MassTransit.KafkaIntegration.Tests
 
             try
             {
-                var config = new ProducerConfig {BootstrapServers = "localhost:9092"};
+                var config = new ProducerConfig { BootstrapServers = "localhost:9092" };
 
                 using IProducer<Null, KafkaMessage> p = new ProducerBuilder<Null, KafkaMessage>(config)
                     .SetValueSerializer(new MassTransitJsonSerializer<KafkaMessage>())
@@ -205,6 +205,128 @@ namespace MassTransit.KafkaIntegration.Tests
     }
 
 
+    public class ConcurrentConsumersReceive_Specs :
+        InMemoryTestFixture
+    {
+        const string Topic = "multiple-consumers-test";
+
+        [Test]
+        public async Task Should_receive_with_multiple_consumers()
+        {
+            const int concurrentConsumers = 10;
+            TaskCompletionSource<ConsumeContext<KafkaMessage>>[] taskCompletionSource =
+                Enumerable.Range(0, 10).Select(_ => GetTask<ConsumeContext<KafkaMessage>>()).ToArray();
+            var services = new ServiceCollection();
+            services.AddSingleton(taskCompletionSource);
+
+            services.TryAddSingleton<ILoggerFactory>(LoggerFactory);
+            services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
+
+            services.AddMassTransit(x =>
+            {
+                x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
+                x.AddRider(rider =>
+                {
+                    rider.AddConsumer<KafkaMessageConsumer>();
+
+                    rider.UsingKafka((context, k) =>
+                    {
+                        k.Host("localhost:9092");
+
+                        k.TopicEndpoint<KafkaMessage>(Topic, nameof(ConcurrentConsumersReceive_Specs), c =>
+                        {
+                            c.ConcurrentConsumerLimit = concurrentConsumers / 2;
+                            c.CreateIfMissing(t => t.NumPartitions = concurrentConsumers);
+                            c.ConfigureConsumer<KafkaMessageConsumer>(context);
+                        });
+                    });
+                });
+            });
+
+            var provider = services.BuildServiceProvider();
+
+            var busControl = provider.GetRequiredService<IBusControl>();
+
+            var observer = GetConsumeObserver();
+            busControl.ConnectConsumeObserver(observer);
+
+            await busControl.StartAsync(TestCancellationToken);
+
+            try
+            {
+                await Task.Delay(TimeSpan.FromSeconds(10));
+                var config = new ProducerConfig { BootstrapServers = "localhost:9092" };
+
+                using IProducer<Null, KafkaMessage> p = new ProducerBuilder<Null, KafkaMessage>(config)
+                    .SetValueSerializer(new MassTransitJsonSerializer<KafkaMessage>())
+                    .Build();
+
+                var kafkaMessage = new KafkaMessageClass("test");
+                var sendContext = new MessageSendContext<KafkaMessage>(kafkaMessage);
+                var message = new Message<Null, KafkaMessage>
+                {
+                    Value = kafkaMessage,
+                    Headers = DictionaryHeadersSerialize.Serializer.Serialize(sendContext)
+                };
+
+                await Task.WhenAll(Enumerable.Range(0, concurrentConsumers).Select(i => new TopicPartition(Topic, i))
+                    .Select(partition => p.ProduceAsync(partition, message)));
+
+                foreach (ConsumeContext<KafkaMessage> result in await Task.WhenAll(taskCompletionSource.Select(x => x.Task)))
+                {
+                    Assert.AreEqual(message.Value.Text, result.Message.Text);
+                    Assert.AreEqual(sendContext.MessageId, result.MessageId);
+                    Assert.That(result.DestinationAddress, Is.EqualTo(new Uri($"loopback://localhost/{KafkaTopicAddress.PathPrefix}/{Topic}")));
+
+                    Assert.That(await observer.Messages.Any<KafkaMessage>());
+                }
+            }
+            finally
+            {
+                await busControl.StopAsync(TestCancellationToken);
+
+                await provider.DisposeAsync();
+            }
+        }
+
+
+        class KafkaMessageClass :
+            KafkaMessage
+        {
+            public KafkaMessageClass(string text)
+            {
+                Text = text;
+            }
+
+            public string Text { get; }
+        }
+
+
+        class KafkaMessageConsumer :
+            IConsumer<KafkaMessage>
+        {
+            readonly TaskCompletionSource<ConsumeContext<KafkaMessage>>[] _taskCompletionSource;
+
+            public KafkaMessageConsumer(TaskCompletionSource<ConsumeContext<KafkaMessage>>[] taskCompletionSource)
+            {
+                _taskCompletionSource = taskCompletionSource;
+            }
+
+            public async Task Consume(ConsumeContext<KafkaMessage> context)
+            {
+                var index = (context.Partition() ?? 0) % _taskCompletionSource.Length;
+                _taskCompletionSource[index].TrySetResult(context);
+            }
+        }
+
+
+        public interface KafkaMessage
+        {
+            string Text { get; }
+        }
+    }
+
+
     public class BatchReceive_Specs :
         InMemoryTestFixture
     {
@@ -245,6 +367,7 @@ namespace MassTransit.KafkaIntegration.Tests
                             c.ConfigureConsumer<KafkaMessageConsumer>(context);
                             c.CreateIfMissing();
 
+                            c.ConcurrentDeliveryLimit = batchSize;
                             c.CheckpointMessageCount = batchSize;
                             c.CheckpointInterval = checkpointInterval;
                         });
@@ -263,7 +386,7 @@ namespace MassTransit.KafkaIntegration.Tests
                 var producer = provider.GetRequiredService<ITopicProducer<KafkaMessage>>();
 
                 for (var i = 0; i < batchSize; i++)
-                    await producer.Produce(new {Index = i}, TestCancellationToken);
+                    await producer.Produce(new { Index = i }, TestCancellationToken);
 
                 ConsumeContext<Batch<KafkaMessage>> result = await taskCompletionSource.Task;
 

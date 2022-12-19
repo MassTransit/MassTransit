@@ -3,10 +3,8 @@ namespace MassTransit.EventHubIntegration
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Azure;
     using Azure.Messaging.EventHubs;
     using Azure.Messaging.EventHubs.Processor;
-    using Azure.Storage.Blobs;
     using MassTransit.Configuration;
     using MassTransit.Middleware;
 
@@ -15,69 +13,43 @@ namespace MassTransit.EventHubIntegration
         BasePipeContext,
         ProcessorContext
     {
-        readonly BlobContainerClient _blobContainerClient;
-        readonly EventProcessorClient _client;
         readonly IProcessorLockContext _lockContext;
+        readonly Func<EventProcessorClient> _clientFactory;
 
-        public EventHubProcessorContext(IHostConfiguration hostConfiguration, ReceiveSettings receiveSettings, BlobContainerClient blobContainerClient,
-            EventProcessorClient client, Func<PartitionInitializingEventArgs, Task> partitionInitializingHandler,
+        public EventHubProcessorContext(IHostConfiguration hostConfiguration, ReceiveSettings receiveSettings,
+            Func<EventProcessorClient> clientFactory, Func<PartitionInitializingEventArgs, Task> partitionInitializingHandler,
             Func<PartitionClosingEventArgs, Task> partitionClosingHandler, CancellationToken cancellationToken)
             : base(cancellationToken)
         {
-            _blobContainerClient = blobContainerClient;
-            _client = client;
-
             var lockContext = new ProcessorLockContext(hostConfiguration, receiveSettings);
-            _client.PartitionInitializingAsync += async args =>
-            {
-                await lockContext.OnPartitionInitializing(args).ConfigureAwait(false);
-                if (partitionInitializingHandler != null)
-                    await partitionInitializingHandler(args).ConfigureAwait(false);
-            };
-            _client.PartitionClosingAsync += async args =>
-            {
-                if (partitionClosingHandler != null)
-                    await partitionClosingHandler(args).ConfigureAwait(false);
-                await lockContext.OnPartitionClosing(args).ConfigureAwait(false);
-            };
-            _client.ProcessErrorAsync += OnError;
-            _client.ProcessEventAsync += OnMessage;
+
+            _clientFactory = () => CreateClient(clientFactory, lockContext, partitionInitializingHandler, partitionClosingHandler);
 
             ReceiveSettings = receiveSettings;
             _lockContext = lockContext;
         }
 
-        public event Func<ProcessEventArgs, Task> ProcessEvent;
         public event Func<ProcessErrorEventArgs, Task> ProcessError;
+
+        public EventProcessorClient CreateClient(Func<ProcessErrorEventArgs, Task> onError)
+        {
+            var client = _clientFactory();
+            client.ProcessErrorAsync += async args =>
+            {
+                if (ProcessError != null)
+                    await ProcessError.Invoke(args).ConfigureAwait(false);
+
+                if (onError != null)
+                    await onError.Invoke(args).ConfigureAwait(false);
+            };
+            return client;
+        }
 
         public ReceiveSettings ReceiveSettings { get; }
 
-        public async Task<bool> CreateBlobIfNotExistsAsync(CancellationToken cancellationToken = default)
+        public EventProcessorClient CreateClient()
         {
-            Response<bool> exists = await _blobContainerClient.ExistsAsync(cancellationToken).ConfigureAwait(false);
-            if (exists.Value)
-                return true;
-
-            try
-            {
-                await _blobContainerClient.CreateIfNotExistsAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-                return true;
-            }
-            catch (RequestFailedException exception)
-            {
-                LogContext.Warning?.Log(exception, "Azure Blob Container does not exist: {Address}", _blobContainerClient.Uri);
-                return false;
-            }
-        }
-
-        public Task StartProcessingAsync(CancellationToken cancellationToken = default)
-        {
-            return _client.StartProcessingAsync(cancellationToken);
-        }
-
-        public Task StopProcessingAsync(CancellationToken cancellationToken = default)
-        {
-            return _client.StopProcessingAsync(cancellationToken);
+            return _clientFactory();
         }
 
         public Task Pending(ProcessEventArgs eventArgs)
@@ -95,21 +67,39 @@ namespace MassTransit.EventHubIntegration
             return _lockContext.Complete(eventArgs);
         }
 
-        async Task OnError(ProcessErrorEventArgs arg)
+        static EventProcessorClient CreateClient(Func<EventProcessorClient> clientFactory, ProcessorLockContext lockContext,
+            Func<PartitionInitializingEventArgs, Task> partitionInitializingHandler, Func<PartitionClosingEventArgs, Task> partitionClosingHandler)
         {
-            if (ProcessError != null)
-                await ProcessError.Invoke(arg).ConfigureAwait(false);
+            var client = clientFactory();
+            client.PartitionInitializingAsync += async args =>
+            {
+                await lockContext.OnPartitionInitializing(args).ConfigureAwait(false);
+                if (partitionInitializingHandler != null)
+                    await partitionInitializingHandler(args).ConfigureAwait(false);
+            };
+            client.PartitionClosingAsync += async args =>
+            {
+                if (partitionClosingHandler != null)
+                    await partitionClosingHandler(args).ConfigureAwait(false);
+
+                await lockContext.OnPartitionClosing(args).ConfigureAwait(false);
+            };
+            return client;
         }
 
-        async Task OnMessage(ProcessEventArgs arg)
+        public ValueTask DisposeAsync()
         {
-            if (!arg.HasEvent)
-                return;
+            return _lockContext.DisposeAsync();
+        }
 
-            await _lockContext.Pending(arg).ConfigureAwait(false);
+        public Task Push(ProcessEventArgs args, Func<Task> method, CancellationToken cancellationToken = default)
+        {
+            return _lockContext.Push(args, method, cancellationToken);
+        }
 
-            if (ProcessEvent != null)
-                await ProcessEvent.Invoke(arg).ConfigureAwait(false);
+        public Task Run(ProcessEventArgs args, Func<Task> method, CancellationToken cancellationToken = default)
+        {
+            return _lockContext.Run(args, method, cancellationToken);
         }
     }
 }

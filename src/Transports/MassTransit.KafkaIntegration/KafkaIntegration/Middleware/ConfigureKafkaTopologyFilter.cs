@@ -10,7 +10,7 @@ namespace MassTransit.KafkaIntegration.Middleware
 
 
     public class ConfigureKafkaTopologyFilter<TKey, TValue> :
-        IFilter<ConsumerContext<TKey, TValue>>
+        IFilter<ConsumerContext>
         where TValue : class
     {
         readonly AdminClientConfig _config;
@@ -24,7 +24,7 @@ namespace MassTransit.KafkaIntegration.Middleware
             _config = new AdminClientConfig(clientConfig.ToDictionary(x => x.Key, x => x.Value));
         }
 
-        public async Task Send(ConsumerContext<TKey, TValue> context, IPipe<ConsumerContext<TKey, TValue>> next)
+        public async Task Send(ConsumerContext context, IPipe<ConsumerContext> next)
         {
             await context.OneTimeSetup<ConfigureTopologyContext<TKey, TValue>>(_ => CreateTopic(), () => new Context()).ConfigureAwait(false);
 

@@ -33,12 +33,6 @@
         TimeSpan CheckpointInterval { set; }
 
         /// <summary>
-        /// The number of concurrent messages to process. Could increase throughput but will not preserve an order (default: 1)
-        /// </summary>
-        [Obsolete("Use ConcurrentMessageLimit instead")]
-        int ConcurrencyLimit { set; }
-
-        /// <summary>
         /// The maximum number of messages in a single partition before checkpoint (default: 10000)
         /// </summary>
         ushort MessageLimit { set; }
@@ -47,6 +41,16 @@
         /// Set max message count for checkpoint, low message count will decrease throughput (default: 5000)
         /// </summary>
         ushort CheckpointMessageCount { set; }
+
+        /// <summary>
+        /// Set number of concurrent consumers, higher value will increase throughput based on partition but might create idle consumers (default: 1)
+        /// </summary>
+        ushort ConcurrentConsumerLimit { set; }
+
+        /// <summary>
+        /// Set number of concurrent messages per single Key-partition, higher value will increase throughput but will break delivery order (default: 1)
+        /// </summary>
+        int ConcurrentDeliveryLimit { set; }
 
         /// <summary>
         /// Name of partition assignment strategy to use when elected group leader assigns partitions to group members.
@@ -149,6 +153,18 @@
         void SetHeadersDeserializer(IHeadersDeserializer deserializer);
 
         /// <summary>
+        /// A handler that is called to report the result of (automatic) offset
+        /// commits. It is not called as a result of the use of the Commit method.
+        /// </summary>
+        /// <remarks>
+        /// Executes as a side-effect of the Consumer.Consume call (on the same thread).
+        /// Exceptions: Any exception thrown by your offsets committed handler
+        /// will be wrapped in a ConsumeException with ErrorCode
+        /// ErrorCode.Local_Application and thrown by the initiating call to Consume/Close.
+        /// </remarks>
+        void SetOffsetsCommittedHandler(Action<CommittedOffsets> offsetsCommittedHandler);
+
+        /// <summary>
         /// Create topic if not exists every time endpoint starts (admin permissions are required).
         /// </summary>
         /// <param name="configure"></param>
@@ -179,17 +195,5 @@
         /// Consume.
         /// </remarks>
         void SetValueDeserializer(IDeserializer<TValue> deserializer);
-
-        /// <summary>
-        /// A handler that is called to report the result of (automatic) offset
-        /// commits. It is not called as a result of the use of the Commit method.
-        /// </summary>
-        /// <remarks>
-        /// Executes as a side-effect of the Consumer.Consume call (on the same thread).
-        /// Exceptions: Any exception thrown by your offsets committed handler
-        /// will be wrapped in a ConsumeException with ErrorCode
-        /// ErrorCode.Local_Application and thrown by the initiating call to Consume/Close.
-        /// </remarks>
-        void SetOffsetsCommittedHandler(Action<IConsumer<TKey, TValue>, CommittedOffsets> offsetsCommittedHandler);
     }
 }
