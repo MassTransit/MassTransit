@@ -10,9 +10,10 @@
     }
 
 
-    public interface IKafkaMessageReceiver<TKey, TValue> :
+    public interface IKafkaMessageConsumer<TKey, TValue> :
         IKafkaMessageReceiver
         where TValue : class
     {
+
     }
 }

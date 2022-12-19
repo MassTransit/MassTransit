@@ -13,5 +13,6 @@ namespace MassTransit.EventHubIntegration
         int PrefetchCount { get; }
         TimeSpan CheckpointInterval { get; }
         int ConcurrentMessageLimit { get; }
+        int ConcurrentDeliveryLimit { get; }
     }
 }

@@ -11,31 +11,37 @@
     using Util;
 
 
-    public class KafkaMessageReceiver<TKey, TValue> :
-        Agent,
-        IKafkaMessageReceiver<TKey, TValue>
+    public class KafkaMessageConsumer<TKey, TValue> :
+        Supervisor,
+        IKafkaMessageConsumer<TKey, TValue>
         where TValue : class
     {
-        readonly CancellationTokenSource _cancellationTokenSource;
-        readonly ConsumerContext<TKey, TValue> _consumerContext;
-        readonly ReceiveEndpointContext _context;
+        readonly ConsumerContext _consumerContext;
+        readonly ReceiveSettings _receiveSettings;
+        readonly KafkaReceiveEndpointContext<TKey, TValue> _context;
         readonly TaskCompletionSource<bool> _deliveryComplete;
         readonly IReceivePipeDispatcher _dispatcher;
+        readonly CancellationTokenSource _cancellationTokenSource;
+        readonly IConsumer<byte[], byte[]> _consumer;
+        readonly Task _task;
+        readonly IChannelExecutorPool<ConsumeResult<byte[], byte[]>> _executorPool;
 
-        public KafkaMessageReceiver(ReceiveEndpointContext context, ConsumerContext<TKey, TValue> consumerContext)
+        public KafkaMessageConsumer(ReceiveSettings receiveSettings, KafkaReceiveEndpointContext<TKey, TValue> context, ConsumerContext consumerContext)
         {
+            _receiveSettings = receiveSettings;
             _context = context;
             _consumerContext = consumerContext;
-            _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(Stopping);
-
-            _consumerContext.ErrorHandler += HandleKafkaError;
 
             _deliveryComplete = TaskUtil.GetTask<bool>();
+            _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(Stopping);
 
             _dispatcher = context.CreateReceivePipeDispatcher();
+            _consumer = _consumerContext.CreateConsumer(HandleKafkaError);
             _dispatcher.ZeroActivity += HandleDeliveryComplete;
 
-            Task.Run(Consume);
+            _executorPool = new CombinedChannelExecutorPool(_consumerContext, receiveSettings);
+
+            _task = Task.Run(Consume);
         }
 
         public long DeliveryCount => _dispatcher.DispatchCount;
@@ -44,9 +50,7 @@
 
         async Task Consume()
         {
-            var executor = new ChannelExecutor(_consumerContext.ReceiveSettings.PrefetchCount, _consumerContext.ReceiveSettings.ConcurrencyLimit);
-
-            await _consumerContext.Subscribe().ConfigureAwait(false);
+            _consumer.Subscribe(_receiveSettings.Topic);
 
             SetReady();
 
@@ -54,8 +58,9 @@
             {
                 while (!_cancellationTokenSource.IsCancellationRequested)
                 {
-                    ConsumeResult<TKey, TValue> consumeResult = await _consumerContext.Consume(_cancellationTokenSource.Token).ConfigureAwait(false);
-                    await executor.Push(() => Handle(consumeResult), Stopping).ConfigureAwait(false);
+                    ConsumeResult<byte[], byte[]> consumeResult = _consumer.Consume(_cancellationTokenSource.Token);
+                    await _consumerContext.Pending(consumeResult).ConfigureAwait(false);
+                    await _executorPool.Push(consumeResult, () => Handle(consumeResult), Stopping).ConfigureAwait(false);
                 }
 
                 SetCompleted(Task.CompletedTask);
@@ -71,18 +76,14 @@
 
                 SetCompleted(TaskUtil.Faulted<bool>(exception));
             }
-            finally
-            {
-                await executor.DisposeAsync().ConfigureAwait(false);
-            }
         }
 
-        async Task Handle(ConsumeResult<TKey, TValue> result)
+        async Task Handle(ConsumeResult<byte[], byte[]> result)
         {
             if (IsStopping)
                 return;
 
-            var context = new KafkaReceiveContext<TKey, TValue>(result, _context, _consumerContext, _consumerContext.HeadersDeserializer);
+            var context = new KafkaReceiveContext<TKey, TValue>(result, _context, _consumerContext);
 
             try
             {
@@ -98,10 +99,10 @@
             }
         }
 
-        void HandleKafkaError(IConsumer<TKey, TValue> consumer, Error error)
+        void HandleKafkaError(IConsumer<byte[], byte[]> consumer, Error error)
         {
             EnabledLogger? logger = error.IsFatal ? LogContext.Error : LogContext.Warning;
-            logger?.Log("Consumer error ({Code}): {Reason} on {Topic}", error.Code, error.Reason, _consumerContext.ReceiveSettings.Topic);
+            logger?.Log("Consumer [{MemberId}] error ({Code}): {Reason} on {Topic}", consumer.MemberId, error.Code, error.Reason, _receiveSettings.Topic);
 
             if (_cancellationTokenSource.IsCancellationRequested)
                 return;
@@ -127,9 +128,7 @@
 
         protected override async Task StopAgent(StopContext context)
         {
-            await _consumerContext.Close().ConfigureAwait(false);
-
-            _consumerContext.ErrorHandler -= HandleKafkaError;
+            _consumer.Close();
 
             LogContext.Debug?.Log("Stopping consumer: {InputAddress}", _context.InputAddress);
 
@@ -150,6 +149,44 @@
                 {
                     LogContext.Warning?.Log("Stop canceled waiting for message consumers to complete: {InputAddress}", _context.InputAddress);
                 }
+            }
+
+            await _task.ConfigureAwait(false);
+            await _executorPool.DisposeAsync().ConfigureAwait(false);
+
+            _consumer.Dispose();
+            _cancellationTokenSource.Dispose();
+        }
+
+
+        class CombinedChannelExecutorPool :
+            IChannelExecutorPool<ConsumeResult<byte[], byte[]>>
+        {
+            readonly IChannelExecutorPool<ConsumeResult<byte[], byte[]>> _partitionExecutorPool;
+            readonly IChannelExecutorPool<ConsumeResult<byte[], byte[]>> _keyExecutorPool;
+
+            public CombinedChannelExecutorPool(IChannelExecutorPool<ConsumeResult<byte[], byte[]>> partitionExecutorPool, ReceiveSettings receiveSettings)
+            {
+                _partitionExecutorPool = partitionExecutorPool;
+                IHashGenerator hashGenerator = new Murmur3UnsafeHashGenerator();
+                _keyExecutorPool = new PartitionChannelExecutorPool<ConsumeResult<byte[], byte[]>>(x => x.Message.Key, hashGenerator,
+                    receiveSettings.ConcurrentMessageLimit,
+                    receiveSettings.ConcurrentDeliveryLimit);
+            }
+
+            public Task Push(ConsumeResult<byte[], byte[]> result, Func<Task> handle, CancellationToken cancellationToken)
+            {
+                return _partitionExecutorPool.Push(result, () => _keyExecutorPool.Run(result, handle, cancellationToken), cancellationToken);
+            }
+
+            public Task Run(ConsumeResult<byte[], byte[]> result, Func<Task> method, CancellationToken cancellationToken = default)
+            {
+                return _partitionExecutorPool.Run(result, () => _keyExecutorPool.Run(result, method, cancellationToken), cancellationToken);
+            }
+
+            public ValueTask DisposeAsync()
+            {
+                return _keyExecutorPool.DisposeAsync();
             }
         }
     }

@@ -104,7 +104,6 @@ namespace MassTransit.EventHubIntegration.Tests
         }
     }
 
-
     public class ReceiveWithPayload_Specs :
         InMemoryTestFixture
     {

@@ -6,93 +6,67 @@ namespace MassTransit.KafkaIntegration
     using Confluent.Kafka;
     using MassTransit.Configuration;
     using MassTransit.Middleware;
-    using Serializers;
-    using Util;
 
 
-    public class KafkaConsumerContext<TKey, TValue> :
+    public class KafkaConsumerContext :
         BasePipeContext,
-        ConsumerContext<TKey, TValue>
-        where TValue : class
+        ConsumerContext
     {
-        readonly IConsumer<TKey, TValue> _consumer;
-        readonly IConsumerLockContext<TKey, TValue> _lockContext;
-        ChannelExecutor _executor;
+        readonly ConsumerBuilderFactory _consumerBuilderFactory;
+        readonly IConsumerLockContext _lockContext;
 
-        public KafkaConsumerContext(IHostConfiguration hostConfiguration, ReceiveSettings receiveSettings, IHeadersDeserializer headersDeserializer,
-            ConsumerBuilder<TKey, TValue> consumerBuilder, CancellationToken cancellationToken)
+        public KafkaConsumerContext(IHostConfiguration hostConfiguration, ReceiveSettings receiveSettings,
+            ConsumerBuilderFactory consumerBuilderFactory, CancellationToken cancellationToken)
             : base(cancellationToken)
         {
-            var lockContext = new ConsumerLockContext<TKey, TValue>(hostConfiguration, receiveSettings);
-
-            _consumer = consumerBuilder
+            var lockContext = new ConsumerLockContext(hostConfiguration, receiveSettings);
+            _consumerBuilderFactory = () => consumerBuilderFactory()
                 .SetPartitionsAssignedHandler(lockContext.OnAssigned)
-                .SetPartitionsRevokedHandler(lockContext.OnUnAssigned)
-                .SetErrorHandler(OnError)
-                .Build();
-            ReceiveSettings = receiveSettings;
-            HeadersDeserializer = headersDeserializer;
-
+                .SetPartitionsRevokedHandler(lockContext.OnUnAssigned);
             _lockContext = lockContext;
-            _executor = new ChannelExecutor(1);
         }
 
-        public event Action<IConsumer<TKey, TValue>, Error> ErrorHandler;
+        public event Action<Error> ErrorHandler;
 
-        public ReceiveSettings ReceiveSettings { get; }
-
-        public IHeadersDeserializer HeadersDeserializer { get; }
-
-        public Task Subscribe()
+        public IConsumer<byte[], byte[]> CreateConsumer(Action<IConsumer<byte[], byte[]>, Error> onError)
         {
-            _consumer.Subscribe(ReceiveSettings.Topic);
-            return Task.CompletedTask;
+            return _consumerBuilderFactory()
+                .SetErrorHandler((consumer, error) =>
+                {
+                    onError?.Invoke(consumer, error);
+                    ErrorHandler?.Invoke(error);
+                })
+                .Build();
         }
 
-        public async Task Close()
-        {
-            await _executor.DisposeAsync().ConfigureAwait(false);
-            _executor = null;
-
-            _consumer.Close();
-        }
-
-        public async Task<ConsumeResult<TKey, TValue>> Consume(CancellationToken cancellationToken)
-        {
-            if (_executor == null)
-                throw new InvalidOperationException("The consumer is being closed");
-
-            ConsumeResult<TKey, TValue> result = await _executor.Run(() => _consumer.Consume(cancellationToken), cancellationToken).ConfigureAwait(false);
-            await _lockContext.Pending(result).ConfigureAwait(false);
-            return result;
-        }
-
-        public async ValueTask DisposeAsync()
-        {
-            if (_executor != null)
-                await _executor.DisposeAsync().ConfigureAwait(false);
-
-            _consumer.Dispose();
-        }
-
-        public Task Pending(ConsumeResult<TKey, TValue> result)
+        public Task Pending(ConsumeResult<byte[], byte[]> result)
         {
             return _lockContext.Pending(result);
         }
 
-        public Task Complete(ConsumeResult<TKey, TValue> result)
+        public Task Complete(ConsumeResult<byte[], byte[]> result)
         {
             return _lockContext.Complete(result);
         }
 
-        public Task Faulted(ConsumeResult<TKey, TValue> result, Exception exception)
+        public Task Faulted(ConsumeResult<byte[], byte[]> result, Exception exception)
         {
             return _lockContext.Faulted(result, exception);
         }
 
-        void OnError(IConsumer<TKey, TValue> consumer, Error error)
+        public Task Push(ConsumeResult<byte[], byte[]> result, Func<Task> method, CancellationToken cancellationToken = default)
         {
-            ErrorHandler?.Invoke(consumer, error);
+            return _lockContext.Push(result, method, cancellationToken);
+        }
+
+        public Task Run(ConsumeResult<byte[], byte[]> result, Func<Task> method, CancellationToken cancellationToken = default)
+        {
+            return _lockContext.Push(result, method, cancellationToken);
+        }
+
+        public ValueTask DisposeAsync()
+        {
+            return _lockContext.DisposeAsync();
         }
     }
 }

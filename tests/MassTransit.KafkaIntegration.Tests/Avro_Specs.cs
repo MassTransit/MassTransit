@@ -34,9 +34,9 @@ namespace MassTransit.KafkaIntegration.Tests
             services.TryAddSingleton<ILoggerFactory>(LoggerFactory);
             services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
 
-            static ISerializer<T> GetSerializer<T>(IServiceProvider provider)
+            static IAsyncSerializer<T> GetSerializer<T>(IServiceProvider provider)
             {
-                return new AvroSerializer<T>(provider.GetService<ISchemaRegistryClient>()).AsSyncOverAsync();
+                return new AvroSerializer<T>(provider.GetService<ISchemaRegistryClient>());
             }
 
             static IDeserializer<T> GetDeserializer<T>(IServiceProvider provider)

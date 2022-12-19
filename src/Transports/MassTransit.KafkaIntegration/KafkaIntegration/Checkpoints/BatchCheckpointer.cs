@@ -9,18 +9,18 @@ namespace MassTransit.KafkaIntegration.Checkpoints
     using Util;
 
 
-    public class BatchCheckpointer<TKey, TValue> :
+    public class BatchCheckpointer :
         ICheckpointer
     {
         readonly Channel<IPendingConfirmation> _channel;
         readonly Task _checkpointTask;
-        readonly IConsumer<TKey, TValue> _consumer;
+        readonly IConsumer<byte[], byte[]> _consumer;
         readonly ChannelExecutor _executor;
         readonly ReceiveSettings _settings;
 
-        public BatchCheckpointer(ChannelExecutor executor, IConsumer<TKey, TValue> consumer, ReceiveSettings settings)
+        public BatchCheckpointer(IConsumer<byte[], byte[]> consumer, ReceiveSettings settings)
         {
-            _executor = executor;
+            _executor = new ChannelExecutor(1);
             _consumer = consumer;
             _settings = settings;
             var channelOptions = new BoundedChannelOptions(settings.MessageLimit)
@@ -45,6 +45,8 @@ namespace MassTransit.KafkaIntegration.Checkpoints
             _channel.Writer.Complete();
 
             await _checkpointTask.ConfigureAwait(false);
+
+            await _executor.DisposeAsync().ConfigureAwait(false);
         }
 
         async Task WaitForBatch()
@@ -122,7 +124,8 @@ namespace MassTransit.KafkaIntegration.Checkpoints
         bool TryCheckpoint(IPendingConfirmation confirmation)
         {
             var offset = confirmation.Offset + 1;
-            LogContext.Debug?.Log("Partition: {PartitionId} updating checkpoint with offset: {Offset}", confirmation.Partition, offset);
+            LogContext.Debug?.Log("Partition: {PartitionId} updating checkpoint with offset: {Offset} on {MemberId}", confirmation.Partition, offset,
+                _consumer.MemberId);
             try
             {
                 _consumer.Commit(new[] { new TopicPartitionOffset(confirmation.Partition, offset) });
@@ -130,7 +133,8 @@ namespace MassTransit.KafkaIntegration.Checkpoints
             }
             catch (KafkaException exception)
             {
-                LogContext.Error?.Log(exception, "Partition: {PartitionId} checkpoint failed with offset: {Offset}", confirmation.Partition, offset);
+                LogContext.Error?.Log(exception, "Partition: {PartitionId} checkpoint failed with offset: {Offset} on {MemberId}", confirmation.Partition,
+                    offset, _consumer.MemberId);
 
                 if (exception.Error.IsLocalError)
                     throw;

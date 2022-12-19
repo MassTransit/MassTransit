@@ -1,25 +1,16 @@
 namespace MassTransit.KafkaIntegration
 {
     using System;
-    using System.Threading;
-    using System.Threading.Tasks;
     using Confluent.Kafka;
-    using Serializers;
+    using Util;
 
 
-    public interface ConsumerContext<TKey, TValue> :
+    public interface ConsumerContext :
         PipeContext,
-        IConsumerLockContext<TKey, TValue>,
-        IAsyncDisposable
-        where TValue : class
+        IConsumerLockContext,
+        IChannelExecutorPool<ConsumeResult<byte[], byte[]>>
     {
-        ReceiveSettings ReceiveSettings { get; }
-        IHeadersDeserializer HeadersDeserializer { get; }
-        event Action<IConsumer<TKey, TValue>, Error> ErrorHandler;
-
-        Task Subscribe();
-        Task Close();
-
-        Task<ConsumeResult<TKey, TValue>> Consume(CancellationToken cancellationToken);
+        event Action<Error> ErrorHandler;
+        IConsumer<byte[], byte[]> CreateConsumer(Action<IConsumer<byte[], byte[]>, Error> onError);
     }
 }

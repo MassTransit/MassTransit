@@ -15,7 +15,7 @@ namespace MassTransit.KafkaIntegration.Tests
     public class Publish_Specs :
         InMemoryTestFixture
     {
-        const string Topic = "test2";
+        const string Topic = "publish";
 
         [Test]
         public async Task Should_receive()

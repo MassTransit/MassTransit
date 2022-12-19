@@ -14,29 +14,39 @@ namespace MassTransit.KafkaIntegration
         where TValue : class
     {
         readonly IBusInstance _busInstance;
-        readonly Recycle<IConsumerContextSupervisor<TKey, TValue>> _consumerContext;
-        readonly ReceiveSettings _settings;
+        readonly ReceiveSettings _receiveSetting;
+        readonly Recycle<IConsumerContextSupervisor> _consumerContext;
 
-        public TopicKafkaReceiveEndpointContext(IBusInstance busInstance, IReceiveEndpointConfiguration endpointConfiguration,
-            IKafkaHostConfiguration hostConfiguration,
-            ReceiveSettings receiveSettings,
-            IHeadersDeserializer headersDeserializer,
-            Func<ConsumerBuilder<TKey, TValue>> consumerBuilderFactory)
+        public TopicKafkaReceiveEndpointContext(IBusInstance busInstance, IKafkaHostConfiguration hostConfiguration,
+            IReceiveEndpointConfiguration endpointConfiguration, ReceiveSettings receiveSetting,
+            IHeadersDeserializer headersDeserializer, IDeserializer<TKey> keyDeserializer, IDeserializer<TValue> valueDeserializer,
+            ConsumerBuilderFactory consumerBuilderFactory)
             : base(busInstance.HostConfiguration, endpointConfiguration)
         {
+            HeadersDeserializer = headersDeserializer;
+            KeyDeserializer = keyDeserializer;
+            ValueDeserializer = valueDeserializer;
             _busInstance = busInstance;
-            _settings = receiveSettings;
+            _receiveSetting = receiveSetting;
 
-            _consumerContext = new Recycle<IConsumerContextSupervisor<TKey, TValue>>(() =>
-                new ConsumerContextSupervisor<TKey, TValue>(hostConfiguration.ClientContextSupervisor, _settings, busInstance.HostConfiguration,
-                    headersDeserializer, consumerBuilderFactory));
+            _consumerContext = new Recycle<IConsumerContextSupervisor>(() =>
+                new ConsumerContextSupervisor(busInstance.HostConfiguration, hostConfiguration.ClientContextSupervisor, receiveSetting,
+                    consumerBuilderFactory));
         }
 
-        public IConsumerContextSupervisor<TKey, TValue> ConsumerContextSupervisor => _consumerContext.Supervisor;
+        public IHeadersDeserializer HeadersDeserializer { get; }
+        public IDeserializer<TKey> KeyDeserializer { get; }
+        public IDeserializer<TValue> ValueDeserializer { get; }
+        public IConsumerContextSupervisor ConsumerContextSupervisor => _consumerContext.Supervisor;
+
+        public KafkaTopicAddress NormalizeAddress(Uri address)
+        {
+            return new KafkaTopicAddress(_busInstance.HostConfiguration.HostAddress, address);
+        }
 
         public override Exception ConvertException(Exception exception, string message)
         {
-            return new KafkaConnectionException(message + _settings.Topic, exception);
+            return new KafkaConnectionException(message + _receiveSetting.Topic, exception);
         }
 
         public override void AddSendAgent(IAgent agent)
@@ -52,8 +62,8 @@ namespace MassTransit.KafkaIntegration
         public override void Probe(ProbeContext context)
         {
             context.Add("type", "confluent.kafka");
-            context.Add("topic", _settings.Topic);
-            context.Set(_settings);
+            context.Add("topic", _receiveSetting.Topic);
+            context.Set(_receiveSetting);
         }
 
         protected override ISendTransportProvider CreateSendTransportProvider()

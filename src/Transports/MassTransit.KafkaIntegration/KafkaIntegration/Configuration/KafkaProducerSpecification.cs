@@ -21,8 +21,8 @@ namespace MassTransit.KafkaIntegration.Configuration
         readonly SerializationConfiguration _serialization;
         Action<ISendPipeConfigurator> _configureSend;
         IHeadersSerializer _headersSerializer;
-        ISerializer<TKey> _keySerializer;
-        ISerializer<TValue> _valueSerializer;
+        IAsyncSerializer<TKey> _keySerializer;
+        IAsyncSerializer<TValue> _valueSerializer;
 
         public KafkaProducerSpecification(IKafkaHostConfiguration hostConfiguration, ProducerConfig producerConfig, string topicName,
             IHeadersSerializer headersSerializer, Action<IClient, string> oAuthBearerTokenRefreshHandler)
@@ -35,8 +35,8 @@ namespace MassTransit.KafkaIntegration.Configuration
             _sendObservers = new SendObservable();
 
             if (!SerializationUtils.Serializers.IsDefaultKeyType<TKey>())
-                SetKeySerializer(new MassTransitJsonSerializer<TKey>());
-            SetValueSerializer(new MassTransitJsonSerializer<TValue>());
+                SetKeySerializer(new MassTransitAsyncJsonSerializer<TKey>());
+            SetValueSerializer(new MassTransitAsyncJsonSerializer<TValue>());
             SetHeadersSerializer(headersSerializer);
 
             _serialization = new SerializationConfiguration();
@@ -137,12 +137,12 @@ namespace MassTransit.KafkaIntegration.Configuration
             set => _producerConfig.EnableBackgroundPoll = value;
         }
 
-        public void SetKeySerializer(ISerializer<TKey> serializer)
+        public void SetKeySerializer(IAsyncSerializer<TKey> serializer)
         {
             _keySerializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
         }
 
-        public void SetValueSerializer(ISerializer<TValue> serializer)
+        public void SetValueSerializer(IAsyncSerializer<TValue> serializer)
         {
             _valueSerializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
         }

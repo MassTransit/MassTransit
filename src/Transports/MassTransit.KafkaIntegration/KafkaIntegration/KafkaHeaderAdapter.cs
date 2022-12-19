@@ -4,11 +4,11 @@ namespace MassTransit.KafkaIntegration
     using Confluent.Kafka;
 
 
-    public class KafkaHeaderAdapter<TKey, TValue> :
+    public class KafkaHeaderAdapter :
         MessageContext
     {
         readonly ReceiveContext _receiveContext;
-        readonly ConsumeResult<TKey, TValue> _result;
+        readonly ConsumeResult<byte[], byte[]> _result;
         Guid? _conversationId;
         Guid? _correlationId;
         Guid? _initiatorId;
@@ -16,7 +16,7 @@ namespace MassTransit.KafkaIntegration
         DateTime? _sentTime;
         Uri _sourceAddress;
 
-        public KafkaHeaderAdapter(ConsumeResult<TKey, TValue> result, ReceiveContext receiveContext)
+        public KafkaHeaderAdapter(ConsumeResult<byte[], byte[]> result, ReceiveContext receiveContext)
         {
             _result = result;
             _receiveContext = receiveContext;

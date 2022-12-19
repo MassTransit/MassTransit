@@ -30,6 +30,11 @@ namespace MassTransit
         ushort CheckpointMessageLimit { set; }
 
         /// <summary>
+        /// Set number of concurrent messages per single Key-partition, higher value will increase throughput but will break delivery order (default: 1)
+        /// </summary>
+        int ConcurrentDeliveryLimit { set; }
+
+        /// <summary>
         /// Configure <see cref="EventProcessorClientOptions" />
         /// </summary>
         Action<EventProcessorClientOptions> ConfigureOptions { set; }
