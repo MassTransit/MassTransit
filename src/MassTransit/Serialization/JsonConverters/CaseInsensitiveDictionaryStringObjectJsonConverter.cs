@@ -120,6 +120,9 @@ namespace MassTransit.Serialization.JsonConverters
 
         static Dictionary<string, object> ReadObject(ref Utf8JsonReader reader, JsonSerializerOptions options)
         {
+            var ignoreDefault = options.DefaultIgnoreCondition.HasFlag(JsonIgnoreCondition.WhenWritingDefault);
+            var ignoreNull = ignoreDefault || options.DefaultIgnoreCondition.HasFlag(JsonIgnoreCondition.WhenWritingNull);
+
             var dictionary = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
             while (reader.Read())
             {
@@ -137,7 +140,7 @@ namespace MassTransit.Serialization.JsonConverters
                 reader.Read();
 
                 var value = ReadPropertyValue(ref reader, options);
-                if (value != null)
+                if (value != null || !ignoreNull)
                     dictionary[propertyName] = value;
             }
 
@@ -146,6 +149,9 @@ namespace MassTransit.Serialization.JsonConverters
 
         static Dictionary<string, object> ReadArray(ref Utf8JsonReader reader, JsonSerializerOptions options)
         {
+            var ignoreDefault = options.DefaultIgnoreCondition.HasFlag(JsonIgnoreCondition.WhenWritingDefault);
+            var ignoreNull = ignoreDefault || options.DefaultIgnoreCondition.HasFlag(JsonIgnoreCondition.WhenWritingNull);
+
             var dictionary = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
             while (reader.Read())
             {
@@ -156,8 +162,11 @@ namespace MassTransit.Serialization.JsonConverters
                 {
                     Dictionary<string, object> elementDictionary = ReadObject(ref reader, options);
                     if (elementDictionary.TryGetValue("Key", out string key) && !string.IsNullOrWhiteSpace(key)
-                        && elementDictionary.TryGetValue("Value", out var value) && value != null)
-                        dictionary[key] = value;
+                        && elementDictionary.TryGetValue("Value", out var value))
+                    {
+                        if (value != null || !ignoreNull)
+                            dictionary[key] = value;
+                    }
                 }
                 else
                     throw new JsonException($"Expected object (key/value), found: {reader.TokenType}");
