@@ -24,9 +24,10 @@ namespace MassTransit
         static readonly Regex _nonAlpha = new Regex("[^a-zA-Z0-9]", RegexOptions.Compiled | RegexOptions.Singleline);
         readonly bool _includeNamespace;
         readonly string _prefix;
+        readonly string _joinSeparator;
 
         /// <summary>
-        /// Default endpoint formatter, which does not have a separator between words
+        /// Default endpoint name formatter.
         /// </summary>
         /// <param name="includeNamespace">If true, the namespace is included in the name</param>
         public DefaultEndpointNameFormatter(bool includeNamespace)
@@ -35,7 +36,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Default endpoint formatter, which does not have a separator between words
+        /// Default endpoint name formatter with prefix.
         /// </summary>
         /// <param name="prefix">Prefix to start the name, should match the casing of the formatter (such as Dev or PreProd)</param>
         /// <param name="includeNamespace">If true, the namespace is included in the name</param>
@@ -43,6 +44,19 @@ namespace MassTransit
         {
             _prefix = prefix;
             _includeNamespace = includeNamespace;
+        }
+
+        /// <summary>
+        /// Default endpoint name formatter with join separator and prefix.
+        /// </summary>
+        /// <param name="joinSeparator">Define the join separator between the words</param>
+        /// <param name="prefix">Prefix to start the name, should match the casing of the formatter (such as Dev or PreProd)</param>
+        /// <param name="includeNamespace">If true, the namespace is included in the name</param>
+        public DefaultEndpointNameFormatter(string joinSeparator, string prefix, bool includeNamespace)
+        {
+            _prefix = prefix;
+            _includeNamespace = includeNamespace;
+            _joinSeparator = joinSeparator;
         }
 
         protected DefaultEndpointNameFormatter()
@@ -199,8 +213,10 @@ namespace MassTransit
 
         string FormatName(Type type)
         {
+            var joinSeparator = string.IsNullOrEmpty(_joinSeparator) ? string.Empty : _joinSeparator;
+
             var name = _includeNamespace
-                ? string.Join("", TypeCache.GetShortName(type).Split(_removeChars))
+                ? string.Join(joinSeparator, TypeCache.GetShortName(type).Split(_removeChars))
                 : type.Name;
 
             return string.IsNullOrWhiteSpace(_prefix) ? name : _prefix + name;
