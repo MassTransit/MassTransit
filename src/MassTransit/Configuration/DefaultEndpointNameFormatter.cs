@@ -213,10 +213,8 @@ namespace MassTransit
 
         string FormatName(Type type)
         {
-            var joinSeparator = string.IsNullOrEmpty(_joinSeparator) ? string.Empty : _joinSeparator;
-
             var name = _includeNamespace
-                ? string.Join(joinSeparator, TypeCache.GetShortName(type).Split(_removeChars))
+                ? string.Join(_joinSeparator ?? "", TypeCache.GetShortName(type).Split(_removeChars))
                 : type.Name;
 
             return string.IsNullOrWhiteSpace(_prefix) ? name : _prefix + name;
