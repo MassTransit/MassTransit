@@ -38,6 +38,8 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         public IDictionary<string, object> ConsumeArguments { get; }
 
+        public string ConsumerTag { get; set; }
+
         public Uri GetInputAddress(Uri hostAddress)
         {
             return GetEndpointAddress(hostAddress);

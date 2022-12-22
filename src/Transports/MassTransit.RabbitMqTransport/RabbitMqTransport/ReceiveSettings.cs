@@ -66,6 +66,11 @@
         bool NoAck { get; }
 
         /// <summary>
+        /// Optional, only present when overridden
+        /// </summary>
+        string ConsumerTag { get; }
+
+        /// <summary>
         /// Get the input address for the transport on the specified host
         /// </summary>
         Uri GetInputAddress(Uri hostAddress);

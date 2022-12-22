@@ -54,5 +54,12 @@
         /// </summary>
         /// <param name="configure"></param>
         void ConfigureConnection(Action<IPipeConfigurator<ConnectionContext>> configure);
+
+        /// <summary>
+        /// By default, RabbitMQ assigns a dynamically generated consumer tag, which is always the right choice. In certain scenarios
+        /// where a specific consumer tag is needed, this will set it.
+        /// </summary>
+        /// <param name="consumerTag">The consumer tag to use for this receive endpoint.</param>
+        void OverrideConsumerTag(string consumerTag);
     }
 }

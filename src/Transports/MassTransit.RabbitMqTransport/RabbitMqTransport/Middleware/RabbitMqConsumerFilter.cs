@@ -28,6 +28,9 @@ namespace MassTransit.RabbitMqTransport.Middleware
         {
             var receiveSettings = context.GetPayload<ReceiveSettings>();
 
+            if (string.IsNullOrWhiteSpace(_consumerTag) && !string.IsNullOrWhiteSpace(receiveSettings.ConsumerTag))
+                _consumerTag = receiveSettings.ConsumerTag;
+
             var consumer = new RabbitMqBasicConsumer(context, _context);
 
             _consumerTag = await context.BasicConsume(receiveSettings.QueueName, receiveSettings.NoAck, _context.ExclusiveConsumer,
