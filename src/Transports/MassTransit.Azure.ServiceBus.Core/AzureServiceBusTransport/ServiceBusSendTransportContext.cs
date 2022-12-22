@@ -80,6 +80,8 @@ namespace MassTransit.AzureServiceBusTransport
                     Activity.Current.SetTag(nameof(context.SessionId), context.SessionId);
             }
 
+            sendContext.CancellationToken.ThrowIfCancellationRequested();
+
             if (IsCancelScheduledSend(context, out var tokenId, out var sequenceNumber))
             {
                 await CancelScheduledSend(sendEndpointContext, tokenId, sequenceNumber).ConfigureAwait(false);

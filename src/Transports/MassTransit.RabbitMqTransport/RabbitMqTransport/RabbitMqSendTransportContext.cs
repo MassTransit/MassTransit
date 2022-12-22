@@ -101,7 +101,11 @@ namespace MassTransit.RabbitMqTransport
             RabbitMqMessageSendContext<T> context = sendContext as RabbitMqMessageSendContext<T>
                 ?? throw new ArgumentException("Invalid SendContext<T> type", nameof(sendContext));
 
+            sendContext.CancellationToken.ThrowIfCancellationRequested();
+
             await _configureTopologyPipe.Send(transportContext).ConfigureAwait(false);
+
+            sendContext.CancellationToken.ThrowIfCancellationRequested();
 
             var exchange = context.Exchange;
             if (exchange.Equals(RabbitMqExchangeNames.ReplyTo))

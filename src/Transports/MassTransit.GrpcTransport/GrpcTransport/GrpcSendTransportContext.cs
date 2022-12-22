@@ -61,6 +61,8 @@ namespace MassTransit.GrpcTransport
             TransportGrpcSendContext<T> context = sendContext as TransportGrpcSendContext<T>
                 ?? throw new ArgumentException("Invalid SendContext<T> type", nameof(sendContext));
 
+            sendContext.CancellationToken.ThrowIfCancellationRequested();
+
             var messageId = context.MessageId ?? NewId.NextGuid();
 
             var transportMessage = new TransportMessage

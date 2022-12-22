@@ -72,7 +72,11 @@ namespace MassTransit.AmazonSqsTransport
             AmazonSqsMessageSendContext<T> context = sendContext as AmazonSqsMessageSendContext<T>
                 ?? throw new ArgumentException("Invalid SendContext<T> type", nameof(sendContext));
 
+            sendContext.CancellationToken.ThrowIfCancellationRequested();
+
             await _configureTopologyPipe.Send(transportContext).ConfigureAwait(false);
+
+            sendContext.CancellationToken.ThrowIfCancellationRequested();
 
             var request = await transportContext.CreatePublishRequest(EntityName, context.Body.GetString()).ConfigureAwait(false);
 

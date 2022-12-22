@@ -51,6 +51,8 @@ namespace MassTransit.InMemoryTransport
             InMemorySendContext<T> context = sendContext as InMemorySendContext<T>
                 ?? throw new ArgumentException("Invalid SendContext<T> type", nameof(sendContext));
 
+            sendContext.CancellationToken.ThrowIfCancellationRequested();
+
             var messageId = context.MessageId ?? NewId.NextGuid();
 
             var transportMessage = new InMemoryTransportMessage(messageId, context.Body.GetBytes(), context.ContentType.ToString(), TypeCache<T>.ShortName)

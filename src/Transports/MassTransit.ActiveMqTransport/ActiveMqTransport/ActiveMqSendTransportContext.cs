@@ -72,7 +72,11 @@ namespace MassTransit.ActiveMqTransport
             TransportActiveMqSendContext<T> context = sendContext as TransportActiveMqSendContext<T>
                 ?? throw new ArgumentException("Invalid SendContext<T> type", nameof(sendContext));
 
+            sendContext.CancellationToken.ThrowIfCancellationRequested();
+
             await _configureTopologyPipe.Send(sessionContext).ConfigureAwait(false);
+
+            sendContext.CancellationToken.ThrowIfCancellationRequested();
 
             var destination = context.ReplyDestination ?? await sessionContext.GetDestination(EntityName, _destinationType).ConfigureAwait(false);
             var producer = await sessionContext.CreateMessageProducer(destination).ConfigureAwait(false);
