@@ -2,7 +2,6 @@ namespace MassTransit
 {
     using System;
     using System.Collections.Generic;
-    using Courier;
 
 
     public static class ActivityObserverConfigurationExtensions
@@ -14,6 +13,17 @@ namespace MassTransit
         /// <param name="observer"></param>
         /// <returns></returns>
         public static ConnectHandle ConnectActivityObserver(this IBusFactoryConfigurator configurator, IActivityObserver observer)
+        {
+            return new ActivityConfigurationObserver(configurator, observer);
+        }
+
+        /// <summary>
+        /// Connect an activity observer that will be connected to all activity execute/compensate endpoints
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="observer"></param>
+        /// <returns></returns>
+        public static ConnectHandle ConnectActivityObserver(this IReceiveEndpointConfigurator configurator, IActivityObserver observer)
         {
             return new ActivityConfigurationObserver(configurator, observer);
         }

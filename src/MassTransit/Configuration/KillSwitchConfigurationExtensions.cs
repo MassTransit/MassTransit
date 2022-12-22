@@ -47,9 +47,9 @@ namespace MassTransit
 
             configure?.Invoke(options);
 
-            var observer = new KillSwitchReceiveEndpointObserver(options);
-
-            configurator.ConnectReceiveEndpointObserver(observer);
+            var killSwitch = new KillSwitch(options);
+            configurator.ConnectReceiveEndpointObserver(killSwitch);
+            configurator.ConnectActivityObserver(killSwitch);
 
             configurator.AddPipeSpecification(new KillSwitchOptionsSpecification(options));
         }
@@ -58,17 +58,19 @@ namespace MassTransit
         class EndpointConfigurationObserver :
             IEndpointConfigurationObserver
         {
-            readonly KillSwitchReceiveEndpointObserver _observer;
+            readonly KillSwitchOptions _options;
 
             public EndpointConfigurationObserver(KillSwitchOptions options)
             {
-                _observer = new KillSwitchReceiveEndpointObserver(options);
+                _options = options;
             }
 
             public void EndpointConfigured<T>(T configurator)
                 where T : IReceiveEndpointConfigurator
             {
-                configurator.ConnectReceiveEndpointObserver(_observer);
+                var killSwitch = new KillSwitch(_options);
+                configurator.ConnectReceiveEndpointObserver(killSwitch);
+                configurator.ConnectActivityObserver(killSwitch);
             }
         }
 

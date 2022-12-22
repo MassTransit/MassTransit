@@ -11,41 +11,82 @@ namespace MassTransit.Transports.Components
     /// </summary>
     public class KillSwitch :
         IKillSwitch,
-        IConsumeObserver
+        IReceiveEndpointObserver,
+        IConsumeObserver,
+        IActivityObserver
     {
         readonly ILogContext _logContext;
         readonly KillSwitchOptions _options;
-        readonly IReceiveEndpoint _receiveEndpoint;
+        ConnectHandle _consumeConnectHandle;
+        IReceiveEndpoint _receiveEndpoint;
         IKillSwitchState _state;
 
-        public KillSwitch(KillSwitchOptions options, IReceiveEndpoint receiveEndpoint)
+        public KillSwitch(KillSwitchOptions options)
         {
             _options = options;
-            _receiveEndpoint = receiveEndpoint;
 
             _logContext = LogContext.Current;
 
             _state = new StartedKillSwitchState(this);
         }
 
+        public Task PreExecute<TActivity, TArguments>(ExecuteActivityContext<TActivity, TArguments> context)
+            where TActivity : class, IExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            return _state.PreConsume(context);
+        }
+
+        public Task PostExecute<TActivity, TArguments>(ExecuteActivityContext<TActivity, TArguments> context)
+            where TActivity : class, IExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            return _state.PostConsume(context);
+        }
+
+        public Task ExecuteFault<TActivity, TArguments>(ExecuteActivityContext<TActivity, TArguments> context, Exception exception)
+            where TActivity : class, IExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            return _state.ConsumeFault(context, exception);
+        }
+
+        public Task PreCompensate<TActivity, TLog>(CompensateActivityContext<TActivity, TLog> context)
+            where TActivity : class, ICompensateActivity<TLog>
+            where TLog : class
+        {
+            return _state.PreConsume(context);
+        }
+
+        public Task PostCompensate<TActivity, TLog>(CompensateActivityContext<TActivity, TLog> context)
+            where TActivity : class, ICompensateActivity<TLog>
+            where TLog : class
+        {
+            return _state.PostConsume(context);
+        }
+
+        public Task CompensateFail<TActivity, TLog>(CompensateActivityContext<TActivity, TLog> context, Exception exception)
+            where TActivity : class, ICompensateActivity<TLog>
+            where TLog : class
+        {
+            return _state.ConsumeFault(context, exception);
+        }
+
         public Task PreConsume<T>(ConsumeContext<T> context)
             where T : class
         {
-            // ReSharper disable once InconsistentlySynchronizedField
             return _state.PreConsume(context);
         }
 
         public Task PostConsume<T>(ConsumeContext<T> context)
             where T : class
         {
-            // ReSharper disable once InconsistentlySynchronizedField
             return _state.PostConsume(context);
         }
 
         public Task ConsumeFault<T>(ConsumeContext<T> context, Exception exception)
             where T : class
         {
-            // ReSharper disable once InconsistentlySynchronizedField
             return _state.ConsumeFault(context, exception);
         }
 
@@ -91,6 +132,30 @@ namespace MassTransit.Transports.Components
                 started.LogThreshold();
 
             Task.Run(() => StopReceiveEndpoint(stopped));
+        }
+
+        public Task Ready(ReceiveEndpointReady ready)
+        {
+            _receiveEndpoint = ready.ReceiveEndpoint;
+
+            _consumeConnectHandle ??= _receiveEndpoint.ConnectConsumeObserver(this);
+
+            return Task.CompletedTask;
+        }
+
+        public Task Stopping(ReceiveEndpointStopping stopping)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task Completed(ReceiveEndpointCompleted completed)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task Faulted(ReceiveEndpointFaulted faulted)
+        {
+            return Task.CompletedTask;
         }
 
         async Task StopReceiveEndpoint(StoppedKillSwitchState state)
