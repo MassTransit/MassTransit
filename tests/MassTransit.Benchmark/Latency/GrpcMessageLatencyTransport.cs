@@ -8,12 +8,13 @@ namespace MassTransitBenchmark.Latency
     public class GrpcMessageLatencyTransport :
         IMessageLatencyTransport
     {
+        const string QueueName = "latency_consumer";
+
         readonly GrpcOptionSet _options;
         readonly IMessageLatencySettings _settings;
         IBusControl _busControl;
         IBusControl _outboundBus;
-        string _queueName = "latency_consumer";
-        Task<ISendEndpoint> _targetEndpoint;
+        ISendEndpoint _targetEndpoint;
 
         public GrpcMessageLatencyTransport(GrpcOptionSet options, IMessageLatencySettings settings)
         {
@@ -21,15 +22,18 @@ namespace MassTransitBenchmark.Latency
             _settings = settings;
         }
 
-        public Task<ISendEndpoint> TargetEndpoint => _targetEndpoint;
+        public Task Send(LatencyTestMessage message)
+        {
+            return _targetEndpoint.Send(message);
+        }
 
-        public async Task Start(Action<IReceiveEndpointConfigurator> callback)
+        public async Task Start(Action<IReceiveEndpointConfigurator> callback, IReportConsumerMetric reportConsumerMetric)
         {
             _busControl = Bus.Factory.CreateUsingGrpc(x =>
             {
                 x.Host(_options.HostAddress);
 
-                x.ReceiveEndpoint(_queueName, e =>
+                x.ReceiveEndpoint(QueueName, e =>
                 {
                     e.PrefetchCount = _settings.PrefetchCount;
 
@@ -42,7 +46,7 @@ namespace MassTransitBenchmark.Latency
 
             await _busControl.StartAsync();
 
-            var targetAddress = new Uri($"exchange:{_queueName}");
+            var targetAddress = new Uri($"exchange:{QueueName}");
 
             if (_options.Split)
             {
@@ -55,7 +59,7 @@ namespace MassTransitBenchmark.Latency
 
                     if (_options.LoadBalance)
                     {
-                        x.ReceiveEndpoint(_queueName, e =>
+                        x.ReceiveEndpoint(QueueName, e =>
                         {
                             e.PrefetchCount = _settings.PrefetchCount;
 
@@ -69,12 +73,12 @@ namespace MassTransitBenchmark.Latency
 
                 await Task.WhenAll(_busControl.StartAsync(), _outboundBus.StartAsync());
 
-                _targetEndpoint = _outboundBus.GetSendEndpoint(targetAddress);
+                _targetEndpoint = await _outboundBus.GetSendEndpoint(targetAddress);
             }
             else
             {
                 await _busControl.StartAsync();
-                _targetEndpoint = _busControl.GetSendEndpoint(targetAddress);
+                _targetEndpoint = await _busControl.GetSendEndpoint(targetAddress);
             }
         }
 

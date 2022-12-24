@@ -3,7 +3,6 @@ namespace MassTransitBenchmark.Latency
     using System;
     using System.Threading.Tasks;
     using MassTransit;
-    using MassTransit.ActiveMqTransport;
 
 
     public class ActiveMqMessageLatencyTransport :
@@ -13,7 +12,7 @@ namespace MassTransitBenchmark.Latency
         readonly IMessageLatencySettings _settings;
         IBusControl _busControl;
         Uri _targetAddress;
-        Task<ISendEndpoint> _targetEndpoint;
+        ISendEndpoint _targetEndpoint;
 
         public ActiveMqMessageLatencyTransport(ActiveMqHostSettings hostSettings, IMessageLatencySettings settings)
         {
@@ -21,9 +20,12 @@ namespace MassTransitBenchmark.Latency
             _settings = settings;
         }
 
-        public Task<ISendEndpoint> TargetEndpoint => _targetEndpoint;
+        public Task Send(LatencyTestMessage message)
+        {
+            return _targetEndpoint.Send(message);
+        }
 
-        public async Task Start(Action<IReceiveEndpointConfigurator> callback)
+        public async Task Start(Action<IReceiveEndpointConfigurator> callback, IReportConsumerMetric reportConsumerMetric)
         {
             _busControl = Bus.Factory.CreateUsingActiveMq(x =>
             {
@@ -45,7 +47,7 @@ namespace MassTransitBenchmark.Latency
 
             await _busControl.StartAsync();
 
-            _targetEndpoint = _busControl.GetSendEndpoint(_targetAddress);
+            _targetEndpoint = await _busControl.GetSendEndpoint(_targetAddress);
         }
 
         public async ValueTask DisposeAsync()

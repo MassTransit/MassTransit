@@ -46,19 +46,13 @@
                 }
 
                 if (optionSet.Benchmark.HasFlag(ProgramOptionSet.BenchmarkOptions.Latency))
-                {
                     await RunLatencyBenchmark(optionSet);
-                }
 
                 if (optionSet.Benchmark.HasFlag(ProgramOptionSet.BenchmarkOptions.Rpc))
-                {
                     RunRequestResponseBenchmark(optionSet);
-                }
 
                 if (optionSet.Benchmark.HasFlag(ProgramOptionSet.BenchmarkOptions.BusOutbox))
-                {
                     await Task.Run(() => RunBusOutboxBenchmark(optionSet));
-                }
 
                 if (Debugger.IsAttached)
                 {
@@ -136,10 +130,17 @@
 
                 transport = new GrpcMessageLatencyTransport(grpcOptionSet, settings);
             }
-            else if (optionSet.Transport == ProgramOptionSet.TransportOptions.Mediator)
+            else if (optionSet.Transport == ProgramOptionSet.TransportOptions.Kafka)
             {
-                transport = new MediatorMessageLatencyTransport(settings);
+                var kafkaOptionSet = new KafkaOptionSet();
+                kafkaOptionSet.Parse(_remaining);
+
+                kafkaOptionSet.ShowOptions();
+
+                transport = new KafkaMessageLatencyTransport(kafkaOptionSet, settings);
             }
+            else if (optionSet.Transport == ProgramOptionSet.TransportOptions.Mediator)
+                transport = new MediatorMessageLatencyTransport(settings);
             else
             {
                 var inMemoryOptionSet = new InMemoryOptionSet();
@@ -187,9 +188,7 @@
                 transport = new RabbitMqRequestResponseTransport(rabbitMqOptionSet, settings);
             }
             else if (optionSet.Transport == ProgramOptionSet.TransportOptions.Mediator)
-            {
                 transport = new MediatorRequestResponseTransport(settings);
-            }
             else
             {
                 var inMemoryOptionSet = new InMemoryOptionSet();

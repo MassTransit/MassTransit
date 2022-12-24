@@ -34,8 +34,8 @@ namespace MassTransitBenchmark
             SetAccessKey("admin");
             SetSecretKey("admin");
 
-            AmazonSqsConfig = new AmazonSQSConfig {ServiceURL = "http://localhost:4566"};
-            AmazonSnsConfig = new AmazonSimpleNotificationServiceConfig {ServiceURL = "http://localhost:4566"};
+            AmazonSqsConfig = new AmazonSQSConfig { ServiceURL = "http://localhost:4566" };
+            AmazonSnsConfig = new AmazonSimpleNotificationServiceConfig { ServiceURL = "http://localhost:4566" };
         }
 
         public AWSCredentials Credentials
@@ -84,15 +84,12 @@ namespace MassTransitBenchmark
 
         void SetRegion(string region)
         {
-            HostAddress = new UriBuilder("amazonsqs", region)
-            {
-                Path = Scope
-            }.Uri;
+            HostAddress = new UriBuilder("amazonsqs", region) { Path = Scope }.Uri;
 
             var regionEndpoint = RegionEndpoint.GetBySystemName(region);
 
-            AmazonSqsConfig = new AmazonSQSConfig {RegionEndpoint = regionEndpoint};
-            AmazonSnsConfig = new AmazonSimpleNotificationServiceConfig {RegionEndpoint = regionEndpoint};
+            AmazonSqsConfig = new AmazonSQSConfig { RegionEndpoint = regionEndpoint };
+            AmazonSnsConfig = new AmazonSimpleNotificationServiceConfig { RegionEndpoint = regionEndpoint };
         }
 
         void SetAccessKey(string accessKey)

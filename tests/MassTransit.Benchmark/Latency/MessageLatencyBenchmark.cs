@@ -26,9 +26,7 @@
             _settings = settings;
 
             if (settings.MessageCount / settings.Clients * settings.Clients != settings.MessageCount)
-            {
                 throw new ArgumentException("The clients must be a factor of message count");
-            }
 
             _payload = _settings.PayloadSize > 0 ? new string('*', _settings.PayloadSize) : null;
         }
@@ -37,7 +35,9 @@
         {
             _capture = new MessageMetricCapture(_settings.MessageCount);
 
-            await _transport.Start(ConfigureReceiveEndpoint);
+            IReportConsumerMetric report = _capture;
+
+            await _transport.Start(ConfigureReceiveEndpoint, report);
             try
             {
                 Console.WriteLine("Running Message Latency Benchmark");
@@ -94,28 +94,32 @@
 
         void DrawResponseTimeGraph(MessageMetric[] metrics, Func<MessageMetric, long> selector)
         {
-            long maxTime = metrics.Max(selector);
-            long minTime = metrics.Min(selector);
+            var maxTime = metrics.Max(selector);
+            var minTime = metrics.Min(selector);
 
             const int segments = 10;
 
-            long span = maxTime - minTime;
-            long increment = span / segments;
+            var span = maxTime - minTime;
+            var increment = span / segments;
 
             var histogram = (from x in metrics.Select(selector)
-                let key = ((x - minTime) * segments / span)
+                let key = (x - minTime) * segments / span
                 where key >= 0 && key < segments
                 let groupKey = key
                 group x by groupKey
                 into segment
                 orderby segment.Key
-                select new {Value = segment.Key, Count = segment.Count()}).ToList();
+                select new
+                {
+                    Value = segment.Key,
+                    Count = segment.Count()
+                }).ToList();
 
-            int maxCount = histogram.Max(x => x.Count);
+            var maxCount = histogram.Max(x => x.Count);
 
             foreach (var item in histogram)
             {
-                int barLength = item.Count * 60 / maxCount;
+                var barLength = item.Count * 60 / maxCount;
                 Console.WriteLine("{0,5}ms {2,-60} ({1,7})", (minTime + increment * item.Value) * 1000 / Stopwatch.Frequency, item.Count,
                     new string('*', barLength));
             }
@@ -128,24 +132,21 @@
             var stripes = new Task[_settings.Clients];
 
             var messageCount = _settings.MessageCount / _settings.Clients;
-            if(messageCount > int.MaxValue)
+            if (messageCount > int.MaxValue)
                 throw new IndexOutOfRangeException("Too many messages");
 
             for (var i = 0; i < _settings.Clients; i++)
             {
-                ISendEndpoint targetEndpoint = await _transport.TargetEndpoint;
-
-                stripes[i] = RunStripe(targetEndpoint, (int)messageCount);
+                stripes[i] = Task.Run(() => RunStripe((int)messageCount));
             }
 
             await Task.WhenAll(stripes).ConfigureAwait(false);
 
             _sendDuration = await _capture.SendCompleted.ConfigureAwait(false);
-
             _consumeDuration = await _capture.ConsumeCompleted.ConfigureAwait(false);
         }
 
-        async Task RunStripe(ISendEndpoint targetEndpoint, int messageCount)
+        async Task RunStripe(int messageCount)
         {
             await Task.Yield();
 
@@ -153,8 +154,8 @@
 
             for (long i = 0; i < messageCount; i++)
             {
-                Guid messageId = ids[i].ToGuid();
-                Task task = targetEndpoint.Send(new LatencyTestMessage(messageId, _payload));
+                var messageId = ids[i].ToGuid();
+                var task = _transport.Send(new LatencyTestMessage(messageId, _payload));
 
                 await _capture.Sent(messageId, task).ConfigureAwait(false);
             }

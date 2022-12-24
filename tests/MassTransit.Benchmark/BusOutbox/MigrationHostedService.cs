@@ -13,10 +13,10 @@ public class MigrationHostedService<TDbContext> :
     IHostedService
     where TDbContext : DbContext
 {
-    readonly IServiceScopeFactory _scopeFactory;
     readonly ILogger<MigrationHostedService<TDbContext>> _logger;
-    IServiceScope _scope;
+    readonly IServiceScopeFactory _scopeFactory;
     TDbContext _context;
+    IServiceScope _scope;
 
     public MigrationHostedService(IServiceScopeFactory scopeFactory, ILogger<MigrationHostedService<TDbContext>> logger)
     {

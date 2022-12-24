@@ -11,7 +11,7 @@
         readonly IMessageLatencySettings _settings;
         IBusControl _busControl;
         Uri _targetAddress;
-        Task<ISendEndpoint> _targetEndpoint;
+        ISendEndpoint _targetEndpoint;
 
         public InMemoryMessageLatencyTransport(InMemoryOptionSet optionSet, IMessageLatencySettings settings)
         {
@@ -19,14 +19,17 @@
             _settings = settings;
         }
 
-        public Task<ISendEndpoint> TargetEndpoint => _targetEndpoint;
+        public Task Send(LatencyTestMessage message)
+        {
+            return _targetEndpoint.Send(message);
+        }
 
         public async ValueTask DisposeAsync()
         {
             await _busControl.StopAsync();
         }
 
-        public async Task Start(Action<IReceiveEndpointConfigurator> callback)
+        public async Task Start(Action<IReceiveEndpointConfigurator> callback, IReportConsumerMetric reportConsumerMetric)
         {
             _busControl = Bus.Factory.CreateUsingInMemory(x =>
             {
@@ -41,7 +44,7 @@
 
             await _busControl.StartAsync();
 
-            _targetEndpoint = _busControl.GetSendEndpoint(_targetAddress);
+            _targetEndpoint = await _busControl.GetSendEndpoint(_targetAddress);
         }
     }
 }

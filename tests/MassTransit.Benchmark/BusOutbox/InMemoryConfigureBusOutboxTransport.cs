@@ -7,8 +7,8 @@ using MassTransit;
 public class InMemoryConfigureBusOutboxTransport :
     IConfigureBusOutboxTransport
 {
-    readonly InMemoryOptionSet _optionSet;
     readonly BusOutboxBenchmarkOptions _options;
+    readonly InMemoryOptionSet _optionSet;
 
     public InMemoryConfigureBusOutboxTransport(InMemoryOptionSet optionSet, BusOutboxBenchmarkOptions options)
     {

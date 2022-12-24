@@ -27,8 +27,8 @@ namespace MassTransitBenchmark.Latency
 
             _consumedMessages = new ConcurrentBag<ConsumedMessage>();
             _sentMessages = new ConcurrentDictionary<Guid, SentMessage>();
-            _sendCompleted = new TaskCompletionSource<TimeSpan>();
-            _consumeCompleted = new TaskCompletionSource<TimeSpan>();
+            _sendCompleted = new TaskCompletionSource<TimeSpan>(TaskCreationOptions.RunContinuationsAsynchronously);
+            _consumeCompleted = new TaskCompletionSource<TimeSpan>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             _stopwatch = Stopwatch.StartNew();
         }
@@ -40,7 +40,7 @@ namespace MassTransitBenchmark.Latency
         {
             _consumedMessages.Add(new ConsumedMessage(messageId, _stopwatch.ElapsedTicks));
 
-            long consumed = Interlocked.Increment(ref _consumed);
+            var consumed = Interlocked.Increment(ref _consumed);
             if (consumed == _messageCount)
                 _consumeCompleted.TrySetResult(_stopwatch.Elapsed);
 
@@ -49,30 +49,30 @@ namespace MassTransitBenchmark.Latency
 
         public async Task Sent(Guid messageId, Task sendTask, bool postSend = false)
         {
-            long sendTimestamp = _stopwatch.ElapsedTicks;
+            var sendTimestamp = _stopwatch.ElapsedTicks;
 
             await sendTask.ConfigureAwait(false);
 
-            long ackTimestamp = _stopwatch.ElapsedTicks;
+            var ackTimestamp = _stopwatch.ElapsedTicks;
 
             _sentMessages.TryAdd(messageId, new SentMessage(sendTimestamp, ackTimestamp));
 
             if (postSend)
                 return;
 
-            long sent = Interlocked.Increment(ref _sent);
+            var sent = Interlocked.Increment(ref _sent);
             if (sent == _messageCount)
                 _sendCompleted.TrySetResult(_stopwatch.Elapsed);
         }
 
         public async Task PostSend(Guid messageId)
         {
-            long ackTimestamp = _stopwatch.ElapsedTicks;
+            var ackTimestamp = _stopwatch.ElapsedTicks;
 
             _sentMessages.AddOrUpdate(messageId, _ => new SentMessage().UpdateAck(ackTimestamp),
                 (_, existing) => new SentMessage(existing.SendTimestamp, ackTimestamp));
 
-            long sent = Interlocked.Increment(ref _sent);
+            var sent = Interlocked.Increment(ref _sent);
             if (sent == _messageCount)
                 _sendCompleted.TrySetResult(_stopwatch.Elapsed);
         }

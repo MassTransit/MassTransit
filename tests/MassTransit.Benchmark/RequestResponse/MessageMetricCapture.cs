@@ -40,7 +40,7 @@ namespace MassTransitBenchmark.RequestResponse
         {
             _consumedMessages.Add(new ConsumedMessage(messageId, _stopwatch.ElapsedTicks));
 
-            long consumed = Interlocked.Increment(ref _consumed);
+            var consumed = Interlocked.Increment(ref _consumed);
             if (consumed == _messageCount)
                 _consumeCompleted.TrySetResult(_stopwatch.Elapsed);
 
@@ -50,15 +50,15 @@ namespace MassTransitBenchmark.RequestResponse
         public async Task<T> ResponseReceived<T>(Guid messageId, Task<T> requestTask)
             where T : class
         {
-            long sendTimestamp = _stopwatch.ElapsedTicks;
+            var sendTimestamp = _stopwatch.ElapsedTicks;
 
             var response = await requestTask.ConfigureAwait(false);
 
-            long responseTimestamp = _stopwatch.ElapsedTicks;
+            var responseTimestamp = _stopwatch.ElapsedTicks;
 
             _sentMessages.Add(new RequestResponseMessage(messageId, sendTimestamp, responseTimestamp));
 
-            long sent = Interlocked.Increment(ref _sent);
+            var sent = Interlocked.Increment(ref _sent);
             if (sent == _messageCount)
                 _requestCompleted.TrySetResult(_stopwatch.Elapsed);
 

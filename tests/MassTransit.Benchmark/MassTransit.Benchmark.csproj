@@ -13,6 +13,7 @@
     <ProjectReference Include="..\..\src\Transports\MassTransit.AmazonSqsTransport\MassTransit.AmazonSqsTransport.csproj" />
     <ProjectReference Include="..\..\src\Transports\MassTransit.Azure.ServiceBus.Core\MassTransit.Azure.ServiceBus.Core.csproj" />
     <ProjectReference Include="..\..\src\Transports\MassTransit.GrpcTransport\MassTransit.GrpcTransport.csproj" />
+    <ProjectReference Include="..\..\src\Transports\MassTransit.KafkaIntegration\MassTransit.KafkaIntegration.csproj" />
     <ProjectReference Include="..\..\src\Transports\MassTransit.RabbitMqTransport\MassTransit.RabbitMqTransport.csproj" />
     <ProjectReference Include="..\..\src\MassTransit\MassTransit.csproj" />
   </ItemGroup>

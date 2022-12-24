@@ -27,9 +27,7 @@
             _settings = settings;
 
             if (settings.MessageCount / settings.Clients * settings.Clients != settings.MessageCount)
-            {
                 throw new ArgumentException("The clients must be a factor of message count");
-            }
         }
 
         public void Run(CancellationToken cancellationToken = default)
@@ -110,7 +108,11 @@
                 group x by groupKey
                 into segment
                 orderby segment.Key
-                select new {Value = segment.Key, Count = segment.Count()}).ToList();
+                select new
+                {
+                    Value = segment.Key,
+                    Count = segment.Count()
+                }).ToList();
 
             var maxCount = histogram.Max(x => x.Count);
 
@@ -130,7 +132,8 @@
 
             for (var i = 0; i < _settings.Clients; i++)
             {
-                var requestClient = await _transport.GetRequestClient<RequestMessage>(_settings.RequestTimeout).ConfigureAwait(false);
+                IRequestClient<RequestMessage> requestClient =
+                    await _transport.GetRequestClient<RequestMessage>(_settings.RequestTimeout).ConfigureAwait(false);
 
                 stripes[i] = RunStripe(requestClient, _settings.MessageCount / _settings.Clients);
             }
@@ -148,7 +151,7 @@
             for (long i = 0; i < messageCount; i++)
             {
                 var messageId = NewId.NextGuid();
-                var task = client.GetResponse<ResponseMessage>(new RequestMessage(messageId));
+                Task<Response<ResponseMessage>> task = client.GetResponse<ResponseMessage>(new RequestMessage(messageId));
 
                 await _capture.ResponseReceived(messageId, task).ConfigureAwait(false);
             }

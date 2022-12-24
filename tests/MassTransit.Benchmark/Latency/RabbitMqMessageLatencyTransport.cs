@@ -3,7 +3,6 @@ namespace MassTransitBenchmark.Latency
     using System;
     using System.Threading.Tasks;
     using MassTransit;
-    using MassTransit.RabbitMqTransport;
 
 
     class RabbitMqMessageLatencyTransport :
@@ -15,7 +14,7 @@ namespace MassTransitBenchmark.Latency
         IBusControl _busControl;
         IBusControl _outboundBus;
         Uri _targetAddress;
-        Task<ISendEndpoint> _targetEndpoint;
+        ISendEndpoint _targetEndpoint;
 
         public RabbitMqMessageLatencyTransport(RabbitMqOptionSet hostSettings, IMessageLatencySettings settings)
         {
@@ -25,9 +24,12 @@ namespace MassTransitBenchmark.Latency
             _split = hostSettings.Split;
         }
 
-        public Task<ISendEndpoint> TargetEndpoint => _targetEndpoint;
+        public Task Send(LatencyTestMessage message)
+        {
+            return _targetEndpoint.Send(message);
+        }
 
-        public async Task Start(Action<IReceiveEndpointConfigurator> callback)
+        public async Task Start(Action<IReceiveEndpointConfigurator> callback, IReportConsumerMetric reportConsumerMetric)
         {
             _busControl = Bus.Factory.CreateUsingRabbitMq(x =>
             {
@@ -61,10 +63,10 @@ namespace MassTransitBenchmark.Latency
 
                 await _outboundBus.StartAsync();
 
-                _targetEndpoint = _outboundBus.GetSendEndpoint(_targetAddress);
+                _targetEndpoint = await _outboundBus.GetSendEndpoint(_targetAddress);
             }
             else
-                _targetEndpoint = _busControl.GetSendEndpoint(_targetAddress);
+                _targetEndpoint = await _busControl.GetSendEndpoint(_targetAddress);
         }
 
         public async ValueTask DisposeAsync()

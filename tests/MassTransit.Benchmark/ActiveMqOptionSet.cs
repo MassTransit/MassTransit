@@ -3,7 +3,6 @@ namespace MassTransitBenchmark
     using System;
     using Apache.NMS;
     using MassTransit;
-    using MassTransit.ActiveMqTransport;
     using MassTransit.ActiveMqTransport.Configuration;
     using NDesk.Options;
 
