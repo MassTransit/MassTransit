@@ -22,7 +22,7 @@ namespace MassTransit.Testing
         readonly bool _includeDetails;
         readonly ActivityListener _listener;
         readonly Activity? _testActivity;
-        readonly ConcurrentDictionary<string?, TraceInfo> _traces;
+        readonly ConcurrentDictionary<string, TraceInfo> _traces;
         readonly TextWriter _writer;
 
         public TestActivityListener(TextWriter writer, string? methodName, string? className, bool includeDetails)
@@ -31,7 +31,7 @@ namespace MassTransit.Testing
             _className = className;
             _includeDetails = includeDetails;
 
-            _traces = new ConcurrentDictionary<string?, TraceInfo>();
+            _traces = new ConcurrentDictionary<string, TraceInfo>();
 
             Activity.DefaultIdFormat = ActivityIdFormat.W3C;
             Activity.ForceDefaultIdFormat = true;
@@ -136,11 +136,11 @@ namespace MassTransit.Testing
 
         SpanInfo GetSpan(Activity activity)
         {
-            var traceId = activity.RootId;
+            var traceId = activity.RootId ?? "";
 
             var trace = _traces.GetOrAdd(traceId, id => new TraceInfo { StartTime = activity.StartTimeUtc });
 
-            var span = trace.Spans.GetOrAdd(activity.Id, id => new SpanInfo
+            var span = trace.Spans.GetOrAdd(activity.Id ?? "", id => new SpanInfo
             {
                 SpanId = id,
                 ParentId = activity.ParentId,
@@ -187,13 +187,13 @@ namespace MassTransit.Testing
         {
             public TraceInfo()
             {
-                Spans = new ConcurrentDictionary<string?, SpanInfo>();
+                Spans = new ConcurrentDictionary<string, SpanInfo>();
             }
 
             public DateTimeOffset StartTime { get; set; }
             public TimeSpan Duration { get; set; }
 
-            public ConcurrentDictionary<string?, SpanInfo> Spans { get; set; }
+            public ConcurrentDictionary<string, SpanInfo> Spans { get; set; }
         }
 
 

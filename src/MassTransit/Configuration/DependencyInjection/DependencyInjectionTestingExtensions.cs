@@ -158,7 +158,8 @@ namespace MassTransit
                     continue;
 
                 var type = typeof(RegistrationForConsumer<>).MakeGenericType(types[0]);
-                var register = (IRegisterTestHarness)Activator.CreateInstance(type);
+                var register = Activator.CreateInstance(type) as IRegisterTestHarness
+                    ?? throw new InvalidOperationException("Could not create consumer registration");
                 register.RegisterTestHarness(services);
             }
         }
@@ -174,13 +175,15 @@ namespace MassTransit
                 if (registration.ImplementationInstance.GetType().ClosesType(typeof(SagaStateMachineRegistration<,>), out Type[] types))
                 {
                     var type = typeof(RegistrationForSagaStateMachine<,>).MakeGenericType(types);
-                    var register = (IRegisterTestHarness)Activator.CreateInstance(type);
+                    var register = Activator.CreateInstance(type) as IRegisterTestHarness
+                        ?? throw new InvalidOperationException("Could not create consumer registration");
                     register.RegisterTestHarness(services);
                 }
                 else if (registration.ImplementationInstance.GetType().ClosesType(typeof(SagaRegistration<>), out types))
                 {
                     var type = typeof(RegistrationForSaga<>).MakeGenericType(types);
-                    var register = (IRegisterTestHarness)Activator.CreateInstance(type);
+                    var register = Activator.CreateInstance(type) as IRegisterTestHarness
+                        ?? throw new InvalidOperationException("Could not create consumer registration");
                     register.RegisterTestHarness(services);
                 }
             }
@@ -229,17 +232,19 @@ namespace MassTransit
             {
                 var frame = stackTrace.GetFrame(i);
 
-                if (!frame.HasMethod())
+                if (frame == null || !frame.HasMethod())
                     continue;
 
                 var method = frame.GetMethod();
+                if (method == null)
+                    continue;
 
                 if (method.GetCustomAttributes(false).Any(x =>
                     {
                         var name = x.GetType().Name;
                         return name.ToLower().Contains("test") || name.ToLower().Contains("fact");
                     }))
-                    return (method.Name, method.DeclaringType.Name);
+                    return (method.Name, method.DeclaringType?.Name);
             }
 
             return (null, null);
