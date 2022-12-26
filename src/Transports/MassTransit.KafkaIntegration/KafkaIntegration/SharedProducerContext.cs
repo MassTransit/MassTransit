@@ -4,17 +4,15 @@ namespace MassTransit.KafkaIntegration
     using System.Threading.Tasks;
     using Confluent.Kafka;
     using MassTransit.Middleware;
-    using Serializers;
 
 
-    public class SharedProducerContext<TKey, TValue> :
+    public class SharedProducerContext :
         ProxyPipeContext,
-        ProducerContext<TKey, TValue>
-        where TValue : class
+        ProducerContext
     {
-        readonly ProducerContext<TKey, TValue> _context;
+        readonly ProducerContext _context;
 
-        public SharedProducerContext(ProducerContext<TKey, TValue> context, CancellationToken cancellationToken)
+        public SharedProducerContext(ProducerContext context, CancellationToken cancellationToken)
             : base(context)
         {
             _context = context;
@@ -28,11 +26,9 @@ namespace MassTransit.KafkaIntegration
 
         public override CancellationToken CancellationToken { get; }
 
-        public IHeadersSerializer HeadersSerializer => _context.HeadersSerializer;
-
-        public async Task Produce(TopicPartition partition, Message<TKey, TValue> message, CancellationToken cancellationToken)
+        public Task Produce(TopicPartition partition, Message<byte[], byte[]> message, CancellationToken cancellationToken)
         {
-            await _context.Produce(partition, message, cancellationToken);
+            return _context.Produce(partition, message, cancellationToken);
         }
     }
 }

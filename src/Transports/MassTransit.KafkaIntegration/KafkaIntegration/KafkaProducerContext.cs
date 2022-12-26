@@ -6,20 +6,17 @@ namespace MassTransit.KafkaIntegration
     using Confluent.Kafka;
     using Logging;
     using MassTransit.Middleware;
-    using Serializers;
 
 
-    public class KafkaProducerContext<TKey, TValue> :
+    public class KafkaProducerContext :
         BasePipeContext,
-        ProducerContext<TKey, TValue>
-        where TValue : class
+        ProducerContext
     {
         readonly CancellationTokenSource _cancellationTokenSource;
         readonly ILogContext _logContext;
-        readonly IProducer<TKey, TValue> _producer;
+        readonly IProducer<byte[], byte[]> _producer;
 
-        public KafkaProducerContext(ProducerBuilder<TKey, TValue> producerBuilder, IHeadersSerializer headersSerializer, ILogContext logContext,
-            CancellationToken cancellationToken)
+        public KafkaProducerContext(ProducerBuilder<byte[], byte[]> producerBuilder, ILogContext logContext, CancellationToken cancellationToken)
             : base(cancellationToken)
         {
             _logContext = logContext;
@@ -27,12 +24,9 @@ namespace MassTransit.KafkaIntegration
                 .SetErrorHandler(OnError)
                 .Build();
             _cancellationTokenSource = new CancellationTokenSource();
-            HeadersSerializer = headersSerializer;
         }
 
-        public IHeadersSerializer HeadersSerializer { get; }
-
-        public Task Produce(TopicPartition partition, Message<TKey, TValue> message, CancellationToken cancellationToken)
+        public Task Produce(TopicPartition partition, Message<byte[], byte[]> message, CancellationToken cancellationToken)
         {
             return _producer.ProduceAsync(partition, message, cancellationToken);
         }
@@ -60,7 +54,7 @@ namespace MassTransit.KafkaIntegration
             }
         }
 
-        void OnError(IProducer<TKey, TValue> producer, Error error)
+        void OnError(IProducer<byte[], byte[]> producer, Error error)
         {
             EnabledLogger? logger = error.IsFatal ? _logContext.Error : _logContext.Warning;
             logger?.Log("Error ({code}): {reason} on producer: {producerName}", error.Code, error.Reason, producer.Name);

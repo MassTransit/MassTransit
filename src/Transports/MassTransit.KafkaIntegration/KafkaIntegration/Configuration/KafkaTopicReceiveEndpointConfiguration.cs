@@ -40,8 +40,7 @@ namespace MassTransit.KafkaIntegration.Configuration
             _options = new OptionsSet();
             Topic = topic;
 
-            if (!SerializationUtils.DeSerializers.IsDefaultKeyType<TKey>())
-                SetKeyDeserializer(new MassTransitJsonDeserializer<TKey>());
+            SetKeyDeserializer(DeserializerTypes.TryGet<TKey>() ?? new MassTransitJsonDeserializer<TKey>());
             SetValueDeserializer(new MassTransitJsonDeserializer<TValue>());
             SetHeadersDeserializer(headersDeserializer);
 
@@ -178,9 +177,6 @@ namespace MassTransit.KafkaIntegration.Configuration
             if (_headersDeserializer == null)
                 yield return this.Failure("HeadersDeserializer", "should not be null");
 
-            if (_keyDeserializer == null && !Cached.Contains<TKey>())
-                yield return this.Failure("KeyDeserializer", "TKey should be known type or key serializer set");
-
             if (_options.TryGetOptions(out KafkaTopicOptions options))
             {
                 foreach (var result in options.Validate())
@@ -211,7 +207,7 @@ namespace MassTransit.KafkaIntegration.Configuration
             KafkaReceiveEndpointContext<TKey, TValue> CreateContext()
             {
                 var builder = new KafkaReceiveEndpointBuilder<TKey, TValue>(_busInstance, _hostConfiguration, _endpointConfiguration, this,
-                    _headersDeserializer, _keyDeserializer ?? Cached.TryGetDeserializer<TKey>(), _valueDeserializer, CreateConsumerBuilder);
+                    _headersDeserializer, _keyDeserializer, _valueDeserializer, CreateConsumerBuilder);
                 foreach (var specification in Specifications)
                     specification.Configure(builder);
 
@@ -231,34 +227,6 @@ namespace MassTransit.KafkaIntegration.Configuration
                 () => context.ConsumerContextSupervisor, consumerPipe);
 
             return new ReceiveEndpoint(transport, context);
-        }
-    }
-
-
-    static class Cached
-    {
-        static readonly Dictionary<Type, object> _defaultDeserializers = new Dictionary<Type, object>
-        {
-            [typeof(Null)] = Deserializers.Null,
-            [typeof(Ignore)] = Deserializers.Ignore,
-            [typeof(int)] = Deserializers.Int32,
-            [typeof(long)] = Deserializers.Int64,
-            [typeof(string)] = Deserializers.Utf8,
-            [typeof(float)] = Deserializers.Single,
-            [typeof(double)] = Deserializers.Double,
-            [typeof(byte[])] = Deserializers.ByteArray
-        };
-
-        public static bool Contains<T>()
-        {
-            return _defaultDeserializers.ContainsKey(typeof(T));
-        }
-
-        public static IDeserializer<T> TryGetDeserializer<T>()
-        {
-            if (_defaultDeserializers.TryGetValue(typeof(T), out var deserializer))
-                return (IDeserializer<T>)deserializer;
-            return null;
         }
     }
 }

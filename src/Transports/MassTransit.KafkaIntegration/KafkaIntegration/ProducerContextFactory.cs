@@ -7,58 +7,53 @@ namespace MassTransit.KafkaIntegration
     using Confluent.Kafka;
     using Internals;
     using MassTransit.Configuration;
-    using Serializers;
 
 
-    public class ProducerContextFactory<TKey, TValue> :
-        IPipeContextFactory<ProducerContext<TKey, TValue>>
-        where TValue : class
+    public class ProducerContextFactory :
+        IPipeContextFactory<ProducerContext>
     {
         readonly IClientContextSupervisor _clientContextSupervisor;
-        readonly IHeadersSerializer _headersSerializer;
         readonly IHostConfiguration _hostConfiguration;
-        readonly Func<ProducerBuilder<TKey, TValue>> _producerBuilderFactory;
+        readonly Func<ProducerBuilder<byte[], byte[]>> _producerBuilderFactory;
 
         public ProducerContextFactory(IClientContextSupervisor clientContextSupervisor, IHostConfiguration hostConfiguration,
-            IHeadersSerializer headersSerializer,
-            Func<ProducerBuilder<TKey, TValue>> producerBuilderFactory)
+            Func<ProducerBuilder<byte[], byte[]>> producerBuilderFactory)
         {
             _clientContextSupervisor = clientContextSupervisor;
             _hostConfiguration = hostConfiguration;
-            _headersSerializer = headersSerializer;
             _producerBuilderFactory = producerBuilderFactory;
         }
 
-        public IPipeContextAgent<ProducerContext<TKey, TValue>> CreateContext(ISupervisor supervisor)
+        public IPipeContextAgent<ProducerContext> CreateContext(ISupervisor supervisor)
         {
-            IAsyncPipeContextAgent<ProducerContext<TKey, TValue>> asyncContext = supervisor.AddAsyncContext<ProducerContext<TKey, TValue>>();
+            IAsyncPipeContextAgent<ProducerContext> asyncContext = supervisor.AddAsyncContext<ProducerContext>();
 
             CreateProducer(asyncContext, supervisor.Stopped);
 
             return asyncContext;
         }
 
-        public IActivePipeContextAgent<ProducerContext<TKey, TValue>> CreateActiveContext(ISupervisor supervisor,
-            PipeContextHandle<ProducerContext<TKey, TValue>> context, CancellationToken cancellationToken = new CancellationToken())
+        public IActivePipeContextAgent<ProducerContext> CreateActiveContext(ISupervisor supervisor,
+            PipeContextHandle<ProducerContext> context, CancellationToken cancellationToken = new CancellationToken())
         {
             return supervisor.AddActiveContext(context, CreateSharedConnection(context.Context, cancellationToken));
         }
 
-        static async Task<ProducerContext<TKey, TValue>> CreateSharedConnection(Task<ProducerContext<TKey, TValue>> context,
+        static async Task<ProducerContext> CreateSharedConnection(Task<ProducerContext> context,
             CancellationToken cancellationToken)
         {
             return context.IsCompletedSuccessfully()
-                ? new SharedProducerContext<TKey, TValue>(context.Result, cancellationToken)
-                : new SharedProducerContext<TKey, TValue>(await context.OrCanceled(cancellationToken).ConfigureAwait(false), cancellationToken);
+                ? new SharedProducerContext(context.Result, cancellationToken)
+                : new SharedProducerContext(await context.OrCanceled(cancellationToken).ConfigureAwait(false), cancellationToken);
         }
 
-        void CreateProducer(IAsyncPipeContextAgent<ProducerContext<TKey, TValue>> asyncContext, CancellationToken cancellationToken)
+        void CreateProducer(IAsyncPipeContextAgent<ProducerContext> asyncContext, CancellationToken cancellationToken)
         {
-            Task<ProducerContext<TKey, TValue>> Create(ClientContext clientContext, CancellationToken createCancellationToken)
+            Task<ProducerContext> Create(ClientContext clientContext, CancellationToken createCancellationToken)
             {
-                ProducerBuilder<TKey, TValue> producerBuilder = _producerBuilderFactory();
-                ProducerContext<TKey, TValue> context =
-                    new KafkaProducerContext<TKey, TValue>(producerBuilder, _headersSerializer, _hostConfiguration.SendLogContext, cancellationToken);
+                ProducerBuilder<byte[], byte[]> producerBuilder = _producerBuilderFactory();
+                ProducerContext context =
+                    new KafkaProducerContext(producerBuilder, _hostConfiguration.SendLogContext, cancellationToken);
                 return Task.FromResult(context);
             }
 
