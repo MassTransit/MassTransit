@@ -11,11 +11,14 @@ namespace MassTransit.KafkaIntegration
 
 
     public class ProducerContextSupervisor<TKey, TValue> :
-        TransportPipeContextSupervisor<ProducerContext<TKey, TValue>>,
+        TransportPipeContextSupervisor<ProducerContext>,
         IProducerContextSupervisor<TKey, TValue>
         where TValue : class
     {
         readonly IHostConfiguration _hostConfiguration;
+        readonly IHeadersSerializer _headersSerializer;
+        readonly IAsyncSerializer<TKey> _keySerializer;
+        readonly IAsyncSerializer<TValue> _valueSerializer;
         readonly SendObservable _sendObservers;
         readonly ISendPipe _sendPipe;
         readonly ISerialization _serialization;
@@ -24,11 +27,15 @@ namespace MassTransit.KafkaIntegration
         public ProducerContextSupervisor(string topicName,
             ISendPipe sendPipe, SendObservable sendObservers, IClientContextSupervisor clientContextSupervisor,
             IHostConfiguration hostConfiguration, IHeadersSerializer headersSerializer,
-            Func<ProducerBuilder<TKey, TValue>> producerBuilderFactory, ISerialization serialization)
-            : base(new ProducerContextFactory<TKey, TValue>(clientContextSupervisor, hostConfiguration, headersSerializer, producerBuilderFactory))
+            IAsyncSerializer<TKey> keySerializer, IAsyncSerializer<TValue> valueSerializer,
+            Func<ProducerBuilder<byte[], byte[]>> producerBuilderFactory, ISerialization serialization)
+            : base(new ProducerContextFactory(clientContextSupervisor, hostConfiguration, producerBuilderFactory))
         {
             _sendObservers = sendObservers;
             _hostConfiguration = hostConfiguration;
+            _headersSerializer = headersSerializer;
+            _keySerializer = keySerializer;
+            _valueSerializer = valueSerializer;
             _serialization = serialization;
             _topicAddress = new KafkaTopicAddress(hostConfiguration.HostAddress, topicName);
             _sendPipe = sendPipe;
@@ -38,7 +45,8 @@ namespace MassTransit.KafkaIntegration
 
         public ITopicProducer<TKey, TValue> CreateProducer()
         {
-            var context = new KafkaTransportContext(_sendPipe, _hostConfiguration, _topicAddress, this, _serialization);
+            var context = new KafkaTransportContext(_sendPipe, _hostConfiguration, _topicAddress, this, _headersSerializer, _keySerializer, _valueSerializer,
+                _serialization);
 
             if (_sendObservers.Count > 0)
                 context.ConnectSendObserver(_sendObservers);
@@ -55,20 +63,29 @@ namespace MassTransit.KafkaIntegration
             readonly IProducerContextSupervisor<TKey, TValue> _supervisor;
 
             public KafkaTransportContext(ISendPipe sendPipe, IHostConfiguration hostConfiguration, KafkaTopicAddress topicAddress,
-                IProducerContextSupervisor<TKey, TValue> supervisor, ISerialization serialization)
+                IProducerContextSupervisor<TKey, TValue> supervisor, IHeadersSerializer headersSerializer, IAsyncSerializer<TKey> keySerializer,
+                IAsyncSerializer<TValue> valueSerializer,
+                ISerialization serialization)
                 : base(hostConfiguration, serialization)
             {
                 _hostConfiguration = hostConfiguration;
                 _supervisor = supervisor;
                 SendPipe = sendPipe;
                 TopicAddress = topicAddress;
+                HeadersSerializer = headersSerializer;
+                KeySerializer = keySerializer;
+                ValueSerializer = valueSerializer;
             }
 
             public Uri HostAddress => _hostConfiguration.HostAddress;
             public KafkaTopicAddress TopicAddress { get; }
             public ISendPipe SendPipe { get; }
+            public IHeadersSerializer HeadersSerializer { get; }
 
-            public Task Send(IPipe<ProducerContext<TKey, TValue>> pipe, CancellationToken cancellationToken)
+            public IAsyncSerializer<TValue> ValueSerializer { get; }
+            public IAsyncSerializer<TKey> KeySerializer { get; }
+
+            public Task Send(IPipe<ProducerContext> pipe, CancellationToken cancellationToken)
             {
                 return _hostConfiguration.Retry(() => _supervisor.Send(pipe, cancellationToken), cancellationToken, _supervisor.SendStopping);
             }

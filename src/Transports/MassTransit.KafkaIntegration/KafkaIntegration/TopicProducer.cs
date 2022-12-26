@@ -49,7 +49,7 @@ namespace MassTransit.KafkaIntegration
 
 
         class SendPipe :
-            IPipe<ProducerContext<TKey, TValue>>
+            IPipe<ProducerContext>
         {
             readonly CancellationToken _cancellationToken;
             readonly KafkaSendTransportContext<TKey, TValue> _context;
@@ -72,7 +72,7 @@ namespace MassTransit.KafkaIntegration
                 _initializerPipe = initializerPipe;
             }
 
-            public async Task Send(ProducerContext<TKey, TValue> context)
+            public async Task Send(ProducerContext context)
             {
                 LogContext.SetCurrentIfNull(_context.LogContext);
 
@@ -99,18 +99,11 @@ namespace MassTransit.KafkaIntegration
                     if (_context.SendObservers.Count > 0)
                         await _context.SendObservers.PreSend(sendContext).ConfigureAwait(false);
 
-                    var message = new Message<TKey, TValue>
-                    {
-                        Key = sendContext.Key,
-                        Value = sendContext.Message
-                    };
+                    var topic = new TopicPartition(_context.TopicAddress.Topic, sendContext.Partition);
+                    Message<byte[], byte[]> message = await CreateMessage(topic, sendContext).ConfigureAwait(false);
 
                     if (sendContext.SentTime.HasValue)
                         message.Timestamp = new Timestamp(sendContext.SentTime.Value);
-
-                    message.Headers = context.HeadersSerializer.Serialize(sendContext);
-
-                    var topic = new TopicPartition(_context.TopicAddress.Topic, sendContext.Partition);
 
                     await context.Produce(topic, message, sendContext.CancellationToken).ConfigureAwait(false);
 
@@ -135,6 +128,25 @@ namespace MassTransit.KafkaIntegration
                 {
                     activity?.Stop();
                 }
+            }
+
+            async Task<Message<byte[], byte[]>> CreateMessage(TopicPartition topic, KafkaSendContext<TKey, TValue> sendContext)
+            {
+                var headers = _context.HeadersSerializer.Serialize(sendContext);
+
+                Task<byte[]> keyTask = _context.KeySerializer
+                    .SerializeAsync(sendContext.Key, new SerializationContext(MessageComponentType.Key, topic.Topic, headers));
+                Task<byte[]> valueTask = _context.ValueSerializer
+                    .SerializeAsync(sendContext.Message, new SerializationContext(MessageComponentType.Value, topic.Topic, headers));
+
+                await Task.WhenAll(keyTask, valueTask).ConfigureAwait(false);
+
+                return new Message<byte[], byte[]>
+                {
+                    Key = keyTask.Result,
+                    Value = valueTask.Result,
+                    Headers = headers
+                };
             }
 
             public void Probe(ProbeContext context)

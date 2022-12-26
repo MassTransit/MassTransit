@@ -34,8 +34,7 @@ namespace MassTransit.KafkaIntegration.Configuration
             _oAuthBearerTokenRefreshHandler = oAuthBearerTokenRefreshHandler;
             _sendObservers = new SendObservable();
 
-            if (!SerializationUtils.Serializers.IsDefaultKeyType<TKey>())
-                SetKeySerializer(new MassTransitAsyncJsonSerializer<TKey>());
+            SetKeySerializer(SerializerTypes.TryGet<TKey>() ?? new MassTransitAsyncJsonSerializer<TKey>());
             SetValueSerializer(new MassTransitAsyncJsonSerializer<TValue>());
             SetHeadersSerializer(headersSerializer);
 
@@ -160,15 +159,13 @@ namespace MassTransit.KafkaIntegration.Configuration
             var sendConfiguration = new SendPipeConfiguration(busInstance.HostConfiguration.Topology.SendTopology);
             _configureSend?.Invoke(sendConfiguration.Configurator);
 
-            ProducerBuilder<TKey, TValue> CreateProducerBuilder()
+            ProducerBuilder<byte[], byte[]> CreateProducerBuilder()
             {
-                ProducerBuilder<TKey, TValue> producerBuilder = new ProducerBuilder<TKey, TValue>(producerConfig)
-                    .SetLogHandler((c, message) => busInstance.HostConfiguration.SendLogContext?.Debug?.Log(message.Message));
+                ProducerBuilder<byte[], byte[]> producerBuilder = new ProducerBuilder<byte[], byte[]>(producerConfig)
+                    .SetLogHandler((c, message) => busInstance.HostConfiguration.SendLogContext?.Debug?.Log(message.Message))
+                    .SetKeySerializer(Serializers.ByteArray)
+                    .SetValueSerializer(Serializers.ByteArray);
 
-                if (_keySerializer != null)
-                    producerBuilder.SetKeySerializer(_keySerializer);
-                if (_valueSerializer != null)
-                    producerBuilder.SetValueSerializer(_valueSerializer);
                 if (_oAuthBearerTokenRefreshHandler != null)
                     producerBuilder.SetOAuthBearerTokenRefreshHandler(_oAuthBearerTokenRefreshHandler);
                 return producerBuilder;
@@ -177,7 +174,8 @@ namespace MassTransit.KafkaIntegration.Configuration
             var sendPipe = sendConfiguration.CreatePipe();
 
             return new ProducerContextSupervisor<TKey, TValue>(TopicName, sendPipe, _sendObservers, _hostConfiguration.ClientContextSupervisor,
-                busInstance.HostConfiguration, _headersSerializer, CreateProducerBuilder, _serialization.CreateSerializerCollection());
+                busInstance.HostConfiguration, _headersSerializer, _keySerializer, _valueSerializer,
+                CreateProducerBuilder, _serialization.CreateSerializerCollection());
         }
 
         public IEnumerable<ValidationResult> Validate()

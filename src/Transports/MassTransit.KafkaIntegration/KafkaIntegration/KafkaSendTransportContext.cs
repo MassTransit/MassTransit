@@ -3,6 +3,8 @@ namespace MassTransit.KafkaIntegration
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Confluent.Kafka;
+    using Serializers;
     using Transports;
 
 
@@ -14,6 +16,10 @@ namespace MassTransit.KafkaIntegration
         KafkaTopicAddress TopicAddress { get; }
         ISendPipe SendPipe { get; }
 
-        Task Send(IPipe<ProducerContext<TKey, TValue>> pipe, CancellationToken cancellationToken);
+        IHeadersSerializer HeadersSerializer { get; }
+        IAsyncSerializer<TValue> ValueSerializer { get; }
+        IAsyncSerializer<TKey> KeySerializer { get; }
+
+        Task Send(IPipe<ProducerContext> pipe, CancellationToken cancellationToken);
     }
 }

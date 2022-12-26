@@ -4,7 +4,7 @@ namespace MassTransit.KafkaIntegration
 
 
     public interface IProducerContextSupervisor<TKey, TValue> :
-        ITransportSupervisor<ProducerContext<TKey, TValue>>,
+        ITransportSupervisor<ProducerContext>,
         IKafkaProducerFactory<TKey, TValue>
         where TValue : class
     {
