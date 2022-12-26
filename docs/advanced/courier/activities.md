@@ -23,7 +23,7 @@ An *Execute Activity* is an activity that only executes and does not support com
 public class ValidateImageActivity :
     IExecuteActivity<ValidateImageArguments>
 {
-    Task<ExecutionResult> Execute(ExecuteContext<DownloadImageArguments> context);
+    Task<ExecutionResult> Execute(ExecuteContext<ValidateImageArguments> context);
 }
 ```
 
