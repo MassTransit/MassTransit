@@ -11,5 +11,11 @@ namespace MassTransit
         {
             return harness.Scope.ServiceProvider.GetRequiredService<ITopicProducer<T>>();
         }
+
+        public static ITopicProducer<TKey, T> GetProducer<TKey, T>(this ITestHarness harness)
+            where T : class
+        {
+            return harness.Scope.ServiceProvider.GetRequiredService<ITopicProducer<TKey, T>>();
+        }
     }
 }

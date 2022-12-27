@@ -7,6 +7,7 @@ namespace MassTransit.KafkaIntegration.Tests
     using NUnit.Framework;
     using TestFramework.Sagas;
     using Testing;
+    using UnitTests;
 
 
     public class Producer_Specs
@@ -17,25 +18,27 @@ namespace MassTransit.KafkaIntegration.Tests
         public async Task Should_receive_messages()
         {
             await using var provider = new ServiceCollection()
+                .ConfigureKafkaTestOptions(options =>
+                {
+                    options.CreateTopicsIfNotExists = true;
+                    options.TopicNames = new[] { Topic };
+                })
                 .AddMassTransitTestHarness(x =>
                 {
                     x.AddTaskCompletionSource<ConsumeContext<KafkaMessage>>();
 
                     x.AddRider(r =>
                     {
-                        r.AddConsumer<KafkaMessageConsumer>();
+                        r.AddConsumer<TestKafkaMessageConsumer<KafkaMessage>>();
 
                         r.AddProducer<KafkaMessage>(Topic);
 
                         r.UsingKafka((context, k) =>
                         {
-                            k.Host("localhost:9092");
-
                             k.TopicEndpoint<KafkaMessage>(Topic, nameof(Receive_Specs), c =>
                             {
                                 c.AutoOffsetReset = AutoOffsetReset.Earliest;
-                                c.CreateIfMissing();
-                                c.ConfigureConsumer<KafkaMessageConsumer>(context);
+                                c.ConfigureConsumer<TestKafkaMessageConsumer<KafkaMessage>>(context);
                             });
                         });
                     });
@@ -66,7 +69,7 @@ namespace MassTransit.KafkaIntegration.Tests
                 });
             }), harness.CancellationToken);
 
-            ConsumeContext<KafkaMessage> result = await provider.GetRequiredService<TaskCompletionSource<ConsumeContext<KafkaMessage>>>().Task;
+            var result = await provider.GetTask<ConsumeContext<KafkaMessage>>();
 
             Assert.AreEqual("text", result.Message.Text);
             Assert.That(result.SourceAddress, Is.EqualTo(new Uri("loopback://localhost/")));
@@ -82,29 +85,50 @@ namespace MassTransit.KafkaIntegration.Tests
             Assert.That(headerType.Value, Is.EqualTo("World"));
         }
 
+
+        public interface HeaderType
+        {
+            string Key { get; }
+            string Value { get; }
+        }
+
+
+        public interface KafkaMessage
+        {
+            string Text { get; }
+        }
+    }
+
+
+    public class ProducerWithObserver_Specs
+    {
+        const string Topic = "producer-bus-observer";
+
         [Test]
         public async Task Should_use_bus_send_observer()
         {
             await using var provider = new ServiceCollection()
+                .ConfigureKafkaTestOptions(options =>
+                {
+                    options.CreateTopicsIfNotExists = true;
+                    options.TopicNames = new[] { Topic };
+                })
                 .AddMassTransitTestHarness(x =>
                 {
                     x.AddTaskCompletionSource<ConsumeContext<KafkaMessage>>();
 
                     x.AddRider(r =>
                     {
-                        r.AddConsumer<KafkaMessageConsumer>();
+                        r.AddConsumer<TestKafkaMessageConsumer<KafkaMessage>>();
 
                         r.AddProducer<KafkaMessage>(Topic);
 
                         r.UsingKafka((context, k) =>
                         {
-                            k.Host("localhost:9092");
-
                             k.TopicEndpoint<KafkaMessage>(Topic, nameof(Receive_Specs), c =>
                             {
                                 c.AutoOffsetReset = AutoOffsetReset.Earliest;
-                                c.CreateIfMissing();
-                                c.ConfigureConsumer<KafkaMessageConsumer>(context);
+                                c.ConfigureConsumer<TestKafkaMessageConsumer<KafkaMessage>>(context);
                             });
                         });
                     });
@@ -126,7 +150,7 @@ namespace MassTransit.KafkaIntegration.Tests
 
             await preSendCompletionSource.Task;
 
-            ConsumeContext<KafkaMessage> result = await provider.GetRequiredService<TaskCompletionSource<ConsumeContext<KafkaMessage>>>().Task;
+            var result = await provider.GetTask<ConsumeContext<KafkaMessage>>();
 
             Assert.AreEqual("text", result.Message.Text);
             Assert.That(result.SourceAddress, Is.EqualTo(new Uri("loopback://localhost/")));
@@ -135,10 +159,61 @@ namespace MassTransit.KafkaIntegration.Tests
             await postSendCompletionSource.Task;
         }
 
+
+        public interface KafkaMessage
+        {
+            string Text { get; }
+        }
+
+
+        class TestSendObserver :
+            ISendObserver
+        {
+            readonly TaskCompletionSource<SendContext> _postSend;
+            readonly TaskCompletionSource<SendContext> _preSend;
+
+            public TestSendObserver(TaskCompletionSource<SendContext> preSend, TaskCompletionSource<SendContext> postSend)
+            {
+                _preSend = preSend;
+                _postSend = postSend;
+            }
+
+            public Task PreSend<T>(SendContext<T> context)
+                where T : class
+            {
+                _preSend.TrySetResult(context);
+                return Task.CompletedTask;
+            }
+
+            public Task PostSend<T>(SendContext<T> context)
+                where T : class
+            {
+                _postSend.TrySetResult(context);
+                return Task.CompletedTask;
+            }
+
+            public Task SendFault<T>(SendContext<T> context, Exception exception)
+                where T : class
+            {
+                return Task.CompletedTask;
+            }
+        }
+    }
+
+
+    public class ProducerStateMachine_Specs
+    {
+        const string Topic = "producer-state-machine";
+
         [Test]
         public async Task Should_produce_from_state_machine()
         {
             await using var provider = new ServiceCollection()
+                .ConfigureKafkaTestOptions(options =>
+                {
+                    options.CreateTopicsIfNotExists = true;
+                    options.TopicNames = new[] { Topic };
+                })
                 .AddMassTransitTestHarness(x =>
                 {
                     x.AddTaskCompletionSource<ConsumeContext<KafkaMessage>>();
@@ -147,19 +222,17 @@ namespace MassTransit.KafkaIntegration.Tests
 
                     x.AddRider(r =>
                     {
-                        r.AddConsumer<KafkaMessageConsumer>();
+                        r.AddConsumer<TestKafkaMessageConsumer<KafkaMessage>>();
 
                         r.AddProducer<KafkaMessage>(Topic);
 
                         r.UsingKafka((context, k) =>
                         {
-                            k.Host("localhost:9092");
-
                             k.TopicEndpoint<KafkaMessage>(Topic, nameof(Receive_Specs), c =>
                             {
                                 c.AutoOffsetReset = AutoOffsetReset.Earliest;
-                                c.CreateIfMissing();
-                                c.ConfigureConsumer<KafkaMessageConsumer>(context);
+
+                                c.ConfigureConsumer<TestKafkaMessageConsumer<KafkaMessage>>(context);
                             });
                         });
                     });
@@ -178,34 +251,10 @@ namespace MassTransit.KafkaIntegration.Tests
                 TestKey = "ABC"
             }, harness.CancellationToken);
 
-            ConsumeContext<KafkaMessage> result = await provider.GetRequiredService<TaskCompletionSource<ConsumeContext<KafkaMessage>>>().Task;
+            var result = await provider.GetTask<ConsumeContext<KafkaMessage>>();
 
             Assert.AreEqual("text", result.Message.Text);
             Assert.AreEqual(correlationId, result.InitiatorId);
-        }
-
-
-        class KafkaMessageConsumer :
-            IConsumer<KafkaMessage>
-        {
-            readonly TaskCompletionSource<ConsumeContext<KafkaMessage>> _taskCompletionSource;
-
-            public KafkaMessageConsumer(TaskCompletionSource<ConsumeContext<KafkaMessage>> taskCompletionSource)
-            {
-                _taskCompletionSource = taskCompletionSource;
-            }
-
-            public async Task Consume(ConsumeContext<KafkaMessage> context)
-            {
-                _taskCompletionSource.TrySetResult(context);
-            }
-        }
-
-
-        public interface HeaderType
-        {
-            string Key { get; }
-            string Value { get; }
         }
 
 
@@ -243,40 +292,6 @@ namespace MassTransit.KafkaIntegration.Tests
             public State Active { get; private set; }
 
             public Event<StartTest> Started { get; private set; }
-        }
-
-
-        class TestSendObserver :
-            ISendObserver
-        {
-            readonly TaskCompletionSource<SendContext> _postSend;
-            readonly TaskCompletionSource<SendContext> _preSend;
-
-            public TestSendObserver(TaskCompletionSource<SendContext> preSend, TaskCompletionSource<SendContext> postSend)
-            {
-                _preSend = preSend;
-                _postSend = postSend;
-            }
-
-            public Task PreSend<T>(SendContext<T> context)
-                where T : class
-            {
-                _preSend.TrySetResult(context);
-                return Task.CompletedTask;
-            }
-
-            public Task PostSend<T>(SendContext<T> context)
-                where T : class
-            {
-                _postSend.TrySetResult(context);
-                return Task.CompletedTask;
-            }
-
-            public Task SendFault<T>(SendContext<T> context, Exception exception)
-                where T : class
-            {
-                return Task.CompletedTask;
-            }
         }
     }
 }

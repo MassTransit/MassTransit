@@ -7,11 +7,11 @@ namespace MassTransit.KafkaIntegration.Tests
     using Confluent.Kafka.SyncOverAsync;
     using Confluent.SchemaRegistry;
     using Confluent.SchemaRegistry.Serdes;
+    using global::UnitTests;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.DependencyInjection.Extensions;
-    using Microsoft.Extensions.Logging;
     using NUnit.Framework;
     using TestFramework;
+    using Testing;
     using UnitTests;
 
 
@@ -23,17 +23,6 @@ namespace MassTransit.KafkaIntegration.Tests
         [Test]
         public async Task Should_produce()
         {
-            TaskCompletionSource<ConsumeContext<KafkaMessage>> taskCompletionSource = GetTask<ConsumeContext<KafkaMessage>>();
-            var services = new ServiceCollection();
-            services.AddSingleton(taskCompletionSource);
-
-            services.AddSingleton<ISchemaRegistryClient>(new CachedSchemaRegistryClient(new Dictionary<string, string>
-            {
-                { "schema.registry.url", "localhost:8081" },
-            }));
-            services.TryAddSingleton<ILoggerFactory>(LoggerFactory);
-            services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
-
             static IAsyncSerializer<T> GetSerializer<T>(IServiceProvider provider)
             {
                 return new AvroSerializer<T>(provider.GetService<ISchemaRegistryClient>());
@@ -44,100 +33,73 @@ namespace MassTransit.KafkaIntegration.Tests
                 return new AvroDeserializer<T>(provider.GetService<ISchemaRegistryClient>()).AsSyncOverAsync();
             }
 
-            services.AddMassTransit(x =>
-            {
-                x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
-                x.AddRider(rider =>
+            await using var provider = new ServiceCollection()
+                .AddSingleton<ISchemaRegistryClient>(new CachedSchemaRegistryClient(new Dictionary<string, string>
                 {
-                    rider.AddConsumer<KafkaMessageConsumer>();
-
-                    rider.AddProducer<string, KafkaMessage>(Topic, context => context.MessageId.ToString(), (context, cfg) =>
+                    { "schema.registry.url", "localhost:8081" },
+                }))
+                .ConfigureKafkaTestOptions(options =>
+                {
+                    options.CreateTopicsIfNotExists = true;
+                    options.TopicNames = new[] { Topic };
+                    options.Partitions = 2;
+                })
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.AddTaskCompletionSource<ConsumeContext<KafkaMessage>>();
+                    x.AddRider(rider =>
                     {
-                        cfg.SetKeySerializer(GetSerializer<string>(context));
-                        cfg.SetValueSerializer(GetSerializer<KafkaMessage>(context));
-                    });
+                        rider.AddConsumer<TestKafkaMessageConsumer<KafkaMessage>>();
 
-                    rider.UsingKafka((context, k) =>
-                    {
-                        k.Host("localhost:9092");
-
-                        k.TopicEndpoint<string, KafkaMessage>(Topic, nameof(Producer_Specs), c =>
+                        rider.AddProducer<string, KafkaMessage>(Topic, context => context.MessageId.ToString(), (context, cfg) =>
                         {
-                            c.SetKeyDeserializer(GetDeserializer<string>(context));
-                            c.SetValueDeserializer(GetDeserializer<KafkaMessage>(context));
+                            cfg.SetKeySerializer(GetSerializer<string>(context));
+                            cfg.SetValueSerializer(GetSerializer<KafkaMessage>(context));
+                        });
 
-                            c.AutoOffsetReset = AutoOffsetReset.Earliest;
-                            c.ConfigureConsumer<KafkaMessageConsumer>(context);
-
-                            c.CreateIfMissing(m =>
+                        rider.UsingKafka((context, k) =>
+                        {
+                            k.TopicEndpoint<string, KafkaMessage>(Topic, nameof(Avro_Specs), c =>
                             {
-                                m.NumPartitions = 2;
+                                c.AutoOffsetReset = AutoOffsetReset.Earliest;
+
+                                c.SetKeyDeserializer(GetDeserializer<string>(context));
+                                c.SetValueDeserializer(GetDeserializer<KafkaMessage>(context));
+
+                                c.ConfigureConsumer<TestKafkaMessageConsumer<KafkaMessage>>(context);
                             });
                         });
                     });
-                });
-            });
+                }).BuildServiceProvider();
 
-            var provider = services.BuildServiceProvider(true);
+            var harness = provider.GetTestHarness();
 
-            var busControl = provider.GetRequiredService<IBusControl>();
+            await harness.Start();
 
-            await busControl.StartAsync(TestCancellationToken);
+            ITopicProducer<KafkaMessage> producer = harness.GetProducer<KafkaMessage>();
 
-            var serviceScope = provider.CreateScope();
+            var correlationId = NewId.NextGuid();
+            var conversationId = NewId.NextGuid();
+            var initiatorId = NewId.NextGuid();
+            var messageId = NewId.NextGuid();
+            await producer.Produce(new { Test = "text" }, Pipe.Execute<SendContext>(context =>
+                {
+                    context.CorrelationId = correlationId;
+                    context.MessageId = messageId;
+                    context.InitiatorId = initiatorId;
+                    context.ConversationId = conversationId;
+                }),
+                harness.CancellationToken);
 
-            var producer = serviceScope.ServiceProvider.GetRequiredService<ITopicProducer<KafkaMessage>>();
+            var result = await provider.GetTask<ConsumeContext<KafkaMessage>>();
 
-            try
-            {
-                var correlationId = NewId.NextGuid();
-                var conversationId = NewId.NextGuid();
-                var initiatorId = NewId.NextGuid();
-                var messageId = NewId.NextGuid();
-                await producer.Produce(new { Test = "text" }, Pipe.Execute<SendContext>(context =>
-                    {
-                        context.CorrelationId = correlationId;
-                        context.MessageId = messageId;
-                        context.InitiatorId = initiatorId;
-                        context.ConversationId = conversationId;
-                    }),
-                    TestCancellationToken);
-
-                ConsumeContext<KafkaMessage> result = await taskCompletionSource.Task;
-
-                Assert.AreEqual("text", result.Message.Test);
-                Assert.That(result.SourceAddress, Is.EqualTo(new Uri("loopback://localhost/")));
-                Assert.That(result.DestinationAddress, Is.EqualTo(new Uri($"loopback://localhost/{KafkaTopicAddress.PathPrefix}/{Topic}")));
-                Assert.That(result.MessageId, Is.EqualTo(messageId));
-                Assert.That(result.CorrelationId, Is.EqualTo(correlationId));
-                Assert.That(result.InitiatorId, Is.EqualTo(initiatorId));
-                Assert.That(result.ConversationId, Is.EqualTo(conversationId));
-            }
-            finally
-            {
-                serviceScope.Dispose();
-
-                await busControl.StopAsync(TestCancellationToken);
-
-                await provider.DisposeAsync();
-            }
-        }
-
-
-        class KafkaMessageConsumer :
-            IConsumer<KafkaMessage>
-        {
-            readonly TaskCompletionSource<ConsumeContext<KafkaMessage>> _taskCompletionSource;
-
-            public KafkaMessageConsumer(TaskCompletionSource<ConsumeContext<KafkaMessage>> taskCompletionSource)
-            {
-                _taskCompletionSource = taskCompletionSource;
-            }
-
-            public async Task Consume(ConsumeContext<KafkaMessage> context)
-            {
-                _taskCompletionSource.TrySetResult(context);
-            }
+            Assert.AreEqual("text", result.Message.Test);
+            Assert.That(result.SourceAddress, Is.EqualTo(new Uri("loopback://localhost/")));
+            Assert.That(result.DestinationAddress, Is.EqualTo(new Uri($"loopback://localhost/{KafkaTopicAddress.PathPrefix}/{Topic}")));
+            Assert.That(result.MessageId, Is.EqualTo(messageId));
+            Assert.That(result.CorrelationId, Is.EqualTo(correlationId));
+            Assert.That(result.InitiatorId, Is.EqualTo(initiatorId));
+            Assert.That(result.ConversationId, Is.EqualTo(conversationId));
         }
     }
 }

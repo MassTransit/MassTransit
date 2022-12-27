@@ -434,17 +434,17 @@ jobs:
   test-kafka:
     name: "Rider: Kafka"
     runs-on: ubuntu-latest
-    if: false # turned off for flakey
+    if: true # turned off for flakey
     services:
       zookeeper:
-        image: confluentinc/cp-zookeeper:6.0.1
+        image: confluentinc/cp-zookeeper:latest
         ports:
           - "2181:2181"
         env:
           ZOOKEEPER_CLIENT_PORT: 2181
           ZOOKEEPER_TICK_TIME: 2000
       broker:
-        image: confluentinc/cp-kafka:6.0.1
+        image: confluentinc/cp-kafka:latest
         ports:
           - "29092:29092"
           - "9092:9092"
@@ -455,20 +455,27 @@ jobs:
           KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
           KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092
           KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+          KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+          KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
+          KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 1
           KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
           KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-          KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
           KAFKA_JMX_PORT: 9101
           KAFKA_JMX_HOSTNAME: localhost
-          ALLOW_PLAINTEXT_LISTENER: "yes"
+          KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+          CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: broker:29092
+          CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
+          CONFLUENT_METRICS_ENABLE: 'false'
+        options: --health-cmd "nc -vz localhost 9092 || exit 1" --health-interval 10s --health-timeout 5s --health-retries 5
       schema-registry:
-        image: confluentinc/cp-schema-registry:6.0.1
+        image: confluentinc/cp-schema-registry:latest
         ports:
           - "8081:8081"
         env:
           SCHEMA_REGISTRY_HOST_NAME: schema-registry
           SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'broker:29092'
           SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+        options: --health-cmd "curl --fail http://localhost:8081/subjects || exit 1" --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
       - name: Check out code
         uses: actions/checkout@v3
@@ -522,7 +529,7 @@ jobs:
       - test-hangfire
       - test-quartz
       # - test-eventhub
-      # - test-kafka
+      - test-kafka
       - test-signalr
     outputs:
       version: ${{ steps.v.outputs.version }}
