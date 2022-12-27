@@ -90,6 +90,11 @@ namespace MassTransit.AzureServiceBusTransport.Topology
             set => _topicConfigurator.RequiresDuplicateDetection = value;
         }
 
+        public bool? SupportOrdering
+        {
+            set => _topicConfigurator.SupportOrdering = value;
+        }
+
         public void EnableDuplicateDetection(TimeSpan historyTimeWindow)
         {
             _topicConfigurator.EnableDuplicateDetection(historyTimeWindow);

@@ -26,6 +26,8 @@
                 yield return this.Failure("AutoDeleteOnIdle", "must be zero, or >= 5:00");
         }
 
+        public bool? SupportOrdering { get; set; }
+
         public CreateTopicOptions GetCreateTopicOptions()
         {
             var options = new CreateTopicOptions(FullPath);
@@ -53,6 +55,9 @@
 
             if (RequiresDuplicateDetection.HasValue)
                 options.RequiresDuplicateDetection = RequiresDuplicateDetection.Value;
+
+            if (SupportOrdering.HasValue)
+                options.SupportOrdering = SupportOrdering.Value;
 
             if (!string.IsNullOrWhiteSpace(UserMetadata))
                 options.UserMetadata = UserMetadata;
