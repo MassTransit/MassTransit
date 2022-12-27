@@ -3,207 +3,110 @@ namespace MassTransit.KafkaIntegration.Tests
     using System;
     using System.Threading.Tasks;
     using Confluent.Kafka;
-    using Confluent.Kafka.Admin;
+    using Metadata;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.DependencyInjection.Extensions;
-    using Microsoft.Extensions.Logging;
     using NUnit.Framework;
     using TestFramework;
+    using Testing;
+    using UnitTests;
 
 
     public class ConfigureTopology_Specs :
         InMemoryTestFixture
     {
-        const string Host = "localhost:9092";
-        const int BrokersCount = 1;
-
         [Test]
         public async Task Should_create_on_start()
         {
-            var services = new ServiceCollection();
-
             const ushort partitionCount = 2;
-            const short replicaCount = BrokersCount;
+            const short replicaCount = 1;
             const string topicName = "create-topic";
-
-            services.TryAddSingleton<ILoggerFactory>(LoggerFactory);
-            services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
-
-            services.AddMassTransit(x =>
-            {
-                x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
-                x.AddRider(rider =>
+            await using var provider = new ServiceCollection()
+                .ConfigureKafkaTestOptions()
+                .AddMassTransitTestHarness(x =>
                 {
-                    rider.UsingKafka((context, k) =>
+                    x.AddRider(rider =>
                     {
-                        k.Host(Host);
-
-                        k.TopicEndpoint<KafkaMessage>(topicName, nameof(ConfigureTopology_Specs), c =>
+                        rider.UsingKafka((_, k) =>
                         {
-                            c.CreateIfMissing(t =>
+                            k.TopicEndpoint<KafkaMessage>(topicName, nameof(ConfigureTopology_Specs), c =>
                             {
-                                t.NumPartitions = partitionCount;
-                                t.ReplicationFactor = replicaCount;
+                                c.CreateIfMissing(t =>
+                                {
+                                    t.NumPartitions = partitionCount;
+                                    t.ReplicationFactor = replicaCount;
+                                });
                             });
                         });
                     });
-                });
-            });
+                }).BuildServiceProvider();
 
-            var provider = services.BuildServiceProvider();
+            var harness = provider.GetTestHarness();
+            await harness.Start();
 
-            var busControl = provider.GetRequiredService<IBusControl>();
+            var client = provider.GetRequiredService<IAdminClient>();
 
-            var config = new AdminClientConfig {BootstrapServers = Host};
-            var client = new AdminClientBuilder(config).Build();
+            var meta = client.GetMetadata(topicName, TimeSpan.FromSeconds(10));
 
-            await busControl.StartAsync(TestCancellationToken);
+            Assert.AreEqual(1, meta.Topics.Count);
 
-            try
+            foreach (var topic in meta.Topics)
             {
-                var meta = client.GetMetadata(topicName, TimeSpan.FromSeconds(10));
+                Assert.AreEqual(partitionCount, topic.Partitions.Count);
 
-                Assert.AreEqual(1, meta.Topics.Count);
-
-                foreach (var topic in meta.Topics)
-                {
-                    Assert.AreEqual(partitionCount, topic.Partitions.Count);
-
-                    foreach (var partition in topic.Partitions)
-                    {
-                        Assert.AreEqual(replicaCount, partition.Replicas.Length);
-                    }
-                }
-
-                await Task.Delay(1000);
-            }
-            finally
-            {
-                await busControl.StopAsync(TestCancellationToken);
-
-                await provider.DisposeAsync();
-
-                try
-                {
-                    await client.DeleteTopicsAsync(new[] {topicName});
-                }
-                catch (DeleteTopicsException)
-                {
-                    //suppress
-                }
-                finally
-                {
-                    client.Dispose();
-                }
+                foreach (var partition in topic.Partitions)
+                    Assert.AreEqual(replicaCount, partition.Replicas.Length);
             }
         }
 
         [Test]
         public async Task Should_bypass_if_created()
         {
-            var services = new ServiceCollection();
-
             const ushort partitionCount = 2;
-            const short replicaCount = BrokersCount;
+            const short replicaCount = 1;
             const string topicName = "do-not-create-topic";
-            TaskCompletionSource<ConsumeContext<KafkaMessage>> taskCompletionSource = GetTask<ConsumeContext<KafkaMessage>>();
-
-            services.TryAddSingleton<ILoggerFactory>(LoggerFactory);
-            services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
-            services.AddSingleton(taskCompletionSource);
-
-            services.AddMassTransit(x =>
-            {
-                x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
-                x.AddRider(rider =>
+            await using var provider = new ServiceCollection()
+                .ConfigureKafkaTestOptions(options =>
                 {
-                    rider.AddConsumer<KafkaMessageConsumer>();
-
-                    rider.AddProducer<KafkaMessage>(topicName);
-
-                    rider.UsingKafka((context, k) =>
+                    options.CreateTopicsIfNotExists = true;
+                    options.CleanTopicsOnStart = !HostMetadataCache.IsRunningInContainer;
+                    options.TopicNames = new[] { topicName };
+                })
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.AddTaskCompletionSource<ConsumeContext<KafkaMessage>>();
+                    x.AddRider(rider =>
                     {
-                        k.Host(Host);
+                        rider.AddConsumer<TestKafkaMessageConsumer<KafkaMessage>>();
 
-                        k.TopicEndpoint<KafkaMessage>(topicName, nameof(ConfigureTopology_Specs), c =>
+                        rider.AddProducer<KafkaMessage>(topicName);
+
+                        rider.UsingKafka((context, k) =>
                         {
-                            c.AutoOffsetReset = AutoOffsetReset.Earliest;
-                            c.ConfigureConsumer<KafkaMessageConsumer>(context);
-
-                            c.CreateIfMissing(t =>
+                            k.TopicEndpoint<KafkaMessage>(topicName, nameof(ConfigureTopology_Specs), c =>
                             {
-                                t.NumPartitions = partitionCount;
-                                t.ReplicationFactor = replicaCount;
+                                c.AutoOffsetReset = AutoOffsetReset.Earliest;
+                                c.ConfigureConsumer<TestKafkaMessageConsumer<KafkaMessage>>(context);
+
+                                c.CreateIfMissing(t =>
+                                {
+                                    t.NumPartitions = partitionCount;
+                                    t.ReplicationFactor = replicaCount;
+                                });
                             });
                         });
                     });
-                });
-            });
+                }).BuildServiceProvider();
 
-            var provider = services.BuildServiceProvider();
+            var harness = provider.GetTestHarness();
+            await harness.Start();
 
-            var busControl = provider.GetRequiredService<IBusControl>();
+            ITopicProducer<KafkaMessage> producer = harness.GetProducer<KafkaMessage>();
 
-            var config = new AdminClientConfig {BootstrapServers = Host};
-            var client = new AdminClientBuilder(config).Build();
-            var specification = new TopicSpecification
-            {
-                Name = topicName,
-                NumPartitions = partitionCount,
-                ReplicationFactor = replicaCount
-            };
-            await client.CreateTopicsAsync(new[] {specification});
+            await producer.Produce(new { Text = "text" }, harness.CancellationToken);
 
-            await busControl.StartAsync(TestCancellationToken);
+            var result = await provider.GetTask<ConsumeContext<KafkaMessage>>();
 
-            var serviceScope = provider.CreateScope();
-
-            var producer = serviceScope.ServiceProvider.GetRequiredService<ITopicProducer<KafkaMessage>>();
-
-            try
-            {
-                await producer.Produce(new {Text = "text"}, TestCancellationToken);
-
-                ConsumeContext<KafkaMessage> result = await taskCompletionSource.Task;
-
-                Assert.NotNull(result);
-            }
-            finally
-            {
-                await busControl.StopAsync(TestCancellationToken);
-
-                await provider.DisposeAsync();
-
-                try
-                {
-                    await client.DeleteTopicsAsync(new[] {topicName});
-                }
-                catch (DeleteTopicsException)
-                {
-                    //suppress
-                }
-                finally
-                {
-                    client.Dispose();
-                }
-            }
-        }
-
-
-        class KafkaMessageConsumer :
-            IConsumer<KafkaMessage>
-        {
-            readonly TaskCompletionSource<ConsumeContext<KafkaMessage>> _taskCompletionSource;
-
-            public KafkaMessageConsumer(TaskCompletionSource<ConsumeContext<KafkaMessage>> taskCompletionSource)
-            {
-                _taskCompletionSource = taskCompletionSource;
-            }
-
-            public async Task Consume(ConsumeContext<KafkaMessage> context)
-            {
-                _taskCompletionSource.TrySetResult(context);
-            }
+            Assert.NotNull(result);
         }
 
 

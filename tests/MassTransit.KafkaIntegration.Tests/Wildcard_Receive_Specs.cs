@@ -9,16 +9,15 @@ namespace MassTransit.KafkaIntegration.Tests
     using Confluent.Kafka;
     using Context;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Logging;
     using NUnit.Framework;
     using Serializers;
     using TestFramework;
+    using Testing;
 
 
     public class Wildcard_Receive_Specs :
         InMemoryTestFixture
     {
-        const string Host = "localhost:9092";
         const string TopicPrefix = "Wildcard-topic-";
         static readonly Regex Topic = new($"^{TopicPrefix}[0-9]*", RegexOptions.Compiled);
 
@@ -31,25 +30,26 @@ namespace MassTransit.KafkaIntegration.Tests
             for (var i = 0; i < numTopics; i++)
                 topicNames[i] = TopicPrefix + i;
 
-            Dictionary<string, TaskCompletionSource<ConsumeContext<KafkaMessage>>> taskCompletionSource =
-                topicNames.ToDictionary(x => x, _ => GetTask<ConsumeContext<KafkaMessage>>());
-            var clientConfig = new ClientConfig { BootstrapServers = Host };
+            Dictionary<string, TaskCompletionSource<ConsumeContext<KafkaMessage>>> CreateTaskCompletionSources(IServiceProvider provider)
+            {
+                var harness = provider.GetRequiredService<ITestHarness>();
+                return topicNames.ToDictionary(x => x, _ => harness.GetTask<ConsumeContext<KafkaMessage>>());
+            }
 
             await using var provider = new ServiceCollection()
-                .AddSingleton<ILoggerFactory>(LoggerFactory)
-                .AddSingleton(taskCompletionSource)
-                .AddSingleton(new TopicCreator(clientConfig))
-                .AddSingleton(typeof(ILogger<>), typeof(Logger<>))
-                .AddMassTransit(x =>
+                .AddSingleton(CreateTaskCompletionSources)
+                .ConfigureKafkaTestOptions(options =>
+                {
+                    options.CreateTopicsIfNotExists = true;
+                    options.TopicNames = topicNames;
+                })
+                .AddMassTransitTestHarness(x =>
                 {
                     x.AddRider(r =>
                     {
                         r.AddConsumer<KafkaMessageConsumer>();
-
                         r.UsingKafka((context, k) =>
                         {
-                            k.Host(Host);
-
                             k.TopicEndpoint<KafkaMessage>(Topic.ToString(), nameof(Wildcard_Receive_Specs), c =>
                             {
                                 c.AutoOffsetReset = AutoOffsetReset.Earliest;
@@ -57,53 +57,36 @@ namespace MassTransit.KafkaIntegration.Tests
                             });
                         });
                     });
-
-                    x.UsingInMemory();
                 }).BuildServiceProvider();
 
-            var topicCreator = provider.GetRequiredService<TopicCreator>();
+            var harness = provider.GetTestHarness();
+            await harness.Start();
 
-            var busControl = provider.GetRequiredService<IBusControl>();
+            using IProducer<Null, KafkaMessage> p = new ProducerBuilder<Null, KafkaMessage>(new ProducerConfig(provider.GetRequiredService<ClientConfig>()))
+                .SetKeySerializer(Serializers.Null)
+                .SetValueSerializer(new MassTransitJsonSerializer<KafkaMessage>())
+                .Build();
 
-            try
+            var kafkaMessage = new KafkaMessageClass("test");
+            var sendContext = new MessageSendContext<KafkaMessage>(kafkaMessage);
+            var message = new Message<Null, KafkaMessage>
             {
-                await topicCreator.CreateTopics(2, 1, topicNames);
+                Value = kafkaMessage,
+                Headers = DictionaryHeadersSerialize.Serializer.Serialize(sendContext)
+            };
 
-                await busControl.StartAsync(TestCancellationToken);
+            foreach (var topicName in topicNames)
+                await p.ProduceAsync(topicName, message);
 
-                using IProducer<Null, KafkaMessage> p = new ProducerBuilder<Null, KafkaMessage>(new ProducerConfig(clientConfig))
-                    .SetKeySerializer(Serializers.Null)
-                    .SetValueSerializer(new MassTransitJsonSerializer<KafkaMessage>())
-                    .Build();
+            p.Flush();
+            p.Dispose();
 
-                var kafkaMessage = new KafkaMessageClass("test");
-                var sendContext = new MessageSendContext<KafkaMessage>(kafkaMessage);
-                var message = new Message<Null, KafkaMessage>
-                {
-                    Value = kafkaMessage,
-                    Headers = DictionaryHeadersSerialize.Serializer.Serialize(sendContext)
-                };
-
-                foreach (var topicName in topicNames)
-                    await p.ProduceAsync(topicName, message);
-
-                p.Flush();
-                p.Dispose();
-
-                foreach ((var topic, TaskCompletionSource<ConsumeContext<KafkaMessage>> value) in taskCompletionSource)
-                {
-                    ConsumeContext<KafkaMessage> result = await value.Task;
-
-                    Assert.That(result.DestinationAddress, Is.EqualTo(new Uri($"loopback://localhost/{KafkaTopicAddress.PathPrefix}/{topic}")));
-                }
-            }
-            finally
+            foreach ((var topic, TaskCompletionSource<ConsumeContext<KafkaMessage>> value) in provider
+                         .GetRequiredService<Dictionary<string, TaskCompletionSource<ConsumeContext<KafkaMessage>>>>())
             {
-                await busControl.StopAsync(TestCancellationToken);
+                ConsumeContext<KafkaMessage> result = await value.Task;
 
-                await topicCreator.DisposeAsync();
-
-                await provider.DisposeAsync();
+                Assert.That(result.DestinationAddress, Is.EqualTo(new Uri($"loopback://localhost/{KafkaTopicAddress.PathPrefix}/{topic}")));
             }
         }
 
