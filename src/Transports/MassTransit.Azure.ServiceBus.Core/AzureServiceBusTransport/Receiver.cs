@@ -53,6 +53,8 @@
                 ServiceBusException { Reason: ServiceBusFailureReason.MessageLockLost } => false,
                 ServiceBusException { Reason: ServiceBusFailureReason.SessionLockLost } => false,
                 ServiceBusException { Reason: ServiceBusFailureReason.ServiceCommunicationProblem } => true,
+                ServiceBusException { Reason: ServiceBusFailureReason.MessagingEntityNotFound } => true,
+                ServiceBusException { Reason: ServiceBusFailureReason.MessagingEntityDisabled } => true,
                 ServiceBusException { IsTransient: true } => false,
                 _ => true
             };
