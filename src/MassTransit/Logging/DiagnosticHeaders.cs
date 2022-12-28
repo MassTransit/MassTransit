@@ -42,17 +42,17 @@ namespace MassTransit.Logging
         public static class Messaging
         {
             public const string BodyLength = "messaging.message_payload_size_bytes";
-            public const string ConversationId = "messaging.conversation_id";
+            public const string ConversationId = "messaging.message.conversation_id";
             public const string Destination = "messaging.destination";
-            public const string DestinationKind = "messaging.destination_kind";
-            public const string TransportMessageId = "messaging.message_id";
+            public const string DestinationKind = "messaging.destination.kind";
+            public const string TransportMessageId = "messaging.message.id";
             public const string Operation = "messaging.operation";
             public const string System = "messaging.system";
 
 
             public static class RabbitMq
             {
-                public const string RoutingKey = "messaging.rabbitmq.routing_key";
+                public const string RoutingKey = "messaging.rabbitmq.destination.routing_key";
             }
         }
     }
