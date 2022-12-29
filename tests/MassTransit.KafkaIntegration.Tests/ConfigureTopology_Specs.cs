@@ -68,7 +68,6 @@ namespace MassTransit.KafkaIntegration.Tests
                 .ConfigureKafkaTestOptions(options =>
                 {
                     options.CreateTopicsIfNotExists = true;
-                    options.CleanTopicsOnStart = !HostMetadataCache.IsRunningInContainer;
                     options.TopicNames = new[] { topicName };
                 })
                 .AddMassTransitTestHarness(x =>
