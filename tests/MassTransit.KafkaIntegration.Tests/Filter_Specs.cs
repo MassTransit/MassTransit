@@ -8,7 +8,6 @@ namespace MassTransit.KafkaIntegration.Tests
     using Microsoft.Extensions.Logging;
     using NUnit.Framework;
     using Testing;
-    using UnitTests;
 
 
     public class Using_a_consumer_filter

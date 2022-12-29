@@ -13,7 +13,6 @@ namespace MassTransit.KafkaIntegration.Tests
     using Serializers;
     using TestFramework;
     using Testing;
-    using UnitTests;
 
 
     public class Receive_Specs :

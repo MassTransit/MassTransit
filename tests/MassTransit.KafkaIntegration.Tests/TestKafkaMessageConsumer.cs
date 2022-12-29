@@ -1,4 +1,4 @@
-namespace MassTransit.KafkaIntegration.Tests.UnitTests
+namespace MassTransit.KafkaIntegration.Tests
 {
     using System.Threading.Tasks;
 

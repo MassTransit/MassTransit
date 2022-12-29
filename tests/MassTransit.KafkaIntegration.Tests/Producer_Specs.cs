@@ -7,7 +7,6 @@ namespace MassTransit.KafkaIntegration.Tests
     using NUnit.Framework;
     using TestFramework.Sagas;
     using Testing;
-    using UnitTests;
 
 
     public class Producer_Specs

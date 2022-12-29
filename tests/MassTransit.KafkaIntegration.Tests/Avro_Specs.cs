@@ -3,16 +3,15 @@ namespace MassTransit.KafkaIntegration.Tests
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using AvroContracts.AvroContracts;
     using Confluent.Kafka;
     using Confluent.Kafka.SyncOverAsync;
     using Confluent.SchemaRegistry;
     using Confluent.SchemaRegistry.Serdes;
-    using global::UnitTests;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
     using TestFramework;
     using Testing;
-    using UnitTests;
 
 
     public class Avro_Specs :

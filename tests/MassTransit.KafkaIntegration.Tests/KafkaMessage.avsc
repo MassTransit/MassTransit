@@ -1,5 +1,5 @@
 {
-  "namespace": "UnitTests",
+  "namespace": "MassTransit.KafkaIntegration.Tests.AvroContracts",
   "type": "record",
   "doc": "A simple Kafka message",
   "name": "KafkaMessage",
