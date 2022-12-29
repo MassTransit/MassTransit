@@ -71,17 +71,20 @@ namespace MassTransit.KafkaIntegration.Tests
                 try
                 {
                     await producer.Produce(new { Index = i }, harness.CancellationToken);
-                    await taskCompletionSources[i].OrCanceled(harness.CancellationToken);
+                    await taskCompletionSources[i];
                 }
                 finally
                 {
                     scope.Dispose();
+                    
+                    if (i < numOfTries - 1)
+                    {
+                        await busControl.StopAsync(harness.CancellationToken);
 
-                    await busControl.StopAsync(harness.CancellationToken);
+                        await Task.Delay(200, harness.CancellationToken);
 
-                    await Task.Delay(100, harness.CancellationToken);
-
-                    await busControl.StartAsync(harness.CancellationToken);
+                        await busControl.StartAsync(harness.CancellationToken);
+                    }
                 }
             }
         }
