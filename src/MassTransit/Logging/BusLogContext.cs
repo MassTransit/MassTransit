@@ -76,7 +76,7 @@ namespace MassTransit.Logging
                 return null;
 
             activity.SetTag(DiagnosticHeaders.Messaging.System, transportContext.ActivitySystem);
-            activity.SetTag(DiagnosticHeaders.Messaging.Destination, transportContext.ActivityDestination);
+            activity.SetTag(DiagnosticHeaders.Messaging.DestinationName, transportContext.ActivityDestination);
             activity.SetTag(DiagnosticHeaders.Messaging.Operation, "send");
 
             return PopulateSendActivity<T>(context, activity, tags);
@@ -119,7 +119,7 @@ namespace MassTransit.Logging
 
             if (activity.IsAllDataRequested)
             {
-                activity.SetTag(DiagnosticHeaders.Messaging.Destination, endpointName);
+                activity.SetTag(DiagnosticHeaders.Messaging.DestinationName, endpointName);
                 activity.SetTag(DiagnosticHeaders.Messaging.Operation, "receive");
                 activity.SetTag(DiagnosticHeaders.InputAddress, inputAddress);
 
