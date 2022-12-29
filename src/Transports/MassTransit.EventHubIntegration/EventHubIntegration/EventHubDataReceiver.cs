@@ -34,7 +34,7 @@
             _dispatcher = context.CreateReceivePipeDispatcher();
             _dispatcher.ZeroActivity += HandleDeliveryComplete;
 
-            _client = processorContext.CreateClient(HandleError);
+            _client = processorContext.GetClient(HandleError);
 
             _client.ProcessEventAsync += HandleMessage;
 

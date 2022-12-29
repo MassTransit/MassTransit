@@ -14,27 +14,39 @@ namespace MassTransit.EventHubIntegration
         ProcessorContext
     {
         readonly IProcessorLockContext _lockContext;
-        readonly Func<EventProcessorClient> _clientFactory;
+        readonly EventProcessorClient _client;
 
         public EventHubProcessorContext(IHostConfiguration hostConfiguration, ReceiveSettings receiveSettings,
-            Func<EventProcessorClient> clientFactory, Func<PartitionInitializingEventArgs, Task> partitionInitializingHandler,
+            EventProcessorClient client, Func<PartitionInitializingEventArgs, Task> partitionInitializingHandler,
             Func<PartitionClosingEventArgs, Task> partitionClosingHandler, CancellationToken cancellationToken)
             : base(cancellationToken)
         {
             var lockContext = new ProcessorLockContext(hostConfiguration, receiveSettings);
 
-            _clientFactory = () => CreateClient(clientFactory, lockContext, partitionInitializingHandler, partitionClosingHandler);
+            client.PartitionInitializingAsync += async args =>
+            {
+                await lockContext.OnPartitionInitializing(args).ConfigureAwait(false);
+                if (partitionInitializingHandler != null)
+                    await partitionInitializingHandler(args).ConfigureAwait(false);
+            };
+            client.PartitionClosingAsync += async args =>
+            {
+                if (partitionClosingHandler != null)
+                    await partitionClosingHandler(args).ConfigureAwait(false);
+
+                await lockContext.OnPartitionClosing(args).ConfigureAwait(false);
+            };
 
             ReceiveSettings = receiveSettings;
             _lockContext = lockContext;
+            _client = client;
         }
 
         public event Func<ProcessErrorEventArgs, Task> ProcessError;
 
-        public EventProcessorClient CreateClient(Func<ProcessErrorEventArgs, Task> onError)
+        public EventProcessorClient GetClient(Func<ProcessErrorEventArgs, Task> onError)
         {
-            var client = _clientFactory();
-            client.ProcessErrorAsync += async args =>
+            _client.ProcessErrorAsync += async args =>
             {
                 if (ProcessError != null)
                     await ProcessError.Invoke(args).ConfigureAwait(false);
@@ -42,15 +54,10 @@ namespace MassTransit.EventHubIntegration
                 if (onError != null)
                     await onError.Invoke(args).ConfigureAwait(false);
             };
-            return client;
+            return _client;
         }
 
         public ReceiveSettings ReceiveSettings { get; }
-
-        public EventProcessorClient CreateClient()
-        {
-            return _clientFactory();
-        }
 
         public Task Pending(ProcessEventArgs eventArgs)
         {
@@ -65,26 +72,6 @@ namespace MassTransit.EventHubIntegration
         public Task Complete(ProcessEventArgs eventArgs)
         {
             return _lockContext.Complete(eventArgs);
-        }
-
-        static EventProcessorClient CreateClient(Func<EventProcessorClient> clientFactory, ProcessorLockContext lockContext,
-            Func<PartitionInitializingEventArgs, Task> partitionInitializingHandler, Func<PartitionClosingEventArgs, Task> partitionClosingHandler)
-        {
-            var client = clientFactory();
-            client.PartitionInitializingAsync += async args =>
-            {
-                await lockContext.OnPartitionInitializing(args).ConfigureAwait(false);
-                if (partitionInitializingHandler != null)
-                    await partitionInitializingHandler(args).ConfigureAwait(false);
-            };
-            client.PartitionClosingAsync += async args =>
-            {
-                if (partitionClosingHandler != null)
-                    await partitionClosingHandler(args).ConfigureAwait(false);
-
-                await lockContext.OnPartitionClosing(args).ConfigureAwait(false);
-            };
-            return client;
         }
 
         public ValueTask DisposeAsync()

@@ -29,9 +29,9 @@ namespace MassTransit.EventHubIntegration
             remove => _context.ProcessError -= value;
         }
 
-        public EventProcessorClient CreateClient(Func<ProcessErrorEventArgs, Task> onError)
+        public EventProcessorClient GetClient(Func<ProcessErrorEventArgs, Task> onError)
         {
-            return _context.CreateClient(onError);
+            return _context.GetClient(onError);
         }
 
         public Task Pending(ProcessEventArgs eventArgs)

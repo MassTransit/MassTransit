@@ -61,8 +61,9 @@ namespace MassTransit.EventHubIntegration
         {
             Task<ProcessorContext> Create(ConnectionContext connectionContext, CancellationToken createCancellationToken)
             {
+                var client = _clientFactory();
                 ProcessorContext context = new EventHubProcessorContext(_hostConfiguration, _receiveSettings,
-                    _clientFactory, _partitionInitializingHandler, _partitionClosingHandler, createCancellationToken);
+                    client, _partitionInitializingHandler, _partitionClosingHandler, createCancellationToken);
                 return Task.FromResult(context);
             }
 
