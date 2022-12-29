@@ -15,6 +15,8 @@ namespace MassTransit
         bool IsSupportedMessageType<T>()
             where T : class;
 
+        bool IsSupportedMessageType(Type messageType);
+
         bool TryGetMessage<T>(out T? message)
             where T : class;
 

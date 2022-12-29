@@ -33,6 +33,15 @@ namespace MassTransit.Serialization
                 || SupportedMessageTypes.Any(x => typeUrn.Equals(x, StringComparison.OrdinalIgnoreCase));
         }
 
+        public override bool IsSupportedMessageType(Type messageType)
+        {
+            var typeUrn = MessageUrn.ForTypeString(messageType);
+
+            return _options.HasFlag(RawSerializerOptions.AnyMessageType)
+                || SupportedMessageTypes.Length == 0
+                || SupportedMessageTypes.Any(x => typeUrn.Equals(x, StringComparison.OrdinalIgnoreCase));
+        }
+
         public override IMessageSerializer GetMessageSerializer()
         {
             return new NewtonsoftRawXmlBodyMessageSerializer(_message, _contentType, _options);

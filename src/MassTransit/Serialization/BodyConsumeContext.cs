@@ -3,7 +3,6 @@ namespace MassTransit.Serialization
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Reflection;
     using Context;
     using Metadata;
@@ -43,9 +42,7 @@ namespace MassTransit.Serialization
                     return existing != null;
             }
 
-            var typeUrn = MessageUrn.ForTypeString(messageType);
-
-            return SerializerContext.SupportedMessageTypes.Any(x => typeUrn.Equals(x, StringComparison.OrdinalIgnoreCase));
+            return SerializerContext.IsSupportedMessageType(messageType);
         }
 
         public override bool TryGetMessage<T>(out ConsumeContext<T>? message)

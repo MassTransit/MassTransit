@@ -4,7 +4,7 @@ namespace MassTransit.KafkaIntegration
     using Confluent.Kafka;
 
 
-    public class KafkaHeaderAdapter :
+    public class KafkaMessageContext :
         MessageContext
     {
         readonly ReceiveContext _receiveContext;
@@ -16,22 +16,22 @@ namespace MassTransit.KafkaIntegration
         DateTime? _sentTime;
         Uri _sourceAddress;
 
-        public KafkaHeaderAdapter(ConsumeResult<byte[], byte[]> result, ReceiveContext receiveContext)
+        public KafkaMessageContext(ConsumeResult<byte[], byte[]> result, ReceiveContext receiveContext)
         {
             _result = result;
             _receiveContext = receiveContext;
         }
 
         public Guid? MessageId => _messageId ??= Headers.Get<Guid>(nameof(MessageId));
-        public Guid? RequestId { get; } = default;
+        public Guid? RequestId => default;
         public Guid? CorrelationId => _correlationId ??= Headers.Get<Guid>(nameof(CorrelationId));
         public Guid? ConversationId => _conversationId ??= Headers.Get<Guid>(nameof(ConversationId));
         public Guid? InitiatorId => _initiatorId ??= Headers.Get<Guid>(nameof(InitiatorId));
-        public DateTime? ExpirationTime { get; } = default;
+        public DateTime? ExpirationTime => default;
         public Uri SourceAddress => _sourceAddress ??= GetEndpointAddress(nameof(SourceAddress));
         public Uri DestinationAddress => _receiveContext.InputAddress;
-        public Uri ResponseAddress { get; } = default;
-        public Uri FaultAddress { get; } = default;
+        public Uri ResponseAddress => default;
+        public Uri FaultAddress => default;
         public DateTime? SentTime => _sentTime ??= _result.Message.Timestamp.UtcDateTime;
         public MassTransit.Headers Headers => _receiveContext.TransportHeaders;
         public HostInfo Host => default;

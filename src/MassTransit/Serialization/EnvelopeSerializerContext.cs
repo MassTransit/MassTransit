@@ -88,5 +88,12 @@ namespace MassTransit.Serialization
 
             return SupportedMessageTypes.Any(x => typeUrn.Equals(x, StringComparison.OrdinalIgnoreCase));
         }
+
+        public virtual bool IsSupportedMessageType(Type messageType)
+        {
+            var typeUrn = MessageUrn.ForTypeString(messageType);
+
+            return SupportedMessageTypes.Any(x => typeUrn.Equals(x, StringComparison.OrdinalIgnoreCase));
+        }
     }
 }

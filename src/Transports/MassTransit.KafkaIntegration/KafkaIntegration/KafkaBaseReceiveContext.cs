@@ -13,37 +13,39 @@
         ReceiveLockContext
         where TValue : class
     {
-        readonly ConsumeResult<byte[], byte[]> _result;
-        readonly KafkaReceiveEndpointContext<TKey, TValue> _receiveEndpointContext;
+        readonly KafkaReceiveEndpointContext<TKey, TValue> _context;
+        readonly Lazy<TKey> _key;
         readonly IConsumerLockContext _lockContext;
-        readonly Lazy<TKey> _keyLazy;
+        readonly ConsumeResult<byte[], byte[]> _result;
         IHeaderProvider _headerProvider;
 
-        public KafkaReceiveContext(ConsumeResult<byte[], byte[]> result, KafkaReceiveEndpointContext<TKey, TValue> receiveEndpointContext,
-            IConsumerLockContext lockContext)
-            : base(false, receiveEndpointContext)
+        public KafkaReceiveContext(ConsumeResult<byte[], byte[]> result, KafkaReceiveEndpointContext<TKey, TValue> context, IConsumerLockContext lockContext)
+            : base(false, context)
         {
             _result = result;
-            _receiveEndpointContext = receiveEndpointContext;
+            _context = context;
             _lockContext = lockContext;
 
-            Body = new NotSupportedMessageBody();
-            InputAddress = receiveEndpointContext.NormalizeAddress(new Uri($"topic:{_result.Topic}"));
-            GroupId = receiveEndpointContext.GroupId;
+            InputAddress = context.NormalizeAddress(new Uri($"topic:{_result.Topic}"));
 
-            var consumeContext = new KafkaConsumeContext<TKey, TValue>(this, _result, receiveEndpointContext.ValueDeserializer);
-            _keyLazy = new Lazy<TKey>(Deserialize);
+            _key = new Lazy<TKey>(() => result.Message.DeserializeKey(result.Topic, _context.KeyDeserializer));
+
+            var messageContext = new KafkaMessageContext(_result, this);
+
+            var serializerContext = new KafkaSerializationContext<TValue>(_result, context.ValueDeserializer, messageContext);
+
+            var consumeContext = new KafkaConsumeContext<TKey, TValue>(this, serializerContext);
 
             AddOrUpdatePayload<ConsumeContext>(() => consumeContext, existing => consumeContext);
         }
 
-        protected override IHeaderProvider HeaderProvider =>
-            _headerProvider ??= _receiveEndpointContext.HeadersDeserializer.Deserialize(_result.Message.Headers);
+        protected override IHeaderProvider HeaderProvider => _headerProvider ??= _context.HeadersDeserializer.Deserialize(_result.Message.Headers);
 
-        public override MessageBody Body { get; }
-        public string GroupId { get; }
+        public override MessageBody Body => new NotSupportedMessageBody();
 
-        public TKey Key => _keyLazy.Value;
+        public string GroupId => _context.GroupId;
+
+        public TKey Key => _key.Value;
 
         public string Topic => _result.Topic;
 
@@ -66,13 +68,6 @@
         public Task ValidateLockStatus()
         {
             return Task.CompletedTask;
-        }
-
-        TKey Deserialize()
-        {
-            ReadOnlySpan<byte> span = _result.Message.Key?.Length > 0 ? new ReadOnlySpan<byte>(_result.Message.Key) : ReadOnlySpan<byte>.Empty;
-            var context = new SerializationContext(MessageComponentType.Key, _result.Topic, _result.Message.Headers);
-            return _receiveEndpointContext.KeyDeserializer.Deserialize(span, span.IsEmpty, context);
         }
     }
 }
