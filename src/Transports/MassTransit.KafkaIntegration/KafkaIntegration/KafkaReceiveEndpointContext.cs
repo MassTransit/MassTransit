@@ -10,6 +10,8 @@ namespace MassTransit.KafkaIntegration
         ReceiveEndpointContext
         where TValue : class
     {
+        string GroupId { get; }
+
         IHeadersDeserializer HeadersDeserializer { get; }
         IDeserializer<TKey> KeyDeserializer { get; }
         IDeserializer<TValue> ValueDeserializer { get; }

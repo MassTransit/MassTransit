@@ -29,6 +29,7 @@
 
             Body = new NotSupportedMessageBody();
             InputAddress = receiveEndpointContext.NormalizeAddress(new Uri($"topic:{_result.Topic}"));
+            GroupId = receiveEndpointContext.GroupId;
 
             var consumeContext = new KafkaConsumeContext<TKey, TValue>(this, _result, receiveEndpointContext.ValueDeserializer);
             _keyLazy = new Lazy<TKey>(Deserialize);
@@ -40,6 +41,7 @@
             _headerProvider ??= _receiveEndpointContext.HeadersDeserializer.Deserialize(_result.Message.Headers);
 
         public override MessageBody Body { get; }
+        public string GroupId { get; }
 
         public TKey Key => _keyLazy.Value;
 
