@@ -463,4 +463,86 @@ namespace MassTransit.KafkaIntegration.Tests
         {
         }
     }
+
+
+    public class MultiGroupReceive_Specs :
+        InMemoryTestFixture
+    {
+        const string Topic = "multi-group";
+
+        [Test]
+        public async Task Should_receive_for_multiple_groups()
+        {
+            var groups = new string[2];
+            for (var i = 0; i < groups.Length; i++)
+                groups[i] = $"{nameof(MultiGroupReceive_Specs)}_{i + 1}";
+
+            Dictionary<string, TaskCompletionSource<ConsumeContext<KafkaMessage>>> GetTasks(IServiceProvider serviceProvider)
+            {
+                var harness = serviceProvider.GetTestHarness();
+                return groups.ToDictionary(x => x, _ => harness.GetTask<ConsumeContext<KafkaMessage>>());
+            }
+
+            await using var provider = new ServiceCollection()
+                .AddSingleton(GetTasks)
+                .ConfigureKafkaTestOptions(options =>
+                {
+                    options.CreateTopicsIfNotExists = true;
+                    options.TopicNames = new[] { Topic };
+                })
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.AddRider(rider =>
+                    {
+                        rider.AddConsumer<KafkaMessageConsumer>();
+                        rider.AddProducer<KafkaMessage>(Topic);
+
+                        rider.UsingKafka((context, k) =>
+                        {
+                            foreach (var group in groups)
+                            {
+                                k.TopicEndpoint<KafkaMessage>(Topic, group, c =>
+                                {
+                                    c.AutoOffsetReset = AutoOffsetReset.Earliest;
+
+                                    c.ConfigureConsumer<KafkaMessageConsumer>(context);
+                                });
+                            }
+                        });
+                    });
+                }).BuildServiceProvider();
+            var harness = provider.GetTestHarness();
+
+            await harness.Start();
+            ITopicProducer<KafkaMessage> producer = harness.GetProducer<KafkaMessage>();
+            await producer.Produce(new { }, harness.CancellationToken);
+
+            var tasks = provider.GetRequiredService<Dictionary<string, TaskCompletionSource<ConsumeContext<KafkaMessage>>>>();
+
+            await Task.WhenAll(tasks.Values.Select(x => x.Task));
+        }
+
+
+        public interface KafkaMessage
+        {
+        }
+
+
+        class KafkaMessageConsumer :
+            IConsumer<KafkaMessage>
+        {
+            readonly Dictionary<string, TaskCompletionSource<ConsumeContext<KafkaMessage>>> _taskCompletionSource;
+
+            public KafkaMessageConsumer(Dictionary<string, TaskCompletionSource<ConsumeContext<KafkaMessage>>> taskCompletionSource)
+            {
+                _taskCompletionSource = taskCompletionSource;
+            }
+
+            public async Task Consume(ConsumeContext<KafkaMessage> context)
+            {
+                if (context.TryGetPayload<KafkaConsumeContext>(out var ctx))
+                    _taskCompletionSource[ctx.GroupId].TrySetResult(context);
+            }
+        }
+    }
 }

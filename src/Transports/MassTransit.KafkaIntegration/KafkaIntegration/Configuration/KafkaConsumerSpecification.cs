@@ -33,6 +33,8 @@ namespace MassTransit.KafkaIntegration.Configuration
             _configure = configure;
             _oAuthBearerTokenRefreshHandler = oAuthBearerTokenRefreshHandler;
             EndpointName = $"{KafkaTopicAddress.PathPrefix}/{_topicName}";
+            if (!string.IsNullOrWhiteSpace(_consumerConfig.GroupId))
+                EndpointName = $"{EndpointName}/{_consumerConfig.GroupId}";
         }
 
         public string EndpointName { get; }

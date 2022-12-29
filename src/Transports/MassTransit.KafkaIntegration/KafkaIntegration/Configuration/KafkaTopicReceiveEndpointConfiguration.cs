@@ -206,8 +206,8 @@ namespace MassTransit.KafkaIntegration.Configuration
 
             KafkaReceiveEndpointContext<TKey, TValue> CreateContext()
             {
-                var builder = new KafkaReceiveEndpointBuilder<TKey, TValue>(_busInstance, _hostConfiguration, _endpointConfiguration, this,
-                    _headersDeserializer, _keyDeserializer, _valueDeserializer, CreateConsumerBuilder);
+                var builder = new KafkaReceiveEndpointBuilder<TKey, TValue>(_busInstance, _hostConfiguration, consumerConfig.GroupId, _endpointConfiguration,
+                    this, _headersDeserializer, _keyDeserializer, _valueDeserializer, CreateConsumerBuilder);
                 foreach (var specification in Specifications)
                     specification.Configure(builder);
 

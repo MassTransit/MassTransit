@@ -12,6 +12,7 @@ namespace MassTransit.KafkaIntegration
     {
         readonly IBusInstance _busInstance;
         readonly IKafkaHostConfiguration _hostConfiguration;
+        readonly string _groupId;
         readonly IReceiveEndpointConfiguration _endpointConfiguration;
         readonly ReceiveSettings _receiveSetting;
         readonly IHeadersDeserializer _headersDeserializer;
@@ -20,13 +21,14 @@ namespace MassTransit.KafkaIntegration
         readonly ConsumerBuilderFactory _consumerBuilderFactory;
 
         public KafkaReceiveEndpointBuilder(IBusInstance busInstance, IKafkaHostConfiguration hostConfiguration,
-            IReceiveEndpointConfiguration endpointConfiguration, ReceiveSettings receiveSetting,
+            string groupId, IReceiveEndpointConfiguration endpointConfiguration, ReceiveSettings receiveSetting,
             IHeadersDeserializer headersDeserializer, IDeserializer<TKey> keyDeserializer, IDeserializer<TValue> valueDeserializer,
             ConsumerBuilderFactory consumerBuilderFactory)
             : base(endpointConfiguration)
         {
             _busInstance = busInstance;
             _hostConfiguration = hostConfiguration;
+            _groupId = groupId;
             _endpointConfiguration = endpointConfiguration;
             _receiveSetting = receiveSetting;
             _headersDeserializer = headersDeserializer;
@@ -37,7 +39,8 @@ namespace MassTransit.KafkaIntegration
 
         public KafkaReceiveEndpointContext<TKey, TValue> CreateReceiveEndpointContext()
         {
-            var context = new TopicKafkaReceiveEndpointContext<TKey, TValue>(_busInstance, _hostConfiguration, _endpointConfiguration, _receiveSetting,
+            var context = new TopicKafkaReceiveEndpointContext<TKey, TValue>(_busInstance, _hostConfiguration, _groupId, _endpointConfiguration,
+                _receiveSetting,
                 _headersDeserializer, _keyDeserializer, _valueDeserializer, _consumerBuilderFactory);
 
             context.GetOrAddPayload(() => _busInstance.HostConfiguration.Topology);

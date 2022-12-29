@@ -18,11 +18,12 @@ namespace MassTransit.KafkaIntegration
         readonly Recycle<IConsumerContextSupervisor> _consumerContext;
 
         public TopicKafkaReceiveEndpointContext(IBusInstance busInstance, IKafkaHostConfiguration hostConfiguration,
-            IReceiveEndpointConfiguration endpointConfiguration, ReceiveSettings receiveSetting,
+            string groupId, IReceiveEndpointConfiguration endpointConfiguration, ReceiveSettings receiveSetting,
             IHeadersDeserializer headersDeserializer, IDeserializer<TKey> keyDeserializer, IDeserializer<TValue> valueDeserializer,
             ConsumerBuilderFactory consumerBuilderFactory)
             : base(busInstance.HostConfiguration, endpointConfiguration)
         {
+            GroupId = groupId;
             HeadersDeserializer = headersDeserializer;
             KeyDeserializer = keyDeserializer;
             ValueDeserializer = valueDeserializer;
@@ -34,6 +35,7 @@ namespace MassTransit.KafkaIntegration
                     consumerBuilderFactory));
         }
 
+        public string GroupId { get; }
         public IHeadersDeserializer HeadersDeserializer { get; }
         public IDeserializer<TKey> KeyDeserializer { get; }
         public IDeserializer<TValue> ValueDeserializer { get; }
