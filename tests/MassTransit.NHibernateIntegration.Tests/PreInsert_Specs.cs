@@ -178,7 +178,7 @@
 
                 await InputQueueSendEndpoint.Send(warmUpMessage);
 
-                await _repository.ShouldContainSaga(sagaId, TestTimeout);
+                await _repository.ShouldContainSagaInState(sagaId, _machine, x => x.Initial, TestTimeout);
 
                 var message = new Start(sagaId, "Joe");
 
