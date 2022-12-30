@@ -2,13 +2,14 @@ namespace MassTransit.KafkaIntegration
 {
     using System;
     using Confluent.Kafka;
+    using Logging;
 
 
     public interface ConsumerContext :
-        PipeContext,
-        IConsumerLockContext
+        PipeContext
     {
         event Action<Error> ErrorHandler;
-        IConsumer<byte[], byte[]> CreateConsumer(Action<IConsumer<byte[], byte[]>, Error> onError);
+        ILogContext LogContext { get; }
+        IConsumer<byte[], byte[]> CreateConsumer(KafkaConsumerBuilderContext context, Action<IConsumer<byte[], byte[]>, Error> onError);
     }
 }

@@ -17,7 +17,7 @@ namespace MassTransit.KafkaIntegration.Tests
         const string Topic = "failure-receive-test";
 
         [Test]
-        public async Task Should_receive()
+        public async Task Should_receive_after_failed_attempt()
         {
             await using var provider = new ServiceCollection()
                 .ConfigureKafkaTestOptions(options =>
@@ -92,7 +92,7 @@ namespace MassTransit.KafkaIntegration.Tests
         const string Topic = "poison-pill-receive-test";
 
         [Test]
-        public async Task Should_receive()
+        public async Task Should_skip_poison_pill()
         {
             await using var provider = new ServiceCollection()
                 .ConfigureKafkaTestOptions(options =>

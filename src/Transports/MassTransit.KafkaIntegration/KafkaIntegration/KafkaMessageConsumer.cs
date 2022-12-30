@@ -12,11 +12,10 @@
 
 
     public class KafkaMessageConsumer<TKey, TValue> :
-        Supervisor,
+        Agent,
         IKafkaMessageConsumer<TKey, TValue>
         where TValue : class
     {
-        readonly ConsumerContext _consumerContext;
         readonly ReceiveSettings _receiveSettings;
         readonly KafkaReceiveEndpointContext<TKey, TValue> _context;
         readonly TaskCompletionSource<bool> _deliveryComplete;
@@ -25,22 +24,25 @@
         readonly IConsumer<byte[], byte[]> _consumer;
         readonly Task _task;
         readonly IChannelExecutorPool<ConsumeResult<byte[], byte[]>> _executorPool;
+        readonly CancellationTokenSource _checkpointTokenSource;
+        readonly IConsumerLockContext _lockContext;
 
         public KafkaMessageConsumer(ReceiveSettings receiveSettings, KafkaReceiveEndpointContext<TKey, TValue> context, ConsumerContext consumerContext)
         {
             _receiveSettings = receiveSettings;
             _context = context;
-            _consumerContext = consumerContext;
 
             _deliveryComplete = TaskUtil.GetTask<bool>();
             _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(Stopping);
+            _checkpointTokenSource = CancellationTokenSource.CreateLinkedTokenSource(Stopped);
+            var lockContext = new ConsumerLockContext(consumerContext, receiveSettings, _checkpointTokenSource.Token);
 
             _dispatcher = context.CreateReceivePipeDispatcher();
-            _consumer = _consumerContext.CreateConsumer(HandleKafkaError);
+            _consumer = consumerContext.CreateConsumer(lockContext, HandleKafkaError);
             _dispatcher.ZeroActivity += HandleDeliveryComplete;
 
-            _executorPool = new CombinedChannelExecutorPool(_consumerContext, receiveSettings);
-
+            _executorPool = new CombinedChannelExecutorPool(lockContext, receiveSettings);
+            _lockContext = lockContext;
             _task = Task.Run(Consume);
         }
 
@@ -59,7 +61,7 @@
                 while (!_cancellationTokenSource.IsCancellationRequested)
                 {
                     ConsumeResult<byte[], byte[]> consumeResult = _consumer.Consume(_cancellationTokenSource.Token);
-                    await _consumerContext.Pending(consumeResult).ConfigureAwait(false);
+                    await _lockContext.Pending(consumeResult).ConfigureAwait(false);
                     await _executorPool.Push(consumeResult, () => Handle(consumeResult), Stopping).ConfigureAwait(false);
                 }
 
@@ -83,7 +85,7 @@
             if (IsStopping)
                 return;
 
-            var context = new KafkaReceiveContext<TKey, TValue>(result, _context, _consumerContext);
+            var context = new KafkaReceiveContext<TKey, TValue>(result, _context, _lockContext);
 
             try
             {
@@ -126,15 +128,13 @@
             }
         }
 
-        protected override async Task StopAgent(StopContext context)
+        protected override Task StopAgent(StopContext context)
         {
-            _consumer.Close();
-
             LogContext.Debug?.Log("Stopping consumer: {InputAddress}", _context.InputAddress);
 
             SetCompleted(ActiveAndActualAgentsCompleted(context));
 
-            await Completed.ConfigureAwait(false);
+            return Completed;
         }
 
         async Task ActiveAndActualAgentsCompleted(StopContext context)
@@ -154,8 +154,14 @@
             await _task.ConfigureAwait(false);
             await _executorPool.DisposeAsync().ConfigureAwait(false);
 
+            // It is time to cancel pending tasks as we already drained current pool
+            _checkpointTokenSource.Cancel();
+
+            _consumer.Close();
+
             _consumer.Dispose();
             _cancellationTokenSource.Dispose();
+            _checkpointTokenSource.Dispose();
         }
 
 
@@ -184,9 +190,10 @@
                 return _partitionExecutorPool.Run(result, () => _keyExecutorPool.Run(result, method, cancellationToken), cancellationToken);
             }
 
-            public ValueTask DisposeAsync()
+            public async ValueTask DisposeAsync()
             {
-                return _keyExecutorPool.DisposeAsync();
+                await _partitionExecutorPool.DisposeAsync().ConfigureAwait(false);
+                await _keyExecutorPool.DisposeAsync().ConfigureAwait(false);
             }
         }
     }

@@ -1,6 +1,7 @@
 namespace MassTransit.KafkaIntegration.Checkpoints
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Confluent.Kafka;
 
@@ -15,5 +16,6 @@ namespace MassTransit.KafkaIntegration.Checkpoints
         void Complete();
         void Faulted(Exception exception);
         void Faulted(string message);
+        void Canceled(CancellationToken cancellationToken);
     }
 }

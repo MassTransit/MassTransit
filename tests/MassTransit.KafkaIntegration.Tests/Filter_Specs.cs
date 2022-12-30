@@ -57,12 +57,7 @@ namespace MassTransit.KafkaIntegration.Tests
 
             ITopicProducer<KafkaMessage> producer = harness.GetProducer<KafkaMessage>();
 
-            var messageId = NewId.NextGuid();
-
-            await producer.Produce(new { Text = "text" }, Pipe.Execute<SendContext>(context =>
-            {
-                context.MessageId = messageId;
-            }), harness.CancellationToken);
+            await producer.Produce(new { }, harness.CancellationToken);
 
             await provider.GetTask<ConsumeContext<KafkaMessage>>();
 
@@ -103,7 +98,6 @@ namespace MassTransit.KafkaIntegration.Tests
 
         public interface KafkaMessage
         {
-            string Text { get; }
         }
     }
 
@@ -114,7 +108,7 @@ namespace MassTransit.KafkaIntegration.Tests
         const string Topic = "scoped-filter-producer";
 
         [Test]
-        public async Task Should_properly_configure_the_filter()
+        public async Task Should_properly_configure_the_scoped_filter()
         {
             await using var provider = new ServiceCollection()
                 .AddScoped<ScopedContext>()
@@ -158,7 +152,7 @@ namespace MassTransit.KafkaIntegration.Tests
 
             ITopicProducer<KafkaMessage> producer = harness.GetProducer<KafkaMessage>();
 
-            await producer.Produce(new { Text = "text" }, harness.CancellationToken);
+            await producer.Produce(new { }, harness.CancellationToken);
 
             var result = await provider.GetTask<ConsumeContext<KafkaMessage>>();
 
@@ -202,7 +196,6 @@ namespace MassTransit.KafkaIntegration.Tests
 
         public record KafkaMessage
         {
-            public string Text { get; init; }
         }
     }
 }

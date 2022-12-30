@@ -3,7 +3,6 @@ namespace MassTransit.KafkaIntegration.Tests
     using System;
     using System.Threading.Tasks;
     using Confluent.Kafka;
-    using Metadata;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
     using TestFramework;

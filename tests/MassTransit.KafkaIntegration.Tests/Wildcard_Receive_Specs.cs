@@ -22,7 +22,7 @@ namespace MassTransit.KafkaIntegration.Tests
         static readonly Regex Topic = new($"^{TopicPrefix}[0-9]*", RegexOptions.Compiled);
 
         [Test]
-        public async Task Should_receive()
+        public async Task Should_receive_from_multiple_topics_in_wild_card()
         {
             const int numTopics = 2;
 

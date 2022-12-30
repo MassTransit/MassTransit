@@ -4,13 +4,15 @@ namespace MassTransit.EventHubIntegration
     using System.Threading.Tasks;
     using Azure.Messaging.EventHubs;
     using Azure.Messaging.EventHubs.Processor;
+    using Logging;
 
 
     public interface ProcessorContext :
-        PipeContext,
-        IProcessorLockContext
+        PipeContext
     {
+        ILogContext LogContext { get; }
         event Func<ProcessErrorEventArgs, Task> ProcessError;
-        EventProcessorClient GetClient(Func<ProcessErrorEventArgs, Task> onError);
+
+        EventProcessorClient GetClient(ProcessorClientBuilderContext context, Func<ProcessErrorEventArgs, Task> errorHandler);
     }
 }

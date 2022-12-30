@@ -177,7 +177,7 @@ namespace MassTransit.KafkaIntegration.Tests
         }
 
         [Test]
-        public async Task Should_receive()
+        public async Task Should_receive_message_and_stabilize_group_with_multi_bus()
         {
             TaskCompletionSource<ConsumeContext<KafkaMessage>> taskCompletionSource = GetTask<ConsumeContext<KafkaMessage>>();
             var services = new ServiceCollection();
@@ -316,7 +316,7 @@ namespace MassTransit.KafkaIntegration.Tests
         }
 
         [Test]
-        public async Task Should_receive()
+        public async Task Should_receive_message_and_stabilize_group_with_multi_bus_and_multiple_consumers()
         {
             TaskCompletionSource<ConsumeContext<KafkaMessage>> taskCompletionSource = GetTask<ConsumeContext<KafkaMessage>>();
 
@@ -394,7 +394,7 @@ namespace MassTransit.KafkaIntegration.Tests
 
                 while (groupInfo.State != "Stable")
                 {
-                    await Task.Delay(TimeSpan.FromSeconds(10)).OrCanceled(TestCancellationToken);
+                    await Task.Delay(TimeSpan.FromSeconds(10), TestCancellationToken);
                     groupInfo = adminClient.ListGroup(nameof(MultiBus_ConcurrentConsumers_ReBalance_Specs), TimeSpan.FromSeconds(5));
                 }
 

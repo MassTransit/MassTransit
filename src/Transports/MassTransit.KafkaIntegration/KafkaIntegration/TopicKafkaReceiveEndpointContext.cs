@@ -31,7 +31,7 @@ namespace MassTransit.KafkaIntegration
             _receiveSetting = receiveSetting;
 
             _consumerContext = new Recycle<IConsumerContextSupervisor>(() =>
-                new ConsumerContextSupervisor(busInstance.HostConfiguration, hostConfiguration.ClientContextSupervisor, receiveSetting,
+                new ConsumerContextSupervisor(busInstance.HostConfiguration, hostConfiguration.ClientContextSupervisor,
                     consumerBuilderFactory));
         }
 
@@ -41,9 +41,9 @@ namespace MassTransit.KafkaIntegration
         public IDeserializer<TValue> ValueDeserializer { get; }
         public IConsumerContextSupervisor ConsumerContextSupervisor => _consumerContext.Supervisor;
 
-        public KafkaTopicAddress NormalizeAddress(Uri address)
+        public KafkaTopicAddress GetInputAddress(string topic)
         {
-            return new KafkaTopicAddress(_busInstance.HostConfiguration.HostAddress, address);
+            return new KafkaTopicAddress(_busInstance.HostConfiguration.HostAddress, topic);
         }
 
         public override Exception ConvertException(Exception exception, string message)

@@ -16,7 +16,7 @@ namespace MassTransit.KafkaIntegration.Tests
         const string Topic = "publish";
 
         [Test]
-        public async Task Should_receive()
+        public async Task Should_receive_in_kafka_and_in_bus()
         {
             await using var provider = new ServiceCollection()
                 .ConfigureKafkaTestOptions(options =>

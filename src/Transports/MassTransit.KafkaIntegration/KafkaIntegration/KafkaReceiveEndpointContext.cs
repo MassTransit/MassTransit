@@ -1,6 +1,5 @@
 namespace MassTransit.KafkaIntegration
 {
-    using System;
     using Confluent.Kafka;
     using Serializers;
     using Transports;
@@ -17,6 +16,6 @@ namespace MassTransit.KafkaIntegration
         IDeserializer<TValue> ValueDeserializer { get; }
         IConsumerContextSupervisor ConsumerContextSupervisor { get; }
 
-        KafkaTopicAddress NormalizeAddress(Uri address);
+        KafkaTopicAddress GetInputAddress(string topic);
     }
 }

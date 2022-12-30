@@ -1,9 +1,9 @@
 namespace MassTransit.EventHubIntegration.Tests
 {
     using System;
-    using System.Linq;
     using System.Threading.Tasks;
     using Contracts;
+    using Internals;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Logging;
@@ -22,13 +22,9 @@ namespace MassTransit.EventHubIntegration.Tests
         [Test]
         public async Task Should_produce()
         {
-            const int numOfTries = 2;
-
-            TaskCompletionSource<ConsumeContext<BatchEventHubMessage>>[] taskCompletionSources = Enumerable.Range(0, numOfTries)
-                .Select(x => GetTask<ConsumeContext<BatchEventHubMessage>>())
-                .ToArray();
+            TaskCompletionSource<ConsumeContext<BatchEventHubMessage>> taskCompletionSource = GetTask<ConsumeContext<BatchEventHubMessage>>();
             var services = new ServiceCollection();
-            services.AddSingleton(taskCompletionSources);
+            services.AddSingleton(taskCompletionSource);
 
             services.TryAddSingleton<ILoggerFactory>(LoggerFactory);
             services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
@@ -56,36 +52,24 @@ namespace MassTransit.EventHubIntegration.Tests
             var provider = services.BuildServiceProvider(true);
 
             var busControl = provider.GetRequiredService<IBusControl>();
+            await busControl.StartAsync(TestCancellationToken);
+            await busControl.StopAsync(TestCancellationToken);
 
+            await Task.Delay(500, TestCancellationToken);
+
+            await busControl.StartAsync(TestCancellationToken);
+
+            var serviceScope = provider.CreateScope();
             try
             {
-                for (var i = 0; i < numOfTries; i++)
-                {
-                    await busControl.StartAsync(TestCancellationToken);
-
-                    var serviceScope = provider.CreateScope();
-
-                    var producerProvider = serviceScope.ServiceProvider.GetRequiredService<IEventHubProducerProvider>();
-                    var producer = await producerProvider.GetProducer(Configuration.EventHubName);
-
-                    try
-                    {
-                        await producer.Produce<BatchEventHubMessage>(new { Index = i }, TestCancellationToken);
-
-                        await taskCompletionSources[i].Task;
-                    }
-                    finally
-                    {
-                        serviceScope.Dispose();
-
-                        await busControl.StopAsync(TestCancellationToken);
-
-                        await Task.Delay(100, TestCancellationToken);
-                    }
-                }
+                var producerProvider = serviceScope.ServiceProvider.GetRequiredService<IEventHubProducerProvider>();
+                var producer = await producerProvider.GetProducer(Configuration.EventHubName);
+                await producer.Produce<BatchEventHubMessage>(new { }, TestCancellationToken);
+                await taskCompletionSource.Task.OrCanceled(TestCancellationToken);
             }
             finally
             {
+                serviceScope.Dispose();
                 await provider.DisposeAsync();
             }
         }
@@ -94,16 +78,16 @@ namespace MassTransit.EventHubIntegration.Tests
         class EventHubMessageConsumer :
             IConsumer<BatchEventHubMessage>
         {
-            readonly TaskCompletionSource<ConsumeContext<BatchEventHubMessage>>[] _taskCompletionSource;
+            readonly TaskCompletionSource<ConsumeContext<BatchEventHubMessage>> _taskCompletionSource;
 
-            public EventHubMessageConsumer(TaskCompletionSource<ConsumeContext<BatchEventHubMessage>>[] taskCompletionSource)
+            public EventHubMessageConsumer(TaskCompletionSource<ConsumeContext<BatchEventHubMessage>> taskCompletionSource)
             {
                 _taskCompletionSource = taskCompletionSource;
             }
 
             public async Task Consume(ConsumeContext<BatchEventHubMessage> context)
             {
-                _taskCompletionSource[context.Message.Index].TrySetResult(context);
+                _taskCompletionSource.TrySetResult(context);
             }
         }
     }

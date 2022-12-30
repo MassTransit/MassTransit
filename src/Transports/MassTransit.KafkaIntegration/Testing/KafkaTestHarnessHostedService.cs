@@ -35,28 +35,29 @@ namespace MassTransit.Testing
             var options = _testHarnessOptions.Value;
 
             if (options.CleanTopicsOnStart)
-                await DeleteTopics(options).ConfigureAwait(false);
+                await DeleteTopics(options, cancellationToken).ConfigureAwait(false);
 
             if (options.CreateTopicsIfNotExists)
-                await CreateTopics(options.TopicNames, options).ConfigureAwait(false);
+                await CreateTopics(options.TopicNames, options, cancellationToken).ConfigureAwait(false);
         }
 
-        async Task DeleteTopics(KafkaTestHarnessOptions options)
+        async Task DeleteTopics(KafkaTestHarnessOptions options, CancellationToken cancellationToken)
         {
             try
             {
                 _logger.LogInformation("Deleting topics: {TopicNames}", string.Join(", ", options.TopicNames));
                 await _adminClient.DeleteTopicsAsync(options.TopicNames).ConfigureAwait(false);
                 // Adding some delays for kafka to settle
-                await Task.Delay(TimeSpan.FromMilliseconds(100)).ConfigureAwait(false);
+                await Task.Delay(TimeSpan.FromMilliseconds(100), cancellationToken).ConfigureAwait(false);
             }
             catch (DeleteTopicsException e)
             {
-                _logger.LogWarning(e, "Topic deletion failed");
+                if (!e.Results.All(x => x.Error.Reason.EndsWith("[Broker: Unknown topic or partition].", StringComparison.OrdinalIgnoreCase)))
+                    _logger.LogWarning(e, "Topic deletion failed");
             }
         }
 
-        async Task CreateTopics(IReadOnlyList<string> topicNames, KafkaTestHarnessOptions options)
+        async Task CreateTopics(IReadOnlyList<string> topicNames, KafkaTestHarnessOptions options, CancellationToken cancellationToken)
         {
             try
             {
@@ -71,21 +72,22 @@ namespace MassTransit.Testing
             }
             catch (CreateTopicsException e)
             {
-                _logger.LogWarning(e, "Topic creation failed");
-
                 List<string> topics = e.Results.Where(result => result.Error.Reason.Contains($"Topic '{result.Topic}' is marked for deletion."))
                     .Select(result => result.Topic).ToList();
+
+                if (!e.Results.All(x => x.Error.Reason.EndsWith("already exists.", StringComparison.OrdinalIgnoreCase)) && !topics.Any())
+                    _logger.LogWarning(e, "Topic creation failed");
 
                 if (topics.Any())
                 {
                     // Retry failing topics creation
-                    await Task.Delay(10).ConfigureAwait(false);
-                    await CreateTopics(topics, options).ConfigureAwait(false);
+                    await Task.Delay(100, cancellationToken).ConfigureAwait(false);
+                    await CreateTopics(topics, options, cancellationToken).ConfigureAwait(false);
                 }
             }
 
             // Adding some delays for kafka to settle
-            await Task.Delay(TimeSpan.FromMilliseconds(100)).ConfigureAwait(false);
+            await Task.Delay(TimeSpan.FromMilliseconds(100), cancellationToken).ConfigureAwait(false);
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

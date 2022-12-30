@@ -434,7 +434,7 @@ jobs:
   test-kafka:
     name: "Rider: Kafka"
     runs-on: ubuntu-latest
-    if: false # turned off for flakey
+    if: true # turned off for flakey
     services:
       zookeeper:
         image: confluentinc/cp-zookeeper:latest
@@ -529,7 +529,7 @@ jobs:
       - test-hangfire
       - test-quartz
       # - test-eventhub
-      # - test-kafka
+      - test-kafka
       - test-signalr
     outputs:
       version: ${{ steps.v.outputs.version }}

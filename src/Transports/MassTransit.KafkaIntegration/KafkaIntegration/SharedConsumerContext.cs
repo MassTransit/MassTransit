@@ -2,8 +2,8 @@ namespace MassTransit.KafkaIntegration
 {
     using System;
     using System.Threading;
-    using System.Threading.Tasks;
     using Confluent.Kafka;
+    using Logging;
     using MassTransit.Middleware;
 
 
@@ -28,39 +28,11 @@ namespace MassTransit.KafkaIntegration
             remove => _context.ErrorHandler -= value;
         }
 
-        public IConsumer<byte[], byte[]> CreateConsumer(Action<IConsumer<byte[], byte[]>, Error> onError)
-        {
-            return _context.CreateConsumer(onError);
-        }
+        public ILogContext LogContext => _context.LogContext;
 
-        public Task Pending(ConsumeResult<byte[], byte[]> result)
+        public IConsumer<byte[], byte[]> CreateConsumer(KafkaConsumerBuilderContext context, Action<IConsumer<byte[], byte[]>, Error> onError)
         {
-            return _context.Pending(result);
-        }
-
-        public Task Complete(ConsumeResult<byte[], byte[]> result)
-        {
-            return _context.Complete(result);
-        }
-
-        public Task Faulted(ConsumeResult<byte[], byte[]> result, Exception exception)
-        {
-            return _context.Faulted(result, exception);
-        }
-
-        public Task Push(ConsumeResult<byte[], byte[]> result, Func<Task> method, CancellationToken cancellationToken = default)
-        {
-            return _context.Push(result, method, cancellationToken);
-        }
-
-        public Task Run(ConsumeResult<byte[], byte[]> result, Func<Task> method, CancellationToken cancellationToken = default)
-        {
-            return _context.Run(result, method, cancellationToken);
-        }
-
-        public ValueTask DisposeAsync()
-        {
-            return _context.DisposeAsync();
+            return _context.CreateConsumer(context, onError);
         }
     }
 }

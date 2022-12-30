@@ -26,9 +26,9 @@
             _context = context;
             _lockContext = lockContext;
 
-            InputAddress = context.NormalizeAddress(new Uri($"topic:{_result.Topic}"));
+            InputAddress = context.GetInputAddress(_result.Topic);
 
-            _key = new Lazy<TKey>(() => result.Message.DeserializeKey(result.Topic, _context.KeyDeserializer));
+            _key = new Lazy<TKey>(() => _context.KeyDeserializer.DeserializeKey(result));
 
             var messageContext = new KafkaMessageContext(_result, this);
 

@@ -16,7 +16,7 @@ namespace MassTransit.KafkaIntegration.Tests
         const string Topic = "endpoint-connector";
 
         [Test]
-        public async Task Should_produce()
+        public async Task Should_receive_on_connected_topic()
         {
             await using var provider = new ServiceCollection()
                 .ConfigureKafkaTestOptions(options =>

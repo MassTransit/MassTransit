@@ -12,15 +12,13 @@ namespace MassTransit.KafkaIntegration
     {
         readonly IHostConfiguration _hostConfiguration;
         readonly IClientContextSupervisor _clientContextSupervisor;
-        readonly ReceiveSettings _receiveSettings;
         readonly ConsumerBuilderFactory _consumerBuilderFactory;
 
-        public ConsumerContextFactory(IHostConfiguration hostConfiguration, IClientContextSupervisor clientContextSupervisor, ReceiveSettings receiveSettings,
+        public ConsumerContextFactory(IHostConfiguration hostConfiguration, IClientContextSupervisor clientContextSupervisor,
             ConsumerBuilderFactory consumerBuilderFactory)
         {
             _hostConfiguration = hostConfiguration;
             _clientContextSupervisor = clientContextSupervisor;
-            _receiveSettings = receiveSettings;
             _consumerBuilderFactory = consumerBuilderFactory;
         }
 
@@ -52,7 +50,7 @@ namespace MassTransit.KafkaIntegration
             Task<ConsumerContext> Create(ClientContext clientContext, CancellationToken createCancellationToken)
             {
                 ConsumerContext context =
-                    new KafkaConsumerContext(_hostConfiguration, _receiveSettings, _consumerBuilderFactory, cancellationToken);
+                    new KafkaConsumerContext(_hostConfiguration, _consumerBuilderFactory, cancellationToken);
                 return Task.FromResult(context);
             }
 

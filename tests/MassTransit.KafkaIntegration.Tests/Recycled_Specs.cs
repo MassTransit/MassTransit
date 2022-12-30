@@ -1,11 +1,7 @@
 namespace MassTransit.KafkaIntegration.Tests
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
     using Confluent.Kafka;
-    using Internals;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
     using TestFramework;
@@ -17,16 +13,9 @@ namespace MassTransit.KafkaIntegration.Tests
     {
         const string Topic = "recycle";
 
-        public Recycled_Specs()
-        {
-            TestTimeout = TimeSpan.FromSeconds(20);
-        }
-
         [Test]
-        public async Task Should_produce()
+        public async Task Should_receive_after_recycle()
         {
-            const int numOfTries = 2;
-
             await using var provider = new ServiceCollection()
                 .ConfigureKafkaTestOptions(options =>
                 {
@@ -35,12 +24,11 @@ namespace MassTransit.KafkaIntegration.Tests
                 })
                 .AddMassTransitTestHarness(x =>
                 {
-                    for (var i = 0; i < numOfTries; i++)
-                        x.AddTaskCompletionSource<ConsumeContext<KafkaMessage>>();
+                    x.AddTaskCompletionSource<ConsumeContext<KafkaMessage>>();
 
                     x.AddRider(rider =>
                     {
-                        rider.AddConsumer<KafkaMessageConsumer>();
+                        rider.AddConsumer<TestKafkaMessageConsumer<KafkaMessage>>();
 
                         rider.AddProducer<KafkaMessage>(Topic);
 
@@ -49,7 +37,7 @@ namespace MassTransit.KafkaIntegration.Tests
                             k.TopicEndpoint<KafkaMessage>(Topic, nameof(Recycled_Specs), c =>
                             {
                                 c.AutoOffsetReset = AutoOffsetReset.Earliest;
-                                c.ConfigureConsumer<KafkaMessageConsumer>(context);
+                                c.ConfigureConsumer<TestKafkaMessageConsumer<KafkaMessage>>(context);
                             });
                         });
                     });
@@ -61,56 +49,21 @@ namespace MassTransit.KafkaIntegration.Tests
             //Start all hosted services
             await harness.Start();
 
-            Task<ConsumeContext<KafkaMessage>>[] taskCompletionSources = provider.GetTasks<ConsumeContext<KafkaMessage>>();
+            await busControl.StopAsync(harness.CancellationToken);
 
-            for (var i = 0; i < numOfTries; i++)
-            {
-                var scope = provider.CreateScope();
-                var producer = scope.ServiceProvider.GetRequiredService<ITopicProducer<KafkaMessage>>();
+            await Task.Delay(500, harness.CancellationToken);
 
-                try
-                {
-                    await producer.Produce(new { Index = i }, harness.CancellationToken);
-                    await taskCompletionSources[i];
-                }
-                finally
-                {
-                    scope.Dispose();
-                    
-                    if (i < numOfTries - 1)
-                    {
-                        await busControl.StopAsync(harness.CancellationToken);
+            await busControl.StartAsync(harness.CancellationToken);
 
-                        await Task.Delay(200, harness.CancellationToken);
+            ITopicProducer<KafkaMessage> producer = harness.GetProducer<KafkaMessage>();
 
-                        await busControl.StartAsync(harness.CancellationToken);
-                    }
-                }
-            }
-        }
-
-
-        class KafkaMessageConsumer :
-            IConsumer<KafkaMessage>
-        {
-            readonly TaskCompletionSource<ConsumeContext<KafkaMessage>>[] _taskCompletionSources;
-
-            public KafkaMessageConsumer(IEnumerable<TaskCompletionSource<ConsumeContext<KafkaMessage>>> taskCompletionSources)
-            {
-                _taskCompletionSources = taskCompletionSources.ToArray();
-            }
-
-            public Task Consume(ConsumeContext<KafkaMessage> context)
-            {
-                _taskCompletionSources[context.Message.Index].TrySetResult(context);
-                return Task.CompletedTask;
-            }
+            await producer.Produce(new { }, harness.CancellationToken);
+            await provider.GetTask<ConsumeContext<KafkaMessage>>();
         }
 
 
         public interface KafkaMessage
         {
-            int Index { get; }
         }
     }
 }

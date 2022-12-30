@@ -18,17 +18,14 @@ namespace MassTransit.EventHubIntegration
         readonly IHostConfiguration _hostConfiguration;
         readonly Func<PartitionClosingEventArgs, Task> _partitionClosingHandler;
         readonly Func<PartitionInitializingEventArgs, Task> _partitionInitializingHandler;
-        readonly ReceiveSettings _receiveSettings;
 
         public ProcessorContextFactory(IConnectionContextSupervisor contextSupervisor, IHostConfiguration hostConfiguration,
-            ReceiveSettings receiveSettings,
             Func<EventProcessorClient> clientFactory,
             Func<PartitionClosingEventArgs, Task> partitionClosingHandler,
             Func<PartitionInitializingEventArgs, Task> partitionInitializingHandler)
         {
             _contextSupervisor = contextSupervisor;
             _hostConfiguration = hostConfiguration;
-            _receiveSettings = receiveSettings;
             _clientFactory = clientFactory;
             _partitionClosingHandler = partitionClosingHandler;
             _partitionInitializingHandler = partitionInitializingHandler;
@@ -62,7 +59,7 @@ namespace MassTransit.EventHubIntegration
             Task<ProcessorContext> Create(ConnectionContext connectionContext, CancellationToken createCancellationToken)
             {
                 var client = _clientFactory();
-                ProcessorContext context = new EventHubProcessorContext(_hostConfiguration, _receiveSettings,
+                ProcessorContext context = new EventHubProcessorContext(_hostConfiguration,
                     client, _partitionInitializingHandler, _partitionClosingHandler, createCancellationToken);
                 return Task.FromResult(context);
             }

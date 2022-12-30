@@ -17,6 +17,7 @@ namespace MassTransit.EventHubIntegration.Checkpoints
         void Complete();
         void Faulted(Exception exception);
         void Faulted(string message);
+        void Canceled(CancellationToken cancellationToken);
 
         Task Checkpoint(CancellationToken cancellationToken = default);
     }
