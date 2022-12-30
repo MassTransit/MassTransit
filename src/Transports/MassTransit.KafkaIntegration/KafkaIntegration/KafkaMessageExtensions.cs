@@ -6,18 +6,21 @@ namespace MassTransit.KafkaIntegration
 
     static class KafkaMessageExtensions
     {
-        public static TKey DeserializeKey<TKey>(this Message<byte[], byte[]> message, string topic, IDeserializer<TKey> deserializer)
+        public static TKey DeserializeKey<TKey>(this IDeserializer<TKey> deserializer, ConsumeResult<byte[], byte[]> result)
         {
-            ReadOnlySpan<byte> bytes = message.Key?.Length > 0 ? new ReadOnlySpan<byte>(message.Key) : ReadOnlySpan<byte>.Empty;
-
-            return deserializer.Deserialize(bytes, bytes.IsEmpty, new SerializationContext(MessageComponentType.Key, topic, message.Headers));
+            return Deserialize(deserializer, result, result.Message.Key, MessageComponentType.Key);
         }
 
-        public static TValue DeserializeValue<TValue>(this Message<byte[], byte[]> message, string topic, IDeserializer<TValue> deserializer)
+        public static TValue DeserializeValue<TValue>(this IDeserializer<TValue> deserializer, ConsumeResult<byte[], byte[]> result)
         {
-            ReadOnlySpan<byte> bytes = message.Value?.Length > 0 ? new ReadOnlySpan<byte>(message.Value) : ReadOnlySpan<byte>.Empty;
+            return Deserialize(deserializer, result, result.Message.Value, MessageComponentType.Value);
+        }
 
-            return deserializer.Deserialize(bytes, bytes.IsEmpty, new SerializationContext(MessageComponentType.Value, topic, message.Headers));
+        static T Deserialize<T>(IDeserializer<T> deserializer, ConsumeResult<byte[], byte[]> result, byte[] value, MessageComponentType componentType)
+        {
+            ReadOnlySpan<byte> bytes = value?.Length > 0 ? new ReadOnlySpan<byte>(value) : ReadOnlySpan<byte>.Empty;
+
+            return deserializer.Deserialize(bytes, bytes.IsEmpty, new SerializationContext(componentType, result.Topic, result.Message.Headers));
         }
     }
 }

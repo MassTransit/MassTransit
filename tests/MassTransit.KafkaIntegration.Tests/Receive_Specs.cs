@@ -18,7 +18,7 @@ namespace MassTransit.KafkaIntegration.Tests
     public class Receive_Specs :
         InMemoryTestFixture
     {
-        const string Topic = "test";
+        const string Topic = "receive";
 
         [Test]
         public async Task Should_receive()
@@ -192,7 +192,7 @@ namespace MassTransit.KafkaIntegration.Tests
         const int NumKeys = 2;
 
         [Test]
-        public async Task Should_receive_concurrently()
+        public async Task Should_receive_concurrently_by_keys()
         {
             await using var provider = new ServiceCollection()
                 .ConfigureKafkaTestOptions(options =>
@@ -417,7 +417,7 @@ namespace MassTransit.KafkaIntegration.Tests
         const string Topic = "test-payload";
 
         [Test]
-        public async Task Should_contains_payload()
+        public async Task Should_receive_with_payload()
         {
             await using var provider = new ServiceCollection()
                 .ConfigureKafkaTestOptions(options =>

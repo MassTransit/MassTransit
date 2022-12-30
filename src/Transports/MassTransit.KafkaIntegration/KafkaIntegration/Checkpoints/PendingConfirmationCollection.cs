@@ -2,17 +2,22 @@ namespace MassTransit.KafkaIntegration.Checkpoints
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Threading;
     using Confluent.Kafka;
 
 
-    public class PendingConfirmationCollection
+    public class PendingConfirmationCollection :
+        IDisposable
     {
         readonly ConcurrentDictionary<Offset, IPendingConfirmation> _confirmations;
         readonly TopicPartition _partition;
+        readonly CancellationTokenRegistration? _registration;
 
-        public PendingConfirmationCollection(TopicPartition partition)
+        public PendingConfirmationCollection(TopicPartition partition, CancellationToken cancellationToken)
         {
             _partition = partition;
+            if (!cancellationToken.CanBeCanceled)
+                _registration = cancellationToken.Register(() => Cancel(cancellationToken));
             _confirmations = new ConcurrentDictionary<Offset, IPendingConfirmation>();
         }
 
@@ -37,6 +42,20 @@ namespace MassTransit.KafkaIntegration.Checkpoints
         {
             if (_confirmations.TryRemove(offset, out var confirmation))
                 confirmation.Faulted(exception);
+        }
+
+        void Cancel(CancellationToken cancellationToken)
+        {
+            foreach (var offset in _confirmations.Keys)
+            {
+                if (_confirmations.TryRemove(offset, out var confirmation))
+                    confirmation.Canceled(cancellationToken);
+            }
+        }
+
+        public void Dispose()
+        {
+            _registration?.Dispose();
         }
     }
 }

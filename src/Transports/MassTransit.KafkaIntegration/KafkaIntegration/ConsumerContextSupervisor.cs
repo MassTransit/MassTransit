@@ -8,10 +8,9 @@ namespace MassTransit.KafkaIntegration
         TransportPipeContextSupervisor<ConsumerContext>,
         IConsumerContextSupervisor
     {
-        public ConsumerContextSupervisor(IHostConfiguration hostConfiguration,
-            IClientContextSupervisor clientContextSupervisor, ReceiveSettings receiveSettings,
+        public ConsumerContextSupervisor(IHostConfiguration hostConfiguration, IClientContextSupervisor clientContextSupervisor,
             ConsumerBuilderFactory consumerBuilderFactory)
-            : base(new ConsumerContextFactory(hostConfiguration, clientContextSupervisor, receiveSettings, consumerBuilderFactory))
+            : base(new ConsumerContextFactory(hostConfiguration, clientContextSupervisor, consumerBuilderFactory))
         {
             clientContextSupervisor.AddConsumeAgent(this);
         }

@@ -2,8 +2,8 @@ namespace MassTransit.KafkaIntegration
 {
     using System;
     using System.Threading;
-    using System.Threading.Tasks;
     using Confluent.Kafka;
+    using Logging;
     using MassTransit.Configuration;
     using MassTransit.Middleware;
 
@@ -12,61 +12,32 @@ namespace MassTransit.KafkaIntegration
         BasePipeContext,
         ConsumerContext
     {
+        readonly IHostConfiguration _hostConfiguration;
         readonly ConsumerBuilderFactory _consumerBuilderFactory;
-        readonly IConsumerLockContext _lockContext;
 
-        public KafkaConsumerContext(IHostConfiguration hostConfiguration, ReceiveSettings receiveSettings,
-            ConsumerBuilderFactory consumerBuilderFactory, CancellationToken cancellationToken)
+        public KafkaConsumerContext(IHostConfiguration hostConfiguration, ConsumerBuilderFactory consumerBuilderFactory, CancellationToken cancellationToken)
             : base(cancellationToken)
         {
-            var lockContext = new ConsumerLockContext(hostConfiguration, receiveSettings);
-            _consumerBuilderFactory = () => consumerBuilderFactory()
-                .SetPartitionsAssignedHandler(lockContext.OnAssigned)
-                .SetPartitionsRevokedHandler(lockContext.OnUnAssigned);
-            _lockContext = lockContext;
+            _hostConfiguration = hostConfiguration;
+            _consumerBuilderFactory = consumerBuilderFactory;
         }
 
-        public event Action<Error> ErrorHandler;
+        public event Action<Error>? ErrorHandler;
 
-        public IConsumer<byte[], byte[]> CreateConsumer(Action<IConsumer<byte[], byte[]>, Error> onError)
+        public ILogContext? LogContext => _hostConfiguration.ReceiveLogContext;
+
+        public IConsumer<byte[], byte[]> CreateConsumer(KafkaConsumerBuilderContext context, Action<IConsumer<byte[], byte[]>, Error> onError)
         {
-            return _consumerBuilderFactory()
-                .SetErrorHandler((consumer, error) =>
+            return _consumerBuilderFactory.Invoke()
+                .SetErrorHandler((c, e) =>
                 {
-                    onError?.Invoke(consumer, error);
-                    ErrorHandler?.Invoke(error);
+                    ErrorHandler?.Invoke(e);
+                    onError.Invoke(c, e);
                 })
+                .SetPartitionsLostHandler(context.OnPartitionLost)
+                .SetPartitionsAssignedHandler(context.OnAssigned)
+                .SetPartitionsRevokedHandler(context.OnUnAssigned)
                 .Build();
-        }
-
-        public Task Pending(ConsumeResult<byte[], byte[]> result)
-        {
-            return _lockContext.Pending(result);
-        }
-
-        public Task Complete(ConsumeResult<byte[], byte[]> result)
-        {
-            return _lockContext.Complete(result);
-        }
-
-        public Task Faulted(ConsumeResult<byte[], byte[]> result, Exception exception)
-        {
-            return _lockContext.Faulted(result, exception);
-        }
-
-        public Task Push(ConsumeResult<byte[], byte[]> result, Func<Task> method, CancellationToken cancellationToken = default)
-        {
-            return _lockContext.Push(result, method, cancellationToken);
-        }
-
-        public Task Run(ConsumeResult<byte[], byte[]> result, Func<Task> method, CancellationToken cancellationToken = default)
-        {
-            return _lockContext.Push(result, method, cancellationToken);
-        }
-
-        public ValueTask DisposeAsync()
-        {
-            return _lockContext.DisposeAsync();
         }
     }
 }

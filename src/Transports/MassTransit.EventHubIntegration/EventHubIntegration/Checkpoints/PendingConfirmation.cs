@@ -44,6 +44,11 @@ namespace MassTransit.EventHubIntegration.Checkpoints
             _source.TrySetException(new ArgumentException(message));
         }
 
+        public void Canceled(CancellationToken cancellationToken)
+        {
+            _source.TrySetCanceled(cancellationToken);
+        }
+
         public Task Checkpoint(CancellationToken cancellationToken = default)
         {
             return _eventArgs.UpdateCheckpointAsync(cancellationToken);

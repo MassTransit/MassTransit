@@ -66,7 +66,7 @@ namespace MassTransit.KafkaIntegration.Tests
             await harness.Start();
 
             ITopicProducer<OriginalMessage> producer = harness.GetProducer<OriginalMessage>();
-            await producer.Produce(new { Text = "test" }, harness.CancellationToken);
+            await producer.Produce(new { }, harness.CancellationToken);
 
             var result = await provider.GetTask<ConsumeContext<OriginalMessage>>();
             var ping = await provider.GetTask<ConsumeContext<FollowingMessage>>();
@@ -123,7 +123,6 @@ namespace MassTransit.KafkaIntegration.Tests
 
         public interface OriginalMessage
         {
-            string Text { get; }
         }
 
 

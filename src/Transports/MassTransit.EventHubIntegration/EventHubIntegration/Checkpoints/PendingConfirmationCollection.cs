@@ -2,17 +2,22 @@ namespace MassTransit.EventHubIntegration.Checkpoints
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Threading;
     using Azure.Messaging.EventHubs.Processor;
 
 
-    public class PendingConfirmationCollection
+    public class PendingConfirmationCollection :
+        IDisposable
     {
         readonly ConcurrentDictionary<long, IPendingConfirmation> _confirmations;
         readonly string _eventHubName;
+        readonly CancellationTokenRegistration? _registration;
 
-        public PendingConfirmationCollection(string eventHubName)
+        public PendingConfirmationCollection(string eventHubName, CancellationToken cancellationToken)
         {
             _eventHubName = eventHubName;
+            if (!cancellationToken.CanBeCanceled)
+                _registration = cancellationToken.Register(() => Cancel(cancellationToken));
             _confirmations = new ConcurrentDictionary<long, IPendingConfirmation>();
         }
 
@@ -37,6 +42,20 @@ namespace MassTransit.EventHubIntegration.Checkpoints
         {
             if (_confirmations.TryRemove(offset, out var confirmation))
                 confirmation.Complete();
+        }
+
+        void Cancel(CancellationToken cancellationToken)
+        {
+            foreach (var offset in _confirmations.Keys)
+            {
+                if (_confirmations.TryRemove(offset, out var confirmation))
+                    confirmation.Canceled(cancellationToken);
+            }
+        }
+
+        public void Dispose()
+        {
+            _registration?.Dispose();
         }
     }
 }

@@ -12,10 +12,10 @@ namespace MassTransit.EventHubIntegration
         TransportPipeContextSupervisor<ProcessorContext>,
         IProcessorContextSupervisor
     {
-        public ProcessorContextSupervisor(IConnectionContextSupervisor supervisor, IHostConfiguration hostConfiguration, ReceiveSettings receiveSettings,
+        public ProcessorContextSupervisor(IConnectionContextSupervisor supervisor, IHostConfiguration hostConfiguration,
             Func<EventProcessorClient> clientFactory, Func<PartitionClosingEventArgs, Task> partitionClosingHandler,
             Func<PartitionInitializingEventArgs, Task> partitionInitializingHandler)
-            : base(new ProcessorContextFactory(supervisor, hostConfiguration, receiveSettings, clientFactory,
+            : base(new ProcessorContextFactory(supervisor, hostConfiguration, clientFactory,
                 partitionClosingHandler,
                 partitionInitializingHandler))
         {

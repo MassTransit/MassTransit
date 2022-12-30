@@ -37,7 +37,7 @@ namespace MassTransit.EventHubIntegration.Configuration
 
         public IEventHubReceiveEndpointContext CreateReceiveEndpointContext()
         {
-            var context = new EventHubReceiveEndpointContext(_hostConfiguration, _busInstance, _configuration, _receiveSettings,
+            var context = new EventHubReceiveEndpointContext(_hostConfiguration, _busInstance, _configuration,
                 _clientFactory, _partitionClosingHandler, _partitionInitializingHandler);
 
             context.GetOrAddPayload(() => _busInstance.HostConfiguration.Topology);

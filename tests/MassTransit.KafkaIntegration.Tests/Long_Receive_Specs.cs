@@ -2,6 +2,7 @@ namespace MassTransit.KafkaIntegration.Tests
 {
     using System;
     using System.Diagnostics;
+    using System.Threading;
     using System.Threading.Tasks;
     using Confluent.Kafka;
     using Microsoft.Extensions.DependencyInjection;
@@ -16,23 +17,17 @@ namespace MassTransit.KafkaIntegration.Tests
         const string Topic = "long-receive-test";
 
         [Test]
-        public async Task Should_receive()
+        public async Task Should_receive_within_slow_consumer()
         {
-            var services = new ServiceCollection();
-
-            services.AddOptions<TestHarnessOptions>()
-                .Configure(x =>
-                {
-                    x.TestInactivityTimeout = TimeSpan.FromSeconds(10);
-                    x.TestTimeout = TimeSpan.FromMinutes(Debugger.IsAttached ? 50 : 2);
-                });
-            await using var provider = services.ConfigureKafkaTestOptions(options =>
+            await using var provider = new ServiceCollection()
+                .ConfigureKafkaTestOptions(options =>
                 {
                     options.CreateTopicsIfNotExists = true;
                     options.TopicNames = new[] { Topic };
                 })
                 .AddMassTransitTestHarness(x =>
                 {
+                    x.SetTestTimeouts(testInactivityTimeout: TimeSpan.FromSeconds(10), testTimeout: TimeSpan.FromMinutes(Debugger.IsAttached ? 50 : 1));
                     x.AddTaskCompletionSource<ConsumeContext<KafkaMessage>>();
                     x.AddRider(rider =>
                     {
@@ -45,8 +40,6 @@ namespace MassTransit.KafkaIntegration.Tests
                             {
                                 c.AutoOffsetReset = AutoOffsetReset.Earliest;
                                 c.ConcurrentMessageLimit = 1;
-                                c.CheckpointMessageCount = 1;
-                                c.CheckpointInterval = TimeSpan.FromSeconds(1);
                                 c.ConfigureConsumer<KafkaMessageConsumer>(context);
                             });
                         });
@@ -68,6 +61,7 @@ namespace MassTransit.KafkaIntegration.Tests
         class KafkaMessageConsumer :
             IConsumer<KafkaMessage>
         {
+            static int _completed = 1;
             readonly TaskCompletionSource<ConsumeContext<KafkaMessage>> _taskCompletionSource;
 
             public KafkaMessageConsumer(TaskCompletionSource<ConsumeContext<KafkaMessage>> taskCompletionSource)
@@ -77,8 +71,11 @@ namespace MassTransit.KafkaIntegration.Tests
 
             public async Task Consume(ConsumeContext<KafkaMessage> context)
             {
-                await Task.Delay(TimeSpan.FromSeconds(5));
-                _taskCompletionSource.TrySetResult(context);
+                if (Interlocked.Decrement(ref _completed) == 0)
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(5));
+                    _taskCompletionSource.TrySetResult(context);
+                }
             }
         }
 

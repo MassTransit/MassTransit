@@ -16,7 +16,7 @@ namespace MassTransit.KafkaIntegration
         public KafkaSerializationContext(ConsumeResult<byte[], byte[]> result, IDeserializer<TMessage> deserializer, MessageContext messageContext)
             : base(SystemTextJsonMessageSerializer.Instance, messageContext, MessageTypeCache<TMessage>.MessageTypeNames)
         {
-            _message = new Lazy<TMessage>(() => result.Message.DeserializeValue(result.Topic, deserializer));
+            _message = new Lazy<TMessage>(() => deserializer.DeserializeValue(result));
         }
 
         public override bool IsSupportedMessageType<T>()

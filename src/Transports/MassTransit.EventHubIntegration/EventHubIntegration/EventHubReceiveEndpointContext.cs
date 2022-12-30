@@ -18,7 +18,7 @@ namespace MassTransit.EventHubIntegration
         readonly Recycle<IProcessorContextSupervisor> _contextSupervisor;
 
         public EventHubReceiveEndpointContext(IEventHubHostConfiguration hostConfiguration, IBusInstance busInstance,
-            IReceiveEndpointConfiguration endpointConfiguration, ReceiveSettings receiveSettings,
+            IReceiveEndpointConfiguration endpointConfiguration,
             Func<EventProcessorClient> clientFactory,
             Func<PartitionClosingEventArgs, Task> partitionClosingHandler,
             Func<PartitionInitializingEventArgs, Task> partitionInitializingHandler)
@@ -26,7 +26,7 @@ namespace MassTransit.EventHubIntegration
         {
             _busInstance = busInstance;
             _contextSupervisor = new Recycle<IProcessorContextSupervisor>(() =>
-                new ProcessorContextSupervisor(hostConfiguration.ConnectionContextSupervisor, busInstance.HostConfiguration, receiveSettings, clientFactory,
+                new ProcessorContextSupervisor(hostConfiguration.ConnectionContextSupervisor, busInstance.HostConfiguration, clientFactory,
                     partitionClosingHandler, partitionInitializingHandler));
         }
 

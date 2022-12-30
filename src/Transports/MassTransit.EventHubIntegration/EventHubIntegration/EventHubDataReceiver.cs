@@ -19,24 +19,28 @@
         readonly ReceiveEndpointContext _context;
         readonly TaskCompletionSource<bool> _deliveryComplete;
         readonly IReceivePipeDispatcher _dispatcher;
-        readonly ProcessorContext _processorContext;
         readonly EventProcessorClient _client;
         readonly IChannelExecutorPool<ProcessEventArgs> _executorPool;
+        readonly CancellationTokenSource _checkpointTokenSource;
+        readonly IProcessorLockContext _lockContext;
 
         public EventHubDataReceiver(ReceiveSettings receiveSettings, ReceiveEndpointContext context, ProcessorContext processorContext)
         {
             _context = context;
-            _processorContext = processorContext;
-            _executorPool = new CombinedChannelExecutorPool(_processorContext, receiveSettings);
+            _checkpointTokenSource = CancellationTokenSource.CreateLinkedTokenSource(Stopped);
+
+            var lockContext = new ProcessorLockContext(processorContext, receiveSettings, _checkpointTokenSource.Token);
+            _executorPool = new CombinedChannelExecutorPool(lockContext, receiveSettings);
 
             _deliveryComplete = TaskUtil.GetTask<bool>();
 
             _dispatcher = context.CreateReceivePipeDispatcher();
             _dispatcher.ZeroActivity += HandleDeliveryComplete;
 
-            _client = processorContext.GetClient(HandleError);
+            _client = processorContext.GetClient(lockContext, HandleError);
 
             _client.ProcessEventAsync += HandleMessage;
+            _lockContext = lockContext;
 
             SetReady(_client.StartProcessingAsync(Stopping));
         }
@@ -65,8 +69,8 @@
             if (IsStopping || !eventArgs.HasEvent)
                 return;
 
-            await _processorContext.Pending(eventArgs).ConfigureAwait(false);
-            await _executorPool.Push(eventArgs, () => Handle(eventArgs), Stopping);
+            await _lockContext.Pending(eventArgs).ConfigureAwait(false);
+            await _executorPool.Push(eventArgs, () => Handle(eventArgs), Stopping).ConfigureAwait(false);
         }
 
         async Task Handle(ProcessEventArgs eventArgs)
@@ -74,7 +78,7 @@
             if (IsStopping)
                 return;
 
-            var context = new EventHubReceiveContext(eventArgs, _context, _processorContext);
+            var context = new EventHubReceiveContext(eventArgs, _context, _lockContext);
 
             try
             {
@@ -96,21 +100,19 @@
             }
         }
 
-        protected override async Task StopAgent(StopContext context)
+        protected override Task StopAgent(StopContext context)
         {
-            await _client.StopProcessingAsync().ConfigureAwait(false);
-
-            _client.ProcessEventAsync -= HandleMessage;
-
             LogContext.Debug?.Log("Stopping consumer: {InputAddress}", _context.InputAddress);
 
             SetCompleted(ActiveAndActualAgentsCompleted(context));
 
-            await Completed.ConfigureAwait(false);
+            return Completed;
         }
 
         async Task ActiveAndActualAgentsCompleted(StopContext context)
         {
+            var stopProcessing = _client.StopProcessingAsync();
+
             if (_dispatcher.ActiveDispatchCount > 0)
             {
                 try
@@ -124,6 +126,14 @@
             }
 
             await _executorPool.DisposeAsync().ConfigureAwait(false);
+
+            // There is not point to wait any longer, we drained our queue
+            _checkpointTokenSource.Cancel();
+
+            await stopProcessing.ConfigureAwait(false);
+            _client.ProcessEventAsync -= HandleMessage;
+
+            _checkpointTokenSource.Dispose();
         }
 
 
@@ -152,9 +162,10 @@
                 return _partitionExecutorPool.Run(args, () => _keyExecutorPool.Run(args, method, cancellationToken), cancellationToken);
             }
 
-            public ValueTask DisposeAsync()
+            public async ValueTask DisposeAsync()
             {
-                return _keyExecutorPool.DisposeAsync();
+                await _partitionExecutorPool.DisposeAsync().ConfigureAwait(false);
+                await _keyExecutorPool.DisposeAsync().ConfigureAwait(false);
             }
 
             static byte[] GetBytes(ProcessEventArgs args)
