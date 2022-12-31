@@ -31,6 +31,7 @@ namespace MassTransit
                 return new AdminClientBuilder(new AdminClientConfig(provider.GetRequiredService<ClientConfig>())).Build();
             }
 
+            clientConfig.ClientId ??= HostMetadataCache.Host.ProcessName;
             services
                 .AddSingleton(CreateClient)
                 .AddSingleton(clientConfig)

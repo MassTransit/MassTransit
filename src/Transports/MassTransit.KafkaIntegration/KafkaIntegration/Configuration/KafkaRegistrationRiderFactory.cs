@@ -4,6 +4,7 @@ namespace MassTransit.KafkaIntegration.Configuration
     using Confluent.Kafka;
     using DependencyInjection;
     using MassTransit.Configuration;
+    using Metadata;
     using Microsoft.Extensions.DependencyInjection;
 
 
@@ -26,7 +27,10 @@ namespace MassTransit.KafkaIntegration.Configuration
 
         public IBusInstanceSpecification CreateRider(IRiderRegistrationContext context)
         {
-            var configurator = new KafkaFactoryConfigurator(_clientConfig ?? context.GetService<ClientConfig>() ?? new ClientConfig());
+            var clientConfig = _clientConfig ?? context.GetService<ClientConfig>() ?? new ClientConfig();
+            clientConfig.ClientId ??= HostMetadataCache.Host.ProcessName;
+
+            var configurator = new KafkaFactoryConfigurator(clientConfig);
 
             _configure?.Invoke(context, configurator);
 
