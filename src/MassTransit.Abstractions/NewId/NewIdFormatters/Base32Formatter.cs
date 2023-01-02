@@ -1,7 +1,7 @@
 ﻿namespace MassTransit.NewIdFormatters
 {
     using System;
-    using System.Threading;
+    using System.Runtime.CompilerServices;
 
 
     public class Base32Formatter :
@@ -9,7 +9,6 @@
     {
         const string LowerCaseChars = "abcdefghijklmnopqrstuvwxyz234567";
         const string UpperCaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-        static readonly ThreadLocal<char[]> _formatBuffer = new ThreadLocal<char[]>(() => new char[26]);
 
         readonly string _chars;
 
@@ -26,9 +25,9 @@
             _chars = chars;
         }
 
-        public string Format(in byte[] bytes)
+        public unsafe string Format(in byte[] bytes)
         {
-            var result = _formatBuffer.Value!;
+            var result = stackalloc char[26];
 
             var offset = 0;
             for (var i = 0; i < 3; i++)
@@ -50,7 +49,8 @@
             return new string(result, 0, 26);
         }
 
-        static void ConvertLongToBase32(in char[] buffer, int offset, long value, int count, string chars)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static unsafe void ConvertLongToBase32(in char* buffer, int offset, long value, int count, string chars)
         {
             for (var i = count - 1; i >= 0; i--)
             {

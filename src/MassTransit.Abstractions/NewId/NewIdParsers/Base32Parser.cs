@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.NewIdParsers
 {
     using System;
+    using System.Runtime.CompilerServices;
     using System.Threading;
 
 
@@ -70,6 +71,7 @@
             return new NewId(new string(buffer, 0, 32));
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void ConvertLongToBase16(in char[] buffer, int offset, long value, int count)
         {
             for (var i = count - 1; i >= 0; i--)

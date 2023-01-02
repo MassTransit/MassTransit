@@ -11,13 +11,15 @@
             Console.WriteLine("MassTransit Benchmark");
             Console.WriteLine();
 
-          //  BenchmarkRunner.Run<SendBenchmark>();
+            //  BenchmarkRunner.Run<SendBenchmark>();
 
             //          BenchmarkRunner.Run<SupervisorBenchmark>();
 
-          //  BenchmarkRunner.Run<JsonSerializationBenchmark>();
+            //  BenchmarkRunner.Run<JsonSerializationBenchmark>();
 
-            BenchmarkRunner.Run<MediatorBenchmark>();
+            //  BenchmarkRunner.Run<MediatorBenchmark>();
+
+            BenchmarkRunner.Run<NewIdBenchmarks>();
         }
     }
 }

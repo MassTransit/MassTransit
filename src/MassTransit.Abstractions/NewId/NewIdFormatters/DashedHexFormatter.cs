@@ -1,5 +1,8 @@
 ﻿namespace MassTransit.NewIdFormatters
 {
+    using System.Runtime.CompilerServices;
+
+
     public class DashedHexFormatter :
         INewIdFormatter
     {
@@ -22,9 +25,9 @@
             _alpha = upperCase ? 'A' : 'a';
         }
 
-        public string Format(in byte[] bytes)
+        public unsafe string Format(in byte[] bytes)
         {
-            var result = new char[_length];
+            var result = stackalloc char[_length];
 
             var i = 0;
             var offset = 0;
@@ -75,6 +78,7 @@
             return new string(result, 0, _length);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static char HexToChar(int value, int alpha)
         {
             value &= 0xf;
