@@ -85,7 +85,7 @@ namespace MassTransit.ActiveMqTransport.Middleware
             return Task.CompletedTask;
         }
 
-        protected override async Task StopAgent(StopContext context)
+        protected override Task StopAgent(StopContext context)
         {
             _messageConsumer.Stop();
             _messageConsumer.Listener -= HandleMessage;
@@ -93,7 +93,7 @@ namespace MassTransit.ActiveMqTransport.Middleware
 
             SetCompleted(ActiveAndActualAgentsCompleted(context));
 
-            await Completed.ConfigureAwait(false);
+            return Completed;
         }
 
         async Task ActiveAndActualAgentsCompleted(StopContext context)

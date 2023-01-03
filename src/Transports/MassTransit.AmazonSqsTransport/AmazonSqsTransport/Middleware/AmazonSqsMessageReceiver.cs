@@ -43,8 +43,19 @@ namespace MassTransit.AmazonSqsTransport.Middleware
             _dispatcher = context.CreateReceivePipeDispatcher();
             _dispatcher.ZeroActivity += HandleDeliveryComplete;
 
-            var task = Task.Run(Consume);
-            SetCompleted(task);
+            var consumeTask = Task.Run(() => Consume());
+            consumeTask.ContinueWith(async _ =>
+            {
+                try
+                {
+                    if (!IsStopping)
+                        await this.Stop("Consume Loop Exited").ConfigureAwait(false);
+                }
+                catch (Exception exception)
+                {
+                    LogContext.Warning?.Log(exception, "Stop Faulted");
+                }
+            });
         }
 
         long DeliveryMetrics.DeliveryCount => _dispatcher.DispatchCount;
@@ -81,18 +92,17 @@ namespace MassTransit.AmazonSqsTransport.Middleware
             }
             catch (Exception exception)
             {
-                LogContext.Error?.Log(exception, "Consume Loop faulted");
-                throw;
+                LogContext.Warning?.Log(exception, "Consume Loop faulted");
             }
         }
 
-        protected override async Task StopAgent(StopContext context)
+        protected override Task StopAgent(StopContext context)
         {
             LogContext.Debug?.Log("Stopping consumer: {InputAddress}", _context.InputAddress);
 
             SetCompleted(ActiveAndActualAgentsCompleted(context));
 
-            await Completed.ConfigureAwait(false);
+            return Completed;
         }
 
         async Task GetQueueAttributes()

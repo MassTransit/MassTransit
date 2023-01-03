@@ -16,16 +16,16 @@
         IKafkaMessageConsumer<TKey, TValue>
         where TValue : class
     {
-        readonly ReceiveSettings _receiveSettings;
+        readonly CancellationTokenSource _cancellationTokenSource;
+        readonly CancellationTokenSource _checkpointTokenSource;
+        readonly IConsumer<byte[], byte[]> _consumer;
+        readonly Task _consumeTask;
         readonly KafkaReceiveEndpointContext<TKey, TValue> _context;
         readonly TaskCompletionSource<bool> _deliveryComplete;
         readonly IReceivePipeDispatcher _dispatcher;
-        readonly CancellationTokenSource _cancellationTokenSource;
-        readonly IConsumer<byte[], byte[]> _consumer;
-        readonly Task _task;
         readonly IChannelExecutorPool<ConsumeResult<byte[], byte[]>> _executorPool;
-        readonly CancellationTokenSource _checkpointTokenSource;
         readonly IConsumerLockContext _lockContext;
+        readonly ReceiveSettings _receiveSettings;
 
         public KafkaMessageConsumer(ReceiveSettings receiveSettings, KafkaReceiveEndpointContext<TKey, TValue> context, ConsumerContext consumerContext)
         {
@@ -43,7 +43,20 @@
 
             _executorPool = new CombinedChannelExecutorPool(lockContext, receiveSettings);
             _lockContext = lockContext;
-            _task = Task.Run(Consume);
+
+            _consumeTask = Task.Run(() => Consume());
+            _consumeTask.ContinueWith(async _ =>
+            {
+                try
+                {
+                    if (!IsStopping)
+                        await this.Stop("Consume Loop Exited").ConfigureAwait(false);
+                }
+                catch (Exception exception)
+                {
+                    LogContext.Warning?.Log(exception, "Stop Faulted");
+                }
+            });
         }
 
         public long DeliveryCount => _dispatcher.DispatchCount;
@@ -64,19 +77,14 @@
                     await _lockContext.Pending(consumeResult).ConfigureAwait(false);
                     await _executorPool.Push(consumeResult, () => Handle(consumeResult), Stopping).ConfigureAwait(false);
                 }
-
-                SetCompleted(Task.CompletedTask);
             }
             catch (OperationCanceledException exception) when (exception.CancellationToken == Stopping
                                                                || exception.CancellationToken == _cancellationTokenSource.Token)
             {
-                SetCompleted(Task.CompletedTask);
             }
             catch (Exception exception)
             {
-                LogContext.Error?.Log(exception, "Consume Loop faulted");
-
-                SetCompleted(TaskUtil.Faulted<bool>(exception));
+                LogContext.Warning?.Log(exception, "Consume Loop faulted");
             }
         }
 
@@ -151,7 +159,7 @@
                 }
             }
 
-            await _task.ConfigureAwait(false);
+            await _consumeTask.ConfigureAwait(false);
             await _executorPool.DisposeAsync().ConfigureAwait(false);
 
             // It is time to cancel pending tasks as we already drained current pool
@@ -168,8 +176,8 @@
         class CombinedChannelExecutorPool :
             IChannelExecutorPool<ConsumeResult<byte[], byte[]>>
         {
-            readonly IChannelExecutorPool<ConsumeResult<byte[], byte[]>> _partitionExecutorPool;
             readonly IChannelExecutorPool<ConsumeResult<byte[], byte[]>> _keyExecutorPool;
+            readonly IChannelExecutorPool<ConsumeResult<byte[], byte[]>> _partitionExecutorPool;
 
             public CombinedChannelExecutorPool(IChannelExecutorPool<ConsumeResult<byte[], byte[]>> partitionExecutorPool, ReceiveSettings receiveSettings)
             {
