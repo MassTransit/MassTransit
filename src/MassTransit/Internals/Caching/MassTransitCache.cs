@@ -99,10 +99,16 @@ namespace MassTransit.Internals.Caching
 
         bool TryGetValue(TKey key, out TCacheValue value)
         {
-            if (_values.TryGetValue(key, out value) && !value.IsFaultedOrCanceled)
+            if (_values.TryGetValue(key, out value))
             {
-                _metrics.Hit();
-                return true;
+                if (!value.IsFaultedOrCanceled)
+                {
+                    _metrics.Hit();
+                    return true;
+                }
+
+                value.Evict();
+                value = default;
             }
 
             return false;
