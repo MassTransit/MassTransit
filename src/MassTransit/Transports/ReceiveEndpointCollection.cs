@@ -101,7 +101,11 @@
 
         protected override async Task StopAgent(StopContext context)
         {
-            ReceiveEndpoint[] endpoints = _endpoints.Values.Where(x => x.IsStarted()).ToArray();
+            ReceiveEndpoint[] endpoints = _endpoints.Values.Where(x => x.IsStarted() && !x.IsBusEndpoint).ToArray();
+
+            await Task.WhenAll(endpoints.Select(x => x.Stop(context.CancellationToken))).ConfigureAwait(false);
+
+            endpoints = _endpoints.Values.Where(x => x.IsStarted() && x.IsBusEndpoint).ToArray();
 
             await Task.WhenAll(endpoints.Select(x => x.Stop(context.CancellationToken))).ConfigureAwait(false);
 

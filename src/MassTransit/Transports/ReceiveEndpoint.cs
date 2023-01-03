@@ -54,6 +54,8 @@ namespace MassTransit.Transports
 
         public EndpointHealthResult HealthResult { get; set; }
 
+        public bool IsBusEndpoint => _context.IsBusEndpoint;
+
         public Uri InputAddress { get; set; }
 
         public Task<ReceiveEndpointReady> Started => _started.Task;

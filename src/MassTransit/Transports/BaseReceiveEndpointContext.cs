@@ -39,6 +39,8 @@ namespace MassTransit.Transports
             PrefetchCount = configuration.PrefetchCount;
             ConcurrentMessageLimit = configuration.ConcurrentMessageLimit;
 
+            IsBusEndpoint = configuration.IsBusEndpoint;
+
             _publishTopology = configuration.Topology.Publish;
 
             _sendObservers = new SendObservable();
@@ -67,7 +69,7 @@ namespace MassTransit.Transports
 
         Uri HostAddress { get; }
 
-        public bool IsBusEndpoint { get; set; }
+        public bool IsBusEndpoint { get; }
 
         public IReceiveObserver ReceiveObservers => _receiveObservers;
 
