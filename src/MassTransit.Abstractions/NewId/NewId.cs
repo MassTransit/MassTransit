@@ -500,7 +500,7 @@ namespace MassTransit
         {
             var ids = new Guid[count];
 
-            _getGenerator().NextGuid(ids, 0, count);
+            _getGenerator().NextSequentialGuid(ids, 0, count);
 
             return ids;
         }
@@ -514,7 +514,7 @@ namespace MassTransit
         /// <returns></returns>
         public static ArraySegment<Guid> NextGuid(Guid[] ids, int index, int count)
         {
-            return _getGenerator().NextGuid(ids, index, count);
+            return _getGenerator().NextSequentialGuid(ids, index, count);
         }
 
         /// <summary>
