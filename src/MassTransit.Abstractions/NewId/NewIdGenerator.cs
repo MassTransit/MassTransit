@@ -2,6 +2,11 @@
 {
     using System;
     using System.Threading;
+#if NET6_0_OR_GREATER
+    using System.Runtime.CompilerServices;
+    using System.Runtime.Intrinsics;
+    using System.Runtime.Intrinsics.X86;
+#endif
 
 
     public class NewIdGenerator :
@@ -84,6 +89,18 @@
             if (lockTaken)
                 _spinLock.Exit();
 
+            // swapping high and low byte, because SQL-server is doing the wrong ordering otherwise
+            var sequenceSwapped = ((sequence << 8) | ((sequence >> 8) & 0x00FF)) & 0xFFFF;
+
+#if NET6_0_OR_GREATER
+            if (Ssse3.IsSupported && BitConverter.IsLittleEndian)
+            {
+                var vec = Vector128.Create((int)a, b, _c, _d | sequenceSwapped);
+                var result = Ssse3.Shuffle(vec.AsByte(), Vector128.Create((byte)12, 13, 14, 15, 8, 9, 10, 11, 5, 4, 3, 2, 1, 0, 7, 6));
+                return Unsafe.As<Vector128<byte>, Guid>(ref result);
+            }
+#endif
+
             var d = (byte)(b >> 8);
             var e = (byte)b;
             var f = (byte)(a >> 24);
@@ -92,9 +109,6 @@
             var i = (byte)a;
             var j = (byte)(b >> 24);
             var k = (byte)(b >> 16);
-
-            // swapping high and low byte, because SQL-server is doing the wrong ordering otherwise
-            var sequenceSwapped = ((sequence << 8) | ((sequence >> 8) & 0x00FF)) & 0xFFFF;
 
             return new Guid(_d | sequenceSwapped, _gb, _gc, d, e, f, g, h, i, j, k);
         }
@@ -114,19 +128,31 @@
             var sequence = _sequence++;
 
             var a = _a;
+#if NET6_0_OR_GREATER
+            var v = _b;
+#endif
             var b = (short)(_b >> 16);
             var c = (short)_b;
 
             if (lockTaken)
                 _spinLock.Exit();
 
+            // swapping high and low byte, because SQL-server is doing the wrong ordering otherwise
+            var sequenceSwapped = ((sequence << 8) | ((sequence >> 8) & 0x00FF)) & 0xFFFF;
+
+#if NET6_0_OR_GREATER
+            if (Ssse3.IsSupported && BitConverter.IsLittleEndian)
+            {
+                var vec = Vector128.Create((int)a, v, _c, _d | sequenceSwapped);
+                var result = Ssse3.Shuffle(vec.AsByte(), Vector128.Create((byte)0, 1, 2, 3, 6, 7, 4, 5, 11, 10, 9, 8, 15, 14, 13, 12));
+                return Unsafe.As<Vector128<byte>, Guid>(ref result);
+            }
+#endif
+
             var d = (byte)(_gc >> 8);
             var e = (byte)_gc;
             var f = (byte)(_gb >> 8);
             var g = (byte)_gb;
-
-            // swapping high and low byte, because SQL-server is doing the wrong ordering otherwise
-            var sequenceSwapped = ((sequence << 8) | ((sequence >> 8) & 0x00FF)) & 0xFFFF;
 
             var h = (byte)((_d | sequenceSwapped) >> 24);
             var i = (byte)((_d | sequenceSwapped) >> 16);
@@ -203,12 +229,21 @@
                 // swapping high and low byte, because SQL-server is doing the wrong ordering otherwise
                 var sequenceSwapped = ((sequence << 8) | ((sequence >> 8) & 0x00FF)) & 0xFFFF;
 
+#if NET6_0_OR_GREATER
+            if (Ssse3.IsSupported && BitConverter.IsLittleEndian)
+            {
+                var vec = Vector128.Create((int)a, b, _c, _d | sequenceSwapped);
+                var result = Ssse3.Shuffle(vec.AsByte(), Vector128.Create((byte)12, 13, 14, 15, 8, 9, 10, 11, 5, 4, 3, 2, 1, 0, 7, 6));
+                ids[offset] = Unsafe.As<Vector128<byte>, Guid>(ref result);
+            }
+#else
                 var h = (byte)((_d | sequenceSwapped) >> 24);
                 var i = (byte)((_d | sequenceSwapped) >> 16);
                 var j = (byte)((_d | sequenceSwapped) >> 8);
                 var k = (byte)(_d | sequenceSwapped);
 
                 ids[offset] = new Guid(a, b, c, d, e, f, g, h, i, j, k);
+#endif
             }
 
             if (lockTaken)

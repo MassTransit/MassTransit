@@ -109,7 +109,7 @@
 
             IGrouping<NewId, NewId>[] duplicates = ids.GroupBy(x => x).Where(x => x.Count() > 1).ToArray();
 
-            Console.WriteLine("Duplicates: {0}", duplicates.Count());
+            Console.WriteLine("Duplicates: {0}", duplicates.Length);
 
             foreach (IGrouping<NewId, NewId> newId in duplicates)
                 Console.WriteLine("{0} {1}", newId.Key, newId.Count());
@@ -141,7 +141,7 @@
 
             IGrouping<NewId, NewId>[] duplicates = ids.GroupBy(x => x).Where(x => x.Count() > 1).ToArray();
 
-            Console.WriteLine("Duplicates: {0}", duplicates.Count());
+            Console.WriteLine("Duplicates: {0}", duplicates.Length);
 
             foreach (IGrouping<NewId, NewId> newId in duplicates)
                 Console.WriteLine("{0} {1}", newId.Key, newId.Count());
