@@ -152,6 +152,29 @@
             Assert.AreEqual(expected, guid);
         }
 
+        [Test]
+        public void Should_generate_known_guid_batch()
+        {
+            var exp = new string[] { "74b719ec-7596-3cf0-7d81-bf34437f0b01", "74b719ec-7596-3cf0-7d81-bf34437f0c01", "74b719ec-7596-3cf0-7d81-bf34437f0d01" };
+            var tickProvider = new MockTickProvider(8410219332513447152);
+            var networkProvider = new MockNetworkProvider(BitConverter.GetBytes(6857996259202924925));
+            var generator = new NewIdGenerator(tickProvider, networkProvider);
+
+            for (int i = 0; i < 267; i++)
+            {
+                generator.NextGuid();
+            }
+
+            var batch = new Guid[3];
+            generator.NextSequentialGuid(batch, 0, batch.Length);
+
+            for (int i = 0; i < exp.Length; i++)
+            {
+                var guid = Guid.Parse(exp[i]);
+                Assert.AreEqual(guid, batch[i]);
+            }
+        }
+
         [SetUp]
         public void Init()
         {

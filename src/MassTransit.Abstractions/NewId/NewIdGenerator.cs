@@ -190,13 +190,16 @@
             return new ArraySegment<NewId>(ids, index, count);
         }
 
-        public ArraySegment<Guid> NextGuid(Guid[] ids, int index, int count)
+        public ArraySegment<Guid> NextSequentialGuid(Guid[] ids, int index, int count)
         {
             if (index + count > ids.Length)
                 throw new ArgumentOutOfRangeException(nameof(count));
 
             var ticks = _tickProvider.Ticks;
 
+#if NET6_0_OR_GREATER
+            var v = _b;
+#endif
             var a = _a;
             var b = (short)(_b >> 16);
             var c = (short)_b;
@@ -219,6 +222,9 @@
                 {
                     UpdateTimestamp(_lastTick + 1);
 
+#if NET6_0_OR_GREATER
+                    v = _b;
+#endif
                     a = _a;
                     b = (short)(_b >> 16);
                     c = (short)_b;
@@ -230,20 +236,21 @@
                 var sequenceSwapped = ((sequence << 8) | ((sequence >> 8) & 0x00FF)) & 0xFFFF;
 
 #if NET6_0_OR_GREATER
-            if (Ssse3.IsSupported && BitConverter.IsLittleEndian)
-            {
-                var vec = Vector128.Create((int)a, b, _c, _d | sequenceSwapped);
-                var result = Ssse3.Shuffle(vec.AsByte(), Vector128.Create((byte)12, 13, 14, 15, 8, 9, 10, 11, 5, 4, 3, 2, 1, 0, 7, 6));
-                ids[offset] = Unsafe.As<Vector128<byte>, Guid>(ref result);
-            }
-#else
+                if (Ssse3.IsSupported && BitConverter.IsLittleEndian)
+                {
+                    var vec = Vector128.Create((int)a, v, _c, _d | sequenceSwapped);
+                    var result = Ssse3.Shuffle(vec.AsByte(), Vector128.Create((byte)0, 1, 2, 3, 6, 7, 4, 5, 11, 10, 9, 8, 15, 14, 13, 12));
+                    ids[offset] = Unsafe.As<Vector128<byte>, Guid>(ref result);
+                    continue;
+                }
+#endif
+
                 var h = (byte)((_d | sequenceSwapped) >> 24);
                 var i = (byte)((_d | sequenceSwapped) >> 16);
                 var j = (byte)((_d | sequenceSwapped) >> 8);
                 var k = (byte)(_d | sequenceSwapped);
 
                 ids[offset] = new Guid(a, b, c, d, e, f, g, h, i, j, k);
-#endif
             }
 
             if (lockTaken)
