@@ -6,7 +6,6 @@ namespace MassTransit.EventHubIntegration.Checkpoints
     using System.Threading.Channels;
     using System.Threading.Tasks;
     using Internals;
-    using Util;
 
 
     public class BatchCheckpointer :
@@ -14,7 +13,6 @@ namespace MassTransit.EventHubIntegration.Checkpoints
     {
         readonly Channel<IPendingConfirmation> _channel;
         readonly Task _checkpointTask;
-        readonly ChannelExecutor _executor;
         readonly ReceiveSettings _settings;
         readonly CancellationToken _cancellationToken;
 
@@ -30,7 +28,6 @@ namespace MassTransit.EventHubIntegration.Checkpoints
                 SingleWriter = true
             };
 
-            _executor = new ChannelExecutor(1);
             _channel = Channel.CreateBounded<IPendingConfirmation>(channelOptions);
             _checkpointTask = Task.Run(WaitForBatch);
         }
@@ -45,8 +42,6 @@ namespace MassTransit.EventHubIntegration.Checkpoints
             _channel.Writer.Complete();
 
             await _checkpointTask.ConfigureAwait(false);
-
-            await _executor.DisposeAsync().ConfigureAwait(false);
         }
 
         async Task WaitForBatch()
@@ -72,7 +67,7 @@ namespace MassTransit.EventHubIntegration.Checkpoints
         {
             var timeoutToken = new CancellationTokenSource(_settings.CheckpointInterval);
             var batchToken = CancellationTokenSource.CreateLinkedTokenSource(timeoutToken.Token, _cancellationToken);
-            var batch = new List<IPendingConfirmation>();
+            var batch = new List<IPendingConfirmation>(_settings.CheckpointMessageCount);
 
             try
             {
@@ -90,11 +85,11 @@ namespace MassTransit.EventHubIntegration.Checkpoints
                             break;
                     }
                 }
-                catch (OperationCanceledException exception) when (exception.CancellationToken == batchToken.Token && batch.Count > 0)
+                catch (Exception) when (batch.Count > 0)
                 {
                 }
 
-                await _executor.Run(() => Checkpoint(batch)).ConfigureAwait(false);
+                await Checkpoint(batch).ConfigureAwait(false);
             }
             catch (OperationCanceledException exception) when (exception.CancellationToken == batchToken.Token)
             {

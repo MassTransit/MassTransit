@@ -17,7 +17,7 @@
         readonly Lazy<TKey> _key;
         readonly IConsumerLockContext _lockContext;
         readonly ConsumeResult<byte[], byte[]> _result;
-        IHeaderProvider _headerProvider;
+        readonly Lazy<IHeaderProvider> _headerProvider;
 
         public KafkaReceiveContext(ConsumeResult<byte[], byte[]> result, KafkaReceiveEndpointContext<TKey, TValue> context, IConsumerLockContext lockContext)
             : base(false, context)
@@ -29,6 +29,7 @@
             InputAddress = context.GetInputAddress(_result.Topic);
 
             _key = new Lazy<TKey>(() => _context.KeyDeserializer.DeserializeKey(result));
+            _headerProvider = new Lazy<IHeaderProvider>(() => _context.HeadersDeserializer.Deserialize(_result.Message.Headers));
 
             var messageContext = new KafkaMessageContext(_result, this);
 
@@ -39,7 +40,7 @@
             AddOrUpdatePayload<ConsumeContext>(() => consumeContext, existing => consumeContext);
         }
 
-        protected override IHeaderProvider HeaderProvider => _headerProvider ??= _context.HeadersDeserializer.Deserialize(_result.Message.Headers);
+        protected override IHeaderProvider HeaderProvider => _headerProvider.Value;
 
         public override MessageBody Body => new NotSupportedMessageBody();
 

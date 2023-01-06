@@ -22,12 +22,6 @@ namespace MassTransit.KafkaIntegration
 
         public override CancellationToken CancellationToken { get; }
 
-        public event Action<Error> ErrorHandler
-        {
-            add => _context.ErrorHandler += value;
-            remove => _context.ErrorHandler -= value;
-        }
-
         public ILogContext LogContext => _context.LogContext;
 
         public IConsumer<byte[], byte[]> CreateConsumer(KafkaConsumerBuilderContext context, Action<IConsumer<byte[], byte[]>, Error> onError)

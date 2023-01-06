@@ -1,8 +1,8 @@
 namespace MassTransit.KafkaIntegration.Middleware
 {
+    using System;
     using System.Linq;
     using System.Threading.Tasks;
-    using Confluent.Kafka;
     using MassTransit.Middleware;
     using Transports;
 
@@ -25,7 +25,7 @@ namespace MassTransit.KafkaIntegration.Middleware
             for (var i = 0; i < consumers.Length; i++)
                 consumers[i] = new KafkaMessageConsumer<TKey, TValue>(receiveSettings, _context, context);
 
-            var supervisor = CreateConsumerSupervisor(context, consumers);
+            var supervisor = CreateConsumerSupervisor(consumers);
 
             await _context.TransportObservers.NotifyReady(_context.InputAddress).ConfigureAwait(false);
 
@@ -49,28 +49,41 @@ namespace MassTransit.KafkaIntegration.Middleware
         {
         }
 
-        Supervisor CreateConsumerSupervisor(ConsumerContext context, IKafkaMessageConsumer<TKey, TValue>[] actualConsumers)
+        Supervisor CreateConsumerSupervisor(IKafkaMessageConsumer<TKey, TValue>[] actualConsumers)
         {
-            var supervisor = new Supervisor();
-
-            foreach (IKafkaMessageConsumer<TKey, TValue> consumer in actualConsumers)
-                supervisor.Add(consumer);
+            var supervisor = new ConsumerSupervisor(actualConsumers);
 
             _context.AddConsumeAgent(supervisor);
 
-            void HandleError(Error exception)
-            {
-                supervisor.Stop(exception.Reason);
-            }
-
-            context.ErrorHandler += HandleError;
-
             supervisor.SetReady();
 
-            supervisor.Completed.ContinueWith(task => context.ErrorHandler -= HandleError,
-                TaskContinuationOptions.ExecuteSynchronously);
-
             return supervisor;
+        }
+
+
+        class ConsumerSupervisor :
+            Supervisor
+        {
+            public ConsumerSupervisor(IKafkaMessageConsumer<TKey, TValue>[] consumers)
+            {
+                foreach (IKafkaMessageConsumer<TKey, TValue> consumer in consumers)
+                {
+                    consumer.Completed.ContinueWith(async _ =>
+                    {
+                        try
+                        {
+                            if (!IsStopping)
+                                await this.Stop("Consumer stopped, stopping supervisor").ConfigureAwait(false);
+                        }
+                        catch (Exception exception)
+                        {
+                            LogContext.Warning?.Log(exception, "Stop Faulted");
+                        }
+                    }, TaskContinuationOptions.RunContinuationsAsynchronously);
+
+                    Add(consumer);
+                }
+            }
         }
 
 

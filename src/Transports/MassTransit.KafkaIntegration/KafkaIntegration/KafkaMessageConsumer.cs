@@ -122,7 +122,6 @@
             {
                 _cancellationTokenSource.Cancel();
                 _deliveryComplete.TrySetResult(true);
-                SetCompleted(TaskUtil.Faulted<bool>(new KafkaException(error)));
             }
         }
 

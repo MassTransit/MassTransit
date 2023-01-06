@@ -135,6 +135,8 @@ namespace MassTransit.EventHubIntegration
                     PartitionKey = sendContext.PartitionKey
                 };
 
+                sendContext.CancellationToken.ThrowIfCancellationRequested();
+
                 StartedActivity? activity = LogContext.Current?.StartSendActivity(_context, sendContext,
                     (nameof(sendContext.PartitionId), options.PartitionId), (nameof(sendContext.PartitionKey), options.PartitionKey));
                 try

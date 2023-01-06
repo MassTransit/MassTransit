@@ -92,6 +92,8 @@ namespace MassTransit.KafkaIntegration
                 sendContext.SourceAddress ??= _context.HostAddress;
                 sendContext.ConversationId ??= NewId.NextGuid();
 
+                sendContext.CancellationToken.ThrowIfCancellationRequested();
+
                 StartedActivity? activity = LogContext.Current?.StartSendActivity(_context, sendContext,
                     (nameof(sendContext.Partition), sendContext.Partition.ToString()));
                 try

@@ -22,18 +22,12 @@ namespace MassTransit.KafkaIntegration
             _consumerBuilderFactory = consumerBuilderFactory;
         }
 
-        public event Action<Error> ErrorHandler;
-
         public ILogContext LogContext => _hostConfiguration.ReceiveLogContext;
 
         public IConsumer<byte[], byte[]> CreateConsumer(KafkaConsumerBuilderContext context, Action<IConsumer<byte[], byte[]>, Error> onError)
         {
             return _consumerBuilderFactory.Invoke()
-                .SetErrorHandler((c, e) =>
-                {
-                    ErrorHandler?.Invoke(e);
-                    onError.Invoke(c, e);
-                })
+                .SetErrorHandler((c, e) => onError.Invoke(c, e))
                 .SetPartitionsLostHandler(context.OnPartitionLost)
                 .SetPartitionsAssignedHandler(context.OnAssigned)
                 .SetPartitionsRevokedHandler(context.OnUnAssigned)
