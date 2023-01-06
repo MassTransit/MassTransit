@@ -31,9 +31,8 @@ namespace MassTransit.EventHubIntegration
         }
 
         public ILogContext LogContext => _hostConfiguration.ReceiveLogContext;
-        public event Func<ProcessErrorEventArgs, Task> ProcessError;
 
-        public EventProcessorClient GetClient(ProcessorClientBuilderContext context, Func<ProcessErrorEventArgs, Task> errorHandler)
+        public EventProcessorClient GetClient(ProcessorClientBuilderContext context)
         {
             _client.PartitionInitializingAsync += async args =>
             {
@@ -47,13 +46,6 @@ namespace MassTransit.EventHubIntegration
                     await _partitionClosingHandler(args).ConfigureAwait(false);
 
                 await context.OnPartitionClosing(args).ConfigureAwait(false);
-            };
-            _client.ProcessErrorAsync += async args =>
-            {
-                if (ProcessError != null)
-                    await ProcessError.Invoke(args).ConfigureAwait(false);
-
-                await errorHandler.Invoke(args).ConfigureAwait(false);
             };
             return _client;
         }

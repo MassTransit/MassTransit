@@ -37,8 +37,9 @@
             _dispatcher = context.CreateReceivePipeDispatcher();
             _dispatcher.ZeroActivity += HandleDeliveryComplete;
 
-            _client = processorContext.GetClient(lockContext, HandleError);
+            _client = processorContext.GetClient(lockContext);
 
+            _client.ProcessErrorAsync += HandleError;
             _client.ProcessEventAsync += HandleMessage;
             _lockContext = lockContext;
 
@@ -60,7 +61,20 @@
 
                 _deliveryComplete.TrySetResult(true);
 
-                SetCompleted(TaskUtil.Faulted<bool>(eventArgs.Exception));
+            #pragma warning disable 4014
+                Task.Run(async () =>
+                {
+                    try
+                    {
+                        if (!IsStopping)
+                            await this.Stop($"Data Receiver Exception: {eventArgs.Exception.Message}").ConfigureAwait(false);
+                    }
+                    catch (Exception exception)
+                    {
+                        LogContext.Warning?.Log(exception, "Stop Faulted");
+                    }
+                });
+            #pragma warning restore 4014
             }
         }
 
@@ -132,6 +146,7 @@
 
             await stopProcessing.ConfigureAwait(false);
             _client.ProcessEventAsync -= HandleMessage;
+            _client.ProcessErrorAsync -= HandleError;
 
             _checkpointTokenSource.Dispose();
         }
