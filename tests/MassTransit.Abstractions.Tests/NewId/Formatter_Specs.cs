@@ -7,53 +7,63 @@
     using NewIdParsers;
     using NUnit.Framework;
 
-
     [TestFixture]
     public class Using_the_newid_formatters
     {
-        [Test]
-        public void Should_compare_known_conversions()
+        private readonly Dictionary<string, string[]> _testValues;
+        public Using_the_newid_formatters()
         {
             var directory = AppDomain.CurrentDomain.BaseDirectory;
-            var newIdFileName = Path.Combine(directory, "NewId", "guids.txt");
             var textsFileName = Path.Combine(directory, "NewId", "texts.txt");
+            var fileText = File.ReadAllText(textsFileName);
 
-            var newIds = new List<NewId>();
+            _testValues = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string[]>>(fileText);
+        }
 
-            using (var file = File.Open(newIdFileName, FileMode.Open, FileAccess.Read, FileShare.Read))
-            using (var reader = new StreamReader(file))
+        // Base32
+        [Test]
+        public void Should_compare_known_conversions_Base32Lower() => CompareKnownEncoding("Base32Lower", new Base32Formatter());
+        [Test]
+        public void Should_compare_known_conversions_Base32Upper() => CompareKnownEncoding("Base32Upper", new Base32Formatter(true));
+        [Test]
+        public void Should_compare_known_conversions_CustomBase32() => CompareKnownEncoding("CustomBase32", new Base32Formatter("0123456789ABCDEFGHIJKLMNOPQRSTUV"));
+
+        // ZBase32
+        [Test]
+        public void Should_compare_known_conversions_ZBase32Lower() => CompareKnownEncoding("ZBase32Lower", new ZBase32Formatter());
+        [Test]
+        public void Should_compare_known_conversions_ZBase32Upper() => CompareKnownEncoding("ZBase32Upper", new ZBase32Formatter(true));
+
+        // Hex
+        [Test]
+        public void Should_compare_known_conversions_HexBase16Lower() => CompareKnownEncoding("HexBase16Lower", new HexFormatter());
+        [Test]
+        public void Should_compare_known_conversions_HexBase16Upper() => CompareKnownEncoding("HexBase16Upper", new HexFormatter(true));
+
+        // DashedHex
+        [Test]
+        public void Should_compare_known_conversions_DashedHexBase16Lower() => CompareKnownEncoding("DashedHexBase16Lower", new DashedHexFormatter());
+        [Test]
+        public void Should_compare_known_conversions_DashedHexBase16Upper() => CompareKnownEncoding("DashedHexBase16Upper", new DashedHexFormatter(upperCase: true));
+        [Test]
+        public void Should_compare_known_conversions_DashedHexBase16BracketsLower() => CompareKnownEncoding("DashedHexBase16BracketsLower", new DashedHexFormatter('{', '}'));
+        [Test]
+        public void Should_compare_known_conversions_DashedHexBase16BracketsUpper() => CompareKnownEncoding("DashedHexBase16BracketsUpper", new DashedHexFormatter('{', '}', upperCase: true));
+
+
+        public void CompareKnownEncoding(string name, INewIdFormatter formatter)
+        {
+            var guids = _testValues["Guids"];
+            var expectedValues = _testValues[name];
+            Assert.AreEqual(guids.Length, expectedValues.Length);
+
+            for (var i = 0; i < guids.Length; i++)
             {
-                while (!reader.EndOfStream)
-                {
-                    var line = reader.ReadLine();
-                    newIds.Add(new NewId(line.Trim()));
-                }
+                var newId = new NewId(guids[i]);
+                var text = newId.ToString(formatter);
+                Assert.AreEqual(expectedValues[i], text);
             }
-
-            var texts = new List<string>(newIds.Count);
-
-            using (var file = File.Open(textsFileName, FileMode.Open, FileAccess.Read, FileShare.Read))
-            using (var reader = new StreamReader(file))
-            {
-                while (!reader.EndOfStream)
-                {
-                    var line = reader.ReadLine();
-                    texts.Add(line.Trim());
-                }
-            }
-
-            Assert.AreEqual(newIds.Count, texts.Count);
-
-            var formatter = new Base32Formatter("0123456789ABCDEFGHIJKLMNOPQRSTUV");
-
-            for (var i = 0; i < newIds.Count; i++)
-            {
-                var text = newIds[i].ToString(formatter);
-
-                Assert.AreEqual(texts[i], text);
-            }
-
-            Console.WriteLine("Compared {0} equal conversions", texts.Count);
+            Console.WriteLine("Compared {0} equal conversions", guids.Length);
         }
 
         [Test]
