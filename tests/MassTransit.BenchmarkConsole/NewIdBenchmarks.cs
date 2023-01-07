@@ -61,7 +61,7 @@ namespace MassTransit.BenchmarkConsole
         }
 
         [Benchmark]
-        public string ToString()
+        public string NewIdToString()
         {
             return Max.ToString();
         }
