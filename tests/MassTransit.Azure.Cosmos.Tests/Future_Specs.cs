@@ -15,21 +15,29 @@ namespace MassTransit.Azure.Cosmos.Tests
         void Configure(ICosmosSagaRepositoryConfigurator configurator);
     }
 
-    class AzureCosmosTestTokenCredentialConfigurator : IAzureCosmosTestAuthenticationConfigurator
-    {
-        public void Configure(ICosmosSagaRepositoryConfigurator configurator)
-        {
-            configurator.AccountEndpoint = Configuration.AccountEndpoint;
-            configurator.TokenCredential = new DefaultAzureCredential();
-        }
-    }
-
     class AzureCosmosTestAccountKeyConfigurator : IAzureCosmosTestAuthenticationConfigurator
     {
         public void Configure(ICosmosSagaRepositoryConfigurator configurator)
         {
             configurator.AccountEndpoint = Configuration.AccountEndpoint;
             configurator.AuthKeyOrResourceToken = Configuration.AccountKey;
+        }
+    }
+
+    class AzureCosmosTestConnectionStringConfigurator : IAzureCosmosTestAuthenticationConfigurator
+    {
+        public void Configure(ICosmosSagaRepositoryConfigurator configurator)
+        {
+            configurator.ConnectionString = Configuration.ConnectionString;
+        }
+    }
+
+    class AzureCosmosTestTokenCredentialConfigurator : IAzureCosmosTestAuthenticationConfigurator
+    {
+        public void Configure(ICosmosSagaRepositoryConfigurator configurator)
+        {
+            configurator.AccountEndpoint = Configuration.AccountEndpoint;
+            configurator.TokenCredential = new DefaultAzureCredential();
         }
     }
 
@@ -92,6 +100,16 @@ namespace MassTransit.Azure.Cosmos.Tests
     {
         public AzureCosmosTokenCredentialFryFutureSpecs()
             : base(new AzureCosmosFutureTestFixtureConfigurator(new AzureCosmosTestTokenCredentialConfigurator()))
+        {
+        }
+    }
+
+    [TestFixture]
+    public class AzureCosmosConnectionStringFryFutureSpecs :
+        FryFuture_Specs
+    {
+        public AzureCosmosConnectionStringFryFutureSpecs()
+            : base(new AzureCosmosFutureTestFixtureConfigurator(new AzureCosmosTestConnectionStringConfigurator()))
         {
         }
     }
