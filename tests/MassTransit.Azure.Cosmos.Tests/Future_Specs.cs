@@ -2,6 +2,7 @@ namespace MassTransit.Azure.Cosmos.Tests
 {
     using System;
     using System.Threading.Tasks;
+    using global::Azure.Identity;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
     using TestFramework;
@@ -9,19 +10,48 @@ namespace MassTransit.Azure.Cosmos.Tests
     using TestFramework.Futures.Tests;
 
 
+    interface IAzureCosmosTestAuthenticationConfigurator
+    {
+        void Configure(ICosmosSagaRepositoryConfigurator configurator);
+    }
+
+    class AzureCosmosTestTokenCredentialConfigurator : IAzureCosmosTestAuthenticationConfigurator
+    {
+        public void Configure(ICosmosSagaRepositoryConfigurator configurator)
+        {
+            configurator.AccountEndpoint = Configuration.AccountEndpoint;
+            configurator.TokenCredential = new DefaultAzureCredential();
+        }
+    }
+
+    class AzureCosmosTestAccountKeyConfigurator : IAzureCosmosTestAuthenticationConfigurator
+    {
+        public void Configure(ICosmosSagaRepositoryConfigurator configurator)
+        {
+            configurator.AccountEndpoint = Configuration.AccountEndpoint;
+            configurator.AuthKeyOrResourceToken = Configuration.AccountKey;
+        }
+    }
+
     class AzureCosmosFutureTestFixtureConfigurator :
         IFutureTestFixtureConfigurator
     {
         const string DatabaseId = "sagaTest";
         const string CollectionId = "futurestate";
 
+        private IAzureCosmosTestAuthenticationConfigurator _authConfigurator;
+
+        public AzureCosmosFutureTestFixtureConfigurator(IAzureCosmosTestAuthenticationConfigurator authConfigurator = null)
+        {
+            _authConfigurator = authConfigurator ?? new AzureCosmosTestAccountKeyConfigurator();
+        }
+
         public void ConfigureFutureSagaRepository(IBusRegistrationConfigurator configurator)
         {
             configurator.AddSagaRepository<FutureState>()
                 .CosmosRepository(r =>
                 {
-                    r.AccountEndpoint = Configuration.AccountEndpoint;
-                    r.AuthKeyOrResourceToken = Configuration.AccountKey;
+                    _authConfigurator.Configure(r);
 
                     r.DatabaseId = DatabaseId;
                     r.CollectionId = CollectionId;
@@ -47,6 +77,22 @@ namespace MassTransit.Azure.Cosmos.Tests
         public Task OneTimeTearDown(IServiceProvider provider)
         {
             return Task.CompletedTask;
+        }
+    }
+
+    // In order to get this test to pass, you have to:
+    // 1. Create a CosmosDB Resource in Azure
+    // 2. Configure role-based access Cosmos (https://learn.microsoft.com/en-us/azure/cosmos-db/how-to-setup-rbac)
+    // 3. Create a 'sagaTest' Database w/ a 'futurestate' collection (rbac doesn't support database/container management operations)
+    // 4. Set Configuration.AccountEndpoint to the CosmosDB Resource (it defaults to the emulator)
+    [TestFixture]
+    [Ignore("Requires AzureCredentials be available on the device and that a remote Cosmos instance is prepped for RBAC.")]
+    public class AzureCosmosTokenCredentialFryFutureSpecs :
+        FryFuture_Specs
+    {
+        public AzureCosmosTokenCredentialFryFutureSpecs()
+            : base(new AzureCosmosFutureTestFixtureConfigurator(new AzureCosmosTestTokenCredentialConfigurator()))
+        {
         }
     }
 
