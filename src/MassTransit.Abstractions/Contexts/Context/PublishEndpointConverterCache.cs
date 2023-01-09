@@ -27,6 +27,17 @@ namespace MassTransit.Context
             return Cached.Converters.Value[messageType].Publish(endpoint, message, pipe, cancellationToken);
         }
 
+        public static Task PublishInitializer(IPublishEndpoint endpoint, Type messageType, object values, CancellationToken cancellationToken = default)
+        {
+            return Cached.Converters.Value[messageType].PublishInitializer(endpoint, values, cancellationToken);
+        }
+
+        public static Task PublishInitializer(IPublishEndpoint endpoint, Type messageType, object values, IPipe<PublishContext> pipe,
+            CancellationToken cancellationToken = default)
+        {
+            return Cached.Converters.Value[messageType].PublishInitializer(endpoint, values, pipe, cancellationToken);
+        }
+
         static Lazy<IPublishEndpointConverter> CreateTypeConverter(Type type)
         {
             return new Lazy<IPublishEndpointConverter>(() => CreateConverter(type));
@@ -47,6 +58,10 @@ namespace MassTransit.Context
             Task Publish(IPublishEndpoint endpoint, object message, CancellationToken cancellationToken = default);
 
             Task Publish(IPublishEndpoint endpoint, object message, IPipe<PublishContext> pipe, CancellationToken cancellationToken = default);
+
+            Task PublishInitializer(IPublishEndpoint endpoint, object values, CancellationToken cancellationToken = default);
+
+            Task PublishInitializer(IPublishEndpoint endpoint, object values, IPipe<PublishContext> pipe, CancellationToken cancellationToken = default);
         }
 
 
@@ -84,6 +99,28 @@ namespace MassTransit.Context
                     return endpoint.Publish(msg, pipe, cancellationToken);
 
                 throw new ArgumentException("Unexpected message type: " + TypeCache.GetShortName(message.GetType()));
+            }
+
+            public Task PublishInitializer(IPublishEndpoint endpoint, object values, CancellationToken cancellationToken)
+            {
+                if (endpoint == null)
+                    throw new ArgumentNullException(nameof(endpoint));
+                if (values == null)
+                    throw new ArgumentNullException(nameof(values));
+
+                return endpoint.Publish<T>(values, cancellationToken);
+            }
+
+            public Task PublishInitializer(IPublishEndpoint endpoint, object values, IPipe<PublishContext> pipe, CancellationToken cancellationToken)
+            {
+                if (endpoint == null)
+                    throw new ArgumentNullException(nameof(endpoint));
+                if (values == null)
+                    throw new ArgumentNullException(nameof(values));
+                if (pipe == null)
+                    throw new ArgumentNullException(nameof(pipe));
+
+                return endpoint.Publish<T>(values, pipe, cancellationToken);
             }
         }
 

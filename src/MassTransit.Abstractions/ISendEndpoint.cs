@@ -80,8 +80,7 @@ namespace MassTransit
         Task Send(object message, Type messageType, IPipe<SendContext> pipe, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Sends an interface message, initializing the properties of the interface using the anonymous
-        /// object specified
+        /// Sends an interface message, initializing the properties of the interface using the anonymous object specified
         /// </summary>
         /// <typeparam name="T">The interface type to send</typeparam>
         /// <param name="values">The property values to initialize on the interface</param>
@@ -91,8 +90,7 @@ namespace MassTransit
             where T : class;
 
         /// <summary>
-        /// Sends an interface message, initializing the properties of the interface using the anonymous
-        /// object specified
+        /// Sends an interface message, initializing the properties of the interface using the anonymous object specified
         /// </summary>
         /// <typeparam name="T">The interface type to send</typeparam>
         /// <param name="values">The property values to initialize on the interface</param>
@@ -103,8 +101,7 @@ namespace MassTransit
             where T : class;
 
         /// <summary>
-        /// Sends an interface message, initializing the properties of the interface using the anonymous
-        /// object specified
+        /// Sends an interface message, initializing the properties of the interface using the anonymous object specified
         /// </summary>
         /// <typeparam name="T">The interface type to send</typeparam>
         /// <param name="values">The property values to initialize on the interface</param>
