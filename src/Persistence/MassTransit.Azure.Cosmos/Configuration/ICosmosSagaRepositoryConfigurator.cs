@@ -19,6 +19,12 @@ namespace MassTransit
 
         string DatabaseId { set; }
 
+        [Obsolete("Use AccountEndpoint")]
+        string EndpointUri { set; }
+
+        [Obsolete("Use AuthKeyOrResourceToken")]
+        string Key { set; }
+
         TokenCredential TokenCredential { set; }
 
         /// <summary>

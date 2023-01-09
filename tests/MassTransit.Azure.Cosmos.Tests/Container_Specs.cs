@@ -1,12 +1,9 @@
-using Azure.Identity;
-
 namespace MassTransit.Azure.Cosmos.Tests
 {
     namespace ContainerTests
     {
         using System;
         using System.Threading.Tasks;
-        using global::Azure.Identity;
         using Microsoft.Extensions.DependencyInjection;
         using NUnit.Framework;
         using TestFramework;

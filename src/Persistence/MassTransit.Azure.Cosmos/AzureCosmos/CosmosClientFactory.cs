@@ -1,8 +1,9 @@
-﻿using Azure.Identity;
-using Microsoft.Azure.Cosmos;
-
-namespace MassTransit.AzureCosmos
+﻿namespace MassTransit.AzureCosmos
 {
+    using Azure.Identity;
+    using Microsoft.Azure.Cosmos;
+
+
     internal static class CosmosClientFactory
     {
         public static CosmosClient CreateClient(CosmosAuthSettings authSettings, CosmosClientOptions clientOptions)

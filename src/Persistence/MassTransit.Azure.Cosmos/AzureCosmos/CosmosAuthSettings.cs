@@ -1,7 +1,8 @@
-﻿using Azure.Core;
-
-namespace MassTransit.AzureCosmos
+﻿namespace MassTransit.AzureCosmos
 {
+    using Azure.Core;
+
+
     public class CosmosAuthSettings
     {
         public CosmosAuthSettings() { }

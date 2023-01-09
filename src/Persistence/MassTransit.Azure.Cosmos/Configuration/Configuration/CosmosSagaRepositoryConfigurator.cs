@@ -107,6 +107,32 @@ namespace MassTransit.Configuration
             }
         }
 
+        [Obsolete("Use AccountEndpoint")]
+        public string EndpointUri
+        {
+            get
+            {
+                return AccountEndpoint;
+            }
+            set
+            {
+                AccountEndpoint = value;
+            }
+        }
+
+        [Obsolete("Use AuthKeyOrResourceToken")]
+        public string Key
+        {
+            get
+            {
+                return AuthKeyOrResourceToken;
+            }
+            set
+            {
+                AuthKeyOrResourceToken = value;
+            }
+        }
+
         public TokenCredential TokenCredential
         {
             get
