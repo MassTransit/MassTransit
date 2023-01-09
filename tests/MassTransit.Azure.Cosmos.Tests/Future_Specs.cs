@@ -20,8 +20,8 @@ namespace MassTransit.Azure.Cosmos.Tests
             configurator.AddSagaRepository<FutureState>()
                 .CosmosRepository(r =>
                 {
-                    r.EndpointUri = Configuration.EndpointUri;
-                    r.Key = Configuration.Key;
+                    r.AccountEndpoint = Configuration.AccountEndpoint;
+                    r.AuthKeyOrResourceToken = Configuration.AccountKey;
 
                     r.DatabaseId = DatabaseId;
                     r.CollectionId = CollectionId;

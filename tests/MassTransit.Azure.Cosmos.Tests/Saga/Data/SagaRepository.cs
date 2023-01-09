@@ -23,7 +23,7 @@
 
         SagaRepository()
         {
-            Client = new CosmosClient(Configuration.EndpointUri, Configuration.Key,
+            Client = new CosmosClient(Configuration.AccountEndpoint, Configuration.AccountKey,
                 new CosmosClientOptions { Serializer = new NewtonsoftJsonCosmosSerializer(AzureCosmosSerializerExtensions.GetSagaRenameSettings<TSaga>()) });
         }
 

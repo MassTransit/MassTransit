@@ -19,18 +19,14 @@ namespace MassTransit.AzureCosmos
         IDisposable
     {
         readonly ConcurrentDictionary<Type, Lazy<CosmosClient>> _clients;
-        readonly string _endpoint;
-        readonly string _key;
+        readonly CosmosAuthSettings _authSettings;
 
-        public NewtonsoftJsonCosmosClientFactory(string endpoint, string key)
+        public NewtonsoftJsonCosmosClientFactory(CosmosAuthSettings authSettings)
         {
-            if (string.IsNullOrWhiteSpace(endpoint))
-                throw new ArgumentNullException(nameof(endpoint));
-            if (string.IsNullOrWhiteSpace(key))
-                throw new ArgumentNullException(nameof(key));
+            if (authSettings == null)
+                throw new ArgumentNullException(nameof(authSettings));
 
-            _endpoint = endpoint;
-            _key = key;
+            _authSettings = authSettings;
 
             _clients = new ConcurrentDictionary<Type, Lazy<CosmosClient>>();
         }
@@ -61,7 +57,7 @@ namespace MassTransit.AzureCosmos
                 if (serializerSettings != null)
                     clientOptions.Serializer = new NewtonsoftJsonCosmosSerializer(serializerSettings);
 
-                return new CosmosClient(_endpoint, _key, clientOptions);
+                return CosmosClientFactory.CreateClient(_authSettings, clientOptions);
             });
         }
 

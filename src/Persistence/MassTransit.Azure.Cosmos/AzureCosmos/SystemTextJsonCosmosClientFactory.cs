@@ -4,6 +4,7 @@ namespace MassTransit.AzureCosmos
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Text.Json;
+    using System.Windows.Input;
     using Microsoft.Azure.Cosmos;
     using Saga;
     using Serialization;
@@ -18,19 +19,15 @@ namespace MassTransit.AzureCosmos
         IDisposable
     {
         readonly ConcurrentDictionary<Type, Lazy<CosmosClient>> _clients;
-        readonly string _endpoint;
-        readonly string _key;
+        readonly CosmosAuthSettings _authSettings; 
         readonly JsonNamingPolicy _namingPolicy;
 
-        public SystemTextJsonCosmosClientFactory(string endpoint, string key, JsonNamingPolicy namingPolicy)
+        public SystemTextJsonCosmosClientFactory(CosmosAuthSettings authSettings, JsonNamingPolicy namingPolicy)
         {
-            if (string.IsNullOrWhiteSpace(endpoint))
-                throw new ArgumentNullException(nameof(endpoint));
-            if (string.IsNullOrWhiteSpace(key))
-                throw new ArgumentNullException(nameof(key));
+            if (authSettings == null)
+                throw new ArgumentNullException(nameof(authSettings));
 
-            _endpoint = endpoint;
-            _key = key;
+            _authSettings = authSettings;
             _namingPolicy = namingPolicy;
 
             _clients = new ConcurrentDictionary<Type, Lazy<CosmosClient>>();
@@ -62,7 +59,7 @@ namespace MassTransit.AzureCosmos
                 if (options != null)
                     clientOptions.Serializer = new SystemTextJsonCosmosSerializer(options);
 
-                return new CosmosClient(_endpoint, _key, clientOptions);
+                return CosmosClientFactory.CreateClient(_authSettings, clientOptions);
             });
         }
 

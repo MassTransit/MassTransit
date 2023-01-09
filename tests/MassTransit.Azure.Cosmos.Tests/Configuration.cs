@@ -6,16 +6,18 @@ namespace MassTransit.Azure.Cosmos.Tests
 
     public static class Configuration
     {
-        public static string EndpointUri =>
-            TestContext.Parameters.Exists("CosmosEndpoint")
-                ? TestContext.Parameters.Get("CosmosEndpoint")
-                : Environment.GetEnvironmentVariable("MT_COSMOS_ENDPOINT")
-                ?? AzureCosmosEmulatorConstants.EndpointUri;
+        public static string AccountEndpoint =>
+            TestContext.Parameters.Exists("CosmosAccountEndpoint")
+                ? TestContext.Parameters.Get("CosmosAccountEndpoint")
+                : Environment.GetEnvironmentVariable("MT_COSMOS_ACCOUNT_ENDPOINT")
+                ?? AzureCosmosEmulatorConstants.AccountEndpoint;
 
-        public static string Key =>
-            TestContext.Parameters.Exists("CosmosKey")
-                ? TestContext.Parameters.Get("CosmosKey")
-                : Environment.GetEnvironmentVariable("MT_COSMOS_KEY")
-                ?? AzureCosmosEmulatorConstants.Key;
+        public static string AccountKey =>
+            TestContext.Parameters.Exists("CosmosAccountKey")
+                ? TestContext.Parameters.Get("CosmosAccountKey")
+                : Environment.GetEnvironmentVariable("MT_COSMOS_ACCOUNT_KEY")
+                ?? AzureCosmosEmulatorConstants.AccountKey;
+
+        public static string ConnectionString => $"AccountEndpoint={AccountEndpoint};AccountKey={AccountKey}";
     }
 }

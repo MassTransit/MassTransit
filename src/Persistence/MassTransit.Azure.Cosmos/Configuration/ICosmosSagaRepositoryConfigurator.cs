@@ -3,17 +3,23 @@ namespace MassTransit
 {
     using System;
     using System.Text.Json;
+    using Azure.Core;
     using Microsoft.Azure.Cosmos;
 
 
     public interface ICosmosSagaRepositoryConfigurator
     {
-        string EndpointUri { set; }
-        string Key { set; }
+        string AccountEndpoint { set; }
+
+        string AuthKeyOrResourceToken { set; }
+
+        string ConnectionString { set; }
+
+        string CollectionId { set; }
 
         string DatabaseId { set; }
 
-        string CollectionId { set; }
+        TokenCredential TokenCredential { set; }
 
         /// <summary>
         /// Set the JSON naming policy, which defaults to CamelCase, to something else, or NULL to use the default PascalCase.
