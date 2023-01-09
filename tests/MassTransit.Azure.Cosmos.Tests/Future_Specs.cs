@@ -1,52 +1,34 @@
 namespace MassTransit.Azure.Cosmos.Tests
 {
-    using System;
-    using System.Threading.Tasks;
-    using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
-    using TestFramework;
     using TestFramework.ForkJoint.Tests;
     using TestFramework.Futures.Tests;
 
 
-    class AzureCosmosFutureTestFixtureConfigurator :
-        IFutureTestFixtureConfigurator
+    // In order to get this test to pass, you have to:
+    // 1. Create a CosmosDB Resource in Azure
+    // 2. Configure role-based access Cosmos (https://learn.microsoft.com/en-us/azure/cosmos-db/how-to-setup-rbac)
+    // 3. Create a 'sagaTest' Database w/ a 'futurestate' collection (rbac doesn't support database/container management operations)
+    // 4. Set Configuration.AccountEndpoint to the CosmosDB Resource (it defaults to the emulator)
+    [TestFixture]
+    [Ignore("Requires AzureCredentials be available on the device and that a remote Cosmos instance is prepped for RBAC.")]
+    public class AzureCosmosTokenCredentialFryFutureSpecs :
+        FryFuture_Specs
     {
-        const string DatabaseId = "sagaTest";
-        const string CollectionId = "futurestate";
-
-        public void ConfigureFutureSagaRepository(IBusRegistrationConfigurator configurator)
-        {
-            configurator.AddSagaRepository<FutureState>()
-                .CosmosRepository(r =>
-                {
-                    r.EndpointUri = Configuration.EndpointUri;
-                    r.Key = Configuration.Key;
-
-                    r.DatabaseId = DatabaseId;
-                    r.CollectionId = CollectionId;
-                });
-        }
-
-        public void ConfigureServices(IServiceCollection collection)
+        public AzureCosmosTokenCredentialFryFutureSpecs()
+            : base(new AzureCosmosFutureTestFixtureConfigurator(new AzureCosmosTestTokenCredentialConfigurator()))
         {
         }
+    }
 
-        public async Task OneTimeSetup(IServiceProvider provider)
+
+    [TestFixture]
+    public class AzureCosmosConnectionStringFryFutureSpecs :
+        FryFuture_Specs
+    {
+        public AzureCosmosConnectionStringFryFutureSpecs()
+            : base(new AzureCosmosFutureTestFixtureConfigurator(new AzureCosmosTestConnectionStringConfigurator()))
         {
-            using var scope = provider.GetRequiredService<IServiceScopeFactory>().CreateScope();
-
-            var client = scope.ServiceProvider.GetRequiredService<ICosmosClientFactory>().GetCosmosClient<FutureState>("client");
-
-            var dbResponse = await client.CreateDatabaseIfNotExistsAsync(DatabaseId);
-            var database = dbResponse.Database;
-
-            await database.CreateContainerIfNotExistsAsync(CollectionId, "/id");
-        }
-
-        public Task OneTimeTearDown(IServiceProvider provider)
-        {
-            return Task.CompletedTask;
         }
     }
 

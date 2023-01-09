@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.Azure.Cosmos.Tests
 {
     using System;
-    using Newtonsoft.Json;
 
 
     /// <summary>

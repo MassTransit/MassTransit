@@ -24,8 +24,8 @@ namespace MassTransit.Azure.Cosmos.Tests
                         configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
                             .CosmosRepository(r =>
                             {
-                                r.EndpointUri = Configuration.EndpointUri;
-                                r.Key = Configuration.Key;
+                                r.AccountEndpoint = Configuration.AccountEndpoint;
+                                r.AuthKeyOrResourceToken = Configuration.AccountKey;
 
                                 r.DatabaseId = "sagaTest";
                                 r.CollectionId = "TestInstance";
@@ -81,8 +81,8 @@ namespace MassTransit.Azure.Cosmos.Tests
                         x.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
                             .CosmosRepository(r =>
                             {
-                                r.EndpointUri = Configuration.EndpointUri;
-                                r.Key = Configuration.Key;
+                                r.AccountEndpoint = Configuration.AccountEndpoint;
+                                r.AuthKeyOrResourceToken = Configuration.AccountKey;
 
                                 r.DatabaseId = "sagaTest";
                                 r.CollectionId = "TestInstance";
@@ -135,7 +135,7 @@ namespace MassTransit.Azure.Cosmos.Tests
                 var clientName = Guid.NewGuid().ToString();
 
                 _provider = new ServiceCollection()
-                    .AddCosmosClientFactory(Configuration.EndpointUri, Configuration.Key)
+                    .AddCosmosClientFactory(Configuration.AccountEndpoint, Configuration.AccountKey)
                     .AddMassTransit(configurator =>
                     {
                         configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()

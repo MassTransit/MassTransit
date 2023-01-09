@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.Azure.Cosmos.Tests
 {
     using System.Threading.Tasks;
+    using ContainerTests;
     using NUnit.Framework;
     using Saga.Data;
 
@@ -12,7 +13,7 @@
         public async Task Before_any()
         {
             await SagaRepository<SimpleSaga>.Instance.Initialize();
-            await SagaRepository<ContainerTests.TestInstance>.Instance.Initialize();
+            await SagaRepository<TestInstance>.Instance.Initialize();
         }
     }
 }

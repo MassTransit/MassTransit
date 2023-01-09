@@ -146,7 +146,7 @@
         {
             _databaseName = "choirSagas";
             _collectionName = "sagas";
-            _cosmosClient = new CosmosClient(Configuration.EndpointUri, Configuration.Key,
+            _cosmosClient = new CosmosClient(Configuration.AccountEndpoint, Configuration.AccountKey,
                 new CosmosClientOptions
                 {
                     Serializer = new SystemTextJsonCosmosSerializer(AzureCosmosSerializerExtensions.GetSerializerOptions<ChoirStateOptimistic>())

@@ -3,6 +3,7 @@ namespace MassTransit.Configuration
     using System;
     using System.Collections.Generic;
     using System.Text.Json;
+    using Azure.Core;
     using AzureCosmos;
     using AzureCosmos.Saga;
     using Microsoft.Azure.Cosmos;
@@ -17,6 +18,7 @@ namespace MassTransit.Configuration
         ISpecification
         where TSaga : class, ISaga
     {
+        readonly CosmosAuthSettings _settings;
         string _clientName;
         Func<IServiceProvider, ICosmosCollectionIdFormatter> _collectionIdFormatter;
         Action<ItemRequestOptions> _itemRequestOptions;
@@ -24,11 +26,11 @@ namespace MassTransit.Configuration
         Action<QueryRequestOptions> _queryRequestOptions;
         Action<ISagaRepositoryRegistrationConfigurator<TSaga>> _registerClientFactory;
 
-        public CosmosSagaRepositoryConfigurator()
+        public CosmosSagaRepositoryConfigurator(CosmosAuthSettings settings = null)
         {
             _collectionIdFormatter = _ => KebabCaseCollectionIdFormatter.Instance;
-
             _registerClientFactory = RegisterSystemTextJsonClientFactory;
+            _settings = settings ?? new CosmosAuthSettings();
 
             PropertyNamingPolicy = SystemTextJsonMessageSerializer.Options.PropertyNamingPolicy;
         }
@@ -37,8 +39,8 @@ namespace MassTransit.Configuration
 
         public void ConfigureEmulator()
         {
-            EndpointUri = AzureCosmosEmulatorConstants.EndpointUri;
-            Key = AzureCosmosEmulatorConstants.Key;
+            AccountEndpoint = AzureCosmosEmulatorConstants.AccountEndpoint;
+            AuthKeyOrResourceToken = AzureCosmosEmulatorConstants.AccountKey;
         }
 
         public void SetCollectionIdFormatter(ICosmosCollectionIdFormatter collectionIdFormatter)
@@ -61,8 +63,57 @@ namespace MassTransit.Configuration
             }
         }
 
-        public string EndpointUri { get; set; }
-        public string Key { get; set; }
+        public string AccountEndpoint
+        {
+            set => _settings.AccountEndpoint = value;
+        }
+
+        public string AuthKeyOrResourceToken
+        {
+            set
+            {
+                if (_settings.AuthKeyOrResourceToken != null
+                    || _settings.ConnectionString != null)
+                    throw new ArgumentException("Another type of authentication is already being used");
+
+                _settings.AuthKeyOrResourceToken = value;
+            }
+        }
+
+        public string ConnectionString
+        {
+            set
+            {
+                if (_settings.AuthKeyOrResourceToken != null
+                    || _settings.TokenCredential != null)
+                    throw new ArgumentException("Another type of authentication is already being used");
+
+                _settings.ConnectionString = value;
+            }
+        }
+
+        [Obsolete("Use AccountEndpoint")]
+        public string EndpointUri
+        {
+            set => AccountEndpoint = value;
+        }
+
+        [Obsolete("Use AuthKeyOrResourceToken")]
+        public string Key
+        {
+            set => AuthKeyOrResourceToken = value;
+        }
+
+        public TokenCredential TokenCredential
+        {
+            set
+            {
+                if (_settings.AuthKeyOrResourceToken != null || _settings.ConnectionString != null)
+                    throw new ArgumentException("Another type of authentication is already being used");
+
+                _settings.TokenCredential = value;
+            }
+        }
 
         public void ConfigureItemRequestOptions(Action<ItemRequestOptions> cfg)
         {
@@ -118,12 +169,12 @@ namespace MassTransit.Configuration
 
         void RegisterNewtonsoftJsonClientFactory(ISagaRepositoryRegistrationConfigurator<TSaga> configurator)
         {
-            configurator.TryAddSingleton<ICosmosClientFactory>(provider => new NewtonsoftJsonCosmosClientFactory(EndpointUri, Key));
+            configurator.TryAddSingleton<ICosmosClientFactory>(provider => new NewtonsoftJsonCosmosClientFactory(_settings));
         }
 
         void RegisterSystemTextJsonClientFactory(ISagaRepositoryRegistrationConfigurator<TSaga> configurator)
         {
-            configurator.TryAddSingleton<ICosmosClientFactory>(provider => new SystemTextJsonCosmosClientFactory(EndpointUri, Key, PropertyNamingPolicy));
+            configurator.TryAddSingleton<ICosmosClientFactory>(provider => new SystemTextJsonCosmosClientFactory(_settings, PropertyNamingPolicy));
         }
 
         DatabaseContext<TSaga> DatabaseContextFactory(IServiceProvider provider)

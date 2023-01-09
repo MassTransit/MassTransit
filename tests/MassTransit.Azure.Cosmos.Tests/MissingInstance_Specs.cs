@@ -147,8 +147,8 @@
                         x.AddSagaStateMachine<MissingInstanceStateMachine, MissingInstance>()
                             .CosmosRepository(r =>
                             {
-                                r.EndpointUri = Configuration.EndpointUri;
-                                r.Key = Configuration.Key;
+                                r.AccountEndpoint = Configuration.AccountEndpoint;
+                                r.AuthKeyOrResourceToken = Configuration.AccountKey;
 
                                 r.DatabaseId = "sagaTest";
                                 r.CollectionId = "TestInstance";
@@ -190,7 +190,7 @@
             {
                 _databaseName = "sagaTest";
                 _collectionName = "TestInstance";
-                _cosmosClient = new CosmosClient(Configuration.EndpointUri, Configuration.Key,
+                _cosmosClient = new CosmosClient(Configuration.AccountEndpoint, Configuration.AccountKey,
                     new CosmosClientOptions
                     {
                         Serializer = new SystemTextJsonCosmosSerializer(AzureCosmosSerializerExtensions.GetSerializerOptions<MissingInstance>())
@@ -270,7 +270,7 @@
             {
                 _databaseName = "masstransitunittests";
                 _collectionName = "sagas";
-                _cosmosClient = new CosmosClient(Configuration.EndpointUri, Configuration.Key,
+                _cosmosClient = new CosmosClient(Configuration.AccountEndpoint, Configuration.AccountKey,
                     new CosmosClientOptions
                     {
                         Serializer = new NewtonsoftJsonCosmosSerializer(AzureCosmosSerializerExtensions.GetSagaRenameSettings<MissingInstance>())
