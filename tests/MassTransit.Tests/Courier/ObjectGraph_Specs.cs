@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text.Json.Serialization;
     using System.Threading.Tasks;
     using MassTransit.Courier.Contracts;
     using MassTransit.Testing;
@@ -104,6 +105,15 @@
             }
 
             completed.Status.ShouldBe(TaskStatus.RanToCompletion);
+        }
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.ConfigureJsonSerializerOptions(j =>
+            {
+                j.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+                return j;
+            });
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

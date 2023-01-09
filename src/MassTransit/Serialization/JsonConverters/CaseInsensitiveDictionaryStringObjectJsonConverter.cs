@@ -49,8 +49,8 @@ namespace MassTransit.Serialization.JsonConverters
             if (key == null)
                 return;
 
-            var ignoreDefault = options.DefaultIgnoreCondition.HasFlag(JsonIgnoreCondition.WhenWritingDefault);
-            var ignoreNull = ignoreDefault || options.DefaultIgnoreCondition.HasFlag(JsonIgnoreCondition.WhenWritingNull);
+            var ignoreDefault = options.DefaultIgnoreCondition == JsonIgnoreCondition.WhenWritingDefault;
+            var ignoreNull = ignoreDefault || options.DefaultIgnoreCondition == JsonIgnoreCondition.WhenWritingNull;
 
             if (objectValue == null && ignoreNull)
                 return;
@@ -120,8 +120,8 @@ namespace MassTransit.Serialization.JsonConverters
 
         static Dictionary<string, object> ReadObject(ref Utf8JsonReader reader, JsonSerializerOptions options)
         {
-            var ignoreDefault = options.DefaultIgnoreCondition.HasFlag(JsonIgnoreCondition.WhenWritingDefault);
-            var ignoreNull = ignoreDefault || options.DefaultIgnoreCondition.HasFlag(JsonIgnoreCondition.WhenWritingNull);
+            var ignoreDefault = options.DefaultIgnoreCondition == JsonIgnoreCondition.WhenWritingDefault;
+            var ignoreNull = ignoreDefault || options.DefaultIgnoreCondition == JsonIgnoreCondition.WhenWritingNull;
 
             var dictionary = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
             while (reader.Read())
@@ -149,8 +149,8 @@ namespace MassTransit.Serialization.JsonConverters
 
         static Dictionary<string, object> ReadArray(ref Utf8JsonReader reader, JsonSerializerOptions options)
         {
-            var ignoreDefault = options.DefaultIgnoreCondition.HasFlag(JsonIgnoreCondition.WhenWritingDefault);
-            var ignoreNull = ignoreDefault || options.DefaultIgnoreCondition.HasFlag(JsonIgnoreCondition.WhenWritingNull);
+            var ignoreDefault = options.DefaultIgnoreCondition == JsonIgnoreCondition.WhenWritingDefault;
+            var ignoreNull = ignoreDefault || options.DefaultIgnoreCondition == JsonIgnoreCondition.WhenWritingNull;
 
             var dictionary = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
             while (reader.Read())
