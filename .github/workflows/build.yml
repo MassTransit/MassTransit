@@ -228,8 +228,8 @@ jobs:
 
       - name: Test CosmosDB
         env:
-          MT_COSMOS_ACCOUNT_ENDPOINT: ${{ secrets.AZURE_COSMOSENDPOINT }}
-          MT_COSMOS_ACCOUNT_KEY: ${{ secrets.AZURE_COSMOSKEY }}
+          MT_COSMOS_ENDPOINT: ${{ secrets.AZURE_COSMOSENDPOINT }}
+          MT_COSMOS_KEY: ${{ secrets.AZURE_COSMOSKEY }}
         run: dotnet test -c Release --logger:"console;verbosity=normal" --filter "Category!=Flaky&Category!=Integration"
         working-directory: tests/MassTransit.Azure.Cosmos.Tests
   test-dapper:
