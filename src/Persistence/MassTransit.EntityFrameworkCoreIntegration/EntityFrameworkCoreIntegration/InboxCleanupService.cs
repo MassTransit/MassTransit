@@ -42,16 +42,22 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                 {
                     if (removed == 0)
                         await Task.Delay(_options.QueryDelay, stoppingToken).ConfigureAwait(false);
+                    else
+                        removed = 0;
 
                     removed = await CleanUpInboxState(stoppingToken).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException exception) when (exception.CancellationToken == stoppingToken)
                 {
                 }
+                catch (DbUpdateConcurrencyException exception)
+                {
+                    _logger.LogDebug(exception,
+                        "CleanUpInboxState faulted: Concurrency exceptions are expected when running multiple instances of the InboxCleanupService");
+                }
                 catch (Exception exception)
                 {
                     _logger.LogError(exception, "CleanUpInboxState faulted");
-                    removed = 0;
                 }
             }
         }
