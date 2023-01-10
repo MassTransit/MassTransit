@@ -48,6 +48,11 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                 catch (OperationCanceledException exception) when (exception.CancellationToken == stoppingToken)
                 {
                 }
+                catch (DbUpdateConcurrencyException exception)
+                {
+                    _logger.LogDebug(exception, "Got DbUpdateException which is expected if there are more than one InboxCleanupService");
+                    removed = 0;
+                }                
                 catch (Exception exception)
                 {
                     _logger.LogError(exception, "CleanUpInboxState faulted");
