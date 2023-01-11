@@ -53,6 +53,12 @@ namespace MassTransit.Serialization
 
         public override bool TryGetMessage(Type messageType, out object? message)
         {
+            if (_message?.GetType() == messageType)
+            {
+                message = _message;
+                return true;
+            }
+
             var messageToken = GetMessageToken(_message);
 
             using var reader = messageToken.CreateReader();
