@@ -153,7 +153,7 @@ namespace MassTransit.Context
             if (properties.TryGetValue(key, out var value))
             {
                 if (value is string text)
-                    return Enum.TryParse<T>(text, out var enumValue) ? enumValue : defaultValue;
+                    return Enum.TryParse<T>(text, true, out var enumValue) ? enumValue : defaultValue;
             }
 
             return defaultValue;
@@ -161,38 +161,48 @@ namespace MassTransit.Context
 
         protected static byte ReadByte(IReadOnlyDictionary<string, object> properties, string key, byte defaultValue = default)
         {
-            if (properties.TryGetValue(key, out var value))
-            {
-                if (value is byte byteValue)
-                    return byteValue;
+            if (!properties.TryGetValue(key, out var value))
+                return defaultValue;
 
-                if (value is string text)
-                    return byte.TryParse(text, out byteValue) ? byteValue : defaultValue;
+            if (value is byte byteValue)
+                return byteValue;
 
-                if (value is byte[] bytes)
-                {
-                    text = Encoding.UTF8.GetString(bytes);
-                    return byte.TryParse(text, out byteValue) ? byteValue : defaultValue;
-                }
-            }
+            var longValue = ReadLong(properties, key);
 
-            return defaultValue;
+            return longValue.HasValue ? (byte)longValue.Value : defaultValue;
         }
 
         protected static int? ReadInt(IReadOnlyDictionary<string, object> properties, string key, int? defaultValue = null)
         {
+            var longValue = ReadLong(properties, key);
+
+            return longValue.HasValue ? (int)longValue.Value : defaultValue;
+        }
+
+        protected static long? ReadLong(IReadOnlyDictionary<string, object> properties, string key, long? defaultValue = null)
+        {
             if (properties.TryGetValue(key, out var value))
             {
-                if (value is int intValue)
-                    return intValue;
+                if (value is long longValue)
+                    return longValue;
+
+                switch (value)
+                {
+                    case int intValue:
+                        return intValue;
+                    case short shortValue:
+                        return shortValue;
+                    case char charValue:
+                        return charValue;
+                }
 
                 if (value is string text)
-                    return int.TryParse(text, out intValue) ? intValue : defaultValue;
+                    return long.TryParse(text, out longValue) ? longValue : defaultValue;
 
                 if (value is byte[] bytes)
                 {
                     text = Encoding.UTF8.GetString(bytes);
-                    return int.TryParse(text, out intValue) ? intValue : defaultValue;
+                    return long.TryParse(text, out longValue) ? longValue : defaultValue;
                 }
             }
 
@@ -201,22 +211,15 @@ namespace MassTransit.Context
 
         protected static bool ReadBoolean(IReadOnlyDictionary<string, object> properties, string key, bool defaultValue = default)
         {
-            if (properties.TryGetValue(key, out var value))
-            {
-                if (value is bool boolValue)
-                    return boolValue;
+            if (!properties.TryGetValue(key, out var value))
+                return defaultValue;
 
-                if (value is string text)
-                    return bool.TryParse(text, out boolValue) ? boolValue : defaultValue;
+            if (value is bool boolValue)
+                return boolValue;
 
-                if (value is byte[] bytes)
-                {
-                    text = Encoding.UTF8.GetString(bytes);
-                    return bool.TryParse(text, out boolValue) ? boolValue : defaultValue;
-                }
-            }
+            var longValue = ReadLong(properties, key);
 
-            return defaultValue;
+            return longValue.HasValue ? longValue.Value != 0 : defaultValue;
         }
 
 

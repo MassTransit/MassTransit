@@ -32,10 +32,11 @@ namespace MassTransit.Util
 
         public static string GetStackTrace(Exception? exception)
         {
-            if (string.IsNullOrWhiteSpace(exception?.StackTrace))
+            var stackTrace = exception?.StackTrace;
+            if (string.IsNullOrWhiteSpace(stackTrace))
                 return "";
 
-            return _cleanup.Replace(exception!.StackTrace, "");
+            return _cleanup.Replace(stackTrace, "");
         }
 
         public static IDictionary<string, object> GetExceptionHeaderDictionary(Exception exception)
