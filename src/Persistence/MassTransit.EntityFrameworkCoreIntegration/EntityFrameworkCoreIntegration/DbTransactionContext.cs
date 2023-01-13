@@ -1,6 +1,7 @@
 namespace MassTransit.EntityFrameworkCoreIntegration
 {
     using System;
+    using Microsoft.EntityFrameworkCore.Storage;
 
 
     /// <summary>
@@ -9,5 +10,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration
     public interface DbTransactionContext
     {
         Guid TransactionId { get; }
+        IDbContextTransaction Transaction { get; }
     }
 }

@@ -40,6 +40,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         public override long? LastSequenceNumber => _inboxState.LastSequenceNumber;
 
         public Guid TransactionId => _transaction.TransactionId;
+        public IDbContextTransaction Transaction => _transaction;
 
         public override async Task SetConsumed()
         {
