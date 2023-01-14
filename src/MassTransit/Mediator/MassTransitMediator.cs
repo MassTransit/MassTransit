@@ -38,6 +38,11 @@ namespace MassTransit.Mediator
             _clientFactory = new ClientFactory(clientFactoryContext);
         }
 
+        public ValueTask DisposeAsync()
+        {
+            return _clientFactory.DisposeAsync();
+        }
+
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
             return _endpoint.ConnectSendObserver(observer);
@@ -102,6 +107,12 @@ namespace MassTransit.Mediator
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
             return _endpoint.ConnectPublishObserver(observer);
+        }
+
+        public Task<ISendEndpoint> GetPublishSendEndpoint<T>()
+            where T : class
+        {
+            return _endpoint.GetPublishSendEndpoint<T>();
         }
 
         public Task Publish<T>(T message, CancellationToken cancellationToken)
@@ -177,11 +188,6 @@ namespace MassTransit.Mediator
                 throw new ArgumentNullException(nameof(values));
 
             return PublishInternal<T>(cancellationToken, values, publishPipe);
-        }
-
-        public ValueTask DisposeAsync()
-        {
-            return _clientFactory.DisposeAsync();
         }
 
         public RequestHandle<T> CreateRequest<T>(T message, CancellationToken cancellationToken, RequestTimeout timeout)
@@ -292,26 +298,56 @@ namespace MassTransit.Mediator
             return new MultipleConnectHandle(_dispatcher.ConnectConsumeMessageObserver(observer), _responseDispatcher.ConnectConsumeMessageObserver(observer));
         }
 
-        async Task PublishInternal<T>(CancellationToken cancellationToken, T message, IPipe<PublishContext<T>> pipe = default)
+        Task PublishInternal<T>(CancellationToken cancellationToken, T message, IPipe<PublishContext<T>> pipe = default)
             where T : class
         {
-            var sendEndpoint = await _endpoint.GetPublishSendEndpoint<T>().ConfigureAwait(false);
+            Task<ISendEndpoint> sendEndpointTask = GetPublishSendEndpoint<T>();
+            if (sendEndpointTask.Status == TaskStatus.RanToCompletion)
+            {
+                var sendEndpoint = sendEndpointTask.Result;
 
-            if (pipe.IsNotEmpty())
-                await sendEndpoint.Send(message, new PublishSendPipeAdapter<T>(pipe), cancellationToken).ConfigureAwait(false);
-            else
-                await sendEndpoint.Send(message, cancellationToken).ConfigureAwait(false);
+                return pipe != null && pipe.IsNotEmpty()
+                    ? sendEndpoint.Send(message, new PublishSendPipeAdapter<T>(pipe), cancellationToken)
+                    : sendEndpoint.Send(message, cancellationToken);
+            }
+
+            async Task PublishAsync()
+            {
+                var sendEndpoint = await sendEndpointTask.ConfigureAwait(false);
+
+                if (pipe != null && pipe.IsNotEmpty())
+                    await sendEndpoint.Send(message, new PublishSendPipeAdapter<T>(pipe), cancellationToken).ConfigureAwait(false);
+                else
+                    await sendEndpoint.Send(message, cancellationToken).ConfigureAwait(false);
+            }
+
+            return PublishAsync();
         }
 
-        async Task PublishInternal<T>(CancellationToken cancellationToken, object values, IPipe<PublishContext<T>> pipe = default)
+        Task PublishInternal<T>(CancellationToken cancellationToken, object values, IPipe<PublishContext<T>> pipe = default)
             where T : class
         {
-            var sendEndpoint = await _endpoint.GetPublishSendEndpoint<T>().ConfigureAwait(false);
+            Task<ISendEndpoint> sendEndpointTask = GetPublishSendEndpoint<T>();
+            if (sendEndpointTask.Status == TaskStatus.RanToCompletion)
+            {
+                var sendEndpoint = sendEndpointTask.Result;
 
-            if (pipe.IsNotEmpty())
-                await sendEndpoint.Send(values, new PublishSendPipeAdapter<T>(pipe), cancellationToken).ConfigureAwait(false);
-            else
-                await sendEndpoint.Send<T>(values, cancellationToken).ConfigureAwait(false);
+                return pipe != null && pipe.IsNotEmpty()
+                    ? sendEndpoint.Send(values, new PublishSendPipeAdapter<T>(pipe), cancellationToken)
+                    : sendEndpoint.Send<T>(values, cancellationToken);
+            }
+
+            async Task PublishAsync()
+            {
+                var sendEndpoint = await sendEndpointTask.ConfigureAwait(false);
+
+                if (pipe != null && pipe.IsNotEmpty())
+                    await sendEndpoint.Send(values, new PublishSendPipeAdapter<T>(pipe), cancellationToken).ConfigureAwait(false);
+                else
+                    await sendEndpoint.Send<T>(values, cancellationToken).ConfigureAwait(false);
+            }
+
+            return PublishAsync();
         }
     }
 }

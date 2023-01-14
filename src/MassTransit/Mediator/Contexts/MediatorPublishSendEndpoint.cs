@@ -58,6 +58,10 @@ namespace MassTransit.Mediator.Contexts
 
                 publishContext.IsPublish = true;
 
+                // ReSharper disable once SuspiciousTypeConversion.Global
+                if (_pipe is ISendContextPipe sendContextPipe)
+                    await sendContextPipe.Send(context).ConfigureAwait(false);
+
                 await _publishPipe.Send(publishContext).ConfigureAwait(false);
 
                 if (_pipe.IsNotEmpty())

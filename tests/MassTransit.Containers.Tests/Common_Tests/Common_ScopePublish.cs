@@ -3,6 +3,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using System;
     using System.Threading.Tasks;
     using Internals;
+    using Mediator;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
     using Scenarios;
@@ -13,6 +14,15 @@ namespace MassTransit.Containers.Tests.Common_Tests
     public class Common_ScopePublish :
         InMemoryContainerTestFixture
     {
+        readonly TaskCompletionSource<PublishContext> _taskCompletionSource;
+
+        public Common_ScopePublish()
+        {
+            _taskCompletionSource = GetTask<PublishContext>();
+        }
+
+        IPublishEndpoint PublishEndpoint => ServiceScope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
+
         [Test]
         public async Task Should_contains_scope_on_publish()
         {
@@ -25,21 +35,54 @@ namespace MassTransit.Containers.Tests.Common_Tests
             Assert.AreEqual(serviceProvider, ServiceScope.ServiceProvider);
         }
 
-        readonly TaskCompletionSource<PublishContext> _taskCompletionSource;
-
-        public Common_ScopePublish()
-        {
-            _taskCompletionSource = GetTask<PublishContext>();
-        }
-
-        IPublishEndpoint PublishEndpoint => ServiceScope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
-
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             Handled<SimpleMessageClass>(configurator);
         }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.ConfigurePublish(cfg => cfg.UseFilter(new TestPublishContextFilter(_taskCompletionSource)));
+        }
+    }
+
+
+    public class Common_Mediator_ScopePublish :
+        InMemoryContainerTestFixture
+    {
+        readonly TaskCompletionSource<PublishContext> _taskCompletionSource;
+
+        public Common_Mediator_ScopePublish()
+        {
+            _taskCompletionSource = GetTask<PublishContext>();
+        }
+
+        IPublishEndpoint PublishEndpoint => ServiceScope.ServiceProvider.GetRequiredService<IScopedMediator>();
+
+        [Test]
+        public async Task Should_contains_scope_on_publish()
+        {
+            await PublishEndpoint.Publish(new SimpleMessageClass("test"));
+
+            var published = await _taskCompletionSource.Task;
+
+            Assert.IsTrue(published.TryGetPayload<IServiceProvider>(out var serviceProvider));
+
+            Assert.AreEqual(serviceProvider, ServiceScope.ServiceProvider);
+        }
+
+        protected override IServiceCollection ConfigureServices(IServiceCollection collection)
+        {
+            return collection.AddMediator(ConfigureRegistration);
+        }
+
+        void ConfigureRegistration(IMediatorRegistrationConfigurator configurator)
+        {
+            configurator.AddConsumer<SimplerConsumer>();
+            configurator.ConfigureMediator(ConfigureMediator);
+        }
+
+        void ConfigureMediator(IMediatorRegistrationContext context, IMediatorConfigurator configurator)
         {
             configurator.ConfigurePublish(cfg => cfg.UseFilter(new TestPublishContextFilter(_taskCompletionSource)));
         }
@@ -71,15 +114,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
     public class Common_Publish_Filter :
         InMemoryContainerTestFixture
     {
-        [Test]
-        public async Task Should_use_scope()
-        {
-            await PublishEndpoint.Publish<SimpleMessageInterface>(new { Name = "test" });
-
-            var result = await TaskCompletionSource.Task;
-            Assert.AreEqual(MyId, result);
-        }
-
         protected readonly TaskCompletionSource<MyId> TaskCompletionSource;
 
         public Common_Publish_Filter()
@@ -90,6 +124,15 @@ namespace MassTransit.Containers.Tests.Common_Tests
         MyId MyId => ServiceScope.ServiceProvider.GetRequiredService<MyId>();
 
         IPublishEndpoint PublishEndpoint => ServiceScope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
+
+        [Test]
+        public async Task Should_use_scope()
+        {
+            await PublishEndpoint.Publish<SimpleMessageInterface>(new { Name = "test" });
+
+            var result = await TaskCompletionSource.Task;
+            Assert.AreEqual(MyId, result);
+        }
 
         protected override IServiceCollection ConfigureServices(IServiceCollection collection)
         {
@@ -112,6 +155,50 @@ namespace MassTransit.Containers.Tests.Common_Tests
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.ConfigureConsumer<SimplerConsumer>(BusRegistrationContext);
+        }
+    }
+
+
+    public class Common_Mediator_Publish_Filter :
+        InMemoryContainerTestFixture
+    {
+        protected readonly TaskCompletionSource<MyId> TaskCompletionSource;
+
+        public Common_Mediator_Publish_Filter()
+        {
+            TaskCompletionSource = GetTask<MyId>();
+        }
+
+        MyId MyId => ServiceScope.ServiceProvider.GetRequiredService<MyId>();
+
+        IPublishEndpoint PublishEndpoint => ServiceScope.ServiceProvider.GetRequiredService<IScopedMediator>();
+
+        [Test]
+        public async Task Should_use_scope()
+        {
+            await PublishEndpoint.Publish<SimpleMessageInterface>(new { Name = "test" });
+
+            var result = await TaskCompletionSource.Task;
+            Assert.AreEqual(MyId, result);
+        }
+
+        protected override IServiceCollection ConfigureServices(IServiceCollection collection)
+        {
+            collection.AddScoped(_ => new MyId(Guid.NewGuid()));
+            collection.AddSingleton(TaskCompletionSource);
+
+            return collection.AddMediator(ConfigureRegistration);
+        }
+
+        void ConfigureRegistration(IMediatorRegistrationConfigurator configurator)
+        {
+            configurator.AddConsumer<SimplerConsumer>();
+            configurator.ConfigureMediator(ConfigureMediator);
+        }
+
+        void ConfigureMediator(IMediatorRegistrationContext context, IMediatorConfigurator configurator)
+        {
+            configurator.UsePublishFilter(typeof(TestScopedPublishFilter<>), BusRegistrationContext);
         }
     }
 
@@ -144,6 +231,15 @@ namespace MassTransit.Containers.Tests.Common_Tests
     public class Common_Publish_Filter_Outbox :
         InMemoryContainerTestFixture
     {
+        protected readonly TaskCompletionSource<ProducingConsumer> ConsumerSource;
+        protected readonly TaskCompletionSource<MyId> MyIdSource;
+
+        public Common_Publish_Filter_Outbox()
+        {
+            MyIdSource = GetTask<MyId>();
+            ConsumerSource = GetTask<ProducingConsumer>();
+        }
+
         [Test]
         public async Task Should_use_scope()
         {
@@ -154,15 +250,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
             var consumer = await ConsumerSource.Task.OrCanceled(InMemoryTestHarness.InactivityToken);
 
             Assert.AreEqual(myId, consumer.MyId);
-        }
-
-        protected readonly TaskCompletionSource<ProducingConsumer> ConsumerSource;
-        protected readonly TaskCompletionSource<MyId> MyIdSource;
-
-        public Common_Publish_Filter_Outbox()
-        {
-            MyIdSource = GetTask<MyId>();
-            ConsumerSource = GetTask<ProducingConsumer>();
         }
 
         protected override IServiceCollection ConfigureServices(IServiceCollection collection)
@@ -248,6 +335,15 @@ namespace MassTransit.Containers.Tests.Common_Tests
     public class Common_Publish_Filter_Fault :
         InMemoryContainerTestFixture
     {
+        protected readonly FilterMarker Marker;
+        protected readonly TaskCompletionSource<ConsumeContext<Fault<SimpleMessageInterface>>> TaskCompletionSource;
+
+        public Common_Publish_Filter_Fault()
+        {
+            TaskCompletionSource = GetTask<ConsumeContext<Fault<SimpleMessageInterface>>>();
+            Marker = new FilterMarker();
+        }
+
         [Test]
         public async Task Should_not_use_scoped_filter_to_publish_fault()
         {
@@ -256,15 +352,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
             ConsumeContext<Fault<SimpleMessageInterface>> result = await TaskCompletionSource.Task;
             Assert.IsNotNull(result);
             Assert.IsFalse(Marker.Called);
-        }
-
-        protected readonly FilterMarker Marker;
-        protected readonly TaskCompletionSource<ConsumeContext<Fault<SimpleMessageInterface>>> TaskCompletionSource;
-
-        public Common_Publish_Filter_Fault()
-        {
-            TaskCompletionSource = GetTask<ConsumeContext<Fault<SimpleMessageInterface>>>();
-            Marker = new FilterMarker();
         }
 
         protected override IServiceCollection ConfigureServices(IServiceCollection collection)
