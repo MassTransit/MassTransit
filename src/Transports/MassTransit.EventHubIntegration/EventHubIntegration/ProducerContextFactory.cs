@@ -11,13 +11,11 @@ namespace MassTransit.EventHubIntegration
     {
         readonly IConnectionContextSupervisor _contextSupervisor;
         readonly string _eventHubName;
-        readonly ISerialization _serializers;
 
-        public ProducerContextFactory(IConnectionContextSupervisor contextSupervisor, string eventHubName, ISerialization serializers)
+        public ProducerContextFactory(IConnectionContextSupervisor contextSupervisor, string eventHubName)
         {
             _contextSupervisor = contextSupervisor;
             _eventHubName = eventHubName;
-            _serializers = serializers;
         }
 
         public IActivePipeContextAgent<ProducerContext> CreateActiveContext(ISupervisor supervisor,
@@ -48,7 +46,7 @@ namespace MassTransit.EventHubIntegration
             Task<ProducerContext> Create(ConnectionContext connectionContext, CancellationToken createCancellationToken)
             {
                 var client = connectionContext.CreateEventHubClient(_eventHubName);
-                ProducerContext context = new EventHubProducerContext(client, _serializers, cancellationToken);
+                ProducerContext context = new EventHubProducerContext(client, cancellationToken);
                 return Task.FromResult(context);
             }
 

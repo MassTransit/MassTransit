@@ -14,14 +14,11 @@ namespace MassTransit.EventHubIntegration
     {
         readonly EventHubProducerClient _producerClient;
 
-        public EventHubProducerContext(EventHubProducerClient producerClient, ISerialization serializers, CancellationToken cancellationToken)
+        public EventHubProducerContext(EventHubProducerClient producerClient, CancellationToken cancellationToken)
             : base(cancellationToken)
         {
             _producerClient = producerClient;
-            Serializer = serializers;
         }
-
-        public ISerialization Serializer { get; }
 
         public Task Produce(IEnumerable<EventData> eventData, SendEventOptions options, CancellationToken cancellationToken)
         {

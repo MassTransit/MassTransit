@@ -16,25 +16,25 @@ namespace MassTransit.EventHubIntegration
         readonly IBusInstance _busInstance;
         readonly IReceiveEndpointCollection _endpoints;
         readonly IEventHubHostConfiguration _hostConfiguration;
-        readonly IEventHubProducerProvider _producerProvider;
         readonly IRiderRegistrationContext _registrationContext;
+        Lazy<IEventHubProducerProvider> _producerProvider;
 
         public EventHubRider(IEventHubHostConfiguration hostConfiguration, IBusInstance busInstance, IReceiveEndpointCollection endpoints,
-            IEventHubProducerProvider producerProvider,
             IRiderRegistrationContext registrationContext)
         {
             _hostConfiguration = hostConfiguration;
             _busInstance = busInstance;
             _endpoints = endpoints;
-            _producerProvider = producerProvider;
             _registrationContext = registrationContext;
+
+            Reset();
         }
 
         public IEventHubProducerProvider GetProducerProvider(ConsumeContext consumeContext = default)
         {
             return consumeContext == null
-                ? _producerProvider
-                : new ConsumeContextEventHubProducerProvider(_producerProvider, consumeContext);
+                ? _producerProvider.Value
+                : new ConsumeContextEventHubProducerProvider(_producerProvider.Value, consumeContext);
         }
 
         public HostReceiveEndpointHandle ConnectEventHubEndpoint(string eventHubName, string consumerGroup,
@@ -56,7 +56,7 @@ namespace MassTransit.EventHubIntegration
 
             var ready = endpointsHandle.Length == 0 ? Task.CompletedTask : _hostConfiguration.ConnectionContextSupervisor.Ready;
 
-            var agent = new RiderAgent(_hostConfiguration.ConnectionContextSupervisor, _endpoints, ready);
+            var agent = new RiderAgent(_hostConfiguration.ConnectionContextSupervisor, _endpoints, ready, Reset);
 
             return new Handle(endpointsHandle, agent);
         }
@@ -66,17 +66,24 @@ namespace MassTransit.EventHubIntegration
             return _endpoints.CheckEndpointHealth();
         }
 
+        void Reset()
+        {
+            _producerProvider = new Lazy<IEventHubProducerProvider>(() => new EventHubProducerProvider(_hostConfiguration, _busInstance));
+        }
+
 
         class RiderAgent :
             Agent
         {
             readonly IReceiveEndpointCollection _endpoints;
+            readonly Action _onStop;
             readonly IConnectionContextSupervisor _supervisor;
 
-            public RiderAgent(IConnectionContextSupervisor supervisor, IReceiveEndpointCollection endpoints, Task ready)
+            public RiderAgent(IConnectionContextSupervisor supervisor, IReceiveEndpointCollection endpoints, Task ready, Action onStop)
             {
                 _supervisor = supervisor;
                 _endpoints = endpoints;
+                _onStop = onStop;
 
                 SetReady(ready);
                 SetCompleted(_supervisor.Completed);
@@ -87,6 +94,8 @@ namespace MassTransit.EventHubIntegration
                 await _endpoints.Stop(context.CancellationToken).ConfigureAwait(false);
                 await _supervisor.Stop(context).ConfigureAwait(false);
                 await base.StopAgent(context).ConfigureAwait(false);
+
+                _onStop();
             }
         }
 

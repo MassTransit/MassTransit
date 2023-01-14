@@ -9,6 +9,8 @@ namespace MassTransit.EventHubIntegration.Configuration
     {
         IConnectionContextSupervisor ConnectionContextSupervisor { get; }
 
+        EventHubSendTransportContext CreateSendTransportContext(string eventHubName, IBusInstance busInstance);
+
         IEventHubReceiveEndpointSpecification CreateSpecification(string eventHubName, string consumerGroup,
             Action<IEventHubReceiveEndpointConfigurator> configure);
 

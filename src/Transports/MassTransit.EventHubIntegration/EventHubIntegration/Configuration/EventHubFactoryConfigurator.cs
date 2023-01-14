@@ -145,6 +145,11 @@ namespace MassTransit.EventHubIntegration.Configuration
             _producerSpecification.ConfigureSend(callback);
         }
 
+        public EventHubSendTransportContext CreateSendTransportContext(string eventHubName, IBusInstance busInstance)
+        {
+            return _producerSpecification.CreateSendTransportContext(eventHubName, busInstance);
+        }
+
         public IEventHubReceiveEndpointSpecification CreateSpecification(string eventHubName, string consumerGroup,
             Action<IEventHubReceiveEndpointConfigurator> configure)
         {
@@ -168,9 +173,7 @@ namespace MassTransit.EventHubIntegration.Configuration
             foreach (var endpoint in _endpoints)
                 endpoints.Add(endpoint.EndpointName, endpoint.CreateReceiveEndpoint(busInstance));
 
-            var producerProvider = _producerSpecification.CreateProducerProvider(busInstance);
-
-            return new EventHubRider(this, busInstance, endpoints, new CachedEventHubProducerProvider(producerProvider), context);
+            return new EventHubRider(this, busInstance, endpoints, context);
         }
 
         public IEnumerable<ValidationResult> Validate()

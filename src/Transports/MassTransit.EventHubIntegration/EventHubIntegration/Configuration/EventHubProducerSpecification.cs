@@ -55,14 +55,19 @@ namespace MassTransit.EventHubIntegration.Configuration
                 yield return this.Failure("HostSettings", "is invalid");
         }
 
-        public IEventHubProducerProvider CreateProducerProvider(IBusInstance busInstance)
+        public EventHubSendTransportContext CreateSendTransportContext(string eventHubName, IBusInstance busInstance)
         {
             var sendConfiguration = new SendPipeConfiguration(busInstance.HostConfiguration.Topology.SendTopology);
             _configureSend?.Invoke(sendConfiguration.Configurator);
             var sendPipe = sendConfiguration.CreatePipe();
 
-            return new EventHubProducerProvider(_hostConfiguration, busInstance, sendPipe, _sendObservers,
+            var supervisor = new ProducerContextSupervisor(_hostConfiguration.ConnectionContextSupervisor, eventHubName);
+
+            var transportContext = new EventHubProducerSendTransportContext(supervisor, sendPipe, busInstance.HostConfiguration, eventHubName,
                 _serializationConfiguration.CreateSerializerCollection());
+            transportContext.ConnectSendObserver(_sendObservers);
+
+            return transportContext;
         }
     }
 }

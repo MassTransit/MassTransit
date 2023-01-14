@@ -4,7 +4,8 @@ namespace MassTransit
     using System.Threading.Tasks;
 
 
-    public interface IEventHubProducerProvider
+    public interface IEventHubProducerProvider :
+        ISendObserverConnector
     {
         Task<IEventHubProducer> GetProducer(Uri address);
     }

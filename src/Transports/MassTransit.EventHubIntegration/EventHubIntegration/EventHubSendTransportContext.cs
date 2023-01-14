@@ -1,17 +1,26 @@
 namespace MassTransit.EventHubIntegration
 {
-    using System;
+    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
     using Transports;
 
 
     public interface EventHubSendTransportContext :
-        SendTransportContext
+        SendTransportContext,
+        IProbeSite
     {
-        Uri HostAddress { get; }
-        EventHubEndpointAddress EndpointAddress { get; }
-        ISendPipe SendPipe { get; }
+        IEnumerable<IAgent> GetAgentHandles();
+
+        Task<EventHubSendContext<T>> CreateContext<T>(T value, IPipe<EventHubSendContext<T>> pipe, CancellationToken cancellationToken,
+            IPipe<SendContext<T>> initializerPipe = null)
+            where T : class;
+
+        Task Send<T>(ProducerContext producerContext, EventHubSendContext<T> sendContext)
+            where T : class;
+
+        Task Send<T>(ProducerContext producerContext, EventHubSendContext<T>[] sendContexts)
+            where T : class;
 
         Task Send(IPipe<ProducerContext> pipe, CancellationToken cancellationToken);
     }

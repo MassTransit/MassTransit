@@ -21,15 +21,14 @@ namespace MassTransit.KafkaIntegration.Configuration
         readonly IReceiveEndpointConfiguration _endpointConfiguration;
         readonly IKafkaHostConfiguration _hostConfiguration;
         readonly Action<IClient, string> _oAuthBearerTokenRefreshHandler;
-        Action<CommittedOffsets> _offsetsCommittedHandler;
         readonly IOptionsSet _options;
         IHeadersDeserializer _headersDeserializer;
         IDeserializer<TKey> _keyDeserializer;
+        Action<CommittedOffsets> _offsetsCommittedHandler;
         IDeserializer<TValue> _valueDeserializer;
 
         public KafkaTopicReceiveEndpointConfiguration(IKafkaHostConfiguration hostConfiguration, ConsumerConfig consumerConfig, string topic,
-            IBusInstance busInstance, IReceiveEndpointConfiguration endpointConfiguration, IHeadersDeserializer headersDeserializer,
-            Action<IClient, string> oAuthBearerTokenRefreshHandler)
+            IBusInstance busInstance, IReceiveEndpointConfiguration endpointConfiguration, Action<IClient, string> oAuthBearerTokenRefreshHandler)
             : base(endpointConfiguration)
         {
             _hostConfiguration = hostConfiguration;
@@ -42,7 +41,6 @@ namespace MassTransit.KafkaIntegration.Configuration
 
             SetKeyDeserializer(DeserializerTypes.TryGet<TKey>() ?? new MassTransitJsonDeserializer<TKey>());
             SetValueDeserializer(new MassTransitJsonDeserializer<TValue>());
-            SetHeadersDeserializer(headersDeserializer);
 
             CheckpointInterval = TimeSpan.FromMinutes(1);
             CheckpointMessageCount = 5000;

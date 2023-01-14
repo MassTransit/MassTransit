@@ -29,10 +29,6 @@ namespace MassTransit.EventHubIntegration
                 case IAsyncDisposable disposable:
                     await disposable.DisposeAsync().ConfigureAwait(false);
                     break;
-
-                case IDisposable disposable:
-                    disposable.Dispose();
-                    break;
             }
         }
 

@@ -52,8 +52,7 @@ namespace MassTransit.KafkaIntegration
             Task<ProducerContext> Create(ClientContext clientContext, CancellationToken createCancellationToken)
             {
                 ProducerBuilder<byte[], byte[]> producerBuilder = _producerBuilderFactory();
-                ProducerContext context =
-                    new KafkaProducerContext(producerBuilder, _hostConfiguration.SendLogContext, cancellationToken);
+                ProducerContext context = new KafkaProducerContext(producerBuilder, _hostConfiguration, cancellationToken);
                 return Task.FromResult(context);
             }
 

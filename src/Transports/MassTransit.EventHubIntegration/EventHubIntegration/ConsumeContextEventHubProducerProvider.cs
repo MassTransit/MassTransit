@@ -5,6 +5,7 @@ namespace MassTransit.EventHubIntegration
     using System.Threading;
     using System.Threading.Tasks;
     using Transports;
+    using Util;
 
 
     public class ConsumeContextEventHubProducerProvider :
@@ -19,10 +20,16 @@ namespace MassTransit.EventHubIntegration
             _consumeContext = consumeContext;
         }
 
-        public async Task<IEventHubProducer> GetProducer(Uri address)
+        public Task<IEventHubProducer> GetProducer(Uri address)
         {
-            var producer = await _provider.GetProducer(address).ConfigureAwait(false);
-            return new Producer(producer, _consumeContext);
+            Task<IEventHubProducer> producerTask = _provider.GetProducer(address);
+            IEventHubProducer producer = new Producer(producerTask, _consumeContext);
+            return Task.FromResult(producer);
+        }
+
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        {
+            return _provider.ConnectSendObserver(observer);
         }
 
 
@@ -30,17 +37,20 @@ namespace MassTransit.EventHubIntegration
             IEventHubProducer
         {
             readonly ConsumeContext _consumeContext;
-            readonly IEventHubProducer _producer;
+            readonly Task<IEventHubProducer> _producerTask;
 
-            public Producer(IEventHubProducer producer, ConsumeContext consumeContext)
+            public Producer(Task<IEventHubProducer> producerTask, ConsumeContext consumeContext)
             {
-                _producer = producer;
+                _producerTask = producerTask;
                 _consumeContext = consumeContext;
             }
 
             public ConnectHandle ConnectSendObserver(ISendObserver observer)
             {
-                return _producer.ConnectSendObserver(observer);
+                var producer = _producerTask.Status == TaskStatus.RanToCompletion
+                    ? _producerTask.Result
+                    : TaskUtil.Await(() => _producerTask);
+                return producer.ConnectSendObserver(observer);
             }
 
             public Task Produce<T>(T message, CancellationToken cancellationToken = default)
@@ -59,7 +69,17 @@ namespace MassTransit.EventHubIntegration
                 where T : class
             {
                 var sendPipeAdapter = new ConsumeSendPipeAdapter<T>(pipe, _consumeContext);
-                return _producer.Produce(message, sendPipeAdapter, cancellationToken);
+
+                if (_producerTask.Status == TaskStatus.RanToCompletion)
+                    return _producerTask.Result.Produce(message, sendPipeAdapter, cancellationToken);
+
+                async Task ProduceAsync()
+                {
+                    var producer = await _producerTask.ConfigureAwait(false);
+                    await producer.Produce(message, sendPipeAdapter, cancellationToken);
+                }
+
+                return ProduceAsync();
             }
 
             public Task Produce<T>(IEnumerable<T> messages, IPipe<EventHubSendContext<T>> pipe, CancellationToken cancellationToken = default)
@@ -67,7 +87,16 @@ namespace MassTransit.EventHubIntegration
             {
                 var sendPipeAdapter = new ConsumeSendPipeAdapter<T>(pipe, _consumeContext);
 
-                return _producer.Produce(messages, sendPipeAdapter, cancellationToken);
+                if (_producerTask.Status == TaskStatus.RanToCompletion)
+                    return _producerTask.Result.Produce(messages, sendPipeAdapter, cancellationToken);
+
+                async Task ProduceAsync()
+                {
+                    var producer = await _producerTask.ConfigureAwait(false);
+                    await producer.Produce(messages, sendPipeAdapter, cancellationToken);
+                }
+
+                return ProduceAsync();
             }
 
             public Task Produce<T>(object values, CancellationToken cancellationToken = default)
@@ -87,7 +116,16 @@ namespace MassTransit.EventHubIntegration
             {
                 var sendPipeAdapter = new ConsumeSendPipeAdapter<T>(pipe, _consumeContext);
 
-                return _producer.Produce(values, sendPipeAdapter, cancellationToken);
+                if (_producerTask.Status == TaskStatus.RanToCompletion)
+                    return _producerTask.Result.Produce(values, sendPipeAdapter, cancellationToken);
+
+                async Task ProduceAsync()
+                {
+                    var producer = await _producerTask.ConfigureAwait(false);
+                    await producer.Produce(values, sendPipeAdapter, cancellationToken);
+                }
+
+                return ProduceAsync();
             }
 
             public Task Produce<T>(IEnumerable<object> values, IPipe<EventHubSendContext<T>> pipe, CancellationToken cancellationToken = default)
@@ -95,7 +133,16 @@ namespace MassTransit.EventHubIntegration
             {
                 var sendPipeAdapter = new ConsumeSendPipeAdapter<T>(pipe, _consumeContext);
 
-                return _producer.Produce(values, sendPipeAdapter, cancellationToken);
+                if (_producerTask.Status == TaskStatus.RanToCompletion)
+                    return _producerTask.Result.Produce(values, sendPipeAdapter, cancellationToken);
+
+                async Task ProduceAsync()
+                {
+                    var producer = await _producerTask.ConfigureAwait(false);
+                    await producer.Produce(values, sendPipeAdapter, cancellationToken);
+                }
+
+                return ProduceAsync();
             }
         }
 

@@ -66,10 +66,69 @@ namespace MassTransit.EventHubIntegration.Tests
                 var producer = await producerProvider.GetProducer(Configuration.EventHubName);
                 await producer.Produce<BatchEventHubMessage>(new { }, TestCancellationToken);
                 await taskCompletionSource.Task.OrCanceled(TestCancellationToken);
+
+                await busControl.StopAsync(TestCancellationToken);
             }
             finally
             {
                 serviceScope.Dispose();
+                await provider.DisposeAsync();
+            }
+        }
+
+        [Test]
+        public async Task Should_produce_after_recycle()
+        {
+            var services = new ServiceCollection();
+
+            services.TryAddSingleton<ILoggerFactory>(LoggerFactory);
+            services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
+
+            services.AddMassTransit(x =>
+            {
+                x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
+                x.AddRider(rider =>
+                {
+                    rider.UsingEventHub((_, k) =>
+                    {
+                        k.Host(Configuration.EventHubNamespace);
+                        k.Storage(Configuration.StorageAccount);
+
+                        k.ReceiveEndpoint(Configuration.EventHubName, c => c.Handler<BatchEventHubMessage>(_ => Task.CompletedTask));
+                    });
+                });
+            });
+
+            var provider = services.BuildServiceProvider(true);
+
+            var busControl = provider.GetRequiredService<IBusControl>();
+            try
+            {
+                await busControl.StartAsync(TestCancellationToken);
+                using (var scope = provider.CreateScope())
+                {
+                    var producerProvider = scope.ServiceProvider.GetRequiredService<IEventHubProducerProvider>();
+                    var producer = await producerProvider.GetProducer(Configuration.EventHubName);
+                    await producer.Produce<BatchEventHubMessage>(new { }, TestCancellationToken);
+                }
+
+                await busControl.StopAsync(TestCancellationToken);
+
+                await Task.Delay(500, TestCancellationToken);
+
+                await busControl.StartAsync(TestCancellationToken);
+
+                using (var scope = provider.CreateScope())
+                {
+                    var producerProvider = scope.ServiceProvider.GetRequiredService<IEventHubProducerProvider>();
+                    var producer = await producerProvider.GetProducer(Configuration.EventHubName);
+                    await producer.Produce<BatchEventHubMessage>(new { }, TestCancellationToken);
+                }
+
+                await busControl.StopAsync(TestCancellationToken);
+            }
+            finally
+            {
                 await provider.DisposeAsync();
             }
         }

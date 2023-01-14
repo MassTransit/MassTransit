@@ -23,8 +23,6 @@ namespace MassTransit.EventHubIntegration
 
         public override CancellationToken CancellationToken { get; }
 
-        public ISerialization Serializer => _context.Serializer;
-
         public Task Produce(EventDataBatch eventDataBatch, CancellationToken cancellationToken)
         {
             return _context.Produce(eventDataBatch, cancellationToken);

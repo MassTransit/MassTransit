@@ -3,21 +3,34 @@ namespace MassTransit.KafkaIntegration
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Confluent.Kafka;
     using Initializers;
     using Logging;
+    using MassTransit.Middleware;
     using Transports;
 
 
     public class TopicProducer<TKey, TValue> :
+        Supervisor,
+        IAsyncDisposable,
         ITopicProducer<TKey, TValue>
         where TValue : class
     {
+        readonly ConnectHandle _connectHandle;
         readonly KafkaSendTransportContext<TKey, TValue> _context;
 
-        public TopicProducer(KafkaSendTransportContext<TKey, TValue> context)
+        public TopicProducer(KafkaSendTransportContext<TKey, TValue> context, ConnectHandle connectHandle = null)
         {
             _context = context;
+            _connectHandle = connectHandle;
+
+            foreach (var handle in _context.GetAgentHandles())
+                Add(handle);
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            _connectHandle?.Disconnect();
+            await this.Stop("Disposing Producer").ConfigureAwait(false);
         }
 
         public Task Produce(TKey key, TValue value, CancellationToken cancellationToken = default)
@@ -39,7 +52,8 @@ namespace MassTransit.KafkaIntegration
         {
             (var message, IPipe<SendContext<TValue>> sendPipe) = await MessageInitializerCache<TValue>.InitializeMessage(values, cancellationToken);
 
-            await _context.Send(new SendPipe(_context, key, message, pipe, cancellationToken, sendPipe), cancellationToken).ConfigureAwait(false);
+            await _context.Send(new SendPipe(_context, key, message, pipe, cancellationToken, sendPipe), cancellationToken)
+                .ConfigureAwait(false);
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
@@ -53,10 +67,9 @@ namespace MassTransit.KafkaIntegration
         {
             readonly CancellationToken _cancellationToken;
             readonly KafkaSendTransportContext<TKey, TValue> _context;
+            readonly IPipe<SendContext<TValue>> _initializerPipe;
             readonly TKey _key;
             readonly IPipe<KafkaSendContext<TKey, TValue>> _pipe;
-            readonly ISendContextPipe _sendContextPipe;
-            readonly IPipe<SendContext<TValue>> _initializerPipe;
             readonly TValue _value;
 
             public SendPipe(KafkaSendTransportContext<TKey, TValue> context, TKey key, TValue value, IPipe<KafkaSendContext<TKey, TValue>> pipe,
@@ -66,8 +79,6 @@ namespace MassTransit.KafkaIntegration
                 _key = key;
                 _value = value;
                 _pipe = pipe;
-                _sendContextPipe = pipe as ISendContextPipe;
-
                 _cancellationToken = cancellationToken;
                 _initializerPipe = initializerPipe;
             }
@@ -76,38 +87,18 @@ namespace MassTransit.KafkaIntegration
             {
                 LogContext.SetCurrentIfNull(_context.LogContext);
 
-                var sendContext = new KafkaMessageSendContext<TKey, TValue>(_key, _value, _cancellationToken) { DestinationAddress = _context.TopicAddress };
-
-                if (_sendContextPipe != null)
-                    await _sendContextPipe.Send(sendContext).ConfigureAwait(false);
-
-                await _context.SendPipe.Send(sendContext).ConfigureAwait(false);
-
-                if (_initializerPipe.IsNotEmpty())
-                    await _initializerPipe.Send(sendContext).ConfigureAwait(false);
-
-                if (_pipe.IsNotEmpty())
-                    await _pipe.Send(sendContext).ConfigureAwait(false);
-
-                sendContext.SourceAddress ??= _context.HostAddress;
-                sendContext.ConversationId ??= NewId.NextGuid();
+                KafkaSendContext<TKey, TValue> sendContext =
+                    await _context.CreateContext(_key, _value, _pipe, _cancellationToken, _initializerPipe).ConfigureAwait(false);
 
                 sendContext.CancellationToken.ThrowIfCancellationRequested();
 
-                StartedActivity? activity = LogContext.Current?.StartSendActivity(_context, sendContext,
-                    (nameof(sendContext.Partition), sendContext.Partition.ToString()));
+                StartedActivity? activity = LogContext.Current?.StartSendActivity(_context, sendContext);
                 try
                 {
                     if (_context.SendObservers.Count > 0)
                         await _context.SendObservers.PreSend(sendContext).ConfigureAwait(false);
 
-                    var topic = new TopicPartition(_context.TopicAddress.Topic, sendContext.Partition);
-                    Message<byte[], byte[]> message = await CreateMessage(topic, sendContext).ConfigureAwait(false);
-
-                    if (sendContext.SentTime.HasValue)
-                        message.Timestamp = new Timestamp(sendContext.SentTime.Value);
-
-                    await context.Produce(topic, message, sendContext.CancellationToken).ConfigureAwait(false);
+                    await _context.Send(context, sendContext).ConfigureAwait(false);
 
                     activity?.Update(sendContext);
                     sendContext.LogSent();
@@ -130,25 +121,6 @@ namespace MassTransit.KafkaIntegration
                 {
                     activity?.Stop();
                 }
-            }
-
-            async Task<Message<byte[], byte[]>> CreateMessage(TopicPartition topic, KafkaSendContext<TKey, TValue> sendContext)
-            {
-                var headers = _context.HeadersSerializer.Serialize(sendContext);
-
-                Task<byte[]> keyTask = _context.KeySerializer
-                    .SerializeAsync(sendContext.Key, new SerializationContext(MessageComponentType.Key, topic.Topic, headers));
-                Task<byte[]> valueTask = _context.ValueSerializer
-                    .SerializeAsync(sendContext.Message, new SerializationContext(MessageComponentType.Value, topic.Topic, headers));
-
-                await Task.WhenAll(keyTask, valueTask).ConfigureAwait(false);
-
-                return new Message<byte[], byte[]>
-                {
-                    Key = keyTask.Result,
-                    Value = valueTask.Result,
-                    Headers = headers
-                };
             }
 
             public void Probe(ProbeContext context)

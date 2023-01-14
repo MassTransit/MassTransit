@@ -5,6 +5,7 @@ namespace MassTransit.KafkaIntegration
     using System.Threading.Tasks;
     using Confluent.Kafka;
     using Logging;
+    using MassTransit.Configuration;
     using MassTransit.Middleware;
 
 
@@ -13,15 +14,16 @@ namespace MassTransit.KafkaIntegration
         ProducerContext
     {
         readonly CancellationTokenSource _cancellationTokenSource;
-        readonly ILogContext _logContext;
+        readonly IHostConfiguration _hostConfiguration;
         readonly IProducer<byte[], byte[]> _producer;
 
-        public KafkaProducerContext(ProducerBuilder<byte[], byte[]> producerBuilder, ILogContext logContext, CancellationToken cancellationToken)
+        public KafkaProducerContext(ProducerBuilder<byte[], byte[]> producerBuilder, IHostConfiguration hostConfiguration, CancellationToken cancellationToken)
             : base(cancellationToken)
         {
-            _logContext = logContext;
+            _hostConfiguration = hostConfiguration;
             _producer = producerBuilder
                 .SetErrorHandler(OnError)
+                .SetLogHandler((_, message) => hostConfiguration.SendLogContext?.Debug?.Log(message.Message))
                 .Build();
             _cancellationTokenSource = new CancellationTokenSource();
         }
@@ -33,6 +35,8 @@ namespace MassTransit.KafkaIntegration
 
         public void Dispose()
         {
+            LogContext.SetCurrentIfNull(_hostConfiguration.SendLogContext);
+
             var timeoutTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
             var cts = CancellationTokenSource.CreateLinkedTokenSource(timeoutTokenSource.Token, _cancellationTokenSource.Token);
             try
@@ -44,7 +48,7 @@ namespace MassTransit.KafkaIntegration
             }
             catch (Exception e)
             {
-                _logContext.Error?.Log(e, "Failed to dispose producer: {producerName}", _producer.Name);
+                LogContext.Error?.Log(e, "Failed to dispose producer: {producerName}", _producer.Name);
             }
             finally
             {
@@ -56,7 +60,9 @@ namespace MassTransit.KafkaIntegration
 
         void OnError(IProducer<byte[], byte[]> producer, Error error)
         {
-            EnabledLogger? logger = error.IsFatal ? _logContext.Error : _logContext.Warning;
+            LogContext.SetCurrentIfNull(_hostConfiguration.SendLogContext);
+
+            EnabledLogger? logger = error.IsFatal ? LogContext.Error : LogContext.Warning;
             logger?.Log("Error ({code}): {reason} on producer: {producerName}", error.Code, error.Reason, producer.Name);
 
             if (!_cancellationTokenSource.IsCancellationRequested && error.IsLocalError)

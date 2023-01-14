@@ -7,8 +7,8 @@ namespace MassTransit.EventHubIntegration
         TransportPipeContextSupervisor<ProducerContext>,
         IProducerContextSupervisor
     {
-        public ProducerContextSupervisor(IConnectionContextSupervisor contextSupervisor, string eventHubName, ISerialization serializers)
-            : base(new ProducerContextFactory(contextSupervisor, eventHubName, serializers))
+        public ProducerContextSupervisor(IConnectionContextSupervisor contextSupervisor, string eventHubName)
+            : base(new ProducerContextFactory(contextSupervisor, eventHubName))
         {
             contextSupervisor.AddSendAgent(this);
         }

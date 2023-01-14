@@ -5,21 +5,33 @@ namespace MassTransit.EventHubIntegration
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Azure.Messaging.EventHubs;
-    using Azure.Messaging.EventHubs.Producer;
     using Initializers;
     using Logging;
+    using MassTransit.Middleware;
     using Transports;
 
 
     public class EventHubProducer :
+        Supervisor,
+        IAsyncDisposable,
         IEventHubProducer
     {
+        readonly ConnectHandle _connectHandle;
         readonly EventHubSendTransportContext _context;
 
-        public EventHubProducer(EventHubSendTransportContext context)
+        public EventHubProducer(EventHubSendTransportContext context, ConnectHandle connectHandle = null)
         {
             _context = context;
+            _connectHandle = connectHandle;
+
+            foreach (var handle in _context.GetAgentHandles())
+                Add(handle);
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            _connectHandle?.Disconnect();
+            await this.Stop("Disposing Agent").ConfigureAwait(false);
         }
 
         public Task Produce<T>(T message, CancellationToken cancellationToken = default)
@@ -66,21 +78,14 @@ namespace MassTransit.EventHubIntegration
             await _context.Send(new SendPipe<T>(message, _context, pipe, cancellationToken, sendPipe), cancellationToken).ConfigureAwait(false);
         }
 
-        public Task Produce<T>(IEnumerable<object> values, IPipe<EventHubSendContext<T>> pipe, CancellationToken cancellationToken)
+        public async Task Produce<T>(IEnumerable<object> values, IPipe<EventHubSendContext<T>> pipe, CancellationToken cancellationToken)
             where T : class
         {
-            // TODO change this to use the proper header initialization, etc.
+            SendTuple<T>[] contexts = await Task.WhenAll(values.Select(value => MessageInitializerCache<T>.InitializeMessage(value, cancellationToken)))
+                .ConfigureAwait(false);
 
-            Task<InitializeContext<T>>[] messageTasks = values.Select(value => MessageInitializerCache<T>.Initialize(value, cancellationToken)).ToArray();
-
-            async Task ProduceAsync()
-            {
-                InitializeContext<T>[] contexts = await Task.WhenAll(messageTasks).ConfigureAwait(false);
-
-                await Produce(contexts.Select(x => x.Message), pipe, cancellationToken).ConfigureAwait(false);
-            }
-
-            return ProduceAsync();
+            await _context.Send(new BatchSendPipe<T>(contexts.Select(x => x.Message), _context, pipe, cancellationToken, contexts.Select(x => x.Pipe)),
+                cancellationToken).ConfigureAwait(false);
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
@@ -113,50 +118,17 @@ namespace MassTransit.EventHubIntegration
             {
                 LogContext.SetCurrentIfNull(_context.LogContext);
 
-                var sendContext = new EventHubMessageSendContext<T>(_message, _cancellationToken)
-                {
-                    Serializer = context.Serializer.GetMessageSerializer(),
-                    DestinationAddress = _context.EndpointAddress
-                };
-
-                await _context.SendPipe.Send(sendContext).ConfigureAwait(false);
-
-                if (_sendPipe.IsNotEmpty())
-                    await _sendPipe.Send(sendContext).ConfigureAwait(false);
-                if (_pipe.IsNotEmpty())
-                    await _pipe.Send(sendContext).ConfigureAwait(false);
-
-                sendContext.SourceAddress ??= _context.HostAddress;
-                sendContext.ConversationId ??= NewId.NextGuid();
-
-                var options = new SendEventOptions
-                {
-                    PartitionId = sendContext.PartitionId,
-                    PartitionKey = sendContext.PartitionKey
-                };
+                EventHubSendContext<T> sendContext = await _context.CreateContext(_message, _pipe, _cancellationToken, _sendPipe).ConfigureAwait(false);
 
                 sendContext.CancellationToken.ThrowIfCancellationRequested();
 
-                StartedActivity? activity = LogContext.Current?.StartSendActivity(_context, sendContext,
-                    (nameof(sendContext.PartitionId), options.PartitionId), (nameof(sendContext.PartitionKey), options.PartitionKey));
+                StartedActivity? activity = LogContext.Current?.StartSendActivity(_context, sendContext);
                 try
                 {
                     if (_context.SendObservers.Count > 0)
                         await _context.SendObservers.PreSend(sendContext).ConfigureAwait(false);
 
-                    var eventData = new EventData(sendContext.Body.GetBytes());
-
-                    eventData.Properties.Set(sendContext.Headers);
-
-                    if (sendContext.MessageId.HasValue)
-                        eventData.MessageId = sendContext.MessageId.Value.ToString("N");
-
-                    if (sendContext.CorrelationId.HasValue)
-                        eventData.CorrelationId = sendContext.CorrelationId.Value.ToString("N");
-
-                    eventData.ContentType = sendContext.ContentType.ToString();
-
-                    await context.Produce(new[] { eventData }, options, sendContext.CancellationToken).ConfigureAwait(false);
+                    await _context.Send(context, sendContext).ConfigureAwait(false);
 
                     activity?.Update(sendContext);
                     sendContext.LogSent();
@@ -193,15 +165,17 @@ namespace MassTransit.EventHubIntegration
         {
             readonly CancellationToken _cancellationToken;
             readonly EventHubSendTransportContext _context;
-            readonly IEnumerable<T> _messages;
+            readonly IPipe<SendContext<T>>[] _initializerPipes;
+            readonly T[] _messages;
             readonly IPipe<EventHubSendContext<T>> _pipe;
 
             public BatchSendPipe(IEnumerable<T> messages, EventHubSendTransportContext context, IPipe<EventHubSendContext<T>> pipe,
-                CancellationToken cancellationToken)
+                CancellationToken cancellationToken, IEnumerable<IPipe<SendContext<T>>> sendPipes = null)
             {
-                _messages = messages;
+                _messages = messages as T[] ?? messages.ToArray();
                 _context = context;
                 _pipe = pipe;
+                _initializerPipes = sendPipes as IPipe<SendContext<T>>[] ?? sendPipes?.ToArray() ?? Array.Empty<IPipe<SendContext<T>>>();
                 _cancellationToken = cancellationToken;
             }
 
@@ -212,72 +186,27 @@ namespace MassTransit.EventHubIntegration
 
                 LogContext.SetCurrentIfNull(_context.LogContext);
 
-                EventHubMessageSendContext<T>[] contexts = _messages
-                    .Select(x => new EventHubMessageSendContext<T>(x, _cancellationToken) { Serializer = context.Serializer.GetMessageSerializer() })
-                    .ToArray();
-
+                var contexts = new EventHubSendContext<T>[_messages.Length];
                 if (contexts.Length == 0)
                     return;
 
-                NewId[] ids = NewId.Next(contexts.Length);
-
-                async Task SendInner(EventHubMessageSendContext<T> c, int idx)
+                for (var i = 0; i < contexts.Length; i++)
                 {
-                    c.DestinationAddress = _context.EndpointAddress;
-
-                    await _context.SendPipe.Send(c).ConfigureAwait(false);
-
-                    if (_pipe.IsNotEmpty())
-                        await _pipe.Send(c).ConfigureAwait(false);
-
-                    c.SourceAddress ??= _context.HostAddress;
-                    c.ConversationId ??= ids[idx].ToGuid();
+                    contexts[i] = await _context.CreateContext(_messages[i], _pipe, _cancellationToken,
+                        _initializerPipes.Length > i ? _initializerPipes[i] : null).ConfigureAwait(false);
                 }
 
-                await Task.WhenAll(contexts.Select(SendInner)).ConfigureAwait(false);
+                EventHubSendContext<T> sendContext = contexts[0];
 
-                EventHubMessageSendContext<T> sendContext = contexts[0];
-                var options = new CreateBatchOptions
-                {
-                    PartitionId = sendContext.PartitionId,
-                    PartitionKey = sendContext.PartitionKey
-                };
+                sendContext.CancellationToken.ThrowIfCancellationRequested();
 
-                StartedActivity? activity = LogContext.Current?.StartSendActivity(_context, sendContext,
-                    (nameof(EventHubMessageSendContext<T>.PartitionId), options.PartitionId),
-                    (nameof(EventHubMessageSendContext<T>.PartitionKey), options.PartitionKey));
+                StartedActivity? activity = LogContext.Current?.StartSendActivity(_context, sendContext);
                 try
                 {
-                    var eventDataBatch = await context.CreateBatch(options, context.CancellationToken).ConfigureAwait(false);
-
                     if (_context.SendObservers.Count > 0)
                         await Task.WhenAll(contexts.Select(c => _context.SendObservers.PreSend(c))).ConfigureAwait(false);
 
-                    async Task FlushAsync(EventDataBatch batch)
-                    {
-                        await context.Produce(batch, _cancellationToken).ConfigureAwait(false);
-                        batch.Dispose();
-                    }
-
-                    for (var i = 0; i < contexts.Length; i++)
-                    {
-                        EventHubMessageSendContext<T> c = contexts[i];
-
-                        var eventData = new EventData(c.Body.GetBytes());
-
-                        eventData.Properties.Set(c.Headers);
-
-                        while (!eventDataBatch.TryAdd(eventData) && eventDataBatch.Count > 0)
-                        {
-                            await FlushAsync(eventDataBatch);
-
-                            if (contexts.Length - i > 1)
-                                eventDataBatch = await context.CreateBatch(options, _cancellationToken).ConfigureAwait(false);
-                        }
-                    }
-
-                    if (eventDataBatch.Count > 0)
-                        await FlushAsync(eventDataBatch);
+                    await _context.Send(context, contexts).ConfigureAwait(false);
 
                     activity?.Update(sendContext);
                     sendContext.LogSent();

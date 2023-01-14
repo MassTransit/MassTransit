@@ -10,7 +10,7 @@ namespace MassTransit.KafkaIntegration.Configuration
 
 
     public class KafkaProducerSpecification<TKey, TValue> :
-        IKafkaProducerSpecification,
+        IKafkaProducerSpecification<TKey, TValue>,
         IKafkaProducerConfigurator<TKey, TValue>
         where TValue : class
     {
@@ -25,18 +25,16 @@ namespace MassTransit.KafkaIntegration.Configuration
         IAsyncSerializer<TValue> _valueSerializer;
 
         public KafkaProducerSpecification(IKafkaHostConfiguration hostConfiguration, ProducerConfig producerConfig, string topicName,
-            IHeadersSerializer headersSerializer, Action<IClient, string> oAuthBearerTokenRefreshHandler)
+            Action<IClient, string> oAuthBearerTokenRefreshHandler)
         {
             _hostConfiguration = hostConfiguration;
             _producerConfig = producerConfig;
             TopicName = topicName;
-            _headersSerializer = headersSerializer;
             _oAuthBearerTokenRefreshHandler = oAuthBearerTokenRefreshHandler;
             _sendObservers = new SendObservable();
 
             SetKeySerializer(SerializerTypes.TryGet<TKey>() ?? new MassTransitAsyncJsonSerializer<TKey>());
             SetValueSerializer(new MassTransitAsyncJsonSerializer<TValue>());
-            SetHeadersSerializer(headersSerializer);
 
             _serialization = new SerializationConfiguration();
         }
@@ -63,7 +61,7 @@ namespace MassTransit.KafkaIntegration.Configuration
 
         public TimeSpan? RetryBackoff
         {
-            set => _producerConfig.RetryBackoffMs = value == null ? (int?)null : Convert.ToInt32(value.Value.TotalMilliseconds);
+            set => _producerConfig.RetryBackoffMs = value == null ? null : (int?)value.Value.TotalMilliseconds;
         }
 
         public int? MessageSendMaxRetries
@@ -73,7 +71,7 @@ namespace MassTransit.KafkaIntegration.Configuration
 
         public TimeSpan? Linger
         {
-            set => _producerConfig.LingerMs = value == null ? (int?)null : Convert.ToInt32(value.Value.TotalMilliseconds);
+            set => _producerConfig.LingerMs = value == null ? null : (int?)value.Value.TotalMilliseconds;
         }
 
         public int? QueueBufferingMaxKbytes
@@ -98,7 +96,7 @@ namespace MassTransit.KafkaIntegration.Configuration
 
         public TimeSpan? TransactionTimeout
         {
-            set => _producerConfig.TransactionTimeoutMs = value == null ? (int?)null : Convert.ToInt32(value.Value.TotalMilliseconds);
+            set => _producerConfig.TransactionTimeoutMs = value == null ? null : (int?)value.Value.TotalMilliseconds;
         }
 
         public string TransactionalId
@@ -113,12 +111,12 @@ namespace MassTransit.KafkaIntegration.Configuration
 
         public TimeSpan? MessageTimeout
         {
-            set => _producerConfig.MessageTimeoutMs = value == null ? (int?)null : Convert.ToInt32(value.Value.TotalMilliseconds);
+            set => _producerConfig.MessageTimeoutMs = value == null ? null : (int?)value.Value.TotalMilliseconds;
         }
 
         public TimeSpan? RequestTimeout
         {
-            set => _producerConfig.RequestTimeoutMs = value == null ? (int?)null : Convert.ToInt32(value.Value.TotalMilliseconds);
+            set => _producerConfig.RequestTimeoutMs = value == null ? null : (int?)value.Value.TotalMilliseconds;
         }
 
         public string DeliveryReportFields
@@ -153,16 +151,13 @@ namespace MassTransit.KafkaIntegration.Configuration
 
         public string TopicName { get; }
 
-        public IKafkaProducerFactory CreateProducerFactory(IBusInstance busInstance)
+        public KafkaSendTransportContext<TKey, TValue> CreateSendTransportContext(IBusInstance busInstance, Action onStop = null)
         {
             var producerConfig = _hostConfiguration.GetProducerConfig(_producerConfig);
-            var sendConfiguration = new SendPipeConfiguration(busInstance.HostConfiguration.Topology.SendTopology);
-            _configureSend?.Invoke(sendConfiguration.Configurator);
 
             ProducerBuilder<byte[], byte[]> CreateProducerBuilder()
             {
                 ProducerBuilder<byte[], byte[]> producerBuilder = new ProducerBuilder<byte[], byte[]>(producerConfig)
-                    .SetLogHandler((c, message) => busInstance.HostConfiguration.SendLogContext?.Debug?.Log(message.Message))
                     .SetKeySerializer(Serializers.ByteArray)
                     .SetValueSerializer(Serializers.ByteArray);
 
@@ -171,11 +166,14 @@ namespace MassTransit.KafkaIntegration.Configuration
                 return producerBuilder;
             }
 
-            var sendPipe = sendConfiguration.CreatePipe();
+            var supervisor = new ProducerContextSupervisor(_hostConfiguration.ClientContextSupervisor, busInstance.HostConfiguration, CreateProducerBuilder,
+                onStop);
 
-            return new ProducerContextSupervisor<TKey, TValue>(TopicName, sendPipe, _sendObservers, _hostConfiguration.ClientContextSupervisor,
-                busInstance.HostConfiguration, _headersSerializer, _keySerializer, _valueSerializer,
-                CreateProducerBuilder, _serialization.CreateSerializerCollection());
+            var transportContext = new KafkaTopicSendTransportContext<TKey, TValue>(busInstance.HostConfiguration, TopicName, supervisor, _headersSerializer,
+                _keySerializer, _valueSerializer, _configureSend, _serialization.CreateSerializerCollection());
+            transportContext.ConnectSendObserver(_sendObservers);
+
+            return transportContext;
         }
 
         public IEnumerable<ValidationResult> Validate()

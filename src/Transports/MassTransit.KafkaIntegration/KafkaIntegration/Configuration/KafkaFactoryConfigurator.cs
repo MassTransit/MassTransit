@@ -18,9 +18,9 @@ namespace MassTransit.KafkaIntegration.Configuration
         readonly ClientConfig _clientConfig;
         readonly Recycle<IClientContextSupervisor> _clientSupervisor;
         readonly ReceiveEndpointObservable _endpointObservers;
-        readonly List<IKafkaProducerSpecification> _producers;
+        readonly SingleThreadedDictionary<string, IKafkaProducerSpecification> _producers;
         readonly SendObservable _sendObservers;
-        readonly List<IKafkaConsumerSpecification> _topics;
+        readonly SingleThreadedDictionary<string, IKafkaConsumerSpecification> _topics;
         Action<ISendPipeConfigurator> _configureSend;
         IHeadersDeserializer _headersDeserializer;
         IHeadersSerializer _headersSerializer;
@@ -30,15 +30,15 @@ namespace MassTransit.KafkaIntegration.Configuration
         public KafkaFactoryConfigurator(ClientConfig clientConfig)
         {
             _clientConfig = clientConfig;
-            _topics = new List<IKafkaConsumerSpecification>();
-            _producers = new List<IKafkaProducerSpecification>();
+            _topics = new SingleThreadedDictionary<string, IKafkaConsumerSpecification>();
+            _producers = new SingleThreadedDictionary<string, IKafkaProducerSpecification>();
             _endpointObservers = new ReceiveEndpointObservable();
             _sendObservers = new SendObservable();
 
             SetHeadersDeserializer(DictionaryHeadersSerialize.Deserializer);
             SetHeadersSerializer(DictionaryHeadersSerialize.Serializer);
 
-            _clientSupervisor = new Recycle<IClientContextSupervisor>(() => new ClientContextSupervisor(_clientConfig, _producers));
+            _clientSupervisor = new Recycle<IClientContextSupervisor>(() => new ClientContextSupervisor(_clientConfig));
         }
 
         public void Host(IReadOnlyList<string> servers, Action<IKafkaHostConfigurator> configure)
@@ -78,7 +78,8 @@ namespace MassTransit.KafkaIntegration.Configuration
             where TValue : class
         {
             var specification = CreateSpecification(topicName, groupId, configure);
-            _topics.Add(specification);
+            if (!_topics.TryAdd(specification.EndpointName, _ => specification))
+                throw new ConfigurationException($"A topic consumer with the same key was already added: {specification.EndpointName}");
         }
 
         public void TopicEndpoint<TKey, TValue>(string topicName, ConsumerConfig consumerConfig,
@@ -86,7 +87,8 @@ namespace MassTransit.KafkaIntegration.Configuration
             where TValue : class
         {
             var specification = CreateSpecification(topicName, consumerConfig, configure);
-            _topics.Add(specification);
+            if (!_topics.TryAdd(specification.EndpointName, topic => CreateSpecification(topic, consumerConfig, configure)))
+                throw new ConfigurationException($"A topic consumer with the same key was already added: {specification.EndpointName}");
         }
 
         void IKafkaFactoryConfigurator.TopicProducer<TKey, TValue>(string topicName, Action<IKafkaProducerConfigurator<TKey, TValue>> configure)
@@ -104,15 +106,20 @@ namespace MassTransit.KafkaIntegration.Configuration
             if (producerConfig == null)
                 throw new ArgumentNullException(nameof(producerConfig));
 
-            var configurator = new KafkaProducerSpecification<TKey, TValue>(this, producerConfig, topicName, _headersSerializer,
-                _oAuthBearerTokenRefreshHandler);
-            configure?.Invoke(configurator);
+            var added = _producers.TryAdd(topicName, topic =>
+            {
+                var configurator = new KafkaProducerSpecification<TKey, TValue>(this, producerConfig, topicName, _oAuthBearerTokenRefreshHandler);
+                configurator.SetHeadersSerializer(_headersSerializer);
+                configure?.Invoke(configurator);
 
-            configurator.ConnectSendObserver(_sendObservers);
-            if (_configureSend != null)
-                configurator.ConfigureSend(_configureSend);
+                configurator.ConnectSendObserver(_sendObservers);
+                if (_configureSend != null)
+                    configurator.ConfigureSend(_configureSend);
+                return configurator;
+            });
 
-            _producers.Add(configurator);
+            if (!added)
+                throw new ConfigurationException($"A topic producer with the same key was already added: {topicName}");
         }
 
         public void SetHeadersDeserializer(IHeadersDeserializer deserializer)
@@ -260,6 +267,18 @@ namespace MassTransit.KafkaIntegration.Configuration
             _configureSend = callback ?? throw new ArgumentNullException(nameof(callback));
         }
 
+        public KafkaSendTransportContext<TKey, TValue> CreateSendTransportContext<TKey, TValue>(IBusInstance busInstance, string topic)
+            where TValue : class
+        {
+            if (!_producers.TryGetValue(topic, out var spec))
+                throw new ConfigurationException($"Producer for topic: {topic} is not configured.");
+
+            if (spec is IKafkaProducerSpecification<TKey, TValue> specification)
+                return specification.CreateSendTransportContext(busInstance);
+
+            throw new ConfigurationException($"Producer for topic: {topic} is not configured for ${typeof(Message<TKey, TValue>).Name} message");
+        }
+
         public IKafkaConsumerSpecification CreateSpecification<TKey, TValue>(string topicName, string groupId,
             Action<IKafkaTopicReceiveEndpointConfigurator<TKey, TValue>> configure)
             where TValue : class
@@ -295,12 +314,10 @@ namespace MassTransit.KafkaIntegration.Configuration
             ConnectSendObserver(busInstance.HostConfiguration.SendObservers);
 
             var endpoints = new ReceiveEndpointCollection();
-            foreach (var topic in _topics)
-                endpoints.Add(topic.EndpointName, topic.CreateReceiveEndpoint(busInstance));
+            foreach (var specification in _topics.Values)
+                endpoints.Add(specification.EndpointName, specification.CreateReceiveEndpoint(busInstance));
 
-            var topicProducerProvider = new TopicProducerProvider(busInstance, this);
-
-            return new KafkaRider(this, busInstance, endpoints, topicProducerProvider, context);
+            return new KafkaRider(this, busInstance, endpoints, context);
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -308,17 +325,10 @@ namespace MassTransit.KafkaIntegration.Configuration
             if (string.IsNullOrEmpty(_clientConfig.BootstrapServers))
                 yield return this.Failure("BootstrapServers", "should not be empty. Please use cfg.Host() to configure it");
 
-            foreach (KeyValuePair<string, IKafkaConsumerSpecification[]> kv in _topics.GroupBy(x => x.EndpointName)
-                         .ToDictionary(x => x.Key, x => x.ToArray()))
-            {
-                if (kv.Value.Length > 1)
-                    yield return this.Failure($"Topic: {kv.Key} was added more than once.");
+            foreach (var result in _topics.Values.SelectMany(x => x.Validate()))
+                yield return result;
 
-                foreach (var result in kv.Value.SelectMany(x => x.Validate()))
-                    yield return result;
-            }
-
-            foreach (var result in _producers.SelectMany(x => x.Validate()))
+            foreach (var result in _producers.Values.SelectMany(x => x.Validate()))
                 yield return result;
         }
 
