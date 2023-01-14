@@ -2,6 +2,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
 {
     using System;
     using System.Threading.Tasks;
+    using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
     using Scenarios;
     using TestFramework;
@@ -11,6 +12,13 @@ namespace MassTransit.Containers.Tests.Common_Tests
     public class Using_the_request_client_to_publish_within_a_scope :
         InMemoryContainerTestFixture
     {
+        readonly TaskCompletionSource<SendContext> _taskCompletionSource;
+
+        public Using_the_request_client_to_publish_within_a_scope()
+        {
+            _taskCompletionSource = GetTask<SendContext>();
+        }
+
         [Test]
         public async Task Should_contains_scope_on_publish()
         {
@@ -22,13 +30,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
             Assert.IsTrue(sent.TryGetPayload<IServiceProvider>(out var serviceProvider));
 
             Assert.AreEqual(serviceProvider, ServiceScope.ServiceProvider);
-        }
-
-        readonly TaskCompletionSource<SendContext> _taskCompletionSource;
-
-        public Using_the_request_client_to_publish_within_a_scope()
-        {
-            _taskCompletionSource = GetTask<SendContext>();
         }
 
         protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
@@ -49,9 +50,69 @@ namespace MassTransit.Containers.Tests.Common_Tests
     }
 
 
+    public class Using_the_mediator_to_publish_within_a_scope :
+        InMemoryContainerTestFixture
+    {
+        readonly TaskCompletionSource<SendContext> _taskCompletionSource;
+
+        public Using_the_mediator_to_publish_within_a_scope()
+        {
+            _taskCompletionSource = GetTask<SendContext>();
+        }
+
+        [Test]
+        public async Task Should_contains_scope_on_publish()
+        {
+            IRequestClient<PingMessage> client = GetRequestClient<PingMessage>();
+            await client.GetResponse<PongMessage>(new PingMessage(NewId.NextGuid()));
+
+            var sent = await _taskCompletionSource.Task;
+
+            Assert.IsTrue(sent.TryGetPayload<IServiceProvider>(out var serviceProvider));
+
+            Assert.AreEqual(serviceProvider, ServiceScope.ServiceProvider);
+        }
+
+        protected override IServiceCollection ConfigureServices(IServiceCollection collection)
+        {
+            return collection.AddMediator(ConfigureRegistration);
+        }
+
+        void ConfigureRegistration(IMediatorRegistrationConfigurator configurator)
+        {
+            configurator.AddRequestClient<PingMessage>();
+            configurator.AddConsumer<Consumer>();
+            configurator.ConfigureMediator(ConfigureMediator);
+        }
+
+        void ConfigureMediator(IMediatorRegistrationContext context, IMediatorConfigurator configurator)
+        {
+            configurator.ConfigureSend(cfg => cfg.UseFilter(new TestRequestClientScopeFilter(_taskCompletionSource)));
+            configurator.ConfigurePublish(cfg => cfg.UseFilter(new TestRequestClientScopeFilter(_taskCompletionSource)));
+        }
+
+
+        class Consumer :
+            IConsumer<PingMessage>
+        {
+            public Task Consume(ConsumeContext<PingMessage> context)
+            {
+                return context.RespondAsync<PongMessage>(new { });
+            }
+        }
+    }
+
+
     public class Using_the_request_client_to_send_within_a_scope :
         InMemoryContainerTestFixture
     {
+        readonly TaskCompletionSource<SendContext> _taskCompletionSource;
+
+        public Using_the_request_client_to_send_within_a_scope()
+        {
+            _taskCompletionSource = GetTask<SendContext>();
+        }
+
         [Test]
         public async Task Should_contains_scope_on_send()
         {
@@ -63,13 +124,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
             Assert.IsTrue(sent.TryGetPayload<IServiceProvider>(out var serviceProvider));
 
             Assert.AreEqual(serviceProvider, ServiceScope.ServiceProvider);
-        }
-
-        readonly TaskCompletionSource<SendContext> _taskCompletionSource;
-
-        public Using_the_request_client_to_send_within_a_scope()
-        {
-            _taskCompletionSource = GetTask<SendContext>();
         }
 
         protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
