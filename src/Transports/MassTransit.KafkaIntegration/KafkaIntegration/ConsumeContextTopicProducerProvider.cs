@@ -25,6 +25,11 @@ namespace MassTransit.KafkaIntegration
             return new TopicProducer<TKey, TValue>(producer, _consumeContext);
         }
 
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        {
+            return _provider.ConnectSendObserver(observer);
+        }
+
 
         class TopicProducer<TKey, TValue> :
             ITopicProducer<TKey, TValue>

@@ -11,30 +11,39 @@ namespace MassTransit.EventHubIntegration
         IEventHubProducerProvider
     {
         readonly IBusInstance _busInstance;
+        readonly IEventHubProducerCache<Uri> _cache;
         readonly IEventHubHostConfiguration _hostConfiguration;
         readonly SendObservable _sendObservable;
-        readonly ISendPipe _sendPipe;
-        readonly ISerialization _serializers;
 
-        public EventHubProducerProvider(IEventHubHostConfiguration hostConfiguration, IBusInstance busInstance, ISendPipe sendPipe,
-            SendObservable sendObservable, ISerialization serializers)
+        public EventHubProducerProvider(IEventHubHostConfiguration hostConfiguration, IBusInstance busInstance)
         {
             _hostConfiguration = hostConfiguration;
             _busInstance = busInstance;
-            _sendPipe = sendPipe;
-            _sendObservable = sendObservable;
-            _serializers = serializers;
+            _cache = new EventHubProducerCache<Uri>();
+            _sendObservable = new SendObservable();
         }
 
         public Task<IEventHubProducer> GetProducer(Uri address)
         {
-            var context = new EventHubProducerSendTransportContext(_hostConfiguration, _sendPipe, _busInstance.HostConfiguration, address, _serializers);
+            return _cache.GetProducer(address, CreateProducer);
+        }
 
-            if (_sendObservable.Count > 0)
-                context.ConnectSendObserver(_sendObservable);
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        {
+            return _sendObservable.Connect(observer);
+        }
 
-            IEventHubProducer eventHubProducer = new EventHubProducer(context);
-            return Task.FromResult(eventHubProducer);
+        Task<IEventHubProducer> CreateProducer(Uri address)
+        {
+            var topicAddress = NormalizeAddress(_busInstance.HostConfiguration.HostAddress, address);
+            var transportContext = _hostConfiguration.CreateSendTransportContext(topicAddress.EventHubName, _busInstance);
+            IEventHubProducer producer = new EventHubProducer(transportContext, transportContext.ConnectSendObserver(_sendObservable));
+            return Task.FromResult(producer);
+        }
+
+        static EventHubEndpointAddress NormalizeAddress(Uri hostAddress, Uri address)
+        {
+            return new EventHubEndpointAddress(hostAddress, address);
         }
     }
 }

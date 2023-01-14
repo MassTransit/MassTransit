@@ -45,8 +45,8 @@ namespace MassTransit.KafkaIntegration.Configuration
             endpointConfiguration.ConnectReceiveEndpointObserver(_endpointObservers);
 
             var configurator = new KafkaTopicReceiveEndpointConfiguration<TKey, TValue>(_hostConfiguration, _consumerConfig, _topicName, busInstance,
-                endpointConfiguration, _headersDeserializer, _oAuthBearerTokenRefreshHandler);
-
+                endpointConfiguration, _oAuthBearerTokenRefreshHandler);
+            configurator.SetHeadersDeserializer(_headersDeserializer);
             _configure?.Invoke(configurator);
 
             IReadOnlyList<ValidationResult> result = Validate().Concat(configurator.Validate())

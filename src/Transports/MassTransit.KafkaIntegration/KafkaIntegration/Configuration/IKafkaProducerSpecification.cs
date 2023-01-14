@@ -1,5 +1,6 @@
 namespace MassTransit.KafkaIntegration.Configuration
 {
+    using System;
     using Transports;
 
 
@@ -7,6 +8,13 @@ namespace MassTransit.KafkaIntegration.Configuration
         ISpecification
     {
         string TopicName { get; }
-        IKafkaProducerFactory CreateProducerFactory(IBusInstance busInstance);
+    }
+
+
+    public interface IKafkaProducerSpecification<TKey, TValue> :
+        IKafkaProducerSpecification
+        where TValue : class
+    {
+        KafkaSendTransportContext<TKey, TValue> CreateSendTransportContext(IBusInstance busInstance, Action onStop = null);
     }
 }

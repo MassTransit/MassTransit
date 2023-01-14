@@ -1,25 +1,22 @@
 namespace MassTransit.KafkaIntegration
 {
-    using System;
+    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
-    using Confluent.Kafka;
-    using Serializers;
     using Transports;
 
 
     public interface KafkaSendTransportContext<TKey, TValue> :
-        SendTransportContext
+        SendTransportContext,
+        IProbeSite
         where TValue : class
     {
-        Uri HostAddress { get; }
-        KafkaTopicAddress TopicAddress { get; }
-        ISendPipe SendPipe { get; }
+        IEnumerable<IAgent> GetAgentHandles();
 
-        IHeadersSerializer HeadersSerializer { get; }
-        IAsyncSerializer<TValue> ValueSerializer { get; }
-        IAsyncSerializer<TKey> KeySerializer { get; }
+        Task<KafkaSendContext<TKey, TValue>> CreateContext(TKey key, TValue value, IPipe<KafkaSendContext<TKey, TValue>> pipe,
+            CancellationToken cancellationToken, IPipe<SendContext<TValue>> initializerPipe = null);
 
+        Task Send(ProducerContext producerContext, KafkaSendContext<TKey, TValue> sendContext);
         Task Send(IPipe<ProducerContext> pipe, CancellationToken cancellationToken);
     }
 }
