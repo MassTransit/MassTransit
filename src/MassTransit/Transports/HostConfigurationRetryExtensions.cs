@@ -18,7 +18,7 @@ namespace MassTransit.Transports
 
             var stoppingContext = new SupervisorStoppingContext(tokenSource.Token);
 
-            RetryPolicyContext<SupervisorStoppingContext> policyContext = hostConfiguration.ReceiveTransportRetryPolicy.CreatePolicyContext(stoppingContext);
+            RetryPolicyContext<SupervisorStoppingContext> policyContext = hostConfiguration.SendTransportRetryPolicy.CreatePolicyContext(stoppingContext);
 
             try
             {

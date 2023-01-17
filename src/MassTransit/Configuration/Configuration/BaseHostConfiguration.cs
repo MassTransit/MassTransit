@@ -86,6 +86,7 @@ namespace MassTransit.Configuration
         public abstract IBusTopology Topology { get; }
 
         public abstract IRetryPolicy ReceiveTransportRetryPolicy { get; }
+        public virtual IRetryPolicy SendTransportRetryPolicy => ReceiveTransportRetryPolicy;
 
         public abstract IReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName, Action<IReceiveEndpointConfigurator>? configure);
 

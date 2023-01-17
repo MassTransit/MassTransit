@@ -52,6 +52,28 @@
                 x.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
             });
 
+            SendTransportRetryPolicy = Retry.CreatePolicy(x =>
+            {
+                x.Ignore<UnauthorizedAccessException>();
+
+                x.Handle<ConnectionException>();
+                x.Handle<TimeoutException>();
+                x.Handle<WebSocketException>();
+                x.Handle<RequestFailedException>();
+                x.Handle<ServiceBusException>(ex => ex.Reason switch
+                {
+                    ServiceBusFailureReason.MessagingEntityNotFound => true,
+                    ServiceBusFailureReason.MessagingEntityAlreadyExists => true,
+                    ServiceBusFailureReason.MessageNotFound => false,
+                    ServiceBusFailureReason.MessageSizeExceeded => false,
+                    ServiceBusFailureReason.ServiceCommunicationProblem => true,
+                    ServiceBusFailureReason.ServiceBusy when ex.IsTransient => true,
+                    _ => false
+                });
+
+                x.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
+            });
+
             _connectionContext = new Recycle<IConnectionContextSupervisor>(() => new ConnectionContextSupervisor(this, topologyConfiguration));
         }
 
@@ -68,6 +90,7 @@
         }
 
         public override IRetryPolicy ReceiveTransportRetryPolicy { get; }
+        public override IRetryPolicy SendTransportRetryPolicy { get; }
 
         IServiceBusBusTopology IServiceBusHostConfiguration.Topology => _busTopology;
 
