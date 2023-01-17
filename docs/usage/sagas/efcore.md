@@ -153,5 +153,39 @@ dotnet ef migrations add InitialCreate -c JobServiceSagaDbContext
  ```cs
  dotnet ef database update -c JobServiceSagaDbContext
  ```
+ 
+### Custom schemas
+
+#### Single schema
+
+In case there is a custom schema set up in your database and you are relying on the user credentials from the `ConnectionString` to access correct schema you must include the schema name when specifying the lock statement provider.
+
+```cs
+services.AddMassTransit(cfg =>
+{
+    cfg.AddSagaStateMachine<OrderStateMachine, OrderState>()
+        .EntityFrameworkRepository(r =>
+        {
+            r.ConcurrencyMode = ConcurrencyMode.Pessimistic; // or use Optimistic, which requires RowVersion
+            
+            r.UseSqlServer("custom_schema");
+
+            r.AddDbContext<DbContext, OrderStateDbContext>((provider,builder) =>
+            {
+                builder.UseSqlServer(connectionString, m =>
+                {
+                    m.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name);
+                    m.MigrationsHistoryTable($"__{nameof(OrderStateDbContext)}");
+                });
+            });
+        });
+});
+```
+
+#### Multiple schemas
+
+In case there are multiple schemas defined for your models you need to define them in code, and there are a few different ways to do that.
+https://learn.microsoft.com/en-us/ef/core/modeling/entity-types?tabs=data-annotations#table-schema
+
 
 
