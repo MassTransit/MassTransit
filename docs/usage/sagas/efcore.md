@@ -126,7 +126,7 @@ services.AddMassTransit(cfg =>
 #### Multiple schemas
 
 In case there are multiple schemas defined for your models you need to define them in code, and there are a few different ways to do that.
-**https://learn.microsoft.com/en-us/ef/core/modeling/entity-types?tabs=data-annotations#table-schema**
+https://learn.microsoft.com/en-us/ef/core/modeling/entity-types?tabs=data-annotations#table-schema
 
 
 #### Single DbContext
