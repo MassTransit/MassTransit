@@ -10,7 +10,7 @@ namespace MassTransit.KafkaIntegration.Configuration
 
 
     public class KafkaTopicReceiveEndpointConfiguration<TKey, TValue> :
-        ReceiverConfiguration,
+        ReceiveEndpointConfiguration,
         ReceiveSettings,
         IKafkaTopicReceiveEndpointConfigurator<TKey, TValue>
         where TValue : class
@@ -29,7 +29,7 @@ namespace MassTransit.KafkaIntegration.Configuration
 
         public KafkaTopicReceiveEndpointConfiguration(IKafkaHostConfiguration hostConfiguration, ConsumerConfig consumerConfig, string topic,
             IBusInstance busInstance, IReceiveEndpointConfiguration endpointConfiguration, Action<IClient, string> oAuthBearerTokenRefreshHandler)
-            : base(endpointConfiguration)
+            : base(busInstance.HostConfiguration, endpointConfiguration)
         {
             _hostConfiguration = hostConfiguration;
             _busInstance = busInstance;
@@ -51,7 +51,11 @@ namespace MassTransit.KafkaIntegration.Configuration
             PrefetchCount = Math.Max(1000, CheckpointMessageCount / 10);
 
             _consumerConfigurator = new PipeConfigurator<ConsumerContext>();
+
+            PublishFaults = false;
         }
+
+        public override Uri HostAddress => _endpointConfiguration.HostAddress;
 
         public AutoOffsetReset? AutoOffsetReset
         {
@@ -159,6 +163,8 @@ namespace MassTransit.KafkaIntegration.Configuration
             _options.Options(options);
         }
 
+        public override Uri InputAddress => _endpointConfiguration.InputAddress;
+
         public ushort ConcurrentConsumerLimit { get; set; }
         public int ConcurrentDeliveryLimit { get; set; }
         public TimeSpan CheckpointInterval { set; get; }
@@ -185,7 +191,12 @@ namespace MassTransit.KafkaIntegration.Configuration
                 yield return result;
         }
 
-        public ReceiveEndpoint Build()
+        public override ReceiveEndpointContext CreateReceiveEndpointContext()
+        {
+            return CreateReceiveKafkaEndpointContext();
+        }
+
+        KafkaReceiveEndpointContext<TKey, TValue> CreateReceiveKafkaEndpointContext()
         {
             var consumerConfig = _hostConfiguration.GetConsumerConfig(_consumerConfig);
 
@@ -202,17 +213,16 @@ namespace MassTransit.KafkaIntegration.Configuration
                 return consumerBuilder;
             }
 
-            KafkaReceiveEndpointContext<TKey, TValue> CreateContext()
-            {
-                var builder = new KafkaReceiveEndpointBuilder<TKey, TValue>(_busInstance, _hostConfiguration, consumerConfig.GroupId, _endpointConfiguration,
-                    this, _headersDeserializer, _keyDeserializer, _valueDeserializer, CreateConsumerBuilder);
-                foreach (var specification in Specifications)
-                    specification.Configure(builder);
+            var builder = new KafkaReceiveEndpointBuilder<TKey, TValue>(_busInstance, _hostConfiguration, consumerConfig.GroupId, this,
+                this, _headersDeserializer, _keyDeserializer, _valueDeserializer, CreateConsumerBuilder);
+            ApplySpecifications(builder);
 
-                return builder.CreateReceiveEndpointContext();
-            }
+            return builder.CreateReceiveEndpointContext();
+        }
 
-            KafkaReceiveEndpointContext<TKey, TValue> context = CreateContext();
+        public ReceiveEndpoint Build()
+        {
+            KafkaReceiveEndpointContext<TKey, TValue> context = CreateReceiveKafkaEndpointContext();
 
             if (_options.TryGetOptions(out KafkaTopicOptions options))
                 _consumerConfigurator.UseFilter(new ConfigureKafkaTopologyFilter<TKey, TValue>(_hostConfiguration.Configuration, options));

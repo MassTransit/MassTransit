@@ -42,10 +42,10 @@ namespace MassTransit.KafkaIntegration.Configuration
         public ReceiveEndpoint CreateReceiveEndpoint(IBusInstance busInstance)
         {
             var endpointConfiguration = busInstance.HostConfiguration.CreateReceiveEndpointConfiguration(EndpointName);
-            endpointConfiguration.ConnectReceiveEndpointObserver(_endpointObservers);
 
             var configurator = new KafkaTopicReceiveEndpointConfiguration<TKey, TValue>(_hostConfiguration, _consumerConfig, _topicName, busInstance,
                 endpointConfiguration, _oAuthBearerTokenRefreshHandler);
+            configurator.ConnectReceiveEndpointObserver(_endpointObservers);
             configurator.SetHeadersDeserializer(_headersDeserializer);
             _configure?.Invoke(configurator);
 

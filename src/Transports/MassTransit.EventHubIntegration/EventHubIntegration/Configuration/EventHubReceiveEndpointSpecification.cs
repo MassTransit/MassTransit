@@ -29,6 +29,8 @@ namespace MassTransit.EventHubIntegration.Configuration
             _storageSettings = storageSettings;
             _configure = configure;
             EndpointName = $"{EventHubEndpointAddress.PathPrefix}/{_eventHubName}";
+            if (!string.IsNullOrWhiteSpace(_consumerGroup))
+                EndpointName = $"{EndpointName}/{_consumerGroup}";
 
             _endpointObservers = new ReceiveEndpointObservable();
         }
@@ -52,7 +54,6 @@ namespace MassTransit.EventHubIntegration.Configuration
                 && (string.IsNullOrWhiteSpace(_hostSettings.FullyQualifiedNamespace) || _hostSettings.TokenCredential == null))
                 yield return this.Failure("HostSettings", "is invalid");
 
-
             if (string.IsNullOrWhiteSpace(_storageSettings.ConnectionString) && _storageSettings.ContainerUri == null)
                 yield return this.Failure("StorageSettings", "is invalid");
         }
@@ -60,10 +61,10 @@ namespace MassTransit.EventHubIntegration.Configuration
         public ReceiveEndpoint CreateReceiveEndpoint(IBusInstance busInstance)
         {
             var endpointConfiguration = busInstance.HostConfiguration.CreateReceiveEndpointConfiguration(EndpointName);
-            endpointConfiguration.ConnectReceiveEndpointObserver(_endpointObservers);
 
             var configurator = new EventHubReceiveEndpointConfigurator(_hostConfiguration, busInstance, endpointConfiguration, _hostSettings,
                 _storageSettings, _eventHubName, _consumerGroup);
+            configurator.ConnectReceiveEndpointObserver(_endpointObservers);
             _configure?.Invoke(configurator);
 
             IReadOnlyList<ValidationResult> result = Validate().Concat(configurator.Validate())
