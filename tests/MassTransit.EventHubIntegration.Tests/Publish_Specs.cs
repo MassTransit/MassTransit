@@ -3,6 +3,7 @@ namespace MassTransit.EventHubIntegration.Tests
     using System;
     using System.Threading.Tasks;
     using Azure.Messaging.EventHubs;
+    using Azure.Messaging.EventHubs.Consumer;
     using Azure.Messaging.EventHubs.Producer;
     using Context;
     using Contracts;
@@ -20,6 +21,7 @@ namespace MassTransit.EventHubIntegration.Tests
         [Test]
         public async Task Should_receive()
         {
+            const string consumerGroup = EventHubConsumerClient.DefaultConsumerGroupName;
             TaskCompletionSource<ConsumeContext<EventHubMessage>> taskCompletionSource = GetTask<ConsumeContext<EventHubMessage>>();
             TaskCompletionSource<ConsumeContext<BusPing>> pingTaskCompletionSource = GetTask<ConsumeContext<BusPing>>();
 
@@ -43,7 +45,7 @@ namespace MassTransit.EventHubIntegration.Tests
                         k.Host(Configuration.EventHubNamespace);
                         k.Storage(Configuration.StorageAccount);
 
-                        k.ReceiveEndpoint(Configuration.EventHubName, c =>
+                        k.ReceiveEndpoint(Configuration.EventHubName, consumerGroup, c =>
                         {
                             c.ConfigureConsumer<EventHubMessageConsumer>(context);
                         });
@@ -77,7 +79,8 @@ namespace MassTransit.EventHubIntegration.Tests
                 Assert.AreEqual(message.Text, result.Message.Text);
 
                 Assert.AreEqual(result.CorrelationId, ping.InitiatorId);
-                Assert.That(ping.SourceAddress, Is.EqualTo(new Uri($"loopback://localhost/{EventHubEndpointAddress.PathPrefix}/{Configuration.EventHubName}")));
+                Assert.That(ping.SourceAddress,
+                    Is.EqualTo(new Uri($"loopback://localhost/{EventHubEndpointAddress.PathPrefix}/{Configuration.EventHubName}/{consumerGroup}")));
             }
             finally
             {
