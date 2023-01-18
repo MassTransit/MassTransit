@@ -51,7 +51,7 @@ namespace MassTransit
     /// <param name="topicName">Out topic name and it's retrieved from inherited class from IKafkaProducer name</param>
     /// <param name="delegate">Out Action for IKafkaTopicReceiveEndpointConfigurator</param>
     static void GetTopicEndpointConfiguration(IRiderRegistrationContext riderRegistrationContext, Type assembly,
-        out object groupName, out string topicName, out Delegate @delegate)
+        out object groupName, out object topicName, out Delegate @delegate)
     {
         var actionIKafkaTopicReceiveEndpointConfigurator = typeof(Action<>).MakeGenericType(
             typeof(IKafkaTopicReceiveEndpointConfigurator<,>).MakeGenericType(typeof(Ignore),
@@ -61,7 +61,7 @@ namespace MassTransit
 
         groupName = instance.GetType().GetProperty(GroupId)?.GetValue(instance);
 
-        topicName = assembly.BaseType.GetGenericArguments()[0].Name.Underscore();
+        topicName = instance.GetType().GetProperty("TopicName")?.GetValue(instance);
 
         var actionMethod = assembly.GetMethod(Method, BindingFlags.Instance | BindingFlags.NonPublic);
 

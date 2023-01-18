@@ -4,7 +4,7 @@ namespace MassTransit
 
 
     public abstract class TopicEndPoint
-        <TProducer> where TProducer : class, IKafkaProducer, new()
+        <TProducer> where TProducer : class, IKafkaProducer
     {
         protected TopicEndPoint(IRiderRegistrationContext context)
         {

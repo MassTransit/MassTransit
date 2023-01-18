@@ -109,11 +109,12 @@ namespace MassTransit.KafkaIntegration.Tests
 
                         r.UsingKafka((context, k) =>
                         {
-                            k.TopicEndpoint<KafkaMessageWithProducerWrapper>(WrapperTopic, nameof(Receive_Wrapper_Specs), c =>
-                            {
-                                c.AutoOffsetReset = AutoOffsetReset.Earliest;
-                                c.ConfigureConsumer<TestKafkaMessageConsumer<KafkaMessageWithProducerWrapper>>(context);
-                            });
+                            k.AddTopicEndPoints(context,AppDomain.CurrentDomain.GetAssemblies());
+                            // k.TopicEndpoint<KafkaMessageWithProducerWrapper>(WrapperTopic, nameof(Receive_Wrapper_Specs) , c =>
+                            // {
+                            //     c.AutoOffsetReset = AutoOffsetReset.Earliest;
+                            //     c.ConfigureConsumer<TestKafkaMessageConsumer<KafkaMessageWithProducerWrapper>>(context);
+                            // });
                         });
                     });
                 })
@@ -191,6 +192,25 @@ namespace MassTransit.KafkaIntegration.Tests
 
             public override void Configure(IRiderRegistrationContext context, IKafkaProducerConfigurator<Null, KafkaMessageWithProducerWrapper> configurator)
             {
+            }
+        }
+        public class ProducerTopicConfiguration:TopicEndPoint<KafkaMessageWithProducerWrapper>
+        {
+            readonly IRiderRegistrationContext _context;
+            public ProducerTopicConfiguration(IRiderRegistrationContext context)
+                : base(context)
+            {
+                _context = context;
+            }
+
+            public override string TopicName => WrapperTopic;
+
+            public override string GroupId => nameof(Receive_Wrapper_Specs);
+
+            protected override void ActionMethod(IKafkaTopicReceiveEndpointConfigurator<Ignore, KafkaMessageWithProducerWrapper> configurator)
+            {
+                configurator.AutoOffsetReset = AutoOffsetReset.Earliest;
+                configurator.ConfigureConsumer<TestKafkaMessageConsumer<KafkaMessageWithProducerWrapper>>(_context);
             }
         }
     }
