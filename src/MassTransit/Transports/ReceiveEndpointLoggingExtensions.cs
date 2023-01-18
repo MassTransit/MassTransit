@@ -14,6 +14,9 @@ namespace MassTransit.Transports
         static readonly LogMessage<Uri, Guid?, string, string, TimeSpan> _logConsumeFault = LogContext.Define<Uri, Guid?, string, string, TimeSpan>(
             LogLevel.Error, "R-FAULT {InputAddress} {MessageId} {MessageType} {ConsumerType}({Duration})");
 
+        static readonly LogMessage<Uri, Guid?, string, string, TimeSpan> _logConsumeCanceled = LogContext.Define<Uri, Guid?, string, string, TimeSpan>(
+            LogLevel.Information, "R-CANCEL {InputAddress} {MessageId} {MessageType} {ConsumerType}({Duration})");
+
         static readonly LogMessage<Uri, string, string, string> _logMoved = LogContext.DefineMessage<Uri, string, string, string>(LogLevel.Information,
             "MOVE {InputAddress} {MessageId} {DestinationAddress} {Reason}");
 
@@ -85,6 +88,13 @@ namespace MassTransit.Transports
             where T : class
         {
             _logConsumeFault(context.ReceiveContext.InputAddress, context.MessageId, TypeCache<T>.ShortName, consumerType, duration, exception);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void LogCanceled<T>(this ConsumeContext<T> context, TimeSpan duration, string consumerType)
+            where T : class
+        {
+            _logConsumeCanceled(context.ReceiveContext.InputAddress, context.MessageId, TypeCache<T>.ShortName, consumerType, duration);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

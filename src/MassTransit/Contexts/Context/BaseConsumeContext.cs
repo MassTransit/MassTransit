@@ -184,7 +184,15 @@ namespace MassTransit.Context
         public virtual async Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
             where T : class
         {
-            await GenerateFault(context, exception).ConfigureAwait(false);
+            switch (exception)
+            {
+                case OperationCanceledException canceledException when canceledException.CancellationToken == context.CancellationToken:
+                    break;
+
+                default:
+                    await GenerateFault(context, exception).ConfigureAwait(false);
+                    break;
+            }
 
             await ReceiveContext.NotifyFaulted(context, duration, consumerType, exception).ConfigureAwait(false);
         }

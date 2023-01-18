@@ -79,6 +79,10 @@
 
                 throw;
             }
+            catch (OperationCanceledException)
+            {
+                // do NOT allow these to escape to the Azure SDK Exception Handler callback, just let it go.
+            }
             finally
             {
                 registration.Dispose();

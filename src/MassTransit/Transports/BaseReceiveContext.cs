@@ -86,7 +86,16 @@ namespace MassTransit.Transports
         {
             IsFaulted = true;
 
-            context.LogFaulted(duration, consumerType, exception);
+            switch (exception)
+            {
+                case OperationCanceledException canceledException when canceledException.CancellationToken == context.CancellationToken:
+                    context.LogCanceled(duration, consumerType);
+                    break;
+
+                default:
+                    context.LogFaulted(duration, consumerType, exception);
+                    break;
+            }
 
             GetOrAddPayload<ConsumerFaultContext>(() => new FaultContext(TypeCache<T>.ShortName, consumerType));
 
