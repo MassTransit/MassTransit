@@ -8,7 +8,6 @@ namespace MassTransit.KafkaIntegration.Tests
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using NUnit.Framework;
-    using Serilog;
     using TestFramework.Sagas;
     using Testing;
 
@@ -118,7 +117,6 @@ namespace MassTransit.KafkaIntegration.Tests
                         });
                     });
                 })
-                .AddLogging(builder => builder.AddSerilog(dispose: true).AddConsole())
                 .BuildServiceProvider(true);
 
             var harness = provider.GetTestHarness();
