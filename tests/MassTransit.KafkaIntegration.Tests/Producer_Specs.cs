@@ -1,10 +1,14 @@
 namespace MassTransit.KafkaIntegration.Tests
 {
     using System;
+    using System.Reflection;
     using System.Threading.Tasks;
     using Confluent.Kafka;
+    using Dynamic.KafkaIntegration.Producer;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Logging;
     using NUnit.Framework;
+    using Serilog;
     using TestFramework.Sagas;
     using Testing;
 
@@ -12,6 +16,7 @@ namespace MassTransit.KafkaIntegration.Tests
     public class Producer_Specs
     {
         const string Topic = "producer";
+        const string WrapperTopic = "producer_wrapper";
 
         [Test]
         public async Task Should_receive_messages()
@@ -84,6 +89,78 @@ namespace MassTransit.KafkaIntegration.Tests
             Assert.That(headerType.Value, Is.EqualTo("World"));
         }
 
+        [Test]
+        public async Task Should_receive_messages_by_producer_wrapper()
+        {
+            await using var provider = new ServiceCollection()
+                .ConfigureKafkaTestOptions(options =>
+                {
+                    options.CreateTopicsIfNotExists = true;
+                    options.TopicNames = new[] { WrapperTopic };
+                })
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.AddTaskCompletionSource<ConsumeContext<KafkaMessageWithProducerWrapper>>();
+
+                    x.AddRider(r =>
+                    {
+                        r.AddConsumer<TestKafkaMessageConsumer<KafkaMessageWithProducerWrapper>>();
+
+                        r.AddProducers(AppDomain.CurrentDomain.GetAssemblies());
+
+                        r.UsingKafka((context, k) =>
+                        {
+                            k.TopicEndpoint<KafkaMessageWithProducerWrapper>(WrapperTopic, nameof(Receive_Wrapper_Specs), c =>
+                            {
+                                c.AutoOffsetReset = AutoOffsetReset.Earliest;
+                                c.ConfigureConsumer<TestKafkaMessageConsumer<KafkaMessageWithProducerWrapper>>(context);
+                            });
+                        });
+                    });
+                })
+                .AddLogging(builder => builder.AddSerilog(dispose: true).AddConsole())
+                .BuildServiceProvider(true);
+
+            var harness = provider.GetTestHarness();
+
+            await harness.Start();
+
+            ITopicProducer<KafkaMessageWithProducerWrapper> producer = harness.GetProducer<KafkaMessageWithProducerWrapper>();
+
+            var correlationId = NewId.NextGuid();
+            var conversationId = NewId.NextGuid();
+            var initiatorId = NewId.NextGuid();
+            var messageId = NewId.NextGuid();
+
+            await producer.Produce(new { Text = "text" }, Pipe.Execute<SendContext>(context =>
+            {
+                context.CorrelationId = correlationId;
+                context.MessageId = messageId;
+                context.InitiatorId = initiatorId;
+                context.ConversationId = conversationId;
+                context.Headers.Set("Special", new
+                {
+                    Key = "Hello",
+                    Value = "World"
+                });
+            }), harness.CancellationToken);
+
+            var result = await provider.GetTask<ConsumeContext<KafkaMessageWithProducerWrapper>>();
+
+            Assert.AreEqual("text", result.Message.Text);
+            Assert.That(result.SourceAddress, Is.EqualTo(new Uri("loopback://localhost/")));
+            Assert.That(result.DestinationAddress, Is.EqualTo(new Uri($"loopback://localhost/{KafkaTopicAddress.PathPrefix}/{WrapperTopic}")));
+            Assert.That(result.MessageId, Is.EqualTo(messageId));
+            Assert.That(result.CorrelationId, Is.EqualTo(correlationId));
+            Assert.That(result.InitiatorId, Is.EqualTo(initiatorId));
+            Assert.That(result.ConversationId, Is.EqualTo(conversationId));
+
+            var headerType = result.Headers.Get<HeaderType>("Special");
+            Assert.That(headerType, Is.Not.Null);
+            Assert.That(headerType.Key, Is.EqualTo("Hello"));
+            Assert.That(headerType.Value, Is.EqualTo("World"));
+        }
+
 
         public interface HeaderType
         {
@@ -95,6 +172,28 @@ namespace MassTransit.KafkaIntegration.Tests
         public interface KafkaMessage
         {
             string Text { get; }
+        }
+
+
+        /// <summary>
+        /// this is producer
+        /// </summary>
+        public interface KafkaMessageWithProducerWrapper : IKafkaProducer
+        {
+            string Text { get; }
+        }
+
+
+        /// <summary>
+        /// this is configuration file for producer
+        /// </summary>
+        public class KafkaMessageConfiguration : KafkaProducerConfiguration<KafkaMessageWithProducerWrapper>
+        {
+            public override string TopicName => WrapperTopic;
+
+            public override void Configure(IRiderRegistrationContext context, IKafkaProducerConfigurator<Null, KafkaMessageWithProducerWrapper> configurator)
+            {
+            }
         }
     }
 

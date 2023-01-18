@@ -112,6 +112,7 @@ namespace MassTransit.KafkaIntegration.Tests
     }
 
 
+
     public class ConcurrentReceive_Specs :
         InMemoryTestFixture
     {
