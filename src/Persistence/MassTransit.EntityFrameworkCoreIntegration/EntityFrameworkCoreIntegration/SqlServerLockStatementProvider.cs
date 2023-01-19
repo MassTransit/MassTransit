@@ -9,5 +9,10 @@
             : base(DefaultSchemaName, new SqlServerLockStatementFormatter(), enableSchemaCaching)
         {
         }
+
+        public SqlServerLockStatementProvider(string schemaName, bool enableSchemaCaching = true)
+            : base(schemaName, new SqlServerLockStatementFormatter(), enableSchemaCaching)
+        {
+        }
     }
 }

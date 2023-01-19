@@ -9,5 +9,10 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             : base(DefaultSchemaName, new PostgresLockStatementFormatter(), enableSchemaCaching)
         {
         }
+
+        public PostgresLockStatementProvider(string schemaName, bool enableSchemaCaching = true)
+            : base(schemaName, new PostgresLockStatementFormatter(), enableSchemaCaching)
+        {
+        }
     }
 }
