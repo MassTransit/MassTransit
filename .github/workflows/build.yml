@@ -537,9 +537,9 @@ jobs:
       - id: v
         run: |
           if [ "${{ github.ref }}" = 'refs/heads/master' ]; then
-            echo "::set-output name=version::${MASSTRANSIT_VERSION}"
+            echo "version=${MASSTRANSIT_VERSION}" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=version::${MASSTRANSIT_VERSION}-develop.${{ github.run_number }}"
+            echo "version=${MASSTRANSIT_VERSION}-develop.${{ github.run_number }}" >> $GITHUB_OUTPUT
           fi
 
   publish:
