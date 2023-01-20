@@ -9,11 +9,13 @@ namespace MassTransit.DependencyInjection
         ICompensateScopeContext<TLog>
         where TLog : class
     {
+        readonly IDisposable _disposable;
         readonly IServiceScope _scope;
 
-        public CreatedCompensateScopeContext(IServiceScope scope, CompensateContext<TLog> context)
+        public CreatedCompensateScopeContext(IServiceScope scope, CompensateContext<TLog> context, IDisposable disposable)
         {
             _scope = scope;
+            _disposable = disposable;
             Context = context;
         }
 
@@ -21,6 +23,8 @@ namespace MassTransit.DependencyInjection
 
         public ValueTask DisposeAsync()
         {
+            _disposable?.Dispose();
+
             if (_scope is IAsyncDisposable asyncDisposable)
                 return asyncDisposable.DisposeAsync();
 

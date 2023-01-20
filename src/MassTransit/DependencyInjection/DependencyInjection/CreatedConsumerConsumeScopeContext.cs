@@ -10,11 +10,13 @@ namespace MassTransit.DependencyInjection
         where TConsumer : class
         where T : class
     {
+        readonly IDisposable _disposable;
         readonly IServiceScope _scope;
 
-        public CreatedConsumerConsumeScopeContext(IServiceScope scope, ConsumerConsumeContext<TConsumer, T> context)
+        public CreatedConsumerConsumeScopeContext(IServiceScope scope, ConsumerConsumeContext<TConsumer, T> context, IDisposable disposable)
         {
             _scope = scope;
+            _disposable = disposable;
             Context = context;
         }
 
@@ -22,6 +24,8 @@ namespace MassTransit.DependencyInjection
 
         public ValueTask DisposeAsync()
         {
+            _disposable?.Dispose();
+
             if (_scope is IAsyncDisposable asyncDisposable)
                 return asyncDisposable.DisposeAsync();
 

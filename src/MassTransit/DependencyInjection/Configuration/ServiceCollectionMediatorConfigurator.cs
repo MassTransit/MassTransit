@@ -54,6 +54,7 @@ namespace MassTransit.Configuration
             return Bus.Factory.CreateMediator(cfg =>
             {
                 _configure?.Invoke(context, cfg);
+
                 cfg.ConfigureConsumers(context);
                 cfg.ConfigureSagas(context);
             });

@@ -8,11 +8,13 @@
     public class CreatedConsumeScopeContext :
         IConsumeScopeContext
     {
+        readonly IDisposable _disposable;
         readonly IServiceScope _scope;
 
-        public CreatedConsumeScopeContext(IServiceScope scope, ConsumeContext context)
+        public CreatedConsumeScopeContext(IServiceScope scope, ConsumeContext context, IDisposable disposable)
         {
             _scope = scope;
+            _disposable = disposable;
             Context = context;
         }
 
@@ -20,6 +22,8 @@
 
         public ValueTask DisposeAsync()
         {
+            _disposable?.Dispose();
+
             if (_scope is IAsyncDisposable asyncDisposable)
                 return asyncDisposable.DisposeAsync();
 
@@ -33,11 +37,13 @@
         IConsumeScopeContext<TMessage>
         where TMessage : class
     {
+        readonly IDisposable _disposable;
         readonly IServiceScope _scope;
 
-        public CreatedConsumeScopeContext(IServiceScope scope, ConsumeContext<TMessage> context)
+        public CreatedConsumeScopeContext(IServiceScope scope, ConsumeContext<TMessage> context, IDisposable disposable)
         {
             _scope = scope;
+            _disposable = disposable;
             Context = context;
         }
 
@@ -57,11 +63,13 @@
 
         public IDisposable PushConsumeContext(ConsumeContext context)
         {
-            return _scope.ServiceProvider.GetRequiredService<ScopedConsumeContextProvider>().PushContext(context);
+            return _scope.SetCurrentConsumeContext(context);
         }
 
         public ValueTask DisposeAsync()
         {
+            _disposable?.Dispose();
+
             if (_scope is IAsyncDisposable asyncDisposable)
                 return asyncDisposable.DisposeAsync();
 

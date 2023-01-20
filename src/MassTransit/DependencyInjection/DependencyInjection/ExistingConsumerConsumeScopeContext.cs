@@ -1,5 +1,6 @@
 namespace MassTransit.DependencyInjection
 {
+    using System;
     using System.Threading.Tasks;
 
 
@@ -8,16 +9,19 @@ namespace MassTransit.DependencyInjection
         where TConsumer : class
         where T : class
     {
-        public ExistingConsumerConsumeScopeContext(ConsumerConsumeContext<TConsumer, T> context)
+        readonly IDisposable _disposable;
+
+        public ExistingConsumerConsumeScopeContext(ConsumerConsumeContext<TConsumer, T> context, IDisposable disposable)
         {
+            _disposable = disposable;
             Context = context;
         }
 
         public ConsumerConsumeContext<TConsumer, T> Context { get; }
 
-        public ValueTask DisposeAsync()
+        public async ValueTask DisposeAsync()
         {
-            return default;
+            _disposable?.Dispose();
         }
     }
 }
