@@ -3,7 +3,6 @@ namespace MassTransit.Mediator.Contexts
     using System;
     using System.Diagnostics;
     using System.Net.Mime;
-    using System.Threading;
     using System.Threading.Tasks;
     using Context;
     using Middleware;
@@ -20,7 +19,7 @@ namespace MassTransit.Mediator.Contexts
 
 
     public sealed class MediatorReceiveContext<TMessage> :
-        BasePipeContext,
+        ProxyPipeContext,
         ReceiveContext
         where TMessage : class
     {
@@ -32,9 +31,8 @@ namespace MassTransit.Mediator.Contexts
 
         public MediatorReceiveContext(SendContext<TMessage> sendContext, ISendEndpointProvider sendEndpointProvider,
             IPublishEndpointProvider publishEndpointProvider, IPublishTopology publishTopology, IReceiveObserver observers,
-            IObjectDeserializer objectDeserializer, CancellationToken cancellationToken,
-            params object[] payloads)
-            : base(cancellationToken, payloads)
+            IObjectDeserializer objectDeserializer)
+            : base(sendContext)
         {
             _observers = observers;
 
