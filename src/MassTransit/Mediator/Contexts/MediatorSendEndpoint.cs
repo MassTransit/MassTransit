@@ -65,6 +65,11 @@ namespace MassTransit.Mediator.Contexts
             return Task.FromResult<ISendEndpoint>(_publishSendEndpoint);
         }
 
+        public Task<ISendEndpoint> GetSendEndpoint(Uri address)
+        {
+            return Task.FromResult<ISendEndpoint>(address.Equals(_sourceAddress) ? _sourceEndpoint : this);
+        }
+
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
             return _sendObservers.Connect(observer);
@@ -195,11 +200,6 @@ namespace MassTransit.Mediator.Contexts
             return context;
         }
 
-        public Task<ISendEndpoint> GetSendEndpoint(Uri address)
-        {
-            return Task.FromResult<ISendEndpoint>(address.Equals(_sourceAddress) ? _sourceEndpoint : this);
-        }
-
         async Task SendMessage<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
             where T : class
         {
@@ -209,7 +209,7 @@ namespace MassTransit.Mediator.Contexts
 
             await pipe.Send(context).ConfigureAwait(false);
 
-            var receiveContext = new MediatorReceiveContext<T>(context, this, this, _publishTopology, _receiveObservers, _objectDeserializer, cancellationToken)
+            var receiveContext = new MediatorReceiveContext<T>(context, this, this, _publishTopology, _receiveObservers, _objectDeserializer)
             {
                 IsDelivered = context.IsPublish && !context.Mandatory
             };
