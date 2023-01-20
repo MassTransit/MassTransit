@@ -1,13 +1,14 @@
 namespace MassTransit.DependencyInjection
 {
+    using System;
     using Microsoft.Extensions.DependencyInjection;
 
 
     static class InternalScopeExtensions
     {
-        public static void SetCurrentConsumeContext(this IServiceScope scope, ConsumeContext context)
+        public static IDisposable SetCurrentConsumeContext(this IServiceScope scope, ConsumeContext context)
         {
-            scope.ServiceProvider.GetRequiredService<ScopedConsumeContextProvider>().SetContext(context);
+            return scope.ServiceProvider.GetRequiredService<ScopedConsumeContextProvider>().PushContext(context);
         }
     }
 }

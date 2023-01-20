@@ -27,7 +27,7 @@ namespace MassTransit.Middleware
 
             IDisposable pop = null;
             if (context.TryGetPayload(out IServiceScope scope))
-                pop = scope.ServiceProvider.GetRequiredService<ScopedConsumeContextProvider>().PushContext(outboxContext);
+                pop = scope.SetCurrentConsumeContext(outboxContext);
 
             try
             {

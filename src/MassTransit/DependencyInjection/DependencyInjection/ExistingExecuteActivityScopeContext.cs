@@ -1,7 +1,7 @@
 ﻿namespace MassTransit.DependencyInjection
 {
+    using System;
     using System.Threading.Tasks;
-    using Courier;
     using Microsoft.Extensions.DependencyInjection;
 
 
@@ -10,19 +10,21 @@
         where TActivity : class, IExecuteActivity<TArguments>
         where TArguments : class
     {
+        readonly IDisposable _disposable;
         readonly IServiceScope _scope;
 
-        public ExistingExecuteActivityScopeContext(ExecuteActivityContext<TActivity, TArguments> context, IServiceScope scope)
+        public ExistingExecuteActivityScopeContext(ExecuteActivityContext<TActivity, TArguments> context, IServiceScope scope, IDisposable disposable)
         {
             _scope = scope;
+            _disposable = disposable;
             Context = context;
         }
 
         public ExecuteActivityContext<TActivity, TArguments> Context { get; }
 
-        public ValueTask DisposeAsync()
+        public async ValueTask DisposeAsync()
         {
-            return default;
+            _disposable?.Dispose();
         }
 
         public T GetService<T>()

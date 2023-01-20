@@ -17,16 +17,15 @@ namespace MassTransit.DependencyInjection
         }
 
         protected ValueTask<TScopeContext> GetScopeContext<TScopeContext, TPipeContext>(TPipeContext context,
-            Func<TPipeContext, IServiceScope, TScopeContext> existingScopeContextFactory,
-            Func<TPipeContext, IServiceScope, TScopeContext> createdScopeContextFactory,
+            Func<TPipeContext, IServiceScope, IDisposable, TScopeContext> existingScopeContextFactory,
+            Func<TPipeContext, IServiceScope, IDisposable, TScopeContext> createdScopeContextFactory,
             Func<TPipeContext, IServiceScope, IServiceProvider, TPipeContext> pipeContextFactory)
             where TPipeContext : ConsumeContext
         {
             if (context.TryGetPayload<IServiceScope>(out var existingServiceScope))
             {
-                existingServiceScope.SetCurrentConsumeContext(context);
-
-                return new ValueTask<TScopeContext>(existingScopeContextFactory(context, existingServiceScope));
+                return new ValueTask<TScopeContext>(existingScopeContextFactory(context, existingServiceScope,
+                    existingServiceScope.SetCurrentConsumeContext(context)));
             }
 
             var serviceProvider = context.GetPayload(_serviceProvider);
@@ -43,9 +42,8 @@ namespace MassTransit.DependencyInjection
                         existing => new ConsumeMessageSchedulerContext(scopeContext, existing.SchedulerFactory));
                 }
 
-                serviceScope.SetCurrentConsumeContext(scopeContext);
-
-                return new ValueTask<TScopeContext>(createdScopeContextFactory(scopeContext, serviceScope));
+                return new ValueTask<TScopeContext>(createdScopeContextFactory(scopeContext, serviceScope,
+                    serviceScope.SetCurrentConsumeContext(scopeContext)));
             }
             catch (Exception ex)
             {

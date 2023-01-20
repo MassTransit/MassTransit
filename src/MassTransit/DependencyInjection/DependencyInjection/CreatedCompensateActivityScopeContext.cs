@@ -2,7 +2,6 @@
 {
     using System;
     using System.Threading.Tasks;
-    using Courier;
     using Microsoft.Extensions.DependencyInjection;
 
 
@@ -11,11 +10,13 @@
         where TActivity : class, ICompensateActivity<TLog>
         where TLog : class
     {
+        readonly IDisposable _disposable;
         readonly IServiceScope _scope;
 
-        public CreatedCompensateActivityScopeContext(CompensateActivityContext<TActivity, TLog> context, IServiceScope scope)
+        public CreatedCompensateActivityScopeContext(CompensateActivityContext<TActivity, TLog> context, IServiceScope scope, IDisposable disposable)
         {
             _scope = scope;
+            _disposable = disposable;
             Context = context;
         }
 
@@ -23,6 +24,8 @@
 
         public ValueTask DisposeAsync()
         {
+            _disposable?.Dispose();
+
             if (_scope is IAsyncDisposable asyncDisposable)
                 return asyncDisposable.DisposeAsync();
 
