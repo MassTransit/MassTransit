@@ -106,7 +106,7 @@ namespace MassTransit.Transports
                 if (_supervisor != null)
                     await _supervisor.Stop(context).ConfigureAwait(false);
 
-                await base.StopAgent(context).ConfigureAwait(false);
+                await Completed.ConfigureAwait(false);
             }
 
             async Task Run()
