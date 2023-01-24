@@ -92,7 +92,7 @@ namespace MassTransit.AmazonSqsTransport
 
             var delay = context.Delay?.TotalSeconds;
             if (delay > 0)
-                message.DelaySeconds = (int)delay.Value;
+                message.DelaySeconds = (int)Math.Min(delay.Value, 15 * 60);
 
             await transportContext.SendMessage(EntityName, message, sendContext.CancellationToken).ConfigureAwait(false);
         }
