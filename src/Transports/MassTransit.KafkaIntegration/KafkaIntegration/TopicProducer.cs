@@ -35,21 +35,33 @@ namespace MassTransit.KafkaIntegration
 
         public Task Produce(TKey key, TValue value, CancellationToken cancellationToken = default)
         {
+            if (value == null)
+                throw new ArgumentNullException(nameof(value));
+
             return Produce(key, value, Pipe.Empty<KafkaSendContext<TKey, TValue>>(), cancellationToken);
         }
 
         public Task Produce(TKey key, TValue value, IPipe<KafkaSendContext<TKey, TValue>> pipe, CancellationToken cancellationToken)
         {
+            if (value == null)
+                throw new ArgumentNullException(nameof(value));
+
             return _context.Send(new SendPipe(_context, key, value, pipe, cancellationToken), cancellationToken);
         }
 
         public Task Produce(TKey key, object values, CancellationToken cancellationToken = default)
         {
+            if (values == null)
+                throw new ArgumentNullException(nameof(values));
+
             return Produce(key, values, Pipe.Empty<KafkaSendContext<TKey, TValue>>(), cancellationToken);
         }
 
         public async Task Produce(TKey key, object values, IPipe<KafkaSendContext<TKey, TValue>> pipe, CancellationToken cancellationToken = default)
         {
+            if (values == null)
+                throw new ArgumentNullException(nameof(values));
+
             (var message, IPipe<SendContext<TValue>> sendPipe) = await MessageInitializerCache<TValue>.InitializeMessage(values, cancellationToken);
 
             await _context.Send(new SendPipe(_context, key, message, pipe, cancellationToken, sendPipe), cancellationToken)
