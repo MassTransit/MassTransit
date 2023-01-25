@@ -167,7 +167,7 @@ namespace MassTransit
             var bytes = _formatterArray.Value!;
 
         #if NET6_0_OR_GREATER
-            if (Sse3.IsSupported && BitConverter.IsLittleEndian)
+            if (Ssse3.IsSupported && BitConverter.IsLittleEndian)
             {
                 Vector128<byte> vector = Unsafe.As<NewId, Vector128<byte>>(ref Unsafe.AsRef(in this));
                 var byteArrayShuffle = Vector128.Create((byte)15, 14, 12, 13, 9, 8, 11, 10, 5, 4, 3, 2, 1, 0, 7, 6);
@@ -202,7 +202,7 @@ namespace MassTransit
             var bytes = _formatterArray.Value!;
 
         #if NET6_0_OR_GREATER
-            if (Sse3.IsSupported && BitConverter.IsLittleEndian)
+            if (Ssse3.IsSupported && BitConverter.IsLittleEndian)
             {
                 Vector128<byte> vector = Unsafe.As<NewId, Vector128<byte>>(ref Unsafe.AsRef(in this));
                 var byteArrayShuffle = Vector128.Create((byte)3, 2, 1, 0, 7, 6, 5, 4, 11, 10, 9, 8, 15, 14, 13, 12);
@@ -307,7 +307,7 @@ namespace MassTransit
         public static NewId FromSequentialGuid(in Guid guid)
         {
         #if NET6_0_OR_GREATER
-            if (Sse3.IsSupported && BitConverter.IsLittleEndian)
+            if (Ssse3.IsSupported && BitConverter.IsLittleEndian)
             {
                 Span<Guid> span = stackalloc Guid[1];
                 span[0] = guid;
@@ -329,7 +329,7 @@ namespace MassTransit
             var bytes = new byte[16];
 
         #if NET6_0_OR_GREATER
-            if (Sse3.IsSupported && BitConverter.IsLittleEndian)
+            if (Ssse3.IsSupported && BitConverter.IsLittleEndian)
             {
                 Vector128<byte> vector = Unsafe.As<NewId, Vector128<byte>>(ref Unsafe.AsRef(in this));
                 var byteArrayShuffle = Vector128.Create((byte)13, 12, 14, 15, 8, 9, 10, 11, 5, 4, 3, 2, 1, 0, 7, 6);
