@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.Monitoring.Performance
 {
     using System;
-    using Metadata;
 
 
     public class MessagePerformanceCounter<TMessage> :

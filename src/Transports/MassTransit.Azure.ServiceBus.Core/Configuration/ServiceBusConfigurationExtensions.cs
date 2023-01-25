@@ -1,7 +1,6 @@
 ﻿namespace MassTransit
 {
     using System;
-    using System.Linq;
     using AzureServiceBusTransport;
     using DependencyInjection;
     using Microsoft.Extensions.DependencyInjection;

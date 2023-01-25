@@ -3,8 +3,6 @@
     using System.Diagnostics;
     using System.Threading.Tasks;
     using MassTransit.Middleware;
-    using Metadata;
-    using Util;
 
 
     /// <summary>

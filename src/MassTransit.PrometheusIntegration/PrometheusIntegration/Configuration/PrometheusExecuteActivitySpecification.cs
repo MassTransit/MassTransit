@@ -2,7 +2,6 @@ namespace MassTransit.PrometheusIntegration.Configuration
 {
     using System.Collections.Generic;
     using System.Linq;
-    using Courier;
     using MassTransit.Configuration;
     using Middleware;
 

@@ -1,6 +1,5 @@
 namespace MassTransit.Middleware.InMemoryOutbox
 {
-    using System;
     using System.Threading.Tasks;
 
 

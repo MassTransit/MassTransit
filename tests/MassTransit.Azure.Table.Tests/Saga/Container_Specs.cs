@@ -7,7 +7,6 @@ namespace MassTransit.Azure.Table.Tests.Saga
         using Microsoft.Extensions.DependencyInjection;
         using NUnit.Framework;
         using TestFramework.Sagas;
-        using Testing;
 
 
         public class Using_optimistic_concurrency :

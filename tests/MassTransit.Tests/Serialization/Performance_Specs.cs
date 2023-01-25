@@ -2,12 +2,10 @@ namespace MassTransit.Tests.Serialization
 {
     using System;
     using System.Diagnostics;
-    using System.IO;
     using Context;
     using InMemoryTransport;
     using MassTransit.Serialization;
     using Messages;
-    using Metadata;
     using NUnit.Framework;
     using TestFramework;
 

@@ -1,8 +1,5 @@
 namespace MassTransit.Transports
 {
-    using Courier;
-
-
     public class ExecuteActivityReceiveEndpointDispatcher<TActivity, TArguments> :
         ITypeReceiveEndpointDispatcherFactory
         where TActivity : class, IExecuteActivity<TArguments>

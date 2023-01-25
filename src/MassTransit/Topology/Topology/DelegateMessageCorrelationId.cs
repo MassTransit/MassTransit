@@ -1,7 +1,6 @@
 namespace MassTransit.Topology
 {
     using System;
-    using Context;
 
 
     public class DelegateMessageCorrelationId<T> :

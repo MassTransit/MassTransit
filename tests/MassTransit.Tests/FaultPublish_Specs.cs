@@ -5,7 +5,6 @@
     using System.Threading;
     using System.Threading.Tasks;
     using MassTransit.Testing;
-    using Metadata;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;

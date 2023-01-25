@@ -2,8 +2,6 @@
 {
     using System;
     using Configuration;
-    using MassTransit.Topology;
-    using Topology;
     using Transports;
 
 

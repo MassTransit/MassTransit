@@ -1,7 +1,6 @@
 namespace MassTransit.Tests
 {
     using System;
-    using Futures;
     using NUnit.Framework;
 
 

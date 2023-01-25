@@ -1,9 +1,6 @@
 ﻿#nullable enable
 namespace MassTransit.MongoDbIntegration.Saga
 {
-    using System;
-    using System.Threading;
-    using System.Threading.Tasks;
     using MassTransit.Saga;
     using MongoDB.Driver;
 

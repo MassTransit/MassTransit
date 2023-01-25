@@ -3,7 +3,6 @@ namespace MassTransit.Tests.Configuration
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using MassTransit.Courier;
     using NUnit.Framework;
     using TestFramework.Courier;
     using TestFramework.Messages;

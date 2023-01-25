@@ -2,7 +2,6 @@ namespace MassTransit.Observables
 {
     using System;
     using System.Threading.Tasks;
-    using Courier;
     using Util;
 
 

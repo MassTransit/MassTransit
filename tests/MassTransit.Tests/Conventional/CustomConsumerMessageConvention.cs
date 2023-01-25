@@ -4,7 +4,6 @@ namespace MassTransit.Tests.Conventional
     using System.Linq;
     using System.Reflection;
     using MassTransit.Configuration;
-    using Metadata;
 
 
     class CustomConsumerMessageConvention<T> :

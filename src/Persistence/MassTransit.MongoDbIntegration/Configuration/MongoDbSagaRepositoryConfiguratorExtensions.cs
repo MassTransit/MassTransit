@@ -4,7 +4,6 @@ namespace MassTransit
     using MongoDB.Bson.Serialization;
     using MongoDB.Driver;
     using MongoDbIntegration;
-    using MongoDbIntegration.Saga;
 
 
     public static class MongoDbSagaRepositoryConfiguratorExtensions

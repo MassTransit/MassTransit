@@ -4,8 +4,6 @@ namespace MassTransit.Transports
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
-    using Context;
-    using Courier;
     using Internals;
 
 

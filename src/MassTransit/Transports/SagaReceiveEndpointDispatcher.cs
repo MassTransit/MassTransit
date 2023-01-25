@@ -1,8 +1,5 @@
 namespace MassTransit.Transports
 {
-    using Saga;
-
-
     public class SagaReceiveEndpointDispatcher<T> :
         ITypeReceiveEndpointDispatcherFactory
         where T : class, ISaga

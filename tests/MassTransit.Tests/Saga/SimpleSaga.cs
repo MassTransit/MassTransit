@@ -3,7 +3,6 @@ namespace MassTransit.Tests.Saga
     using System;
     using System.Linq.Expressions;
     using System.Threading.Tasks;
-    using MassTransit.Saga;
     using Messages;
 
 

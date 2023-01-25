@@ -1,6 +1,5 @@
 namespace MassTransit.Analyzers
 {
-    using System;
     using System.Collections.Generic;
     using System.Collections.Immutable;
     using System.Composition;
@@ -66,7 +65,7 @@ namespace MassTransit.Analyzers
             // Find the interface identified by the diagnostic
             var symbols = root.DescendantNodes().OfType<InterfaceDeclarationSyntax>().Select(i => semanticModel.GetDeclaredSymbol(i)).ToList();
             ITypeSymbol contractType = symbols.FirstOrDefault(i => i?.ToDisplayString(symbolDisplayFormat) == fullType);
-            
+
             if (contractType != null)
             {
                 var dictionary = new Dictionary<AnonymousObjectCreationExpressionSyntax, ITypeSymbol>();

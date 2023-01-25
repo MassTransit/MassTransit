@@ -4,15 +4,11 @@ namespace MassTransit.AmazonSqsTransport.Tests
     using System.Threading.Tasks;
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
-    using Courier;
     using MassTransit.Testing;
-    using MassTransit.Topology;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Logging;
-    using Newtonsoft.Json.Linq;
     using NUnit.Framework;
-    using Saga;
     using TestFramework;
     using TestFramework.Messages;
 

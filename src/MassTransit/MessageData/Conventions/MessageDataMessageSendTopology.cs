@@ -3,7 +3,6 @@ namespace MassTransit.MessageData.Conventions
     using Initializers;
     using MassTransit.Configuration;
     using Middleware;
-    using Topology;
 
 
     public class MessageDataMessageSendTopology<T> :

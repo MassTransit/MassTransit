@@ -2,7 +2,6 @@ namespace MassTransit
 {
     using System.Threading.Tasks;
     using SagaStateMachine;
-    using Serialization;
 
 
     public static class FutureVariableExtensions

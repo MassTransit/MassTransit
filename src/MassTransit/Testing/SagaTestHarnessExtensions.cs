@@ -1,7 +1,6 @@
 namespace MassTransit.Testing
 {
     using System;
-    using Saga;
 
 
     public static class SagaTestHarnessExtensions

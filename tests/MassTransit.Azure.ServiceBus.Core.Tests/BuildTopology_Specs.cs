@@ -7,7 +7,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
     using AzureServiceBusTransport;
     using AzureServiceBusTransport.Configuration;
     using AzureServiceBusTransport.Topology;
-    using MassTransit.Topology;
     using NUnit.Framework;
     using TopologyTestTypes;
 

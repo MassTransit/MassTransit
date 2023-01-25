@@ -3,7 +3,6 @@ namespace MassTransit.TestFramework.ForkJoint.Activities
     using System;
     using System.Threading.Tasks;
     using Contracts;
-    using MassTransit.Courier;
     using Microsoft.Extensions.Logging;
 
 

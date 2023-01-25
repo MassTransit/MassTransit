@@ -3,7 +3,6 @@
     using System;
     using System.Runtime.Serialization;
     using System.Threading.Tasks;
-    using Middleware;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;

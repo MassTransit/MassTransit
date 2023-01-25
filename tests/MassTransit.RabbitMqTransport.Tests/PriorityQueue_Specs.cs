@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
-    using System.Configuration;
     using System.Threading.Tasks;
     using MassTransit.Testing;
     using Microsoft.Extensions.DependencyInjection;

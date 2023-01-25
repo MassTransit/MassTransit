@@ -2,7 +2,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
     using TestFramework;

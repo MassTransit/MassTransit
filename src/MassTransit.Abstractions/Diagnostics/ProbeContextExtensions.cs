@@ -1,8 +1,5 @@
 namespace MassTransit
 {
-    using Internals;
-
-
     public static class ProbeContextExtensions
     {
         public static ProbeContext CreateFilterScope(this ProbeContext context, string filterType)

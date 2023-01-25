@@ -4,7 +4,6 @@ namespace MassTransit.Middleware.Timeout
     using System.Collections.Generic;
     using System.Threading;
     using Context;
-    using Courier;
 
 
     public class TimeoutExecuteContext<TArguments> :

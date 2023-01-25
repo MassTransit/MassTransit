@@ -2,7 +2,6 @@
 {
     using System;
     using System.Threading;
-    using Context;
 
 
     public class ConsumeContextRetryPolicy :

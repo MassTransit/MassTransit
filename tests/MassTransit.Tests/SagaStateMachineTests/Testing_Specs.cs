@@ -5,7 +5,6 @@
     using System.Threading.Tasks;
     using MassTransit.Testing;
     using NUnit.Framework;
-    using TestFramework;
 
 
     [TestFixture]

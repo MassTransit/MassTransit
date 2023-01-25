@@ -1,7 +1,6 @@
 namespace MassTransit.DependencyInjection.Registration
 {
     using System;
-    using Futures;
 
 
     public class RequestConsumerFutureDefinition<TFuture, TConsumer, TRequest, TResponse, TFault> :

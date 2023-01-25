@@ -2,14 +2,11 @@ namespace MassTransit.TestFramework
 {
     using System;
     using System.Threading.Tasks;
-    using Context;
     using Logging;
-    using MassTransit.Logging;
     using Mediator;
     using NUnit.Framework;
     using NUnit.Framework.Internal;
     using Testing;
-    using Util;
 
 
     public class MediatorTestFixture :

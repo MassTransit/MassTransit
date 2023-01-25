@@ -2,7 +2,6 @@ namespace MassTransit.Context
 {
     using System;
     using System.Collections.Generic;
-    using Courier;
 
 
     public class ExecuteContextProxy<TArguments> :

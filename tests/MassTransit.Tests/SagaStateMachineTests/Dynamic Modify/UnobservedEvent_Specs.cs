@@ -3,8 +3,6 @@
     using System;
     using System.Linq;
     using System.Threading.Tasks;
-    using Automatonymous;
-    using Introspection;
     using NUnit.Framework;
 
 

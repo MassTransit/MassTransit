@@ -3,12 +3,9 @@
     using System;
     using System.Threading.Tasks;
     using DataAccess;
-    using MassTransit.Saga;
     using MassTransit.Tests.Saga;
     using MassTransit.Tests.Saga.Messages;
-    using Microsoft.EntityFrameworkCore;
     using NUnit.Framework;
-    using Saga;
     using Shared;
     using Shouldly;
     using Testing;

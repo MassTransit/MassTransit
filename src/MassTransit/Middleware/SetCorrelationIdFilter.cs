@@ -1,7 +1,6 @@
 namespace MassTransit.Middleware
 {
     using System.Threading.Tasks;
-    using Context;
 
 
     /// <summary>

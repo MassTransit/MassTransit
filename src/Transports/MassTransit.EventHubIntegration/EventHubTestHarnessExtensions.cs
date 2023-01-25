@@ -1,7 +1,6 @@
 namespace MassTransit
 {
     using System.Threading.Tasks;
-    using EventHubIntegration;
     using Microsoft.Extensions.DependencyInjection;
     using Testing;
 

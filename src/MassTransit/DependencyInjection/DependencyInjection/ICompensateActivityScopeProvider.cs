@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.DependencyInjection
 {
     using System.Threading.Tasks;
-    using Courier;
 
 
     public interface ICompensateActivityScopeProvider<TActivity, TLog> :

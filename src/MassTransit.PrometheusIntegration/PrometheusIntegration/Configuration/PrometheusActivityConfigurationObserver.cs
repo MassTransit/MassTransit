@@ -1,7 +1,6 @@
 namespace MassTransit.PrometheusIntegration.Configuration
 {
     using System;
-    using Courier;
 
 
     public class PrometheusActivityConfigurationObserver :

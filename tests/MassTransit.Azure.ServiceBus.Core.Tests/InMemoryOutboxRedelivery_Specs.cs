@@ -2,7 +2,6 @@
 {
     using System;
     using System.Threading.Tasks;
-    using Core;
     using NUnit.Framework;
 
 

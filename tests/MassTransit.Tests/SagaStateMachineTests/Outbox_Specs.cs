@@ -3,7 +3,6 @@ namespace MassTransit.Tests.SagaStateMachineTests
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using MassTransit.Saga;
     using NUnit.Framework;
     using TestFramework;
 

@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.Tests.SagaStateMachineTests.Automatonymous
 {
     using System;
-    using Introspection;
     using NUnit.Framework;
 
 

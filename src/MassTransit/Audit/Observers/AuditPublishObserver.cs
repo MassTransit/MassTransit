@@ -3,8 +3,6 @@
     using System;
     using System.Threading.Tasks;
     using Configuration;
-    using Util;
-    using Util.Scanning;
 
 
     public class AuditPublishObserver :

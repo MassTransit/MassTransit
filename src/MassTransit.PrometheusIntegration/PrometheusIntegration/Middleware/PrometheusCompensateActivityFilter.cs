@@ -1,7 +1,6 @@
 namespace MassTransit.PrometheusIntegration.Middleware
 {
     using System.Threading.Tasks;
-    using Courier;
 
 
     public class PrometheusCompensateActivityFilter<TActivity, TLog> :

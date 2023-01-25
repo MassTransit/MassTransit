@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.InMemoryTransport
 {
     using Configuration;
-    using Topology;
     using Transports;
 
 

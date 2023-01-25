@@ -2,7 +2,6 @@
 {
     using System.Collections.Generic;
     using MassTransit.Configuration;
-    using Transports.Fabric;
 
 
     public class InvalidInMemoryConsumeTopologySpecification :

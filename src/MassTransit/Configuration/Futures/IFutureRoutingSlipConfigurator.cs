@@ -2,7 +2,6 @@ namespace MassTransit
 {
     using System;
     using Courier.Contracts;
-    using Futures;
 
 
     public interface IFutureRoutingSlipConfigurator<TResult, TFault, out TInput>

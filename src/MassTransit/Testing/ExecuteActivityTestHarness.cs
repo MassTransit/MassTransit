@@ -1,7 +1,6 @@
 namespace MassTransit.Testing
 {
     using System;
-    using Courier;
 
 
     public class ExecuteActivityTestHarness<TActivity, TArguments>
