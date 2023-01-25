@@ -35,6 +35,6 @@ Bus.Factory.CreateUsingRabbitMq(..., cfg =>
 });
 ```
 
-The CorrelationId topology convention is [implemented here](https://github.com/MassTransit/MassTransit/tree/develop/src/MassTransit/Topology/Conventions/CorrelationId), which can be used as an example of how to create your own conventions, or add additional CorrelationId detectors to the existing convention.
+The CorrelationId topology convention is [implemented here](https://github.com/MassTransit/MassTransit/blob/develop/src/MassTransit/Topology/Configuration/CorrelationIdMessageSendTopologyConvention.cs), which can be used as an example of how to create your own conventions, or add additional CorrelationId detectors to the existing convention.
 
 > Send topologies are applied to all outbound messages, regardless of whether they are _sent_ or _published_.
