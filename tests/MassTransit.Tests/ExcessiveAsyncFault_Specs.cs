@@ -6,7 +6,6 @@
         using System.Linq;
         using System.Threading.Tasks;
         using MassTransit.Testing;
-        using Metadata;
         using NUnit.Framework;
         using TestFramework;
         using TestFramework.Messages;

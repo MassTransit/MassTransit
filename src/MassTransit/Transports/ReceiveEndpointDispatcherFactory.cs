@@ -6,7 +6,6 @@ namespace MassTransit.Transports
     using System.Linq;
     using System.Threading.Tasks;
     using Configuration;
-    using Courier;
 
 
     public class ReceiveEndpointDispatcherFactory :

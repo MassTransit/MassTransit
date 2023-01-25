@@ -4,7 +4,6 @@ namespace MassTransit.ActiveMqTransport.Tests
     using NUnit.Framework;
     using Serialization;
     using TestMessages;
-    using Transports;
 
 
     [TestFixture]

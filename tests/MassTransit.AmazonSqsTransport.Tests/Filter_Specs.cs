@@ -4,7 +4,6 @@ namespace MassTransit.AmazonSqsTransport.Tests
     using System.Threading.Tasks;
     using Filtering;
     using NUnit.Framework;
-    using Util;
 
 
     namespace Filtering

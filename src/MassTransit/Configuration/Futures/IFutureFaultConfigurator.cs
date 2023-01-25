@@ -1,8 +1,5 @@
 namespace MassTransit
 {
-    using Futures;
-
-
     public interface IFutureFaultConfigurator<TFault, out TInput>
         where TInput : class
         where TFault : class

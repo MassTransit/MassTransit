@@ -3,7 +3,6 @@ namespace MassTransit.Tests.Caching
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Internals.Caching;
-    using MassTransit.Caching;
     using Middleware.Caching;
     using Middleware.Caching.TestValueObjects;
     using NUnit.Framework;

@@ -2,7 +2,6 @@ namespace MassTransit.DependencyInjection.Registration
 {
     using System;
     using Configuration;
-    using Futures;
 
 
     public class FutureRegistrationConfigurator<TFuture> :

@@ -5,7 +5,6 @@
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
-    using Courier;
     using Courier.Contracts;
     using MassTransit.Testing;
     using NUnit.Framework;

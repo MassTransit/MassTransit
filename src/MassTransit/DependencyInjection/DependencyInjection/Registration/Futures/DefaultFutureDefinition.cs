@@ -1,8 +1,5 @@
 namespace MassTransit.DependencyInjection.Registration
 {
-    using Futures;
-
-
     public class DefaultFutureDefinition<TFuture> :
         FutureDefinition<TFuture>
         where TFuture : class, SagaStateMachine<FutureState>

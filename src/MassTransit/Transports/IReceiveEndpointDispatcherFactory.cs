@@ -1,8 +1,6 @@
 namespace MassTransit.Transports
 {
     using System;
-    using Courier;
-    using Saga;
 
 
     public interface IReceiveEndpointDispatcherFactory :

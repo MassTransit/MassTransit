@@ -2,7 +2,6 @@ namespace MassTransit.Monitoring.Performance
 {
     using System;
     using System.Threading.Tasks;
-    using Util;
 
 
     public class PerformanceCounterBusObserver :

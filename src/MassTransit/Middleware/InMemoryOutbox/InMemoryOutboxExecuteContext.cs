@@ -3,7 +3,6 @@ namespace MassTransit.Middleware.InMemoryOutbox
     using System;
     using System.Collections.Generic;
     using Context;
-    using Courier;
 
 
     public class InMemoryOutboxExecuteContext<TArguments> :

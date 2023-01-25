@@ -4,7 +4,6 @@ namespace MassTransit
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-    using Courier;
     using DependencyInjection.Registration;
     using Internals;
     using Metadata;

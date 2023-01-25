@@ -6,7 +6,6 @@
     using System.Threading.Tasks;
     using MassTransit.Audit;
     using MassTransit.Caching;
-    using Metadata;
 
 
     public class InMemoryAuditStore :

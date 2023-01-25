@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.Tests.SagaStateMachineTests
 {
     using System;
-    using MassTransit.Saga;
     using NUnit.Framework;
     using TestFramework;
 

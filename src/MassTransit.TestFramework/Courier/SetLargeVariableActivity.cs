@@ -2,7 +2,6 @@ namespace MassTransit.TestFramework.Courier
 {
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using MassTransit.Courier;
 
 
     public class SetLargeVariableActivity :

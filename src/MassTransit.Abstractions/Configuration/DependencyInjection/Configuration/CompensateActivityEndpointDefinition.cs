@@ -1,8 +1,5 @@
 namespace MassTransit.Configuration
 {
-    using Courier;
-
-
     public class CompensateActivityEndpointDefinition<TActivity, TLog> :
         SettingsEndpointDefinition<ICompensateActivity<TLog>>
         where TActivity : class, ICompensateActivity<TLog>

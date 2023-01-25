@@ -1,6 +1,5 @@
 ﻿namespace MassTransit.Azure.ServiceBus.Core.Tests
 {
-    using System;
     using global::Azure;
     using global::Azure.Core;
 

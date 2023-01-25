@@ -3,7 +3,6 @@ namespace MassTransit.Configuration
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Courier;
     using Internals;
     using Middleware;
     using Transports;

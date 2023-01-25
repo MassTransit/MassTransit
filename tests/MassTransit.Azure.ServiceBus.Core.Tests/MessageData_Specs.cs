@@ -3,7 +3,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using MessageData;
     using NUnit.Framework;
 
 

@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using Courier;
     using Courier.Contracts;
     using Internals;
     using Util;

@@ -1,7 +1,6 @@
 namespace MassTransit.TestFramework.Courier
 {
     using System.Threading.Tasks;
-    using MassTransit.Courier;
 
 
     public class SetVariablesFaultyActivity :

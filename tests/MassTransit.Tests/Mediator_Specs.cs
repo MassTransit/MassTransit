@@ -9,7 +9,6 @@ namespace MassTransit.Tests
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
-    using Util;
 
 
     [TestFixture]

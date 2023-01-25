@@ -3,7 +3,6 @@ namespace MassTransit.Containers.Tests.Scenarios
     using System;
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using Saga;
     using Shouldly;
     using TestFramework;
     using Testing;

@@ -1,7 +1,6 @@
 namespace MassTransit
 {
     using System;
-    using Futures;
 
 
     public interface IFutureResponseConfigurator<TResult, TResponse> :

@@ -3,7 +3,6 @@ namespace MassTransit
     using System;
     using System.Diagnostics;
     using Internals;
-    using Util;
 
 
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]

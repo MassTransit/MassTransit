@@ -1,7 +1,6 @@
 namespace MassTransit
 {
     using System;
-    using Courier;
 
 
     public interface IActivityDefinition :

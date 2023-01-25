@@ -1,8 +1,5 @@
 ﻿namespace MassTransit.Configuration
 {
-    using Courier;
-
-
     public class ExecuteActivityArgumentsConfigurator<TActivity, TArguments> :
         IExecuteActivityArgumentsConfigurator<TArguments>
         where TActivity : class, IExecuteActivity<TArguments>

@@ -1,8 +1,5 @@
 namespace MassTransit.Context
 {
-    using Courier;
-
-
     public class HostExecuteActivityContext<TActivity, TArguments> :
         ExecuteContextProxy<TArguments>,
         ExecuteActivityContext<TActivity, TArguments>

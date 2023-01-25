@@ -2,7 +2,6 @@ namespace MassTransit.Tests.Saga
 {
     using System;
     using System.Threading.Tasks;
-    using MassTransit.Saga;
     using MassTransit.Testing;
     using NUnit.Framework;
     using TestFramework;

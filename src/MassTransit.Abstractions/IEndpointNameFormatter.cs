@@ -1,8 +1,5 @@
 namespace MassTransit
 {
-    using Courier;
-
-
     public interface IEndpointNameFormatter
     {
         /// <summary>

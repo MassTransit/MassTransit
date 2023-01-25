@@ -1,7 +1,6 @@
 ﻿namespace MassTransit
 {
     using Configuration;
-    using Transports.Fabric;
 
 
     public interface IInMemoryConsumeTopology :

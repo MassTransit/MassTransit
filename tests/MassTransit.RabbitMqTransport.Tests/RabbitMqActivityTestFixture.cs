@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using Courier;
     using MassTransit.Testing;
     using NUnit.Framework;
     using TestFramework;

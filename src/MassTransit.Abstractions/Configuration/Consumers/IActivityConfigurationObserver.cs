@@ -2,7 +2,6 @@ namespace MassTransit
 {
     using System;
     using System.ComponentModel;
-    using Courier;
 
 
     public interface IActivityConfigurationObserver

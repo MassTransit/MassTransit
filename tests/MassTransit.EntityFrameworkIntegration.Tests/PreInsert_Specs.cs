@@ -7,7 +7,6 @@
         using System.Data.Entity;
         using System.Data.Entity.ModelConfiguration;
         using System.Threading.Tasks;
-        using MassTransit.Saga;
         using NUnit.Framework;
         using Saga;
         using TestFramework;

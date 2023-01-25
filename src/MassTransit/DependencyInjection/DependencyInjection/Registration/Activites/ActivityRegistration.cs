@@ -3,7 +3,6 @@ namespace MassTransit.DependencyInjection.Registration
     using System;
     using System.Collections.Generic;
     using Configuration;
-    using Courier;
     using Microsoft.Extensions.DependencyInjection;
     using Transports;
 

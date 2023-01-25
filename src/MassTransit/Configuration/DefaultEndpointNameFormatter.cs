@@ -4,7 +4,6 @@ namespace MassTransit
     using System.Linq;
     using System.Text;
     using System.Text.RegularExpressions;
-    using Courier;
     using Metadata;
     using NewIdFormatters;
 

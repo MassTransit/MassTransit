@@ -3,7 +3,6 @@
     using System;
     using GrpcTransport;
     using GrpcTransport.Configuration;
-    using GrpcTransport.Topology;
 
 
     public static class GrpcRoutingKeyConventionExtensions

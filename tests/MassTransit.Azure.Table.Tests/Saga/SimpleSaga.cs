@@ -2,7 +2,6 @@
 {
     using System;
     using System.Threading.Tasks;
-    using MassTransit.Saga;
 
 
     public class SimpleSaga :

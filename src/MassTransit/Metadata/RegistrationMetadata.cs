@@ -3,8 +3,6 @@ namespace MassTransit.Metadata
     using System;
     using System.Linq;
     using System.Reflection;
-    using Courier;
-    using Futures;
     using Internals;
 
 

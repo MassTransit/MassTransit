@@ -1,6 +1,5 @@
 ﻿namespace MassTransit.Configuration
 {
-    using Serialization;
     using Transports;
 
 

@@ -1,7 +1,6 @@
 namespace MassTransit.TestFramework.ForkJoint.Activities
 {
     using System.Threading.Tasks;
-    using MassTransit.Courier;
     using Microsoft.Extensions.Logging;
     using Services;
 

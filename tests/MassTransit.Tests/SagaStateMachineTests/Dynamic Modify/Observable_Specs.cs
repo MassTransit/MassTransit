@@ -2,7 +2,6 @@
 {
     using System;
     using Automatonymous;
-    using Introspection;
     using NUnit.Framework;
 
 

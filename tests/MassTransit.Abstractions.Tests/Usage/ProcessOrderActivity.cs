@@ -2,7 +2,6 @@ namespace MassTransit.Abstractions.Tests.Usage
 {
     using System;
     using System.Threading.Tasks;
-    using Courier;
 
 
     public class ProcessOrderActivity :

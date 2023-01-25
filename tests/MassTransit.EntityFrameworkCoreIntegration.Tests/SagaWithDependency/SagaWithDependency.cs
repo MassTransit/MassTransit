@@ -3,7 +3,6 @@
     using System;
     using System.Threading.Tasks;
     using DataAccess;
-    using MassTransit.Saga;
     using MassTransit.Tests.Saga.Messages;
     using Messages;
 

@@ -4,7 +4,6 @@ namespace MassTransit.Tests
     using System.Threading.Tasks;
     using NUnit.Framework;
     using TestFramework.Messages;
-    using Util;
 
 
     [TestFixture]

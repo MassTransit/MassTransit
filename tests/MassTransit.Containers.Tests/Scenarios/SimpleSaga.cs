@@ -3,7 +3,6 @@ namespace MassTransit.Containers.Tests.Scenarios
     using System;
     using System.Linq.Expressions;
     using System.Threading.Tasks;
-    using Saga;
     using Util;
 
 

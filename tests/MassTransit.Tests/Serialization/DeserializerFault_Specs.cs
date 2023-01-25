@@ -1,10 +1,8 @@
 namespace MassTransit.Tests.Serialization
 {
     using System;
-    using System.Text;
     using System.Threading.Tasks;
     using MassTransit.Serialization;
-    using MassTransit.Transports;
     using NUnit.Framework;
     using TestFramework;
     using TestMessages;

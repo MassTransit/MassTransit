@@ -1,7 +1,6 @@
 namespace MassTransit.Futures
 {
     using System.Threading.Tasks;
-    using Courier;
     using Courier.Contracts;
 
 

@@ -7,7 +7,6 @@
     using Amazon.DynamoDBv2;
     using Amazon.DynamoDBv2.DataModel;
     using Amazon.DynamoDBv2.Model;
-    using DynamoDbIntegration;
     using DynamoDbIntegration.Saga;
     using NUnit.Framework;
     using Shouldly;

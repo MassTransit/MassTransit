@@ -2,7 +2,6 @@
 {
     using System;
     using System.Linq.Expressions;
-    using MassTransit.Saga;
     using NUnit.Framework;
     using SagaStateMachine;
     using TestFramework;

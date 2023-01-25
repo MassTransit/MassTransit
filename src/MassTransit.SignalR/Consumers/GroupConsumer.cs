@@ -4,9 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Context;
     using Contracts;
-    using Logging;
     using Microsoft.AspNetCore.SignalR;
     using Utils;
 

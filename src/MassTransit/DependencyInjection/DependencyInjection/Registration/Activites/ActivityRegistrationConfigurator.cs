@@ -2,7 +2,6 @@ namespace MassTransit.DependencyInjection.Registration
 {
     using System;
     using Configuration;
-    using Courier;
 
 
     public class ActivityRegistrationConfigurator<TActivity, TArguments, TLog> :

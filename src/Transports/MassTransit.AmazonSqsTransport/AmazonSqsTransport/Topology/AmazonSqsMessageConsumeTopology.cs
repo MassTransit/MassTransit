@@ -4,7 +4,6 @@ namespace MassTransit.AmazonSqsTransport.Topology
     using System.Collections.Generic;
     using System.Linq;
     using Configuration;
-    using MassTransit.Topology;
 
 
     public class AmazonSqsMessageConsumeTopology<TMessage> :

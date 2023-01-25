@@ -1,7 +1,6 @@
 namespace MassTransit.TestFramework.ForkJoint.Futures
 {
     using Contracts;
-    using MassTransit.Courier;
 
 
     public class BurgerFuture :
