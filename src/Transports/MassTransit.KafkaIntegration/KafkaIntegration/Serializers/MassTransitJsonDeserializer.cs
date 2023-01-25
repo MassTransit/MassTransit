@@ -11,6 +11,9 @@ namespace MassTransit.KafkaIntegration.Serializers
     {
         public T Deserialize(ReadOnlySpan<byte> data, bool isNull, SerializationContext context)
         {
+            if (data.IsEmpty && isNull)
+                return default;
+
             return JsonSerializer.Deserialize<T>(data, SystemTextJsonMessageSerializer.Options);
         }
     }
