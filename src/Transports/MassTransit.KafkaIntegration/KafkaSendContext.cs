@@ -10,18 +10,21 @@ namespace MassTransit
     }
 
 
-    public interface KafkaSendContext<out T> :
+    public interface KafkaSendContext<T> :
         SendContext<T>,
         KafkaSendContext
         where T : class
     {
+        IAsyncSerializer<T> ValueSerializer { get; set; }
     }
 
 
-    public interface KafkaSendContext<TKey, out T> :
+    public interface KafkaSendContext<TKey, T> :
         KafkaSendContext<T>
         where T : class
     {
         TKey Key { get; set; }
+
+        IAsyncSerializer<TKey> KeySerializer { get; set; }
     }
 }

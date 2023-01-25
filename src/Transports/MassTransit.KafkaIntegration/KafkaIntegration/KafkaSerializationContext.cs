@@ -21,12 +21,12 @@ namespace MassTransit.KafkaIntegration
 
         public override bool IsSupportedMessageType<T>()
         {
-            return typeof(T).IsAssignableFrom(typeof(TMessage));
+            return IsSupportedMessageType(typeof(T));
         }
 
         public override bool IsSupportedMessageType(Type messageType)
         {
-            return messageType.IsAssignableFrom(typeof(TMessage));
+            return messageType.IsAssignableFrom(typeof(TMessage)) && _message.Value != null;
         }
 
         public override bool TryGetMessage<T>(out T message)
@@ -44,7 +44,7 @@ namespace MassTransit.KafkaIntegration
 
         public override bool TryGetMessage(Type messageType, out object message)
         {
-            if (messageType.IsAssignableFrom(typeof(TMessage)))
+            if (IsSupportedMessageType(messageType))
             {
                 message = _message.Value;
                 return true;

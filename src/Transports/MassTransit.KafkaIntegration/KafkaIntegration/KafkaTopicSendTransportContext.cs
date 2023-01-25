@@ -49,7 +49,10 @@ namespace MassTransit.KafkaIntegration
         public async Task<KafkaSendContext<TKey, TValue>> CreateContext(TKey key, TValue value, IPipe<KafkaSendContext<TKey, TValue>> pipe,
             CancellationToken cancellationToken, IPipe<SendContext<TValue>> initializerPipe = null)
         {
-            var sendContext = new KafkaMessageSendContext<TKey, TValue>(key, value, cancellationToken) { DestinationAddress = _topicAddress };
+            var sendContext = new KafkaMessageSendContext<TKey, TValue>(key, value, _keySerializer, _valueSerializer, cancellationToken)
+            {
+                DestinationAddress = _topicAddress
+            };
 
             if (pipe is ISendContextPipe sendPipe)
                 await sendPipe.Send(sendContext).ConfigureAwait(false);
@@ -112,9 +115,10 @@ namespace MassTransit.KafkaIntegration
         {
             var headers = _headersSerializer.Serialize(sendContext);
 
-            Task<byte[]> keyTask = _keySerializer.SerializeAsync(sendContext.Key, new SerializationContext(MessageComponentType.Key, topic.Topic, headers));
+            Task<byte[]> keyTask =
+                sendContext.KeySerializer.SerializeAsync(sendContext.Key, new SerializationContext(MessageComponentType.Key, topic.Topic, headers));
             Task<byte[]> valueTask =
-                _valueSerializer.SerializeAsync(sendContext.Message, new SerializationContext(MessageComponentType.Value, topic.Topic, headers));
+                sendContext.ValueSerializer.SerializeAsync(sendContext.Message, new SerializationContext(MessageComponentType.Value, topic.Topic, headers));
 
             await Task.WhenAll(keyTask, valueTask).ConfigureAwait(false);
 

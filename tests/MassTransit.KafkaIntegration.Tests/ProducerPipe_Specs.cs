@@ -101,6 +101,74 @@ namespace MassTransit.KafkaIntegration.Tests
     }
 
 
+    public class Producer_Custom_Serializers_Specs :
+        InMemoryTestFixture
+    {
+        const string Topic = "producer-custom-serializer";
+
+        [Test]
+        public async Task Should_produce_with_custom_serializer()
+        {
+            await using var provider = new ServiceCollection()
+                .ConfigureKafkaTestOptions(options =>
+                {
+                    options.CreateTopicsIfNotExists = true;
+                    options.TopicNames = new[] { Topic };
+                })
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.AddTaskCompletionSource<ConsumeContext<KafkaMessage>>();
+
+                    x.SetTestTimeouts(testInactivityTimeout: TimeSpan.FromSeconds(10));
+                    x.AddRider(rider =>
+                    {
+                        rider.AddProducer<string, KafkaMessage>(Topic);
+
+                        rider.UsingKafka((_, k) =>
+                        {
+                            k.TopicEndpoint<string, KafkaMessage>(Topic, nameof(ProducerPipe_Specs), c =>
+                            {
+                                c.AutoOffsetReset = AutoOffsetReset.Earliest;
+
+                                c.DiscardSkippedMessages();
+                                c.Handler<KafkaMessage>(_ => Task.CompletedTask);
+                            });
+                        });
+                    });
+                }).BuildServiceProvider(true);
+
+            var harness = provider.GetTestHarness();
+
+            await harness.Start();
+
+            ITopicProducer<string, KafkaMessage> producer = harness.GetProducer<string, KafkaMessage>();
+
+            await producer.Produce("some", new { }, Pipe.Execute<KafkaSendContext<string, KafkaMessage>>(context =>
+            {
+                context.KeySerializer = new CustomSerializer<string>();
+                context.ValueSerializer = new CustomSerializer<KafkaMessage>();
+            }), harness.CancellationToken);
+
+            Assert.IsFalse(await harness.Consumed.Any<KafkaMessage>());
+        }
+
+
+        class CustomSerializer<T> :
+            IAsyncSerializer<T>
+        {
+            public Task<byte[]> SerializeAsync(T data, SerializationContext context)
+            {
+                return Task.FromResult(Array.Empty<byte>());
+            }
+        }
+
+
+        public interface KafkaMessage
+        {
+        }
+    }
+
+
     public class ProducerPipe_With_KeyResolver_Specs :
         InMemoryTestFixture
     {
