@@ -15,10 +15,12 @@
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
     <DebugType>embedded</DebugType>
   </PropertyGroup>
-  
+
   <PropertyGroup>
     <PackageIcon>mt-logo-small.png</PackageIcon>
+    <PackageReadmeFile>NuGet.README.md</PackageReadmeFile>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/MassTransit/MassTransit</PackageProjectUrl>
     <Description>MassTransit is a message-based distributed application framework for .NET http://masstransit-project.com</Description>
     <IsPackable>True</IsPackable>
 
@@ -28,6 +30,7 @@
 
   <ItemGroup>
     <None Include="..\..\mt-logo-small.png" Pack="true" Visible="false" PackagePath=""/>
+    <None Include="..\..\NuGet.README.md" Pack="true" Visible="false" PackagePath=""/>
   </ItemGroup>
 
 </Project>
