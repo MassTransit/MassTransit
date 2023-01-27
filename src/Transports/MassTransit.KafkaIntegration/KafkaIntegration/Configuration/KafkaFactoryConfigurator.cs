@@ -87,7 +87,7 @@ namespace MassTransit.KafkaIntegration.Configuration
             where TValue : class
         {
             var specification = CreateSpecification(topicName, consumerConfig, configure);
-            if (!_topics.TryAdd(specification.EndpointName, topic => CreateSpecification(topic, consumerConfig, configure)))
+            if (!_topics.TryAdd(specification.EndpointName, _ => specification))
                 throw new ConfigurationException($"A topic consumer with the same key was already added: {specification.EndpointName}");
         }
 
