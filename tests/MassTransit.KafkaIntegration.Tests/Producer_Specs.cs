@@ -16,6 +16,9 @@ namespace MassTransit.KafkaIntegration.Tests
         [Test]
         public async Task Should_receive_messages()
         {
+            var consumerConfig = new ConsumerConfig { GroupId = nameof(Producer_Specs) };
+            var producerConfig = new ProducerConfig();
+
             await using var provider = new ServiceCollection()
                 .ConfigureKafkaTestOptions(options =>
                 {
@@ -30,11 +33,11 @@ namespace MassTransit.KafkaIntegration.Tests
                     {
                         r.AddConsumer<TestKafkaMessageConsumer<KafkaMessage>>();
 
-                        r.AddProducer<KafkaMessage>(Topic);
+                        r.AddProducer<KafkaMessage>(Topic, producerConfig);
 
                         r.UsingKafka((context, k) =>
                         {
-                            k.TopicEndpoint<KafkaMessage>(Topic, nameof(Receive_Specs), c =>
+                            k.TopicEndpoint<KafkaMessage>(Topic, consumerConfig, c =>
                             {
                                 c.AutoOffsetReset = AutoOffsetReset.Earliest;
                                 c.ConfigureConsumer<TestKafkaMessageConsumer<KafkaMessage>>(context);
@@ -106,6 +109,7 @@ namespace MassTransit.KafkaIntegration.Tests
         [Test]
         public async Task Should_use_bus_send_observer()
         {
+            var consumerConfig = new ConsumerConfig { GroupId = nameof(ProducerWithObserver_Specs) };
             await using var provider = new ServiceCollection()
                 .ConfigureKafkaTestOptions(options =>
                 {
@@ -124,7 +128,7 @@ namespace MassTransit.KafkaIntegration.Tests
 
                         r.UsingKafka((context, k) =>
                         {
-                            k.TopicEndpoint<KafkaMessage>(Topic, nameof(Receive_Specs), c =>
+                            k.TopicEndpoint<KafkaMessage>(Topic, consumerConfig, c =>
                             {
                                 c.AutoOffsetReset = AutoOffsetReset.Earliest;
                                 c.ConfigureConsumer<TestKafkaMessageConsumer<KafkaMessage>>(context);
@@ -207,6 +211,7 @@ namespace MassTransit.KafkaIntegration.Tests
         [Test]
         public async Task Should_produce_from_state_machine()
         {
+            var consumerConfig = new ConsumerConfig { GroupId = nameof(ProducerStateMachine_Specs) };
             await using var provider = new ServiceCollection()
                 .ConfigureKafkaTestOptions(options =>
                 {
@@ -227,7 +232,7 @@ namespace MassTransit.KafkaIntegration.Tests
 
                         r.UsingKafka((context, k) =>
                         {
-                            k.TopicEndpoint<KafkaMessage>(Topic, nameof(Receive_Specs), c =>
+                            k.TopicEndpoint<KafkaMessage>(Topic, consumerConfig, c =>
                             {
                                 c.AutoOffsetReset = AutoOffsetReset.Earliest;
 
