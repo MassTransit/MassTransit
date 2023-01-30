@@ -118,9 +118,9 @@ namespace MassTransit.GrpcTransport
                 scope.Add("nodeAddress", _context.TransportProvider.HostNodeContext.NodeAddress);
             }
 
-            async Task ReceiveTransportHandle.Stop(CancellationToken cancellationToken)
+            Task ReceiveTransportHandle.Stop(CancellationToken cancellationToken)
             {
-                await this.Stop("Stop Receive Transport", cancellationToken).ConfigureAwait(false);
+                return this.Stop("Stop Receive Transport", cancellationToken);
             }
 
             async Task StartDispatcher()
@@ -172,7 +172,7 @@ namespace MassTransit.GrpcTransport
                 {
                     await _context.TransportProvider.StartupTask.OrCanceled(Stopping).ConfigureAwait(false);
 
-                    await _context.Dependencies.OrCanceled(Stopping).ConfigureAwait(false);
+                    await _context.DependenciesReady.OrCanceled(Stopping).ConfigureAwait(false);
 
                     var hostNodeContext = _context.TransportProvider.HostNodeContext;
 

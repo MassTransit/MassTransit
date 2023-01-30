@@ -35,13 +35,17 @@ namespace MassTransit.Configuration
             set { }
         }
 
-        public void AddDependency(IReceiveEndpointObserverConnector connector)
+        public void AddDependency(IReceiveEndpointDependentConnector dependent)
         {
         }
 
         ConnectHandle IReceiveEndpointObserverConnector.ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
         {
             return _configuration.ConnectReceiveEndpointObserver(observer);
+        }
+
+        public void AddDependent(IReceiveEndpointObserverConnector dependency)
+        {
         }
 
         public void ConfigureMessageTopology<T>(bool enabled = true)
