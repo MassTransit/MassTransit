@@ -41,7 +41,12 @@ namespace MassTransit.Transports
         /// <summary>
         /// Task completed when dependencies are ready
         /// </summary>
-        Task Dependencies { get; }
+        Task DependenciesReady { get; }
+
+        /// <summary>
+        /// Task completed when dependants are completed
+        /// </summary>
+        Task DependentsCompleted { get; }
 
         /// <summary>
         /// If true (the default), faults should be published when no ResponseAddress or FaultAddress are present.

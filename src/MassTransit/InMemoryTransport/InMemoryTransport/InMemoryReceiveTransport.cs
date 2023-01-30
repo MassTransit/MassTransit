@@ -131,16 +131,16 @@ namespace MassTransit.InMemoryTransport
                 context.CreateScope("inMemory");
             }
 
-            async Task ReceiveTransportHandle.Stop(CancellationToken cancellationToken)
+            Task ReceiveTransportHandle.Stop(CancellationToken cancellationToken)
             {
-                await this.Stop("Stop Receive Transport", cancellationToken).ConfigureAwait(false);
+                return this.Stop("Stop Receive Transport", cancellationToken);
             }
 
             async Task Startup()
             {
                 try
                 {
-                    await _context.Dependencies.OrCanceled(Stopping).ConfigureAwait(false);
+                    await _context.DependenciesReady.OrCanceled(Stopping).ConfigureAwait(false);
 
                     _topologyHandle = _queue.ConnectMessageReceiver(_context.TransportContext, this);
 

@@ -4,6 +4,7 @@ namespace MassTransit.Transports
     using System.Threading;
     using System.Threading.Tasks;
     using Events;
+    using Internals;
     using Util;
 
 
@@ -167,6 +168,8 @@ namespace MassTransit.Transports
 
             if (_handle != null)
             {
+                await _context.DependentsCompleted.OrCanceled(cancellationToken).ConfigureAwait(false);
+
                 await _context.EndpointObservers.Stopping(new ReceiveEndpointStoppingEvent(_context.InputAddress, this, removed)).ConfigureAwait(false);
 
                 await _handle.TransportHandle.Stop(cancellationToken).ConfigureAwait(false);

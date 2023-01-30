@@ -50,7 +50,8 @@ namespace MassTransit.Transports
             _receiveObservers = configuration.ReceiveObservers;
             _transportObservers = configuration.TransportObservers;
 
-            Dependencies = configuration.Dependencies;
+            DependenciesReady = configuration.DependenciesReady;
+            DependentsCompleted = configuration.DependentsCompleted;
 
             Serialization = configuration.Serialization.CreateSerializerCollection();
 
@@ -104,7 +105,8 @@ namespace MassTransit.Transports
 
         public Uri InputAddress { get; }
 
-        public Task Dependencies { get; }
+        public Task DependenciesReady { get; }
+        public Task DependentsCompleted { get; }
 
         public bool PublishFaults { get; }
 

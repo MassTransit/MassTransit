@@ -10,7 +10,8 @@ namespace MassTransit
     /// </summary>
     public interface IReceiveEndpointConfigurator :
         IEndpointConfigurator,
-        IReceiveEndpointObserverConnector
+        IReceiveEndpointDependencyConnector,
+        IReceiveEndpointDependentConnector
     {
         /// <summary>
         /// Returns the input address of the receive endpoint
@@ -79,11 +80,5 @@ namespace MassTransit
         /// Clears all message serialization configuration
         /// </summary>
         void ClearSerialization();
-
-        /// <summary>
-        /// Add the observable receive endpoint as a dependency
-        /// </summary>
-        /// <param name="connector"></param>
-        void AddDependency(IReceiveEndpointObserverConnector connector);
     }
 }

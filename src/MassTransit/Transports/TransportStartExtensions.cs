@@ -22,7 +22,7 @@ namespace MassTransit.Transports
                 await supervisor.Send(pipe, cancellationToken).ConfigureAwait(false);
             }
 
-            await context.Dependencies.OrCanceled(cancellationToken).ConfigureAwait(false);
+            await context.DependenciesReady.OrCanceled(cancellationToken).ConfigureAwait(false);
         }
 
 
