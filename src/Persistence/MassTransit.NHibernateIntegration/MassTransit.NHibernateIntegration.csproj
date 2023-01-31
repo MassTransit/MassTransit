@@ -21,9 +21,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-        <PackageReference Include="Iesi.Collections" Version="4.0.5" />
-        <PackageReference Include="NHibernate" Version="5.4.0" />
-        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
+        <PackageReference Include="Iesi.Collections" />
+        <PackageReference Include="NHibernate" />
+        <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
         <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 
