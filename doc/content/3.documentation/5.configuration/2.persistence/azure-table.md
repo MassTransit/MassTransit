@@ -12,7 +12,7 @@ Azure Tables currently only supports Optimistic Concurrency. Mass Transit manage
 Be sure to set DateTime properties as nullable when updated later in the saga. Failure to do this can result in 400 bad requests from Table Storage.
 ::
 
-```cs {10}
+```csharp
 public class OrderState :
     SagaStateMachineInstance
 {

@@ -52,7 +52,7 @@ x.UsingGrpc((context, cfg) =>
 
 To configure the host using a complete address, such as `http://localhost:19796`, a `Uri` can be specified. The following configures a standalone instance, no servers are specified. Incoming connections are of course accepted.
 
-```cs
+```csharp
 cfg.Host(new Uri("http://localhost:19796"));
 ```
 
