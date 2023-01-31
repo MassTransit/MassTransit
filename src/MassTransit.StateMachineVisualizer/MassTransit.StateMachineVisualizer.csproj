@@ -19,9 +19,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
-    <PackageReference Include="QuikGraph" Version="2.5.0" />
-    <PackageReference Include="QuikGraph.Graphviz" Version="2.5.0" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
+    <PackageReference Include="QuikGraph" />
+    <PackageReference Include="QuikGraph.Graphviz" />
     <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 
