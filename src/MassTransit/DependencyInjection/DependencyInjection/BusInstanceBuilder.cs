@@ -90,6 +90,7 @@ namespace MassTransit.DependencyInjection
 
                 var ctorParent = parentType.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, parameterTypes, null);
                 var ctorBuilder = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, parameterTypes);
+                ctorBuilder.DefineParameter(1, ParameterAttributes.None, "busControl");
 
                 var il = ctorBuilder.GetILGenerator();
                 il.Emit(OpCodes.Ldarg_0);
