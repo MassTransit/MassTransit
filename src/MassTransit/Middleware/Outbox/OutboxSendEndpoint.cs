@@ -13,8 +13,8 @@ namespace MassTransit.Middleware.Outbox
     public class OutboxSendEndpoint :
         ITransportSendEndpoint
     {
+        readonly OutboxSendContext _context;
         readonly ITransportSendEndpoint _endpoint;
-        readonly OutboxSendContext _outboxContext;
 
         /// <summary>
         /// Creates an send endpoint on the outbox
@@ -23,7 +23,7 @@ namespace MassTransit.Middleware.Outbox
         /// <param name="endpoint"></param>
         public OutboxSendEndpoint(OutboxSendContext outboxContext, ISendEndpoint endpoint)
         {
-            _outboxContext = outboxContext;
+            _context = outboxContext;
             _endpoint = endpoint as ITransportSendEndpoint ?? throw new ArgumentException("Must be a transport endpoint", nameof(endpoint));
         }
 
@@ -37,7 +37,7 @@ namespace MassTransit.Middleware.Outbox
         public Task<SendContext<T>> CreateSendContext<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
             where T : class
         {
-            return _endpoint.CreateSendContext(message, new OutboxSendEndpointPipe<T>(pipe), cancellationToken);
+            return _endpoint.CreateSendContext(message, new OutboxSendEndpointPipe<T>(pipe, _context), cancellationToken);
         }
 
         public async Task Send<T>(T message, CancellationToken cancellationToken)
@@ -46,7 +46,8 @@ namespace MassTransit.Middleware.Outbox
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
-            SendContext<T> context = await _endpoint.CreateSendContext(message, new OutboxSendEndpointPipe<T>(), cancellationToken).ConfigureAwait(false);
+            SendContext<T> context =
+                await _endpoint.CreateSendContext(message, new OutboxSendEndpointPipe<T>(_context), cancellationToken).ConfigureAwait(false);
 
             await AddSend(context).ConfigureAwait(false);
         }
@@ -59,7 +60,8 @@ namespace MassTransit.Middleware.Outbox
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            SendContext<T> context = await _endpoint.CreateSendContext(message, new OutboxSendEndpointPipe<T>(pipe), cancellationToken).ConfigureAwait(false);
+            SendContext<T> context = await _endpoint.CreateSendContext(message, new OutboxSendEndpointPipe<T>(pipe, _context), cancellationToken)
+                .ConfigureAwait(false);
 
             await AddSend(context).ConfigureAwait(false);
         }
@@ -92,7 +94,8 @@ namespace MassTransit.Middleware.Outbox
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            SendContext<T> context = await _endpoint.CreateSendContext(message, new OutboxSendEndpointPipe<T>(pipe), cancellationToken).ConfigureAwait(false);
+            SendContext<T> context = await _endpoint.CreateSendContext(message, new OutboxSendEndpointPipe<T>(pipe, _context), cancellationToken)
+                .ConfigureAwait(false);
 
             await AddSend(context).ConfigureAwait(false);
         }
@@ -128,10 +131,10 @@ namespace MassTransit.Middleware.Outbox
                 throw new ArgumentNullException(nameof(values));
 
             (var message, IPipe<SendContext<T>> sendPipe) =
-                await MessageInitializerCache<T>.InitializeMessage(values, new OutboxSendEndpointPipe<T>(), cancellationToken).ConfigureAwait(false);
+                await MessageInitializerCache<T>.InitializeMessage(values, new OutboxSendEndpointPipe<T>(_context), cancellationToken).ConfigureAwait(false);
 
             SendContext<T> context =
-                await _endpoint.CreateSendContext(message, new OutboxSendEndpointPipe<T>(sendPipe), cancellationToken).ConfigureAwait(false);
+                await _endpoint.CreateSendContext(message, new OutboxSendEndpointPipe<T>(sendPipe, _context), cancellationToken).ConfigureAwait(false);
 
             await AddSend(context).ConfigureAwait(false);
         }
@@ -143,10 +146,11 @@ namespace MassTransit.Middleware.Outbox
                 throw new ArgumentNullException(nameof(values));
 
             (var message, IPipe<SendContext<T>> sendPipe) =
-                await MessageInitializerCache<T>.InitializeMessage(values, new OutboxSendEndpointPipe<T>(pipe), cancellationToken).ConfigureAwait(false);
+                await MessageInitializerCache<T>.InitializeMessage(values, new OutboxSendEndpointPipe<T>(pipe, _context), cancellationToken)
+                    .ConfigureAwait(false);
 
             SendContext<T> context =
-                await _endpoint.CreateSendContext(message, new OutboxSendEndpointPipe<T>(sendPipe), cancellationToken).ConfigureAwait(false);
+                await _endpoint.CreateSendContext(message, new OutboxSendEndpointPipe<T>(sendPipe, _context), cancellationToken).ConfigureAwait(false);
 
             await AddSend(context).ConfigureAwait(false);
         }
@@ -160,10 +164,11 @@ namespace MassTransit.Middleware.Outbox
                 throw new ArgumentNullException(nameof(pipe));
 
             (var message, IPipe<SendContext<T>> sendPipe) =
-                await MessageInitializerCache<T>.InitializeMessage(values, new OutboxSendEndpointPipe<T>(pipe), cancellationToken).ConfigureAwait(false);
+                await MessageInitializerCache<T>.InitializeMessage(values, new OutboxSendEndpointPipe<T>(pipe, _context), cancellationToken)
+                    .ConfigureAwait(false);
 
             SendContext<T> context =
-                await _endpoint.CreateSendContext(message, new OutboxSendEndpointPipe<T>(sendPipe), cancellationToken).ConfigureAwait(false);
+                await _endpoint.CreateSendContext(message, new OutboxSendEndpointPipe<T>(sendPipe, _context), cancellationToken).ConfigureAwait(false);
 
             await AddSend(context).ConfigureAwait(false);
         }
@@ -174,7 +179,7 @@ namespace MassTransit.Middleware.Outbox
             StartedActivity? activity = LogContext.Current?.StartOutboxSendActivity(context);
             try
             {
-                await _outboxContext.AddSend(context).ConfigureAwait(false);
+                await _context.AddSend(context).ConfigureAwait(false);
                 activity?.Update(context);
             }
             catch (Exception ex)
@@ -190,37 +195,30 @@ namespace MassTransit.Middleware.Outbox
 
 
         class OutboxSendEndpointPipe<T> :
-            IPipe<SendContext<T>>
+            SendContextPipeAdapter<T>
             where T : class
         {
-            readonly IPipe<SendContext<T>> _pipe;
-            readonly ISendContextPipe _sendContextPipe;
+            readonly IServiceProvider _provider;
 
-            public OutboxSendEndpointPipe()
+            public OutboxSendEndpointPipe(IServiceProvider provider)
+                : base(null)
             {
-                _pipe = default;
-                _sendContextPipe = default;
+                _provider = provider;
             }
 
-            public OutboxSendEndpointPipe(IPipe<SendContext<T>> pipe)
+            public OutboxSendEndpointPipe(IPipe<SendContext<T>> pipe, IServiceProvider provider)
+                : base(pipe)
             {
-                _pipe = pipe;
-                _sendContextPipe = pipe as ISendContextPipe;
+                _provider = provider;
             }
 
-            public void Probe(ProbeContext context)
+            protected override void Send<TMessage>(SendContext<TMessage> context)
             {
-                _pipe?.Probe(context);
+                context.GetOrAddPayload(() => _provider);
             }
 
-            public async Task Send(SendContext<T> context)
+            protected override void Send(SendContext<T> context)
             {
-                if (_sendContextPipe != null)
-                    await _sendContextPipe.Send(context).ConfigureAwait(false);
-
-                if (_pipe.IsNotEmpty())
-                    await _pipe.Send(context).ConfigureAwait(false);
-
                 context.ConversationId ??= NewId.NextGuid();
             }
         }

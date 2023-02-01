@@ -62,18 +62,19 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             return _dbContext.Set<OutboxMessage>().AddSend(context, SystemTextJsonMessageSerializer.Instance, outboxId: _outboxId);
         }
 
+        public object? GetService(Type serviceType)
+        {
+            return _provider.GetService(serviceType);
+        }
+
         public ISendEndpointProvider SendEndpointProvider
         {
-            get { return _sendEndpointProvider ??= new OutboxSendEndpointProvider(this, new ScopedSendEndpointProvider(_bus, _provider)); }
+            get { return _sendEndpointProvider ??= new OutboxSendEndpointProvider(this, _bus); }
         }
 
         public IPublishEndpoint PublishEndpoint
         {
-            get
-            {
-                return _publishEndpoint ??= new PublishEndpoint(new OutboxPublishEndpointProvider(this,
-                    new ScopedPublishEndpointProvider(_bus, _provider)));
-            }
+            get { return _publishEndpoint ??= new PublishEndpoint(new OutboxPublishEndpointProvider(this, _bus)); }
         }
 
         public IScopedClientFactory ClientFactory

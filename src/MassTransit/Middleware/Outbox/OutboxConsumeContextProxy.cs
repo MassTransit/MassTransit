@@ -11,12 +11,14 @@ namespace MassTransit.Middleware.Outbox
         OutboxConsumeContext<TMessage>
         where TMessage : class
     {
-        protected OutboxConsumeContextProxy(ConsumeContext<TMessage> context, OutboxConsumeOptions options)
+        readonly IServiceProvider _provider;
+
+        protected OutboxConsumeContextProxy(ConsumeContext<TMessage> context, OutboxConsumeOptions options, IServiceProvider provider)
             : base(context)
         {
-            Options = options;
-
             CapturedContext = context;
+            Options = options;
+            _provider = provider;
 
             var outboxReceiveContext = new OutboxReceiveContext(this, context.ReceiveContext);
 
@@ -54,5 +56,10 @@ namespace MassTransit.Middleware.Outbox
 
         public abstract Task AddSend<T>(SendContext<T> context)
             where T : class;
+
+        public object GetService(Type serviceType)
+        {
+            return _provider.GetService(serviceType);
+        }
     }
 }

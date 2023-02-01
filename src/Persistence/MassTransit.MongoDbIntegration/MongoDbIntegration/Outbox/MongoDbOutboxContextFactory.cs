@@ -12,10 +12,12 @@ namespace MassTransit.MongoDbIntegration.Outbox
         IOutboxContextFactory<MongoDbContext>
     {
         readonly MongoDbContext _dbContext;
+        readonly IServiceProvider _provider;
 
-        public MongoDbOutboxContextFactory(MongoDbContext dbContext)
+        public MongoDbOutboxContextFactory(MongoDbContext dbContext, IServiceProvider provider)
         {
             _dbContext = dbContext;
+            _provider = provider;
         }
 
         public async Task Send<T>(ConsumeContext<T> context, OutboxConsumeOptions options, IPipe<OutboxConsumeContext<T>> next)
@@ -66,7 +68,7 @@ namespace MassTransit.MongoDbIntegration.Outbox
 
                         updateReceiveCount = false;
 
-                        var outboxContext = new MongoDbOutboxConsumeContext<T>(context, options, inboxState, _dbContext);
+                        var outboxContext = new MongoDbOutboxConsumeContext<T>(context, options, _provider, _dbContext, inboxState);
 
                         await next.Send(outboxContext).ConfigureAwait(false);
 

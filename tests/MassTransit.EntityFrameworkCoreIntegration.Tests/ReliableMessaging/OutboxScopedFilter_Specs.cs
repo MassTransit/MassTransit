@@ -2,6 +2,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
 {
     using System;
     using System.Threading.Tasks;
+    using DependencyInjection;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
     using Testing;
@@ -31,7 +32,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
                         });
                     });
 
-                    x.AddConsumer<SimplerConsumer>();
+                    x.AddConsumer<SimplerConsumer, SimplerConsumerDefinition>();
 
                     x.UsingInMemory((context, cfg) =>
                     {
@@ -63,10 +64,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
 
                 Assert.That(await consumerHarness.Consumed.Any<SimpleMessageInterface>(), Is.True);
 
-                var myId = harness.Scope.ServiceProvider.GetRequiredService<MyId>();
-
-                var result = await taskCompletionSource.Task;
-                Assert.AreEqual(myId, result);
+                await taskCompletionSource.Task;
             }
             finally
             {
@@ -205,14 +203,36 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
                 _consumerCreated.TrySetResult(this);
             }
 
-            public Task<SimpleMessageInterface> Last => _received.Task;
-
-            public static Task<SimplerConsumer> LastConsumer => _consumerCreated.Task;
-
             public async Task Consume(ConsumeContext<SimpleMessageInterface> message)
             {
+                await message.Publish<SimpleEvent>(new { });
+
                 _received.TrySetResult(message.Message);
             }
+        }
+
+
+        class SimplerConsumerDefinition :
+            ConsumerDefinition<SimplerConsumer>
+        {
+            readonly IServiceProvider _provider;
+
+            public SimplerConsumerDefinition(IServiceProvider provider)
+            {
+                _provider = provider;
+            }
+
+            protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,
+                IConsumerConfigurator<SimplerConsumer> consumerConfigurator)
+            {
+                endpointConfigurator.UseEntityFrameworkOutbox<ReliableDbContext>(_provider);
+            }
+        }
+
+
+        public interface SimpleEvent
+        {
+            string Name { get; }
         }
 
 
@@ -221,17 +241,21 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
             where T : class
         {
             readonly MyId _myId;
+            readonly IServiceProvider _provider;
             readonly TaskCompletionSource<MyId> _taskCompletionSource;
 
-            public TestScopedPublishFilter(TaskCompletionSource<MyId> taskCompletionSource, MyId myId)
+            public TestScopedPublishFilter(TaskCompletionSource<MyId> taskCompletionSource, MyId myId, IServiceProvider provider)
             {
                 _taskCompletionSource = taskCompletionSource;
                 _myId = myId;
+                _provider = provider;
             }
 
             public Task Send(PublishContext<T> context, IPipe<PublishContext<T>> next)
             {
-                _taskCompletionSource.TrySetResult(_myId);
+                if (context is PublishContext<SimpleEvent> && _provider.GetService<ScopedConsumeContextProvider>()?.HasContext == true)
+                    _taskCompletionSource.TrySetResult(_myId);
+
                 return next.Send(context);
             }
 

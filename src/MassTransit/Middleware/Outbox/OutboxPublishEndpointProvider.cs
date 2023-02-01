@@ -6,12 +6,12 @@ namespace MassTransit.Middleware.Outbox
     public class OutboxPublishEndpointProvider :
         IPublishEndpointProvider
     {
-        readonly OutboxSendContext _outboxContext;
+        readonly OutboxSendContext _context;
         readonly IPublishEndpointProvider _publishEndpointProvider;
 
-        public OutboxPublishEndpointProvider(OutboxSendContext outboxContext, IPublishEndpointProvider publishEndpointProvider)
+        public OutboxPublishEndpointProvider(OutboxSendContext context, IPublishEndpointProvider publishEndpointProvider)
         {
-            _outboxContext = outboxContext;
+            _context = context;
             _publishEndpointProvider = publishEndpointProvider;
         }
 
@@ -25,7 +25,7 @@ namespace MassTransit.Middleware.Outbox
         {
             var endpoint = await _publishEndpointProvider.GetPublishSendEndpoint<T>().ConfigureAwait(false);
 
-            return new OutboxSendEndpoint(_outboxContext, endpoint);
+            return new OutboxSendEndpoint(_context, endpoint);
         }
     }
 }

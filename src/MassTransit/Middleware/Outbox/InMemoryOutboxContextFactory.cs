@@ -1,5 +1,6 @@
 namespace MassTransit.Middleware.Outbox
 {
+    using System;
     using System.Threading.Tasks;
 
 
@@ -7,10 +8,12 @@ namespace MassTransit.Middleware.Outbox
         IOutboxContextFactory<InMemoryOutboxMessageRepository>
     {
         readonly InMemoryOutboxMessageRepository _messageRepository;
+        readonly IServiceProvider _provider;
 
-        public InMemoryOutboxContextFactory(InMemoryOutboxMessageRepository messageRepository)
+        public InMemoryOutboxContextFactory(InMemoryOutboxMessageRepository messageRepository, IServiceProvider provider)
         {
             _messageRepository = messageRepository;
+            _provider = provider;
         }
 
         public async Task Send<T>(ConsumeContext<T> context, OutboxConsumeOptions options, IPipe<OutboxConsumeContext<T>> next)
@@ -42,7 +45,7 @@ namespace MassTransit.Middleware.Outbox
 
                     updateDeliveryCount = false;
 
-                    var outboxContext = new InMemoryOutboxConsumeContext<T>(context, options, inboxMessage);
+                    var outboxContext = new InMemoryOutboxConsumeContext<T>(context, options, _provider, inboxMessage);
 
                     await next.Send(outboxContext).ConfigureAwait(false);
 

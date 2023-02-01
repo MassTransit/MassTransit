@@ -16,8 +16,9 @@ namespace MassTransit.MongoDbIntegration.Outbox
         readonly InboxState _inboxState;
         readonly MongoDbCollectionContext<OutboxMessage> _collection;
 
-        public MongoDbOutboxConsumeContext(ConsumeContext<TMessage> context, OutboxConsumeOptions options, InboxState inboxState, MongoDbContext dbContext)
-            : base(context, options)
+        public MongoDbOutboxConsumeContext(ConsumeContext<TMessage> context, OutboxConsumeOptions options, IServiceProvider provider, MongoDbContext dbContext,
+            InboxState inboxState)
+            : base(context, options, provider)
         {
             _inboxState = inboxState;
             _collection = dbContext.GetCollection<OutboxMessage>();

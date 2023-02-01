@@ -14,8 +14,9 @@ namespace MassTransit.Middleware.Outbox
     {
         readonly InMemoryInboxMessage _inboxMessage;
 
-        public InMemoryOutboxConsumeContext(ConsumeContext<TMessage> context, OutboxConsumeOptions options, InMemoryInboxMessage inboxMessage)
-            : base(context, options)
+        public InMemoryOutboxConsumeContext(ConsumeContext<TMessage> context, OutboxConsumeOptions options, IServiceProvider provider,
+            InMemoryInboxMessage inboxMessage)
+            : base(context, options, provider)
         {
             _inboxMessage = inboxMessage;
         }

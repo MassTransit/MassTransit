@@ -97,6 +97,29 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
         }
 
         [Test]
+        public async Task Should_start_successfully_with_middleware()
+        {
+            using var tracerProvider = TraceConfig.CreateTraceProvider("ef-core-tests");
+
+            await using var provider = CreateServiceProvider();
+
+            var harness = provider.GetTestHarness();
+
+            await harness.Start();
+
+            try
+            {
+                IRequestClient<Start> client = harness.GetRequestClient<Start>();
+
+                Response<StartupComplete> complete = await client.GetResponse<StartupComplete>(new Start(), harness.CancellationToken);
+            }
+            finally
+            {
+                await harness.Stop();
+            }
+        }
+
+        [Test]
         [Explicit]
         public async Task Should_start_with_delay_successfully()
         {
@@ -104,7 +127,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
 
             await using var provider = CreateServiceProvider(x =>
             {
-                x.UsingInMemory((context,cfg)=>
+                x.UsingInMemory((context, cfg) =>
                 {
                     cfg.UseDelayedMessageScheduler();
                     cfg.UseNewtonsoftJsonSerializer();
@@ -138,7 +161,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
             }
         }
 
-        static ServiceProvider CreateServiceProvider(Action<IBusRegistrationConfigurator> callback = null)
+        static ServiceProvider CreateServiceProvider(Action<IBusRegistrationConfigurator> callback = null,
+            Action<IBusRegistrationContext, IBusFactoryConfigurator> configure = null)
         {
             var services = new ServiceCollection();
 
@@ -157,6 +181,18 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
                         .EntityFrameworkRepository(r => r.ExistingDbContext<ResponsibleDbContext>());
 
                     callback?.Invoke(x);
+
+                    if (configure != null)
+                    {
+                        x.UsingInMemory((context, cfg) =>
+                        {
+                            cfg.UseDelayedMessageScheduler();
+
+                            configure(context, cfg);
+
+                            cfg.ConfigureEndpoints(context);
+                        });
+                    }
                 });
 
             services.AddOptions<TextWriterLoggerOptions>().Configure(options => options.Disable("Microsoft"));
@@ -171,9 +207,11 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
         using System;
         using System.Collections.Generic;
         using System.Reflection;
+        using DependencyInjection;
         using Microsoft.EntityFrameworkCore;
         using Microsoft.EntityFrameworkCore.Design;
         using Microsoft.EntityFrameworkCore.Metadata.Builders;
+        using Microsoft.Extensions.Logging;
         using TestFramework;
 
 
@@ -193,6 +231,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
                 endpointConfigurator.UseMessageRetry(r => r.Intervals(10, 50, 100, 100, 100, 100, 100, 100));
 
                 endpointConfigurator.UseEntityFrameworkOutbox<ResponsibleDbContext>(_provider);
+                endpointConfigurator.UseSendFilter(typeof(SendFilter<>), _provider);
             }
         }
 
@@ -232,6 +271,33 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
             public State Running { get; private set; }
             public State Delayed { get; private set; }
             public Event<Start> Started { get; private set; }
+        }
+
+
+        public class SendFilter<TMessage>
+            : IFilter<SendContext<TMessage>>
+            where TMessage : class
+        {
+            readonly ScopedConsumeContextProvider _contextProvider;
+            readonly ILogger<SendFilter<TMessage>> _logger;
+
+            public SendFilter(ScopedConsumeContextProvider contextProvider, ILogger<SendFilter<TMessage>> logger)
+            {
+                _contextProvider = contextProvider;
+                _logger = logger;
+            }
+
+            public async Task Send(SendContext<TMessage> context, IPipe<SendContext<TMessage>> next)
+            {
+                _logger.LogDebug("Send HasContext: {HasContext}", _contextProvider.HasContext);
+
+                await next.Send(context);
+            }
+
+            public void Probe(ProbeContext context)
+            {
+                context.CreateScope(GetType().ToString());
+            }
         }
 
 

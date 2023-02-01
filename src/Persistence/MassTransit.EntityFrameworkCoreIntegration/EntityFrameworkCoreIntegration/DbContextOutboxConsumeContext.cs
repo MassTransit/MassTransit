@@ -21,9 +21,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         readonly InboxState _inboxState;
         readonly IDbContextTransaction _transaction;
 
-        public DbContextOutboxConsumeContext(ConsumeContext<TMessage> context, OutboxConsumeOptions options, TDbContext dbContext,
+        public DbContextOutboxConsumeContext(ConsumeContext<TMessage> context, OutboxConsumeOptions options, IServiceProvider provider, TDbContext dbContext,
             IDbContextTransaction transaction, InboxState inboxState)
-            : base(context, options)
+            : base(context, options, provider)
         {
             _dbContext = dbContext;
             _transaction = transaction;

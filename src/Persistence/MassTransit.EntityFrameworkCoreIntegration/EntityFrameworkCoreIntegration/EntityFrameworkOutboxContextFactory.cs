@@ -15,13 +15,15 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         where TDbContext : DbContext
     {
         readonly TDbContext _dbContext;
+        readonly IServiceProvider _provider;
         readonly IsolationLevel _isolationLevel;
         readonly ILockStatementProvider _lockStatementProvider;
         string _lockStatement;
 
-        public EntityFrameworkOutboxContextFactory(TDbContext dbContext, IOptions<EntityFrameworkOutboxOptions> options)
+        public EntityFrameworkOutboxContextFactory(TDbContext dbContext, IServiceProvider provider, IOptions<EntityFrameworkOutboxOptions> options)
         {
             _dbContext = dbContext;
+            _provider = provider;
             _lockStatementProvider = options.Value.LockStatementProvider;
             _isolationLevel = options.Value.IsolationLevel;
         }
@@ -73,7 +75,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                         _dbContext.Update(inboxState);
                         await _dbContext.SaveChangesAsync().ConfigureAwait(false);
 
-                        var outboxContext = new DbContextOutboxConsumeContext<TDbContext, T>(context, options, _dbContext, transaction, inboxState);
+                        var outboxContext = new DbContextOutboxConsumeContext<TDbContext, T>(context, options, _provider, _dbContext, transaction, inboxState);
 
                         await next.Send(outboxContext).ConfigureAwait(false);
 
