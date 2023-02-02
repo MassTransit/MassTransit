@@ -5,6 +5,7 @@ namespace MassTransit.Serialization
     using System.Collections.Generic;
     using System.Net.Mime;
     using System.Text.Json;
+    using System.Text.Json.Nodes;
 
 
     public class SystemTextJsonSerializerContext :
@@ -31,9 +32,9 @@ namespace MassTransit.Serialization
         {
             var jsonElement = GetJsonElement(Message);
 
-            if (typeof(T) == typeof(JsonElement))
+            if (typeof(T) == typeof(JsonObject))
             {
-                message = jsonElement as T;
+                message = JsonObject.Create(jsonElement) as T;
                 return message != null;
             }
 
