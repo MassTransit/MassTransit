@@ -14,7 +14,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             ScopedConsumeContextProvider consumeContextProvider, IServiceProvider provider)
         {
             if (consumeContextProvider.HasContext)
-                Context = new ConsumeContextScopedBusContext<TBus>(bus, consumeContextProvider.GetContext(), clientFactory.Value, provider);
+                Context = new ConsumeContextScopedBusContext(consumeContextProvider.GetContext(), clientFactory.Value);
             else
                 Context = new EntityFrameworkScopedBusContext<TBus, TDbContext>(bus, dbContext, clientFactory.Value, provider);
         }
