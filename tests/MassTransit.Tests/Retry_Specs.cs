@@ -716,7 +716,7 @@
         {
             _retryObserver = new RetryObserver();
 
-            configurator.UseRetry(x =>
+            configurator.UseMessageRetry(x =>
             {
                 x.Interval(1, TimeSpan.FromMinutes(1));
                 x.ConnectRetryObserver(_retryObserver);
@@ -728,6 +728,103 @@
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _completed = GetTask<PingMessage>();
+
+            Handler<PingMessage>(configurator, context =>
+            {
+                var attempt = Interlocked.Increment(ref _attempts);
+                if (attempt == 1)
+                    throw new IntentionalTestException();
+
+                _completed.TrySetResult(context.Message);
+
+                return Task.CompletedTask;
+            });
+        }
+
+
+        class RetryObserver :
+            IRetryObserver
+        {
+            readonly TaskCompletionSource<RetryContext> _completionSource;
+
+            public RetryObserver()
+            {
+                _completionSource = TaskUtil.GetTask<RetryContext>();
+            }
+
+            public Task<RetryContext> Completed => _completionSource.Task;
+
+            public Task PostCreate<T>(RetryPolicyContext<T> context)
+                where T : class, PipeContext
+            {
+                return Task.CompletedTask;
+            }
+
+            public Task PostFault<T>(RetryContext<T> context)
+                where T : class, PipeContext
+            {
+                _completionSource.TrySetResult(context);
+
+                return Task.CompletedTask;
+            }
+
+            public Task PreRetry<T>(RetryContext<T> context)
+                where T : class, PipeContext
+            {
+                return Task.CompletedTask;
+            }
+
+            public Task RetryFault<T>(RetryContext<T> context)
+                where T : class, PipeContext
+            {
+                return Task.CompletedTask;
+            }
+
+            public Task RetryComplete<T>(RetryContext<T> context)
+                where T : class, PipeContext
+            {
+                return Task.CompletedTask;
+            }
+        }
+    }
+
+
+    [TestFixture]
+    public class When_you_say_deuces_and_stop_the_bus_by_endpoint :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_cancel_the_retry_and_give_it_up()
+        {
+            await InputQueueSendEndpoint.Send(new PingMessage());
+
+            await _retryObserver.Completed;
+
+            await Task.Delay(100);
+
+            _attempts.ShouldBe(1);
+        }
+
+        int _attempts;
+        TaskCompletionSource<PingMessage> _completed;
+        RetryObserver _retryObserver;
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            _retryObserver = new RetryObserver();
+
+            base.ConfigureInMemoryBus(configurator);
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            _completed = GetTask<PingMessage>();
+
+            configurator.UseMessageRetry(x =>
+            {
+                x.Interval(1, TimeSpan.FromMinutes(1));
+                x.ConnectRetryObserver(_retryObserver);
+            });
 
             Handler<PingMessage>(configurator, context =>
             {
