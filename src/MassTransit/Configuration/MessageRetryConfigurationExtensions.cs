@@ -14,6 +14,46 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="configure"></param>
+        public static void UseMessageRetry(this IBusFactoryConfigurator configurator, Action<IRetryConfigurator> configure)
+        {
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+
+            if (configure == null)
+                throw new ArgumentNullException(nameof(configure));
+
+            var retryObserver = new RetryBusObserver();
+            configurator.ConnectBusObserver(retryObserver);
+
+            var observer = new MessageRetryConfigurationObserver(configurator, retryObserver.Stopping, configure);
+        }
+
+        /// <summary>
+        /// For all configured messages type (handlers, consumers, and sagas), configures message retry using the retry configuration specified.
+        /// Retry is configured once for each message type, and is added prior to the consumer factory or saga repository in the pipeline.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configure"></param>
+        public static void UseMessageRetry(this IReceiveEndpointConfigurator configurator, Action<IRetryConfigurator> configure)
+        {
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+
+            if (configure == null)
+                throw new ArgumentNullException(nameof(configure));
+
+            var retryObserver = new RetryReceiveEndpointObserver();
+            configurator.ConnectReceiveEndpointObserver(retryObserver);
+
+            var observer = new MessageRetryConfigurationObserver(configurator, retryObserver.Stopping, configure);
+        }
+
+        /// <summary>
+        /// For all configured messages type (handlers, consumers, and sagas), configures message retry using the retry configuration specified.
+        /// Retry is configured once for each message type, and is added prior to the consumer factory or saga repository in the pipeline.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configure"></param>
         public static void UseMessageRetry(this IConsumePipeConfigurator configurator, Action<IRetryConfigurator> configure)
         {
             if (configurator == null)
