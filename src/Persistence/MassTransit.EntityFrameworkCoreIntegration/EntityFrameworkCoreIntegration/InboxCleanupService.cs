@@ -21,11 +21,11 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         BackgroundService
         where TDbContext : DbContext
     {
-        readonly ILogger<BusOutboxDeliveryService<TDbContext>> _logger;
+        readonly ILogger<InboxCleanupService<TDbContext>> _logger;
         readonly InboxCleanupServiceOptions _options;
         readonly IServiceProvider _provider;
 
-        public InboxCleanupService(IOptions<InboxCleanupServiceOptions> options, ILogger<BusOutboxDeliveryService<TDbContext>> logger,
+        public InboxCleanupService(IOptions<InboxCleanupServiceOptions> options, ILogger<InboxCleanupService<TDbContext>> logger,
             IServiceProvider provider)
         {
             _options = options.Value;
