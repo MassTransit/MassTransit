@@ -13,3 +13,7 @@ The analyzer supports methods that accept an `object` _values_ argument, includi
 - `ISendEndpoint.Send<T>(object values)`
 - `IPublishEndpoint.Publish<T>(object values)`
 - `ConsumeContext.RespondAsync<T>(object values)`
+
+## ConsumeContext CancellationToken suggestion
+
+The analyzer is similar to [CA2016](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca2016), but it is able to recognize when `CancellationToken` is present from `ConsumeContext` or any its implementation.
