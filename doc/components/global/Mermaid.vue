@@ -4,16 +4,16 @@
   </div>
 </template>
 
-<script>
-export default {
-  mounted() {
-    import("mermaid/dist/mermaid").then(m => {
-      m.initialize({
-        startOnLoad: true,
-          theme: 'dark'
-      });
-      m.init();
-    });
-  }
-};
+<script lang="ts" setup>
+
+import mermaid from 'mermaid'
+
+mermaid.initialize({
+    startOnLoad: true,
+    theme: 'dark',
+});
+
+onMounted(()=>{
+    mermaid.init();
+})
 </script>
