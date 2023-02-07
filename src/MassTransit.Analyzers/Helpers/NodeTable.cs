@@ -1,7 +1,7 @@
 namespace MassTransit.Analyzers.Helpers
 {
-    using System;
     using System.Collections.Concurrent;
+
 
     class NodeTable<T>
     {
@@ -10,7 +10,7 @@ namespace MassTransit.Analyzers.Helpers
 
         public NodeTable(int capacity)
         {
-            _nodes = new ConcurrentDictionary<T, int>(Environment.ProcessorCount, capacity);
+            _nodes = new ConcurrentDictionary<T, int>(8, capacity);
         }
 
         /// <summary>
@@ -21,10 +21,7 @@ namespace MassTransit.Analyzers.Helpers
         /// <returns>The index that uniquely relates to the specified key</returns>
         public int this[T key]
         {
-            get
-            {
-                return _nodes.GetOrAdd(key, k => ++_count);
-            }
+            get { return _nodes.GetOrAdd(key, k => ++_count); }
         }
     }
 }

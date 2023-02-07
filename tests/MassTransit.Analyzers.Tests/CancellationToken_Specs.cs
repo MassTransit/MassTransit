@@ -43,25 +43,9 @@ namespace ConsoleApplication1
     class Consumer :
         IConsumer<SubmitOrder>
     {
-        public async Task Consume(ConsumeContext<SubmitOrder> context)
+        public Task Consume(ConsumeContext<SubmitOrder> context)
         {
-            await Task.Delay(10);
-            context.RespondAsync<OrderSubmitted>(context.Message);
-        }
-    }
-
-    class Program
-    {
-        static async Task Main()
-        {
-            var bus = Bus.Factory.CreateUsingInMemory(cfg => { });
-
-            var client = bus.CreateRequestClient<SubmitOrder>();
-            var response = await client.GetResponse<OrderSubmitted>(new
-            {
-                Id = NewId.NextGuid(),
-                CustomerId = ""427"",
-            });
+            return Task.Delay(10);
         }
     }
 }
@@ -71,10 +55,26 @@ namespace ConsoleApplication1
                 Id = "MCA2016",
                 Message = "Cancellation token from 'context.CancellationToken' can be used in cancellation token overload for 'Task.Delay' method",
                 Severity = DiagnosticSeverity.Info,
-                Locations = new[] { new DiagnosticResultLocation("Test0.cs", 30, 19) }
+                Locations = new[] { new DiagnosticResultLocation("Test0.cs", 30, 20) }
             };
 
             VerifyCSharpDiagnostic(test, expected);
+
+            var fix = Usings + MessageContracts + @"
+namespace ConsoleApplication1
+{
+    class Consumer :
+        IConsumer<SubmitOrder>
+    {
+        public Task Consume(ConsumeContext<SubmitOrder> context)
+        {
+            return Task.Delay(10, context.CancellationToken);
+        }
+    }
+}
+";
+
+            VerifyCSharpFix(test, fix);
         }
 
         [Test]
@@ -117,21 +117,6 @@ namespace ConsoleApplication1
         {
         }
     }
-
-    class Program
-    {
-        static async Task Main()
-        {
-            var bus = Bus.Factory.CreateUsingInMemory(cfg => { });
-
-            var client = bus.CreateRequestClient<SubmitOrder>();
-            var response = await client.GetResponse<OrderSubmitted>(new
-            {
-                Id = NewId.NextGuid(),
-                CustomerId = ""427"",
-            });
-        }
-    }
 }
 ";
             var expected1 = new DiagnosticResult
@@ -151,6 +136,48 @@ namespace ConsoleApplication1
             };
 
             VerifyCSharpDiagnostic(test, expected1, expected2);
+
+            var fix = Usings + MessageContracts + @"
+namespace ConsoleApplication1
+{
+
+        class TestInstance :
+            SagaStateMachineInstance
+        {
+            public Guid CorrelationId { get; set; }
+            public State CurrentState { get; set; }
+            public string Value { get; set; }
+        }
+
+        class SetValueAsyncActivity :
+            IStateMachineActivity<TestInstance, SubmitOrder>
+        {
+
+        Task IStateMachineActivity<TestInstance, SubmitOrder>.Execute(BehaviorContext<TestInstance, SubmitOrder> context,
+            IBehavior<TestInstance, SubmitOrder> next)
+        {
+            return Task.Delay(10, context.CancellationToken);
+        }
+
+        async Task IStateMachineActivity<TestInstance, SubmitOrder>.Faulted<TException>(BehaviorExceptionContext<TestInstance, SubmitOrder, TException> ctx,
+            IBehavior<TestInstance, SubmitOrder> next)
+        {
+            return Task.Run(() => next.Faulted(ctx), ctx.CancellationToken);
+        }
+
+        public void Accept(StateMachineVisitor visitor)
+        {
+            visitor.Visit(this);
+        }
+
+        public void Probe(ProbeContext context)
+        {
+        }
+    }
+}
+";
+
+            VerifyCSharpFix(test, fix);
         }
 
         [Test]
@@ -170,21 +197,6 @@ namespace ConsoleApplication1
 
         }
     }
-
-    class Program
-    {
-        static async Task Main()
-        {
-            var bus = Bus.Factory.CreateUsingInMemory(cfg => { });
-
-            var client = bus.CreateRequestClient<SubmitOrder>();
-            var response = await client.GetResponse<OrderSubmitted>(new
-            {
-                Id = NewId.NextGuid(),
-                CustomerId = ""427"",
-            });
-        }
-    }
 }
 ";
             var expected = new DiagnosticResult
@@ -196,6 +208,24 @@ namespace ConsoleApplication1
             };
 
             VerifyCSharpDiagnostic(test, expected);
+
+            var fix = Usings + MessageContracts + @"
+namespace ConsoleApplication1
+{
+    class Consumer :
+        IConsumer<SubmitOrder>
+    {
+        public async Task Consume(ConsumeContext<SubmitOrder> context)
+        {
+            await Task.Delay(10, context.CancellationToken);
+            context.RespondAsync<OrderSubmitted>(context.Message);
+            await Task.Run(() => {}, context.CancellationToken);
+
+        }
+    }
+}
+";
+            VerifyCSharpFix(test, fix);
         }
 
         [Test]
@@ -211,21 +241,6 @@ namespace ConsoleApplication1
         {
             await Task.Delay(10, context.CancellationToken);
             context.RespondAsync<OrderSubmitted>(context.Message);
-        }
-    }
-
-    class Program
-    {
-        static async Task Main()
-        {
-            var bus = Bus.Factory.CreateUsingInMemory(cfg => { });
-
-            var client = bus.CreateRequestClient<SubmitOrder>();
-            var response = await client.GetResponse<OrderSubmitted>(new
-            {
-                Id = NewId.NextGuid(),
-                CustomerId = ""427"",
-            });
         }
     }
 }
@@ -248,14 +263,6 @@ namespace ConsoleApplication1
             return context.Publish<OrderSubmitted>(new {});
         }
     }
-
-    class Program
-    {
-        static async Task Main()
-        {
-            var bus = Bus.Factory.CreateUsingInMemory(cfg => { });
-        }
-    }
 }
 ";
 
@@ -264,7 +271,7 @@ namespace ConsoleApplication1
 
         protected override CodeFixProvider GetCSharpCodeFixProvider()
         {
-            return new MessageContractCodeFixProvider();
+            return new CancellationTokenOverloadMethodFixer();
         }
 
         protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer()

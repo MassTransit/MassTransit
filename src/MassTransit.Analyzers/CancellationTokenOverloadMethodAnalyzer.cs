@@ -21,7 +21,10 @@ namespace MassTransit.Analyzers
     {
         public const string CancellationTokenOverloadMethodRuleId = "MCA2016";
 
-        const string Category = "Usage";
+        const string Category = "Reliability";
+        internal const string ParameterIndex = "ParameterIndex";
+        internal const string ParameterName = "ParameterName";
+        internal const string CancellationTokens = "CancellationTokens";
 
         static readonly DiagnosticDescriptor CancellationTokenOverloadMethodRule = new DiagnosticDescriptor(CancellationTokenOverloadMethodRuleId,
             "Context.CancellationToken could be used in method overload with CancellationToken",
@@ -76,9 +79,9 @@ namespace MassTransit.Analyzers
                 var methodNameNode = GetInvocationMethodNameNode(analysisContext.Operation.Syntax) ?? analysisContext.Operation.Syntax;
 
                 ImmutableDictionary<string, string?> properties = ImmutableDictionary.Create<string, string?>(StringComparer.Ordinal)
-                    .Add("ParameterIndex", newParameterIndex.ToString(CultureInfo.InvariantCulture))
-                    .Add("ParameterName", newParameterName)
-                    .Add("CancellationTokens", string.Join(",", availableCancellationTokens));
+                    .Add(ParameterIndex, newParameterIndex.ToString(CultureInfo.InvariantCulture))
+                    .Add(ParameterName, newParameterName)
+                    .Add(CancellationTokens, string.Join(",", availableCancellationTokens));
 
                 var diagnostic = Diagnostic.Create(CancellationTokenOverloadMethodRule, invocation.Syntax.GetLocation(), properties,
                     string.Join(",", availableCancellationTokens), methodNameNode);
@@ -94,19 +97,28 @@ namespace MassTransit.Analyzers
                 return false;
 
             var receiverType = operation.GetReceiverType(compilation, true, cancellationToken);
-            return receiverType != null && HasInterface(receiverType, consumeContextTypeSymbol);
+            return receiverType != null && TryGetInterface(receiverType, consumeContextTypeSymbol, out _);
         }
 
-        static bool HasInterface(ITypeSymbol? symbol, ISymbol consumeContextTypeSymbol)
+        static bool TryGetInterface(ITypeSymbol? symbol, ISymbol expectedSymbol, out ITypeSymbol? result)
         {
-            if (symbol == null)
+            result = null;
+            if (symbol == null || !SymbolEqualityComparer.Default.Equals(symbol.ContainingNamespace, expectedSymbol.ContainingNamespace))
                 return false;
 
-            if (!SymbolEqualityComparer.Default.Equals(symbol.ContainingNamespace, consumeContextTypeSymbol.ContainingNamespace))
-                return false;
+            if (SymbolEqualityComparer.Default.Equals(symbol, expectedSymbol))
+            {
+                result = symbol;
+                return true;
+            }
 
-            return SymbolEqualityComparer.Default.Equals(symbol, consumeContextTypeSymbol)
-                || symbol.Interfaces.Any(x => HasInterface(x, consumeContextTypeSymbol));
+            foreach (var s in symbol.Interfaces)
+            {
+                if (TryGetInterface(s, expectedSymbol, out result))
+                    return true;
+            }
+
+            return false;
         }
 
         static bool HasAnOverloadWithCancellationToken(IInvocationOperation operation, ITypeSymbol cancellationTokenSymbol,
@@ -356,9 +368,6 @@ namespace MassTransit.Analyzers
                 if ((int)symbol.SpecialType >= 1 && (int)symbol.SpecialType <= 45)
                     return Enumerable.Empty<ISymbol>();
 
-                if (SymbolEqualityComparer.Default.Equals(symbol, cancellationTokenSymbol))
-                    return new[] { symbol };
-
                 var result = new HashSet<ISymbol>(SymbolEqualityComparer.Default);
                 foreach (var member in GetPipeContextMembers(symbol, pipeContextSymbol))
                 {
@@ -388,9 +397,10 @@ namespace MassTransit.Analyzers
                 return symbol is { IsImplicitlyDeclared: false, Kind: SymbolKind.Property };
             }
 
-            return !SymbolEqualityComparer.Default.Equals(symbol, pipeContextSymbol)
-                ? new HashSet<ISymbol>(symbol.Interfaces.SelectMany(x => GetPipeContextMembers(x, pipeContextSymbol)), SymbolEqualityComparer.Default)
-                : new HashSet<ISymbol>(symbol.GetMembers().Where(Filter), SymbolEqualityComparer.Default);
+            if (TryGetInterface(symbol, pipeContextSymbol, out var result) && result != null)
+                return new HashSet<ISymbol>(result.GetMembers().Where(Filter), SymbolEqualityComparer.Default);
+
+            return new HashSet<ISymbol>(Array.Empty<ISymbol>(), SymbolEqualityComparer.Default);
         }
 
 
