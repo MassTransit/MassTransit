@@ -1,8 +1,6 @@
 namespace MassTransit
 {
     using System;
-    using Configuration;
-    using DependencyInjection.Registration;
     using Internals;
 
 
@@ -206,25 +204,6 @@ namespace MassTransit
             public IFutureRegistrationConfigurator Register(IRegistrationConfigurator configurator, Type futureDefinitionType)
             {
                 return configurator.AddFuture<TFuture>(futureDefinitionType);
-            }
-        }
-
-
-        interface IConfigureSagaRepository
-        {
-            void Configure(IRegistrationConfigurator configurator, ISagaRepositoryRegistrationProvider provider);
-        }
-
-
-        class ConfigureSagaRepository<TSaga> :
-            IConfigureSagaRepository
-            where TSaga : class, ISaga
-        {
-            public void Configure(IRegistrationConfigurator configurator, ISagaRepositoryRegistrationProvider provider)
-            {
-                var registrationConfigurator = new SagaRegistrationConfigurator<TSaga>(configurator);
-
-                provider.Configure(registrationConfigurator);
             }
         }
     }

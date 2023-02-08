@@ -3,6 +3,7 @@ namespace MassTransit.DependencyInjection.Registration
     using System;
     using System.Collections.Generic;
     using Configuration;
+    using Internals;
     using Microsoft.Extensions.DependencyInjection;
     using Transports;
 
@@ -18,9 +19,12 @@ namespace MassTransit.DependencyInjection.Registration
         public ExecuteActivityRegistration()
         {
             _configureActions = new List<Action<IExecuteActivityConfigurator<TActivity, TArguments>>>();
+            IncludeInConfigureEndpoints = !Type.HasAttribute<ExcludeFromConfigureEndpointsAttribute>();
         }
 
         public Type Type => typeof(TActivity);
+
+        public bool IncludeInConfigureEndpoints { get; set; }
 
         void IExecuteActivityRegistration.AddConfigureAction<T, TArgs>(Action<IExecuteActivityConfigurator<T, TArgs>> configure)
         {
@@ -48,6 +52,8 @@ namespace MassTransit.DependencyInjection.Registration
                 TypeCache<TActivity>.ShortName);
 
             configurator.AddEndpointSpecification(specification);
+
+            IncludeInConfigureEndpoints = false;
         }
 
         IExecuteActivityDefinition IExecuteActivityRegistration.GetDefinition(IServiceProvider provider)

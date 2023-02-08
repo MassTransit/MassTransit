@@ -6,5 +6,7 @@ namespace MassTransit.Configuration
     public interface IRegistration
     {
         Type Type { get; }
+
+        bool IncludeInConfigureEndpoints { get; set; }
     }
 }

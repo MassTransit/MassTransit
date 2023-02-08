@@ -13,5 +13,6 @@ namespace MassTransit
     public interface IConsumerRegistrationConfigurator
     {
         void Endpoint(Action<IEndpointRegistrationConfigurator> configure);
+        void ExcludeFromConfigureEndpoints();
     }
 }

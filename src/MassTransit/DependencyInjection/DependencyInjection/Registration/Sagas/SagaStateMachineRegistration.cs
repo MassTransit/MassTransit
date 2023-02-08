@@ -3,6 +3,7 @@ namespace MassTransit.DependencyInjection.Registration
     using System;
     using System.Collections.Generic;
     using Configuration;
+    using Internals;
     using Microsoft.Extensions.DependencyInjection;
     using Transports;
 
@@ -24,9 +25,12 @@ namespace MassTransit.DependencyInjection.Registration
         public SagaStateMachineRegistration()
         {
             _configureActions = new List<Action<ISagaConfigurator<TInstance>>>();
+            IncludeInConfigureEndpoints = !Type.HasAttribute<ExcludeFromConfigureEndpointsAttribute>();
         }
 
         public Type Type => typeof(TInstance);
+
+        public bool IncludeInConfigureEndpoints { get; set; }
 
         public void AddConfigureAction<T>(Action<ISagaConfigurator<T>> configure)
             where T : class, ISaga
@@ -65,6 +69,8 @@ namespace MassTransit.DependencyInjection.Registration
                 TypeCache<TInstance>.ShortName, TypeCache.GetShortName(stateMachine.GetType()));
 
             configurator.AddEndpointSpecification(stateMachineConfigurator);
+
+            IncludeInConfigureEndpoints = false;
         }
 
         ISagaDefinition ISagaRegistration.GetDefinition(IServiceProvider provider)

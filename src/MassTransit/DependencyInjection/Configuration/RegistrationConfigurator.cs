@@ -44,7 +44,7 @@ namespace MassTransit.Configuration
 
             registration.AddConfigureAction(configure);
 
-            return new ConsumerRegistrationConfigurator<T>(this);
+            return new ConsumerRegistrationConfigurator<T>(this, registration);
         }
 
         public ISagaRegistrationConfigurator<T> AddSaga<T>(Action<ISagaConfigurator<T>> configure)
@@ -63,7 +63,7 @@ namespace MassTransit.Configuration
 
             registration.AddConfigureAction(configure);
 
-            return new SagaRegistrationConfigurator<T>(this);
+            return new SagaRegistrationConfigurator<T>(this, registration);
         }
 
         public ISagaRegistrationConfigurator<T> AddSagaStateMachine<TStateMachine, T>(Action<ISagaConfigurator<T>> configure = null)
@@ -81,7 +81,7 @@ namespace MassTransit.Configuration
 
             registration.AddConfigureAction(configure);
 
-            return new SagaRegistrationConfigurator<T>(this);
+            return new SagaRegistrationConfigurator<T>(this, registration);
         }
 
         public IExecuteActivityRegistrationConfigurator<TActivity, TArguments> AddExecuteActivity<TActivity, TArguments>(
@@ -101,7 +101,7 @@ namespace MassTransit.Configuration
 
             registration.AddConfigureAction(configure);
 
-            return new ExecuteActivityRegistrationConfigurator<TActivity, TArguments>(this);
+            return new ExecuteActivityRegistrationConfigurator<TActivity, TArguments>(this, registration);
         }
 
         public IActivityRegistrationConfigurator<TActivity, TArguments, TLog> AddActivity<TActivity, TArguments, TLog>(
@@ -126,15 +126,15 @@ namespace MassTransit.Configuration
             registration.AddConfigureAction(configureExecute);
             registration.AddConfigureAction(configureCompensate);
 
-            return new ActivityRegistrationConfigurator<TActivity, TArguments, TLog>(this);
+            return new ActivityRegistrationConfigurator<TActivity, TArguments, TLog>(this, registration);
         }
 
         public IFutureRegistrationConfigurator<TFuture> AddFuture<TFuture>(Type futureDefinitionType)
             where TFuture : class, SagaStateMachine<FutureState>
         {
-            _collection.RegisterFuture<TFuture>(Registrar, futureDefinitionType);
+            var registration = _collection.RegisterFuture<TFuture>(Registrar, futureDefinitionType);
 
-            return new FutureRegistrationConfigurator<TFuture>(this);
+            return new FutureRegistrationConfigurator<TFuture>(this, registration);
         }
 
         public void AddConfigureEndpointsCallback(ConfigureEndpointsCallback callback)
@@ -276,11 +276,11 @@ namespace MassTransit.Configuration
 
                     var register = (IConfigureSagaRepository)Activator.CreateInstance(typeof(ConfigureSagaRepository<>).MakeGenericType(registration.Type));
 
-                    register.Configure(this, _sagaRepositoryRegistrationProvider);
+                    register.Configure(this, _sagaRepositoryRegistrationProvider, registration);
                 }
 
                 if (Registrar.GetRegistrations<IFutureRegistration>().Any() && _collection.All(x => x.ServiceType != typeof(ISagaRepository<FutureState>)))
-                    new ConfigureSagaRepository<FutureState>().Configure(this, _sagaRepositoryRegistrationProvider);
+                    new ConfigureSagaRepository<FutureState>().Configure(this, _sagaRepositoryRegistrationProvider, null);
             }
         }
 
@@ -305,7 +305,7 @@ namespace MassTransit.Configuration
 
         interface IConfigureSagaRepository
         {
-            void Configure(IRegistrationConfigurator configurator, ISagaRepositoryRegistrationProvider provider);
+            void Configure(IRegistrationConfigurator configurator, ISagaRepositoryRegistrationProvider provider, ISagaRegistration registration);
         }
 
 
@@ -313,9 +313,9 @@ namespace MassTransit.Configuration
             IConfigureSagaRepository
             where TSaga : class, ISaga
         {
-            public void Configure(IRegistrationConfigurator configurator, ISagaRepositoryRegistrationProvider provider)
+            public void Configure(IRegistrationConfigurator configurator, ISagaRepositoryRegistrationProvider provider, ISagaRegistration registration)
             {
-                var registrationConfigurator = new SagaRegistrationConfigurator<TSaga>(configurator);
+                var registrationConfigurator = new SagaRegistrationConfigurator<TSaga>(configurator, registration);
 
                 provider.Configure(registrationConfigurator);
             }

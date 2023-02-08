@@ -2,6 +2,7 @@ namespace MassTransit.DependencyInjection.Registration
 {
     using System;
     using Configuration;
+    using Internals;
     using Microsoft.Extensions.DependencyInjection;
     using Transports;
 
@@ -12,7 +13,14 @@ namespace MassTransit.DependencyInjection.Registration
     {
         IFutureDefinition<TFuture> _definition;
 
+        public FutureRegistration()
+        {
+            IncludeInConfigureEndpoints = !Type.HasAttribute<ExcludeFromConfigureEndpointsAttribute>();
+        }
+
         public Type Type => typeof(TFuture);
+
+        public bool IncludeInConfigureEndpoints { get; set; }
 
         public void Configure(IReceiveEndpointConfigurator configurator, IServiceProvider provider)
         {
@@ -32,6 +40,8 @@ namespace MassTransit.DependencyInjection.Registration
                 configurator.InputAddress.GetEndpointName(), TypeCache<TFuture>.ShortName);
 
             configurator.AddEndpointSpecification(sagaConfigurator);
+
+            IncludeInConfigureEndpoints = false;
         }
 
         public IFutureDefinition GetDefinition(IServiceProvider provider)

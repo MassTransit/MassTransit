@@ -29,5 +29,11 @@ namespace MassTransit.KafkaIntegration.Configuration
         }
 
         public Type Type => typeof(KafkaProducerRegistration<TKey, TValue>);
+
+        public bool IncludeInConfigureEndpoints
+        {
+            get => false;
+            set { }
+        }
     }
 }

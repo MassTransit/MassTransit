@@ -9,10 +9,12 @@ namespace MassTransit.DependencyInjection.Registration
         where TSaga : class, ISaga
     {
         readonly IRegistrationConfigurator _configurator;
+        readonly ISagaRegistration _registration;
 
-        public SagaRegistrationConfigurator(IRegistrationConfigurator configurator)
+        public SagaRegistrationConfigurator(IRegistrationConfigurator configurator, ISagaRegistration registration = null)
         {
             _configurator = configurator;
+            _registration = registration;
         }
 
         ISagaRegistrationConfigurator ISagaRegistrationConfigurator.Endpoint(Action<IEndpointRegistrationConfigurator> configure)
@@ -20,8 +22,17 @@ namespace MassTransit.DependencyInjection.Registration
             return Endpoint(configure);
         }
 
+        void ISagaRegistrationConfigurator.ExcludeFromConfigureEndpoints()
+        {
+            if (_registration != null)
+                _registration.IncludeInConfigureEndpoints = false;
+        }
+
         public ISagaRegistrationConfigurator<TSaga> Endpoint(Action<IEndpointRegistrationConfigurator> configure)
         {
+            if (_registration is { IncludeInConfigureEndpoints: false })
+                throw new ConfigurationException("Saga is excluded from ConfigureEndpoints");
+
             var configurator = new EndpointRegistrationConfigurator<TSaga>();
 
             configure?.Invoke(configurator);

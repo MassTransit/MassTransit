@@ -41,19 +41,19 @@ namespace MassTransit.Configuration
             var registrationFilter = builder.Filter;
 
             List<IGrouping<string, IConsumerDefinition>> consumersByEndpoint = Selector.GetRegistrations<IConsumerRegistration>(this)
-                .Where(x => registrationFilter.Matches(x) && !WasConfigured(x.Type))
+                .Where(x => x.IncludeInConfigureEndpoints && registrationFilter.Matches(x))
                 .Select(x => x.GetDefinition(this))
                 .GroupBy(x => x.GetEndpointName(endpointNameFormatter))
                 .ToList();
 
             List<IGrouping<string, ISagaDefinition>> sagasByEndpoint = Selector.GetRegistrations<ISagaRegistration>(this)
-                .Where(x => registrationFilter.Matches(x) && !WasConfigured(x.Type))
+                .Where(x => x.IncludeInConfigureEndpoints && registrationFilter.Matches(x))
                 .Select(x => x.GetDefinition(this))
                 .GroupBy(x => x.GetEndpointName(endpointNameFormatter))
                 .ToList();
 
             List<IActivityDefinition> activities = Selector.GetRegistrations<IActivityRegistration>(this)
-                .Where(x => registrationFilter.Matches(x) && !WasConfigured(x.Type))
+                .Where(x => x.IncludeInConfigureEndpoints && registrationFilter.Matches(x))
                 .Select(x => x.GetDefinition(this))
                 .ToList();
 
@@ -66,19 +66,19 @@ namespace MassTransit.Configuration
                 .ToList();
 
             List<IGrouping<string, IExecuteActivityDefinition>> executeActivitiesByEndpoint = Selector.GetRegistrations<IExecuteActivityRegistration>(this)
-                .Where(x => registrationFilter.Matches(x) && !WasConfigured(x.Type))
+                .Where(x => x.IncludeInConfigureEndpoints && registrationFilter.Matches(x))
                 .Select(x => x.GetDefinition(this))
                 .GroupBy(x => x.GetExecuteEndpointName(endpointNameFormatter))
                 .ToList();
 
             List<IGrouping<string, IFutureDefinition>> futuresByEndpoint = Selector.GetRegistrations<IFutureRegistration>(this)
-                .Where(x => registrationFilter.Matches(x) && !WasConfigured(x.Type))
+                .Where(x => x.IncludeInConfigureEndpoints && registrationFilter.Matches(x))
                 .Select(x => x.GetDefinition(this))
                 .GroupBy(x => x.GetEndpointName(endpointNameFormatter))
                 .ToList();
 
             var endpointsWithName = Selector.GetRegistrations<IEndpointRegistration>(this)
-                .Where(x => registrationFilter.Matches(x) && !WasConfigured(x.Type))
+                .Where(x => x.IncludeInConfigureEndpoints && registrationFilter.Matches(x))
                 .Select(x => x.GetDefinition(this))
                 .Select(x => new
                 {
