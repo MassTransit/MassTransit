@@ -11,10 +11,12 @@ namespace MassTransit.DependencyInjection.Registration
         where TLog : class
     {
         readonly IRegistrationConfigurator _configurator;
+        readonly IActivityRegistration _registration;
 
-        public ActivityRegistrationConfigurator(IRegistrationConfigurator configurator)
+        public ActivityRegistrationConfigurator(IRegistrationConfigurator configurator, IActivityRegistration registration)
         {
             _configurator = configurator;
+            _registration = registration;
         }
 
         public void Endpoints(Action<IEndpointRegistrationConfigurator> configureExecute, Action<IEndpointRegistrationConfigurator> configureCompensate)
@@ -25,6 +27,9 @@ namespace MassTransit.DependencyInjection.Registration
 
         public IActivityRegistrationConfigurator ExecuteEndpoint(Action<IEndpointRegistrationConfigurator> configureExecute)
         {
+            if (!_registration.IncludeInConfigureEndpoints)
+                throw new ConfigurationException("Activity is excluded from ConfigureEndpoints");
+
             var configurator = new EndpointRegistrationConfigurator<IExecuteActivity<TArguments>> { ConfigureConsumeTopology = false };
 
             configureExecute?.Invoke(configurator);
@@ -36,6 +41,9 @@ namespace MassTransit.DependencyInjection.Registration
 
         public IActivityRegistrationConfigurator CompensateEndpoint(Action<IEndpointRegistrationConfigurator> configureCompensate)
         {
+            if (!_registration.IncludeInConfigureEndpoints)
+                throw new ConfigurationException("Activity is excluded from ConfigureEndpoints");
+
             var compensateConfigurator = new EndpointRegistrationConfigurator<ICompensateActivity<TLog>> { ConfigureConsumeTopology = false };
 
             configureCompensate?.Invoke(compensateConfigurator);
@@ -43,6 +51,11 @@ namespace MassTransit.DependencyInjection.Registration
             _configurator.AddEndpoint<CompensateActivityEndpointDefinition<TActivity, TLog>, ICompensateActivity<TLog>>(compensateConfigurator.Settings);
 
             return this;
+        }
+
+        public void ExcludeFromConfigureEndpoints()
+        {
+            _registration.IncludeInConfigureEndpoints = false;
         }
     }
 }

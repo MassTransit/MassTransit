@@ -3,6 +3,7 @@ namespace MassTransit.DependencyInjection.Registration
     using System;
     using System.Collections.Generic;
     using Configuration;
+    using Internals;
     using Microsoft.Extensions.DependencyInjection;
     using Transports;
 
@@ -23,9 +24,12 @@ namespace MassTransit.DependencyInjection.Registration
         public ConsumerRegistration()
         {
             _configureActions = new List<Action<IConsumerConfigurator<TConsumer>>>();
+            IncludeInConfigureEndpoints = !Type.HasAttribute<ExcludeFromConfigureEndpointsAttribute>();
         }
 
         public Type Type => typeof(TConsumer);
+
+        public bool IncludeInConfigureEndpoints { get; set; }
 
         void IConsumerRegistration.AddConfigureAction<T>(Action<IConsumerConfigurator<T>> configure)
         {
@@ -58,6 +62,8 @@ namespace MassTransit.DependencyInjection.Registration
             LogContext.Info?.Log("Configured endpoint {Endpoint}, Consumer: {ConsumerType}", endpointName, TypeCache<TConsumer>.ShortName);
 
             configurator.AddEndpointSpecification(consumerConfigurator);
+
+            IncludeInConfigureEndpoints = false;
         }
 
         IConsumerDefinition IConsumerRegistration.GetDefinition(IServiceProvider provider)
@@ -67,7 +73,7 @@ namespace MassTransit.DependencyInjection.Registration
 
         public IConsumerRegistrationConfigurator GetConsumerRegistrationConfigurator(IRegistrationConfigurator registrationConfigurator)
         {
-            return new ConsumerRegistrationConfigurator<TConsumer>(registrationConfigurator);
+            return new ConsumerRegistrationConfigurator<TConsumer>(registrationConfigurator, this);
         }
 
         IConsumerDefinition<TConsumer> GetConsumerDefinition(IServiceProvider provider)

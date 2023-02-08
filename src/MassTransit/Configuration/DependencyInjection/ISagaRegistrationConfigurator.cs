@@ -15,5 +15,6 @@ namespace MassTransit
     public interface ISagaRegistrationConfigurator
     {
         ISagaRegistrationConfigurator Endpoint(Action<IEndpointRegistrationConfigurator> configure);
+        void ExcludeFromConfigureEndpoints();
     }
 }

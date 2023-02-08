@@ -11,6 +11,12 @@ namespace MassTransit.DependencyInjection.Registration
     {
         public Type Type => typeof(T);
 
+        public bool IncludeInConfigureEndpoints
+        {
+            get => true;
+            set { }
+        }
+
         public IEndpointDefinition GetDefinition(IServiceProvider provider)
         {
             return provider.GetRequiredService<IEndpointDefinition<T>>();

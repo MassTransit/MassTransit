@@ -33,5 +33,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="configureCompensate"></param>
         IActivityRegistrationConfigurator CompensateEndpoint(Action<IEndpointRegistrationConfigurator> configureCompensate);
+
+        void ExcludeFromConfigureEndpoints();
     }
 }
