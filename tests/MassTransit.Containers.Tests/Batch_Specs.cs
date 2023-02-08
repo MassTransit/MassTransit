@@ -285,7 +285,6 @@ namespace MassTransit.Containers.Tests
             Assert.That(await harness.GetConsumerHarness<FailingBatchConsumer>().Consumed.Any<Batch<BatchItem>>(), Is.True);
 
             Assert.That(await harness.Published.SelectAsync<Fault<BatchItem>>().Take(2).Count(), Is.EqualTo(2));
-            Assert.That(await harness.Published.SelectAsync<Fault<Batch<BatchItem>>>().Take(1).Count(), Is.EqualTo(1));
         }
     }
 
@@ -316,7 +315,6 @@ namespace MassTransit.Containers.Tests
             Assert.That(await harness.GetConsumerHarness<FailingBatchConsumer>().Consumed.Any<Batch<BatchItem>>(), Is.True);
 
             Assert.That(await harness.Published.SelectAsync<Fault<BatchItem>>().Take(2).Count(), Is.EqualTo(2));
-            Assert.That(await harness.Published.SelectAsync<Fault<Batch<BatchItem>>>().Take(1).Count(), Is.EqualTo(1));
         }
 
         [Test]
@@ -346,7 +344,6 @@ namespace MassTransit.Containers.Tests
             Assert.That(await harness.GetConsumerHarness<FailingBatchConsumer>().Consumed.Any<Batch<BatchItem>>(), Is.True);
 
             Assert.That(await harness.Published.SelectAsync<Fault<BatchItem>>().Take(2).Count(), Is.EqualTo(2));
-            Assert.That(await harness.Published.SelectAsync<Fault<Batch<BatchItem>>>().Take(1).Count(), Is.EqualTo(1));
         }
 
         [Test]
@@ -374,7 +371,6 @@ namespace MassTransit.Containers.Tests
             Assert.That(await harness.GetConsumerHarness<FailingBatchConsumer>().Consumed.Any<Batch<BatchItem>>(), Is.True);
 
             Assert.That(await harness.Published.SelectAsync<Fault<BatchItem>>().Take(2).Count(), Is.EqualTo(2));
-            Assert.That(await harness.Published.SelectAsync<Fault<Batch<BatchItem>>>().Take(1).Count(), Is.EqualTo(1));
         }
 
         [Test]
@@ -404,7 +400,6 @@ namespace MassTransit.Containers.Tests
             Assert.That(await harness.GetConsumerHarness<FailingBatchConsumer>().Consumed.Any<Batch<BatchItem>>(), Is.True);
 
             Assert.That(await harness.Published.SelectAsync<Fault<BatchItem>>().Take(2).Count(), Is.EqualTo(2));
-            Assert.That(await harness.Published.SelectAsync<Fault<Batch<BatchItem>>>().Take(1).Count(), Is.EqualTo(1));
         }
 
         [Test]
@@ -441,7 +436,6 @@ namespace MassTransit.Containers.Tests
             Assert.That(await harness.GetConsumerHarness<FailingBatchConsumer>().Consumed.Any<Batch<BatchItem>>(), Is.True);
 
             Assert.That(await harness.Published.SelectAsync<Fault<BatchItem>>().Take(2).Count(), Is.EqualTo(2));
-            Assert.That(await harness.Published.SelectAsync<Fault<Batch<BatchItem>>>().Take(1).Count(), Is.EqualTo(1));
         }
     }
 
