@@ -1,4 +1,8 @@
-# Azure Service Bus
+---
+navigation.title: Azure Service Bus
+---
+
+# Azure Service Bus Session State
 
 [![alt NuGet](https://img.shields.io/nuget/v/MassTransit.Azure.ServiceBus.Core.svg "NuGet")](https://nuget.org/packages/MassTransit.Azure.ServiceBus.Core/)
 
