@@ -26,6 +26,7 @@ const mapping: { [key: string]: string } = {
     '/advanced': '/documentation/concepts',
     '/advanced/index.html': '/documentation/concepts',
 
+    '/advanced/courier': '/documentation/patterns/routing-slip',
     '/advanced/courier/activities.html': '/documentation/patterns/routing-slip#activities',
     '/advanced/courier/': '/documentation/patterns/routing-slip',
     '/advanced/courier/index.html': '/documentation/patterns/routing-slip',
@@ -129,12 +130,14 @@ const mapping: { [key: string]: string } = {
 
     '/usage/requests.html': '/documentation/concepts/messages',
 
+    '/usage/faas': '/documentation/configuration/transports/azure-functions',
     '/usage/faas/aws-lambda.html': '/documentation/configuration/transports/aws-lambda',
     '/usage/faas/index.html': '/documentation/configuration',
     '/usage/faas/azure-functions.html': '/documentation/configuration/transports/azure-functions',
     '/usage/exceptions.html': '/documentation/concepts/exceptions',
     '/usage/templates.html': '/quick-starts/templates',
 
+    '/usage/sagas': '/documentation/patterns/saga',
     '/usage/sagas/azure-table.html': '/documentation/configuration/persistence/azure-table',
     '/usage/sagas/persistence.html': '/documentation/patterns/saga/persistence',
     '/usage/sagas/quickstart.html': '/documentation/configuration/persistence/messages',
@@ -162,6 +165,7 @@ const mapping: { [key: string]: string } = {
 
     '/usage/containers/multibus.html': '/documentation/configuration/multibus',
 
+    '/usage/containers': '/documentation/configuration',
     '/usage/containers/index.html': '/documentation/configuration',
     '/usage/containers/msdi.html': '/documentation/configuration',
     '/usage/containers/definitions.html': '/documentation/concepts/messages',
@@ -191,7 +195,8 @@ const mapping: { [key: string]: string } = {
     '/architecture/packages.html': '/support/packages',
     '/architecture/green-cache.html': '/documentation/concepts/messages',
     '/architecture/nservicebus.html': '/documentation/configuration/integrations/nsb',
-    '/architecture/interoperability.html': '/documentation/concepts/messages',
+    '/architecture/interoperability.html': '/documentation/configuration/integrations/serialization',
+    '/advanced/interoperability.html': '/documentation/configuration/integrations/serialization',
     '/architecture/history.html': '/documentation/concepts/messages',
     '/architecture/encrypted-messages.html': '/documentation/concepts/messages',
     '/architecture/newid.html': '/documentation/patterns/newid',

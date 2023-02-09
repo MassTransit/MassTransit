@@ -25,6 +25,7 @@ export default defineAppConfig({
             credits: {
                 text: 'Copyright 2023 Chris Patterson',
                 href: 'https://masstransit.io',
+                icon: 'IconMasstransit'
             },
             icons: [],
         },
