@@ -39,11 +39,21 @@ namespace MassTransit.DependencyInjection
         public async Task<T> Execute<T>(Func<SagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken)
             where T : class
         {
-            await using var serviceScope = _serviceProvider.CreateAsyncScope();
+            var serviceScope = _serviceProvider.CreateScope();
 
-            var factory = serviceScope.ServiceProvider.GetRequiredService<ISagaRepositoryContextFactory<TSaga>>();
+            try
+            {
+                var factory = serviceScope.ServiceProvider.GetRequiredService<ISagaRepositoryContextFactory<TSaga>>();
 
-            return await factory.Execute(asyncMethod, cancellationToken).ConfigureAwait(false);
+                return await factory.Execute(asyncMethod, cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                if (serviceScope is IAsyncDisposable asyncDisposable)
+                    await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+                else
+                    serviceScope.Dispose();
+            }
         }
 
         async Task Send<T>(ConsumeContext<T> context, Func<ConsumeContext<T>, ISagaRepositoryContextFactory<TSaga>, Task> send)
@@ -70,7 +80,7 @@ namespace MassTransit.DependencyInjection
                 return;
             }
 
-            var serviceScope = serviceProvider.CreateAsyncScope();
+            var serviceScope = serviceProvider.CreateScope();
             try
             {
                 var scopeContext = new ConsumeContextScope<T>(context, serviceScope, serviceScope.ServiceProvider);
@@ -93,7 +103,11 @@ namespace MassTransit.DependencyInjection
             finally
             {
                 disposable?.Dispose();
-                await serviceScope.DisposeAsync().ConfigureAwait(false);
+
+                if (serviceScope is IAsyncDisposable asyncDisposable)
+                    await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+                else
+                    serviceScope.Dispose();
             }
         }
     }
