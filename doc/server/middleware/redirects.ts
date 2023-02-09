@@ -131,7 +131,7 @@ const mapping: { [key: string]: string } = {
     '/usage/faas/index.html': '/documentation/configuration',
     '/usage/faas/azure-functions.html': '/documentation/configuration/transports/azure-functions',
     '/usage/exceptions.html': '/documentation/concepts/exceptions',
-    '/usage/templates.html': '/documentation/quick-starts/templates',
+    '/usage/templates.html': '/quick-starts/templates',
 
     '/usage/sagas/azure-table.html': '/documentation/configuration/persistence/azure-table',
     '/usage/sagas/persistence.html': '/documentation/patterns/saga/persistence',
@@ -164,6 +164,7 @@ const mapping: { [key: string]: string } = {
     '/usage/containers/msdi.html': '/documentation/configuration',
     '/usage/containers/definitions.html': '/documentation/concepts/messages',
     '/usage/containers/simpleinjector.html': '/documentation/configuration',
+    '/MassTransit/usage/containers/autofac.html': '/documentation/configuration',
     '/usage/containers/autofac.html': '/documentation/configuration',
     '/usage/containers/castlewindsor.html': '/documentation/configuration',
     '/usage/containers/structuremap.html': '/documentation/configuration',
@@ -173,7 +174,7 @@ const mapping: { [key: string]: string } = {
     '/usage/lifecycle-observers.html': '/documentation/configuration/observability',
     '/usage/mediator.html': '/documentation/concepts/mediator',
     '/usage/consumers.html': '/documentation/concepts/consumers',
-    '/usage/logging.html': '/documentation/integrations/logging',
+    '/usage/logging.html': '/documentation/configuration/integrations/logging',
 
     '/troubleshooting/common-gotchas.html': '/support/common-mistakes',
     '/troubleshooting/show-config.html': '/support/show-configuration',
@@ -193,14 +194,23 @@ const mapping: { [key: string]: string } = {
     '/architecture/encrypted-messages.html': '/documentation/concepts/messages',
     '/architecture/newid.html': '/documentation/patterns/newid',
 
+    '/getting-started/': '/quick-starts',
     '/getting-started/upgrade-v6.html': '/support/upgrade',
     '/getting-started/index.html': '/documentation/concepts/messages',
     '/getting-started/live-coding.html': '/documentation/concepts/messages',
     '/discord.html': '/support/support-channels'
 }
 
+// flip the map, so we ignore good routes
+const reverseMapping = Object.assign({}, ...Object.entries(mapping).map(([k,v]) => ({[v]: k})))
+
+
 export default defineEventHandler((evt: H3Event) => {
     let path = evt.node.req.url || ''
+
+    // good endpoint, bail
+    if(reverseMapping[path]) return;
+
     let dest = mapping[path]
 
     // try looking for it with html
@@ -209,7 +219,7 @@ export default defineEventHandler((evt: H3Event) => {
     }
 
     // if still undefined, but path ends with .md
-    if (dest === undefined || path.endsWith('.md')) {
+    if (dest === undefined && path.endsWith('.md')) {
         // swap .md for .html
         path = path.replace('.md', '.html')
         dest = mapping[path]
