@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(IsWindows)' == 'true' ">
-    <TargetFrameworks>$(TargetFrameworks);net461</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworks);net462</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -19,7 +19,7 @@
     <Description>$(Description)</Description>
   </PropertyGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net462' ">
     <PackageReference Include="System.ValueTuple" />
   </ItemGroup>
 

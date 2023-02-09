@@ -163,8 +163,12 @@ namespace MassTransit.Analyzers
 
                 foreach (var arg in invocationOperation.Arguments.Where(x => IsValid(x, cancellationTokenSymbol)))
                 {
+                    if (arg.Parameter == null)
+                        continue;
+
                     parameterIndex = invocationOperation.TargetMethod.Parameters.IndexOf(arg.Parameter);
                     parameterName = arg.Parameter.Name;
+
                     return true;
                 }
 
