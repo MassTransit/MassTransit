@@ -23,7 +23,7 @@ const mapping: { [key: string]: string } = {
     '/advanced/topology/deploy.html': '/documentation/configuration/topology/deploy',
     '/advanced/topology/consume.html': '/documentation/configuration/topology',
 
-    '/advanced/': '/documentation/concepts',
+    '/advanced': '/documentation/concepts',
     '/advanced/index.html': '/documentation/concepts',
 
     '/advanced/courier/activities.html': '/documentation/patterns/routing-slip#activities',
@@ -47,7 +47,6 @@ const mapping: { [key: string]: string } = {
 
     '/advanced/signalr/quickstart.html': '/documentation/configuration/integrations/signalr',
     '/advanced/signalr': '/documentation/configuration/integrations/signalr',
-    '/advanced/signalr/': '/documentation/configuration/integrations/signalr',
     '/advanced/signalr/index.html': '/documentation/configuration/integrations/signalr',
     '/advanced/signalr/considerations.html': '/documentation/configuration/integrations/signalr',
     '/advanced/signalr/sample.html': '/documentation/configuration/integrations/signalr',
@@ -108,6 +107,8 @@ const mapping: { [key: string]: string } = {
     '/articles/outbox.html': '/documentation/concepts/messages',
     '/articles/net5.html': '/documentation/concepts/messages',
     '/articles/mediator.html': '/documentation/concepts/messages',
+
+    '/usage': '/documentation/concepts',
 
     '/usage/guidance.html': '/documentation/concepts/messages',
     '/usage/index.html': '/documentation/concepts/messages',
@@ -203,14 +204,18 @@ const mapping: { [key: string]: string } = {
 }
 
 // flip the map, so we ignore good routes
-const reverseMapping = Object.assign({}, ...Object.entries(mapping).map(([k,v]) => ({[v]: k})))
+const reverseMapping = Object.assign({}, ...Object.entries(mapping).map(([k, v]) => ({[v]: k})))
 
 
 export default defineEventHandler((evt: H3Event) => {
     let path = evt.node.req.url || ''
 
     // good endpoint, bail
-    if(reverseMapping[path]) return;
+    if (reverseMapping[path]) return;
+
+    if (path.startsWith('/MassTransit/')) {
+        path = path.replace('/MassTransit', '')
+    }
 
     let dest = mapping[path]
 
