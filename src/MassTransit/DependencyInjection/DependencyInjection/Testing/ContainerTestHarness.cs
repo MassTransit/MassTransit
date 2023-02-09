@@ -22,7 +22,7 @@ namespace MassTransit.DependencyInjection.Testing
         readonly IServiceProvider _provider;
         readonly Lazy<BusTestPublishObserver> _published;
         readonly Lazy<BusTestReceiveObserver> _received;
-        readonly Lazy<IServiceScope> _scope;
+        readonly Lazy<AsyncServiceScope> _scope;
         readonly Lazy<BusTestSendObserver> _sent;
         CancellationToken _cancellationToken;
         CancellationTokenSource _cancellationTokenSource;
@@ -47,7 +47,7 @@ namespace MassTransit.DependencyInjection.Testing
             _received = new Lazy<BusTestReceiveObserver>(() => new BusTestReceiveObserver(TestInactivityTimeout));
             _sent = new Lazy<BusTestSendObserver>(() => new BusTestSendObserver(TestTimeout, TestInactivityTimeout, InactivityToken));
 
-            _scope = new Lazy<IServiceScope>(() => _provider.CreateScope());
+            _scope = new Lazy<AsyncServiceScope>(() => _provider.CreateAsyncScope());
 
             provider.GetService<TestActivityListener>();
         }
@@ -68,9 +68,6 @@ namespace MassTransit.DependencyInjection.Testing
                 {
                     case IAsyncDisposable asyncDisposable:
                         await asyncDisposable.DisposeAsync();
-                        break;
-                    case IDisposable disposable:
-                        disposable.Dispose();
                         break;
                 }
             }

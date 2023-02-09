@@ -39,7 +39,7 @@ namespace MassTransit.DependencyInjection
         public async Task<T> Execute<T>(Func<SagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken)
             where T : class
         {
-            using var serviceScope = _serviceProvider.CreateScope();
+            await using var serviceScope = _serviceProvider.CreateAsyncScope();
 
             var factory = serviceScope.ServiceProvider.GetRequiredService<ISagaRepositoryContextFactory<TSaga>>();
 
@@ -70,7 +70,7 @@ namespace MassTransit.DependencyInjection
                 return;
             }
 
-            var serviceScope = serviceProvider.CreateScope();
+            var serviceScope = serviceProvider.CreateAsyncScope();
             try
             {
                 var scopeContext = new ConsumeContextScope<T>(context, serviceScope, serviceScope.ServiceProvider);
@@ -93,10 +93,7 @@ namespace MassTransit.DependencyInjection
             finally
             {
                 disposable?.Dispose();
-                if (serviceScope is IAsyncDisposable asyncDisposable)
-                    await asyncDisposable.DisposeAsync().ConfigureAwait(false);
-                else
-                    serviceScope.Dispose();
+                await serviceScope.DisposeAsync().ConfigureAwait(false);
             }
         }
     }

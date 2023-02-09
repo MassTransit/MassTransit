@@ -53,7 +53,7 @@ namespace MassTransit
 
             services.AddOptions<TestHarnessOptions>();
             services.AddBusObserver<ContainerTestHarnessBusObserver>();
-            services.TryAddSingleton<ITestHarness>(provider => provider.GetService<ContainerTestHarness>());
+            services.TryAddSingleton<ITestHarness>(provider => provider.GetRequiredService<ContainerTestHarness>());
             services.TryAddSingleton<ContainerTestHarness>();
 
             services.AddOptions<MassTransitHostOptions>().Configure(options =>
@@ -154,7 +154,8 @@ namespace MassTransit
 
             foreach (var registration in consumerRegistrations)
             {
-                if (!registration.ImplementationInstance.GetType().ClosesType(typeof(ConsumerRegistration<>), out Type[] types))
+                if (registration.ImplementationInstance == null
+                    || !registration.ImplementationInstance.GetType().ClosesType(typeof(ConsumerRegistration<>), out Type[] types))
                     continue;
 
                 var type = typeof(RegistrationForConsumer<>).MakeGenericType(types[0]);
@@ -172,6 +173,9 @@ namespace MassTransit
 
             foreach (var registration in sagaStateMachines)
             {
+                if (registration.ImplementationInstance == null)
+                    continue;
+
                 if (registration.ImplementationInstance.GetType().ClosesType(typeof(SagaStateMachineRegistration<,>), out Type[] types))
                 {
                     var type = typeof(RegistrationForSagaStateMachine<,>).MakeGenericType(types);
@@ -258,7 +262,7 @@ namespace MassTransit
         {
             configurator.TryAddSingleton<ConsumerContainerTestHarnessRegistration<T>>();
             configurator.TryAddSingleton<IConsumerFactoryDecoratorRegistration<T>>(provider =>
-                provider.GetService<ConsumerContainerTestHarnessRegistration<T>>());
+                provider.GetRequiredService<ConsumerContainerTestHarnessRegistration<T>>());
             configurator.TryAddSingleton<IConsumerTestHarness<T>, RegistrationConsumerTestHarness<T>>();
         }
 
@@ -270,7 +274,8 @@ namespace MassTransit
             where T : class, ISaga
         {
             services.TryAddSingleton<SagaContainerTestHarnessRegistration<T>>();
-            services.TryAddSingleton<ISagaRepositoryDecoratorRegistration<T>>(provider => provider.GetService<SagaContainerTestHarnessRegistration<T>>());
+            services.TryAddSingleton<ISagaRepositoryDecoratorRegistration<T>>(provider =>
+                provider.GetRequiredService<SagaContainerTestHarnessRegistration<T>>());
             services.TryAddSingleton<ISagaTestHarness<T>, RegistrationSagaTestHarness<T>>();
         }
 
@@ -283,15 +288,16 @@ namespace MassTransit
             where T : class, SagaStateMachineInstance
         {
             services.TryAddSingleton<SagaContainerTestHarnessRegistration<T>>();
-            services.TryAddSingleton<ISagaRepositoryDecoratorRegistration<T>>(provider => provider.GetService<SagaContainerTestHarnessRegistration<T>>());
+            services.TryAddSingleton<ISagaRepositoryDecoratorRegistration<T>>(provider =>
+                provider.GetRequiredService<SagaContainerTestHarnessRegistration<T>>());
 
             services.TryAddSingleton<RegistrationSagaStateMachineTestHarness<TStateMachine, T>>();
             services.TryAddSingleton<ISagaStateMachineTestHarness<TStateMachine, T>>(provider =>
-                provider.GetService<RegistrationSagaStateMachineTestHarness<TStateMachine, T>>());
+                provider.GetRequiredService<RegistrationSagaStateMachineTestHarness<TStateMachine, T>>());
         #pragma warning disable CS0618
             services.TryAddSingleton<IStateMachineSagaTestHarness<T, TStateMachine>>(provider =>
             #pragma warning restore CS0618
-                provider.GetService<RegistrationSagaStateMachineTestHarness<TStateMachine, T>>());
+                provider.GetRequiredService<RegistrationSagaStateMachineTestHarness<TStateMachine, T>>());
         }
 
         /// <summary>
@@ -302,7 +308,7 @@ namespace MassTransit
             where T : class, IConsumer
         {
             configurator.AddSingleton<ConsumerTestHarnessRegistration<T>>();
-            configurator.AddSingleton<IConsumerFactoryDecoratorRegistration<T>>(provider => provider.GetService<ConsumerTestHarnessRegistration<T>>());
+            configurator.AddSingleton<IConsumerFactoryDecoratorRegistration<T>>(provider => provider.GetRequiredService<ConsumerTestHarnessRegistration<T>>());
             configurator.AddSingleton<IConsumerTestHarness<T>, RegistrationConsumerTestHarness<T>>();
         }
 
@@ -315,7 +321,7 @@ namespace MassTransit
             where T : class, ISaga
         {
             configurator.AddSingleton<SagaTestHarnessRegistration<T>>();
-            configurator.AddSingleton<ISagaRepositoryDecoratorRegistration<T>>(provider => provider.GetService<SagaTestHarnessRegistration<T>>());
+            configurator.AddSingleton<ISagaRepositoryDecoratorRegistration<T>>(provider => provider.GetRequiredService<SagaTestHarnessRegistration<T>>());
             configurator.AddSingleton<ISagaTestHarness<T>, RegistrationSagaTestHarness<T>>();
         }
 
@@ -329,15 +335,16 @@ namespace MassTransit
             where TStateMachine : SagaStateMachine<TSaga>
         {
             configurator.AddSingleton<SagaTestHarnessRegistration<TSaga>>();
-            configurator.AddSingleton<ISagaRepositoryDecoratorRegistration<TSaga>>(provider => provider.GetService<SagaTestHarnessRegistration<TSaga>>());
+            configurator.AddSingleton<ISagaRepositoryDecoratorRegistration<TSaga>>(provider =>
+                provider.GetRequiredService<SagaTestHarnessRegistration<TSaga>>());
 
             configurator.AddSingleton<RegistrationSagaStateMachineTestHarness<TStateMachine, TSaga>>();
             configurator.AddSingleton<ISagaStateMachineTestHarness<TStateMachine, TSaga>>(provider =>
-                provider.GetService<RegistrationSagaStateMachineTestHarness<TStateMachine, TSaga>>());
+                provider.GetRequiredService<RegistrationSagaStateMachineTestHarness<TStateMachine, TSaga>>());
         #pragma warning disable CS0618
             configurator.AddSingleton<IStateMachineSagaTestHarness<TSaga, TStateMachine>>(provider =>
             #pragma warning restore CS0618
-                provider.GetService<RegistrationSagaStateMachineTestHarness<TStateMachine, TSaga>>());
+                provider.GetRequiredService<RegistrationSagaStateMachineTestHarness<TStateMachine, TSaga>>());
         }
 
 

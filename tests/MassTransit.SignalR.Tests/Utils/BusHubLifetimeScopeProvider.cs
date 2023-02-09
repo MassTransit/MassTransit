@@ -1,5 +1,6 @@
 namespace MassTransit.SignalR.Tests
 {
+    using System.Threading.Tasks;
     using Contracts;
     using Microsoft.AspNetCore.SignalR;
     using Scoping;
@@ -37,8 +38,9 @@ namespace MassTransit.SignalR.Tests
             public IPublishEndpoint PublishEndpoint { get; }
             public IRequestClient<GroupManagement<THub>> RequestClient { get; }
 
-            public void Dispose()
+            public ValueTask DisposeAsync()
             {
+                return default;
             }
         }
     }

@@ -56,7 +56,7 @@ namespace MassTransit.MongoDbIntegration
 
         async Task EnsureIndexCreated(CancellationToken cancellationToken)
         {
-            var scope = _provider.CreateScope();
+            var scope = _provider.CreateAsyncScope();
 
             try
             {
@@ -71,11 +71,7 @@ namespace MassTransit.MongoDbIntegration
             }
             finally
             {
-                // ReSharper disable once SuspiciousTypeConversion.Global
-                if (scope is IAsyncDisposable disposable)
-                    await disposable.DisposeAsync();
-                else
-                    scope.Dispose();
+                await scope.DisposeAsync().ConfigureAwait(false);
             }
         }
 

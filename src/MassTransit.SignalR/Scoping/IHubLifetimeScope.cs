@@ -6,7 +6,7 @@ namespace MassTransit.SignalR.Scoping
 
 
     public interface IHubLifetimeScope<THub> :
-        IDisposable
+        IAsyncDisposable
         where THub : Hub
     {
         IPublishEndpoint PublishEndpoint { get; }

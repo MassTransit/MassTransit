@@ -1,6 +1,7 @@
 namespace MassTransit.SignalR.Scoping
 {
     using System;
+    using System.Threading.Tasks;
     using Contracts;
     using Microsoft.AspNetCore.SignalR;
     using Microsoft.Extensions.DependencyInjection;
@@ -19,7 +20,7 @@ namespace MassTransit.SignalR.Scoping
         public IHubLifetimeScope<THub> CreateScope<THub>()
             where THub : Hub
         {
-            return new HubLifetimeScope<THub>(_serviceScopeFactory.CreateScope());
+            return new HubLifetimeScope<THub>(_serviceScopeFactory.CreateAsyncScope());
         }
 
 
@@ -27,9 +28,9 @@ namespace MassTransit.SignalR.Scoping
             IHubLifetimeScope<THub>
             where THub : Hub
         {
-            readonly IServiceScope _serviceScope;
+            readonly AsyncServiceScope _serviceScope;
 
-            public HubLifetimeScope(IServiceScope serviceScope)
+            public HubLifetimeScope(AsyncServiceScope serviceScope)
             {
                 _serviceScope = serviceScope;
                 PublishEndpoint = ServiceProvider.GetRequiredService<IPublishEndpoint>();
@@ -41,9 +42,9 @@ namespace MassTransit.SignalR.Scoping
             public IPublishEndpoint PublishEndpoint { get; }
             public IRequestClient<GroupManagement<THub>> RequestClient { get; }
 
-            public void Dispose()
+            public ValueTask DisposeAsync()
             {
-                _serviceScope.Dispose();
+                return _serviceScope.DisposeAsync();
             }
         }
     }
