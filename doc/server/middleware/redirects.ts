@@ -123,7 +123,7 @@ const mapping: { [key: string]: string } = {
 
     '/usage/message-data.html': '/documentation/patterns/claim-check',
 
-    '/usage/configuration.html': '/documentation/documentation/configuration',
+    '/usage/configuration.html': '/documentation/configuration',
 
     '/usage/requests.html': '/documentation/concepts/messages',
 
@@ -158,7 +158,7 @@ const mapping: { [key: string]: string } = {
     '/usage/riders/kafka.html': '/documentation/concepts/messages',
     '/usage/riders/eventhub.html': '/documentation/concepts/messages',
 
-    '/usage/containers/multibus.html': '/documentation/documentation/configuration/multibus',
+    '/usage/containers/multibus.html': '/documentation/configuration/multibus',
 
     '/usage/containers/index.html': '/documentation/configuration',
     '/usage/containers/msdi.html': '/documentation/configuration',
@@ -173,7 +173,7 @@ const mapping: { [key: string]: string } = {
     '/usage/lifecycle-observers.html': '/documentation/configuration/observability',
     '/usage/mediator.html': '/documentation/concepts/mediator',
     '/usage/consumers.html': '/documentation/concepts/consumers',
-    '/usage/logging.html': '/documentation/documentation/integrations/logging',
+    '/usage/logging.html': '/documentation/integrations/logging',
 
     '/troubleshooting/common-gotchas.html': '/support/common-mistakes',
     '/troubleshooting/show-config.html': '/support/show-configuration',
