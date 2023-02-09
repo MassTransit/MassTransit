@@ -11,6 +11,7 @@ const mapping: { [key: string]: string } = {
     '/advanced/middleware/receive.html': '/documentation/configuration/middleware/filters',
     '/advanced/middleware/rate-limiter.html': '/documentation/configuration/middleware/filters',
     '/advanced/middleware/latest.html': '/documentation/configuration/middleware/filters',
+    '/advanced/middleware': '/documentation/configuration/middleware',
 
     '/advanced/topology/message.html': '/documentation/configuration/topology/message',
     '/advanced/topology/conventions.html': '/documentation/configuration/topology/conventions',
@@ -194,7 +195,7 @@ const mapping: { [key: string]: string } = {
     '/architecture/encrypted-messages.html': '/documentation/concepts/messages',
     '/architecture/newid.html': '/documentation/patterns/newid',
 
-    '/getting-started/': '/quick-starts',
+    '/getting-started': '/quick-starts',
     '/getting-started/upgrade-v6.html': '/support/upgrade',
     '/getting-started/index.html': '/documentation/concepts/messages',
     '/getting-started/live-coding.html': '/documentation/concepts/messages',
