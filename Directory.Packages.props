@@ -45,13 +45,13 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.1" Condition="'$(TargetFramework)' != 'netstandard2.0'" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.8" />
     <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="5.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="3.1.18" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="6.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="3.1.18" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="3.1.18" />
-    <PackageVersion Include="Microsoft.Extensions.Http" Version="3.1.18" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.18" />
-    <PackageVersion Include="Microsoft.Extensions.Options" Version="3.1.18" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="6.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.3" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="6.0.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.4.1" />
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="1.1.1" />
     <PackageVersion Include="MongoDB.Driver" Version="2.18.0" />

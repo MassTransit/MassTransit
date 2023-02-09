@@ -88,7 +88,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
         async Task<int> DeliverOutbox(CancellationToken cancellationToken)
         {
-            var scope = _provider.CreateScope();
+            var scope = _provider.CreateAsyncScope();
 
             var dbContext = scope.ServiceProvider.GetRequiredService<TDbContext>();
 
@@ -178,11 +178,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                 if (dbContext != null)
                     await dbContext.DisposeAsync().ConfigureAwait(false);
 
-                // ReSharper disable once SuspiciousTypeConversion.Global
-                if (scope is IAsyncDisposable disposable)
-                    await disposable.DisposeAsync().ConfigureAwait(false);
-                else
-                    scope.Dispose();
+                await scope.DisposeAsync().ConfigureAwait(false);
             }
         }
 

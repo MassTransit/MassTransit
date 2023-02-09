@@ -65,7 +65,7 @@ namespace MassTransit.MongoDbIntegration
 
         async Task<IEnumerable<Guid>> GetOutboxes(int resultLimit, CancellationToken cancellationToken)
         {
-            var scope = _provider.CreateScope();
+            var scope = _provider.CreateAsyncScope();
 
             try
             {
@@ -86,17 +86,13 @@ namespace MassTransit.MongoDbIntegration
             }
             finally
             {
-                // ReSharper disable once SuspiciousTypeConversion.Global
-                if (scope is IAsyncDisposable asyncDisposable)
-                    await asyncDisposable.DisposeAsync().ConfigureAwait(false);
-                else
-                    scope.Dispose();
+                await scope.DisposeAsync().ConfigureAwait(false);
             }
         }
 
         async Task DeliverOutbox(Guid outboxId, CancellationToken cancellationToken)
         {
-            var scope = _provider.CreateScope();
+            var scope = _provider.CreateAsyncScope();
 
             var dbContext = scope.ServiceProvider.GetRequiredService<MongoDbContext>();
 
@@ -180,11 +176,7 @@ namespace MassTransit.MongoDbIntegration
             }
             finally
             {
-                // ReSharper disable once SuspiciousTypeConversion.Global
-                if (scope is IAsyncDisposable asyncDisposable)
-                    await asyncDisposable.DisposeAsync().ConfigureAwait(false);
-                else
-                    scope.Dispose();
+                await scope.DisposeAsync().ConfigureAwait(false);
             }
         }
 

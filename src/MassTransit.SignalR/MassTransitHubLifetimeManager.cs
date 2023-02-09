@@ -67,16 +67,16 @@
 
         public override async Task SendAllAsync(string methodName, object[] args, CancellationToken cancellationToken = default)
         {
-            using IHubLifetimeScope<THub> scope = _scopeProvider.CreateScope<THub>();
+            await using IHubLifetimeScope<THub> scope = _scopeProvider.CreateScope<THub>();
             LogContext.Info?.Log("Publishing All<THub> message to MassTransit.");
             await scope.PublishEndpoint.Publish<All<THub>>(
-                new {Messages = Protocols.ToProtocolDictionary(methodName, args)}, cancellationToken);
+                new { Messages = Protocols.ToProtocolDictionary(methodName, args) }, cancellationToken);
         }
 
         public override async Task SendAllExceptAsync(string methodName, object[] args, IReadOnlyList<string> excludedConnectionIds,
             CancellationToken cancellationToken = default)
         {
-            using IHubLifetimeScope<THub> scope = _scopeProvider.CreateScope<THub>();
+            await using IHubLifetimeScope<THub> scope = _scopeProvider.CreateScope<THub>();
             LogContext.Info?.Log("Publishing All<THub> message to MassTransit, with exceptions.");
             await scope.PublishEndpoint.Publish<All<THub>>(new
             {
@@ -100,7 +100,7 @@
                 return;
             }
 
-            using IHubLifetimeScope<THub> scope = _scopeProvider.CreateScope<THub>();
+            await using IHubLifetimeScope<THub> scope = _scopeProvider.CreateScope<THub>();
             LogContext.Info?.Log("Publishing Connection<THub> message to MassTransit.");
             await scope.PublishEndpoint.Publish<Connection<THub>>(new
                 {
@@ -118,7 +118,7 @@
 
             if (connectionIds.Any())
             {
-                using IHubLifetimeScope<THub> scope = _scopeProvider.CreateScope<THub>();
+                await using IHubLifetimeScope<THub> scope = _scopeProvider.CreateScope<THub>();
                 IReadOnlyDictionary<string, byte[]> protocolDictionary = Protocols.ToProtocolDictionary(methodName, args);
                 IEnumerable<Task> publishTasks = connectionIds.Select(connectionId =>
                     scope.PublishEndpoint.Publish<Connection<THub>>(new
@@ -137,7 +137,7 @@
             if (groupName == null)
                 throw new ArgumentNullException(nameof(groupName));
 
-            using IHubLifetimeScope<THub> scope = _scopeProvider.CreateScope<THub>();
+            await using IHubLifetimeScope<THub> scope = _scopeProvider.CreateScope<THub>();
             LogContext.Info?.Log("Publishing Group<THub> message to MassTransit.");
             await scope.PublishEndpoint.Publish<Group<THub>>(new
                 {
@@ -153,7 +153,7 @@
             if (groupName == null)
                 throw new ArgumentNullException(nameof(groupName));
 
-            using IHubLifetimeScope<THub> scope = _scopeProvider.CreateScope<THub>();
+            await using IHubLifetimeScope<THub> scope = _scopeProvider.CreateScope<THub>();
             LogContext.Info?.Log("Publishing Group<THub> message to MassTransit, with exceptions.");
             await scope.PublishEndpoint.Publish<Group<THub>>(new
             {
@@ -171,7 +171,7 @@
 
             if (groupNames.Any())
             {
-                using IHubLifetimeScope<THub> scope = _scopeProvider.CreateScope<THub>();
+                await using IHubLifetimeScope<THub> scope = _scopeProvider.CreateScope<THub>();
                 IReadOnlyDictionary<string, byte[]> protocolDictionary = Protocols.ToProtocolDictionary(methodName, args);
                 IEnumerable<Task> publishTasks = groupNames.Where(x => !string.IsNullOrEmpty(x)).Select(groupName =>
                     scope.PublishEndpoint.Publish<Group<THub>>(new
@@ -187,7 +187,7 @@
 
         public override async Task SendUserAsync(string userId, string methodName, object[] args, CancellationToken cancellationToken = default)
         {
-            using IHubLifetimeScope<THub> scope = _scopeProvider.CreateScope<THub>();
+            await using IHubLifetimeScope<THub> scope = _scopeProvider.CreateScope<THub>();
             LogContext.Info?.Log("Publishing User<THub> message to MassTransit.");
             await scope.PublishEndpoint.Publish<User<THub>>(new
             {
@@ -204,7 +204,7 @@
 
             if (userIds.Any())
             {
-                using IHubLifetimeScope<THub> scope = _scopeProvider.CreateScope<THub>();
+                await using IHubLifetimeScope<THub> scope = _scopeProvider.CreateScope<THub>();
                 IReadOnlyDictionary<string, byte[]> protocolDictionary = Protocols.ToProtocolDictionary(methodName, args);
                 IEnumerable<Task> publishTasks = userIds.Select(userId => scope.PublishEndpoint.Publish<User<THub>>(new
                 {
@@ -235,7 +235,7 @@
             }
 
             // Publish to mass transit group management instead, but it waits for an ack...
-            using IHubLifetimeScope<THub> scope = _scopeProvider.CreateScope<THub>();
+            await using IHubLifetimeScope<THub> scope = _scopeProvider.CreateScope<THub>();
             try
             {
                 LogContext.Info?.Log("Publishing add GroupManagement<THub> message to MassTransit.");
@@ -276,7 +276,7 @@
             }
 
             // Publish to mass transit group management instead, but it waits for an ack...
-            using IHubLifetimeScope<THub> scope = _scopeProvider.CreateScope<THub>();
+            await using IHubLifetimeScope<THub> scope = _scopeProvider.CreateScope<THub>();
             try
             {
                 LogContext.Info?.Log("Publishing remove GroupManagement<THub> message to MassTransit.");
