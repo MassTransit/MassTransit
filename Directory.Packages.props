@@ -38,11 +38,11 @@
     <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="5.8.1" />
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.4.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.8.0" />
     <PackageVersion Include="Microsoft.Data.SqlClient" Version="2.1.5" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.1" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.0" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.18" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.1" Condition="'$(TargetFramework)' != 'netstandard2.0'" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.0" Condition="'$(TargetFramework)' != 'netstandard2.0'" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.13" />
     <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="5.0.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />

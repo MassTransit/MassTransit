@@ -2,11 +2,11 @@
   <Import Project="../../signing.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0</TargetFrameworks>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(IsWindows)' == 'true' ">
-    <TargetFrameworks>$(TargetFrameworks);net461</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworks);net462</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -14,20 +14,20 @@
     <Description>MassTransit SignalR Backplane support; $(Description)</Description>
   </PropertyGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net461'">
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" />
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net462'">
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Core"/>
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' != 'net461'">
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
+  <ItemGroup Condition=" '$(TargetFramework)' != 'net462'">
+    <FrameworkReference Include="Microsoft.AspNetCore.App"/>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\MassTransit\MassTransit.csproj" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\MassTransit\MassTransit.csproj"/>
   </ItemGroup>
 
 </Project>
