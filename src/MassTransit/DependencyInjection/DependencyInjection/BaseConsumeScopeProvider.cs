@@ -30,7 +30,7 @@ namespace MassTransit.DependencyInjection
 
             var serviceProvider = context.GetPayload(_serviceProvider);
 
-            var serviceScope = serviceProvider.CreateAsyncScope();
+            var serviceScope = serviceProvider.CreateScope();
             try
             {
                 var scopeContext = pipeContextFactory(context, serviceScope, serviceScope.ServiceProvider);
@@ -47,7 +47,11 @@ namespace MassTransit.DependencyInjection
             }
             catch (Exception ex)
             {
-                return ex.DisposeAsync<TScopeContext>(() => serviceScope.DisposeAsync());
+                if (serviceScope is IAsyncDisposable asyncDisposable)
+                    return ex.DisposeAsync<TScopeContext>(() => asyncDisposable.DisposeAsync());
+
+                serviceScope.Dispose();
+                throw;
             }
         }
     }
