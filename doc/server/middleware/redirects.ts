@@ -200,11 +200,19 @@ const mapping: { [key: string]: string } = {
 }
 
 export default defineEventHandler((evt: H3Event) => {
-    const path = evt.node.req.url || ''
+    let path = evt.node.req.url || ''
     let dest = mapping[path]
 
-    if(dest === undefined || dest === null) {
+    // try looking for it with html
+    if (dest === undefined) {
         dest = mapping[path + '.html']
+    }
+
+    // if still undefined, but path ends with .md
+    if (dest === undefined || path.endsWith('.md')) {
+        // swap .md for .html
+        path = path.replace('.md', '.html')
+        dest = mapping[path]
     }
 
     if (dest) {
