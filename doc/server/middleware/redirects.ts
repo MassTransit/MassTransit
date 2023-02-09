@@ -201,7 +201,11 @@ const mapping: { [key: string]: string } = {
 
 export default defineEventHandler((evt: H3Event) => {
     const path = evt.node.req.url || ''
-    const dest = mapping[path]
+    let dest = mapping[path]
+
+    if(dest === undefined || dest === null) {
+        dest = mapping[path + '.html']
+    }
 
     if (dest) {
         sendRedirect(evt, dest, 302)
