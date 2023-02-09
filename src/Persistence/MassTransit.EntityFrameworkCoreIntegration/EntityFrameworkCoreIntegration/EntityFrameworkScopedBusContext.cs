@@ -14,7 +14,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
     public class EntityFrameworkScopedBusContext<TBus, TDbContext> :
         ScopedBusContext,
-        OutboxSendContext
+        OutboxSendContext,
+        IDisposable
         where TBus : class, IBus
         where TDbContext : DbContext
     {
@@ -22,6 +23,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         readonly IClientFactory _clientFactory;
         readonly TDbContext _dbContext;
         readonly object _lock = new object();
+        readonly IBusOutboxNotification _notification;
         readonly Guid _outboxId;
         readonly IServiceProvider _provider;
         OutboxState? _outboxState;
@@ -30,14 +32,25 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         IScopedClientFactory? _scopedClientFactory;
         ISendEndpointProvider? _sendEndpointProvider;
 
-        public EntityFrameworkScopedBusContext(TBus bus, TDbContext dbContext, IClientFactory clientFactory, IServiceProvider provider)
+        public EntityFrameworkScopedBusContext(TBus bus, TDbContext dbContext, IBusOutboxNotification notification, IClientFactory clientFactory,
+            IServiceProvider provider)
         {
             _bus = bus;
             _dbContext = dbContext;
+            _notification = notification;
             _clientFactory = clientFactory;
             _provider = provider;
 
             _outboxId = NewId.NextGuid();
+        }
+
+        public void Dispose()
+        {
+            lock (_lock)
+            {
+                if (_outboxState != null)
+                    _notification.Delivered();
+            }
         }
 
         public Task AddSend<T>(SendContext<T> context)

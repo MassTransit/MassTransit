@@ -3,15 +3,15 @@
 version: '2.3'
 services:
   mssql:
-    image: "mcr.microsoft.com/mssql/server:2017-latest"
+    image: "mcr.microsoft.com/azure-sql-edge"
     environment:
       - "ACCEPT_EULA=Y"
       - "SA_PASSWORD=Password12!"
     ports:
-      - 1433:1433
+      - "1433:1433"
   postgres:
-    image: "postgres:10"
+    image: "postgres"
     environment:
       - "POSTGRES_PASSWORD=Password12!"
     ports:
-      - 5432:5432
+      - "5432:5432"

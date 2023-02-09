@@ -15,12 +15,14 @@ namespace MassTransit.MongoDbIntegration
 
     public class MongoDbScopedBusContext<TBus> :
         ScopedBusContext,
-        OutboxSendContext
+        OutboxSendContext,
+        IDisposable
         where TBus : class, IBus
     {
         readonly TBus _bus;
         readonly IClientFactory _clientFactory;
         readonly MongoDbContext _dbContext;
+        readonly IBusOutboxNotification _notification;
         readonly Guid _outboxId;
         readonly MongoDbCollectionContext<OutboxMessage> _outboxMessages;
         readonly MongoDbCollectionContext<OutboxState> _outboxStates;
@@ -31,10 +33,12 @@ namespace MassTransit.MongoDbIntegration
         ISendEndpointProvider? _sendEndpointProvider;
         Task? _startTransaction;
 
-        public MongoDbScopedBusContext(TBus bus, MongoDbContext dbContext, IClientFactory clientFactory, IServiceProvider provider)
+        public MongoDbScopedBusContext(TBus bus, MongoDbContext dbContext, IBusOutboxNotification notification, IClientFactory clientFactory,
+            IServiceProvider provider)
         {
             _bus = bus;
             _dbContext = dbContext;
+            _notification = notification;
             _clientFactory = clientFactory;
             _provider = provider;
 
@@ -42,6 +46,15 @@ namespace MassTransit.MongoDbIntegration
             _outboxStates = _dbContext.GetCollection<OutboxState>();
 
             _outboxId = NewId.NextGuid();
+        }
+
+        public void Dispose()
+        {
+            lock (_dbContext)
+            {
+                if (_startTransaction != null)
+                    _notification.Delivered();
+            }
         }
 
         public async Task AddSend<T>(SendContext<T> context)

@@ -4,6 +4,7 @@ namespace MassTransit.Configuration
     using System;
     using DependencyInjection;
     using Microsoft.Extensions.DependencyInjection;
+    using Middleware.Outbox;
     using MongoDbIntegration;
 
 
@@ -37,7 +38,8 @@ namespace MassTransit.Configuration
         public virtual void Configure(Action<IMongoDbBusOutboxConfigurator>? configure)
         {
             _configurator.AddHostedService<BusOutboxDeliveryService>();
-                        _configurator.ReplaceScoped<IScopedBusContextProvider<IBus>, MongoDbScopedBusContextProvider<IBus>>();
+            _configurator.ReplaceScoped<IScopedBusContextProvider<IBus>, MongoDbScopedBusContextProvider<IBus>>();
+            _configurator.AddSingleton<IBusOutboxNotification, BusOutboxNotification>();
 
             _configurator.AddOptions<OutboxDeliveryServiceOptions>()
                 .Configure(options =>

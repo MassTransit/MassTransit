@@ -75,6 +75,66 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
         }
 
         [Test]
+        public async Task Should_start_immediately_when_context_disposed()
+        {
+            using var tracerProvider = TraceConfig.CreateTraceProvider("ef-core-tests");
+
+            await using var provider = new ServiceCollection()
+                .AddBusOutboxServices()
+                .AddTelemetryListener()
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.SetTestTimeouts(testInactivityTimeout: TimeSpan.FromSeconds(5));
+                    x.AddEntityFrameworkOutbox<ReliableDbContext>(o =>
+                    {
+                        o.QueryDelay = TimeSpan.FromMinutes(10);
+
+                        o.UseBusOutbox(bo =>
+                        {
+                            bo.MessageDeliveryLimit = 10;
+                        });
+                    });
+
+                    x.AddConsumer<PingConsumer>();
+                })
+                .BuildServiceProvider(true);
+
+            var harness = provider.GetTestHarness();
+            await harness.Start();
+
+            IConsumerTestHarness<PingConsumer> consumerHarness = harness.GetConsumerHarness<PingConsumer>();
+
+            try
+            {
+                {
+                    await using var scope = harness.Scope.ServiceProvider.CreateAsyncScope();
+                    await using var dbContext = scope.ServiceProvider.GetRequiredService<ReliableDbContext>();
+
+                    var publishEndpoint = scope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
+
+                    var activity = TraceConfig.Source.StartActivity(ActivityKind.Client);
+
+                    await publishEndpoint.Publish(new PingMessage());
+
+                    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+
+                    Assert.That(await consumerHarness.Consumed.Any<PingMessage>(cts.Token), Is.False);
+
+                    await dbContext.SaveChangesAsync(harness.CancellationToken);
+
+                    activity.Stop();
+                }
+
+
+                Assert.That(await consumerHarness.Consumed.Any<PingMessage>(), Is.True);
+            }
+            finally
+            {
+                await harness.Stop();
+            }
+        }
+
+        [Test]
         [Explicit]
         public async Task Fill_up_the_outbox()
         {

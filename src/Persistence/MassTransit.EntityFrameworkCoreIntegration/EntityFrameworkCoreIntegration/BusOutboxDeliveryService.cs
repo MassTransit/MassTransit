@@ -14,6 +14,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Middleware;
+    using Middleware.Outbox;
     using Serialization;
     using Util;
 
@@ -26,15 +27,17 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         readonly IsolationLevel _isolationLevel;
         readonly ILockStatementProvider _lockStatementProvider;
         readonly ILogger _logger;
+        readonly IBusOutboxNotification _notification;
         readonly OutboxDeliveryServiceOptions _options;
         readonly IServiceProvider _provider;
         string _getOutboxIdStatement;
 
         public BusOutboxDeliveryService(IBusControl busControl, IOptions<OutboxDeliveryServiceOptions> options,
-            IOptions<EntityFrameworkOutboxOptions> outboxOptions,
+            IOptions<EntityFrameworkOutboxOptions> outboxOptions, IBusOutboxNotification notification,
             ILogger<BusOutboxDeliveryService<TDbContext>> logger, IServiceProvider provider)
         {
             _busControl = busControl;
+            _notification = notification;
             _provider = provider;
             _logger = logger;
 
@@ -56,7 +59,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             {
                 try
                 {
-                    await Task.Delay(_options.QueryDelay, stoppingToken).ConfigureAwait(false);
+                    await _notification.WaitForDelivery(stoppingToken).ConfigureAwait(false);
 
                     await _busControl.WaitForHealthStatus(BusHealthStatus.Healthy, stoppingToken).ConfigureAwait(false);
 

@@ -6,6 +6,7 @@ namespace MassTransit.Configuration
     using EntityFrameworkCoreIntegration;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
+    using Middleware.Outbox;
 
 
     public class EntityFrameworkBusOutboxConfigurator<TDbContext> :
@@ -40,6 +41,7 @@ namespace MassTransit.Configuration
         {
             _configurator.AddHostedService<BusOutboxDeliveryService<TDbContext>>();
             _configurator.ReplaceScoped<IScopedBusContextProvider<IBus>, EntityFrameworkScopedBusContextProvider<IBus, TDbContext>>();
+            _configurator.AddSingleton<IBusOutboxNotification, BusOutboxNotification>();
 
             _configurator.AddOptions<OutboxDeliveryServiceOptions>()
                 .Configure(options =>
