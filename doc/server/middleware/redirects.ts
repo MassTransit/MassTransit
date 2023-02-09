@@ -178,6 +178,7 @@ const mapping: { [key: string]: string } = {
     '/usage/producers.html': '/documentation/concepts/producers',
     '/usage/testing.html': '/documentation/concepts/testing',
     '/usage/lifecycle-observers.html': '/documentation/configuration/observability',
+    '/usage/observers.html': '/documentation/configuration/observability',
     '/usage/mediator.html': '/documentation/concepts/mediator',
     '/usage/consumers.html': '/documentation/concepts/consumers',
     '/usage/logging.html': '/documentation/configuration/integrations/logging',

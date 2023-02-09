@@ -70,6 +70,6 @@ services.AddMassTransit(x =>
 
 Redis supports both Optimistic (default) and Pessimistic concurrency.
 
-In optimistic mode, the saga instance is not locked before reading, which can ultimately lead to a write conflict if the instance was updated by another message. The _Version_ property is used to compare that the update would not overwrite a previous update. It is recommended that a retry policy is configured (using `UseMessageRetry`, see the [exceptions](/usage/exceptions.md#retry) documentation).
+In optimistic mode, the saga instance is not locked before reading, which can ultimately lead to a write conflict if the instance was updated by another message. The _Version_ property is used to compare that the update would not overwrite a previous update. It is recommended that a retry policy is configured (using `UseMessageRetry`, see the [exceptions](/documentation/concepts/exceptions#retry) documentation).
 
 Pessimistic concurrency uses the Redis lock mechanism. During the message processing, the repository will lock the saga instance before reading it, so that any concurrent attempts to lock the same instance will wait until the current message has completed or the lock timeout expires.

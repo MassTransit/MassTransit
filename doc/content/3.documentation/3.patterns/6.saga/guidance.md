@@ -48,7 +48,7 @@ services.AddMassTransit(x =>
 });
 ```
 
-Alternatively if using a [saga definition](/usage/containers/definitions):
+Alternatively if using a [saga definition](/documentation/patterns/saga#definition):
 
 ```csharp
 public sealed class OrderStateSagaDefinition : SagaDefinition<OrderState>

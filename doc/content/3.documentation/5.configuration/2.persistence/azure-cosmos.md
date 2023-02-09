@@ -4,7 +4,7 @@
 
 When using Azure Cosmos DB, no additional saga properties are required. An Azure Cosmos DB document has an `_etag` used for optimistic concurrency, however, the saga instance class does not require it. MassTransit manages the *_etag* property under the hood using a *payload* on the `SagaConsumeContext`.
 
-```csharp {10}
+```csharp 
 public class OrderState :
     SagaStateMachineInstance
 {
@@ -25,7 +25,7 @@ string eTag = context.TryGetPayload<SagaETag>(out var payload) ? payload.ETag : 
 
 To configure Cosmos DB as the saga repository for a saga, use the code shown below using the _AddMassTransit_ container extension.
 
-```csharp {4-10}
+```csharp 
 container.AddMassTransit(cfg =>
 {
     cfg.AddSagaStateMachine<OrderStateMachine, OrderState>()
@@ -41,7 +41,7 @@ container.AddMassTransit(cfg =>
 
 To use the CosmosDb emulator, specify it in the configuration.
 
-```csharp {4-9}
+```csharp 
 container.AddMassTransit(cfg =>
 {
     cfg.AddSagaStateMachine<OrderStateMachine, OrderState>()
@@ -54,7 +54,7 @@ container.AddMassTransit(cfg =>
 });
 ```
 
-The container extension will register the saga repository in the container. For more details on container configuration, review the [container configuration](/usage/containers/) section of the documentation.
+The container extension will register the saga repository in the container. For more details on container configuration, review the [configuration](/documentation/patterns/saga/) section of the documentation.
 
 ## Other Considerations
 
