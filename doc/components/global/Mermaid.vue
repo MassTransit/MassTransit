@@ -1,19 +1,22 @@
 <template>
-  <div class="mermaid">
-    <slot></slot>
-  </div>
+    <slot>
+    </slot>
 </template>
 
 <script lang="ts" setup>
 
 import mermaid from 'mermaid'
 
+mermaid.setParseErrorHandler(err=>{
+    console.log('err', err)
+})
 mermaid.initialize({
-    startOnLoad: true,
+    startOnLoad: false,
+    securityLevel: 'loose',
     theme: 'dark',
 });
 
-onMounted(()=>{
-    mermaid.init();
+onMounted(()=> {
+    mermaid.init({}, '.mermaid')
 })
 </script>
