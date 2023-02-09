@@ -1,4 +1,8 @@
-# Kafka 
+---
+navigation.title: Kafka
+---
+
+# Kafka Rider
 
 Apache Kafka is a distributed streaming platform for building real-time data pipelines and streaming applications. It is written in Scala and Java and is built on the Apache Kafka project, which provides a high-performance, fault-tolerant, and scalable infrastructure for handling streams of records in real-time.
 
