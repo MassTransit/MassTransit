@@ -1,6 +1,7 @@
 namespace MassTransit.Configuration
 {
     using System;
+    using Context;
     using DependencyInjection;
     using Mediator;
     using Microsoft.Extensions.DependencyInjection;
@@ -40,9 +41,13 @@ namespace MassTransit.Configuration
         static void AddMassTransitComponents(IServiceCollection collection)
         {
             collection.AddScoped<IScopedMediator, ScopedMediator>();
+
             collection.TryAddScoped<ScopedConsumeContextProvider>();
-            collection.TryAddScoped(provider => provider.GetRequiredService<ScopedConsumeContextProvider>().GetContext());
+            collection.TryAddScoped(provider => provider.GetRequiredService<ScopedConsumeContextProvider>().GetContext() ?? MissingConsumeContext.Instance);
+
             collection.TryAddSingleton<IConsumeScopeProvider>(provider => new ConsumeScopeProvider(provider));
+
+            collection.TryAddScoped(typeof(IRequestClient<>), typeof(GenericRequestClient<>));
         }
 
         IMediator MediatorFactory(IServiceProvider provider)

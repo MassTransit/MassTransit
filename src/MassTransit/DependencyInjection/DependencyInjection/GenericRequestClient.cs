@@ -122,7 +122,7 @@ namespace MassTransit.DependencyInjection
             return _client.GetResponse<T1, T2, T3>(values, callback, cancellationToken, timeout);
         }
 
-        IRequestClient<TRequest> GetRequestClient(IServiceProvider provider)
+        static IRequestClient<TRequest> GetRequestClient(IServiceProvider provider)
         {
             var consumeContext = provider.GetRequiredService<ScopedConsumeContextProvider>().GetContext();
 
@@ -130,7 +130,7 @@ namespace MassTransit.DependencyInjection
             if (clientFactory != null)
                 return clientFactory.CreateRequestClient<TRequest>();
 
-            var mediator = provider.GetService<IMediator>();
+            var mediator = provider.GetService<IScopedMediator>();
             if (mediator != null)
             {
                 return consumeContext != null
