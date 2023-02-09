@@ -19,6 +19,79 @@ namespace MassTransit.MongoDbIntegration.Tests
     public class Using_the_bus_outbox
     {
         [Test]
+        [Explicit]
+        public async Task Fill_up_the_outbox()
+        {
+            await using var provider = new ServiceCollection()
+                .AddBusOutboxServices()
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.AddMongoDbOutbox(o =>
+                    {
+                        o.Connection = "mongodb://127.0.0.1:27021";
+                        o.DatabaseName = "sagaTest";
+
+                        o.QueryDelay = TimeSpan.FromSeconds(1);
+
+                        o.UseBusOutbox(bo =>
+                        {
+                            bo.MessageDeliveryLimit = 10;
+                        });
+                    });
+
+                    x.AddConsumer<PingConsumer>();
+                })
+                .BuildServiceProvider(true);
+
+            var harness = provider.GetTestHarness();
+
+            await harness.Start();
+
+            var totalTimer = Stopwatch.StartNew();
+            var sendTimer = Stopwatch.StartNew();
+
+            const int loopCount = 100;
+            const int messagesPerLoop = 1;
+            await Task.WhenAll(Enumerable.Range(0, loopCount).Select(async n =>
+            {
+                // ReSharper disable once AccessToDisposedClosure
+                await using var scope = provider.CreateAsyncScope();
+
+                using var dbContext = scope.ServiceProvider.GetRequiredService<MongoDbContext>();
+
+                await dbContext.BeginTransaction(harness.CancellationToken);
+
+                var publishEndpoint = scope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
+
+                await Task.WhenAll(Enumerable.Range(0, messagesPerLoop).Select(_ => publishEndpoint.Publish(new PingMessage())));
+
+                await dbContext.CommitTransaction(harness.CancellationToken);
+            }));
+
+            sendTimer.Stop();
+
+            var count = await harness.Consumed.SelectAsync<PingMessage>().Count();
+
+            totalTimer.Stop();
+
+            var totalTime = totalTimer.Elapsed - harness.TestInactivityTimeout;
+
+            const int messageCount = loopCount * messagesPerLoop;
+
+            Assert.That(count, Is.EqualTo(messageCount));
+
+            TestContext.Out.WriteLine("Message Count: {0}", messageCount);
+
+            TestContext.Out.WriteLine("Total send duration: {0:g}", sendTimer.Elapsed);
+            TestContext.Out.WriteLine("Send message rate: {0:F2} (msg/s)", messageCount * 1000 / sendTimer.Elapsed.TotalMilliseconds);
+            TestContext.Out.WriteLine("Total consume duration: {0:g}", totalTime);
+            TestContext.Out.WriteLine("Consume message rate: {0:F2} (msg/s)", messageCount * 1000 / totalTime.TotalMilliseconds);
+
+
+            await harness.Stop();
+        }
+
+        [Test]
         public async Task Should_not_send_when_transaction_aborted()
         {
             await using var provider = new ServiceCollection()
@@ -69,6 +142,61 @@ namespace MassTransit.MongoDbIntegration.Tests
             using var anotherCts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
 
             Assert.That(await consumerHarness.Consumed.Any<PingMessage>(anotherCts.Token), Is.False);
+
+            await harness.Stop();
+        }
+
+        [Test]
+        public async Task Should_start_immediately_when_context_disposed()
+        {
+            await using var provider = new ServiceCollection()
+                .AddBusOutboxServices()
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.SetTestTimeouts(testInactivityTimeout: TimeSpan.FromSeconds(5));
+                    x.AddMongoDbOutbox(o =>
+                    {
+                        o.Connection = "mongodb://127.0.0.1:27021";
+                        o.DatabaseName = "sagaTest";
+
+                        o.QueryDelay = TimeSpan.FromMinutes(1);
+
+                        o.UseBusOutbox(bo =>
+                        {
+                            bo.MessageDeliveryLimit = 10;
+                        });
+                    });
+
+                    x.AddConsumer<PingConsumer>();
+                })
+                .BuildServiceProvider(true);
+
+            var harness = provider.GetTestHarness();
+
+            await ClearOutbox(provider, harness);
+
+            await harness.Start();
+
+            IConsumerTestHarness<PingConsumer> consumerHarness = harness.GetConsumerHarness<PingConsumer>();
+
+            {
+                await using var scope = harness.Scope.ServiceProvider.CreateAsyncScope();
+                using var dbContext = scope.ServiceProvider.GetRequiredService<MongoDbContext>();
+
+                await dbContext.BeginTransaction(harness.CancellationToken);
+
+                var publishEndpoint = scope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
+
+                await publishEndpoint.Publish(new PingMessage());
+
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+
+                Assert.That(await consumerHarness.Consumed.Any<PingMessage>(cts.Token), Is.False);
+
+                await dbContext.CommitTransaction(harness.CancellationToken);
+            }
+
+            Assert.That(await consumerHarness.Consumed.Any<PingMessage>(), Is.True);
 
             await harness.Stop();
         }
@@ -134,6 +262,7 @@ namespace MassTransit.MongoDbIntegration.Tests
                 .AddBusOutboxServices()
                 .AddMassTransitTestHarness(x =>
                 {
+                    x.SetTestTimeouts(testInactivityTimeout: TimeSpan.FromSeconds(10));
                     x.AddMongoDbOutbox(o =>
                     {
                         o.Connection = "mongodb://127.0.0.1:27021";
@@ -181,79 +310,6 @@ namespace MassTransit.MongoDbIntegration.Tests
         }
 
         [Test]
-        [Explicit]
-        public async Task Fill_up_the_outbox()
-        {
-            await using var provider = new ServiceCollection()
-                .AddBusOutboxServices()
-                .AddMassTransitTestHarness(x =>
-                {
-                    x.AddMongoDbOutbox(o =>
-                    {
-                        o.Connection = "mongodb://127.0.0.1:27021";
-                        o.DatabaseName = "sagaTest";
-
-                        o.QueryDelay = TimeSpan.FromSeconds(1);
-
-                        o.UseBusOutbox(bo =>
-                        {
-                            bo.MessageDeliveryLimit = 10;
-                        });
-                    });
-
-                    x.AddConsumer<PingConsumer>();
-                })
-                .BuildServiceProvider(true);
-
-            var harness = provider.GetTestHarness();
-
-            await harness.Start();
-
-            var totalTimer = Stopwatch.StartNew();
-            var sendTimer = Stopwatch.StartNew();
-
-            const int loopCount = 100;
-            const int messagesPerLoop = 1;
-            await Task.WhenAll(Enumerable.Range(0, loopCount).Select(async n =>
-            {
-                // ReSharper disable once AccessToDisposedClosure
-                using var scope = provider.CreateScope();
-
-                using var dbContext = scope.ServiceProvider.GetRequiredService<MongoDbContext>();
-
-                await dbContext.BeginTransaction(harness.CancellationToken);
-
-                var publishEndpoint = scope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
-
-                await Task.WhenAll(Enumerable.Range(0, messagesPerLoop).Select(_ => publishEndpoint.Publish(new PingMessage())));
-
-                await dbContext.CommitTransaction(harness.CancellationToken);
-            }));
-
-            sendTimer.Stop();
-
-            var count = await harness.Consumed.SelectAsync<PingMessage>().Count();
-
-            totalTimer.Stop();
-
-            var totalTime = totalTimer.Elapsed - harness.TestInactivityTimeout;
-
-            const int messageCount = loopCount * messagesPerLoop;
-
-            Assert.That(count, Is.EqualTo(messageCount));
-
-            TestContext.Out.WriteLine("Message Count: {0}", messageCount);
-
-            TestContext.Out.WriteLine("Total send duration: {0:g}", sendTimer.Elapsed);
-            TestContext.Out.WriteLine("Send message rate: {0:F2} (msg/s)", messageCount * 1000 / sendTimer.Elapsed.TotalMilliseconds);
-            TestContext.Out.WriteLine("Total consume duration: {0:g}", totalTime);
-            TestContext.Out.WriteLine("Consume message rate: {0:F2} (msg/s)", messageCount * 1000 / totalTime.TotalMilliseconds);
-
-
-            await harness.Stop();
-        }
-
-        [Test]
         public async Task Should_work_without_starting_the_bus()
         {
             await using var provider = new ServiceCollection()
@@ -295,7 +351,7 @@ namespace MassTransit.MongoDbIntegration.Tests
             }
 
             {
-                using var scope = provider.CreateScope();
+                await using var scope = provider.CreateAsyncScope();
 
                 using var dbContext = scope.ServiceProvider.GetRequiredService<MongoDbContext>();
 
@@ -309,9 +365,9 @@ namespace MassTransit.MongoDbIntegration.Tests
             await harness.Stop();
         }
 
-        static async Task ClearOutbox(ServiceProvider provider, ITestHarness harness)
+        static async Task ClearOutbox(IServiceProvider provider, ITestHarness harness)
         {
-            using var scope = provider.CreateScope();
+            await using var scope = provider.CreateAsyncScope();
 
             using var dbContext = scope.ServiceProvider.GetRequiredService<MongoDbContext>();
 

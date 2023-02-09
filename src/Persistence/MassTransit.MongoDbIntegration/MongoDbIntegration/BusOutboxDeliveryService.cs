@@ -10,6 +10,7 @@ namespace MassTransit.MongoDbIntegration
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Middleware;
+    using Middleware.Outbox;
     using MongoDB.Bson;
     using MongoDB.Driver;
     using Outbox;
@@ -22,13 +23,15 @@ namespace MassTransit.MongoDbIntegration
     {
         readonly IBusControl _busControl;
         readonly ILogger _logger;
+        readonly IBusOutboxNotification _notification;
         readonly OutboxDeliveryServiceOptions _options;
         readonly IServiceProvider _provider;
 
-        public BusOutboxDeliveryService(IBusControl busControl, IOptions<OutboxDeliveryServiceOptions> options, ILogger<BusOutboxDeliveryService> logger,
-            IServiceProvider provider)
+        public BusOutboxDeliveryService(IBusControl busControl, IOptions<OutboxDeliveryServiceOptions> options,
+            IBusOutboxNotification notification, ILogger<BusOutboxDeliveryService> logger, IServiceProvider provider)
         {
             _busControl = busControl;
+            _notification = notification;
             _provider = provider;
             _logger = logger;
 
@@ -47,7 +50,7 @@ namespace MassTransit.MongoDbIntegration
             {
                 try
                 {
-                    await Task.Delay(_options.QueryDelay, stoppingToken).ConfigureAwait(false);
+                    await _notification.WaitForDelivery(stoppingToken).ConfigureAwait(false);
 
                     await _busControl.WaitForHealthStatus(BusHealthStatus.Healthy, stoppingToken).ConfigureAwait(false);
 

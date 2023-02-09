@@ -1,6 +1,11 @@
 #!/bin/bash
 
-mongo <<EOF
+DELAY=10
+
+echo "****** Waiting for ${DELAY} seconds for containers to go up ******"
+sleep $DELAY
+
+mongosh --host mongo1:27017 <<EOF
 var config = {
     "_id": "dbrs",
     "version": 1,
