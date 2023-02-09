@@ -235,8 +235,7 @@ namespace MassTransit
             for (var i = 0; i < frameCount; i++)
             {
                 var frame = stackTrace.GetFrame(i);
-
-                if (frame == null || !frame.HasMethod())
+                if (frame == null)
                     continue;
 
                 var method = frame.GetMethod();
