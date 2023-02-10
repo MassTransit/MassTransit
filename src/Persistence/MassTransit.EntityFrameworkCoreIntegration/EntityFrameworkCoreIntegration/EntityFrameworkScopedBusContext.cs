@@ -6,6 +6,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
     using Clients;
     using DependencyInjection;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.ChangeTracking;
     using Middleware;
     using Middleware.Outbox;
     using Serialization;
@@ -24,10 +25,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         readonly TDbContext _dbContext;
         readonly object _lock = new object();
         readonly IBusOutboxNotification _notification;
-        readonly Guid _outboxId;
         readonly IServiceProvider _provider;
-        OutboxState? _outboxState;
-
+        Guid _outboxId;
+        EntityEntry<OutboxState>? _outboxState;
         IPublishEndpoint? _publishEndpoint;
         IScopedClientFactory? _scopedClientFactory;
         ISendEndpointProvider? _sendEndpointProvider;
@@ -48,27 +48,32 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         {
             lock (_lock)
             {
-                if (_outboxState != null)
+                if (WasCommitted())
                     _notification.Delivered();
+
+                _outboxState = null;
             }
         }
 
         public Task AddSend<T>(SendContext<T> context)
             where T : class
         {
-            if (_outboxState == null)
+            if (_outboxState == null || WasCommitted())
             {
                 lock (_lock)
                 {
-                    if (_outboxState == null)
+                    if (WasCommitted())
                     {
-                        _outboxState = new OutboxState
-                        {
-                            OutboxId = _outboxId,
-                            Created = DateTime.UtcNow
-                        };
-                        _dbContext.Add(_outboxState);
+                        _notification.Delivered();
+                        _outboxId = NewId.NextGuid();
+                        _outboxState = null;
                     }
+
+                    _outboxState ??= _dbContext.Add(new OutboxState
+                    {
+                        OutboxId = _outboxId,
+                        Created = DateTime.UtcNow
+                    });
                 }
             }
 
@@ -97,6 +102,11 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                 return _scopedClientFactory ??=
                     new ScopedClientFactory(new ClientFactory(new ScopedClientFactoryContext(_clientFactory, _provider)), null);
             }
+        }
+
+        bool WasCommitted()
+        {
+            return _outboxState?.State == EntityState.Unchanged;
         }
     }
 }

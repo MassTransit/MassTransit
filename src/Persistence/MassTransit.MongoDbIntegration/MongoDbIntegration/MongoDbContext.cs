@@ -15,6 +15,8 @@ namespace MassTransit.MongoDbIntegration
         /// </summary>
         IClientSessionHandle? Session { get; }
 
+        Guid? TransactionId { get; }
+
         Task<IClientSessionHandle> StartSession(CancellationToken cancellationToken);
 
         Task BeginTransaction(CancellationToken cancellationToken);

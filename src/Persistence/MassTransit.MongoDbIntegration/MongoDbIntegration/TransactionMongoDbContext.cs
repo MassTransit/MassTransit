@@ -33,6 +33,8 @@ namespace MassTransit.MongoDbIntegration
 
         public IClientSessionHandle? Session { get; private set; }
 
+        public Guid? TransactionId { get; private set; }
+
         public void Dispose()
         {
             Session?.Dispose();
@@ -65,10 +67,13 @@ namespace MassTransit.MongoDbIntegration
             var session = await StartSession(cancellationToken).ConfigureAwait(false);
 
             if (!session.IsInTransaction)
+            {
                 session.StartTransaction();
+                TransactionId = NewId.NextGuid();
+            }
         }
 
-        public Task CommitTransaction(CancellationToken cancellationToken)
+        public async Task CommitTransaction(CancellationToken cancellationToken)
         {
             if (Session == null)
                 throw new InvalidOperationException("No session has been created");
@@ -76,10 +81,11 @@ namespace MassTransit.MongoDbIntegration
             if (Session.IsInTransaction == false)
                 throw new InvalidOperationException("The session is not in an active transaction");
 
-            return Session.CommitTransactionAsync(cancellationToken);
+            await Session.CommitTransactionAsync(cancellationToken).ConfigureAwait(false);
+            TransactionId = null;
         }
 
-        public Task AbortTransaction(CancellationToken cancellationToken)
+        public async Task AbortTransaction(CancellationToken cancellationToken)
         {
             if (Session == null)
                 throw new InvalidOperationException("No session has been created");
@@ -87,7 +93,8 @@ namespace MassTransit.MongoDbIntegration
             if (Session.IsInTransaction == false)
                 throw new InvalidOperationException("The session is not in an active transaction");
 
-            return Session.AbortTransactionAsync(cancellationToken);
+            await Session.AbortTransactionAsync(cancellationToken).ConfigureAwait(false);
+            TransactionId = null;
         }
 
         public MongoDbCollectionContext<T> GetCollection<T>()
