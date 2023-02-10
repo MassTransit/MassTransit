@@ -36,7 +36,7 @@ namespace MassTransit.Configuration
 
         protected override IScopedClientFactory GetScopedBusContext(IServiceProvider provider)
         {
-            var clientFactory = provider.GetRequiredService<IMediator>();
+            var clientFactory = provider.GetRequiredService<IScopedMediator>();
             var consumeContext = provider.GetRequiredService<ScopedConsumeContextProvider>().GetContext();
 
             return consumeContext != null
