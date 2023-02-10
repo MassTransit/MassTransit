@@ -29,6 +29,7 @@ namespace MassTransit.Middleware.Outbox
             }
             catch (OperationCanceledException e) when (e.CancellationToken == _cancellationTokenSource.Token)
             {
+                cancellationToken.ThrowIfCancellationRequested();
             }
             finally
             {
