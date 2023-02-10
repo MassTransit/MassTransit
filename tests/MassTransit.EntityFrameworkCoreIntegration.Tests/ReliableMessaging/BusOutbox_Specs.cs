@@ -75,6 +75,73 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
         }
 
         [Test]
+        public async Task Should_support_multiple_save_changes()
+        {
+            using var tracerProvider = TraceConfig.CreateTraceProvider("ef-core-tests");
+
+            await using var provider = new ServiceCollection()
+                .AddBusOutboxServices()
+                .AddTelemetryListener()
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.SetTestTimeouts(testInactivityTimeout: TimeSpan.FromSeconds(5));
+                    x.AddEntityFrameworkOutbox<ReliableDbContext>(o =>
+                    {
+                        o.QueryDelay = TimeSpan.FromMinutes(10);
+
+                        o.UseBusOutbox(bo =>
+                        {
+                            bo.MessageDeliveryLimit = 10;
+                        });
+                    });
+
+                    x.AddConsumer<PingConsumer>();
+                })
+                .BuildServiceProvider(true);
+
+            var harness = provider.GetTestHarness();
+            await harness.Start();
+
+            IConsumerTestHarness<PingConsumer> consumerHarness = harness.GetConsumerHarness<PingConsumer>();
+
+            try
+            {
+                {
+                    await using var scope = harness.Scope.ServiceProvider.CreateAsyncScope();
+                    await using var dbContext = scope.ServiceProvider.GetRequiredService<ReliableDbContext>();
+
+                    var publishEndpoint = scope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
+
+                    var activity = TraceConfig.Source.StartActivity(ActivityKind.Client);
+
+                    await publishEndpoint.Publish(new PingMessage());
+
+                    using var cts1 = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+
+                    Assert.That(await consumerHarness.Consumed.Any<PingMessage>(cts1.Token), Is.False);
+
+                    await dbContext.SaveChangesAsync(harness.CancellationToken);
+
+                    await publishEndpoint.Publish(new PingMessage());
+
+                    using var cts2 = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+
+                    Assert.That(await consumerHarness.Consumed.Any<PingMessage>(cts2.Token), Is.True);
+
+                    await dbContext.SaveChangesAsync(harness.CancellationToken);
+
+                    activity.Stop();
+                }
+
+                Assert.That(consumerHarness.Consumed.Count(harness.CancellationToken), Is.EqualTo(2));
+            }
+            finally
+            {
+                await harness.Stop();
+            }
+        }
+
+        [Test]
         public async Task Should_start_immediately_when_context_disposed()
         {
             using var tracerProvider = TraceConfig.CreateTraceProvider("ef-core-tests");

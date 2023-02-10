@@ -256,6 +256,69 @@ namespace MassTransit.MongoDbIntegration.Tests
         }
 
         [Test]
+        public async Task Should_support_multiple_transactions()
+        {
+            await using var provider = new ServiceCollection()
+                .AddBusOutboxServices()
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.SetTestTimeouts(testInactivityTimeout: TimeSpan.FromSeconds(5));
+                    x.AddMongoDbOutbox(o =>
+                    {
+                        o.Connection = "mongodb://127.0.0.1:27021";
+                        o.DatabaseName = "sagaTest";
+
+                        o.QueryDelay = TimeSpan.FromMinutes(1);
+
+                        o.UseBusOutbox(bo =>
+                        {
+                            bo.MessageDeliveryLimit = 10;
+                        });
+                    });
+
+                    x.AddConsumer<PingConsumer>();
+                })
+                .BuildServiceProvider(true);
+
+            var harness = provider.GetTestHarness();
+
+            await ClearOutbox(provider, harness);
+
+            await harness.Start();
+
+            IConsumerTestHarness<PingConsumer> consumerHarness = harness.GetConsumerHarness<PingConsumer>();
+
+            {
+                await using var scope = harness.Scope.ServiceProvider.CreateAsyncScope();
+                using var dbContext = scope.ServiceProvider.GetRequiredService<MongoDbContext>();
+
+                await dbContext.BeginTransaction(harness.CancellationToken);
+
+                var publishEndpoint = scope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
+
+                await publishEndpoint.Publish(new PingMessage());
+
+                using var cts1 = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+
+                Assert.That(await consumerHarness.Consumed.Any<PingMessage>(cts1.Token), Is.False);
+
+                await dbContext.CommitTransaction(harness.CancellationToken);
+
+                await publishEndpoint.Publish(new PingMessage());
+
+                using var cts2 = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+
+                Assert.That(await consumerHarness.Consumed.Any<PingMessage>(cts2.Token), Is.True);
+
+                await dbContext.CommitTransaction(harness.CancellationToken);
+            }
+
+            Assert.That(consumerHarness.Consumed.Count(harness.CancellationToken), Is.EqualTo(2));
+
+            await harness.Stop();
+        }
+
+        [Test]
         public async Task Should_support_the_test_harness()
         {
             await using var provider = new ServiceCollection()

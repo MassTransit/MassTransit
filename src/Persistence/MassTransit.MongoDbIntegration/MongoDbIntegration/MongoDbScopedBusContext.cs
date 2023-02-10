@@ -22,8 +22,8 @@ namespace MassTransit.MongoDbIntegration
         readonly TBus _bus;
         readonly IClientFactory _clientFactory;
         readonly MongoDbContext _dbContext;
+        readonly SemaphoreSlim _lock;
         readonly IBusOutboxNotification _notification;
-        readonly Guid _outboxId;
         readonly MongoDbCollectionContext<OutboxMessage> _outboxMessages;
         readonly MongoDbCollectionContext<OutboxState> _outboxStates;
         readonly IServiceProvider _provider;
@@ -31,7 +31,7 @@ namespace MassTransit.MongoDbIntegration
         IPublishEndpoint? _publishEndpoint;
         IScopedClientFactory? _scopedClientFactory;
         ISendEndpointProvider? _sendEndpointProvider;
-        Task? _startTransaction;
+        Guid? _transactionId;
 
         public MongoDbScopedBusContext(TBus bus, MongoDbContext dbContext, IBusOutboxNotification notification, IClientFactory clientFactory,
             IServiceProvider provider)
@@ -45,27 +45,42 @@ namespace MassTransit.MongoDbIntegration
             _outboxMessages = _dbContext.GetCollection<OutboxMessage>();
             _outboxStates = _dbContext.GetCollection<OutboxState>();
 
-            _outboxId = NewId.NextGuid();
+            _lock = new SemaphoreSlim(1);
         }
 
         public void Dispose()
         {
-            lock (_dbContext)
-            {
-                if (_startTransaction != null)
-                    _notification.Delivered();
-            }
+            _lock.Wait();
+            if (WasCommitted())
+                _notification.Delivered();
+
+            _transactionId = null;
+            _lock.Dispose();
         }
 
         public async Task AddSend<T>(SendContext<T> context)
             where T : class
         {
-            lock (_dbContext)
-                _startTransaction ??= StartOutboxTransaction(context.CancellationToken);
+            if (_transactionId == null || WasCommitted())
+            {
+                await _lock.WaitAsync(context.CancellationToken).ConfigureAwait(false);
+                try
+                {
+                    if (WasCommitted())
+                    {
+                        _notification.Delivered();
+                        _transactionId = null;
+                    }
 
-            await _startTransaction.ConfigureAwait(false);
+                    _transactionId ??= await StartOutboxTransaction(context.CancellationToken).ConfigureAwait(false);
+                }
+                finally
+                {
+                    _lock.Release();
+                }
+            }
 
-            await _outboxMessages.AddSend(context, SystemTextJsonMessageSerializer.Instance, outboxId: _outboxId).ConfigureAwait(false);
+            await _outboxMessages.AddSend(context, SystemTextJsonMessageSerializer.Instance, outboxId: _transactionId).ConfigureAwait(false);
         }
 
         public object? GetService(Type serviceType)
@@ -92,17 +107,26 @@ namespace MassTransit.MongoDbIntegration
             }
         }
 
-        async Task StartOutboxTransaction(CancellationToken cancellationToken)
+        bool WasCommitted()
+        {
+            return _transactionId != _dbContext.TransactionId;
+        }
+
+        async Task<Guid?> StartOutboxTransaction(CancellationToken cancellationToken)
         {
             await _dbContext.BeginTransaction(cancellationToken).ConfigureAwait(false);
 
+            var outboxId = _dbContext.TransactionId ?? throw new ArgumentNullException(nameof(_dbContext.TransactionId));
+
             var outboxState = new OutboxState
             {
-                OutboxId = _outboxId,
+                OutboxId = outboxId,
                 Created = DateTime.UtcNow
             };
 
             await _outboxStates.InsertOne(outboxState, cancellationToken).ConfigureAwait(false);
+
+            return outboxId;
         }
     }
 }
