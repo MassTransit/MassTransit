@@ -84,6 +84,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                 var messageCount = await DeliverOutbox(cancellationToken).ConfigureAwait(false);
                 if (messageCount > 0)
                     resultCount++;
+
+                if (messageCount == -1)
+                    break;
             }
 
             return resultCount;
@@ -206,7 +209,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         {
             var messageLimit = _options.MessageDeliveryLimit;
 
-            bool hasLastSequenceNumber = outboxState.LastSequenceNumber.HasValue;
+            var hasLastSequenceNumber = outboxState.LastSequenceNumber.HasValue;
 
             var lastSequenceNumber = outboxState.LastSequenceNumber ?? 0;
 
