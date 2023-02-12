@@ -50,12 +50,16 @@
             {
                 MessageTimeToLiveExpiredException _ => false,
                 MessageLockExpiredException _ => false,
+
                 ServiceBusException { Reason: ServiceBusFailureReason.MessageLockLost } => false,
                 ServiceBusException { Reason: ServiceBusFailureReason.SessionLockLost } => false,
+
                 ServiceBusException { Reason: ServiceBusFailureReason.ServiceCommunicationProblem } => true,
                 ServiceBusException { Reason: ServiceBusFailureReason.MessagingEntityNotFound } => true,
                 ServiceBusException { Reason: ServiceBusFailureReason.MessagingEntityDisabled } => true,
+
                 ServiceBusException { IsTransient: true } => false,
+
                 _ => true
             };
 
@@ -149,9 +153,17 @@
             }
         }
 
-        Task OnMessage(ProcessMessageEventArgs messageReceiver, ServiceBusReceivedMessage message, CancellationToken cancellationToken)
+        async Task OnMessage(ProcessMessageEventArgs messageReceiver, ServiceBusReceivedMessage message, CancellationToken cancellationToken)
         {
-            return _messageReceiver.Handle(message, cancellationToken, context => AddReceiveContextPayloads(context, messageReceiver, message));
+            try
+            {
+                await _messageReceiver.Handle(message, cancellationToken, context => AddReceiveContextPayloads(context, messageReceiver, message))
+                    .ConfigureAwait(false);
+            }
+            catch (Exception)
+            {
+                // do NOT let exceptions propagate to the Azure SDK
+            }
         }
 
         void AddReceiveContextPayloads(ReceiveContext receiveContext, ProcessMessageEventArgs receiverClient, ServiceBusReceivedMessage message)

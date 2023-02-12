@@ -1,5 +1,6 @@
 namespace MassTransit.AzureServiceBusTransport
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Azure.Messaging.ServiceBus;
@@ -29,10 +30,15 @@ namespace MassTransit.AzureServiceBusTransport
 
         async Task OnSession(ProcessSessionMessageEventArgs messageSession, ServiceBusReceivedMessage message, CancellationToken cancellationToken)
         {
-            LogContext.Debug?.Log("Receiving {SessionId}:{MessageId}({EntityPath})", message.SessionId, message.MessageId, _context.EntityPath);
-
-            await _messageReceiver.Handle(message, cancellationToken, context => AddReceiveContextPayloads(context, messageSession, message))
-                .ConfigureAwait(false);
+            try
+            {
+                await _messageReceiver.Handle(message, cancellationToken, context => AddReceiveContextPayloads(context, messageSession, message))
+                    .ConfigureAwait(false);
+            }
+            catch (Exception)
+            {
+                // do NOT let exceptions propagate to the Azure SDK
+            }
         }
 
         void AddReceiveContextPayloads(ReceiveContext receiveContext, ProcessSessionMessageEventArgs messageSession, ServiceBusReceivedMessage message)

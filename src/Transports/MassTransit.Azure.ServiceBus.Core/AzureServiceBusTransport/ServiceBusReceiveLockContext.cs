@@ -33,6 +33,7 @@ namespace MassTransit.AzureServiceBusTransport
                 case ServiceBusException { Reason: ServiceBusFailureReason.SessionLockLost }:
                 case ServiceBusException { Reason: ServiceBusFailureReason.ServiceCommunicationProblem }:
                     return;
+
                 default:
                     try
                     {

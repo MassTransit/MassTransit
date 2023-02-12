@@ -67,7 +67,6 @@
                     message.MessageId, message.SequenceNumber, message.SessionId);
 
                 await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
-
                 throw;
             }
             catch (ServiceBusException ex) when (ex.Reason == ServiceBusFailureReason.MessageLockLost)
@@ -76,12 +75,16 @@
                     message.SequenceNumber);
 
                 await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
-
                 throw;
             }
             catch (OperationCanceledException)
             {
-                // do NOT allow these to escape to the Azure SDK Exception Handler callback, just let it go.
+                throw;
+            }
+            catch (Exception exception)
+            {
+                context.LogTransportFaulted(exception);
+                throw;
             }
             finally
             {
