@@ -33,7 +33,7 @@
 
             foreach (var connection in _hubLifetimeManager.Connections)
             {
-                if (excludedConnectionIds == null || !excludedConnectionIds.Contains(connection.ConnectionId, StringComparer.OrdinalIgnoreCase))
+                if (excludedConnectionIds == null || !excludedConnectionIds.Contains(connection.ConnectionId, StringComparer.Ordinal))
                     tasks.Add(connection.WriteAsync(message.Value).AsTask());
             }
 

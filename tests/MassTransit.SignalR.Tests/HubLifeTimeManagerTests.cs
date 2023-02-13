@@ -1,5 +1,6 @@
 ﻿namespace MassTransit.SignalR.Tests
 {
+    using System;
     using System.Linq;
     using System.Threading.Tasks;
     using Contracts;
@@ -17,6 +18,11 @@
             Assert.AreEqual("Hello", message.Target);
             Assert.AreEqual(1, message.Arguments.Length);
             Assert.AreEqual("World", message.Arguments[0].ToString());
+        }
+
+        static async Task AssertNoMessageAsync(TestClient client, int milliseconds = 1000)
+        {
+            Assert.ThrowsAsync<TimeoutException>(async () => await client.ReadAsync().OrTimeout(milliseconds));
         }
 
         [Test]
@@ -233,6 +239,104 @@
                 await AssertMessageAsync(client1);
                 await AssertMessageAsync(client2);
             }
+        }
+
+        [Test]
+        public async Task ConnectionShouldReceiveMessage()
+        {
+            using var client = new TestClient();
+
+            MassTransitHubLifetimeManager<MyHub> manager = BackplaneHarness.HubLifetimeManager;
+
+            var connection = HubConnectionContextUtils.Create(client.Connection);
+
+            await manager.OnConnectedAsync(connection).OrTimeout(Harness.TestTimeout);
+
+            await manager.SendConnectionAsync(connection.ConnectionId, "Hello", new object[] { "World" }).OrTimeout(Harness.TestTimeout);
+            await AssertMessageAsync(client);
+        }
+
+        [Test]
+        public async Task ConnectionShouldNotBeReceivedIfConnectionIdCasingIsOff()
+        {
+            using var client = new TestClient();
+
+            MassTransitHubLifetimeManager<MyHub> manager = BackplaneHarness.HubLifetimeManager;
+
+            var connection = HubConnectionContextUtils.Create(client.Connection);
+
+            await manager.OnConnectedAsync(connection).OrTimeout(Harness.TestTimeout);
+
+            await manager.SendConnectionAsync(connection.ConnectionId.ToUpper(), "Hello", new object[] { "World" }).OrTimeout(Harness.TestTimeout);
+            await AssertNoMessageAsync(client);
+        }
+
+        [Test]
+        public async Task ExcludedConnectionShouldNotReceiveSendAllMessage()
+        {
+            using var client = new TestClient();
+
+            MassTransitHubLifetimeManager<MyHub> manager = BackplaneHarness.HubLifetimeManager;
+
+            var connection = HubConnectionContextUtils.Create(client.Connection);
+
+            await manager.OnConnectedAsync(connection).OrTimeout(Harness.TestTimeout);
+
+            await manager.SendAllExceptAsync("Hello", new object[] { "World" }, new[] { connection.ConnectionId }).OrTimeout(Harness.TestTimeout);
+            await AssertNoMessageAsync(client);
+        }
+
+        [Test]
+        public async Task ExcludedConnectionShouldReceiveSendAllMessageWhenCasingIsOff()
+        {
+            using var client = new TestClient();
+
+            MassTransitHubLifetimeManager<MyHub> manager = BackplaneHarness.HubLifetimeManager;
+
+            var connection = HubConnectionContextUtils.Create(client.Connection);
+
+            await manager.OnConnectedAsync(connection).OrTimeout(Harness.TestTimeout);
+
+            await manager.SendAllExceptAsync("Hello", new object[] { "World" }, new[] { connection.ConnectionId.ToUpper() }).OrTimeout(Harness.TestTimeout);
+            await AssertMessageAsync(client);
+        }
+
+        [Test]
+        public async Task ExcludedConnectionShouldNotReceiveSendGroupMessage()
+        {
+            const string groupName = "group";
+
+            using var client = new TestClient();
+
+            MassTransitHubLifetimeManager<MyHub> manager = BackplaneHarness.HubLifetimeManager;
+
+            var connection = HubConnectionContextUtils.Create(client.Connection);
+
+            await manager.OnConnectedAsync(connection).OrTimeout(Harness.TestTimeout);
+
+            await manager.AddToGroupAsync(connection.ConnectionId, groupName).OrTimeout(Harness.TestTimeout);
+
+            await manager.SendGroupExceptAsync(groupName, "Hello", new object[] { "World" }, new[] { connection.ConnectionId }).OrTimeout(Harness.TestTimeout);
+            await AssertNoMessageAsync(client);
+        }
+
+        [Test]
+        public async Task ExcludedConnectionShouldReceiveSendGroupMessageWhenCasingIsOff()
+        {
+            const string groupName = "group";
+
+            using var client = new TestClient();
+
+            MassTransitHubLifetimeManager<MyHub> manager = BackplaneHarness.HubLifetimeManager;
+
+            var connection = HubConnectionContextUtils.Create(client.Connection);
+
+            await manager.OnConnectedAsync(connection).OrTimeout(Harness.TestTimeout);
+
+            await manager.AddToGroupAsync(connection.ConnectionId, groupName).OrTimeout(Harness.TestTimeout);
+
+            await manager.SendGroupExceptAsync(groupName, "Hello", new object[] { "World" }, new[] { connection.ConnectionId.ToUpper() }).OrTimeout(Harness.TestTimeout);
+            await AssertMessageAsync(client);
         }
 
         [Test]

@@ -37,7 +37,7 @@
             var tasks = new List<Task>();
             foreach (var connection in groupStore)
             {
-                if (excludedConnectionIds == null || !excludedConnectionIds.Contains(connection.ConnectionId, StringComparer.OrdinalIgnoreCase))
+                if (excludedConnectionIds == null || !excludedConnectionIds.Contains(connection.ConnectionId, StringComparer.Ordinal))
                     tasks.Add(connection.WriteAsync(message.Value).AsTask());
             }
 
