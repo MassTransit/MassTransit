@@ -85,7 +85,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                 if (messageCount > 0)
                     resultCount++;
 
-                if (messageCount == -1)
+                if (messageCount == 0)
                     break;
             }
 
