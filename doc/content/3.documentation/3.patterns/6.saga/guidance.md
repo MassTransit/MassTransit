@@ -1,4 +1,8 @@
-# Guidance
+---
+navigation.title: Guidance
+---
+
+# Saga Guidance
 
 What follows is a set of guidelines related to sagas that was collected from Discord, Stack Overflow, and other sources to provide an easy way to link answers to commonly asked questions.
 

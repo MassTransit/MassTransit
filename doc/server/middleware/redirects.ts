@@ -116,6 +116,7 @@ const mapping: { [key: string]: string } = {
     '/usage/monitoring.html': '/documentation/concepts/messages',
     '/usage/correlation.html': '/documentation/concepts/messages',
 
+    '/usage/transports': '/documentation/transports',
     '/usage/transports/in-memory.html': '/documentation/transports',
     '/usage/transports/grpc.html': '/documentation/transports',
     '/usage/transports/index.html': '/documentation/transports',
@@ -159,16 +160,17 @@ const mapping: { [key: string]: string } = {
 
     '/usage/messages.html': '/documentation/concepts/messages',
 
-    '/usage/riders/index.html': '/documentation/concepts/messages',
-    '/usage/riders/kafka.html': '/documentation/concepts/messages',
-    '/usage/riders/eventhub.html': '/documentation/concepts/messages',
+    '/usage/riders': '/documentation/concepts/riders',
+    '/usage/riders/index.html': '/documentation/concepts/riders',
+    '/usage/riders/kafka.html': '/documentation/transports/kafka',
+    '/usage/riders/eventhub.html': '/documentation/configuration/transports/azure-event-hub',
 
     '/usage/containers/multibus.html': '/documentation/configuration/multibus',
 
     '/usage/containers': '/documentation/configuration',
     '/usage/containers/index.html': '/documentation/configuration',
     '/usage/containers/msdi.html': '/documentation/configuration',
-    '/usage/containers/definitions.html': '/documentation/concepts/messages',
+    '/usage/containers/definitions.html': '/documentation/concepts/consumers#definitions',
     '/usage/containers/simpleinjector.html': '/documentation/configuration',
     '/MassTransit/usage/containers/autofac.html': '/documentation/configuration',
     '/usage/containers/autofac.html': '/documentation/configuration',

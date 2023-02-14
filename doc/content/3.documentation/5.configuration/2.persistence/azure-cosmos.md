@@ -54,7 +54,7 @@ container.AddMassTransit(cfg =>
 });
 ```
 
-The container extension will register the saga repository in the container. For more details on container configuration, review the [configuration](/documentation/patterns/saga/) section of the documentation.
+The container extension will register the saga repository in the container. For more details on container configuration, review the [configuration](/documentation/patterns/saga) section of the documentation.
 
 ## Other Considerations
 
