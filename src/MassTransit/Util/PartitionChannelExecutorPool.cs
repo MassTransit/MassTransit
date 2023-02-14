@@ -10,9 +10,9 @@ namespace MassTransit.Util
     public class PartitionChannelExecutorPool<T> :
         IChannelExecutorPool<T>
     {
-        readonly PartitionKeyProvider<T> _partitionKeyProvider;
         readonly IHashGenerator _hashGenerator;
-        readonly ChannelExecutor[] _partitions;
+        readonly PartitionKeyProvider<T> _partitionKeyProvider;
+        readonly Lazy<ChannelExecutor>[] _partitions;
 
         public PartitionChannelExecutorPool(PartitionKeyProvider<T> partitionKeyProvider, IHashGenerator hashGenerator, int concurrencyLimit,
             int concurrentDeliveryLimit = 1)
@@ -20,34 +20,40 @@ namespace MassTransit.Util
             _partitionKeyProvider = partitionKeyProvider;
             _hashGenerator = hashGenerator;
             _partitions = Enumerable.Range(0, concurrencyLimit)
-                .Select(x => new ChannelExecutor(concurrentDeliveryLimit))
+                .Select(x => new Lazy<ChannelExecutor>(() => new ChannelExecutor(concurrentDeliveryLimit)))
                 .ToArray();
-        }
-
-        public Task Push(T partition, Func<Task> handle, CancellationToken cancellationToken)
-        {
-            var executor = GetExecutor(partition);
-            return executor.Push(handle, cancellationToken);
-        }
-
-        public Task Run(T partition, Func<Task> method, CancellationToken cancellationToken = default)
-        {
-            var executor = GetExecutor(partition);
-            return executor.Run(method, cancellationToken);
-        }
-
-        ChannelExecutor GetExecutor(T partition)
-        {
-            var partitionKey = _partitionKeyProvider(partition);
-            var hash = partitionKey?.Length > 0 ? _hashGenerator.Hash(partitionKey) : 0;
-            var index = hash % _partitions.Length;
-            return _partitions[index];
         }
 
         public async ValueTask DisposeAsync()
         {
-            foreach (var partition in _partitions)
-                await partition.DisposeAsync().ConfigureAwait(false);
+            foreach (Lazy<ChannelExecutor> partition in _partitions)
+            {
+                if (partition.IsValueCreated)
+                    await partition.Value.DisposeAsync().ConfigureAwait(false);
+            }
+        }
+
+        public Task Push(T partition, Func<Task> method, CancellationToken cancellationToken = default)
+        {
+            var executor = GetChannelExecutor(partition);
+            return executor.Push(method, cancellationToken);
+        }
+
+        public Task Run(T partition, Func<Task> method, CancellationToken cancellationToken = default)
+        {
+            var executor = GetChannelExecutor(partition);
+            return executor.Run(method, cancellationToken);
+        }
+
+        ChannelExecutor GetChannelExecutor(T partition)
+        {
+            if (_partitions.Length == 1)
+                return _partitions[0].Value;
+
+            var partitionKey = _partitionKeyProvider(partition);
+            var hash = partitionKey?.Length > 0 ? _hashGenerator.Hash(partitionKey) : 0;
+            var index = hash % _partitions.Length;
+            return _partitions[index].Value;
         }
     }
 }

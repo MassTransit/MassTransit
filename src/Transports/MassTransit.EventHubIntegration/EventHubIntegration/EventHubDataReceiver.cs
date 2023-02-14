@@ -16,12 +16,12 @@
         Agent,
         IEventHubDataReceiver
     {
+        readonly CancellationTokenSource _checkpointTokenSource;
+        readonly EventProcessorClient _client;
         readonly ReceiveEndpointContext _context;
         readonly TaskCompletionSource<bool> _deliveryComplete;
         readonly IReceivePipeDispatcher _dispatcher;
-        readonly EventProcessorClient _client;
         readonly IChannelExecutorPool<ProcessEventArgs> _executorPool;
-        readonly CancellationTokenSource _checkpointTokenSource;
         readonly IProcessorLockContext _lockContext;
 
         public EventHubDataReceiver(ReceiveSettings receiveSettings, ReceiveEndpointContext context, ProcessorContext processorContext)
@@ -155,8 +155,8 @@
         class CombinedChannelExecutorPool :
             IChannelExecutorPool<ProcessEventArgs>
         {
-            readonly IChannelExecutorPool<ProcessEventArgs> _partitionExecutorPool;
             readonly IChannelExecutorPool<ProcessEventArgs> _keyExecutorPool;
+            readonly IChannelExecutorPool<ProcessEventArgs> _partitionExecutorPool;
 
             public CombinedChannelExecutorPool(IChannelExecutorPool<ProcessEventArgs> partitionExecutorPool, ReceiveSettings receiveSettings)
             {
