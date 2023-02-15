@@ -22,6 +22,7 @@ namespace MassTransit.KafkaIntegration.Configuration
         Action<ISendPipeConfigurator> _configureSend;
         IHeadersSerializer _headersSerializer;
         IAsyncSerializer<TKey> _keySerializer;
+        Action<string> _statisticsHandler;
         IAsyncSerializer<TValue> _valueSerializer;
 
         public KafkaProducerSpecification(IKafkaHostConfiguration hostConfiguration, ProducerConfig producerConfig, string topicName,
@@ -134,6 +135,11 @@ namespace MassTransit.KafkaIntegration.Configuration
             set => _producerConfig.EnableBackgroundPoll = value;
         }
 
+        public void SetStatisticsHandler(Action<string> statisticsHandler)
+        {
+            _statisticsHandler = statisticsHandler ?? throw new ArgumentNullException(nameof(statisticsHandler));
+        }
+
         public void SetKeySerializer(IAsyncSerializer<TKey> serializer)
         {
             _keySerializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
@@ -163,6 +169,9 @@ namespace MassTransit.KafkaIntegration.Configuration
 
                 if (_oAuthBearerTokenRefreshHandler != null)
                     producerBuilder.SetOAuthBearerTokenRefreshHandler(_oAuthBearerTokenRefreshHandler);
+
+                if (_statisticsHandler != null)
+                    producerBuilder.SetStatisticsHandler((_, statistics) => _statisticsHandler(statistics));
                 return producerBuilder;
             }
 

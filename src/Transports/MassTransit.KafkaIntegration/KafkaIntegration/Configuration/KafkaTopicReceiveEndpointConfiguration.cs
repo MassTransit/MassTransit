@@ -25,6 +25,7 @@ namespace MassTransit.KafkaIntegration.Configuration
         IHeadersDeserializer _headersDeserializer;
         IDeserializer<TKey> _keyDeserializer;
         Action<CommittedOffsets> _offsetsCommittedHandler;
+        Action<string> _statisticsHandler;
         IDeserializer<TValue> _valueDeserializer;
 
         public KafkaTopicReceiveEndpointConfiguration(IKafkaHostConfiguration hostConfiguration, ConsumerConfig consumerConfig, string topic,
@@ -153,6 +154,11 @@ namespace MassTransit.KafkaIntegration.Configuration
             _offsetsCommittedHandler = _offsetsCommittedHandler ?? throw new ArgumentNullException(nameof(offsetsCommittedHandler));
         }
 
+        public void SetStatisticsHandler(Action<string> statisticsHandler)
+        {
+            _statisticsHandler = statisticsHandler ?? throw new ArgumentNullException(nameof(statisticsHandler));
+        }
+
         public void CreateIfMissing(Action<KafkaTopicOptions> configure)
         {
             if (_options.TryGetOptions<KafkaTopicOptions>(out _))
@@ -209,6 +215,8 @@ namespace MassTransit.KafkaIntegration.Configuration
                     consumerBuilder.SetOffsetsCommittedHandler((_, offsets) => _offsetsCommittedHandler(offsets));
                 if (_oAuthBearerTokenRefreshHandler != null)
                     consumerBuilder.SetOAuthBearerTokenRefreshHandler(_oAuthBearerTokenRefreshHandler);
+                if (_statisticsHandler != null)
+                    consumerBuilder.SetStatisticsHandler((_, statistics) => _statisticsHandler(statistics));
 
                 return consumerBuilder;
             }
