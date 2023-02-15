@@ -14,12 +14,14 @@ namespace MassTransit.KafkaIntegration
         IConsumerLockContext,
         KafkaConsumerBuilderContext
     {
+        readonly CancellationToken _cancellationToken;
+
+        readonly ConsumerContext _context;
+
         readonly SingleThreadedDictionary<TopicPartition, PartitionCheckpointData> _data =
             new SingleThreadedDictionary<TopicPartition, PartitionCheckpointData>();
 
-        readonly ConsumerContext _context;
         readonly ReceiveSettings _receiveSettings;
-        readonly CancellationToken _cancellationToken;
 
         public ConsumerLockContext(ConsumerContext context, ReceiveSettings receiveSettings, CancellationToken cancellationToken)
         {
@@ -28,12 +30,11 @@ namespace MassTransit.KafkaIntegration
             _cancellationToken = cancellationToken;
         }
 
-        public async Task Pending(ConsumeResult<byte[], byte[]> result)
+        public Task Pending(ConsumeResult<byte[], byte[]> result)
         {
             LogContext.SetCurrentIfNull(_context.LogContext);
 
-            if (_data.TryGetValue(result.TopicPartition, out var data))
-                await data.Pending(result).ConfigureAwait(false);
+            return _data.TryGetValue(result.TopicPartition, out var data) ? data.Pending(result) : Task.CompletedTask;
         }
 
         public Task Complete(ConsumeResult<byte[], byte[]> result)
@@ -54,6 +55,20 @@ namespace MassTransit.KafkaIntegration
                 data.Faulted(result, exception);
 
             return Task.CompletedTask;
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+        }
+
+        public Task Push(ConsumeResult<byte[], byte[]> partition, Func<Task> method, CancellationToken cancellationToken = default)
+        {
+            return _data[partition.TopicPartition].Push(method);
+        }
+
+        public Task Run(ConsumeResult<byte[], byte[]> partition, Func<Task> method, CancellationToken cancellationToken = default)
+        {
+            return _data[partition.TopicPartition].Run(method);
         }
 
         public void OnAssigned(IConsumer<byte[], byte[]> consumer, IEnumerable<TopicPartition> partitions)
@@ -107,10 +122,10 @@ namespace MassTransit.KafkaIntegration
         sealed class PartitionCheckpointData
         {
             readonly CancellationToken _cancellationToken;
+            readonly CancellationTokenSource _cancellationTokenSource;
             readonly ICheckpointer _checkpointer;
             readonly ChannelExecutor _executor;
             readonly PendingConfirmationCollection _pending;
-            readonly CancellationTokenSource _cancellationTokenSource;
 
             public PartitionCheckpointData(TopicPartition partition, IConsumer<byte[], byte[]> consumer, ReceiveSettings settings,
                 CancellationToken cancellationToken)
@@ -166,21 +181,6 @@ namespace MassTransit.KafkaIntegration
             {
                 return _executor.Run(method, _cancellationTokenSource.Token);
             }
-        }
-
-
-        public async ValueTask DisposeAsync()
-        {
-        }
-
-        public Task Push(ConsumeResult<byte[], byte[]> partition, Func<Task> method, CancellationToken cancellationToken = default)
-        {
-            return _data[partition.TopicPartition].Push(method);
-        }
-
-        public Task Run(ConsumeResult<byte[], byte[]> partition, Func<Task> method, CancellationToken cancellationToken = default)
-        {
-            return _data[partition.TopicPartition].Run(method);
         }
     }
 }

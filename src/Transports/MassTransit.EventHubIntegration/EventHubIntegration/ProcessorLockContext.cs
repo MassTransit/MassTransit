@@ -12,10 +12,10 @@ namespace MassTransit.EventHubIntegration
         IProcessorLockContext,
         ProcessorClientBuilderContext
     {
-        readonly SingleThreadedDictionary<string, PartitionCheckpointData> _data = new SingleThreadedDictionary<string, PartitionCheckpointData>();
-        readonly ProcessorContext _context;
-        readonly ReceiveSettings _receiveSettings;
         readonly CancellationToken _cancellationToken;
+        readonly ProcessorContext _context;
+        readonly SingleThreadedDictionary<string, PartitionCheckpointData> _data = new SingleThreadedDictionary<string, PartitionCheckpointData>();
+        readonly ReceiveSettings _receiveSettings;
 
         public ProcessorLockContext(ProcessorContext context, ReceiveSettings receiveSettings, CancellationToken cancellationToken)
         {
@@ -24,12 +24,11 @@ namespace MassTransit.EventHubIntegration
             _cancellationToken = cancellationToken;
         }
 
-        public async Task Pending(ProcessEventArgs eventArgs)
+        public Task Pending(ProcessEventArgs eventArgs)
         {
             LogContext.SetCurrentIfNull(_context.LogContext);
 
-            if (_data.TryGetValue(eventArgs.Partition.PartitionId, out var data))
-                await data.Pending(eventArgs).ConfigureAwait(false);
+            return _data.TryGetValue(eventArgs.Partition.PartitionId, out var data) ? data.Pending(eventArgs) : Task.CompletedTask;
         }
 
         public Task Faulted(ProcessEventArgs eventArgs, Exception exception)
@@ -52,14 +51,28 @@ namespace MassTransit.EventHubIntegration
             return Task.CompletedTask;
         }
 
-        public async Task OnPartitionInitializing(PartitionInitializingEventArgs eventArgs)
+        public async ValueTask DisposeAsync()
+        {
+        }
+
+        public Task Push(ProcessEventArgs partition, Func<Task> method, CancellationToken cancellationToken = default)
+        {
+            return _data[partition.Partition.PartitionId].Push(method);
+        }
+
+        public Task Run(ProcessEventArgs partition, Func<Task> method, CancellationToken cancellationToken = default)
+        {
+            return _data[partition.Partition.PartitionId].Run(method);
+        }
+
+        public Task OnPartitionInitializing(PartitionInitializingEventArgs eventArgs)
         {
             LogContext.SetCurrentIfNull(_context.LogContext);
 
-            if (!_data.TryAdd(eventArgs.PartitionId, _ => new PartitionCheckpointData(_receiveSettings, _cancellationToken)))
-                return;
+            if (_data.TryAdd(eventArgs.PartitionId, _ => new PartitionCheckpointData(_receiveSettings, _cancellationToken)))
+                LogContext.Info?.Log("Partition: {PartitionId} was initialized", eventArgs.PartitionId);
 
-            LogContext.Info?.Log("Partition: {PartitionId} was initialized", eventArgs.PartitionId);
+            return Task.CompletedTask;
         }
 
         public async Task OnPartitionClosing(PartitionClosingEventArgs eventArgs)
@@ -77,10 +90,10 @@ namespace MassTransit.EventHubIntegration
         sealed class PartitionCheckpointData
         {
             readonly CancellationToken _cancellationToken;
+            readonly CancellationTokenSource _cancellationTokenSource;
+            readonly ICheckpointer _checkpointer;
             readonly ChannelExecutor _executor;
             readonly PendingConfirmationCollection _pending;
-            readonly ICheckpointer _checkpointer;
-            readonly CancellationTokenSource _cancellationTokenSource;
 
             public PartitionCheckpointData(ReceiveSettings settings, CancellationToken cancellationToken)
             {
@@ -134,21 +147,6 @@ namespace MassTransit.EventHubIntegration
             {
                 return _executor.Run(method, _cancellationTokenSource.Token);
             }
-        }
-
-
-        public async ValueTask DisposeAsync()
-        {
-        }
-
-        public Task Push(ProcessEventArgs partition, Func<Task> method, CancellationToken cancellationToken = default)
-        {
-            return _data[partition.Partition.PartitionId].Push(method);
-        }
-
-        public Task Run(ProcessEventArgs partition, Func<Task> method, CancellationToken cancellationToken = default)
-        {
-            return _data[partition.Partition.PartitionId].Run(method);
         }
     }
 }

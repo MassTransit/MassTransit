@@ -61,7 +61,7 @@ namespace MassTransit.EventHubIntegration
             return context;
         }
 
-        public async Task Send<T>(ProducerContext producerContext, EventHubSendContext<T> sendContext)
+        public Task Send<T>(ProducerContext producerContext, EventHubSendContext<T> sendContext)
             where T : class
         {
             EventHubMessageSendContext<T> context = sendContext as EventHubMessageSendContext<T>
@@ -97,7 +97,7 @@ namespace MassTransit.EventHubIntegration
 
             context.CancellationToken.ThrowIfCancellationRequested();
 
-            await producerContext.Produce(new[] { eventData }, options, context.CancellationToken).ConfigureAwait(false);
+            return producerContext.Produce(new[] { eventData }, options, context.CancellationToken);
         }
 
         public async Task Send<T>(ProducerContext producerContext, EventHubSendContext<T>[] sendContexts)
@@ -157,7 +157,7 @@ namespace MassTransit.EventHubIntegration
 
                 while (!eventDataBatch.TryAdd(eventData) && eventDataBatch.Count > 0)
                 {
-                    await FlushAsync(eventDataBatch);
+                    await FlushAsync(eventDataBatch).ConfigureAwait(false);
 
                     if (sendContexts.Length - i > 1)
                         eventDataBatch = await producerContext.CreateBatch(options, context.CancellationToken).ConfigureAwait(false);
@@ -165,7 +165,7 @@ namespace MassTransit.EventHubIntegration
             }
 
             if (eventDataBatch.Count > 0)
-                await FlushAsync(eventDataBatch);
+                await FlushAsync(eventDataBatch).ConfigureAwait(false);
         }
 
         public Task Send(IPipe<ProducerContext> pipe, CancellationToken cancellationToken)
