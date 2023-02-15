@@ -188,6 +188,25 @@ namespace MassTransit
         bool? EnableBackgroundPoll { set; }
 
         /// <summary>
+        ///     Set the handler to call on statistics events. Statistics are provided as
+        ///     a JSON formatted string as defined here:
+        ///     https://github.com/edenhill/librdkafka/blob/master/STATISTICS.md
+        /// </summary>
+        /// <remarks>
+        ///     You can enable statistics and set the statistics interval
+        ///     using the StatisticsIntervalMs configuration property
+        ///     (disabled by default).
+        ///
+        ///     Executes on the poll thread (by default, a background thread managed by
+        ///     the producer).
+        ///
+        ///     Exceptions: Any exception thrown by your statistics handler
+        ///     will be devivered to your error handler, if set, else they will be
+        ///     silently ignored.
+        /// </remarks>
+        void SetStatisticsHandler(Action<string> statisticsHandler);
+
+        /// <summary>
         /// Set the serializer to use to serialize headers.
         /// </summary>
         /// <param name="serializer"></param>

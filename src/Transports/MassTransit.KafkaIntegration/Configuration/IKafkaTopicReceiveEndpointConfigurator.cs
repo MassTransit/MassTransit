@@ -165,6 +165,26 @@
         void SetOffsetsCommittedHandler(Action<CommittedOffsets> offsetsCommittedHandler);
 
         /// <summary>
+        ///     Set the handler to call on statistics events. Statistics
+        ///     are provided as a JSON formatted string as defined here:
+        ///     https://github.com/edenhill/librdkafka/blob/master/STATISTICS.md
+        /// </summary>
+        /// <remarks>
+        ///     You can enable statistics and set the statistics interval
+        ///     using the StatisticsIntervalMs configuration property
+        ///     (disabled by default).
+        ///
+        ///     Executes as a side-effect of the Consume method (on the same
+        ///     thread).
+        ///
+        ///     Exceptions: Any exception thrown by your statistics handler
+        ///     will be wrapped in a ConsumeException with ErrorCode
+        ///     ErrorCode.Local_Application and thrown by the initiating call
+        ///     to Consume.
+        /// </remarks>
+        void SetStatisticsHandler(Action<string> statisticsHandler);
+
+        /// <summary>
         /// Create topic if not exists every time endpoint starts (admin permissions are required).
         /// </summary>
         /// <param name="configure"></param>
