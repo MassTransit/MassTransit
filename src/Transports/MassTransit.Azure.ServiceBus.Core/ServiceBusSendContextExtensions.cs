@@ -49,5 +49,11 @@
             if (context.TryGetPayload(out ServiceBusSendContext sendContext))
                 sendContext.PartitionKey = partitionKey;
         }
+
+        public static void SetLabel(this SendContext context, string label)
+        {
+            if (context.TryGetPayload(out ServiceBusSendContext sendContext))
+                sendContext.Label = label;
+        }
     }
 }

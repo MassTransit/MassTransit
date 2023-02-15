@@ -45,6 +45,8 @@
 
         public DateTime? ScheduledEnqueueTimeUtc { get; set; }
 
+        public string Label { get; set; }
+
         public string PartitionKey
         {
             get => _partitionKey;
@@ -120,6 +122,7 @@
             PartitionKey = ReadString(properties, PropertyNames.PartitionKey);
             SessionId = ReadString(properties, PropertyNames.SessionId);
             ReplyToSessionId = ReadString(properties, PropertyNames.ReplyToSessionId);
+            Label = ReadString(properties, PropertyNames.Label);
         }
 
         public override void WritePropertiesTo(IDictionary<string, object> properties)
@@ -132,6 +135,8 @@
                 properties[PropertyNames.SessionId] = SessionId;
             if (!string.IsNullOrWhiteSpace(ReplyToSessionId))
                 properties[PropertyNames.ReplyToSessionId] = ReplyToSessionId;
+            if (!string.IsNullOrWhiteSpace(Label))
+                properties[PropertyNames.Label] = Label;
         }
 
 
@@ -140,6 +145,7 @@
             public const string PartitionKey = "ASB-PartitionKey";
             public const string SessionId = "ASB-SessionId";
             public const string ReplyToSessionId = "ASB-ReplyToSessionId";
+            public const string Label = "ASB-Label";
         }
     }
 }
