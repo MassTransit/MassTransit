@@ -197,6 +197,9 @@ namespace MassTransit.AzureServiceBusTransport
             if (context.ReplyToSessionId != null)
                 message.ReplyToSessionId = context.ReplyToSessionId;
 
+            if (context.Label != null)
+                message.Subject = context.Label;
+
             return message;
         }
 

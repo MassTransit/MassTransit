@@ -25,6 +25,11 @@
         /// Set the replyToSessionId of the message
         /// </summary>
         string ReplyToSessionId { set; }
+
+        /// <summary>
+        /// Set the application specific label of the message
+        /// </summary>
+        string Label { set; }
     }
 
 
