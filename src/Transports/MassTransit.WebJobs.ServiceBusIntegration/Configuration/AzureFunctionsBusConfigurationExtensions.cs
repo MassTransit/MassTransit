@@ -50,12 +50,22 @@ namespace MassTransit
                         var connectionString = config[connectionStringConfigurationKey];
 
                         if (string.IsNullOrWhiteSpace(connectionString))
-                            throw new ArgumentNullException(connectionStringConfigurationKey, "A connection string must be used for Azure Functions.");
+                        {
+                            var ns = config["ServiceBusConnection__fullyQualifiedNamespace"]
+                                ?? config[$"{connectionStringConfigurationKey}__fullyQualifiedNamespace"];
+                            if (string.IsNullOrWhiteSpace(ns))
+                            {
+                                throw new ArgumentNullException(connectionStringConfigurationKey,
+                                    "The service bus connection string or namespace was not configured");
+                            }
+
+                            connectionString = $"Endpoint=sb://{ns}";
+                        }
 
                         cfg.Host(connectionString, h =>
                         {
                             if (IsMissingCredentials(connectionString))
-                                h.TokenCredential = new ManagedIdentityCredential();
+                                h.TokenCredential = new DefaultAzureCredential();
                         });
 
                         cfg.UseServiceBusMessageScheduler();
