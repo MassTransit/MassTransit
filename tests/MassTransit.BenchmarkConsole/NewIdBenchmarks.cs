@@ -16,11 +16,19 @@ namespace MassTransit.BenchmarkConsole
             AddJob(
                 Job.Default.WithEnvironmentVariable(new EnvironmentVariable("COMPlus_EnableSSE2", "0")).WithRuntime(CoreRuntime.Core60).AsDefault());
 
+            AddJob(
+                Job.Default.WithEnvironmentVariable(new EnvironmentVariable("COMPlus_EnableSSE2", "0")).WithRuntime(CoreRuntime.Core70));
+
             // Run with intrinsics
             AddJob(
                 Job.Default.WithRuntime(CoreRuntime.Core60));
+            AddJob(
+                Job.Default.WithRuntime(CoreRuntime.Core70));
+            AddJob(
+                Job.Default.WithRuntime(CoreRuntime.Core31));
         }
     }
+
 
     [Config(typeof(Config))]
     [MemoryDiagnoser(false)]
