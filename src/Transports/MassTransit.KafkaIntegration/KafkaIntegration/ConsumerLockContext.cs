@@ -57,8 +57,9 @@ namespace MassTransit.KafkaIntegration
             return Task.CompletedTask;
         }
 
-        public async ValueTask DisposeAsync()
+        public ValueTask DisposeAsync()
         {
+            return default;
         }
 
         public Task Push(ConsumeResult<byte[], byte[]> partition, Func<Task> method, CancellationToken cancellationToken = default)

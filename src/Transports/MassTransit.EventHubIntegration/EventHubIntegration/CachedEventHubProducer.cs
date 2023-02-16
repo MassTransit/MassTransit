@@ -22,14 +22,13 @@ namespace MassTransit.EventHubIntegration
 
         public TKey Key { get; }
 
-        public async ValueTask DisposeAsync()
+        public ValueTask DisposeAsync()
         {
-            switch (_producer)
+            return _producer switch
             {
-                case IAsyncDisposable disposable:
-                    await disposable.DisposeAsync().ConfigureAwait(false);
-                    break;
-            }
+                IAsyncDisposable disposable => disposable.DisposeAsync(),
+                _ => default
+            };
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)

@@ -29,10 +29,13 @@ namespace MassTransitBenchmark.Latency
             return Task.CompletedTask;
         }
 
-        public async ValueTask DisposeAsync()
+        public ValueTask DisposeAsync()
         {
-            if (_mediator is IAsyncDisposable asyncDisposable)
-                await asyncDisposable.DisposeAsync();
+            return _mediator switch
+            {
+                IAsyncDisposable disposable => disposable.DisposeAsync(),
+                _ => default
+            };
         }
     }
 }

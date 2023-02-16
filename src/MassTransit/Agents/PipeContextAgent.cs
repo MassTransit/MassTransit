@@ -44,10 +44,15 @@
 
             if (_context.Status == TaskStatus.RanToCompletion)
             {
-                if (_context.Result is IAsyncDisposable asyncDisposable)
-                    await asyncDisposable.DisposeAsync().ConfigureAwait(false);
-                else if (_context.Result is IDisposable disposable)
-                    disposable.Dispose();
+                switch (_context.Result)
+                {
+                    case IAsyncDisposable asyncDisposable:
+                        await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+                        break;
+                    case IDisposable disposable:
+                        disposable.Dispose();
+                        break;
+                }
             }
 
             SetCompleted(_inactive.Task);

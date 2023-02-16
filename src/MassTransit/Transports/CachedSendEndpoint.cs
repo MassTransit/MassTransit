@@ -21,14 +21,13 @@ namespace MassTransit.Transports
 
         public TKey Key { get; }
 
-        async ValueTask IAsyncDisposable.DisposeAsync()
+        ValueTask IAsyncDisposable.DisposeAsync()
         {
-            switch (_endpoint)
+            return _endpoint switch
             {
-                case IAsyncDisposable disposable:
-                    await disposable.DisposeAsync().ConfigureAwait(false);
-                    break;
-            }
+                IAsyncDisposable disposable => disposable.DisposeAsync(),
+                _ => default
+            };
         }
 
         public event Action Used;

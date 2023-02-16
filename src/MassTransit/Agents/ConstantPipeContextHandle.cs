@@ -23,10 +23,15 @@
             if (_disposed)
                 return;
 
-            if (_context is IAsyncDisposable asyncDisposable)
-                await asyncDisposable.DisposeAsync().ConfigureAwait(false);
-            else if (_context is IDisposable disposable)
-                disposable.Dispose();
+            switch (_context)
+            {
+                case IAsyncDisposable asyncDisposable:
+                    await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+                    break;
+                case IDisposable disposable:
+                    disposable.Dispose();
+                    break;
+            }
 
             _disposed = true;
         }

@@ -51,8 +51,9 @@ namespace MassTransit.EventHubIntegration
             return Task.CompletedTask;
         }
 
-        public async ValueTask DisposeAsync()
+        public ValueTask DisposeAsync()
         {
+            return default;
         }
 
         public Task Push(ProcessEventArgs partition, Func<Task> method, CancellationToken cancellationToken = default)

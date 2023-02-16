@@ -20,14 +20,13 @@ namespace MassTransit.KafkaIntegration.Caching
 
         public event Action Used;
 
-        public async ValueTask DisposeAsync()
+        public ValueTask DisposeAsync()
         {
-            switch (_topicProducer)
+            return _topicProducer switch
             {
-                case IAsyncDisposable disposable:
-                    await disposable.DisposeAsync().ConfigureAwait(false);
-                    break;
-            }
+                IAsyncDisposable disposable => disposable.DisposeAsync(),
+                _ => default
+            };
         }
 
         public T Key { get; }

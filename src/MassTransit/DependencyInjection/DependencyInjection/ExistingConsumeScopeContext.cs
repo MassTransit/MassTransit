@@ -18,9 +18,10 @@
 
         public ConsumeContext Context { get; }
 
-        public async ValueTask DisposeAsync()
+        public ValueTask DisposeAsync()
         {
             _disposable?.Dispose();
+            return default;
         }
     }
 
@@ -39,9 +40,10 @@
             _disposable = disposable;
         }
 
-        public async ValueTask DisposeAsync()
+        public ValueTask DisposeAsync()
         {
             _disposable?.Dispose();
+            return default;
         }
 
         public T GetService<T>()

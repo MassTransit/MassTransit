@@ -34,12 +34,15 @@
         IMessageSerializer Serializer { get; }
         ISerialization Serialization { get; }
 
-        public async ValueTask DisposeAsync()
+        public ValueTask DisposeAsync()
         {
             _observerHandle?.Disconnect();
 
-            if (_transport is IAsyncDisposable disposable)
-                await disposable.DisposeAsync().ConfigureAwait(false);
+            return _transport switch
+            {
+                IAsyncDisposable disposable => disposable.DisposeAsync(),
+                _ => default
+            };
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)

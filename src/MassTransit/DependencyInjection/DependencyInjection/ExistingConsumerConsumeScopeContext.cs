@@ -19,9 +19,10 @@ namespace MassTransit.DependencyInjection
 
         public ConsumerConsumeContext<TConsumer, T> Context { get; }
 
-        public async ValueTask DisposeAsync()
+        public ValueTask DisposeAsync()
         {
             _disposable?.Dispose();
+            return default;
         }
     }
 }

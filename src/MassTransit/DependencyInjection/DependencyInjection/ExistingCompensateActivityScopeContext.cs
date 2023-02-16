@@ -22,9 +22,10 @@
 
         public CompensateActivityContext<TActivity, TLog> Context { get; }
 
-        public async ValueTask DisposeAsync()
+        public ValueTask DisposeAsync()
         {
             _disposable?.Dispose();
+            return default;
         }
 
         public T GetService<T>()

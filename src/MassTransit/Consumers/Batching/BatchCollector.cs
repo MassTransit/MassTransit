@@ -25,9 +25,9 @@ namespace MassTransit.Batching
             _dispatcher = new ChannelExecutor(options.ConcurrencyLimit);
         }
 
-        public async ValueTask DisposeAsync()
+        public ValueTask DisposeAsync()
         {
-            await _collector.DisposeAsync().ConfigureAwait(false);
+            return _collector.DisposeAsync();
         }
 
         public Task<BatchConsumer<TMessage>> Collect(ConsumeContext<TMessage> context)
@@ -98,9 +98,9 @@ namespace MassTransit.Batching
             _collectors = new Dictionary<TKey, BatchConsumer<TMessage>>();
         }
 
-        public async ValueTask DisposeAsync()
+        public ValueTask DisposeAsync()
         {
-            await _collector.DisposeAsync().ConfigureAwait(false);
+            return _collector.DisposeAsync();
         }
 
         public Task<BatchConsumer<TMessage>> Collect(ConsumeContext<TMessage> context)

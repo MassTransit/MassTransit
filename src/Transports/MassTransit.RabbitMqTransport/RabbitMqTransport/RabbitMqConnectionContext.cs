@@ -66,7 +66,7 @@ namespace MassTransit.RabbitMqTransport
             return new RabbitMqModelContext(this, model, cancellationToken);
         }
 
-        public async ValueTask DisposeAsync()
+        public ValueTask DisposeAsync()
         {
             Connection.ConnectionShutdown -= OnConnectionShutdown;
 
@@ -76,7 +76,7 @@ namespace MassTransit.RabbitMqTransport
 
             TransportLogMessages.DisconnectedHost(Description);
 
-            await _executor.DisposeAsync().ConfigureAwait(false);
+            return _executor.DisposeAsync();
         }
 
         void OnConnectionShutdown(object connection, ShutdownEventArgs reason)
