@@ -43,8 +43,7 @@ namespace MassTransit.QuartzIntegration
                 .WithSchedule(SimpleScheduleBuilder.Create().WithMisfireHandlingInstructionFireNow())
                 .WithIdentity(triggerKey);
 
-            var trigger = await PopulateTrigger(context, builder, messageBody, context.Message.Destination, context.MessageId, context.Message.CorrelationId)
-                .ConfigureAwait(false);
+            var trigger = PopulateTrigger(context, builder, messageBody, context.Message.Destination, context.MessageId, context.Message.CorrelationId);
 
             var scheduler = await _schedulerFactory.GetScheduler(context.CancellationToken).ConfigureAwait(false);
 
@@ -93,8 +92,8 @@ namespace MassTransit.QuartzIntegration
             if (schedule.EndTime.HasValue)
                 triggerBuilder.EndAt(schedule.EndTime);
 
-            var trigger = await PopulateTrigger(context, triggerBuilder, messageBody, context.Message.Destination, context.MessageId,
-                context.Message.CorrelationId).ConfigureAwait(false);
+            var trigger = PopulateTrigger(context, triggerBuilder, messageBody, context.Message.Destination, context.MessageId,
+                context.Message.CorrelationId);
 
             var scheduler = await _schedulerFactory.GetScheduler(context.CancellationToken).ConfigureAwait(false);
 
@@ -106,7 +105,7 @@ namespace MassTransit.QuartzIntegration
             LogContext.Debug?.Log("Scheduled: {Key} {Schedule}", triggerKey, trigger.GetNextFireTimeUtc());
         }
 
-        static async Task<ITrigger> PopulateTrigger(ConsumeContext context, TriggerBuilder builder, MessageBody messageBody, Uri destination,
+        static ITrigger PopulateTrigger(ConsumeContext context, TriggerBuilder builder, MessageBody messageBody, Uri destination,
             Guid? messageId = default, Guid? tokenId = default)
         {
             builder = builder

@@ -52,16 +52,14 @@ namespace MassTransit.QuartzIntegration
             return Task.CompletedTask;
         }
 
-        public async Task PreStop(IBus bus)
+        public Task PreStop(IBus bus)
         {
-            if (_scheduler != null)
-                await _scheduler.Standby().ConfigureAwait(false);
+            return _scheduler != null ? _scheduler.Standby() : Task.CompletedTask;
         }
 
-        public async Task PostStop(IBus bus)
+        public Task PostStop(IBus bus)
         {
-            if (_scheduler != null)
-                await _scheduler.Shutdown(_options.Value.WaitForJobsToComplete).ConfigureAwait(false);
+            return _scheduler != null ? _scheduler.Shutdown(_options.Value.WaitForJobsToComplete) : Task.CompletedTask;
         }
 
         public Task StopFaulted(IBus bus, Exception exception)

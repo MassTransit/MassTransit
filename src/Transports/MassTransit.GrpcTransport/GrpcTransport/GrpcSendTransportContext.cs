@@ -55,7 +55,7 @@ namespace MassTransit.GrpcTransport
             return CreateSendContext(message, pipe, cancellationToken);
         }
 
-        public async Task Send<T>(PipeContext transportContext, SendContext<T> sendContext)
+        public Task Send<T>(PipeContext transportContext, SendContext<T> sendContext)
             where T : class
         {
             TransportGrpcSendContext<T> context = sendContext as TransportGrpcSendContext<T>
@@ -100,7 +100,7 @@ namespace MassTransit.GrpcTransport
 
             var grpcTransportMessage = new GrpcTransportMessage(transportMessage, HostMetadataCache.Host);
 
-            await _exchange.Send(grpcTransportMessage, context.CancellationToken).ConfigureAwait(false);
+            return _exchange.Send(grpcTransportMessage, context.CancellationToken);
         }
 
         public Task Send(IPipe<PipeContext> pipe, CancellationToken cancellationToken = default)

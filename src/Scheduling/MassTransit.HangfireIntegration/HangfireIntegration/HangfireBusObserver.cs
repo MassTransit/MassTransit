@@ -36,7 +36,7 @@ namespace MassTransit.HangfireIntegration
             return Task.CompletedTask;
         }
 
-        public async Task PostStart(IBus bus, Task<BusReady> busReady)
+        public Task PostStart(IBus bus, Task<BusReady> busReady)
         {
             var options = _options.Value;
             options.Queues = new[] { HangfireEndpointOptions.DefaultQueueName };
@@ -44,7 +44,7 @@ namespace MassTransit.HangfireIntegration
 
             _server = new BackgroundJobServer(options, _jobStorage);
 
-            await busReady.ConfigureAwait(false);
+            return busReady;
         }
 
         public Task StartFaulted(IBus bus, Exception exception)

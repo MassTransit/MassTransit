@@ -87,13 +87,12 @@ namespace MassTransit.KafkaIntegration
                     _consumeContext = consumeContext;
                 }
 
-                public async Task Send(KafkaSendContext<TKey, TValue> context)
+                public Task Send(KafkaSendContext<TKey, TValue> context)
                 {
                     if (_consumeContext != null)
                         context.TransferConsumeContextHeaders(_consumeContext);
 
-                    if (_pipe.IsNotEmpty())
-                        await _pipe.Send(context).ConfigureAwait(false);
+                    return _pipe.IsNotEmpty() ? _pipe.Send(context) : Task.CompletedTask;
                 }
 
                 public void Probe(ProbeContext context)
@@ -101,9 +100,10 @@ namespace MassTransit.KafkaIntegration
                     _pipe.Probe(context);
                 }
 
-                public async Task Send<T>(SendContext<T> context)
+                public Task Send<T>(SendContext<T> context)
                     where T : class
                 {
+                    return Task.CompletedTask;
                 }
             }
         }

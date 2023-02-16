@@ -104,7 +104,7 @@
             }
         }
 
-        async Task HandleDeliveryComplete()
+        Task HandleDeliveryComplete()
         {
             if (IsStopping)
             {
@@ -112,6 +112,8 @@
 
                 _deliveryComplete.TrySetResult(true);
             }
+
+            return Task.CompletedTask;
         }
 
         protected override Task StopAgent(StopContext context)

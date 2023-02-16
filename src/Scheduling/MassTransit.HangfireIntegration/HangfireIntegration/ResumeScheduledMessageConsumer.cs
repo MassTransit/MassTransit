@@ -19,7 +19,7 @@
             _jobStorage = jobStorage;
         }
 
-        public async Task Consume(ConsumeContext<ResumeScheduledRecurringMessage> context)
+        public Task Consume(ConsumeContext<ResumeScheduledRecurringMessage> context)
         {
             var jobKey = JobKey.Create(context.Message.ScheduleId, context.Message.ScheduleGroup);
 
@@ -33,7 +33,7 @@
                     context.Message.ScheduleId,
                     context.Message.ScheduleGroup, context.Message.Timestamp);
 
-                return;
+                return Task.CompletedTask;
             }
 
             var cron = connection.GetJobParameter(jobKey, "MT-OriginalCron");
@@ -42,6 +42,8 @@
 
             LogContext.Debug?.Log("ResumeScheduledRecurringMessage: {ScheduleId}/{ScheduleGroup} at {Timestamp}", context.Message.ScheduleId,
                 context.Message.ScheduleGroup, context.Message.Timestamp);
+
+            return Task.CompletedTask;
         }
     }
 }

@@ -21,7 +21,7 @@ namespace MassTransit.HangfireIntegration
             _jobStorage = jobStorage;
         }
 
-        public async Task Consume(ConsumeContext<CancelScheduledMessage> context)
+        public Task Consume(ConsumeContext<CancelScheduledMessage> context)
         {
             using var connection = _jobStorage.GetConnection();
             using var transaction = connection.CreateWriteTransaction();
@@ -35,9 +35,10 @@ namespace MassTransit.HangfireIntegration
                 LogContext.Debug?.Log("CancelScheduledMessage: no message found for {Id}", jobId);
 
             transaction.Commit();
+            return Task.CompletedTask;
         }
 
-        public async Task Consume(ConsumeContext<ScheduleMessage> context)
+        public Task Consume(ConsumeContext<ScheduleMessage> context)
         {
             var id = context.Message.CorrelationId.ToString("N");
             var message = HashedHangfireScheduledMessageData.Create(context, id);
@@ -52,6 +53,7 @@ namespace MassTransit.HangfireIntegration
             transaction.SetRangeInHash(id, new Dictionary<string, string> { [JobIdKey] = jobId });
             LogContext.Debug?.Log("Scheduled: {Id}", jobId);
             transaction.Commit();
+            return Task.CompletedTask;
         }
 
         bool TryRemoveJob(IStorageConnection connection, string id, out string? jobId)

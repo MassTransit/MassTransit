@@ -129,7 +129,7 @@ namespace MassTransit.GrpcTransport
             return new GrpcClient(_hostConfiguration, _hostNode, client, node);
         }
 
-        async Task Startup()
+        Task Startup()
         {
             _server.Start();
 
@@ -142,7 +142,7 @@ namespace MassTransit.GrpcTransport
                 Add(client);
             }
 
-            await Task.WhenAll(_clients.Select(x => x.Ready)).OrCanceled(Stopping).ConfigureAwait(false);
+            return Task.WhenAll(_clients.Select(x => x.Ready)).OrCanceled(Stopping);
         }
 
         static IEnumerable<ChannelOption> GetChannelOptions()

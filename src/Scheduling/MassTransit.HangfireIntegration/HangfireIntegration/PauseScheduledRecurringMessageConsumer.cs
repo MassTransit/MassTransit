@@ -19,7 +19,7 @@
             _jobStorage = jobStorage;
         }
 
-        public async Task Consume(ConsumeContext<PauseScheduledRecurringMessage> context)
+        public Task Consume(ConsumeContext<PauseScheduledRecurringMessage> context)
         {
             var jobKey = JobKey.Create(context.Message.ScheduleId, context.Message.ScheduleGroup);
 
@@ -33,7 +33,7 @@
                     context.Message.ScheduleId,
                     context.Message.ScheduleGroup, context.Message.Timestamp);
 
-                return;
+                return Task.CompletedTask;
             }
 
             using var transaction = connection.CreateWriteTransaction();
@@ -46,6 +46,8 @@
 
             LogContext.Debug?.Log("PauseScheduledRecurringMessage: {ScheduleId}/{ScheduleGroup} at {Timestamp}", context.Message.ScheduleId,
                 context.Message.ScheduleGroup, context.Message.Timestamp);
+
+            return Task.CompletedTask;
         }
     }
 }

@@ -19,15 +19,16 @@ namespace MassTransit.HangfireIntegration
             _timeZoneResolver = timeZoneResolver;
         }
 
-        public async Task Consume(ConsumeContext<CancelScheduledRecurringMessage> context)
+        public Task Consume(ConsumeContext<CancelScheduledRecurringMessage> context)
         {
             var jobKey = JobKey.Create(context.Message.ScheduleId, context.Message.ScheduleGroup);
             _recurringJobManager.RemoveIfExists(jobKey);
 
             LogContext.Debug?.Log("Canceled Recurring Message: {Key}", jobKey);
+            return Task.CompletedTask;
         }
 
-        public async Task Consume(ConsumeContext<ScheduleRecurringMessage> context)
+        public Task Consume(ConsumeContext<ScheduleRecurringMessage> context)
         {
             var jobKey = JobKey.Create(context.Message.Schedule.ScheduleId, context.Message.Schedule.ScheduleGroup);
             var message = HangfireRecurringScheduledMessageData.Create(context, jobKey);
@@ -43,6 +44,7 @@ namespace MassTransit.HangfireIntegration
                 tz);
 
             LogContext.Debug?.Log("Scheduled: {Key}", jobKey);
+            return Task.CompletedTask;
         }
     }
 }
