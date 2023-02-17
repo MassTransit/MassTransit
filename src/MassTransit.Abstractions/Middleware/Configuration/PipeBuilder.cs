@@ -2,6 +2,10 @@ namespace MassTransit.Configuration
 {
     using System.Collections.Generic;
     using Middleware;
+#if NET6_0_OR_GREATER
+    using System;
+    using System.Runtime.InteropServices;
+#endif
 
 
     public class PipeBuilder<TContext> :
@@ -25,6 +29,21 @@ namespace MassTransit.Configuration
             _filters.Add(filter);
         }
 
+    #if NET6_0_OR_GREATER
+        public IPipe<TContext> Build()
+        {
+            Span<IFilter<TContext>> items = CollectionsMarshal.AsSpan(_filters);
+            if (items.Length == 0)
+                return Pipe.Empty<TContext>();
+
+            IPipe<TContext> current = new LastPipe<TContext>(items[items.Length - 1]);
+
+            for (var i = items.Length - 2; i >= 0; i--)
+                current = new FilterPipe<TContext>(items[i], current);
+
+            return current;
+        }
+    #else
         public IPipe<TContext> Build()
         {
             if (_filters.Count == 0)
@@ -37,5 +56,6 @@ namespace MassTransit.Configuration
 
             return current;
         }
+    #endif
     }
 }
