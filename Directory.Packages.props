@@ -4,9 +4,9 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Apache.NMS.ActiveMQ.NetStd" Version="1.8.0" />
-    <PackageVersion Include="AWSSDK.DynamoDBv2" Version="3.7.101.41" />
-    <PackageVersion Include="AWSSDK.SimpleNotificationService" Version="3.7.101.6" />
-    <PackageVersion Include="AWSSDK.SQS" Version="3.7.100.70" />
+    <PackageVersion Include="AWSSDK.DynamoDBv2" Version="3.7.101.48" />
+    <PackageVersion Include="AWSSDK.SimpleNotificationService" Version="3.7.101.13" />
+    <PackageVersion Include="AWSSDK.SQS" Version="3.7.100.77" />
     <PackageVersion Include="Azure.Identity" Version="1.8.2" />
     <PackageVersion Include="Azure.Messaging.EventHubs.Processor" Version="5.7.5" />
     <PackageVersion Include="Azure.Messaging.ServiceBus" Version="7.12.0" />
@@ -17,7 +17,7 @@
     <PackageVersion Include="coverlet.collector" Version="3.1.2" />
     <PackageVersion Include="dapper.contrib" Version="2.0.78" />
     <PackageVersion Include="EntityFramework" Version="6.4.4" />
-    <PackageVersion Include="Google.Protobuf" Version="3.21.12" />
+    <PackageVersion Include="Google.Protobuf" Version="3.22.0" />
     <PackageVersion Include="Grpc.Core" Version="2.46.6" />
     <PackageVersion Include="Grpc.Net.Client" Version="2.51.0" />
     <PackageVersion Include="Grpc.Tools" Version="2.51.0" />
@@ -38,7 +38,7 @@
     <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="5.8.1" />
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.8.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.11.0" />
     <PackageVersion Include="Microsoft.Data.SqlClient" Version="2.1.5" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.1" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.18" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
