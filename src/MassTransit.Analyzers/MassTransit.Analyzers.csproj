@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <Authors>Remco Blok, $(Authors)</Authors>
+    <Authors>Remco Blok</Authors>
     <PackageTags>MassTransit</PackageTags>
     <Description>$(Description)</Description>
     <NoPackageAnalysis>true</NoPackageAnalysis>
