@@ -195,7 +195,7 @@ namespace MassTransit.Serialization.JsonConverters
                     if (reader.TryGetInt64(out var result))
                         return result;
 
-                    return reader.GetDecimal();
+                    return reader.GetDouble();
 
                 case JsonTokenType.StartObject:
                     return ReadObject(ref reader, options);
