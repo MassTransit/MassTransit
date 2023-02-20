@@ -1,4 +1,4 @@
-﻿namespace MassTransit.MessageData
+namespace MassTransit.MessageData
 {
     using System;
     using System.Collections.Concurrent;

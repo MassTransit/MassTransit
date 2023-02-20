@@ -3,7 +3,6 @@
     using System;
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using Shouldly;
     using TestFramework;
     using TestFramework.Messages;
 
@@ -19,7 +18,7 @@
 
             ConsumeContext<PingMessage> context = await _handled;
 
-            context.ConversationId.HasValue.ShouldBe(true);
+            Assert.That(context.ConversationId.HasValue, Is.True);
         }
 
         Task<ConsumeContext<PingMessage>> _handled;
@@ -42,7 +41,7 @@
 
             ConsumeContext<PingMessage> context = await _handled;
 
-            context.ConversationId.HasValue.ShouldBe(true);
+            Assert.That(context.ConversationId.HasValue, Is.True);
         }
 
         Task<ConsumeContext<PingMessage>> _handled;
@@ -67,13 +66,13 @@
 
             ConsumeContext<PingMessage> context = await _handled;
 
-            context.ConversationId.HasValue.ShouldBe(true);
+            Assert.That(context.ConversationId.HasValue, Is.True);
 
             ConsumeContext<PongMessage> responseContext = await responseHandled;
 
-            responseContext.ConversationId.HasValue.ShouldBe(true);
+            Assert.That(responseContext.ConversationId.HasValue, Is.True);
 
-            responseContext.ConversationId.ShouldBe(context.ConversationId);
+            Assert.That(responseContext.ConversationId, Is.EqualTo(context.ConversationId));
         }
 
         Task<ConsumeContext<PingMessage>> _handled;

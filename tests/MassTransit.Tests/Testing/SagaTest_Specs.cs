@@ -8,7 +8,6 @@ namespace MassTransit.Tests.Testing
     using MassTransit.Testing;
     using Newtonsoft.Json;
     using NUnit.Framework;
-    using Shouldly;
     using TestFramework;
 
 
@@ -71,40 +70,40 @@ namespace MassTransit.Tests.Testing
         [Test]
         public void Should_send_the_initial_message_to_the_consumer()
         {
-            _harness.Sent.Select<A>().Any().ShouldBe(true);
+            Assert.That(_harness.Sent.Select<A>().Any(), Is.True);
         }
 
         [Test]
         public void Should_receive_the_message_type_a()
         {
-            _harness.Consumed.Select<A>().Any().ShouldBe(true);
+            Assert.That(_harness.Consumed.Select<A>().Any(), Is.True);
         }
 
         [Test]
         public void Should_create_a_new_saga_for_the_message()
         {
-            _saga.Created.Select(x => x.CorrelationId == _sagaId).Any().ShouldBe(true);
+            Assert.That(_saga.Created.Select(x => x.CorrelationId == _sagaId).Any(), Is.True);
         }
 
         [Test]
         public void Should_have_the_saga_instance_with_the_value()
         {
             var saga = _saga.Created.Contains(_sagaId);
-            saga.ShouldNotBe(null);
+            Assert.That(saga, Is.Not.Null);
 
-            saga.ValueA.ShouldBe(_testValueA);
+            Assert.That(saga.ValueA, Is.EqualTo(_testValueA));
         }
 
         [Test]
         public void Should_have_published_event_message()
         {
-            _harness.Published.Select<Aa>().Any().ShouldBe(true);
+            Assert.That(_harness.Published.Select<Aa>().Any(), Is.True);
         }
 
         [Test]
         public void Should_have_called_the_consumer_method()
         {
-            _saga.Consumed.Select<A>().Any().ShouldBe(true);
+            Assert.That(_saga.Consumed.Select<A>().Any(), Is.True);
         }
 
 

@@ -2,7 +2,6 @@
 {
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using Shouldly;
     using TestFramework;
     using TestFramework.Messages;
 
@@ -22,7 +21,7 @@
 
             ConsumeContext<PongMessage> responseContext = await responseHandled;
 
-            responseContext.SourceAddress.ShouldBe(InputQueueAddress);
+            Assert.That(responseContext.SourceAddress, Is.EqualTo(InputQueueAddress));
         }
 
         Task<ConsumeContext<PingMessage>> _handled;

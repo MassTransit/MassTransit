@@ -3,7 +3,6 @@ namespace MassTransit.Containers.Tests.Scenarios
     using System;
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using Shouldly;
     using TestFramework;
     using Testing;
 
@@ -22,7 +21,7 @@ namespace MassTransit.Containers.Tests.Scenarios
 
             Guid? foundId = await GetSagaRepository<SimpleSaga>().ShouldContainSaga(message.CorrelationId, TestTimeout);
 
-            foundId.HasValue.ShouldBe(true);
+            Assert.That(foundId.HasValue, Is.True);
         }
 
         [Test]
@@ -36,7 +35,7 @@ namespace MassTransit.Containers.Tests.Scenarios
 
             Guid? foundId = await GetSagaRepository<SimpleSaga>().ShouldContainSaga(message.CorrelationId, TestTimeout);
 
-            foundId.HasValue.ShouldBe(true);
+            Assert.That(foundId.HasValue, Is.True);
 
             var nextMessage = new SecondSagaMessage {CorrelationId = sagaId};
 
@@ -44,7 +43,7 @@ namespace MassTransit.Containers.Tests.Scenarios
 
             foundId = await GetSagaRepository<SimpleSaga>().ShouldContainSaga(x => x.CorrelationId == sagaId && x.Second.IsCompleted, TestTimeout);
 
-            foundId.HasValue.ShouldBe(true);
+            Assert.That(foundId.HasValue, Is.True);
         }
 
         [Test]
@@ -58,7 +57,7 @@ namespace MassTransit.Containers.Tests.Scenarios
 
             Guid? foundId = await GetSagaRepository<SimpleSaga>().ShouldContainSaga(message.CorrelationId, TestTimeout);
 
-            foundId.HasValue.ShouldBe(true);
+            Assert.That(foundId.HasValue, Is.True);
 
             var nextMessage = new ThirdSagaMessage {CorrelationId = sagaId};
 
@@ -66,7 +65,7 @@ namespace MassTransit.Containers.Tests.Scenarios
 
             foundId = await GetSagaRepository<SimpleSaga>().ShouldContainSaga(x => x.CorrelationId == sagaId && x.Third.IsCompleted, TestTimeout);
 
-            foundId.HasValue.ShouldBe(true);
+            Assert.That(foundId.HasValue, Is.True);
         }
 
         protected abstract ISagaRepository<T> GetSagaRepository<T>()

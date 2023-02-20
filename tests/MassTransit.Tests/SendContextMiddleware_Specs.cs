@@ -8,7 +8,6 @@ namespace MassTransit.Tests
     using MassTransit.Testing;
     using MassTransit.Testing.Implementations;
     using NUnit.Framework;
-    using Shouldly;
     using TestFramework;
 
 
@@ -149,23 +148,23 @@ namespace MassTransit.Tests
                 ISentMessage<A> a = sendObserver.Messages.Select<A>().FirstOrDefault();
                 ISentMessage<B> b = sendObserver.Messages.Select<B>().FirstOrDefault();
 
-                a.ShouldNotBeNull();
-                b.ShouldNotBeNull();
+                Assert.That(a, Is.Not.Null);
+                Assert.That(b, Is.Not.Null);
 
                 Dictionary<string, object> ah = a.Context.Headers.GetAll().ToDictionary(x => x.Key, x => x.Value);
                 Dictionary<string, object> bh = b.Context.Headers.GetAll().ToDictionary(x => x.Key, x => x.Value);
 
-                ah.ShouldContainKey("x-send-filter");
-                ah.ShouldContainKey("x-send-message-filter");
-                ah["x-send-filter"].ShouldBe("send-filter");
-                ah["x-send-message-filter"].ShouldBe("send-message-filter");
+                Assert.That(ah.ContainsKey("x-send-filter"), Is.True);
+                Assert.That(ah.ContainsKey("x-send-message-filter"), Is.True);
+                Assert.That(ah["x-send-filter"], Is.EqualTo("send-filter"));
+                Assert.That(ah["x-send-message-filter"], Is.EqualTo("send-message-filter"));
 
-                bh.ShouldContainKey("x-send-filter");
-                bh.ShouldContainKey("x-send-message-filter");
+                Assert.That(bh.ContainsKey("x-send-filter"),Is.True);
+                Assert.That(bh.ContainsKey("x-send-message-filter"), Is.True);
 
                 // those fails, as while they DO have ",has-consume-context" they don't have access to SomePayload
-                bh["x-send-filter"].ShouldBe("send-filter,has-consume-context,has-some-payload:hello");
-                bh["x-send-message-filter"].ShouldBe("send-message-filter,has-consume-context,has-some-payload:hello");
+                Assert.That(bh["x-send-filter"], Is.EqualTo("send-filter,has-consume-context,has-some-payload:hello"));
+                Assert.That(bh["x-send-message-filter"], Is.EqualTo("send-message-filter,has-consume-context,has-some-payload:hello"));
             }
         }
 
@@ -425,23 +424,23 @@ namespace MassTransit.Tests
                 IPublishedMessage<A> a = publishObserver.Messages.Select<A>().FirstOrDefault();
                 IPublishedMessage<B> b = publishObserver.Messages.Select<B>().FirstOrDefault();
 
-                a.ShouldNotBeNull();
-                b.ShouldNotBeNull();
+                Assert.That(a, Is.Not.Null);
+                Assert.That(b, Is.Not.Null);
 
                 Dictionary<string, object> ah = a.Context.Headers.GetAll().ToDictionary(x => x.Key, x => x.Value);
                 Dictionary<string, object> bh = b.Context.Headers.GetAll().ToDictionary(x => x.Key, x => x.Value);
 
-                ah.ShouldContainKey("x-send-filter");
-                ah.ShouldContainKey("x-send-message-filter");
-                ah["x-send-filter"].ShouldBe("send-filter");
-                ah["x-send-message-filter"].ShouldBe("send-message-filter");
+                Assert.That(ah.ContainsKey("x-send-filter"));
+                Assert.That(ah.ContainsKey("x-send-message-filter"));
+                Assert.That(ah["x-send-filter"], Is.EqualTo("send-filter"));
+                Assert.That(ah["x-send-message-filter"], Is.EqualTo("send-message-filter"));
 
-                bh.ShouldContainKey("x-send-filter");
-                bh.ShouldContainKey("x-send-message-filter");
+                Assert.That(bh.ContainsKey("x-send-filter"));
+                Assert.That(bh.ContainsKey("x-send-message-filter"));
 
                 // those fails, as while they DO have ",has-consume-context" they don't have access to SomePayload
-                bh["x-send-filter"].ShouldBe("send-filter,has-consume-context,has-some-payload:hello");
-                bh["x-send-message-filter"].ShouldBe("send-message-filter,has-consume-context,has-some-payload:hello");
+                Assert.That(bh["x-send-filter"], Is.EqualTo("send-filter,has-consume-context,has-some-payload:hello"));
+                Assert.That(bh["x-send-message-filter"], Is.EqualTo("send-message-filter,has-consume-context,has-some-payload:hello"));
             }
         }
 

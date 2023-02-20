@@ -8,7 +8,6 @@
     using MassTransit.Courier.Contracts;
     using MassTransit.Testing;
     using NUnit.Framework;
-    using Shouldly;
     using TestFramework;
     using TestFramework.Courier;
 
@@ -59,7 +58,7 @@
                     : "VisitUnknownFilter");
             }
 
-            completed.Status.ShouldBe(TaskStatus.RanToCompletion);
+            Assert.That(completed.Status, Is.EqualTo(TaskStatus.RanToCompletion));
         }
 
         int _intValue;
@@ -104,7 +103,7 @@
                     : "VisitUnknownFilter");
             }
 
-            completed.Status.ShouldBe(TaskStatus.RanToCompletion);
+            Assert.That(completed.Status, Is.EqualTo(TaskStatus.RanToCompletion));
         }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)

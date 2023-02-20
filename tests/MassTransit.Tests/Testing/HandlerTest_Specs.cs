@@ -4,8 +4,6 @@ namespace MassTransit.Tests.Testing
     using System.Threading.Tasks;
     using MassTransit.Testing;
     using NUnit.Framework;
-    using Shouldly;
-
 
     [TestFixture]
     public class Using_the_handler_test_factory
@@ -13,25 +11,25 @@ namespace MassTransit.Tests.Testing
         [Test]
         public void Should_have_received_a_message_of_type_a()
         {
-            _harness.Consumed.Select<A>().Any().ShouldBe(true);
+            Assert.That(_harness.Consumed.Select<A>().Any(), Is.True);
         }
 
         [Test]
         public void Should_have_sent_a_message_of_type_a()
         {
-            _harness.Sent.Select<A>().Any().ShouldBe(true);
+            Assert.That(_harness.Sent.Select<A>().Any(), Is.True);
         }
 
         [Test]
         public void Should_have_sent_a_message_of_type_b()
         {
-            _harness.Sent.Select<B>().Any().ShouldBe(true);
+            Assert.That(_harness.Sent.Select<B>().Any(), Is.True);
         }
 
         [Test]
         public void Should_support_a_simple_handler()
         {
-            _handler.Consumed.Select().Any().ShouldBe(true);
+            Assert.That(_handler.Consumed.Select().Any(), Is.True);
         }
 
         InMemoryTestHarness _harness;
@@ -73,31 +71,31 @@ namespace MassTransit.Tests.Testing
         [Test]
         public void Should_have_published_a_message_of_type_b()
         {
-            _harness.Published.Select<B>().Any().ShouldBe(true);
+            Assert.That(_harness.Published.Select<B>().Any(), Is.True);
         }
 
         [Test]
         public void Should_have_published_a_message_of_type_ib()
         {
-            _harness.Published.Select<IB>().Any().ShouldBe(true);
+            Assert.That(_harness.Published.Select<IB>().Any(), Is.True);
         }
 
         [Test]
         public void Should_have_received_a_message_of_type_a()
         {
-            _harness.Consumed.Select<A>().Any().ShouldBe(true);
+            Assert.That(_harness.Consumed.Select<A>().Any(), Is.True);
         }
 
         [Test]
         public void Should_have_sent_a_message_of_type_a()
         {
-            _harness.Published.Select<A>().Any().ShouldBe(true);
+            Assert.That(_harness.Published.Select<A>().Any(), Is.True);
         }
 
         [Test]
         public void Should_support_a_simple_handler()
         {
-            _handler.Consumed.Select().Any().ShouldBe(true);
+            Assert.That(_handler.Consumed.Select().Any(), Is.True);
         }
 
         InMemoryTestHarness _harness;

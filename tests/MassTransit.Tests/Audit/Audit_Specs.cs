@@ -4,7 +4,6 @@
     using System.Threading.Tasks;
     using MassTransit.Testing;
     using NUnit.Framework;
-    using Shouldly;
 
 
     [TestFixture]
@@ -15,7 +14,7 @@
         {
             var expected = _harness.Consumed.Select<A>().Any();
             var expectedB = _harness.Consumed.Select<B>().Any();
-            _store.Count(x => x.Result.Metadata.ContextType == "Consume").ShouldBe(2);
+            Assert.That(_store.Count(x => x.Result.Metadata.ContextType == "Consume"), Is.EqualTo(2));
         }
 
         [Test]
@@ -23,7 +22,7 @@
         {
             var expected = _harness.Sent.Select<A>().Any();
             var expectedB = _harness.Sent.Select<B>().Any();
-            _store.Count(x => x.Result.Metadata.ContextType == "Send").ShouldBe(2);
+            Assert.That(_store.Count(x => x.Result.Metadata.ContextType == "Send"), Is.EqualTo(2));
         }
 
         InMemoryTestHarness _harness;
