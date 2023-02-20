@@ -6,7 +6,6 @@
     using MassTransit.Middleware;
     using MassTransit.Testing;
     using NUnit.Framework;
-    using Shouldly;
 
 
     [TestFixture]
@@ -31,7 +30,7 @@
                 {
                     await externalHarness.Bus.Publish(new A());
 
-                    realConsumer.Consumed.Select<A>().Any().ShouldBeTrue();
+                    Assert.That(realConsumer.Consumed.Select<A>().Any(), Is.True);
                 }
                 finally
                 {

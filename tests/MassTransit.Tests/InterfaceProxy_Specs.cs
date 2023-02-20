@@ -3,7 +3,6 @@
     using System;
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using Shouldly;
     using TestFramework;
 
 
@@ -16,7 +15,7 @@
         {
             ConsumeContext<IProxyMe> message = await _handler;
 
-            message.Message.Address.OriginalString.ShouldBe(UriString);
+            Assert.That(message.Message.Address.OriginalString, Is.EqualTo(UriString));
         }
 
         [Test]
@@ -24,7 +23,7 @@
         {
             ConsumeContext<IProxyMe> message = await _handler;
 
-            message.Message.CorrelationId.ShouldBe(_correlationId);
+            Assert.That(message.Message.CorrelationId, Is.EqualTo(_correlationId));
         }
 
         [Test]
@@ -32,7 +31,7 @@
         {
             ConsumeContext<IProxyMe> message = await _handler;
 
-            message.Message.IntValue.ShouldBe(IntValue);
+            Assert.That(message.Message.IntValue, Is.EqualTo(IntValue));
         }
 
         [Test]
@@ -46,7 +45,7 @@
         {
             ConsumeContext<IProxyMe> message = await _handler;
 
-            message.Message.StringValue.ShouldBe(StringValue);
+            Assert.That(message.Message.StringValue, Is.EqualTo(StringValue));
         }
 
         const int IntValue = 42;

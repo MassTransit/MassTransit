@@ -14,7 +14,6 @@ namespace MassTransit.Tests.Serialization
     using Newtonsoft.Json.Linq;
     using Newtonsoft.Json.Serialization;
     using NUnit.Framework;
-    using Shouldly;
 
 
     public class When_serializing_messages_with_json_dot_net
@@ -113,11 +112,11 @@ namespace MassTransit.Tests.Serialization
                 result = _deserializer.Deserialize<Envelope>(jsonReader);
             }
 
-            result.MessageType.Count.ShouldBe(3);
-            result.MessageType[0].ShouldBe(typeof(TestMessage).ToMessageName());
-            result.MessageType[1].ShouldBe(typeof(MessageA).ToMessageName());
-            result.MessageType[2].ShouldBe(typeof(MessageB).ToMessageName());
-            result.Headers.Count.ShouldBe(1);
+            Assert.That(result.MessageType.Count, Is.EqualTo(3));
+            Assert.That(result.MessageType[0], Is.EqualTo(typeof(TestMessage).ToMessageName()));
+            Assert.That(result.MessageType[1], Is.EqualTo(typeof(MessageA).ToMessageName()));
+            Assert.That(result.MessageType[2], Is.EqualTo(typeof(MessageB).ToMessageName()));
+            Assert.That(result.Headers.Count, Is.EqualTo(1));
         }
 
         [Test]
@@ -137,7 +136,7 @@ namespace MassTransit.Tests.Serialization
 
                 _serializer.Populate(jsonReader, message);
 
-                message.Name.ShouldBe("Joe");
+                Assert.That(message.Name, Is.EqualTo("Joe"));
             }
         }
 
@@ -156,10 +155,10 @@ namespace MassTransit.Tests.Serialization
             {
                 var message = (TestMessage)_serializer.Deserialize(jsonReader, typeof(TestMessage));
 
-                message.Name.ShouldBe("Joe");
-                message.Details.Count.ShouldBe(2);
+                Assert.That(message.Name, Is.EqualTo("Joe"));
+                Assert.That(message.Details.Count, Is.EqualTo(2));
 
-                message.EnumDetails.Count().ShouldBe(1);
+                Assert.That(message.EnumDetails.Count(), Is.EqualTo(1));
             }
         }
 
@@ -181,11 +180,11 @@ namespace MassTransit.Tests.Serialization
                     ContractResolver = new CamelCasePropertyNamesContractResolver()
                 });
 
-            result.MessageType.Count.ShouldBe(3);
-            result.MessageType[0].ShouldBe(typeof(TestMessage).ToMessageName());
-            result.MessageType[1].ShouldBe(typeof(MessageA).ToMessageName());
-            result.MessageType[2].ShouldBe(typeof(MessageB).ToMessageName());
-            result.Headers.Count.ShouldBe(1);
+            Assert.That(result.MessageType.Count, Is.EqualTo(3));
+            Assert.That(result.MessageType[0], Is.EqualTo(typeof(TestMessage).ToMessageName()));
+            Assert.That(result.MessageType[1], Is.EqualTo(typeof(MessageA).ToMessageName()));
+            Assert.That(result.MessageType[2], Is.EqualTo(typeof(MessageB).ToMessageName()));
+            Assert.That(result.Headers.Count, Is.EqualTo(1));
         }
 
         [Test]
@@ -352,7 +351,7 @@ namespace MassTransit.Tests.Serialization
 
             var result = SerializeAndReturn(obj);
 
-            result.Value.ShouldBe("Monster");
+            Assert.That(result.Value, Is.EqualTo("Monster"));
         }
 
         [Test]
@@ -362,7 +361,7 @@ namespace MassTransit.Tests.Serialization
 
             var result = SerializeAndReturn(obj);
 
-            result.Value.ShouldBe("Monster");
+            Assert.That(result.Value, Is.EqualTo("Monster"));
         }
 
 
@@ -381,7 +380,7 @@ namespace MassTransit.Tests.Serialization
             public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
             {
                 reader.Read();
-                reader.Value.ShouldBe("value");
+                Assert.That(reader.Value, Is.EqualTo("value"));
                 reader.Read();
                 var value = (string)reader.Value;
                 return new MessageA {Value = value};
@@ -453,7 +452,7 @@ namespace MassTransit.Tests.Serialization
 
             var result = SerializeAndReturn(obj);
 
-            result.ValueB.ShouldBe("Monster");
+            Assert.That(result.ValueB, Is.EqualTo("Monster"));
         }
 
         [Test]
@@ -463,7 +462,7 @@ namespace MassTransit.Tests.Serialization
 
             var result = SerializeAndReturn(obj);
 
-            result.ValueA.ShouldBe("Monster");
+            Assert.That(result.ValueA, Is.EqualTo("Monster"));
         }
 
 
@@ -532,11 +531,11 @@ namespace MassTransit.Tests.Serialization
 
             // act, assert
             var serializedMessage = JsonConvert.SerializeObject(message, NewtonsoftJsonMessageSerializer.SerializerSettings);
-            serializedMessage.ShouldNotBeNull();
+            Assert.That(serializedMessage, Is.Not.Null);
 
             var deserializedMessage = JsonConvert.DeserializeObject<MessageA>(serializedMessage, NewtonsoftJsonMessageSerializer.DeserializerSettings);
-            deserializedMessage.ShouldNotBeNull();
-            deserializedMessage.Decimal.ShouldBe(message.Decimal);
+            Assert.That(deserializedMessage, Is.Not.Null);
+            Assert.That(deserializedMessage.Decimal, Is.EqualTo(message.Decimal));
         }
 
         [Test]
@@ -547,11 +546,11 @@ namespace MassTransit.Tests.Serialization
 
             // act, assert
             var serializedMessage = JsonConvert.SerializeObject(message, NewtonsoftJsonMessageSerializer.SerializerSettings);
-            serializedMessage.ShouldNotBeNull();
+            Assert.That(serializedMessage, Is.Not.Null);
 
             var deserializedMessage = System.Text.Json.JsonSerializer.Deserialize<MessageA>(serializedMessage, SystemTextJsonMessageSerializer.Options);
-            deserializedMessage.ShouldNotBeNull();
-            deserializedMessage.Decimal.ShouldBe(message.Decimal);
+            Assert.That(deserializedMessage, Is.Not.Null);
+            Assert.That(deserializedMessage.Decimal, Is.EqualTo(message.Decimal));
         }
 
 

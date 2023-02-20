@@ -5,7 +5,6 @@
     using MassTransit.Testing;
     using Messages;
     using NUnit.Framework;
-    using Shouldly;
     using TestFramework;
 
 
@@ -22,7 +21,7 @@
 
             Guid? sagaId = await _repository.ShouldContainSaga(_sagaId, TestTimeout);
 
-            sagaId.HasValue.ShouldBe(true);
+            Assert.That(sagaId.HasValue, Is.True);
         }
 
         ISagaRepository<InjectingSampleSaga> _repository;
