@@ -15,9 +15,11 @@
         {
             MessageData<string> property = await _repository.PutString(new string('8', 10000));
 
+            MessageData<string> loaded = await _repository.GetString(property.Address);
             Assert.That(property.Address, Is.Not.Null);
 
-            Assert.That(File.Exists(property.Address.AbsolutePath), Is.True);
+
+            Assert.That(await loaded.Value, Is.Not.Null);
         }
 
         [Test]

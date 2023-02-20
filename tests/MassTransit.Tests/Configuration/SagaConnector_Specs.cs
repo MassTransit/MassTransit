@@ -32,19 +32,19 @@ namespace MassTransit.Tests.Configuration
         [Test]
         public void Should_have_an_a()
         {
-            Assert.That(_factory.Connectors.First().MessageType, Is.AssignableTo(typeof(InitiateSimpleSaga)));
+            Assert.That(_factory.Connectors.First().MessageType, Is.EqualTo(typeof(InitiateSimpleSaga)));
         }
 
         [Test]
         public void Should_have_a_b()
         {
-            Assert.That(_factory.Connectors.Skip(1).First().MessageType, Is.AssignableTo(typeof(CompleteSimpleSaga)));
+            Assert.That(_factory.Connectors.Skip(1).First().MessageType, Is.EqualTo(typeof(CompleteSimpleSaga)));
         }
 
         [Test]
         public void Should_have_a_c()
         {
-            Assert.That(_factory.Connectors.Skip(2).First().MessageType, Is.AssignableTo(typeof(ObservableSagaMessage)));
+            Assert.That(_factory.Connectors.Skip(2).First().MessageType, Is.EqualTo(typeof(ObservableSagaMessage)));
         }
     }
 }
