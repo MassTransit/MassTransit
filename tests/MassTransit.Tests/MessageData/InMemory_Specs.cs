@@ -1,5 +1,6 @@
 ﻿namespace MassTransit.Tests.MessageData
 {
+    using System.IO;
     using System.Threading.Tasks;
     using MassTransit.MessageData;
     using NUnit.Framework;
@@ -19,7 +20,10 @@
 
                 var dataFromRepository = await _repository.Get(property.Address);
 
-                Assert.That(dataFromRepository, Is.EqualTo(data));
+                using var reader = new StreamReader(dataFromRepository);
+                var stringFromRepository = await reader.ReadToEndAsync();
+                
+                Assert.That(stringFromRepository, Is.EqualTo(data));
             }
 
             IMessageDataRepository _repository;
