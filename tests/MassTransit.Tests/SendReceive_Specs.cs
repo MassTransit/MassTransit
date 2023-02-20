@@ -2,7 +2,6 @@ namespace MassTransit.Tests
 {
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using Shouldly;
     using TestFramework;
     using TestFramework.Messages;
 
@@ -66,7 +65,7 @@ namespace MassTransit.Tests
 
             ConsumeContext<MessageA> consumeContext = await handler;
 
-            consumeContext.RequestId.ShouldBe(requestId);
+            Assert.That(consumeContext.RequestId, Is.EqualTo(requestId));
         }
 
         [Test]
@@ -81,7 +80,7 @@ namespace MassTransit.Tests
 
             ConsumeContext<MessageA> consumeContext = await handler;
 
-            consumeContext.RequestId.ShouldBe(requestId);
+            Assert.That(consumeContext.RequestId, Is.EqualTo(requestId));
         }
 
         [Test]
@@ -96,7 +95,7 @@ namespace MassTransit.Tests
 
             ConsumeContext<MessageA> consumeContext = await handler;
 
-            consumeContext.RequestId.ShouldBe(requestId);
+            Assert.That(consumeContext.RequestId, Is.EqualTo(requestId));
         }
     }
 }

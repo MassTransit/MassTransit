@@ -4,7 +4,6 @@
     using System.Threading;
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using Shouldly;
     using TestFramework;
     using TestFramework.Messages;
     using Util;
@@ -27,7 +26,7 @@
 
             await fault;
 
-            _attempts.ShouldBe(1);
+            Assert.That(_attempts, Is.EqualTo(1));
         }
 
         int _attempts;
@@ -64,7 +63,7 @@
 
             await fault;
 
-            _attempts.ShouldBe(1);
+            Assert.That(_attempts, Is.EqualTo(1));
         }
 
         int _attempts;
@@ -99,7 +98,7 @@
 
             await fault;
 
-            Consumer.Attempts.ShouldBe(6);
+            Assert.That(Consumer.Attempts, Is.EqualTo(6));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -143,7 +142,7 @@
 
             await fault;
 
-            _attempts.ShouldBe(2);
+            Assert.That(_attempts, Is.EqualTo(2));
         }
 
         int _attempts;
@@ -183,7 +182,7 @@
 
             await fault;
 
-            _attempts.ShouldBe(2);
+            Assert.That(_attempts, Is.EqualTo(2));
         }
 
         int _attempts;
@@ -234,10 +233,10 @@
 
             await fault;
 
-            _attempts.ShouldBe(4);
+            Assert.That(_attempts, Is.EqualTo(4));
 
-            _lastCount.ShouldBe(2);
-            _lastAttempt.ShouldBe(3);
+            Assert.That(_lastCount, Is.EqualTo(2));
+            Assert.That(_lastAttempt, Is.EqualTo(3));
         }
 
         int _attempts;
@@ -284,10 +283,10 @@
 
             await fault;
 
-            _attempts.ShouldBe(6);
+            Assert.That(_attempts, Is.EqualTo(6));
 
-            _lastCount.ShouldBe(4);
-            _lastAttempt.ShouldBe(5);
+            Assert.That(_lastCount, Is.EqualTo(4));
+            Assert.That(_lastAttempt, Is.EqualTo(5));
         }
 
         static int _attempts;
@@ -370,10 +369,10 @@
 
             await fault;
 
-            Consumer.Attempts.ShouldBe(4);
+            Assert.That(Consumer.Attempts, Is.EqualTo(4));
 
-            Consumer.LastCount.ShouldBe(2);
-            Consumer.LastAttempt.ShouldBe(3);
+            Assert.That(Consumer.LastCount, Is.EqualTo(2));
+            Assert.That(Consumer.LastAttempt, Is.EqualTo(3));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -424,10 +423,10 @@
 
             await fault;
 
-            _attempts.ShouldBe(1);
+            Assert.That(_attempts, Is.EqualTo(1));
 
-            _lastAttempt.ShouldBe(0);
-            _lastCount.ShouldBe(0);
+            Assert.That(_lastAttempt, Is.EqualTo(0));
+            Assert.That(_lastCount, Is.EqualTo(0));
         }
 
         int _attempts;
@@ -477,9 +476,9 @@
 
             await fault;
 
-            _attempts.ShouldBe(1);
+            Assert.That(_attempts, Is.EqualTo(1));
 
-            _lastAttempt.ShouldBe(0);
+            Assert.That(_lastAttempt, Is.EqualTo(0));
         }
 
         int _attempts;
@@ -523,7 +522,7 @@
 
             await Task.Delay(100);
 
-            _attempts.ShouldBe(2);
+            Assert.That(_attempts, Is.EqualTo(2));
         }
 
         int _attempts;
@@ -705,7 +704,7 @@
 
             await Task.Delay(100);
 
-            _attempts.ShouldBe(1);
+            Assert.That(_attempts, Is.EqualTo(1));
         }
 
         int _attempts;

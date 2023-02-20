@@ -2,7 +2,6 @@
 {
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using Shouldly;
     using TestFramework;
 
 
@@ -17,8 +16,8 @@
 
             ConsumeContext<A> result = await _received;
 
-            result.Message.First.ShouldBe("Hello");
-            result.Message.Second.ShouldBe("World");
+            Assert.That(result.Message.First, Is.EqualTo("Hello"));
+            Assert.That(result.Message.Second, Is.EqualTo("World"));
         }
 
         Task<ConsumeContext<A>> _received;
@@ -57,8 +56,8 @@
 
             ConsumeContext<A> result = await _received;
 
-            result.Message.First.ShouldBe("Hello");
-            result.Message.Second.ShouldBe("World");
+            Assert.That(result.Message.First, Is.EqualTo("Hello"));
+            Assert.That(result.Message.Second, Is.EqualTo("World"));
         }
 
         Task<ConsumeContext<A>> _received;
@@ -99,12 +98,12 @@
             ConsumeContext<IA> original = await unmodified;
             var tweaked = await _tweaked.Task;
 
-            result.Message.First.ShouldBe("Hello");
-            result.Message.Second.ShouldBe("World");
-            tweaked.Second.ShouldBe("World");
+            Assert.That(result.Message.First, Is.EqualTo("Hello"));
+            Assert.That(result.Message.Second, Is.EqualTo("World"));
+            Assert.That(tweaked.Second, Is.EqualTo("World"));
 
-            original.Message.First.ShouldBe("Hello");
-            original.Message.Second.ShouldBe(null);
+            Assert.That(original.Message.First, Is.EqualTo("Hello"));
+            Assert.That(original.Message.Second, Is.Null);
         }
 
         Task<ConsumeContext<IA>> _received;
@@ -156,13 +155,13 @@
             ConsumeContext<IA> original = await unmodified;
             var tweaked = await _tweaked.Task;
 
-            result.Message.First.ShouldBe("Hello");
-            result.Message.Second.ShouldBe(null);
+            Assert.That(result.Message.First, Is.EqualTo("Hello"));
+            Assert.That(result.Message.Second, Is.Null);
 
-            tweaked.Second.ShouldBe("World");
+            Assert.That(tweaked.Second, Is.EqualTo("World"));
 
-            original.Message.First.ShouldBe("Hello");
-            original.Message.Second.ShouldBe(null);
+            Assert.That(original.Message.First, Is.EqualTo("Hello"));
+            Assert.That(original.Message.Second, Is.Null);
         }
 
         Task<ConsumeContext<IA>> _received;

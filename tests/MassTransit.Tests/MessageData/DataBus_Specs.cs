@@ -11,8 +11,98 @@
         using MassTransit.MessageData.Values;
         using MassTransit.Serialization;
         using NUnit.Framework;
-        using Shouldly;
         using TestFramework;
+
+
+        [TestFixture]
+        public class Sending_inlined_message_data :
+            InMemoryTestFixture
+        {
+            [Test]
+            public async Task Should_not_inline_stream()
+            {
+                var data = new byte[256];
+                using MemoryStream ms = new MemoryStream(data);
+
+                await InputQueueSendEndpoint.Send<MessageWithStream>(new { Stream = ms});
+
+                var recievedStreamcontext = await _receivedStream;
+                Assert.That(recievedStreamcontext.Message.Stream.Address, Is.Not.Null);
+
+                using MemoryStream receivedMemoryStream = new MemoryStream();
+                await _receivedStreamData.CopyToAsync(receivedMemoryStream);
+                Assert.That(receivedMemoryStream.ToArray(), Is.EqualTo(data));
+            }
+
+            [Test]
+            public async Task Should_inline_the_string()
+            {
+                var data = new string('*', 256);
+
+                var message = new SendMessageWithBigData { Body = await _repository.PutString(data) };
+
+                await InputQueueSendEndpoint.Send(message);
+
+                var recievedContext = await _received;
+                Assert.That(recievedContext.Message.Body.Address, Is.Null);
+                Assert.That(_receivedBody, Is.EqualTo(data));
+            }
+
+            [Test]
+            public async Task Should_be_able_to_write_bytes_too()
+            {
+                var data = new byte[256];
+
+                var message = new MessageWithByteArrayImpl { Bytes = await _repository.PutBytes(data) };
+
+                await InputQueueSendEndpoint.Send(message);
+
+                var receivedBytesContext = await _receivedBytes;
+
+                Assert.That(receivedBytesContext.Message.Bytes.Address, Is.Null);
+                Assert.That(_receivedBytesArray, Is.EqualTo(data));
+            }
+
+            IMessageDataRepository _repository;
+            Task<ConsumeContext<MessageWithBigData>> _received;
+            Task<ConsumeContext<MessageWithByteArray>> _receivedBytes;
+            Task<ConsumeContext<MessageWithStream>> _receivedStream;
+            string _receivedBody;
+            byte[] _receivedBytesArray;
+            Stream _receivedStreamData;
+
+            protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+            {
+                var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+
+                var messageDataPath = Path.Combine(baseDirectory, "MessageData");
+
+                var dataDirectory = new DirectoryInfo(messageDataPath);
+
+                _repository = new FileSystemMessageDataRepository(dataDirectory);
+                MessageDataDefaults.AlwaysWriteToRepository = false;
+                MessageDataDefaults.Threshold = 4096;
+                configurator.UseMessageData(_repository);
+            }
+
+            protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+            {
+                _received = Handler<MessageWithBigData>(configurator, async context =>
+                {
+                    _receivedBody = await context.Message.Body.Value;
+                });
+
+                _receivedBytes = Handler<MessageWithByteArray>(configurator, async context =>
+                {
+                    _receivedBytesArray = await context.Message.Bytes.Value;
+                });
+
+                _receivedStream = Handler<MessageWithStream>(configurator, async context =>
+                {
+                    _receivedStreamData = await context.Message.Stream.Value;
+                });
+            }
+        }
 
 
         [TestFixture]
@@ -33,7 +123,7 @@
 
                 using MemoryStream receivedMemoryStream = new MemoryStream();
                 await _receivedStreamData.CopyToAsync(receivedMemoryStream);
-                receivedMemoryStream.ToArray().ShouldBe(data);
+                Assert.That(receivedMemoryStream.ToArray(), Is.EqualTo(data));
             }
 
             [Test]
@@ -47,7 +137,7 @@
 
                 await _receivedBytes;
 
-                _receivedBytesArray.ShouldBe(data);
+                Assert.That(_receivedBytesArray,Is.EqualTo(data));
             }
 
             [Test]
@@ -61,7 +151,7 @@
 
                 await _received;
 
-                _receivedBody.ShouldBe(data);
+                Assert.That(_receivedBody, Is.EqualTo(data));
             }
 
             IMessageDataRepository _repository;
@@ -123,7 +213,7 @@
 
                 using MemoryStream receivedMemoryStream = new MemoryStream();
                 await _receivedStreamData.CopyToAsync(receivedMemoryStream);
-                receivedMemoryStream.ToArray().ShouldBe(data);
+                Assert.That(receivedMemoryStream.ToArray(), Is.EqualTo(data));
             }
 
             [Test]
@@ -137,7 +227,7 @@
 
                 await _receivedBytes;
 
-                _receivedBytesArray.ShouldBe(data);
+                Assert.That(_receivedBytesArray, Is.EqualTo(data));
             }
 
             [Test]
@@ -151,7 +241,7 @@
 
                 await _received;
 
-                _receivedBody.ShouldBe(data);
+                Assert.That(_receivedBody, Is.EqualTo(data));
             }
 
             IMessageDataRepository _repository;
@@ -219,7 +309,7 @@
 
                 await _received;
 
-                _receivedBody.ShouldBe(data);
+                Assert.That(_receivedBody, Is.EqualTo(data));
             }
 
             IMessageDataRepository _messageDataRepository;
@@ -361,7 +451,7 @@
                 await _received;
 
                 var newId = new NewId(_receivedBytesArray);
-                newId.ToString().ShouldBe(data);
+                Assert.That(newId.ToString(), Is.EqualTo(data));
             }
 
             IMessageDataRepository _messageDataRepository;
@@ -414,7 +504,7 @@
                 await _receivedStream.CopyToAsync(memoryStreamForReceivedStream);
 
                 NewId newId = new NewId(memoryStreamForReceivedStream.ToArray());
-                newId.ToString().ShouldBe(data);
+                Assert.That(newId.ToString(), Is.EqualTo(data));
             }
 
             IMessageDataRepository _messageDataRepository;

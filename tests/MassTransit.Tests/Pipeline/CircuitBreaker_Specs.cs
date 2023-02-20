@@ -4,7 +4,6 @@
     using System.Threading;
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using Shouldly;
     using TestFramework;
 
 
@@ -35,7 +34,7 @@
             for (var i = 0; i < 100; i++)
                 Assert.That(async () => await pipe.Send(context), Throws.TypeOf<IntentionalTestException>());
 
-            count.ShouldBe(6);
+            Assert.That(count, Is.EqualTo(6));
         }
     }
 }

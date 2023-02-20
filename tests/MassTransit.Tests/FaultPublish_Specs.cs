@@ -6,7 +6,6 @@
     using System.Threading.Tasks;
     using MassTransit.Testing;
     using NUnit.Framework;
-    using Shouldly;
     using TestFramework;
     using TestFramework.Messages;
 
@@ -20,7 +19,7 @@
         {
             await InputQueueSendEndpoint.Send(new PingMessage());
 
-            _consumer.Faults.Select().Count().ShouldBe(1);
+            Assert.That(_consumer.Faults.Select().Count(), Is.EqualTo(1));
         }
 
         PingConsumer _consumer;
@@ -62,7 +61,7 @@
         {
             await InputQueueSendEndpoint.Send(new PingMessage());
 
-            _consumer.Faults.Select().Count().ShouldBe(0);
+            Assert.That(_consumer.Faults.Select().Count(), Is.EqualTo(0));
         }
 
         PingConsumer _consumer;
@@ -106,7 +105,7 @@
         {
             await InputQueueSendEndpoint.Send<ActualMessageType>(new { });
 
-            _consumer.Faults.Select().Count().ShouldBe(1);
+            Assert.That(_consumer.Faults.Select().Count(), Is.EqualTo(1));
 
             IReceivedMessage<Fault<BaseMessageType>> fault = _consumer.Faults.Select().FirstOrDefault();
             Assert.That(fault, Is.Not.Null);
@@ -167,7 +166,7 @@
         {
             await InputQueueSendEndpoint.Send<ActualMessageType>(new { });
 
-            _consumer.Faults.Select().Count().ShouldBe(1);
+            Assert.That(_consumer.Faults.Select().Count(), Is.EqualTo(1));
 
             IReceivedMessage<Fault<BaseMessageType>> fault = _consumer.Faults.Select().FirstOrDefault();
             Assert.That(fault, Is.Not.Null);
