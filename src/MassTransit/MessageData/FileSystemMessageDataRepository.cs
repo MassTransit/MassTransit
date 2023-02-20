@@ -82,5 +82,19 @@ namespace MassTransit.MessageData
 
             return Path.Combine(elements);
         }
+
+        async Task IMessageDataRepository.Delete(Uri address, CancellationToken cancellationToken = default)
+        {
+            if (address == null)
+                return;
+
+            var filePath = ParseFilePath(address);
+
+            var fullPath = Path.Combine(_dataDirectory.FullName, filePath);
+            if (!File.Exists(fullPath))
+                throw new FileNotFoundException("The file was not found", fullPath);
+
+            File.Delete(fullPath);
+        }
     }
 }

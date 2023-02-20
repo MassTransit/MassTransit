@@ -151,5 +151,18 @@ namespace MassTransit.AzureStorage.MessageData
                 await blob.SetMetadataAsync(metadata).ConfigureAwait(false);
             }
         }
+
+        public async Task Delete(Uri address, CancellationToken cancellationToken = default)
+        {
+            if (address == null)
+                return;
+
+            var blobName = new BlobUriBuilder(address).BlobName;
+            var blob = _container.GetBlobClient(blobName);
+
+            LogContext.Debug?.Log("DELETE Message Data: {Address} ({Blob})", address, blobName);
+
+            await blob.DeleteAsync(DeleteSnapshotsOption.IncludeSnapshots, default, cancellationToken).ConfigureAwait(false);
+        }
     }
 }

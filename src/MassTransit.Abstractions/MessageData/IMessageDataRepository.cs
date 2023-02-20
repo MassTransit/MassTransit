@@ -29,5 +29,13 @@ namespace MassTransit
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<Uri> Put(Stream stream, TimeSpan? timeToLive = default, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Deletes message data into the repository
+        /// </summary>
+        /// <param name="address">The data address</param>
+        /// <param name="cancellationToken">A cancellation token for the request</param>
+        /// <returns></returns>
+        Task Delete(Uri address, CancellationToken cancellationToken = default);
     }
 }

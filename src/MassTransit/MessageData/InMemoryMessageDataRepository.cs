@@ -40,5 +40,14 @@
 
             return address;
         }
+
+        async Task IMessageDataRepository.Delete(Uri address, CancellationToken cancellationToken = default)
+        {
+            if (address == null)
+                return;
+
+            if (!_values.TryRemove(address, out byte[] value))
+                throw new MessageDataNotFoundException();
+        }
     }
 }

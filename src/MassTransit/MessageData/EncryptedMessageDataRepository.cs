@@ -70,5 +70,13 @@
 
             return addressBuilder.Uri;
         }
+
+        public async Task Delete(Uri address, CancellationToken cancellationToken = new CancellationToken())
+        {
+            if (address == null)
+                return;
+
+            await _repository.Delete(address, cancellationToken).ConfigureAwait(false);
+        }
     }
 }
