@@ -3,7 +3,7 @@
 
   <PropertyGroup>
     <Product>MassTransit</Product>
-    <Copyright>Copyright 2007-2022 Chris Patterson</Copyright>
+    <Copyright>Copyright 2007-2023 Chris Patterson</Copyright>
     <Authors>Chris Patterson</Authors>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -20,8 +20,8 @@
     <PackageIcon>mt-logo-small.png</PackageIcon>
     <PackageReadmeFile>NuGet.README.md</PackageReadmeFile>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/MassTransit/MassTransit</PackageProjectUrl>
-    <Description>MassTransit is a message-based distributed application framework for .NET http://masstransit-project.com</Description>
+    <PackageProjectUrl>https://masstransit.io</PackageProjectUrl>
+    <Description>MassTransit provides a developer-focused, modern platform for creating distributed applications without complexity.</Description>
     <IsPackable>True</IsPackable>
 
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
