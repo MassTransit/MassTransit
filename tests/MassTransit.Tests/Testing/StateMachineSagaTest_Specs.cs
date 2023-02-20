@@ -7,7 +7,6 @@ namespace MassTransit.Tests.Testing
     using MassTransit.Testing;
     using Newtonsoft.Json;
     using NUnit.Framework;
-    using Shouldly;
     using TestFramework;
 
 
@@ -73,16 +72,16 @@ namespace MassTransit.Tests.Testing
         public async Task Should_receive_the_fault_with_data()
         {
             await _saga.Exists(_sagaId);
-            _harness.Consumed.Select<StartMessage>().Any().ShouldBeTrue();
-            _harness.Consumed.Select<Fault<ExecuteRequest>>().Any().ShouldBeTrue();
+            Assert.That(_harness.Consumed.Select<StartMessage>().Any(), Is.True);
+            Assert.That(_harness.Consumed.Select<Fault<ExecuteRequest>>().Any(), Is.True);
 
             var result = (Fault<ExecuteRequest>)_harness.Consumed.Select<Fault<ExecuteRequest>>().Single().MessageObject;
-            result.FaultId.ShouldBe(_faultId);
-            result.FaultedMessageId.ShouldBe(_faultedMessageId);
-            result.Timestamp.ShouldBe(_timestamp);
-            result.FaultMessageTypes.ShouldBeEquivalentTo(_faultMessageTypes);
-            result.Message.ShouldNotBeNull();
-            result.Exceptions.ShouldNotBeNull();
+            Assert.That(result.FaultId, Is.EqualTo(_faultId));
+            Assert.That(result.FaultedMessageId, Is.EqualTo(_faultedMessageId));
+            Assert.That(result.Timestamp, Is.EqualTo(_timestamp));
+            Assert.That(result.FaultMessageTypes, Is.EqualTo(_faultMessageTypes));
+            Assert.That(result.Message, Is.Not.Null);
+            Assert.That(result.Exceptions, Is.Not.Null);
         }
 
         [OneTimeTearDown]

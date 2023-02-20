@@ -6,7 +6,6 @@
     using System.Threading;
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using Shouldly;
     using TestFramework;
 
 
@@ -42,7 +41,7 @@
 
             await Task.WhenAll(tasks);
 
-            maxCount.ShouldBe(32);
+            Assert.That(maxCount, Is.EqualTo(32));
         }
 
         [Test]
@@ -74,7 +73,7 @@
 
             await Task.WhenAll(tasks);
 
-            maxCount.ShouldBe(1);
+            Assert.That(maxCount, Is.EqualTo(1));
         }
     }
 
@@ -119,7 +118,7 @@
 
             timer.Stop();
 
-            timer.ElapsedMilliseconds.ShouldBeGreaterThan(9500);
+            Assert.That(timer.ElapsedMilliseconds, Is.GreaterThan(9500));
         }
 
         [Test]
@@ -148,7 +147,7 @@
 
             timer.Stop();
 
-            timer.ElapsedMilliseconds.ShouldBeGreaterThan(9500);
+            Assert.That(timer.ElapsedMilliseconds, Is.GreaterThan(9500));
         }
     }
 }

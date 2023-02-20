@@ -7,7 +7,6 @@
     using MassTransit.Testing;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
-    using Shouldly;
     using TestFramework;
     using TestFramework.Messages;
 
@@ -21,7 +20,7 @@
         {
             Response<PongMessage> message = await _response;
 
-            message.Message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
+            Assert.That(message.Message.CorrelationId, Is.EqualTo(_ping.Result.Message.CorrelationId));
         }
 
         Task<ConsumeContext<PingMessage>> _ping;

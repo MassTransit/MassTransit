@@ -4,7 +4,6 @@ namespace MassTransit.Tests.Testing
     using System.Threading.Tasks;
     using MassTransit.Testing;
     using NUnit.Framework;
-    using Shouldly;
 
 
     public class When_a_consumer_with_multiple_message_consumers_is_tested
@@ -33,25 +32,25 @@ namespace MassTransit.Tests.Testing
         [Test]
         public void Should_have_sent_the_aa_response_from_the_consumer()
         {
-            _harness.Sent.Select<Aa>().Any().ShouldBe(true);
+            Assert.That(_harness.Sent.Select<Aa>().Any(), Is.True);
         }
 
         [Test]
         public void Should_have_sent_the_bb_response_from_the_consumer()
         {
-            _harness.Sent.Select<Bb>().Any().ShouldBe(true);
+            Assert.That(_harness.Sent.Select<Bb>().Any(), Is.True);
         }
 
         [Test]
         public void Should_have_called_the_consumer_a_method()
         {
-            _consumer.Consumed.Select<A>().Any().ShouldBe(true);
+            Assert.That(_consumer.Consumed.Select<A>().Any(), Is.True);
         }
 
         [Test]
         public void Should_have_called_the_consumer_b_method()
         {
-            _consumer.Consumed.Select<B>().Any().ShouldBe(true);
+            Assert.That(_consumer.Consumed.Select<B>().Any(), Is.True);
         }
 
 
