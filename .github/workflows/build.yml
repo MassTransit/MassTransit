@@ -23,7 +23,7 @@ on:
 jobs:
   compile:
     name: Build
-    timeout-minutes: 10
+    timeout-minutes: 15
     strategy:
       max-parallel: 2
       matrix:
