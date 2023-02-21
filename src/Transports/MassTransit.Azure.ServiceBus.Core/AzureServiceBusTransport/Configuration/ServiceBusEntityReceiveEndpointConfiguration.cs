@@ -127,11 +127,9 @@
                 ClientPipeConfigurator.UseFilter(new TransportReadyFilter<ClientContext>(receiveEndpointContext));
             else
             {
-                var messageReceiver = new ServiceBusMessageReceiver(receiveEndpointContext);
-
                 ClientPipeConfigurator.UseFilter(_settings.RequiresSession
-                    ? new MessageSessionReceiverFilter(messageReceiver, receiveEndpointContext)
-                    : new MessageReceiverFilter(messageReceiver, receiveEndpointContext));
+                    ? new MessageSessionReceiverFilter(receiveEndpointContext)
+                    : new MessageReceiverFilter(receiveEndpointContext));
             }
 
             IPipe<ClientContext> clientPipe = ClientPipeConfigurator.Build();

@@ -9,46 +9,46 @@ namespace MassTransit.AzureServiceBusTransport
     public class SessionReceiver :
         Receiver
     {
-        readonly ClientContext _context;
-        readonly IServiceBusMessageReceiver _messageReceiver;
+        readonly ClientContext _clientContext;
+        readonly ServiceBusReceiveEndpointContext _context;
 
-        public SessionReceiver(ClientContext context, IServiceBusMessageReceiver messageReceiver)
-            : base(context, messageReceiver)
+        public SessionReceiver(ClientContext clientContext, ServiceBusReceiveEndpointContext context)
+            : base(clientContext, context)
         {
+            _clientContext = clientContext;
             _context = context;
-            _messageReceiver = messageReceiver;
         }
 
-        public override Task Start()
+        public override void Start()
         {
-            _context.OnSessionAsync(OnSession, ExceptionHandler);
+            _clientContext.OnSessionAsync(OnSession, ExceptionHandler);
 
-            SetReady();
-
-            return _context.StartAsync();
+            SetReady(_clientContext.StartAsync());
         }
 
         async Task OnSession(ProcessSessionMessageEventArgs messageSession, ServiceBusReceivedMessage message, CancellationToken cancellationToken)
         {
+            MessageLockContext lockContext = new ServiceBusSessionMessageLockContext(messageSession, message);
+            MessageSessionContext sessionContext = new ServiceBusMessageSessionContext(messageSession);
+            var context = new ServiceBusReceiveContext(message, _context, lockContext, _clientContext, sessionContext);
+
+            CancellationTokenRegistration registration = default;
+            if (cancellationToken.CanBeCanceled)
+                registration = cancellationToken.Register(context.Cancel);
+
             try
             {
-                await _messageReceiver.Handle(message, cancellationToken, context => AddReceiveContextPayloads(context, messageSession, message))
-                    .ConfigureAwait(false);
+                await Dispatch(message, context, lockContext).ConfigureAwait(false);
             }
             catch (Exception)
             {
                 // do NOT let exceptions propagate to the Azure SDK
             }
-        }
-
-        void AddReceiveContextPayloads(ReceiveContext receiveContext, ProcessSessionMessageEventArgs messageSession, ServiceBusReceivedMessage message)
-        {
-            MessageSessionContext sessionContext = new ServiceBusMessageSessionContext(messageSession);
-            MessageLockContext lockContext = new ServiceBusSessionMessageLockContext(messageSession, message);
-
-            receiveContext.GetOrAddPayload(() => sessionContext);
-            receiveContext.GetOrAddPayload(() => lockContext);
-            receiveContext.GetOrAddPayload(() => _context);
+            finally
+            {
+                registration.Dispose();
+                context.Dispose();
+            }
         }
     }
 }

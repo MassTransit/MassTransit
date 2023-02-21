@@ -6,6 +6,7 @@
     using NUnit.Framework;
 
 
+    [TestFixture]
     public class TwoScopeAzureServiceBusTestFixture :
         AzureServiceBusTestFixture
     {
@@ -66,10 +67,8 @@
             {
                 try
                 {
-                    using (var tokenSource = new CancellationTokenSource(TestTimeout))
-                    {
-                        await _secondBusHandle.StopAsync(tokenSource.Token);
-                    }
+                    using var tokenSource = new CancellationTokenSource(TestTimeout);
+                    await _secondBusHandle.StopAsync(tokenSource.Token);
                 }
                 finally
                 {
@@ -86,10 +85,8 @@
         {
             try
             {
-                using (var tokenSource = new CancellationTokenSource(TestTimeout))
-                {
-                    await _secondBusHandle?.StopAsync(tokenSource.Token);
-                }
+                using var tokenSource = new CancellationTokenSource(TestTimeout);
+                await _secondBusHandle?.StopAsync(tokenSource.Token);
             }
             catch (Exception ex)
             {

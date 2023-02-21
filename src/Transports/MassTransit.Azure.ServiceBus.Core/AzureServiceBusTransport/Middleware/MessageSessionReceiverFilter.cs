@@ -6,14 +6,22 @@ namespace MassTransit.AzureServiceBusTransport.Middleware
     public class MessageSessionReceiverFilter :
         MessageReceiverFilter
     {
-        public MessageSessionReceiverFilter(IServiceBusMessageReceiver messageReceiver, ServiceBusReceiveEndpointContext context)
-            : base(messageReceiver, context)
+        public MessageSessionReceiverFilter(ServiceBusReceiveEndpointContext context)
+            : base(context)
         {
         }
 
-        protected override IReceiver CreateMessageReceiver(ClientContext context, IServiceBusMessageReceiver messageReceiver)
+        public override void Probe(ProbeContext context)
         {
-            return new SessionReceiver(context, messageReceiver);
+            var scope = context.CreateFilterScope("messageSessionReceiver");
+            scope.Add("type", "brokeredMessage");
+
+            Context.ReceivePipe.Probe(scope);
+        }
+
+        protected override IReceiver CreateMessageReceiver(ClientContext context)
+        {
+            return new SessionReceiver(context, Context);
         }
     }
 }

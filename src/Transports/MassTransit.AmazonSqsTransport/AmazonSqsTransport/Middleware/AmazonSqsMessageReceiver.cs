@@ -8,7 +8,6 @@ namespace MassTransit.AmazonSqsTransport.Middleware
     using Amazon.SQS;
     using Amazon.SQS.Model;
     using Internals;
-    using MassTransit.Middleware;
     using Transports;
     using Util;
 
@@ -17,13 +16,10 @@ namespace MassTransit.AmazonSqsTransport.Middleware
     /// Receives messages from AmazonSQS, pushing them to the InboundPipe of the service endpoint.
     /// </summary>
     public sealed class AmazonSqsMessageReceiver :
-        Agent,
-        DeliveryMetrics
+        ConsumerAgent
     {
         readonly ClientContext _client;
         readonly SqsReceiveEndpointContext _context;
-        readonly TaskCompletionSource<bool> _deliveryComplete;
-        readonly IReceivePipeDispatcher _dispatcher;
         readonly ReceiveSettings _receiveSettings;
 
         /// <summary>
@@ -32,34 +28,15 @@ namespace MassTransit.AmazonSqsTransport.Middleware
         /// <param name="client">The model context for the consumer</param>
         /// <param name="context">The topology</param>
         public AmazonSqsMessageReceiver(ClientContext client, SqsReceiveEndpointContext context)
+            : base(context)
         {
             _client = client;
             _context = context;
 
             _receiveSettings = client.GetPayload<ReceiveSettings>();
 
-            _deliveryComplete = TaskUtil.GetTask<bool>();
-
-            _dispatcher = context.CreateReceivePipeDispatcher();
-            _dispatcher.ZeroActivity += HandleDeliveryComplete;
-
-            var consumeTask = Task.Run(() => Consume());
-            consumeTask.ContinueWith(async _ =>
-            {
-                try
-                {
-                    if (!IsStopping)
-                        await this.Stop("Consume Loop Exited").ConfigureAwait(false);
-                }
-                catch (Exception exception)
-                {
-                    LogContext.Warning?.Log(exception, "Stop Faulted");
-                }
-            });
+            TrySetConsumeTask(Task.Run(() => Consume()));
         }
-
-        long DeliveryMetrics.DeliveryCount => _dispatcher.DispatchCount;
-        int DeliveryMetrics.ConcurrentDeliveryCount => _dispatcher.MaxConcurrentDispatchCount;
 
         async Task Consume()
         {
@@ -96,15 +73,6 @@ namespace MassTransit.AmazonSqsTransport.Middleware
             }
         }
 
-        protected override Task StopAgent(StopContext context)
-        {
-            LogContext.Debug?.Log("Stopping consumer: {InputAddress}", _context.InputAddress);
-
-            SetCompleted(ActiveAndActualAgentsCompleted(context));
-
-            return Completed;
-        }
-
         async Task GetQueueAttributes()
         {
             var queueInfo = await _client.GetQueueInfo(_receiveSettings.EntityName).ConfigureAwait(false);
@@ -131,7 +99,7 @@ namespace MassTransit.AmazonSqsTransport.Middleware
             var context = new AmazonSqsReceiveContext(message, redelivered, _context, _client, _receiveSettings, _client.ConnectionContext);
             try
             {
-                await _dispatcher.Dispatch(context, context).ConfigureAwait(false);
+                await Dispatch(context, context).ConfigureAwait(false);
             }
             catch (Exception exception)
             {
@@ -165,29 +133,6 @@ namespace MassTransit.AmazonSqsTransport.Middleware
             catch (OperationCanceledException)
             {
                 return Array.Empty<Message>();
-            }
-        }
-
-        Task HandleDeliveryComplete()
-        {
-            if (IsStopping)
-                _deliveryComplete.TrySetResult(true);
-
-            return Task.CompletedTask;
-        }
-
-        async Task ActiveAndActualAgentsCompleted(StopContext context)
-        {
-            if (_dispatcher.ActiveDispatchCount > 0)
-            {
-                try
-                {
-                    await _deliveryComplete.Task.OrCanceled(context.CancellationToken).ConfigureAwait(false);
-                }
-                catch (OperationCanceledException)
-                {
-                    LogContext.Warning?.Log("Stop canceled waiting for message consumers to complete: {InputAddress}", _context.InputAddress);
-                }
             }
         }
 
