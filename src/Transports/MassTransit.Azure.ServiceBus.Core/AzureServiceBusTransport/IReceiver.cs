@@ -1,14 +1,12 @@
 ﻿namespace MassTransit.AzureServiceBusTransport
 {
-    using System.Threading.Tasks;
     using Transports;
 
 
     public interface IReceiver :
-        IAgent
+        IAgent,
+        DeliveryMetrics
     {
-        DeliveryMetrics GetDeliveryMetrics();
-
-        Task Start();
+        void Start();
     }
 }

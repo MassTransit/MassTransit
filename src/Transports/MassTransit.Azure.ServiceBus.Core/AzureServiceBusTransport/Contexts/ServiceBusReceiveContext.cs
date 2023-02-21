@@ -13,8 +13,8 @@
     {
         readonly ServiceBusReceivedMessage _message;
 
-        public ServiceBusReceiveContext(ServiceBusReceivedMessage message, ReceiveEndpointContext receiveEndpointContext)
-            : base(message.DeliveryCount > 1, receiveEndpointContext)
+        public ServiceBusReceiveContext(ServiceBusReceivedMessage message, ReceiveEndpointContext receiveEndpointContext, params object[] payloads)
+            : base(message.DeliveryCount > 1, receiveEndpointContext, payloads)
         {
             _message = message;
 

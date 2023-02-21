@@ -4,26 +4,21 @@ namespace MassTransit.RabbitMqTransport
     using System.Collections.Concurrent;
     using System.Threading;
     using System.Threading.Tasks;
-    using Internals;
-    using MassTransit.Middleware;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
     using Transports;
-    using Util;
 
 
     /// <summary>
     /// Receives messages from RabbitMQ, pushing them to the InboundPipe of the service endpoint.
     /// </summary>
     public class RabbitMqBasicConsumer :
-        Agent,
+        ConsumerAgent,
         IAsyncBasicConsumer,
         IBasicConsumer,
         RabbitMqDeliveryMetrics
     {
         readonly RabbitMqReceiveEndpointContext _context;
-        readonly TaskCompletionSource<bool> _deliveryComplete;
-        readonly IReceivePipeDispatcher _dispatcher;
         readonly SemaphoreSlim _limit;
         readonly ModelContext _model;
         readonly ConcurrentDictionary<ulong, RabbitMqReceiveContext> _pending;
@@ -39,6 +34,7 @@ namespace MassTransit.RabbitMqTransport
         /// <param name="model">The model context for the consumer</param>
         /// <param name="context">The topology</param>
         public RabbitMqBasicConsumer(ModelContext model, RabbitMqReceiveEndpointContext context)
+            : base(context)
         {
             _model = model;
             _context = context;
@@ -47,15 +43,12 @@ namespace MassTransit.RabbitMqTransport
 
             _pending = new ConcurrentDictionary<ulong, RabbitMqReceiveContext>();
 
-            _dispatcher = context.CreateReceivePipeDispatcher();
-            _dispatcher.ZeroActivity += HandleDeliveryComplete;
-
-            _deliveryComplete = TaskUtil.GetTask<bool>();
-
             if (context.ConcurrentMessageLimit.HasValue)
                 _limit = new SemaphoreSlim(context.ConcurrentMessageLimit.Value);
 
             ConsumerCancelled += OnConsumerCancelled;
+
+            TrySetManualConsumeTask();
         }
 
         /// <summary>
@@ -128,13 +121,7 @@ namespace MassTransit.RabbitMqTransport
 
             LogContext.Debug?.Log("Consumer Cancel Ok: {InputAddress} - {ConsumerTag}", _context.InputAddress, consumerTag);
 
-            if (_dispatcher.ActiveDispatchCount == 0)
-            {
-                _deliveryComplete.TrySetResult(true);
-                SetCompleted(Task.CompletedTask);
-            }
-            else
-                SetCompleted(_deliveryComplete.Task);
+            TrySetConsumeCompleted();
         }
 
         /// <summary>
@@ -150,15 +137,9 @@ namespace MassTransit.RabbitMqTransport
 
             CancelPendingConsumers();
 
-            ConsumerCancelled?.Invoke(this, new ConsumerEventArgs(new[] {consumerTag}));
+            ConsumerCancelled?.Invoke(this, new ConsumerEventArgs(new[] { consumerTag }));
 
-            if (_dispatcher.ActiveDispatchCount == 0)
-            {
-                _deliveryComplete.TrySetResult(true);
-                SetCompleted(Task.CompletedTask);
-            }
-            else
-                SetCompleted(_deliveryComplete.Task);
+            TrySetConsumeCanceled();
         }
 
         public void HandleModelShutdown(object model, ShutdownEventArgs reason)
@@ -167,12 +148,11 @@ namespace MassTransit.RabbitMqTransport
 
             LogContext.Debug?.Log(
                 "Consumer Model Shutdown: {InputAddress} - {ConsumerTag}, Concurrent Peak: {MaxConcurrentDeliveryCount}, {ReplyCode}-{ReplyText}",
-                _context.InputAddress, _consumerTag, _dispatcher.MaxConcurrentDispatchCount, reason.ReplyCode, reason.ReplyText);
+                _context.InputAddress, _consumerTag, ConcurrentDeliveryCount, reason.ReplyCode, reason.ReplyText);
 
             CancelPendingConsumers();
 
-            _deliveryComplete.TrySetResult(false);
-            SetCompleted(Task.CompletedTask);
+            TrySetConsumeCanceled();
         }
 
         public void HandleBasicDeliver(string consumerTag, ulong deliveryTag, bool redelivered, string exchange, string routingKey,
@@ -198,7 +178,7 @@ namespace MassTransit.RabbitMqTransport
 
                 try
                 {
-                    await _dispatcher.Dispatch(context, receiveLock).ConfigureAwait(false);
+                    await Dispatch(context, receiveLock).ConfigureAwait(false);
                 }
                 catch (Exception exception)
                 {
@@ -224,10 +204,6 @@ namespace MassTransit.RabbitMqTransport
 
         string RabbitMqDeliveryMetrics.ConsumerTag => _consumerTag;
 
-        long DeliveryMetrics.DeliveryCount => _dispatcher.DispatchCount;
-
-        int DeliveryMetrics.ConcurrentDeliveryCount => _dispatcher.MaxConcurrentDispatchCount;
-
         void CancelPendingConsumers()
         {
             foreach (var context in _pending.Values)
@@ -241,25 +217,11 @@ namespace MassTransit.RabbitMqTransport
             return Task.CompletedTask;
         }
 
-        Task HandleDeliveryComplete()
-        {
-            if (IsStopping)
-                _deliveryComplete.TrySetResult(true);
-
-            return Task.CompletedTask;
-        }
-
         protected override async Task StopAgent(StopContext context)
         {
-            LogContext.Debug?.Log("Stopping Consumer: {InputAddress} - {ConsumerTag}", _context.InputAddress, _consumerTag);
-
-            await CancelAndWaitForDeliveryComplete(context).ConfigureAwait(false);
-
             try
             {
-                await Completed.ConfigureAwait(false);
-
-                _limit?.Dispose();
+                await base.StopAgent(context).ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {
@@ -268,31 +230,25 @@ namespace MassTransit.RabbitMqTransport
 
                 throw;
             }
+            finally
+            {
+                _limit?.Dispose();
+            }
         }
 
-        async Task CancelAndWaitForDeliveryComplete(StopContext context)
+        protected override async Task ActiveAndActualAgentsCompleted(StopContext context)
         {
             try
             {
-                await _model.BasicCancel(_consumerTag).ConfigureAwait(false);
+                if (IsGracefulShutdown)
+                    await _model.BasicCancel(_consumerTag).ConfigureAwait(false);
             }
             catch (Exception exception)
             {
                 LogContext.Warning?.Log(exception, "BasicCancel faulted: {InputAddress} - {ConsumerTag}", _context.InputAddress, _consumerTag);
             }
 
-            if (_dispatcher.ActiveDispatchCount > 0)
-            {
-                try
-                {
-                    await _deliveryComplete.Task.OrCanceled(context.CancellationToken).ConfigureAwait(false);
-                }
-                catch (OperationCanceledException)
-                {
-                    LogContext.Warning?.Log("Stop canceled waiting for message consumers to complete: {InputAddress} - {ConsumerTag}",
-                        _context.InputAddress, _consumerTag);
-                }
-            }
+            await base.ActiveAndActualAgentsCompleted(context).ConfigureAwait(false);
         }
     }
 }
