@@ -21,9 +21,21 @@ namespace MassTransit
         static readonly char[] _removeChars = { '.', '+' };
 
         static readonly Regex _nonAlpha = new Regex("[^a-zA-Z0-9]", RegexOptions.Compiled | RegexOptions.Singleline);
-        readonly bool _includeNamespace;
-        readonly string _prefix;
-        readonly string _joinSeparator;
+
+        /// <summary>
+        /// Gets a value indicating whether the namespace is included in the name.
+        /// </summary>
+        protected bool IncludeNamespace { get; }
+
+        /// <summary>
+        /// Gets the Prefix to start the name.
+        /// </summary>
+        protected string Prefix { get; }
+
+        /// <summary>
+        /// Gets the join separator between the words
+        /// </summary>
+        protected string JoinSeparator { get; }
 
         /// <summary>
         /// Default endpoint name formatter.
@@ -31,7 +43,7 @@ namespace MassTransit
         /// <param name="includeNamespace">If true, the namespace is included in the name</param>
         public DefaultEndpointNameFormatter(bool includeNamespace)
         {
-            _includeNamespace = includeNamespace;
+            IncludeNamespace = includeNamespace;
         }
 
         /// <summary>
@@ -41,8 +53,8 @@ namespace MassTransit
         /// <param name="includeNamespace">If true, the namespace is included in the name</param>
         public DefaultEndpointNameFormatter(string prefix, bool includeNamespace)
         {
-            _prefix = prefix;
-            _includeNamespace = includeNamespace;
+            Prefix = prefix;
+            IncludeNamespace = includeNamespace;
         }
 
         /// <summary>
@@ -53,21 +65,21 @@ namespace MassTransit
         /// <param name="includeNamespace">If true, the namespace is included in the name</param>
         public DefaultEndpointNameFormatter(string joinSeparator, string prefix, bool includeNamespace)
         {
-            _prefix = prefix;
-            _includeNamespace = includeNamespace;
-            _joinSeparator = joinSeparator;
+            Prefix = prefix;
+            IncludeNamespace = includeNamespace;
+            JoinSeparator = joinSeparator;
         }
 
         protected DefaultEndpointNameFormatter()
         {
-            _includeNamespace = false;
+            IncludeNamespace = false;
         }
 
         public static IEndpointNameFormatter Instance { get; } = new DefaultEndpointNameFormatter();
 
         public string Separator { get; protected set; } = "";
 
-        public string TemporaryEndpoint(string tag)
+        public virtual string TemporaryEndpoint(string tag)
         {
             if (string.IsNullOrWhiteSpace(tag))
                 tag = "endpoint";
@@ -120,38 +132,38 @@ namespace MassTransit
             return sb.ToString();
         }
 
-        public string Consumer<T>()
+        public virtual string Consumer<T>()
             where T : class, IConsumer
         {
-            return GetConsumerName<T>();
+            return GetConsumerName(typeof(T));
         }
 
-        public string Message<T>()
+        public virtual string Message<T>()
             where T : class
         {
             return GetMessageName(typeof(T));
         }
 
-        public string Saga<T>()
+        public virtual string Saga<T>()
             where T : class, ISaga
         {
-            return GetSagaName<T>();
+            return GetSagaName(typeof(T));
         }
 
-        public string ExecuteActivity<T, TArguments>()
+        public virtual string ExecuteActivity<T, TArguments>()
             where T : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
-            var activityName = GetActivityName<T>();
+            var activityName = GetActivityName(typeof(T), typeof(TArguments));
 
             return $"{activityName}_execute";
         }
 
-        public string CompensateActivity<T, TLog>()
+        public virtual string CompensateActivity<T, TLog>()
             where T : class, ICompensateActivity<TLog>
             where TLog : class
         {
-            var activityName = GetActivityName<T>();
+            var activityName = GetActivityName(typeof(T), typeof(TLog));
 
             return $"{activityName}_compensate";
         }
@@ -161,14 +173,19 @@ namespace MassTransit
             return name;
         }
 
-        string GetConsumerName<T>()
+        /// <summary>
+        /// Gets the endpoint name for a consumer of the given type.
+        /// </summary>
+        /// <param name="type">The type of the consumer implementing <see cref="IConsumer"/></param>
+        /// <returns>The fully formatted name as it will be provided via <see cref="Consumer{T}"/></returns>
+        protected virtual string GetConsumerName(Type type)
         {
-            if (typeof(T).IsGenericType && typeof(T).Name.Contains('`'))
-                return SanitizeName(FormatName(typeof(T).GetGenericArguments().Last()));
+            if (type.IsGenericType && type.Name.Contains('`'))
+                return SanitizeName(FormatName(type.GetGenericArguments().Last()));
 
             const string consumer = "Consumer";
 
-            var consumerName = FormatName(typeof(T));
+            var consumerName = FormatName(type);
 
             if (consumerName.EndsWith(consumer, StringComparison.InvariantCultureIgnoreCase))
                 consumerName = consumerName.Substring(0, consumerName.Length - consumer.Length);
@@ -176,7 +193,12 @@ namespace MassTransit
             return SanitizeName(consumerName);
         }
 
-        string GetMessageName(Type type)
+        /// <summary>
+        /// Gets the endpoint name for a message of the given type.
+        /// </summary>
+        /// <param name="type">The type of the message</param>
+        /// <returns>The fully formatted name as it will be provided via <see cref="Message{T}"/></returns>
+        protected virtual string GetMessageName(Type type)
         {
             if (type.IsGenericType && type.Name.Contains('`'))
                 return SanitizeName(FormatName(type.GetGenericArguments().Last()));
@@ -186,11 +208,16 @@ namespace MassTransit
             return SanitizeName(messageName);
         }
 
-        string GetSagaName<T>()
+        /// <summary>
+        /// Gets the endpoint name for a saga of the given type.
+        /// </summary>
+        /// <param name="type">The type of the saga implementing <see cref="ISaga"/></param>
+        /// <returns>The fully formatted name as it will be provided via <see cref="Saga{T}"/></returns>
+        protected virtual string GetSagaName(Type type)
         {
             const string saga = "Saga";
 
-            var sagaName = FormatName(typeof(T));
+            var sagaName = FormatName(type);
 
             if (sagaName.EndsWith(saga, StringComparison.InvariantCultureIgnoreCase))
                 sagaName = sagaName.Substring(0, sagaName.Length - saga.Length);
@@ -198,11 +225,22 @@ namespace MassTransit
             return SanitizeName(sagaName);
         }
 
-        string GetActivityName<T>()
+        /// <summary>
+        /// Gets the name for an activity of the given type.
+        /// </summary>
+        /// <remarks>
+        /// The activity name is used both for execution and compensation endpoint names.
+        /// </remarks>
+        /// <param name="activityType">The type of the activity implementing <see cref="IActivity"/></param>
+        /// <param name="argumentType">
+        /// For execution endpoints this is the activity arguments, for compensation this is the log type.
+        /// </param>
+        /// <returns>The formatted activity name further used in <see cref="ExecuteActivity{T,TArguments}"/> and <see cref="CompensateActivity{T,TLog}"/>.</returns>
+        protected virtual string GetActivityName(Type activityType, Type argumentType)
         {
             const string activity = "Activity";
 
-            var activityName = FormatName(typeof(T));
+            var activityName = FormatName(activityType);
 
             if (activityName.EndsWith(activity, StringComparison.InvariantCultureIgnoreCase))
                 activityName = activityName.Substring(0, activityName.Length - activity.Length);
@@ -210,13 +248,18 @@ namespace MassTransit
             return SanitizeName(activityName);
         }
 
-        string FormatName(Type type)
+        /// <summary>
+        /// Does a basic formatting of the type respecting settings like <see cref="IncludeNamespace"/>.
+        /// </summary>
+        /// <param name="type">The type to format.</param>
+        /// <returns>A formatted type name, not yet sanitized via <see cref="SanitizeName"/>.</returns>
+        protected virtual string FormatName(Type type)
         {
-            var name = _includeNamespace
-                ? string.Join(_joinSeparator ?? "", TypeCache.GetShortName(type).Split(_removeChars))
+            var name = IncludeNamespace
+                ? string.Join(JoinSeparator ?? "", TypeCache.GetShortName(type).Split(_removeChars))
                 : type.Name;
 
-            return string.IsNullOrWhiteSpace(_prefix) ? name : _prefix + name;
+            return string.IsNullOrWhiteSpace(Prefix) ? name : Prefix + name;
         }
     }
 }
