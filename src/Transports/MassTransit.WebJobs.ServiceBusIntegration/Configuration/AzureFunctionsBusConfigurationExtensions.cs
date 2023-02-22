@@ -51,8 +51,8 @@ namespace MassTransit
 
                         if (string.IsNullOrWhiteSpace(connectionString))
                         {
-                            var ns = Environment.GetEnvironmentVariable("ServiceBusConnection__fullyQualifiedNamespace")
-                                ?? Environment.GetEnvironmentVariable($"{connectionStringConfigurationKey}__fullyQualifiedNamespace");
+                            var ns = config["ServiceBusConnection:fullyQualifiedNamespace"]
+                                ?? config[$"{connectionStringConfigurationKey}:fullyQualifiedNamespace"];
                             if (string.IsNullOrWhiteSpace(ns))
                             {
                                 throw new ArgumentNullException(connectionStringConfigurationKey,
