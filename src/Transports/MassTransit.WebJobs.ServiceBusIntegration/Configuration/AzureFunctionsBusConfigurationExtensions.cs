@@ -51,8 +51,8 @@ namespace MassTransit
 
                         if (string.IsNullOrWhiteSpace(connectionString))
                         {
-                            var ns = config["ServiceBusConnection__fullyQualifiedNamespace"]
-                                ?? config[$"{connectionStringConfigurationKey}__fullyQualifiedNamespace"];
+                            var ns = config["ServiceBusConnection:fullyQualifiedNamespace"]
+                                ?? config[$"{connectionStringConfigurationKey}:fullyQualifiedNamespace"];
                             if (string.IsNullOrWhiteSpace(ns))
                             {
                                 throw new ArgumentNullException(connectionStringConfigurationKey,
@@ -81,6 +81,8 @@ namespace MassTransit
 
         static bool IsMissingCredentials(string connectionString)
         {
+            if (!connectionString.Contains("=")) return true;
+
             var properties = ServiceBusConnectionStringProperties.Parse(connectionString);
 
             return (string.IsNullOrWhiteSpace(properties.SharedAccessKeyName) || string.IsNullOrWhiteSpace(properties.SharedAccessKey))
