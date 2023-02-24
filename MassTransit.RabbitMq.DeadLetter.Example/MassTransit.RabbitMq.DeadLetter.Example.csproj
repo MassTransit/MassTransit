@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <Nullable>disable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <LangVersion>10</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\src\MassTransit.Abstractions\MassTransit.Abstractions.csproj" />
+      <ProjectReference Include="..\src\MassTransit\MassTransit.csproj" />
+      <ProjectReference Include="..\src\Transports\MassTransit.RabbitMqTransport\MassTransit.RabbitMqTransport.csproj" />
+    </ItemGroup>
+
+</Project>
