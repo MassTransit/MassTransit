@@ -9,9 +9,9 @@ services:
       - "ACTIVEMQ_OPTS=-Xms512m -Xms512m"
       - "ACTIVEMQ_CONFIG_SCHEDULERENABLED=true"
     ports:
-      - 8161:8161
-      - 61616:61616
-      - 61613:61613
+      - "8161:8161"
+      - "61616:61616"
+      - "61613:61613"
   artemis:
     image: quay.io/artemiscloud/activemq-artemis-broker
     environment:
