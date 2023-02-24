@@ -4,13 +4,13 @@ namespace MassTransit.AmazonSqsTransport.Tests
     using System.Threading.Tasks;
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
-    using MassTransit.Testing;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Logging;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
+    using Testing;
 
 
     [TestFixture]
@@ -26,7 +26,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
                 Value = "Hello"
             };
 
-            await Bus.Publish(message);
+            await Bus.Publish(message, Pipe.Execute<SendContext>(ctx => ctx.SetGroupId(message.CorrelationId.ToString())));
 
             await AmazonSqsTestHarness.Consumed.Any<PingMessage>(x => x.Context.Message.CorrelationId == message.CorrelationId);
 
@@ -107,7 +107,8 @@ namespace MassTransit.AmazonSqsTransport.Tests
             await busControl.StartAsync(TestCancellationToken);
             try
             {
-                await busControl.Publish(new MessageInOrder());
+                var id = NewId.NextGuid();
+                await busControl.Publish(new MessageInOrder(), Pipe.Execute<SendContext>(ctx => ctx.SetGroupId(id.ToString())));
 
                 var source = provider.GetRequiredService<TaskCompletionSource<ConsumeContext<MessageInOrder>>>();
 
