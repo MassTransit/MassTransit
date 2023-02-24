@@ -47,7 +47,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
                     removed = await CleanUpInboxState(stoppingToken).ConfigureAwait(false);
                 }
-                catch (OperationCanceledException exception) when (exception.CancellationToken == stoppingToken)
+                catch (OperationCanceledException)
                 {
                 }
                 catch (DbUpdateConcurrencyException exception)
