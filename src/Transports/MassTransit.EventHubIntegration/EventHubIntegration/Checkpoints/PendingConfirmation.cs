@@ -11,18 +11,16 @@ namespace MassTransit.EventHubIntegration.Checkpoints
     public class PendingConfirmation :
         IPendingConfirmation
     {
-        readonly string _eventHubName;
         readonly TaskCompletionSource<long> _source;
         ProcessEventArgs _eventArgs;
 
-        public PendingConfirmation(string eventHubName, ProcessEventArgs eventArgs)
+        public PendingConfirmation(ProcessEventArgs eventArgs)
         {
-            _eventHubName = eventHubName;
             _eventArgs = eventArgs;
             _source = TaskUtil.GetTask<long>();
         }
 
-        Uri Topic => new Uri($"topic:{_eventHubName}");
+        Uri Topic => new Uri($"topic:{Partition.EventHubName}");
 
         public PartitionContext Partition => _eventArgs.Partition;
         public long Offset => _eventArgs.Data.Offset;

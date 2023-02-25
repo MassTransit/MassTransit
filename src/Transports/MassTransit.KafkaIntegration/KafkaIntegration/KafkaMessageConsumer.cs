@@ -94,6 +94,11 @@
                 return;
 
             var context = new KafkaReceiveContext<TKey, TValue>(result, _context, _lockContext);
+            var cancellationToken = context.CancellationToken;
+
+            CancellationTokenRegistration? registration = null;
+            if (cancellationToken.CanBeCanceled)
+                registration = cancellationToken.Register(() => _lockContext.Canceled(result, cancellationToken));
 
             try
             {
@@ -105,6 +110,7 @@
             }
             finally
             {
+                registration?.Dispose();
                 context.Dispose();
             }
         }

@@ -12,22 +12,35 @@ namespace MassTransit.KafkaIntegration
 
     public class ConsumerLockContext :
         IConsumerLockContext,
-        KafkaConsumerBuilderContext
+        KafkaConsumerBuilderContext,
+        IChannelExecutorPool<ConsumeResult<byte[], byte[]>>
     {
-        readonly CancellationToken _cancellationToken;
-
         readonly ConsumerContext _context;
-
-        readonly SingleThreadedDictionary<TopicPartition, PartitionCheckpointData> _data =
-            new SingleThreadedDictionary<TopicPartition, PartitionCheckpointData>();
-
+        readonly SingleThreadedDictionary<TopicPartition, PartitionCheckpointData> _data;
+        readonly PendingConfirmationCollection _pending;
         readonly ReceiveSettings _receiveSettings;
 
         public ConsumerLockContext(ConsumerContext context, ReceiveSettings receiveSettings, CancellationToken cancellationToken)
         {
             _context = context;
             _receiveSettings = receiveSettings;
-            _cancellationToken = cancellationToken;
+            _pending = new PendingConfirmationCollection(cancellationToken);
+            _data = new SingleThreadedDictionary<TopicPartition, PartitionCheckpointData>();
+        }
+
+        public ValueTask DisposeAsync()
+        {
+            return default;
+        }
+
+        public Task Push(ConsumeResult<byte[], byte[]> partition, Func<Task> method, CancellationToken cancellationToken = default)
+        {
+            return _data.TryGetValue(partition.TopicPartition, out var data) ? data.Push(method) : Task.CompletedTask;
+        }
+
+        public Task Run(ConsumeResult<byte[], byte[]> partition, Func<Task> method, CancellationToken cancellationToken = default)
+        {
+            return _data.TryGetValue(partition.TopicPartition, out var data) ? data.Run(method) : Task.CompletedTask;
         }
 
         public Task Pending(ConsumeResult<byte[], byte[]> result)
@@ -41,35 +54,25 @@ namespace MassTransit.KafkaIntegration
         {
             LogContext.SetCurrentIfNull(_context.LogContext);
 
-            if (_data.TryGetValue(result.TopicPartition, out var data))
-                data.Complete(result);
+            _pending.Complete(result.TopicPartitionOffset);
 
             return Task.CompletedTask;
+        }
+
+        public void Canceled(ConsumeResult<byte[], byte[]> result, CancellationToken cancellationToken)
+        {
+            LogContext.SetCurrentIfNull(_context.LogContext);
+
+            _pending.Canceled(result.TopicPartitionOffset, cancellationToken);
         }
 
         public Task Faulted(ConsumeResult<byte[], byte[]> result, Exception exception)
         {
             LogContext.SetCurrentIfNull(_context.LogContext);
 
-            if (_data.TryGetValue(result.TopicPartition, out var data))
-                data.Faulted(result, exception);
+            _pending.Faulted(result.TopicPartitionOffset, exception);
 
             return Task.CompletedTask;
-        }
-
-        public ValueTask DisposeAsync()
-        {
-            return default;
-        }
-
-        public Task Push(ConsumeResult<byte[], byte[]> partition, Func<Task> method, CancellationToken cancellationToken = default)
-        {
-            return _data[partition.TopicPartition].Push(method);
-        }
-
-        public Task Run(ConsumeResult<byte[], byte[]> partition, Func<Task> method, CancellationToken cancellationToken = default)
-        {
-            return _data[partition.TopicPartition].Run(method);
         }
 
         public void OnAssigned(IConsumer<byte[], byte[]> consumer, IEnumerable<TopicPartition> partitions)
@@ -78,7 +81,7 @@ namespace MassTransit.KafkaIntegration
 
             foreach (var partition in partitions)
             {
-                if (!_data.TryAdd(partition, p => new PartitionCheckpointData(partition, consumer, _receiveSettings, _cancellationToken)))
+                if (!_data.TryAdd(partition, p => new PartitionCheckpointData(consumer, _receiveSettings, _pending)))
                     continue;
 
                 LogContext.Debug?.Log("Partition: {PartitionId} was assigned to: {MemberId}", partition, consumer.MemberId);
@@ -89,14 +92,13 @@ namespace MassTransit.KafkaIntegration
         {
             LogContext.SetCurrentIfNull(_context.LogContext);
 
-            async Task<bool> LostAndDelete(TopicPartitionOffset topicPartition)
+            Task LostAndDelete(TopicPartitionOffset topicPartition)
             {
-                if (!_data.TryGetValue(topicPartition.TopicPartition, out var data))
-                    return false;
+                if (!_data.TryRemove(topicPartition.TopicPartition, out var data))
+                    return Task.CompletedTask;
 
-                await data.Lost().ConfigureAwait(false);
                 LogContext.Debug?.Log("Partition: {PartitionId} was lost on {MemberId}", topicPartition.TopicPartition, consumer.MemberId);
-                return _data.TryRemove(topicPartition.TopicPartition, out _);
+                return data.Lost();
             }
 
             TaskUtil.Await(Task.WhenAll(partitions.Select(partition => LostAndDelete(partition))));
@@ -106,14 +108,13 @@ namespace MassTransit.KafkaIntegration
         {
             LogContext.SetCurrentIfNull(_context.LogContext);
 
-            async Task<bool> CloseAndDelete(TopicPartitionOffset topicPartition)
+            Task CloseAndDelete(TopicPartitionOffset topicPartition)
             {
-                if (!_data.TryGetValue(topicPartition.TopicPartition, out var data))
-                    return false;
+                if (!_data.TryRemove(topicPartition.TopicPartition, out var data))
+                    return Task.CompletedTask;
 
-                await data.Close().ConfigureAwait(false);
                 LogContext.Debug?.Log("Partition: {PartitionId} was closed on {MemberId}", topicPartition.TopicPartition, consumer.MemberId);
-                return _data.TryRemove(topicPartition.TopicPartition, out _);
+                return data.Close();
             }
 
             TaskUtil.Await(Task.WhenAll(partitions.Select(partition => CloseAndDelete(partition))));
@@ -122,39 +123,24 @@ namespace MassTransit.KafkaIntegration
 
         sealed class PartitionCheckpointData
         {
-            readonly CancellationToken _cancellationToken;
             readonly CancellationTokenSource _cancellationTokenSource;
             readonly ICheckpointer _checkpointer;
             readonly ChannelExecutor _executor;
             readonly PendingConfirmationCollection _pending;
 
-            public PartitionCheckpointData(TopicPartition partition, IConsumer<byte[], byte[]> consumer, ReceiveSettings settings,
-                CancellationToken cancellationToken)
+            public PartitionCheckpointData(IConsumer<byte[], byte[]> consumer, ReceiveSettings settings, PendingConfirmationCollection pending)
             {
-                _cancellationToken = cancellationToken;
+                _pending = pending;
                 _cancellationTokenSource = new CancellationTokenSource();
-                _pending = new PendingConfirmationCollection(partition, _cancellationToken);
+
                 _executor = new ChannelExecutor(settings.PrefetchCount, settings.ConcurrentMessageLimit);
                 _checkpointer = new BatchCheckpointer(consumer, settings, _cancellationTokenSource.Token);
             }
 
             public Task Pending(ConsumeResult<byte[], byte[]> result)
             {
-                if (_cancellationToken.IsCancellationRequested)
-                    return Task.CompletedTask;
-
-                var pendingConfirmation = _pending.Add(result.Offset);
+                var pendingConfirmation = _pending.Add(result.TopicPartitionOffset);
                 return _checkpointer.Pending(pendingConfirmation);
-            }
-
-            public void Complete(ConsumeResult<byte[], byte[]> result)
-            {
-                _pending.Complete(result.Offset);
-            }
-
-            public void Faulted(ConsumeResult<byte[], byte[]> result, Exception exception)
-            {
-                _pending.Faulted(result.Offset, exception);
             }
 
             public Task Lost()
