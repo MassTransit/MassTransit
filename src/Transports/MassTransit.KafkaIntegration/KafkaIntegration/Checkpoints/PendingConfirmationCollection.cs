@@ -9,17 +9,17 @@ namespace MassTransit.KafkaIntegration.Checkpoints
     public class PendingConfirmationCollection :
         IDisposable
     {
-        readonly ConcurrentDictionary<Offset, IPendingConfirmation> _confirmations;
-        readonly TopicPartition _partition;
+        readonly CancellationToken _cancellationToken;
+        readonly ConcurrentDictionary<TopicPartitionOffset, IPendingConfirmation> _confirmations;
         readonly CancellationTokenRegistration? _registration;
 
-        public PendingConfirmationCollection(TopicPartition partition, CancellationToken cancellationToken)
+        public PendingConfirmationCollection(CancellationToken cancellationToken)
         {
-            _partition = partition;
-            _confirmations = new ConcurrentDictionary<Offset, IPendingConfirmation>();
+            _cancellationToken = cancellationToken;
+            _confirmations = new ConcurrentDictionary<TopicPartitionOffset, IPendingConfirmation>();
 
             if (cancellationToken.CanBeCanceled)
-                _registration = cancellationToken.Register(() => Cancel(cancellationToken));
+                _registration = cancellationToken.Register(Cancel);
         }
 
         public void Dispose()
@@ -27,36 +27,41 @@ namespace MassTransit.KafkaIntegration.Checkpoints
             _registration?.Dispose();
         }
 
-        public IPendingConfirmation Add(Offset offset)
+        public IPendingConfirmation Add(TopicPartitionOffset offset)
         {
-            var pendingConfirmation = new PendingConfirmation(_partition, offset);
+            _cancellationToken.ThrowIfCancellationRequested();
+
+            var pendingConfirmation = new PendingConfirmation(offset.TopicPartition, offset.Offset);
             return _confirmations.AddOrUpdate(offset, key => pendingConfirmation, (key, existing) =>
             {
-                existing.Faulted($"Duplicate key: {key}, partition: {_partition}");
+                existing.Faulted($"Duplicate key: {key}");
 
                 return pendingConfirmation;
             });
         }
 
-        public void Complete(Offset offset)
+        public void Complete(TopicPartitionOffset offset)
         {
             if (_confirmations.TryRemove(offset, out var confirmation))
                 confirmation.Complete();
         }
 
-        public void Faulted(Offset offset, Exception exception)
+        public void Canceled(TopicPartitionOffset offset, CancellationToken cancellationToken)
+        {
+            if (_confirmations.TryRemove(offset, out var confirmation))
+                confirmation.Canceled(cancellationToken);
+        }
+
+        public void Faulted(TopicPartitionOffset offset, Exception exception)
         {
             if (_confirmations.TryRemove(offset, out var confirmation))
                 confirmation.Faulted(exception);
         }
 
-        void Cancel(CancellationToken cancellationToken)
+        void Cancel()
         {
             foreach (var offset in _confirmations.Keys)
-            {
-                if (_confirmations.TryRemove(offset, out var confirmation))
-                    confirmation.Canceled(cancellationToken);
-            }
+                Canceled(offset, _cancellationToken);
         }
     }
 }

@@ -93,6 +93,10 @@
                 return;
 
             var context = new EventHubReceiveContext(eventArgs, _context, _lockContext);
+            var cancellationToken = context.CancellationToken;
+            CancellationTokenRegistration? registration = null;
+            if (cancellationToken.CanBeCanceled)
+                registration = cancellationToken.Register(() => _lockContext.Canceled(eventArgs, cancellationToken));
 
             try
             {
@@ -100,6 +104,7 @@
             }
             finally
             {
+                registration?.Dispose();
                 context.Dispose();
             }
         }
