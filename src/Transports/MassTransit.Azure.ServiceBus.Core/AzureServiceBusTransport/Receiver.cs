@@ -10,7 +10,7 @@
 
 
     public class Receiver :
-        ConsumerAgent,
+        ConsumerAgent<long>,
         IReceiver
     {
         readonly ClientContext _clientContext;
@@ -136,7 +136,7 @@
             try
             {
                 var receiveLock = new ServiceBusReceiveLockContext(lockContext, context);
-                await Dispatch(context, receiveLock).ConfigureAwait(false);
+                await Dispatch(context.SequenceNumber, context, receiveLock).ConfigureAwait(false);
             }
             catch (ServiceBusException ex) when (ex.Reason == ServiceBusFailureReason.SessionLockLost)
             {

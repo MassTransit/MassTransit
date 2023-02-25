@@ -6,13 +6,14 @@
     using System.Threading.Tasks;
     using Azure.Messaging.EventHubs;
     using Azure.Messaging.EventHubs.Processor;
+    using Checkpoints;
     using MassTransit.Middleware;
     using Transports;
     using Util;
 
 
     public class EventHubDataReceiver :
-        ConsumerAgent,
+        ConsumerAgent<PartitionOffset>,
         IEventHubDataReceiver
     {
         readonly CancellationTokenSource _checkpointTokenSource;
@@ -75,7 +76,11 @@
 
             try
             {
-                await Dispatch(context, context).ConfigureAwait(false);
+                await Dispatch(eventArgs, context, context).ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                context.LogTransportFaulted(exception);
             }
             finally
             {
@@ -99,6 +104,7 @@
             _client.ProcessEventAsync -= HandleMessage;
             _client.ProcessErrorAsync -= HandleError;
 
+            await _lockContext.DisposeAsync().ConfigureAwait(false);
             _checkpointTokenSource.Dispose();
         }
 
@@ -128,10 +134,9 @@
                 return _partitionExecutorPool.Run(args, () => _keyExecutorPool.Run(args, method, cancellationToken), cancellationToken);
             }
 
-            public async ValueTask DisposeAsync()
+            public ValueTask DisposeAsync()
             {
-                await _partitionExecutorPool.DisposeAsync().ConfigureAwait(false);
-                await _keyExecutorPool.DisposeAsync().ConfigureAwait(false);
+                return _keyExecutorPool.DisposeAsync();
             }
 
             static byte[] GetBytes(ProcessEventArgs args)

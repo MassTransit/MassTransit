@@ -6,7 +6,8 @@ namespace MassTransit.EventHubIntegration
     using Azure.Messaging.EventHubs.Processor;
 
 
-    public interface IProcessorLockContext
+    public interface IProcessorLockContext :
+        IAsyncDisposable
     {
         Task Pending(ProcessEventArgs eventArgs);
         Task Complete(ProcessEventArgs eventArgs);

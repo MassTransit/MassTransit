@@ -28,11 +28,6 @@ namespace MassTransit.KafkaIntegration
             _data = new SingleThreadedDictionary<TopicPartition, PartitionCheckpointData>();
         }
 
-        public ValueTask DisposeAsync()
-        {
-            return default;
-        }
-
         public Task Push(ConsumeResult<byte[], byte[]> partition, Func<Task> method, CancellationToken cancellationToken = default)
         {
             return _data.TryGetValue(partition.TopicPartition, out var data) ? data.Push(method) : Task.CompletedTask;
@@ -41,6 +36,12 @@ namespace MassTransit.KafkaIntegration
         public Task Run(ConsumeResult<byte[], byte[]> partition, Func<Task> method, CancellationToken cancellationToken = default)
         {
             return _data.TryGetValue(partition.TopicPartition, out var data) ? data.Run(method) : Task.CompletedTask;
+        }
+
+        public ValueTask DisposeAsync()
+        {
+            _pending.Dispose();
+            return default;
         }
 
         public Task Pending(ConsumeResult<byte[], byte[]> result)
@@ -154,7 +155,6 @@ namespace MassTransit.KafkaIntegration
                 await _executor.DisposeAsync().ConfigureAwait(false);
                 await _checkpointer.DisposeAsync().ConfigureAwait(false);
 
-                _pending.Dispose();
                 _cancellationTokenSource.Cancel();
                 _cancellationTokenSource.Dispose();
             }

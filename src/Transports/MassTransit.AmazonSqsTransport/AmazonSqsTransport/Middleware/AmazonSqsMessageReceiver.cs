@@ -16,7 +16,7 @@ namespace MassTransit.AmazonSqsTransport.Middleware
     /// Receives messages from AmazonSQS, pushing them to the InboundPipe of the service endpoint.
     /// </summary>
     public sealed class AmazonSqsMessageReceiver :
-        ConsumerAgent
+        ConsumerAgent<string>
     {
         readonly ClientContext _client;
         readonly SqsReceiveEndpointContext _context;
@@ -28,7 +28,7 @@ namespace MassTransit.AmazonSqsTransport.Middleware
         /// <param name="client">The model context for the consumer</param>
         /// <param name="context">The topology</param>
         public AmazonSqsMessageReceiver(ClientContext client, SqsReceiveEndpointContext context)
-            : base(context)
+            : base(context, StringComparer.Ordinal)
         {
             _client = client;
             _context = context;
@@ -99,7 +99,7 @@ namespace MassTransit.AmazonSqsTransport.Middleware
             var context = new AmazonSqsReceiveContext(message, redelivered, _context, _client, _receiveSettings, _client.ConnectionContext);
             try
             {
-                await Dispatch(context, context).ConfigureAwait(false);
+                await Dispatch(message.MessageId, context, context).ConfigureAwait(false);
             }
             catch (Exception exception)
             {

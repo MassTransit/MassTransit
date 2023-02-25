@@ -6,7 +6,8 @@ namespace MassTransit.KafkaIntegration
     using Confluent.Kafka;
 
 
-    public interface IConsumerLockContext
+    public interface IConsumerLockContext :
+        IAsyncDisposable
     {
         Task Pending(ConsumeResult<byte[], byte[]> result);
         Task Complete(ConsumeResult<byte[], byte[]> result);

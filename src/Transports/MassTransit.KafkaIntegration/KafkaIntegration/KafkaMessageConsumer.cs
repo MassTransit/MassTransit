@@ -11,7 +11,7 @@
 
 
     public class KafkaMessageConsumer<TKey, TValue> :
-        ConsumerAgent,
+        ConsumerAgent<TopicPartitionOffset>,
         IKafkaMessageConsumer<TKey, TValue>
         where TValue : class
     {
@@ -80,7 +80,7 @@
 
             try
             {
-                await Dispatch(context, context).ConfigureAwait(false);
+                await Dispatch(result.TopicPartitionOffset, context, context).ConfigureAwait(false);
             }
             catch (Exception exception)
             {
@@ -115,9 +115,10 @@
             _checkpointTokenSource.Cancel();
 
             _consumer.Close();
-
             _consumer.Dispose();
             _cancellationTokenSource.Dispose();
+
+            await _lockContext.DisposeAsync().ConfigureAwait(false);
             _checkpointTokenSource.Dispose();
         }
 
@@ -147,10 +148,9 @@
                 return _partitionExecutorPool.Run(result, () => _keyExecutorPool.Run(result, method, cancellationToken), cancellationToken);
             }
 
-            public async ValueTask DisposeAsync()
+            public ValueTask DisposeAsync()
             {
-                await _partitionExecutorPool.DisposeAsync().ConfigureAwait(false);
-                await _keyExecutorPool.DisposeAsync().ConfigureAwait(false);
+                return _keyExecutorPool.DisposeAsync();
             }
         }
     }

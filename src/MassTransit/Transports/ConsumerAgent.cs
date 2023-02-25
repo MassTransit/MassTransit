@@ -1,6 +1,8 @@
 namespace MassTransit.Transports
 {
     using System;
+    using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
     using Internals;
@@ -8,7 +10,7 @@ namespace MassTransit.Transports
     using Util;
 
 
-    public abstract class ConsumerAgent :
+    public abstract class ConsumerAgent<TKey> :
         Agent,
         DeliveryMetrics
     {
@@ -16,13 +18,16 @@ namespace MassTransit.Transports
         readonly TaskCompletionSource<bool> _deliveryComplete;
         readonly IReceivePipeDispatcher _dispatcher;
         readonly object _lock = new object();
+        readonly ConcurrentDictionary<TKey, BaseReceiveContext> _pending;
         Task _consumeTask;
         TaskCompletionSource<bool> _consumeTaskSource;
 
-        protected ConsumerAgent(ReceiveEndpointContext context)
+        protected ConsumerAgent(ReceiveEndpointContext context, IEqualityComparer<TKey> equalityComparer = default)
         {
             _context = context;
             _deliveryComplete = TaskUtil.GetTask<bool>();
+
+            _pending = new ConcurrentDictionary<TKey, BaseReceiveContext>(equalityComparer);
 
             _dispatcher = context.CreateReceivePipeDispatcher();
             _dispatcher.ZeroActivity += HandleDeliveryComplete;
@@ -118,6 +123,15 @@ namespace MassTransit.Transports
             return Completed;
         }
 
+        void CancelPendingConsumers()
+        {
+            foreach (var key in _pending.Keys)
+            {
+                if (_pending.TryRemove(key, out var context))
+                    context.Cancel();
+            }
+        }
+
         protected void TrySetConsumeCompleted()
         {
             _consumeTaskSource?.TrySetResult(true);
@@ -128,8 +142,7 @@ namespace MassTransit.Transports
             if (_consumeTaskSource == null)
                 return;
 
-            if (IsIdle)
-                _deliveryComplete.TrySetResult(false);
+            CancelPendingConsumers();
 
             _consumeTaskSource.TrySetCanceled(cancellationToken);
         }
@@ -139,7 +152,7 @@ namespace MassTransit.Transports
             if (_consumeTaskSource == null)
                 return;
 
-            _deliveryComplete.TrySetResult(false);
+            CancelPendingConsumers();
 
             _consumeTaskSource.TrySetException(exception);
         }
@@ -155,6 +168,8 @@ namespace MassTransit.Transports
                 catch (OperationCanceledException)
                 {
                     LogContext.Warning?.Log("Stop canceled waiting for message consumers to complete: {InputAddress}", _context.InputAddress);
+
+                    CancelPendingConsumers();
                 }
             }
 
@@ -174,9 +189,27 @@ namespace MassTransit.Transports
             }
         }
 
-        protected Task Dispatch(ReceiveContext context, ReceiveLockContext receiveLock = default)
+        protected virtual bool IsDuplicate(TKey key)
         {
-            return _dispatcher.Dispatch(context, receiveLock);
+            return true;
+        }
+
+        protected async Task Dispatch<TContext>(TKey key, TContext context, ReceiveLockContext receiveLock = default)
+            where TContext : BaseReceiveContext
+        {
+            var added = _pending.TryAdd(key, context);
+            if (!added && IsDuplicate(key))
+                LogContext.Warning?.Log("Duplicate dispatch key {Key}", key);
+
+            try
+            {
+                await _dispatcher.Dispatch(context, receiveLock).ConfigureAwait(false);
+            }
+            finally
+            {
+                if (added)
+                    _pending.TryRemove(key, out _);
+            }
         }
     }
 }

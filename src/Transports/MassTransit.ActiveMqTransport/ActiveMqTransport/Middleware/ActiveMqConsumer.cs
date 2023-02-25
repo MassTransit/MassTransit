@@ -12,7 +12,7 @@ namespace MassTransit.ActiveMqTransport.Middleware
     /// Receives messages from ActiveMQ, pushing them to the InboundPipe of the service endpoint.
     /// </summary>
     public sealed class ActiveMqConsumer :
-        ConsumerAgent
+        ConsumerAgent<string>
     {
         readonly ActiveMqReceiveEndpointContext _context;
         readonly ChannelExecutor _executor;
@@ -28,7 +28,7 @@ namespace MassTransit.ActiveMqTransport.Middleware
         /// <param name="context">The topology</param>
         /// <param name="executor"></param>
         public ActiveMqConsumer(SessionContext session, MessageConsumer messageConsumer, ActiveMqReceiveEndpointContext context, ChannelExecutor executor)
-            : base(context)
+            : base(context, StringComparer.Ordinal)
         {
             _session = session;
             _messageConsumer = messageConsumer;
@@ -54,7 +54,7 @@ namespace MassTransit.ActiveMqTransport.Middleware
 
                 try
                 {
-                    await Dispatch(context, context).ConfigureAwait(false);
+                    await Dispatch(message.NMSMessageId, context, context).ConfigureAwait(false);
                 }
                 catch (Exception exception)
                 {
