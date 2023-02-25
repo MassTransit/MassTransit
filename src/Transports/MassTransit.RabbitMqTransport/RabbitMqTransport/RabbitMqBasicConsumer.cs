@@ -1,7 +1,6 @@
 namespace MassTransit.RabbitMqTransport
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Threading;
     using System.Threading.Tasks;
     using RabbitMQ.Client;
@@ -13,15 +12,15 @@ namespace MassTransit.RabbitMqTransport
     /// Receives messages from RabbitMQ, pushing them to the InboundPipe of the service endpoint.
     /// </summary>
     public class RabbitMqBasicConsumer :
-        ConsumerAgent,
+        ConsumerAgent<ulong>,
         IAsyncBasicConsumer,
         IBasicConsumer,
         RabbitMqDeliveryMetrics
     {
         readonly RabbitMqReceiveEndpointContext _context;
         readonly SemaphoreSlim _limit;
+
         readonly ModelContext _model;
-        readonly ConcurrentDictionary<ulong, RabbitMqReceiveContext> _pending;
         readonly ReceiveSettings _receiveSettings;
 
         string _consumerTag;
@@ -40,8 +39,6 @@ namespace MassTransit.RabbitMqTransport
             _context = context;
 
             _receiveSettings = model.GetPayload<ReceiveSettings>();
-
-            _pending = new ConcurrentDictionary<ulong, RabbitMqReceiveContext>();
 
             if (context.ConcurrentMessageLimit.HasValue)
                 _limit = new SemaphoreSlim(context.ConcurrentMessageLimit.Value);
@@ -135,8 +132,6 @@ namespace MassTransit.RabbitMqTransport
 
             LogContext.Debug?.Log("Consumer Canceled: {InputAddress} - {ConsumerTag}", _context.InputAddress, consumerTag);
 
-            CancelPendingConsumers();
-
             ConsumerCancelled?.Invoke(this, new ConsumerEventArgs(new[] { consumerTag }));
 
             TrySetConsumeCanceled();
@@ -149,8 +144,6 @@ namespace MassTransit.RabbitMqTransport
             LogContext.Debug?.Log(
                 "Consumer Model Shutdown: {InputAddress} - {ConsumerTag}, Concurrent Peak: {MaxConcurrentDeliveryCount}, {ReplyCode}-{ReplyText}",
                 _context.InputAddress, _consumerTag, ConcurrentDeliveryCount, reason.ReplyCode, reason.ReplyText);
-
-            CancelPendingConsumers();
 
             TrySetConsumeCanceled();
         }
@@ -167,10 +160,6 @@ namespace MassTransit.RabbitMqTransport
                 var context = new RabbitMqReceiveContext(exchange, routingKey, _consumerTag, deliveryTag, bodyBytes, redelivered, properties,
                     _context, _receiveSettings, _model, _model.ConnectionContext);
 
-                var added = _pending.TryAdd(deliveryTag, context);
-                if (!added && deliveryTag != 1) // DIRECT REPLY-TO fixed value
-                    LogContext.Warning?.Log("Duplicate BasicDeliver: {DeliveryTag}", deliveryTag);
-
                 var receiveLock = _receiveSettings.NoAck ? default : new RabbitMqReceiveLockContext(_model, deliveryTag);
 
                 if (_limit != null)
@@ -178,7 +167,7 @@ namespace MassTransit.RabbitMqTransport
 
                 try
                 {
-                    await Dispatch(context, receiveLock).ConfigureAwait(false);
+                    await Dispatch(deliveryTag, context, receiveLock).ConfigureAwait(false);
                 }
                 catch (Exception exception)
                 {
@@ -187,9 +176,6 @@ namespace MassTransit.RabbitMqTransport
                 finally
                 {
                     _limit?.Release();
-
-                    if (added)
-                        _pending.TryRemove(deliveryTag, out _);
 
                     context.Dispose();
                 }
@@ -204,10 +190,9 @@ namespace MassTransit.RabbitMqTransport
 
         string RabbitMqDeliveryMetrics.ConsumerTag => _consumerTag;
 
-        void CancelPendingConsumers()
+        protected override bool IsDuplicate(ulong deliveryTag)
         {
-            foreach (var context in _pending.Values)
-                context.Cancel();
+            return deliveryTag != 1;
         }
 
         Task OnConsumerCancelled(object obj, ConsumerEventArgs args)
@@ -222,13 +207,6 @@ namespace MassTransit.RabbitMqTransport
             try
             {
                 await base.StopAgent(context).ConfigureAwait(false);
-            }
-            catch (OperationCanceledException)
-            {
-                foreach (var pendingContext in _pending.Values)
-                    pendingContext.Cancel();
-
-                throw;
             }
             finally
             {

@@ -26,11 +26,6 @@ namespace MassTransit.EventHubIntegration
             _data = new SingleThreadedDictionary<string, PartitionCheckpointData>(StringComparer.Ordinal);
         }
 
-        public ValueTask DisposeAsync()
-        {
-            return default;
-        }
-
         public Task Push(ProcessEventArgs partition, Func<Task> method, CancellationToken cancellationToken = default)
         {
             return _data.TryGetValue(partition.Partition.PartitionId, out var data) ? data.Push(method) : Task.CompletedTask;
@@ -39,6 +34,12 @@ namespace MassTransit.EventHubIntegration
         public Task Run(ProcessEventArgs partition, Func<Task> method, CancellationToken cancellationToken = default)
         {
             return _data.TryGetValue(partition.Partition.PartitionId, out var data) ? data.Run(method) : Task.CompletedTask;
+        }
+
+        public ValueTask DisposeAsync()
+        {
+            _pending.Dispose();
+            return default;
         }
 
         public Task Pending(ProcessEventArgs eventArgs)
@@ -122,7 +123,6 @@ namespace MassTransit.EventHubIntegration
 
                 LogContext.Info?.Log("Partition: {PartitionId} was closed, reason: {Reason}", args.PartitionId, args.Reason);
 
-                _pending.Dispose();
                 _cancellationTokenSource.Cancel();
                 _cancellationTokenSource.Dispose();
             }
