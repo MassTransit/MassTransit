@@ -829,6 +829,76 @@ namespace ConsoleApplication1
         }
 
         [Test]
+        public void WhenMessageContractHasNullableAreStructurallyCompatibleAndMissingCaseNullableProperty_ShouldHaveDiagnosticAndCodeFix()
+        {
+            var test = Usings + @"
+namespace ConsoleApplication1
+{
+    public interface OrderSubmitted
+    {
+        Guid Id { get; }
+        int Quantity { get; }
+        decimal? Price { get; }
+    }
+
+    class Program
+    {
+        static async Task Main()
+        {
+            var bus = Bus.Factory.CreateUsingInMemory(cfg => { });
+
+            await bus.Publish<OrderSubmitted>(new
+            {
+                Id = NewId.NextGuid(),
+                quantity = 10
+            });
+        }
+    }
+}
+";
+            var expected = new DiagnosticResult
+            {
+                Id = "MCA0003",
+                Message =
+                    "Anonymous type is missing properties that are in the message contract 'OrderSubmitted'. The following properties are missing: Price.",
+                Severity = DiagnosticSeverity.Info,
+                Locations =
+                    new[] { new DiagnosticResultLocation("Test0.cs", 23, 47) }
+            };
+
+            VerifyCSharpDiagnostic(test, expected);
+
+            var fixtest = Usings + @"
+namespace ConsoleApplication1
+{
+    public interface OrderSubmitted
+    {
+        Guid Id { get; }
+        int Quantity { get; }
+        decimal? Price { get; }
+    }
+
+    class Program
+    {
+        static async Task Main()
+        {
+            var bus = Bus.Factory.CreateUsingInMemory(cfg => { });
+
+            await bus.Publish<OrderSubmitted>(new
+            {
+                Id = NewId.NextGuid(),
+                quantity = 10
+,
+                Price = default(decimal?)
+            });
+        }
+    }
+}
+";
+            VerifyCSharpFix(test, fixtest);
+        }
+
+        [Test]
         public void WhenPublishTypesAreStructurallyCompatibleAndMissingProperty_ShouldHaveDiagnostic()
         {
             var test = Usings + MessageContracts + @"
