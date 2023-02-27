@@ -37,7 +37,10 @@ namespace MassTransit.Configuration
         IBusTopology Topology { get; }
 
         IRetryPolicy ReceiveTransportRetryPolicy { get; }
+
         IRetryPolicy SendTransportRetryPolicy { get; }
+
+        TimeSpan? ConsumerStopTimeout { get; set; }
 
         /// <summary>
         /// Create a receive endpoint configuration
