@@ -87,6 +87,7 @@ namespace MassTransit.Configuration
 
         public abstract IRetryPolicy ReceiveTransportRetryPolicy { get; }
         public virtual IRetryPolicy SendTransportRetryPolicy => ReceiveTransportRetryPolicy;
+        public TimeSpan? ConsumerStopTimeout { get; set; }
 
         public abstract IReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName, Action<IReceiveEndpointConfigurator>? configure);
 

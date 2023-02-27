@@ -4,6 +4,7 @@ namespace MassTransit.Configuration
     using System.Collections.Generic;
     using System.Linq;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Options;
     using Transports;
 
 
@@ -28,6 +29,7 @@ namespace MassTransit.Configuration
             LogContext.ConfigureCurrentLogContextIfNull(context);
 
             _hostConfiguration.LogContext = LogContext.Current;
+            _hostConfiguration.ConsumerStopTimeout = context.GetService<IOptions<MassTransitHostOptions>>()?.Value.ConsumerStopTimeout;
 
             ConnectBusObservers(context, configurator);
 

@@ -161,6 +161,15 @@ namespace MassTransit.Transports
         {
             if (!IsIdle)
             {
+                CancellationTokenSource cancellationTokenSource = null;
+                CancellationTokenRegistration? registration = null;
+
+                if (_context.ConsumerStopTimeout != null)
+                {
+                    cancellationTokenSource = new CancellationTokenSource(_context.ConsumerStopTimeout.Value);
+                    registration = cancellationTokenSource.Token.Register(CancelPendingConsumers);
+                }
+
                 try
                 {
                     await _deliveryComplete.Task.OrCanceled(context.CancellationToken).ConfigureAwait(false);
@@ -170,6 +179,11 @@ namespace MassTransit.Transports
                     LogContext.Warning?.Log("Stop canceled waiting for message consumers to complete: {InputAddress}", _context.InputAddress);
 
                     CancelPendingConsumers();
+                }
+                finally
+                {
+                    registration?.Dispose();
+                    cancellationTokenSource?.Dispose();
                 }
             }
 

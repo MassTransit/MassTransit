@@ -7,6 +7,7 @@ namespace MassTransit
     using System.IO;
     using System.Linq;
     using Configuration;
+    using DependencyInjection;
     using DependencyInjection.Registration;
     using DependencyInjection.Testing;
     using Internals;
@@ -60,6 +61,8 @@ namespace MassTransit
             {
                 options.WaitUntilStarted = true;
             });
+
+            services.TryAddSingleton<IValidateOptions<MassTransitHostOptions>, ValidateMassTransitHostOptions>();
 
             // If the bus was already configured, well, let's use it and any existing registrations
             if (services.Any(d => d.ServiceType == typeof(IBus)))

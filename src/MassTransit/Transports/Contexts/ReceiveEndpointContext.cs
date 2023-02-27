@@ -18,6 +18,8 @@ namespace MassTransit.Transports
         IReceiveEndpointObserverConnector,
         IProbeSite
     {
+        TimeSpan? ConsumerStopTimeout { get; }
+
         Uri InputAddress { get; }
 
         bool IsBusEndpoint { get; }
