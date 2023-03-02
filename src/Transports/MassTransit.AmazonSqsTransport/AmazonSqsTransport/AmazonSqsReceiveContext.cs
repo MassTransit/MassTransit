@@ -23,6 +23,7 @@
         readonly Message _message;
         readonly ReceiveSettings _settings;
         bool _locked;
+        bool _disposed;
 
         public AmazonSqsReceiveContext(Message message, bool redelivered, SqsReceiveEndpointContext context, ClientContext clientContext,
             ReceiveSettings settings, ConnectionContext connectionContext)
@@ -91,6 +92,7 @@
         public override void Dispose()
         {
             _activeTokenSource.Dispose();
+            _disposed = true;
 
             base.Dispose();
         }
@@ -158,11 +160,13 @@
                 }
                 catch (OperationCanceledException)
                 {
-                    _activeTokenSource.Cancel();
+                    if (!_disposed)
+                        _activeTokenSource.Cancel();
                 }
                 catch (Exception)
                 {
-                    _activeTokenSource.Cancel();
+                    if (!_disposed)
+                        _activeTokenSource.Cancel();
                 }
             }
         }
