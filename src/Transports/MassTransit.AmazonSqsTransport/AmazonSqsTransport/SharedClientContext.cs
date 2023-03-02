@@ -51,14 +51,9 @@
             return _context.DeleteQueue(queue);
         }
 
-        public Task<PublishRequest> CreatePublishRequest(string topicName, string body)
+        public Task Publish(string topicName, PublishBatchRequestEntry request, CancellationToken cancellationToken = default)
         {
-            return _context.CreatePublishRequest(topicName, body);
-        }
-
-        public Task Publish(PublishRequest request, CancellationToken cancellationToken)
-        {
-            return _context.Publish(request, cancellationToken);
+            return _context.Publish(topicName, request, cancellationToken);
         }
 
         public Task SendMessage(string queueName, SendMessageBatchRequestEntry request, CancellationToken cancellationToken)

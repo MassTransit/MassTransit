@@ -26,10 +26,7 @@ namespace MassTransit.AmazonSqsTransport
             _client = client;
             _cancellationToken = cancellationToken;
 
-            var options = new CacheOptions { Capacity = ClientContextCacheDefaults.Capacity };
-            var policy = new TimeToLiveCachePolicy<QueueInfo>(ClientContextCacheDefaults.MaxAge);
-
-            _cache = new MassTransitCache<string, QueueInfo, ITimeToLiveCacheValue<QueueInfo>>(policy, options);
+            _cache = ClientContextCacheDefaults.CreateCache<string, QueueInfo>();
 
             _durableQueues = new Dictionary<string, QueueInfo>();
         }

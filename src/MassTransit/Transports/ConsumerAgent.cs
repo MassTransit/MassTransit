@@ -46,11 +46,7 @@ namespace MassTransit.Transports
         Task HandleDeliveryComplete()
         {
             if (IsStopping)
-            {
-                LogContext.Debug?.Log("Consumer shutdown completed: {InputAddress}", _context.InputAddress);
-
                 _deliveryComplete.TrySetResult(true);
-            }
 
             return Task.CompletedTask;
         }
@@ -114,7 +110,7 @@ namespace MassTransit.Transports
 
         protected override Task StopAgent(StopContext context)
         {
-            LogContext.Debug?.Log("Stopping consumer: {InputAddress} with a reason: {Reason}", _context.InputAddress, context.Reason);
+            LogContext.Debug?.Log("Consumer Stopping: {InputAddress} ({Reason})", _context.InputAddress, context.Reason);
 
             TrySetConsumeCompleted();
 
@@ -176,7 +172,7 @@ namespace MassTransit.Transports
                 }
                 catch (OperationCanceledException)
                 {
-                    LogContext.Warning?.Log("Stop canceled waiting for message consumers to complete: {InputAddress}", _context.InputAddress);
+                    LogContext.Warning?.Log("Consumer stop canceled: {InputAddress}", _context.InputAddress);
 
                     CancelPendingConsumers();
                 }
@@ -199,7 +195,7 @@ namespace MassTransit.Transports
             }
             catch (Exception e)
             {
-                LogContext.Error?.Log(e, "Stop failed waiting for consume task to complete: {InputAddress}", _context.InputAddress);
+                LogContext.Warning?.Log(e, "Consumer stop faulted: {InputAddress}", _context.InputAddress);
             }
         }
 

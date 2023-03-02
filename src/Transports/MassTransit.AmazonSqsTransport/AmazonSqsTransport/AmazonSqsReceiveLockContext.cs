@@ -106,13 +106,16 @@ namespace MassTransit.AmazonSqsTransport
                 try
                 {
                     if (delay > TimeSpan.Zero)
-                        await Task.Delay(delay, _activeTokenSource.Token).ConfigureAwait(false);
+                    {
+                        await Task.Delay(delay, _activeTokenSource.Token)
+                            .ContinueWith(t => t, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default)
+                            .ConfigureAwait(false);
+                    }
 
                     if (_activeTokenSource.IsCancellationRequested)
                         break;
 
-                    await _clientContext.ChangeMessageVisibility(_settings.QueueUrl, _message.ReceiptHandle, visibilityTimeout)
-                        .ConfigureAwait(false);
+                    await _clientContext.ChangeMessageVisibility(_settings.QueueUrl, _message.ReceiptHandle, visibilityTimeout).ConfigureAwait(false);
 
                     // Max 12 hours, https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html
                     if (_receiveContext.ElapsedTime + TimeSpan.FromSeconds(visibilityTimeout) >= MaxVisibilityTimeout)

@@ -16,9 +16,9 @@ namespace MassTransit.AmazonSqsTransport
         readonly ChannelExecutor _executor;
         readonly BatchSettings _settings;
 
-        protected Batcher()
+        protected Batcher(BatchSettings settings = null)
         {
-            _settings = ClientContextBatchSettings.GetBatchSettings();
+            _settings = settings ?? ClientContextBatchSettings.GetBatchSettings();
 
             var channelOptions = new BoundedChannelOptions(_settings.MessageLimit)
             {
@@ -76,9 +76,9 @@ namespace MassTransit.AmazonSqsTransport
                 try
                 {
                     for (int entryId = 0,
-                        batchLength = 0;
-                        entryId < _settings.MessageLimit && batchLength < _settings.SizeLimit;
-                        entryId++)
+                         batchLength = 0;
+                         entryId < _settings.MessageLimit && batchLength < _settings.SizeLimit;
+                         entryId++)
                     {
                         BatchEntry<TEntry> entry = await _channel.Reader.ReadAsync(batchToken.Token).ConfigureAwait(false);
 

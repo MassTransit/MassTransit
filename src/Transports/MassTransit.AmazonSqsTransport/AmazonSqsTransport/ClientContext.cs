@@ -23,9 +23,7 @@ namespace MassTransit.AmazonSqsTransport
 
         Task DeleteQueue(Queue queue);
 
-        Task<PublishRequest> CreatePublishRequest(string topicName, string body);
-
-        Task Publish(PublishRequest request, CancellationToken cancellationToken = default);
+        Task Publish(string topicName, PublishBatchRequestEntry request, CancellationToken cancellationToken = default);
 
         Task SendMessage(string queueName, SendMessageBatchRequestEntry request, CancellationToken cancellationToken);
 
