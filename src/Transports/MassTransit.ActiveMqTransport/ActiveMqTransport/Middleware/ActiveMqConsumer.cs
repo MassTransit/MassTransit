@@ -54,7 +54,7 @@ namespace MassTransit.ActiveMqTransport.Middleware
 
                 try
                 {
-                    await Dispatch(message.NMSMessageId, context, context).ConfigureAwait(false);
+                    await Dispatch(message.NMSMessageId, context, _ => new ActiveMqReceiveLockContext(message)).ConfigureAwait(false);
                 }
                 catch (Exception exception)
                 {

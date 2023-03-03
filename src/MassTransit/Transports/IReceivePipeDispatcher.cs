@@ -15,6 +15,6 @@
         IReceiveObserverConnector,
         IProbeSite
     {
-        Task Dispatch(ReceiveContext context, ReceiveLockContext receiveLock = default);
+        Task Dispatch(ReceiveContext context, ReceiveLockContext receiveLock);
     }
 }

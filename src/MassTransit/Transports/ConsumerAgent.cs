@@ -203,27 +203,52 @@ namespace MassTransit.Transports
             }
         }
 
-        protected virtual bool IsDuplicate(TKey key)
+        protected virtual bool IsTrackable(TKey key)
         {
             return true;
         }
 
-        protected async Task Dispatch<TContext>(TKey key, TContext context, ReceiveLockContext receiveLock = default)
+        protected Task Dispatch<TContext>(TKey key, TContext context, Func<ReceiveContext, ReceiveLockContext> receiveLockFactory)
             where TContext : BaseReceiveContext
         {
-            var added = _pending.TryAdd(key, context);
-            if (!added && IsDuplicate(key))
-                LogContext.Warning?.Log("Duplicate dispatch key {Key}", key);
+            var added = false;
+            ReceiveLockContext lockContext;
 
-            try
+            if (!IsTrackable(key))
+                lockContext = receiveLockFactory(context);
+            else
             {
-                await _dispatcher.Dispatch(context, receiveLock).ConfigureAwait(false);
+                lockContext = _pending.AddOrUpdate(key, _ =>
+                {
+                    added = true;
+                    context.PushLockContext(receiveLockFactory);
+                    return context;
+                }, (_, current) =>
+                {
+                    added = false;
+                    current.PushLockContext(receiveLockFactory);
+                    return current;
+                });
+
+                if (!added)
+                {
+                    context.LogTransportDupe(key);
+                    return Task.CompletedTask;
+                }
             }
-            finally
+
+
+            var dispatchTask = _dispatcher.Dispatch(context, lockContext);
+
+            if (added)
             {
-                if (added)
-                    _pending.TryRemove(key, out _);
+                dispatchTask.ContinueWith(_ =>
+                {
+                    _pending.TryRemove(key, out var _);
+                }, TaskContinuationOptions.ExecuteSynchronously);
             }
+
+            return dispatchTask;
         }
     }
 }

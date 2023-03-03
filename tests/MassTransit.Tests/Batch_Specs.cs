@@ -296,6 +296,40 @@
     }
 
 
+    [TestFixture]
+    public class Duplicate_messages_by_id_consumer :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_receive_single_message_within_same_message_id()
+        {
+            var correlation1 = NewId.NextGuid();
+
+            await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext>(ctx => ctx.MessageId = correlation1));
+            await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext>(ctx => ctx.MessageId = correlation1));
+
+            await InactivityTask;
+
+            var count = await BusTestHarness.Consumed.SelectAsync<PingMessage>().Count();
+
+            Assert.That(count, Is.EqualTo(1));
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            configurator.Consumer(() =>
+            {
+                TaskCompletionSource<Batch<PingMessage>> tcs = GetTask<Batch<PingMessage>>();
+                return new TestBatchConsumer(tcs);
+            }, cc => cc.Options<BatchOptions>(x =>
+            {
+                x.TimeLimit = TimeSpan.FromSeconds(1);
+                x.MessageLimit = 2;
+            }));
+        }
+    }
+
+
     class TestBatchConsumer :
         IConsumer<Batch<PingMessage>>
     {

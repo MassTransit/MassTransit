@@ -99,7 +99,8 @@ namespace MassTransit.AmazonSqsTransport.Middleware
             var context = new AmazonSqsReceiveContext(message, redelivered, _context, _client, _receiveSettings, _client.ConnectionContext);
             try
             {
-                await Dispatch(message.MessageId, context, context).ConfigureAwait(false);
+                await Dispatch(message.MessageId, context, ctx => new AmazonSqsReceiveLockContext(ctx, message, _receiveSettings, _client))
+                    .ConfigureAwait(false);
             }
             catch (Exception exception)
             {

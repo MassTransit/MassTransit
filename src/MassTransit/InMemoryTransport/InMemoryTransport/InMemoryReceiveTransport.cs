@@ -3,6 +3,7 @@ namespace MassTransit.InMemoryTransport
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Context;
     using Internals;
     using Transports;
     using Transports.Fabric;
@@ -107,9 +108,10 @@ namespace MassTransit.InMemoryTransport
                     LogContext.Current = _context.LogContext;
 
                     var context = new InMemoryReceiveContext(message, _context);
+
                     try
                     {
-                        await Dispatch(message.MessageId, context).ConfigureAwait(false);
+                        await Dispatch(message.MessageId, context, _ => NoLockReceiveContext.Instance).ConfigureAwait(false);
                     }
                     catch (Exception exception)
                     {

@@ -68,7 +68,7 @@
             if (IsStopping)
                 return;
 
-            var context = new EventHubReceiveContext(eventArgs, _context, _lockContext);
+            var context = new EventHubReceiveContext(eventArgs, _context);
             var cancellationToken = context.CancellationToken;
             CancellationTokenRegistration? registration = null;
             if (cancellationToken.CanBeCanceled)
@@ -76,7 +76,7 @@
 
             try
             {
-                await Dispatch(eventArgs, context, context).ConfigureAwait(false);
+                await Dispatch(eventArgs, context, _ => new EventHubReceiveLockContext(eventArgs, _lockContext)).ConfigureAwait(false);
             }
             catch (Exception exception)
             {

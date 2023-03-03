@@ -10,8 +10,7 @@
     public sealed class ActiveMqReceiveContext :
         BaseReceiveContext,
         ActiveMqMessageContext,
-        ReceiveContext,
-        ReceiveLockContext
+        ReceiveContext
     {
         public ActiveMqReceiveContext(IMessage transportMessage, ActiveMqReceiveEndpointContext context, params object[] payloads)
             : base(transportMessage.NMSRedelivered, context, payloads)
@@ -32,23 +31,6 @@
         public int GroupSequence => TransportMessage is Message message ? message.GroupSequence : default;
 
         public override MessageBody Body { get; }
-
-        public Task Complete()
-        {
-            TransportMessage.Acknowledge();
-
-            return Task.CompletedTask;
-        }
-
-        public Task Faulted(Exception exception)
-        {
-            return Task.CompletedTask;
-        }
-
-        public Task ValidateLockStatus()
-        {
-            return Task.CompletedTask;
-        }
 
         protected override ISendEndpointProvider GetSendEndpointProvider()
         {
