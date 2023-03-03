@@ -97,9 +97,10 @@ namespace MassTransit.AmazonSqsTransport.Middleware
             var redelivered = message.Attributes.TryGetInt("ApproximateReceiveCount", out var receiveCount) && receiveCount > 1;
 
             var context = new AmazonSqsReceiveContext(message, redelivered, _context, _client, _receiveSettings, _client.ConnectionContext);
+            var lockContext = new AmazonSqsReceiveLockContext(context, message, _receiveSettings, _client);
             try
             {
-                await Dispatch(message.MessageId, context, context).ConfigureAwait(false);
+                await Dispatch(message.MessageId, context, lockContext).ConfigureAwait(false);
             }
             catch (Exception exception)
             {
@@ -107,6 +108,7 @@ namespace MassTransit.AmazonSqsTransport.Middleware
             }
             finally
             {
+                await lockContext.DisposeAsync();
                 context.Dispose();
             }
         }

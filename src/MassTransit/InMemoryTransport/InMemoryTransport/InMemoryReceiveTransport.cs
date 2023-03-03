@@ -83,6 +83,7 @@ namespace MassTransit.InMemoryTransport
         {
             readonly InMemoryReceiveEndpointContext _context;
             readonly ChannelExecutor _executor;
+            readonly ReceiveLockContext _lockContext;
             readonly IMessageQueue<InMemoryTransportContext, InMemoryTransportMessage> _queue;
             TopologyHandle _topologyHandle;
 
@@ -91,6 +92,7 @@ namespace MassTransit.InMemoryTransport
             {
                 _context = context;
                 _queue = queue;
+                _lockContext = new InMemoryReceiveLockContext();
 
                 _executor = new ChannelExecutor(context.ConcurrentMessageLimit ?? context.PrefetchCount, false);
 
@@ -107,9 +109,10 @@ namespace MassTransit.InMemoryTransport
                     LogContext.Current = _context.LogContext;
 
                     var context = new InMemoryReceiveContext(message, _context);
+
                     try
                     {
-                        await Dispatch(message.MessageId, context).ConfigureAwait(false);
+                        await Dispatch(message.MessageId, context, _lockContext).ConfigureAwait(false);
                     }
                     catch (Exception exception)
                     {

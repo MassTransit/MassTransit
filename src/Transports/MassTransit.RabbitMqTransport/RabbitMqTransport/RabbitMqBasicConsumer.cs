@@ -190,7 +190,7 @@ namespace MassTransit.RabbitMqTransport
 
         string RabbitMqDeliveryMetrics.ConsumerTag => _consumerTag;
 
-        protected override bool IsDuplicate(ulong deliveryTag)
+        protected override bool IsTrackable(ulong deliveryTag)
         {
             return deliveryTag != 1;
         }

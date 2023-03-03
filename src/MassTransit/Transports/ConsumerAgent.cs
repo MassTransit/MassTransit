@@ -203,27 +203,52 @@ namespace MassTransit.Transports
             }
         }
 
-        protected virtual bool IsDuplicate(TKey key)
+        protected virtual bool IsTrackable(TKey key)
         {
             return true;
         }
 
-        protected async Task Dispatch<TContext>(TKey key, TContext context, ReceiveLockContext receiveLock = default)
+        protected Task Dispatch<TContext>(TKey key, TContext context, ReceiveLockContext receiveLock)
             where TContext : BaseReceiveContext
         {
-            var added = _pending.TryAdd(key, context);
-            if (!added && IsDuplicate(key))
-                LogContext.Warning?.Log("Duplicate dispatch key {Key}", key);
+            var added = false;
+            var lockContext = receiveLock;
 
-            try
+            if (IsTrackable(key))
             {
-                await _dispatcher.Dispatch(context, receiveLock).ConfigureAwait(false);
+                lockContext = _pending.AddOrUpdate(key, _ =>
+                {
+                    added = true;
+                    context.Pending(receiveLock);
+                    return context;
+                }, (_, current) =>
+                {
+                    added = false;
+                    current.Pending(receiveLock);
+                    return current;
+                });
+
+                if (!added)
+                {
+                    LogContext.Warning?.Log("Duplicate dispatch key {Key}", key);
+                    return Task.CompletedTask;
+                }
             }
-            finally
+
+            async Task DispatchAsync()
             {
-                if (added)
-                    _pending.TryRemove(key, out _);
+                try
+                {
+                    await _dispatcher.Dispatch(context, lockContext).ConfigureAwait(false);
+                }
+                finally
+                {
+                    if (added)
+                        _pending.TryRemove(key, out _);
+                }
             }
+
+            return DispatchAsync();
         }
     }
 }
