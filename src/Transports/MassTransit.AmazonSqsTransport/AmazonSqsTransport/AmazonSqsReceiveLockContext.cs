@@ -10,20 +10,19 @@ namespace MassTransit.AmazonSqsTransport
 
 
     public class AmazonSqsReceiveLockContext :
-        ReceiveLockContext,
-        IAsyncDisposable
+        ReceiveLockContext
     {
         static readonly TimeSpan MaxVisibilityTimeout = TimeSpan.FromHours(12);
         readonly CancellationTokenSource _activeTokenSource;
         readonly ClientContext _clientContext;
         readonly Message _message;
 
-        readonly BaseReceiveContext _receiveContext;
+        readonly ReceiveContext _receiveContext;
         readonly ReceiveSettings _settings;
-        readonly Task<Task> _visibilityTask;
+        readonly Task _visibilityTask;
         bool _locked;
 
-        public AmazonSqsReceiveLockContext(BaseReceiveContext receiveContext, Message message, ReceiveSettings settings, ClientContext clientContext)
+        public AmazonSqsReceiveLockContext(ReceiveContext receiveContext, Message message, ReceiveSettings settings, ClientContext clientContext)
         {
             _receiveContext = receiveContext;
             _message = message;
@@ -35,18 +34,20 @@ namespace MassTransit.AmazonSqsTransport
             _visibilityTask = Task.Factory.StartNew(RenewMessageVisibility, _activeTokenSource.Token, TaskCreationOptions.None, TaskScheduler.Default);
         }
 
-        public async ValueTask DisposeAsync()
-        {
-            _activeTokenSource.Cancel();
-            await _visibilityTask.ConfigureAwait(false);
-            _activeTokenSource.Dispose();
-        }
-
-        public Task Complete()
+        public async Task Complete()
         {
             _activeTokenSource.Cancel();
 
-            return _clientContext.DeleteMessage(_settings.EntityName, _message.ReceiptHandle);
+            try
+            {
+                await _clientContext.DeleteMessage(_settings.EntityName, _message.ReceiptHandle).ConfigureAwait(false);
+
+                await _visibilityTask.ConfigureAwait(false);
+            }
+            finally
+            {
+                _activeTokenSource.Dispose();
+            }
         }
 
         public async Task Faulted(Exception exception)
@@ -55,6 +56,8 @@ namespace MassTransit.AmazonSqsTransport
 
             try
             {
+                await _visibilityTask.ConfigureAwait(false);
+
                 if (!_clientContext.CancellationToken.IsCancellationRequested)
                 {
                     await _clientContext.ChangeMessageVisibility(_settings.QueueUrl, _message.ReceiptHandle,
@@ -70,6 +73,10 @@ namespace MassTransit.AmazonSqsTransport
             {
                 LogContext.Error?.Log(ex, "ChangeMessageVisibility failed: {ReceiptHandle}, Original Exception: {Exception}",
                     _message.ReceiptHandle, exception);
+            }
+            finally
+            {
+                _activeTokenSource.Dispose();
             }
         }
 
@@ -94,14 +101,14 @@ namespace MassTransit.AmazonSqsTransport
 
             visibilityTimeout = Math.Min(60, visibilityTimeout);
 
-            while (_activeTokenSource.Token.IsCancellationRequested == false)
+            while (!_activeTokenSource.IsCancellationRequested)
             {
                 try
                 {
                     if (delay > TimeSpan.Zero)
                         await Task.Delay(delay, _activeTokenSource.Token).ConfigureAwait(false);
 
-                    if (_activeTokenSource.Token.IsCancellationRequested)
+                    if (_activeTokenSource.IsCancellationRequested)
                         break;
 
                     await _clientContext.ChangeMessageVisibility(_settings.QueueUrl, _message.ReceiptHandle, visibilityTimeout)
@@ -119,7 +126,6 @@ namespace MassTransit.AmazonSqsTransport
 
                     _locked = false;
 
-                    _receiveContext.Cancel();
                     break;
                 }
                 catch (ReceiptHandleIsInvalidException exception)
@@ -128,7 +134,6 @@ namespace MassTransit.AmazonSqsTransport
 
                     _locked = false;
 
-                    _receiveContext.Cancel();
                     break;
                 }
                 catch (AmazonSQSException exception)
@@ -145,11 +150,11 @@ namespace MassTransit.AmazonSqsTransport
                 }
                 catch (OperationCanceledException)
                 {
-                    _activeTokenSource.Cancel();
+                    break;
                 }
                 catch (Exception)
                 {
-                    _activeTokenSource.Cancel();
+                    break;
                 }
             }
         }

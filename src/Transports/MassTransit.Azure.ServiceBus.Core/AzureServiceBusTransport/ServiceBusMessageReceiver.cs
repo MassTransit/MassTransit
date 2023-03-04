@@ -4,6 +4,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Azure.Messaging.ServiceBus;
+    using Context;
     using Transports;
 
 
@@ -30,7 +31,7 @@
 
             try
             {
-                await _dispatcher.Dispatch(context).ConfigureAwait(false);
+                await _dispatcher.Dispatch(context, NoLockReceiveContext.Instance).ConfigureAwait(false);
             }
             catch (ServiceBusException ex) when (ex.Reason == ServiceBusFailureReason.SessionLockLost)
             {

@@ -219,7 +219,7 @@ namespace MassTransit.Mediator.Contexts
                 if (_sendObservers.Count > 0)
                     await _sendObservers.PreSend(context).ConfigureAwait(false);
 
-                await _dispatcher.Dispatch(receiveContext).ConfigureAwait(false);
+                await _dispatcher.Dispatch(receiveContext, NoLockReceiveContext.Instance).ConfigureAwait(false);
 
                 if (_sendObservers.Count > 0)
                     await _sendObservers.PostSend(context).ConfigureAwait(false);

@@ -119,17 +119,17 @@ namespace MassTransit.Transports
         public Uri InputAddress { get; protected set; }
         public ContentType ContentType => _contentType.Value;
 
-        public Task Complete()
+        Task ReceiveLockContext.Complete()
         {
             return _pendingLockContexts.Complete();
         }
 
-        public Task Faulted(Exception exception)
+        Task ReceiveLockContext.Faulted(Exception exception)
         {
             return _pendingLockContexts.Faulted(exception);
         }
 
-        public Task ValidateLockStatus()
+        Task ReceiveLockContext.ValidateLockStatus()
         {
             return _pendingLockContexts.ValidateLockStatus();
         }
@@ -175,10 +175,12 @@ namespace MassTransit.Transports
             }
         }
 
-        public void Pending(ReceiveLockContext lockContext)
+        public void PushLockContext(Func<ReceiveContext, ReceiveLockContext> lockContextFactory)
         {
-            if (lockContext != null)
-                _pendingLockContexts.Add(lockContext);
+            if (lockContextFactory == null)
+                throw new ArgumentNullException(nameof(lockContextFactory));
+
+            _pendingLockContexts.Enqueue(lockContextFactory(this));
         }
 
 

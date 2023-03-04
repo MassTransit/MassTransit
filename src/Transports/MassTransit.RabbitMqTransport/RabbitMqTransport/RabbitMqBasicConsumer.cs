@@ -3,6 +3,7 @@ namespace MassTransit.RabbitMqTransport
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Context;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
     using Transports;
@@ -160,14 +161,14 @@ namespace MassTransit.RabbitMqTransport
                 var context = new RabbitMqReceiveContext(exchange, routingKey, _consumerTag, deliveryTag, bodyBytes, redelivered, properties,
                     _context, _receiveSettings, _model, _model.ConnectionContext);
 
-                var receiveLock = _receiveSettings.NoAck ? default : new RabbitMqReceiveLockContext(_model, deliveryTag);
-
                 if (_limit != null)
                     await _limit.WaitAsync(context.CancellationToken).ConfigureAwait(false);
 
                 try
                 {
-                    await Dispatch(deliveryTag, context, receiveLock).ConfigureAwait(false);
+                    await Dispatch(deliveryTag, context,
+                            _ => _receiveSettings.NoAck ? NoLockReceiveContext.Instance : new RabbitMqReceiveLockContext(_model, deliveryTag))
+                        .ConfigureAwait(false);
                 }
                 catch (Exception exception)
                 {

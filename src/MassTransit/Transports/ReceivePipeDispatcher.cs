@@ -44,7 +44,7 @@ namespace MassTransit.Transports
 
         public event ZeroActiveDispatchHandler ZeroActivity;
 
-        public async Task Dispatch(ReceiveContext context, ReceiveLockContext receiveLock = default)
+        public async Task Dispatch(ReceiveContext context, ReceiveLockContext receiveLock)
         {
             LogContext.SetCurrentIfNull(_hostConfiguration.ReceiveLogContext);
 
@@ -56,15 +56,17 @@ namespace MassTransit.Transports
                 if (_observers.Count > 0)
                     await _observers.PreReceive(context).ConfigureAwait(false);
 
-                if (receiveLock != null)
-                    await receiveLock.ValidateLockStatus().ConfigureAwait(false);
+                var validateLockStatusTask = receiveLock.ValidateLockStatus();
+                if (validateLockStatusTask.Status != TaskStatus.RanToCompletion)
+                    await validateLockStatusTask.ConfigureAwait(false);
 
                 await _receivePipe.Send(context).ConfigureAwait(false);
 
                 await context.ReceiveCompleted.ConfigureAwait(false);
 
-                if (receiveLock != null)
-                    await receiveLock.Complete().ConfigureAwait(false);
+                var receiveLockCompleteTask = receiveLock.Complete();
+                if (receiveLockCompleteTask.Status != TaskStatus.RanToCompletion)
+                    await receiveLockCompleteTask.ConfigureAwait(false);
 
                 if (_observers.Count > 0)
                     await _observers.PostReceive(context).ConfigureAwait(false);
@@ -78,7 +80,9 @@ namespace MassTransit.Transports
                 {
                     try
                     {
-                        await receiveLock.Faulted(ex).ConfigureAwait(false);
+                        var receiveLockFaultedTask = receiveLock.Faulted(ex);
+                        if (receiveLockFaultedTask.Status != TaskStatus.RanToCompletion)
+                            await receiveLockFaultedTask.ConfigureAwait(false);
 
                         activity?.AddExceptionEvent(ex);
                     }

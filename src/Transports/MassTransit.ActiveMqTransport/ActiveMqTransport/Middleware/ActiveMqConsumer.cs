@@ -51,11 +51,10 @@ namespace MassTransit.ActiveMqTransport.Middleware
                 LogContext.Current = _context.LogContext;
 
                 var context = new ActiveMqReceiveContext(message, _context, _receiveSettings, _session, _session.ConnectionContext);
-                var lockContext = new ActiveMqReceiveLockContext(message);
 
                 try
                 {
-                    await Dispatch(message.NMSMessageId, context, lockContext).ConfigureAwait(false);
+                    await Dispatch(message.NMSMessageId, context, _ => new ActiveMqReceiveLockContext(message)).ConfigureAwait(false);
                 }
                 catch (Exception exception)
                 {

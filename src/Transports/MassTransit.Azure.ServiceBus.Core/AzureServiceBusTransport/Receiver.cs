@@ -135,8 +135,7 @@
         {
             try
             {
-                var receiveLock = new ServiceBusReceiveLockContext(context, lockContext, message);
-                await Dispatch(context.SequenceNumber, context, receiveLock).ConfigureAwait(false);
+                await Dispatch(context.SequenceNumber, context, ctx => new ServiceBusReceiveLockContext(ctx, lockContext, message)).ConfigureAwait(false);
             }
             catch (ServiceBusException ex) when (ex.Reason == ServiceBusFailureReason.SessionLockLost)
             {

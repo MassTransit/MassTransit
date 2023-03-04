@@ -72,29 +72,6 @@ namespace MassTransit.Containers.Tests
         }
 
         [Test]
-        public async Task Should_deliver_the_batch_to_the_consumer_with_message()
-        {
-            await using var provider = new ServiceCollection()
-                .AddMassTransitTestHarness(x =>
-                {
-                    x.AddConsumer<TestOutboxBatchConsumer>(c => c.Message<Batch<BatchItem>>(m => m.UseInMemoryOutbox()));
-                })
-                .BuildServiceProvider(true);
-
-            var harness = provider.GetTestHarness();
-
-            await harness.Start();
-
-            await harness.Bus.PublishBatch(new[] { new BatchItem(), new BatchItem() });
-
-            Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Take(2).Count(), Is.EqualTo(2));
-
-            Assert.That(await harness.GetConsumerHarness<TestOutboxBatchConsumer>().Consumed.Any<Batch<BatchItem>>(), Is.True);
-
-            Assert.IsTrue(await harness.Published.Any<BatchResult>(x => x.Context.Message.Count == 2 && x.Context.Message.Mode == BatchCompletionMode.Time));
-        }
-
-        [Test]
         public async Task Should_deliver_the_batch_to_the_consumer_after_retry()
         {
             await using var provider = new ServiceCollection()
@@ -119,6 +96,29 @@ namespace MassTransit.Containers.Tests
             Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Take(2).Count(), Is.EqualTo(2));
 
             Assert.That(await harness.GetConsumerHarness<TestRetryOutboxBatchConsumer>().Consumed.Any<Batch<BatchItem>>(), Is.True);
+
+            Assert.IsTrue(await harness.Published.Any<BatchResult>(x => x.Context.Message.Count == 2 && x.Context.Message.Mode == BatchCompletionMode.Time));
+        }
+
+        [Test]
+        public async Task Should_deliver_the_batch_to_the_consumer_with_message()
+        {
+            await using var provider = new ServiceCollection()
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.AddConsumer<TestOutboxBatchConsumer>(c => c.Message<Batch<BatchItem>>(m => m.UseInMemoryOutbox()));
+                })
+                .BuildServiceProvider(true);
+
+            var harness = provider.GetTestHarness();
+
+            await harness.Start();
+
+            await harness.Bus.PublishBatch(new[] { new BatchItem(), new BatchItem() });
+
+            Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Take(2).Count(), Is.EqualTo(2));
+
+            Assert.That(await harness.GetConsumerHarness<TestOutboxBatchConsumer>().Consumed.Any<Batch<BatchItem>>(), Is.True);
 
             Assert.IsTrue(await harness.Published.Any<BatchResult>(x => x.Context.Message.Count == 2 && x.Context.Message.Mode == BatchCompletionMode.Time));
         }
@@ -318,35 +318,6 @@ namespace MassTransit.Containers.Tests
         }
 
         [Test]
-        public async Task Should_fault_once_for_each_message_in_the_batch_with_in_memory_outbox()
-        {
-            await using var provider = new ServiceCollection()
-                .AddMassTransitTestHarness(x =>
-                {
-                    x.AddConsumer<FailingBatchConsumer>(c => c.Options<BatchOptions>(o => o.SetMessageLimit(2)));
-
-                    x.AddConfigureEndpointsCallback((_, cfg) =>
-                    {
-                        cfg.UseMessageRetry(r => r.Immediate(2));
-                        cfg.UseInMemoryOutbox();
-                    });
-                })
-                .BuildServiceProvider(true);
-
-            var harness = provider.GetTestHarness();
-
-            await harness.Start();
-
-            await harness.Bus.PublishBatch(new[] { new BatchItem(), new BatchItem() });
-
-            Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Take(2).Count(), Is.EqualTo(2));
-
-            Assert.That(await harness.GetConsumerHarness<FailingBatchConsumer>().Consumed.Any<Batch<BatchItem>>(), Is.True);
-
-            Assert.That(await harness.Published.SelectAsync<Fault<BatchItem>>().Take(2).Count(), Is.EqualTo(2));
-        }
-
-        [Test]
         public async Task Should_fault_once_for_each_message_in_the_batch_at_the_consumer_retry()
         {
             await using var provider = new ServiceCollection()
@@ -403,6 +374,35 @@ namespace MassTransit.Containers.Tests
         }
 
         [Test]
+        public async Task Should_fault_once_for_each_message_in_the_batch_with_in_memory_outbox()
+        {
+            await using var provider = new ServiceCollection()
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.AddConsumer<FailingBatchConsumer>(c => c.Options<BatchOptions>(o => o.SetMessageLimit(2)));
+
+                    x.AddConfigureEndpointsCallback((_, cfg) =>
+                    {
+                        cfg.UseMessageRetry(r => r.Immediate(2));
+                        cfg.UseInMemoryOutbox();
+                    });
+                })
+                .BuildServiceProvider(true);
+
+            var harness = provider.GetTestHarness();
+
+            await harness.Start();
+
+            await harness.Bus.PublishBatch(new[] { new BatchItem(), new BatchItem() });
+
+            Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Take(2).Count(), Is.EqualTo(2));
+
+            Assert.That(await harness.GetConsumerHarness<FailingBatchConsumer>().Consumed.Any<Batch<BatchItem>>(), Is.True);
+
+            Assert.That(await harness.Published.SelectAsync<Fault<BatchItem>>().Take(2).Count(), Is.EqualTo(2));
+        }
+
+        [Test]
         public async Task Should_fault_once_for_each_message_in_the_batch_with_scheduled_redelivery()
         {
             await using var provider = new ServiceCollection()
@@ -436,6 +436,38 @@ namespace MassTransit.Containers.Tests
             Assert.That(await harness.GetConsumerHarness<FailingBatchConsumer>().Consumed.Any<Batch<BatchItem>>(), Is.True);
 
             Assert.That(await harness.Published.SelectAsync<Fault<BatchItem>>().Take(2).Count(), Is.EqualTo(2));
+        }
+    }
+
+
+    [TestFixture]
+    public class Duplicate_messages_by_id_consumer :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_receive_single_message_within_same_message_id()
+        {
+            await using var provider = new ServiceCollection()
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.AddConsumer<TestBatchConsumer>(c => c.Options<BatchOptions>(o => o.SetMessageLimit(2)));
+                })
+                .BuildServiceProvider(true);
+
+            var harness = provider.GetTestHarness();
+
+            await harness.Start();
+
+            var correlation1 = NewId.NextGuid();
+
+            await harness.Bus.Publish(new BatchItem(), context => context.MessageId = correlation1);
+            await harness.Bus.Publish(new BatchItem(), context => context.MessageId = correlation1);
+
+            Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Count(), Is.EqualTo(1));
+
+            Assert.That(await harness.GetConsumerHarness<TestBatchConsumer>().Consumed.Any<Batch<BatchItem>>(), Is.True);
+
+            Assert.IsTrue(await harness.Published.Any<BatchResult>(x => x.Context.Message is { Count: 1, Mode: BatchCompletionMode.Time }));
         }
     }
 

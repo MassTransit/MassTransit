@@ -208,47 +208,43 @@ namespace MassTransit.Transports
             return true;
         }
 
-        protected Task Dispatch<TContext>(TKey key, TContext context, ReceiveLockContext receiveLock)
+        protected Task Dispatch<TContext>(TKey key, TContext context, Func<ReceiveContext, ReceiveLockContext> receiveLockFactory)
             where TContext : BaseReceiveContext
         {
             var added = false;
-            var lockContext = receiveLock;
+            ReceiveLockContext lockContext;
 
-            if (IsTrackable(key))
+            if (!IsTrackable(key))
+                lockContext = receiveLockFactory(context);
+            else
             {
                 lockContext = _pending.AddOrUpdate(key, _ =>
                 {
                     added = true;
-                    context.Pending(receiveLock);
+                    context.PushLockContext(receiveLockFactory);
                     return context;
                 }, (_, current) =>
                 {
                     added = false;
-                    current.Pending(receiveLock);
+                    current.PushLockContext(receiveLockFactory);
                     return current;
                 });
 
                 if (!added)
                 {
-                    LogContext.Warning?.Log("Duplicate dispatch key {Key}", key);
+                    context.LogTransportDupe(key);
                     return Task.CompletedTask;
                 }
             }
 
-            async Task DispatchAsync()
-            {
-                try
-                {
-                    await _dispatcher.Dispatch(context, lockContext).ConfigureAwait(false);
-                }
-                finally
-                {
-                    if (added)
-                        _pending.TryRemove(key, out _);
-                }
-            }
 
-            return DispatchAsync();
+            var dispatchTask = _dispatcher.Dispatch(context, lockContext);
+            dispatchTask.ContinueWith(_ =>
+            {
+                if (added)
+                    _pending.TryRemove(key, out var _);
+            }, TaskContinuationOptions.ExecuteSynchronously);
+            return dispatchTask;
         }
     }
 }

@@ -72,7 +72,6 @@
                 return;
 
             var context = new KafkaReceiveContext<TKey, TValue>(result, _context);
-            var lockContext = new KafkaReceiveLockContext(result, _lockContext);
             var cancellationToken = context.CancellationToken;
 
             CancellationTokenRegistration? registration = null;
@@ -81,7 +80,7 @@
 
             try
             {
-                await Dispatch(result.TopicPartitionOffset, context, lockContext).ConfigureAwait(false);
+                await Dispatch(result.TopicPartitionOffset, context, _ => new KafkaReceiveLockContext(result, _lockContext)).ConfigureAwait(false);
             }
             catch (Exception exception)
             {

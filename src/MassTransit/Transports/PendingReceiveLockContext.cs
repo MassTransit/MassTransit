@@ -7,21 +7,10 @@ namespace MassTransit.Transports
 
 
     public class PendingReceiveLockContext :
-        ReceiveLockContext,
-        IDisposable
+        ReceiveLockContext
     {
-        readonly object _lock = new object();
         ReceiveLockContext _lockContext;
         Queue<ReceiveLockContext> _pending;
-
-        public void Dispose()
-        {
-            lock (_lock)
-            {
-                _lockContext = null;
-                _pending?.Clear();
-            }
-        }
 
         public Task Complete()
         {
@@ -38,9 +27,18 @@ namespace MassTransit.Transports
             return Execute(context => context.ValidateLockStatus());
         }
 
-        public void Add(ReceiveLockContext lockContext)
+        public void Dispose()
         {
-            lock (_lock)
+            lock (this)
+            {
+                _lockContext = null;
+                _pending?.Clear();
+            }
+        }
+
+        public void Enqueue(ReceiveLockContext lockContext)
+        {
+            lock (this)
             {
                 if (_lockContext == null)
                     _lockContext = lockContext;
@@ -53,7 +51,7 @@ namespace MassTransit.Transports
         {
             if (_lockContext == null)
             {
-                lock (_lock)
+                lock (this)
                 {
                     if (_lockContext == null)
                         return;
@@ -86,10 +84,11 @@ namespace MassTransit.Transports
 
         bool TryDequeue()
         {
-            lock (_lock)
+            lock (this)
             {
                 if (_pending == null || _pending.Count == 0)
                     return false;
+
                 _lockContext = _pending.Dequeue();
                 return true;
             }
