@@ -1,6 +1,5 @@
 namespace MassTransit.Middleware.Outbox
 {
-    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Options;
@@ -25,11 +24,12 @@ namespace MassTransit.Middleware.Outbox
 
             try
             {
-                await Task.Delay(_options.Value.QueryDelay, _cancellationTokenSource.Token).ConfigureAwait(false);
-            }
-            catch (OperationCanceledException e) when (e.CancellationToken == _cancellationTokenSource.Token)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
+                var delay = await Task.Delay(_options.Value.QueryDelay, _cancellationTokenSource.Token)
+                    .ContinueWith(t => t, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default)
+                    .ConfigureAwait(false);
+
+                if (delay.IsCanceled)
+                    cancellationToken.ThrowIfCancellationRequested();
             }
             finally
             {
