@@ -1,15 +1,18 @@
 ﻿namespace MassTransit.RabbitMqTransport
 {
     using System;
+    using System.Collections.Generic;
     using System.Net.Mime;
     using System.Threading.Tasks;
+    using Context;
     using RabbitMQ.Client;
     using Transports;
 
 
     public sealed class RabbitMqReceiveContext :
         BaseReceiveContext,
-        RabbitMqBasicConsumeContext
+        RabbitMqBasicConsumeContext,
+        TransportReceiveContext
     {
         public RabbitMqReceiveContext(string exchange, string routingKey, string consumerTag, ulong deliveryTag, byte[] body,
             bool redelivered, IBasicProperties properties, RabbitMqReceiveEndpointContext receiveEndpointContext, params object[] payloads)
@@ -35,6 +38,27 @@
         public IBasicProperties Properties { get; }
 
         byte[] RabbitMqBasicConsumeContext.Body => Body.GetBytes();
+
+        public IDictionary<string, object> GetTransportProperties()
+        {
+            var properties = new Lazy<Dictionary<string, object>>(() => new Dictionary<string, object>());
+
+            if (!string.IsNullOrWhiteSpace(RoutingKey))
+                properties.Value[RabbitMqTransportPropertyNames.RoutingKey] = RoutingKey;
+
+            if (Properties.IsAppIdPresent())
+                properties.Value[RabbitMqTransportPropertyNames.AppId] = Properties.AppId;
+            if (Properties.IsPriorityPresent())
+                properties.Value[RabbitMqTransportPropertyNames.Priority] = Properties.Priority;
+            if (Properties.IsReplyToPresent())
+                properties.Value[RabbitMqTransportPropertyNames.ReplyTo] = Properties.ReplyTo;
+            if (Properties.IsTypePresent())
+                properties.Value[RabbitMqTransportPropertyNames.Type] = Properties.Type;
+            if (Properties.IsUserIdPresent())
+                properties.Value[RabbitMqTransportPropertyNames.UserId] = Properties.UserId;
+
+            return properties.IsValueCreated ? properties.Value : null;
+        }
 
         protected override ContentType GetContentType()
         {

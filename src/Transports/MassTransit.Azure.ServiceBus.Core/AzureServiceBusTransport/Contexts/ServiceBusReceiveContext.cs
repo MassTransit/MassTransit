@@ -4,12 +4,14 @@
     using System.Collections.Generic;
     using System.Net.Mime;
     using Azure.Messaging.ServiceBus;
+    using Context;
     using Transports;
 
 
     public sealed class ServiceBusReceiveContext :
         BaseReceiveContext,
-        ServiceBusMessageContext
+        ServiceBusMessageContext,
+        TransportReceiveContext
     {
         readonly ServiceBusReceivedMessage _message;
 
@@ -62,6 +64,22 @@
         public DateTime EnqueuedTime => _message.EnqueuedTime.UtcDateTime;
 
         public DateTime ScheduledEnqueueTime => _message.ScheduledEnqueueTime.UtcDateTime;
+
+        public IDictionary<string, object> GetTransportProperties()
+        {
+            var properties = new Lazy<Dictionary<string, object>>(() => new Dictionary<string, object>());
+
+            if (!string.IsNullOrWhiteSpace(PartitionKey))
+                properties.Value[AzureServiceBusTransportPropertyNames.PartitionKey] = PartitionKey;
+            if (!string.IsNullOrWhiteSpace(SessionId))
+                properties.Value[AzureServiceBusTransportPropertyNames.SessionId] = SessionId;
+            if (!string.IsNullOrWhiteSpace(ReplyToSessionId))
+                properties.Value[AzureServiceBusTransportPropertyNames.ReplyToSessionId] = ReplyToSessionId;
+            if (!string.IsNullOrWhiteSpace(Label))
+                properties.Value[AzureServiceBusTransportPropertyNames.Label] = Label;
+
+            return properties.IsValueCreated ? properties.Value : null;
+        }
 
         protected override ContentType GetContentType()
         {

@@ -4,6 +4,7 @@ namespace MassTransit.HangfireIntegration
     using System.Collections.Generic;
     using System.Net.Mime;
     using System.Threading.Tasks;
+    using Context;
     using Hangfire;
     using Hangfire.Server;
     using Serialization;
@@ -112,6 +113,11 @@ namespace MassTransit.HangfireIntegration
 
                 foreach (KeyValuePair<string, object> header in _messageContext.Headers.GetAll())
                     context.Headers.Set(header.Key, header.Value);
+
+                IReadOnlyDictionary<string, object>? transportProperties = _messageContext.TransportProperties;
+                if (transportProperties != null && context is TransportSendContext transportSendContext)
+                    transportSendContext.ReadPropertiesFrom(transportProperties);
+
 
                 context.Serializer = serializerContext.GetMessageSerializer();
 

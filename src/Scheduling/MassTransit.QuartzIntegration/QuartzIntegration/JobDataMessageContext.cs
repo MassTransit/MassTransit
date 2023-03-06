@@ -131,6 +131,9 @@ namespace MassTransit.QuartzIntegration
         public Headers Headers => _headers ??= GetHeaders();
         public HostInfo Host => _hostInfo ??= _jobDataMap.TryGetValue(nameof(Host), out HostInfo? value) ? value! : HostMetadataCache.Empty;
 
+        public IReadOnlyDictionary<string, object>? TransportProperties =>
+            _jobDataMap.TryGetValue<IReadOnlyDictionary<string, object>>("TransportProperties", out var properties) ? properties : default;
+
         Headers GetHeaders()
         {
             var headers = new DictionarySendHeaders();

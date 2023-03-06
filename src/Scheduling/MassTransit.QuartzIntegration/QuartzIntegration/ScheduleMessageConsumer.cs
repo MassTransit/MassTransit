@@ -147,6 +147,13 @@ namespace MassTransit.QuartzIntegration
             if (headers.Any())
                 builder = builder.UsingJobData("HeadersAsJson", JsonSerializer.Serialize(headers, SystemTextJsonMessageSerializer.Options));
 
+            if (context.ReceiveContext.TryGetPayload<TransportReceiveContext>(out var transportReceiveContext))
+            {
+                IDictionary<string, object>? properties = transportReceiveContext.GetTransportProperties();
+                if (properties != null)
+                    builder = builder.UsingJobData("TransportProperties", JsonSerializer.Serialize(properties, SystemTextJsonMessageSerializer.Options));
+            }
+
             var trigger = builder
                 .Build();
 

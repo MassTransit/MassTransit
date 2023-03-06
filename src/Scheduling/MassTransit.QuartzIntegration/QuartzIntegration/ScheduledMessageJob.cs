@@ -6,6 +6,7 @@ namespace MassTransit.QuartzIntegration
     using System.Linq;
     using System.Net.Mime;
     using System.Threading.Tasks;
+    using Context;
     using Quartz;
     using Serialization;
 
@@ -89,6 +90,10 @@ namespace MassTransit.QuartzIntegration
 
                 foreach (KeyValuePair<string, object> header in _messageContext.Headers.GetAll())
                     context.Headers.Set(header.Key, header.Value);
+
+                IReadOnlyDictionary<string, object>? transportProperties = _messageContext.TransportProperties;
+                if (transportProperties != null && context is TransportSendContext transportSendContext)
+                    transportSendContext.ReadPropertiesFrom(transportProperties);
 
                 context.Serializer = serializerContext.GetMessageSerializer();
 

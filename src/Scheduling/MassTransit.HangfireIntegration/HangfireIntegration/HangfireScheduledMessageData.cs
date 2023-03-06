@@ -4,6 +4,7 @@ namespace MassTransit.HangfireIntegration
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.Json;
+    using Context;
     using Serialization;
 
 
@@ -23,6 +24,7 @@ namespace MassTransit.HangfireIntegration
         public string? InitiatorId { get; set; }
         public string? TokenId { get; set; }
         public string? HeadersAsJson { get; set; }
+        public string? TransportProperties { get; set; }
 
         public Uri Destination => new Uri(DestinationAddress!);
 
@@ -59,6 +61,13 @@ namespace MassTransit.HangfireIntegration
             IEnumerable<KeyValuePair<string, object>> headers = context.Headers.GetAll().ToList();
             if (headers.Any())
                 data.HeadersAsJson = JsonSerializer.Serialize(headers, SystemTextJsonMessageSerializer.Options);
+
+            if (context.ReceiveContext.TryGetPayload<TransportReceiveContext>(out var transportReceiveContext))
+            {
+                IDictionary<string, object>? properties = transportReceiveContext.GetTransportProperties();
+                if (properties != null)
+                    data.TransportProperties = JsonSerializer.Serialize(properties, SystemTextJsonMessageSerializer.Options);
+            }
         }
     }
 }

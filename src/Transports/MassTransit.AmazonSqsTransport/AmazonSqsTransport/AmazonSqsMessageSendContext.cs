@@ -28,8 +28,8 @@
         {
             base.ReadPropertiesFrom(properties);
 
-            GroupId = ReadString(properties, PropertyNames.GroupId);
-            DeduplicationId = ReadString(properties, PropertyNames.DeduplicationId);
+            GroupId = ReadString(properties, AmazonSqsTransportPropertyNames.GroupId);
+            DeduplicationId = ReadString(properties, AmazonSqsTransportPropertyNames.DeduplicationId);
         }
 
         public override void WritePropertiesTo(IDictionary<string, object> properties)
@@ -37,16 +37,9 @@
             base.WritePropertiesTo(properties);
 
             if (!string.IsNullOrWhiteSpace(GroupId))
-                properties[PropertyNames.GroupId] = GroupId;
+                properties[AmazonSqsTransportPropertyNames.GroupId] = GroupId;
             if (!string.IsNullOrWhiteSpace(DeduplicationId))
-                properties[PropertyNames.DeduplicationId] = DeduplicationId;
-        }
-
-
-        static class PropertyNames
-        {
-            public const string GroupId = "SQS-GroupId";
-            public const string DeduplicationId = "SQS-DeduplicationId";
+                properties[AmazonSqsTransportPropertyNames.DeduplicationId] = DeduplicationId;
         }
     }
 }
