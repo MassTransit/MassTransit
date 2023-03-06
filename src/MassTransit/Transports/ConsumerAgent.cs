@@ -27,7 +27,7 @@ namespace MassTransit.Transports
             _context = context;
             _deliveryComplete = TaskUtil.GetTask<bool>();
 
-            _pending = new ConcurrentDictionary<TKey, BaseReceiveContext>(equalityComparer);
+            _pending = new ConcurrentDictionary<TKey, BaseReceiveContext>(equalityComparer ?? EqualityComparer<TKey>.Default);
 
             _dispatcher = context.CreateReceivePipeDispatcher();
             _dispatcher.ZeroActivity += HandleDeliveryComplete;
