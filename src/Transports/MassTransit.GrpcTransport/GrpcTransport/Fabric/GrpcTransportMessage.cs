@@ -4,6 +4,7 @@ namespace MassTransit.GrpcTransport.Fabric
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using Contracts;
     using Serialization;
@@ -73,34 +74,34 @@ namespace MassTransit.GrpcTransport.Fabric
             return Headers.GetAll();
         }
 
-        public bool TryGetHeader(string key, out object? value)
+        public bool TryGetHeader(string key, [NotNullWhen(true)] out object? value)
         {
             switch (key)
             {
                 case MessageHeaders.MessageId:
                     value = MessageId;
-                    return true;
+                    return value != null;
                 case MessageHeaders.CorrelationId:
                     value = CorrelationId;
-                    return true;
+                    return value != null;
                 case MessageHeaders.ConversationId:
                     value = ConversationId;
-                    return true;
+                    return value != null;
                 case MessageHeaders.RequestId:
                     value = RequestId;
-                    return true;
+                    return value != null;
                 case MessageHeaders.InitiatorId:
                     value = InitiatorId;
-                    return true;
+                    return value != null;
                 case MessageHeaders.SourceAddress:
                     value = SourceAddress;
-                    return true;
+                    return value != null;
                 case MessageHeaders.ResponseAddress:
                     value = ResponseAddress;
-                    return true;
+                    return value != null;
                 case MessageHeaders.FaultAddress:
                     value = FaultAddress;
-                    return true;
+                    return value != null;
             }
 
             return Headers.TryGetHeader(key, out value);

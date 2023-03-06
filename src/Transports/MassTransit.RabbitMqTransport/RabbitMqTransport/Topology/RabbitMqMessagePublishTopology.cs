@@ -3,6 +3,7 @@ namespace MassTransit.RabbitMqTransport.Topology
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using Configuration;
     using MassTransit.Topology;
     using RabbitMQ.Client;
@@ -67,7 +68,7 @@ namespace MassTransit.RabbitMqTransport.Topology
                 configurator.Apply(builder);
         }
 
-        public override bool TryGetPublishAddress(Uri baseAddress, out Uri? publishAddress)
+        public override bool TryGetPublishAddress(Uri baseAddress, [NotNullWhen(true)] out Uri? publishAddress)
         {
             publishAddress = _exchange.GetEndpointAddress(baseAddress);
             return true;

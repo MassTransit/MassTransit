@@ -2,6 +2,7 @@ namespace MassTransit.Serialization
 {
     using System.Collections;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
 
 
@@ -19,7 +20,7 @@ namespace MassTransit.Serialization
             return Enumerable.Empty<KeyValuePair<string, object>>();
         }
 
-        public bool TryGetHeader(string key, out object? value)
+        public bool TryGetHeader(string key, [NotNullWhen(true)] out object? value)
         {
             value = default;
             return false;

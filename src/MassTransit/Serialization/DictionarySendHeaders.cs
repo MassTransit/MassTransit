@@ -4,6 +4,7 @@ namespace MassTransit.Serialization
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
 
 
@@ -57,7 +58,7 @@ namespace MassTransit.Serialization
                 _headers.Add(key, value);
         }
 
-        public bool TryGetHeader(string key, out object? value)
+        public bool TryGetHeader(string key, [NotNullWhen(true)] out object? value)
         {
             return _headers.TryGetValue(key, out value);
         }

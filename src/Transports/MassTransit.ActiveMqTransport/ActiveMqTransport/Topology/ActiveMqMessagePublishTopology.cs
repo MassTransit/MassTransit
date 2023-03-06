@@ -2,6 +2,7 @@
 namespace MassTransit.ActiveMqTransport.Topology
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
     using Configuration;
     using MassTransit.Topology;
 
@@ -38,7 +39,7 @@ namespace MassTransit.ActiveMqTransport.Topology
             set => _topic.AutoDelete = value;
         }
 
-        public override bool TryGetPublishAddress(Uri baseAddress, out Uri? publishAddress)
+        public override bool TryGetPublishAddress(Uri baseAddress, [NotNullWhen(true)] out Uri? publishAddress)
         {
             publishAddress = _topic.GetEndpointAddress(baseAddress);
             return true;

@@ -2,6 +2,7 @@ namespace MassTransit.Context
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -32,7 +33,7 @@ namespace MassTransit.Context
 
         public abstract bool HasPayloadType(Type payloadType);
 
-        public abstract bool TryGetPayload<T>(out T payload)
+        public abstract bool TryGetPayload<T>([NotNullWhen(true)] out T payload)
             where T : class;
 
         public abstract T GetOrAddPayload<T>(PayloadFactory<T> payloadFactory)

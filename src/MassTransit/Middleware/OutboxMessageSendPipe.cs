@@ -3,6 +3,7 @@ namespace MassTransit.Middleware
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Net.Mime;
     using System.Threading.Tasks;
     using Context;
@@ -82,7 +83,7 @@ namespace MassTransit.Middleware
                     yield return new KeyValuePair<string, object>(MessageHeaders.ContentType, _message.ContentType!);
             }
 
-            public bool TryGetHeader(string key, out object? value)
+            public bool TryGetHeader(string key, [NotNullWhen(true)] out object? value)
             {
                 if (nameof(_message.MessageId).Equals(key, StringComparison.OrdinalIgnoreCase))
                 {

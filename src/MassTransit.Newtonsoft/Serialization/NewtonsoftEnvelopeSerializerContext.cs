@@ -3,6 +3,7 @@ namespace MassTransit.Serialization
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using JsonConverters;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
@@ -51,7 +52,7 @@ namespace MassTransit.Serialization
             return false;
         }
 
-        public override bool TryGetMessage(Type messageType, out object? message)
+        public override bool TryGetMessage(Type messageType, [NotNullWhen(true)] out object? message)
         {
             if (_message != null && messageType.IsInstanceOfType(_message))
             {
