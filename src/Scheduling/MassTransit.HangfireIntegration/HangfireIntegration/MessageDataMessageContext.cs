@@ -40,11 +40,9 @@ namespace MassTransit.HangfireIntegration
         {
             get
             {
-                if (string.IsNullOrWhiteSpace(_messageData.TransportProperties))
-                    return null;
-
-                return JsonSerializer.Deserialize<IReadOnlyDictionary<string, object>>(_messageData.TransportProperties,
-                    SystemTextJsonMessageSerializer.Options);
+                return !string.IsNullOrWhiteSpace(_messageData.TransportProperties)
+                    ? JsonSerializer.Deserialize<IReadOnlyDictionary<string, object>>(_messageData.TransportProperties, SystemTextJsonMessageSerializer.Options)
+                    : null;
             }
         }
 

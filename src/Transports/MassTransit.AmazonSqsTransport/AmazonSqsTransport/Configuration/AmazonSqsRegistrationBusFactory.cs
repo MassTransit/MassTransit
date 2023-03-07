@@ -2,6 +2,8 @@ namespace MassTransit.AmazonSqsTransport.Configuration
 {
     using System;
     using System.Collections.Generic;
+    using Amazon;
+    using Amazon.Runtime;
     using MassTransit.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
@@ -35,15 +37,20 @@ namespace MassTransit.AmazonSqsTransport.Configuration
             var options = context.GetRequiredService<IOptionsMonitor<AmazonSqsTransportOptions>>().Get(busName);
             if (!string.IsNullOrWhiteSpace(options.Region))
             {
-                configurator.Host(new UriBuilder
+                var regionEndpoint = RegionEndpoint.GetBySystemName(options.Region);
+
+                configurator.Host(regionEndpoint.SystemName, h =>
                 {
-                    Scheme = "amazonsqs",
-                    Host = options.Region,
-                    Path = options.Scope
-                }.Uri, h =>
-                {
-                    h.AccessKey(options.AccessKey);
-                    h.SecretKey(options.SecretKey);
+                    if (!string.IsNullOrWhiteSpace(options.Scope))
+                        h.Scope(options.Scope);
+
+                    if (!string.IsNullOrWhiteSpace(options.AccessKey) && !string.IsNullOrWhiteSpace(options.SecretKey))
+                    {
+                        h.AccessKey(options.AccessKey);
+                        h.SecretKey(options.SecretKey);
+                    }
+                    else
+                        h.Credentials(FallbackCredentialsFactory.GetCredentials());
                 });
             }
 
