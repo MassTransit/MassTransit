@@ -2,6 +2,7 @@ namespace MassTransit.Configuration
 {
     using System;
     using System.Linq;
+    using Internals;
 
 
     public class SendMessageFilterConfigurator :
@@ -14,12 +15,17 @@ namespace MassTransit.Configuration
 
         public CompositeFilter<SendContext> Filter { get; }
 
-        void IMessageFilterConfigurator.Include(params Type[] messageTypes)
+        void IMessageTypeFilterConfigurator.Include(params Type[] messageTypes)
         {
             Filter.Includes += message => Match(message, messageTypes);
         }
 
-        void IMessageFilterConfigurator.Include<T>()
+        void IMessageTypeFilterConfigurator.Include(Func<Type, bool> filter)
+        {
+            Filter.Includes += context => context.GetType().ClosesType(typeof(SendContext<>), out Type[] types) && filter(types[0]);
+        }
+
+        void IMessageTypeFilterConfigurator.Include<T>()
         {
             Filter.Includes += message => Match<T>(message);
         }
@@ -29,12 +35,17 @@ namespace MassTransit.Configuration
             Filter.Includes += message => Match(message, filter);
         }
 
-        void IMessageFilterConfigurator.Exclude(params Type[] messageTypes)
+        void IMessageTypeFilterConfigurator.Exclude(params Type[] messageTypes)
         {
             Filter.Excludes += message => Match(message, messageTypes);
         }
 
-        void IMessageFilterConfigurator.Exclude<T>()
+        void IMessageTypeFilterConfigurator.Exclude(Func<Type, bool> filter)
+        {
+            Filter.Excludes += context => context.GetType().ClosesType(typeof(SendContext<>), out Type[] types) && filter(types[0]);
+        }
+
+        void IMessageTypeFilterConfigurator.Exclude<T>()
         {
             Filter.Excludes += message => Match<T>(message);
         }
