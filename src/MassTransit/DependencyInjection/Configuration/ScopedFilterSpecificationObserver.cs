@@ -12,12 +12,18 @@ namespace MassTransit.Configuration
         IPublishPipeSpecificationObserver
     {
         readonly Type _filterType;
+        readonly CompositeFilter<Type> _messageTypeFilter;
         readonly IServiceProvider _provider;
 
-        public ScopedFilterSpecificationObserver(Type filterType, IServiceProvider provider)
+        public ScopedFilterSpecificationObserver(Type filterType, IServiceProvider provider, CompositeFilter<Type> messageTypeFilter)
         {
             _filterType = filterType;
             _provider = provider;
+            _messageTypeFilter = messageTypeFilter;
+            _messageTypeFilter.Excludes += type => type.HasInterface<Fault>();
+            _messageTypeFilter.Excludes += type => type.HasInterface<ReceiveFault>();
+            // do not create filters for scheduled/outbox messages
+            _messageTypeFilter.Excludes += type => type == typeof(SerializedMessageBody);
         }
 
         public void MessageSpecificationCreated<T>(IMessagePublishPipeSpecification<T> specification)
@@ -36,14 +42,7 @@ namespace MassTransit.Configuration
             where TContext : class, PipeContext
             where T : class
         {
-            if (typeof(T).HasInterface<Fault>())
-                return;
-
-            if (!_filterType.IsGenericType || !_filterType.IsGenericTypeDefinition)
-                throw new ConfigurationException("The scoped filter must be a generic type definition");
-
-            // do not create filters for scheduled/outbox messages
-            if (typeof(T) == typeof(SerializedMessageBody))
+            if (!_messageTypeFilter.Matches(typeof(T)))
                 return;
 
             var filterType = _filterType.MakeGenericType(typeof(T));

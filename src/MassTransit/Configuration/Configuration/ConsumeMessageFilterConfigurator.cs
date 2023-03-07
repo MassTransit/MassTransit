@@ -2,6 +2,7 @@ namespace MassTransit.Configuration
 {
     using System;
     using System.Linq;
+    using Internals;
 
 
     public class ConsumeMessageFilterConfigurator :
@@ -19,6 +20,11 @@ namespace MassTransit.Configuration
             Filter.Includes += message => Match(message, messageTypes);
         }
 
+        public void Include(Func<Type, bool> filter)
+        {
+            Filter.Includes += context => context.GetType().ClosesType(typeof(ConsumeContext<>), out Type[] types) && filter(types[0]);
+        }
+
         public void Include<T>()
             where T : class
         {
@@ -34,6 +40,11 @@ namespace MassTransit.Configuration
         public void Exclude(params Type[] messageTypes)
         {
             Filter.Excludes += message => Match(message, messageTypes);
+        }
+
+        public void Exclude(Func<Type, bool> filter)
+        {
+            Filter.Excludes += context => context.GetType().ClosesType(typeof(ConsumeContext<>), out Type[] types) && filter(types[0]);
         }
 
         public void Exclude<T>()

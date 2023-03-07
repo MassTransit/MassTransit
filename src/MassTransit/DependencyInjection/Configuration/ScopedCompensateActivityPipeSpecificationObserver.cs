@@ -10,12 +10,14 @@ namespace MassTransit.Configuration
         IActivityConfigurationObserver
     {
         readonly Type _filterType;
+        readonly CompositeFilter<Type> _messageTypeFilter;
         readonly IServiceProvider _provider;
 
-        public ScopedCompensateActivityPipeSpecificationObserver(Type filterType, IServiceProvider provider)
+        public ScopedCompensateActivityPipeSpecificationObserver(Type filterType, IServiceProvider provider, CompositeFilter<Type> messageTypeFilter)
         {
             _filterType = filterType;
             _provider = provider;
+            _messageTypeFilter = messageTypeFilter;
         }
 
         public void ActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator, Uri compensateAddress)
@@ -34,8 +36,8 @@ namespace MassTransit.Configuration
             where TActivity : class, ICompensateActivity<TLog>
             where TLog : class
         {
-            if (!_filterType.IsGenericType || !_filterType.IsGenericTypeDefinition)
-                throw new ConfigurationException("The scoped filter must be a generic type definition");
+            if (!_messageTypeFilter.Matches(typeof(TLog)))
+                return;
 
             var filterType = _filterType.MakeGenericType(typeof(TLog));
 
