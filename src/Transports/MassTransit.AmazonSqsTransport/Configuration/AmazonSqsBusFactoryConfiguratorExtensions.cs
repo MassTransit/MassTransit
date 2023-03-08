@@ -25,7 +25,7 @@ namespace MassTransit
         /// <param name="configurator">The registration configurator (configured via AddMassTransit)</param>
         /// <param name="configure">The configuration callback for the bus factory</param>
         public static void UsingAmazonSqs(this IBusRegistrationConfigurator configurator,
-            Action<IBusRegistrationContext, IAmazonSqsBusFactoryConfigurator> configure = null)
+            Action<IBusRegistrationContext, IAmazonSqsBusFactoryConfigurator>? configure = null)
         {
             configurator.SetBusFactory(new AmazonSqsRegistrationBusFactory(configure));
         }
