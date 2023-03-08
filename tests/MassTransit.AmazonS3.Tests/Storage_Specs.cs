@@ -50,8 +50,10 @@ namespace MassTransit.AmazonS3.Tests
             });
 
             Assert.That(await harness.Consumed.Any<SimpleMessage>(), Is.True, "Did not receive message");
-            IReceivedMessage<SimpleMessage>? message = await harness.Consumed.SelectAsync<SimpleMessage>().First();
-            var messageValue = await ((SimpleMessage)message.MessageObject).BigData.Value;
+            IReceivedMessage<SimpleMessage>? receivedMessage = await harness.Consumed.SelectAsync<SimpleMessage>().First();
+            var message = receivedMessage.Context.Message;
+            Assert.That(message.BigData, Is.Not.Null);
+            var messageValue = await message.BigData!.Value;
             Assert.That(messageValue, Is.EqualTo(randomText), "Message not retrieved");
 
             await harness.Stop();
