@@ -31,7 +31,7 @@ namespace MassTransit.AmazonSqsTransport
             _activeTokenSource = new CancellationTokenSource();
             _locked = true;
 
-            _visibilityTask = Task.Factory.StartNew(RenewMessageVisibility, _activeTokenSource.Token, TaskCreationOptions.None, TaskScheduler.Default);
+            _visibilityTask = Task.Run(() => RenewMessageVisibility());
         }
 
         public async Task Complete()
