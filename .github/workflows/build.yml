@@ -170,7 +170,7 @@ jobs:
         run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.RabbitMqTransport.Tests
   test-sqs:
-    name: "Transports: SQS"
+    name: "Transports: SQS (+S3)"
     timeout-minutes: 10
     runs-on: ubuntu-latest
     services:
@@ -193,6 +193,9 @@ jobs:
       - name: Test SQS
         run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.AmazonSqsTransport.Tests
+      - name: Test S3
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
+        working-directory: tests/MassTransit.AmazonS3.Tests
   test-azure-table:
     name: "Storage: Azure Table"
     if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/v8') && github.repository == 'MassTransit/MassTransit'
