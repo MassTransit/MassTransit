@@ -80,9 +80,10 @@ namespace MassTransit.AmazonS3.MessageData
                     }
                 }
 
-                await _s3Client.DeleteLifecycleConfigurationAsync(_bucket);
                 if (MessageDataDefaults.TimeToLive != null && MessageDataDefaults.TimeToLive.Value.Days > 0)
                 {
+                    // Do no delete life cycle rule if TimeToLive is not available. Allow user to create rule in S3 console.
+                    await _s3Client.DeleteLifecycleConfigurationAsync(_bucket);
                     await _s3Client.PutLifecycleConfigurationAsync(new PutLifecycleConfigurationRequest
                     {
                         BucketName = _bucket,
