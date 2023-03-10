@@ -247,7 +247,7 @@ namespace MassTransit
                 {
                     Guid guid => guid,
                     string text when Guid.TryParse(text, out var guid) => guid,
-                    _ => default
+                    _ => default(Guid?)
                 };
             }
 

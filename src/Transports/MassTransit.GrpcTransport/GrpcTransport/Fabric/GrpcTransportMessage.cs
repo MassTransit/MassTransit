@@ -149,7 +149,7 @@ namespace MassTransit.GrpcTransport.Fabric
         {
             return Guid.TryParse(value, out var guid)
                 ? guid
-                : default;
+                : default(Guid?);
         }
 
         static Uri? ToUri(string? value)
@@ -157,7 +157,7 @@ namespace MassTransit.GrpcTransport.Fabric
             try
             {
                 return string.IsNullOrWhiteSpace(value)
-                    ? default
+                    ? null
                     : new Uri(value);
             }
             catch (FormatException)

@@ -1,9 +1,9 @@
-namespace MassTransit.Tests
+namespace MassTransit.GrpcTransport.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Contracts.JobService;
     using JobConsumerTests;
+    using MassTransit.Contracts.JobService;
     using MassTransit.Testing;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
@@ -11,9 +11,6 @@ namespace MassTransit.Tests
 
     namespace JobConsumerTests
     {
-        using System;
-
-
         public interface OddJob
         {
             TimeSpan Duration { get; }
@@ -290,7 +287,7 @@ namespace MassTransit.Tests
                     x.AddConsumer<OddJobCompletedConsumer>()
                         .Endpoint(e => e.ConcurrentMessageLimit = 1);
 
-                    x.UsingInMemory((context, cfg) =>
+                    x.UsingGrpc((context, cfg) =>
                     {
                         cfg.UseDelayedMessageScheduler();
 
