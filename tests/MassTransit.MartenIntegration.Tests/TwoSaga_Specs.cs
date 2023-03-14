@@ -12,12 +12,12 @@ namespace MassTransit.MartenIntegration.Tests
         using Testing;
 
 
-        public class Using_the_container_integration :
+        public class Using_Marten_with_multiple_sagas :
             InMemoryTestFixture
         {
             readonly IServiceProvider _provider;
 
-            public Using_the_container_integration()
+            public Using_Marten_with_multiple_sagas()
             {
                 _provider = new ServiceCollection()
                     .AddMassTransit(ConfigureRegistration)
@@ -28,11 +28,10 @@ namespace MassTransit.MartenIntegration.Tests
             public async Task Should_work_as_expected()
             {
                 Task<ConsumeContext<TestStarted>> started = await ConnectPublishHandler<TestStarted>();
-                Task<ConsumeContext<TestUpdated>> updated = await ConnectPublishHandler<TestUpdated>();
 
                 var correlationId = NewId.NextGuid();
 
-                await InputQueueSendEndpoint.Send(new StartTest
+                await Bus.Publish(new StartTest
                 {
                     CorrelationId = correlationId,
                     TestKey = "Unique"
@@ -46,30 +45,27 @@ namespace MassTransit.MartenIntegration.Tests
 
                 Guid? sagaId = await repository.ShouldContainSagaInState(correlationId, machine, x => x.Active, TestTimeout);
                 Assert.That(sagaId.HasValue);
-
-                await InputQueueSendEndpoint.Send(new UpdateTest
-                {
-                    TestId = correlationId,
-                    TestKey = "Unique"
-                });
-
-                await updated;
             }
 
             protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
             {
-                configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
-                    .MartenRepository("server=localhost;port=5432;database=MartenTest;user id=postgres;password=Password12!;", r =>
+                configurator.AddMarten(options =>
+                {
+                    options.Connection("server=localhost;port=5432;database=MartenTest;user id=postgres;password=Password12!;");
+                    options.CreateDatabasesForTenants(c =>
                     {
-                        r.CreateDatabasesForTenants(c =>
-                        {
-                            c.ForTenant()
-                                .CheckAgainstPgDatabase()
-                                .WithOwner("postgres")
-                                .WithEncoding("UTF-8")
-                                .ConnectionLimit(-1);
-                        });
+                        c.ForTenant()
+                            .CheckAgainstPgDatabase()
+                            .WithOwner("postgres")
+                            .WithEncoding("UTF-8")
+                            .ConnectionLimit(-1);
                     });
+                });
+
+                configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
+                    .MartenRepository();
+                configurator.AddSagaStateMachine<TestStateMachineSaga2, TestInstance2>()
+                    .MartenRepository();
 
                 configurator.AddBus(provider => BusControl);
             }
@@ -78,11 +74,12 @@ namespace MassTransit.MartenIntegration.Tests
             {
                 configurator.UseInMemoryOutbox();
                 configurator.ConfigureSaga<TestInstance>(_provider.GetRequiredService<IBusRegistrationContext>());
+                configurator.ConfigureSaga<TestInstance2>(_provider.GetRequiredService<IBusRegistrationContext>());
             }
         }
 
 
-        public class TestInstance :
+        public class TestInstance2 :
             SagaStateMachineInstance
         {
             public string CurrentState { get; set; }
@@ -91,30 +88,18 @@ namespace MassTransit.MartenIntegration.Tests
         }
 
 
-        public class TestStateMachineSaga :
-            MassTransitStateMachine<TestInstance>
+        public class TestStateMachineSaga2 :
+            MassTransitStateMachine<TestInstance2>
         {
-            public TestStateMachineSaga()
+            public TestStateMachineSaga2()
             {
                 InstanceState(x => x.CurrentState);
-
-                Event(() => Updated, x => x.CorrelateById(m => m.Message.TestId));
 
                 Initially(
                     When(Started)
                         .Then(context => context.Instance.Key = context.Data.TestKey)
-                        .Activity(x => x.OfInstanceType<PublishTestStartedActivity>())
+                        .Activity(x => x.OfInstanceType<PublishTestStartedActivity2>())
                         .TransitionTo(Active));
-
-                During(Active,
-                    When(Updated)
-                        .Publish(context => new TestUpdated
-                        {
-                            CorrelationId = context.Instance.CorrelationId,
-                            TestKey = context.Instance.Key
-                        })
-                        .TransitionTo(Done)
-                        .Finalize());
 
                 SetCompletedWhenFinalized();
             }
@@ -123,23 +108,15 @@ namespace MassTransit.MartenIntegration.Tests
             public State Done { get; private set; }
 
             public Event<StartTest> Started { get; private set; }
-            public Event<UpdateTest> Updated { get; private set; }
         }
 
 
-        public class UpdateTest
-        {
-            public Guid TestId { get; set; }
-            public string TestKey { get; set; }
-        }
-
-
-        public class PublishTestStartedActivity :
-            IStateMachineActivity<TestInstance>
+        public class PublishTestStartedActivity2 :
+            IStateMachineActivity<TestInstance2>
         {
             readonly ConsumeContext _context;
 
-            public PublishTestStartedActivity(ConsumeContext context)
+            public PublishTestStartedActivity2(ConsumeContext context)
             {
                 _context = context;
             }
@@ -154,7 +131,7 @@ namespace MassTransit.MartenIntegration.Tests
                 visitor.Visit(this);
             }
 
-            public async Task Execute(BehaviorContext<TestInstance> context, IBehavior<TestInstance> next)
+            public async Task Execute(BehaviorContext<TestInstance2> context, IBehavior<TestInstance2> next)
             {
                 await _context.Publish(new TestStarted
                 {
@@ -165,7 +142,7 @@ namespace MassTransit.MartenIntegration.Tests
                 await next.Execute(context).ConfigureAwait(false);
             }
 
-            public async Task Execute<T>(BehaviorContext<TestInstance, T> context, IBehavior<TestInstance, T> next)
+            public async Task Execute<T>(BehaviorContext<TestInstance2, T> context, IBehavior<TestInstance2, T> next)
                 where T : class
             {
                 await _context.Publish(new TestStarted
@@ -177,13 +154,13 @@ namespace MassTransit.MartenIntegration.Tests
                 await next.Execute(context).ConfigureAwait(false);
             }
 
-            public Task Faulted<TException>(BehaviorExceptionContext<TestInstance, TException> context, IBehavior<TestInstance> next)
+            public Task Faulted<TException>(BehaviorExceptionContext<TestInstance2, TException> context, IBehavior<TestInstance2> next)
                 where TException : Exception
             {
                 return next.Faulted(context);
             }
 
-            public Task Faulted<T, TException>(BehaviorExceptionContext<TestInstance, T, TException> context, IBehavior<TestInstance, T> next)
+            public Task Faulted<T, TException>(BehaviorExceptionContext<TestInstance2, T, TException> context, IBehavior<TestInstance2, T> next)
                 where TException : Exception
                 where T : class
             {
