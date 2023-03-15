@@ -17,38 +17,78 @@ public class OrderState :
 }
 ```
 
-## Container Integration
+## Configuration
 
-To configure Marten as the saga repository for a saga, use the code shown below using the _AddMassTransit_ container extension. This will configure Marten to connect to the local Marten instance on the default port using Optimistic concurrency.
+To configure Marten and use it as a saga repository with MassTransit, use the `MartenRepository` method when adding the saga.
 
 ```csharp
-container.AddMassTransit(cfg =>
+services.AddMarten(options =>
 {
-    var connectionString = "host=localhost;port=5432;database=orders;username=web;password=webpw;";
+    const string connectionString = "host=localhost;port=5432;database=orders;username=web;password=webpw;";
+    
+    options.Connection(connectionString);
+});
 
-    cfg.AddSagaStateMachine<OrderStateMachine, OrderState>()
-        .MartenRepository(connectionString);
+services.AddMassTransit(x =>
+{
+    x.AddSagaStateMachine<OrderStateMachine, OrderState>()
+        .MartenRepository();
+});
+```
+
+### Repository Provider
+
+When adding sagas using any of the `AddSagas` or `AddSagaStateMachines` methods, the Marten saga repository provider can be used to automatically configure Marten as the saga repository. 
+
+```csharp
+services.AddMarten(options =>
+{
+    const string connectionString = "host=localhost;port=5432;database=orders;username=web;password=webpw;";
+    
+    options.Connection(connectionString);
+});
+
+services.AddMassTransit(x =>
+{
+    x.SetMartenSagaRepositoryProvider();
+
+    var entryAssembly = System.Reflection.Assembly.GetEntryAssembly();
+    
+    x.AddSagaStateMachines(entryAssembly);
+});
+```
+
+To configure the saga repository for a specific saga type, use the `AddSagaRepository` method and specify the appropriate saga repository.
+
+```csharp
+services.AddMassTransit(x =>
+{
+    x.SetMartenSagaRepositoryProvider();
+
+    var entryAssembly = System.Reflection.Assembly.GetEntryAssembly();
+    
+    x.AddSagaStateMachines(entryAssembly);
+    
+    x.AddSagaRepository<OrderState>()
+        .MartenRepository();
 });
 ```
 
 ## Optimistic Concurrency
 
-To use Marten's built-in Optimistic concurrency, use the configuration options to configure the schema. Marten supports optimistic concurrency by using an eTag-like version field in the metadata, which does not require any additional fields in the saga class.
+To use Marten's built-in optimistic concurrency, which uses an *eTag*-like version metadata field, an additional schema configuration may be specified.
+
+> This does **not** require any additional fields in the saga class.
 
 ```csharp
-container.AddMassTransit(cfg =>
+services.AddMassTransit(x =>
 {
-    var connectionString = "host=localhost;port=5432;database=orders;username=web;password=webpw;";
-
-    cfg.AddSagaStateMachine<OrderStateMachine, OrderState>()
-        .MartenRepository(connectionString, r =>
-        {
-            r.Schema.For<OrderState>().UseOptimisticConcurrency(true);
-        });
+    x.AddSagaStateMachine<OrderStateMachine, OrderState>()
+        .MartenRepository(r => r.UseOptimisticConcurrency(true));
 });
 ```
 
-Alternatively, you can add the `UseOptimisticConcurrency` attribute to the class.
+Alternatively, you can add the `UseOptimisticConcurrency` attribute to the saga class.
 
 ```csharp
 [UseOptimisticConcurrency]
@@ -62,7 +102,7 @@ public class OrderState :
 
 ## Index Creation
 
-Marten can create indices for properties, which greatly increases query performance. If your saga is correlating events using other fields, index creation is recommended. For example, if an _OrderNumber_ property was added to the _OrderState_ class, it could be indexed by configuring it in the repository.
+Marten can create indices for properties, which greatly increases query performance. If your saga is correlating events using other saga properties, index creation is recommended. For example, if an _OrderNumber_ property was added to the _OrderState_ class, it could be indexed by configuring it in the repository.
 
 ```csharp
 public class OrderState :
@@ -78,19 +118,21 @@ public class OrderState :
 ```
 
 ```csharp
-container.AddMassTransit(cfg =>
+services.AddMarten(options =>
 {
-    var connectionString = "host=localhost;port=5432;database=orders;username=web;password=webpw;";
+    const string connectionString = "host=localhost;port=5432;database=orders;username=web;password=webpw;";
+    
+    options.Connection(connectionString);
+});
 
-    cfg.AddSagaStateMachine<OrderStateMachine, OrderState>()
-        .MartenRepository(connectionString, r =>
-        {
-            r.Schema.For<OrderState>().Index(x => x.OrderNumber);
-        });
+services.AddMassTransit(x =>
+{
+    x.AddSagaStateMachine<OrderStateMachine, OrderState>()
+        .MartenRepository(r => r.Index(x => x.OrderNumber));
 });
 ```
 
-Details on how Marten creates indices is available in the [Computed Index](https://martendb.io/documentation/documents/customizing/computed_index/) documentation.
+Details on how Marten creates indices is available in the [Indexing](https://martendb.io/documents/indexing/) documentation.
 
 [1]: https://www.postgresql.org/docs/9.5/static/functions-json.html
 [2]: http://jasperfx.github.io/marten/

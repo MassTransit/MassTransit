@@ -16,7 +16,13 @@ namespace MassTransit.Configuration
         ISpecification
         where TSaga : class, ISaga
     {
+        readonly Action<MartenRegistry.DocumentMappingExpression<TSaga>> _configureSchema;
         Action<StoreOptions> _configureMarten;
+
+        public MartenSagaRepositoryConfigurator(Action<MartenRegistry.DocumentMappingExpression<TSaga>> configureSchema = null)
+        {
+            _configureSchema = configureSchema;
+        }
 
         public void Connection(string connectionString, Action<StoreOptions> configure = null)
         {
@@ -58,17 +64,32 @@ namespace MassTransit.Configuration
                 });
             }
 
-            configurator.TryAddEnumerable(ServiceDescriptor.Singleton<IConfigureMarten, MartenSagaRepositoryStoreOptionsConfigurator>());
+            configurator.TryAddEnumerable(ServiceDescriptor.Singleton<IConfigureMarten, MartenSagaRepositoryStoreOptionsConfigurator>(Factory));
             configurator.RegisterSagaRepository<T, IDocumentSession, SagaConsumeContextFactory<IDocumentSession, T>, MartenSagaRepositoryContextFactory<T>>();
+        }
+
+        MartenSagaRepositoryStoreOptionsConfigurator Factory(IServiceProvider provider)
+        {
+            return new MartenSagaRepositoryStoreOptionsConfigurator(_configureSchema);
         }
 
 
         class MartenSagaRepositoryStoreOptionsConfigurator :
             IConfigureMarten
         {
+            readonly Action<MartenRegistry.DocumentMappingExpression<TSaga>> _configure;
+
+            public MartenSagaRepositoryStoreOptionsConfigurator(Action<MartenRegistry.DocumentMappingExpression<TSaga>> configure)
+            {
+                _configure = configure;
+            }
+
             public void Configure(IServiceProvider services, StoreOptions options)
             {
-                options.Schema.For<TSaga>().Identity(x => x.CorrelationId).IdStrategy(new NoOpIdGeneration());
+                MartenRegistry.DocumentMappingExpression<TSaga> mappingExpression =
+                    options.Schema.For<TSaga>().Identity(x => x.CorrelationId).IdStrategy(new NoOpIdGeneration());
+
+                _configure?.Invoke(mappingExpression);
             }
         }
     }

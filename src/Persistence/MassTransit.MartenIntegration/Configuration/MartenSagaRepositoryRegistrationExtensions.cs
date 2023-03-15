@@ -9,19 +9,30 @@ namespace MassTransit
     public static class MartenSagaRepositoryRegistrationExtensions
     {
         /// <summary>
-        /// Adds a Marten saga repository to the registration
+        /// Configures the <typeparamref name="T"/> saga to use the Marten saga repository.
         /// </summary>
         /// <param name="configurator"></param>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public static ISagaRegistrationConfigurator<T> MartenRepository<T>(this ISagaRegistrationConfigurator<T> configurator)
+        /// <param name="configure">Optional, allows additional configuration on the saga schema</param>
+        /// <typeparam name="T">The saga type</typeparam>
+        public static ISagaRegistrationConfigurator<T> MartenRepository<T>(this ISagaRegistrationConfigurator<T> configurator,
+            Action<MartenRegistry.DocumentMappingExpression<T>> configure = null)
             where T : class, ISaga
         {
-            var repositoryConfigurator = new MartenSagaRepositoryConfigurator<T>();
+            var repositoryConfigurator = new MartenSagaRepositoryConfigurator<T>(configure);
 
             configurator.Repository(x => repositoryConfigurator.Register(x));
 
             return configurator;
+        }
+
+        /// <summary>
+        /// Use the Marten saga repository for any sagas without an explicitly configured saga repository.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="optimisticConcurrency">If true, optimistic concurrency will be used for any configured saga types</param>
+        public static void SetMartenSagaRepositoryProvider(this IRegistrationConfigurator configurator, bool optimisticConcurrency = false)
+        {
+            configurator.SetSagaRepositoryProvider(new MartenSagaRepositoryRegistrationProvider(optimisticConcurrency));
         }
 
         /// <summary>
@@ -86,15 +97,6 @@ namespace MassTransit
             configurator.Repository(x => repositoryConfigurator.Register(x));
 
             return configurator;
-        }
-
-        /// <summary>
-        /// Use the Marten saga repository for sagas configured by type (without a specific repository specified via AddSaga/AddSagaStateMachine)
-        /// </summary>
-        /// <param name="configurator"></param>
-        public static void SetMartenSagaRepositoryProvider(this IRegistrationConfigurator configurator)
-        {
-            configurator.SetSagaRepositoryProvider(new MartenSagaRepositoryRegistrationProvider());
         }
 
         /// <summary>
