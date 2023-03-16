@@ -4,6 +4,7 @@
     {
         using System;
         using System.Threading.Tasks;
+        using Contracts;
         using NUnit.Framework;
         using Testing;
 
@@ -111,7 +112,7 @@
 
 
         class RequestSettingsImpl :
-            RequestSettings
+            RequestSettings<TestState, ValidateAddress, AddressValidated>
         {
             public RequestSettingsImpl(Uri serviceAddress, Uri schedulingServiceAddress, TimeSpan timeout)
             {
@@ -126,6 +127,9 @@
 
             public TimeSpan Timeout { get; }
             public TimeSpan? TimeToLive { get; }
+            public Action<IEventCorrelationConfigurator<TestState, AddressValidated>> Completed { get; set; }
+            public Action<IEventCorrelationConfigurator<TestState, Fault<ValidateAddress>>> Faulted { get; set; }
+            public Action<IEventCorrelationConfigurator<TestState, RequestTimeoutExpired<ValidateAddress>>> TimeoutExpired { get; set; }
         }
 
 
@@ -195,7 +199,7 @@
         class TestStateMachine :
             MassTransitStateMachine<TestState>
         {
-            public TestStateMachine(RequestSettings settings)
+            public TestStateMachine(RequestSettings<TestState, ValidateAddress, AddressValidated> settings)
             {
                 Event(() => Register, x =>
                 {

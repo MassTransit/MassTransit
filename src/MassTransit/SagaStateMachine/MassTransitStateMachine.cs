@@ -1272,11 +1272,11 @@
         /// <param name="configureRequest">Allow the request settings to be specified inline</param>
         protected void Request<TRequest, TResponse>(Expression<Func<Request<TInstance, TRequest, TResponse>>> propertyExpression,
             Expression<Func<TInstance, Guid?>> requestIdExpression,
-            Action<IRequestConfigurator> configureRequest = default)
+            Action<IRequestConfigurator<TInstance, TRequest, TResponse>> configureRequest = default)
             where TRequest : class
             where TResponse : class
         {
-            var configurator = new StateMachineRequestConfigurator<TRequest>();
+            var configurator = new StateMachineRequestConfigurator<TInstance, TRequest, TResponse>();
 
             configureRequest?.Invoke(configurator);
 
@@ -1294,11 +1294,11 @@
         /// <param name="propertyExpression">The request property on the state machine</param>
         /// <param name="configureRequest">Allow the request settings to be specified inline</param>
         protected void Request<TRequest, TResponse>(Expression<Func<Request<TInstance, TRequest, TResponse>>> propertyExpression,
-            Action<IRequestConfigurator> configureRequest = default)
+            Action<IRequestConfigurator<TInstance, TRequest, TResponse>> configureRequest = default)
             where TRequest : class
             where TResponse : class
         {
-            var configurator = new StateMachineRequestConfigurator<TRequest>();
+            var configurator = new StateMachineRequestConfigurator<TInstance, TRequest, TResponse>();
 
             configureRequest?.Invoke(configurator);
 
@@ -1316,7 +1316,7 @@
         /// <param name="requestIdExpression">The property where the requestId is stored</param>
         /// <param name="settings">The request settings (which can be read from configuration, etc.)</param>
         protected void Request<TRequest, TResponse>(Expression<Func<Request<TInstance, TRequest, TResponse>>> propertyExpression,
-            Expression<Func<TInstance, Guid?>> requestIdExpression, RequestSettings settings)
+            Expression<Func<TInstance, Guid?>> requestIdExpression, RequestSettings<TInstance, TRequest, TResponse> settings)
             where TRequest : class
             where TResponse : class
         {
@@ -1326,9 +1326,21 @@
 
             InitializeRequest(this, property, request);
 
-            Event(propertyExpression, x => x.Completed, x => x.CorrelateBy(requestIdExpression, context => context.RequestId));
-            Event(propertyExpression, x => x.Faulted, x => x.CorrelateBy(requestIdExpression, context => context.RequestId));
-            Event(propertyExpression, x => x.TimeoutExpired, x => x.CorrelateBy(requestIdExpression, context => context.Message.RequestId));
+            Event(propertyExpression, x => x.Completed, x =>
+            {
+                x.CorrelateBy(requestIdExpression, context => context.RequestId);
+                settings.Completed?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.Faulted, x =>
+            {
+                x.CorrelateBy(requestIdExpression, context => context.RequestId);
+                settings.Faulted?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.TimeoutExpired, x =>
+            {
+                x.CorrelateBy(requestIdExpression, context => context.Message.RequestId);
+                settings.TimeoutExpired?.Invoke(x);
+            });
 
             State(propertyExpression, x => x.Pending);
 
@@ -1351,7 +1363,7 @@
         /// <param name="propertyExpression">The request property on the state machine</param>
         /// <param name="settings">The request settings (which can be read from configuration, etc.)</param>
         protected internal void Request<TRequest, TResponse>(Expression<Func<Request<TInstance, TRequest, TResponse>>> propertyExpression,
-            RequestSettings settings)
+            RequestSettings<TInstance, TRequest, TResponse> settings)
             where TRequest : class
             where TResponse : class
         {
@@ -1361,9 +1373,21 @@
 
             InitializeRequest(this, property, request);
 
-            Event(propertyExpression, x => x.Completed, x => x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId")));
-            Event(propertyExpression, x => x.Faulted, x => x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId")));
-            Event(propertyExpression, x => x.TimeoutExpired, x => x.CorrelateById(context => context.Message.RequestId));
+            Event(propertyExpression, x => x.Completed, x =>
+            {
+                x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId"));
+                settings.Completed?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.Faulted, x =>
+            {
+                x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId"));
+                settings.Faulted?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.TimeoutExpired, x =>
+            {
+                x.CorrelateById(context => context.Message.RequestId);
+                settings.TimeoutExpired?.Invoke(x);
+            });
 
             State(propertyExpression, x => x.Pending);
 
@@ -1387,12 +1411,12 @@
         /// <param name="configureRequest">Allow the request settings to be specified inline</param>
         protected void Request<TRequest, TResponse, TResponse2>(Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2>>> propertyExpression,
             Expression<Func<TInstance, Guid?>> requestIdExpression,
-            Action<IRequestConfigurator> configureRequest = default)
+            Action<IRequestConfigurator<TInstance, TRequest, TResponse, TResponse2>> configureRequest = default)
             where TRequest : class
             where TResponse : class
             where TResponse2 : class
         {
-            var configurator = new StateMachineRequestConfigurator<TRequest>();
+            var configurator = new StateMachineRequestConfigurator<TInstance, TRequest, TResponse, TResponse2>();
 
             configureRequest?.Invoke(configurator);
 
@@ -1411,12 +1435,12 @@
         /// <param name="propertyExpression">The request property on the state machine</param>
         /// <param name="configureRequest">Allow the request settings to be specified inline</param>
         protected void Request<TRequest, TResponse, TResponse2>(Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2>>> propertyExpression,
-            Action<IRequestConfigurator> configureRequest = default)
+            Action<IRequestConfigurator<TInstance, TRequest, TResponse, TResponse2>> configureRequest = default)
             where TRequest : class
             where TResponse : class
             where TResponse2 : class
         {
-            var configurator = new StateMachineRequestConfigurator<TRequest>();
+            var configurator = new StateMachineRequestConfigurator<TInstance, TRequest, TResponse, TResponse2>();
 
             configureRequest?.Invoke(configurator);
 
@@ -1436,7 +1460,7 @@
         /// <param name="settings">The request settings (which can be read from configuration, etc.)</param>
         protected internal void Request<TRequest, TResponse, TResponse2>(
             Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2>>> propertyExpression,
-            Expression<Func<TInstance, Guid?>> requestIdExpression, RequestSettings settings)
+            Expression<Func<TInstance, Guid?>> requestIdExpression, RequestSettings<TInstance, TRequest, TResponse, TResponse2> settings)
             where TRequest : class
             where TResponse : class
             where TResponse2 : class
@@ -1447,10 +1471,26 @@
 
             InitializeRequest(this, property, request);
 
-            Event(propertyExpression, x => x.Completed, x => x.CorrelateBy(requestIdExpression, context => context.RequestId));
-            Event(propertyExpression, x => x.Completed2, x => x.CorrelateBy(requestIdExpression, context => context.RequestId));
-            Event(propertyExpression, x => x.Faulted, x => x.CorrelateBy(requestIdExpression, context => context.RequestId));
-            Event(propertyExpression, x => x.TimeoutExpired, x => x.CorrelateBy(requestIdExpression, context => context.Message.RequestId));
+            Event(propertyExpression, x => x.Completed, x =>
+            {
+                x.CorrelateBy(requestIdExpression, context => context.RequestId);
+                settings.Completed?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.Completed2, x =>
+            {
+                x.CorrelateBy(requestIdExpression, context => context.RequestId);
+                settings.Completed2?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.Faulted, x =>
+            {
+                x.CorrelateBy(requestIdExpression, context => context.RequestId);
+                settings.Faulted?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.TimeoutExpired, x =>
+            {
+                x.CorrelateById(context => context.Message.RequestId);
+                settings.TimeoutExpired?.Invoke(x);
+            });
 
             State(propertyExpression, x => x.Pending);
 
@@ -1478,7 +1518,7 @@
         /// <param name="settings">The request settings (which can be read from configuration, etc.)</param>
         protected internal void Request<TRequest, TResponse, TResponse2>(
             Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2>>> propertyExpression,
-            RequestSettings settings)
+            RequestSettings<TInstance, TRequest, TResponse, TResponse2> settings)
             where TRequest : class
             where TResponse : class
             where TResponse2 : class
@@ -1489,10 +1529,26 @@
 
             InitializeRequest(this, property, request);
 
-            Event(propertyExpression, x => x.Completed, x => x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId")));
-            Event(propertyExpression, x => x.Completed2, x => x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId")));
-            Event(propertyExpression, x => x.Faulted, x => x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId")));
-            Event(propertyExpression, x => x.TimeoutExpired, x => x.CorrelateById(context => context.Message.RequestId));
+            Event(propertyExpression, x => x.Completed, x =>
+            {
+                x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId"));
+                settings.Completed?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.Completed2, x =>
+            {
+                x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId"));
+                settings.Completed2?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.Faulted, x =>
+            {
+                x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId"));
+                settings.Faulted?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.TimeoutExpired, x =>
+            {
+                x.CorrelateById(context => context.Message.RequestId);
+                settings.TimeoutExpired?.Invoke(x);
+            });
 
             State(propertyExpression, x => x.Pending);
 
@@ -1520,13 +1576,13 @@
         protected void Request<TRequest, TResponse, TResponse2, TResponse3>(
             Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2, TResponse3>>> propertyExpression,
             Expression<Func<TInstance, Guid?>> requestIdExpression,
-            Action<IRequestConfigurator> configureRequest = default)
+            Action<IRequestConfigurator<TInstance, TRequest, TResponse, TResponse2, TResponse3>> configureRequest = default)
             where TRequest : class
             where TResponse : class
             where TResponse2 : class
             where TResponse3 : class
         {
-            var configurator = new StateMachineRequestConfigurator<TRequest>();
+            var configurator = new StateMachineRequestConfigurator<TInstance, TRequest, TResponse, TResponse2, TResponse3>();
 
             configureRequest?.Invoke(configurator);
 
@@ -1547,13 +1603,13 @@
         /// <param name="configureRequest">Allow the request settings to be specified inline</param>
         protected void Request<TRequest, TResponse, TResponse2, TResponse3>(
             Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2, TResponse3>>> propertyExpression,
-            Action<IRequestConfigurator> configureRequest = default)
+            Action<IRequestConfigurator<TInstance, TRequest, TResponse, TResponse2, TResponse3>> configureRequest = default)
             where TRequest : class
             where TResponse : class
             where TResponse2 : class
             where TResponse3 : class
         {
-            var configurator = new StateMachineRequestConfigurator<TRequest>();
+            var configurator = new StateMachineRequestConfigurator<TInstance, TRequest, TResponse, TResponse2, TResponse3>();
 
             configureRequest?.Invoke(configurator);
 
@@ -1574,7 +1630,7 @@
         /// <param name="settings">The request settings (which can be read from configuration, etc.)</param>
         protected internal void Request<TRequest, TResponse, TResponse2, TResponse3>(
             Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2, TResponse3>>> propertyExpression,
-            Expression<Func<TInstance, Guid?>> requestIdExpression, RequestSettings settings)
+            Expression<Func<TInstance, Guid?>> requestIdExpression, RequestSettings<TInstance, TRequest, TResponse, TResponse2, TResponse3> settings)
             where TRequest : class
             where TResponse : class
             where TResponse2 : class
@@ -1586,11 +1642,31 @@
 
             InitializeRequest(this, property, request);
 
-            Event(propertyExpression, x => x.Completed, x => x.CorrelateBy(requestIdExpression, context => context.RequestId));
-            Event(propertyExpression, x => x.Completed2, x => x.CorrelateBy(requestIdExpression, context => context.RequestId));
-            Event(propertyExpression, x => x.Completed3, x => x.CorrelateBy(requestIdExpression, context => context.RequestId));
-            Event(propertyExpression, x => x.Faulted, x => x.CorrelateBy(requestIdExpression, context => context.RequestId));
-            Event(propertyExpression, x => x.TimeoutExpired, x => x.CorrelateBy(requestIdExpression, context => context.Message.RequestId));
+            Event(propertyExpression, x => x.Completed, x =>
+            {
+                x.CorrelateBy(requestIdExpression, context => context.RequestId);
+                settings.Completed?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.Completed2, x =>
+            {
+                x.CorrelateBy(requestIdExpression, context => context.RequestId);
+                settings.Completed2?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.Completed3, x =>
+            {
+                x.CorrelateBy(requestIdExpression, context => context.RequestId);
+                settings.Completed3?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.Faulted, x =>
+            {
+                x.CorrelateBy(requestIdExpression, context => context.RequestId);
+                settings.Faulted?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.TimeoutExpired, x =>
+            {
+                x.CorrelateById(context => context.Message.RequestId);
+                settings.TimeoutExpired?.Invoke(x);
+            });
 
             State(propertyExpression, x => x.Pending);
 
@@ -1622,7 +1698,7 @@
         /// <param name="settings">The request settings (which can be read from configuration, etc.)</param>
         protected internal void Request<TRequest, TResponse, TResponse2, TResponse3>(
             Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2, TResponse3>>> propertyExpression,
-            RequestSettings settings)
+            RequestSettings<TInstance, TRequest, TResponse, TResponse2, TResponse3> settings)
             where TRequest : class
             where TResponse : class
             where TResponse2 : class
@@ -1634,11 +1710,31 @@
 
             InitializeRequest(this, property, request);
 
-            Event(propertyExpression, x => x.Completed, x => x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId")));
-            Event(propertyExpression, x => x.Completed2, x => x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId")));
-            Event(propertyExpression, x => x.Completed3, x => x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId")));
-            Event(propertyExpression, x => x.Faulted, x => x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId")));
-            Event(propertyExpression, x => x.TimeoutExpired, x => x.CorrelateById(context => context.Message.RequestId));
+            Event(propertyExpression, x => x.Completed, x =>
+            {
+                x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId"));
+                settings.Completed?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.Completed2, x =>
+            {
+                x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId"));
+                settings.Completed2?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.Completed3, x =>
+            {
+                x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId"));
+                settings.Completed3?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.Faulted, x =>
+            {
+                x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId"));
+                settings.Faulted?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.TimeoutExpired, x =>
+            {
+                x.CorrelateById(context => context.Message.RequestId);
+                settings.TimeoutExpired?.Invoke(x);
+            });
 
             State(propertyExpression, x => x.Pending);
 
