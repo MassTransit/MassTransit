@@ -38,6 +38,7 @@ MassTransit NuGet Packages
 | **Monitoring**                                                  |      |               |                |
 | [MassTransit.Prometheus][Prometheus.nuget]                      | 6.0  |      2.0      |     4.6.2      |
 | **Persistence**                                                 |      |               |                |
+| [MassTransit.AmazonS3][AmazonS3.nuget]                          | 6.0  |      2.0      |     4.6.2      |
 | [MassTransit.Azure.Cosmos][Cosmos.nuget]                        | 6.0  |   2.0, 2.1    |     4.6.2      |
 | [MassTransit.Azure.Storage][AzureStorage.nuget]                 | 6.0  |   2.0, 2.1    |     4.6.2      |
 | [MassTransit.Azure.Table][AzureTable.nuget]                     | 6.0  |   2.0, 2.1    |     4.6.2      |
@@ -132,6 +133,7 @@ Logo Design by _The Agile Badger_
 [Quartz.nuget]: https://www.nuget.org/packages/MassTransit.Quartz
 
 [ActiveMQ.nuget]: https://www.nuget.org/packages/MassTransit.ActiveMQ
+[AmazonS3.nuget]: https://www.nuget.org/packages/MassTransit.AmazonS3
 [AmazonSQS.nuget]: https://www.nuget.org/packages/MassTransit.AmazonSQS
 [AzureSbCore.nuget]: https://www.nuget.org/packages/MassTransit.Azure.ServiceBus.Core
 [Grpc.nuget]: https://www.nuget.org/packages/MassTransit.Grpc
