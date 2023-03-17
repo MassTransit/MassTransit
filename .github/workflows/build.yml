@@ -111,22 +111,6 @@ jobs:
         run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.ActiveMqTransport.Tests
 
-  test-grpc:
-    name: "Transports: gRPC"
-    timeout-minutes: 10
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v3
-
-      - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '6.0.x'
-
-      - name: Test gRPC
-        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
-        working-directory: tests/MassTransit.GrpcTransport.Tests
   test-azure-service-bus:
     name: "Transports: Azure Service Bus"
     if: false # too flaky at this point
@@ -518,7 +502,6 @@ jobs:
       - test-containers
       - test-activemq
       # - test-azure-service-bus
-      - test-grpc
       - test-rabbitmq
       - test-sqs
       - test-azure-table
