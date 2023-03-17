@@ -151,7 +151,7 @@ namespace MassTransit.KafkaIntegration.Configuration
 
         public void SetOffsetsCommittedHandler(Action<CommittedOffsets> offsetsCommittedHandler)
         {
-            _offsetsCommittedHandler = _offsetsCommittedHandler ?? throw new ArgumentNullException(nameof(offsetsCommittedHandler));
+            _offsetsCommittedHandler = offsetsCommittedHandler ?? throw new ArgumentNullException(nameof(offsetsCommittedHandler));
         }
 
         public void SetStatisticsHandler(Action<string> statisticsHandler)
