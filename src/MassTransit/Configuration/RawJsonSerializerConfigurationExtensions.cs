@@ -22,6 +22,20 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Add support for RAW JSON message serialization and deserialization (does not change the default serializer)
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="options">Options for the raw serializer behavior</param>
+        public static void AddRawJsonSerializer(this IBusFactoryConfigurator configurator, RawSerializerOptions options =
+            RawSerializerOptions.AddTransportHeaders | RawSerializerOptions.CopyHeaders)
+        {
+            var factory = new SystemTextJsonRawMessageSerializerFactory(options);
+
+            configurator.AddSerializer(factory, false);
+            configurator.AddDeserializer(factory);
+        }
+
+        /// <summary>
         /// Serialize messages using the raw JSON message serializer
         /// </summary>
         /// <param name="configurator"></param>
