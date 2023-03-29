@@ -234,6 +234,32 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Configure the repository for use with SQLite
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static IEntityFrameworkSagaRepositoryConfigurator<T> UseSqlite<T>(this IEntityFrameworkSagaRepositoryConfigurator<T> configurator)
+            where T : class, ISaga
+        {
+            configurator.LockStatementProvider = new SqliteLockStatementProvider();
+
+            return configurator;
+        }
+
+        /// <summary>
+        /// Configure the repository for use with SQLite
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <returns></returns>
+        public static IEntityFrameworkSagaRepositoryConfigurator UseSqlite(this IEntityFrameworkSagaRepositoryConfigurator configurator)
+        {
+            configurator.LockStatementProvider = new SqliteLockStatementProvider();
+
+            return configurator;
+        }
+
+        /// <summary>
         /// Create EntityFramework saga repository
         /// </summary>
         /// <param name="registrationConfigurator"></param>

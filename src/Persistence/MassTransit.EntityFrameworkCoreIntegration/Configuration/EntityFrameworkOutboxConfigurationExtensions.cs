@@ -86,6 +86,18 @@ namespace MassTransit
             return configurator;
         }
 
+        /// <summary>
+        /// Configure the outbox for use with SQLite
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <returns></returns>
+        public static IEntityFrameworkOutboxConfigurator UseSqlite(this IEntityFrameworkOutboxConfigurator configurator)
+        {
+            configurator.LockStatementProvider = new SqliteLockStatementProvider();
+
+            return configurator;
+        }
+
         public static void AddInboxStateEntity(this ModelBuilder modelBuilder, Action<EntityTypeBuilder<InboxState>>? callback = null)
         {
             EntityTypeBuilder<InboxState> inbox = modelBuilder.Entity<InboxState>();
