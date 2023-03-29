@@ -18,7 +18,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
         public SqlLockStatementProvider(string defaultSchema, ILockStatementFormatter formatter, bool enableSchemaCaching = true)
         {
-            DefaultSchema = defaultSchema ?? throw new ArgumentNullException(nameof(defaultSchema));
+            DefaultSchema = defaultSchema;
 
             _formatter = formatter;
             _enableSchemaCaching = enableSchemaCaching;

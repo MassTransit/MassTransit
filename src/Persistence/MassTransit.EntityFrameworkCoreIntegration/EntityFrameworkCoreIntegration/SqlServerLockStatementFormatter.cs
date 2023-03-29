@@ -8,7 +8,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
     {
         public void Create(StringBuilder sb, string schema, string table)
         {
-            sb.AppendFormat("SELECT * FROM [{0}].{1} WITH (UPDLOCK, ROWLOCK, SERIALIZABLE) WHERE ", schema, table);
+            sb.AppendFormat("SELECT * FROM {0} WITH (UPDLOCK, ROWLOCK, SERIALIZABLE) WHERE ", GetSchemaTableName(schema, table));
         }
 
         public void AppendColumn(StringBuilder sb, int index, string columnName)
@@ -25,7 +25,12 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
         public void CreateOutboxStatement(StringBuilder sb, string schema, string table, string columnName)
         {
-            sb.AppendFormat(@"SELECT TOP 1 * FROM [{0}].{1} WITH (UPDLOCK, ROWLOCK, READPAST) ORDER BY {2}", schema, table, columnName);
+            sb.AppendFormat(@"SELECT TOP 1 * FROM {0} WITH (UPDLOCK, ROWLOCK, READPAST) ORDER BY {1}", GetSchemaTableName(schema, table), columnName);
+        }
+
+        private static string GetSchemaTableName(string schema, string table)
+        {
+            return string.IsNullOrEmpty(schema) ? $"{table}" : $"[{schema}].{table}";
         }
     }
 }
