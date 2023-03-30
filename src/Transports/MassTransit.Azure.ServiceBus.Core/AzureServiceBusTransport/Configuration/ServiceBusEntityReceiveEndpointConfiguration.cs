@@ -127,6 +127,7 @@
                 ClientPipeConfigurator.UseFilter(new TransportReadyFilter<ClientContext>(receiveEndpointContext));
             else
             {
+                ClientPipeConfigurator.UseFilter(new ReceiveEndpointDependencyFilter<ClientContext>(receiveEndpointContext));
                 ClientPipeConfigurator.UseFilter(_settings.RequiresSession
                     ? new MessageSessionReceiverFilter(receiveEndpointContext)
                     : new MessageReceiverFilter(receiveEndpointContext));

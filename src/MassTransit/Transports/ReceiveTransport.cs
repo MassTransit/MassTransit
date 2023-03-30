@@ -189,7 +189,9 @@ namespace MassTransit.Transports
                     if (_preStartPipe.IsNotEmpty())
                         await _supervisor.Send(_preStartPipe, Stopping).ConfigureAwait(false);
 
-                    await _context.OnTransportStartup(_supervisor, Stopping).ConfigureAwait(false);
+                    // Nothing connected to the pipe, so signal early we are available
+                    if (!_context.ReceivePipe.Connected.IsCompleted)
+                        await _context.OnTransportStartup(_supervisor, Stopping).ConfigureAwait(false);
 
                     if (!IsStopping)
                         await _supervisor.Send(_transportPipe, Stopped).ConfigureAwait(false);
