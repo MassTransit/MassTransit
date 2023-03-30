@@ -53,11 +53,9 @@
             return EndpointObservers.Connect(observer);
         }
 
-        public void AddDependent(IReceiveEndpointObserverConnector dependency)
+        public void AddDependent(IReceiveEndpointDependent dependent)
         {
-            var dependant = new ReceiveEndpointDependent(dependency);
-
-            _dependents.Add(dependant);
+            _dependents.Add(dependent);
         }
 
         public override IEnumerable<ValidationResult> Validate()
@@ -107,11 +105,8 @@
             Topology.Consume.GetMessageTopology<T>().ConfigureConsumeTopology = enabled;
         }
 
-        public void AddDependency(IReceiveEndpointDependentConnector connector)
+        public void AddDependency(IReceiveEndpointDependency dependency)
         {
-            var dependency = new ReceiveEndpointDependency(connector);
-            connector.AddDependent(this);
-
             _dependencies.Add(dependency);
         }
 
@@ -140,90 +135,6 @@
         protected virtual bool IsAlreadyConfigured()
         {
             return false;
-        }
-
-
-        class ReceiveEndpointDependency :
-            IReceiveEndpointDependency,
-            IReceiveEndpointObserver
-        {
-            readonly ConnectHandle _handle;
-            readonly TaskCompletionSource<ReceiveEndpointReady> _ready;
-
-            public ReceiveEndpointDependency(IReceiveEndpointObserverConnector connector)
-            {
-                _ready = new TaskCompletionSource<ReceiveEndpointReady>(TaskCreationOptions.RunContinuationsAsynchronously);
-
-                _handle = connector.ConnectReceiveEndpointObserver(this);
-            }
-
-            public Task Ready => _ready.Task;
-
-            Task IReceiveEndpointObserver.Ready(ReceiveEndpointReady ready)
-            {
-                _handle.Disconnect();
-
-                _ready.TrySetResult(ready);
-
-                return Task.CompletedTask;
-            }
-
-            Task IReceiveEndpointObserver.Stopping(ReceiveEndpointStopping stopping)
-            {
-                return Task.CompletedTask;
-            }
-
-            Task IReceiveEndpointObserver.Completed(ReceiveEndpointCompleted completed)
-            {
-                return Task.CompletedTask;
-            }
-
-            Task IReceiveEndpointObserver.Faulted(ReceiveEndpointFaulted faulted)
-            {
-                return Task.CompletedTask;
-            }
-        }
-
-
-        class ReceiveEndpointDependent :
-            IReceiveEndpointDependent,
-            IReceiveEndpointObserver
-        {
-            readonly TaskCompletionSource<ReceiveEndpointCompleted> _completed;
-            readonly ConnectHandle _handle;
-
-            public ReceiveEndpointDependent(IReceiveEndpointObserverConnector connector)
-            {
-                _completed = new TaskCompletionSource<ReceiveEndpointCompleted>(TaskCreationOptions.RunContinuationsAsynchronously);
-
-                _handle = connector.ConnectReceiveEndpointObserver(this);
-            }
-
-            public Task Completed => _completed.Task;
-
-            Task IReceiveEndpointObserver.Ready(ReceiveEndpointReady ready)
-            {
-                return Task.CompletedTask;
-            }
-
-            Task IReceiveEndpointObserver.Stopping(ReceiveEndpointStopping stopping)
-            {
-                return Task.CompletedTask;
-            }
-
-            Task IReceiveEndpointObserver.Completed(ReceiveEndpointCompleted completed)
-            {
-                _handle.Disconnect();
-
-                _completed.TrySetResult(completed);
-
-                return Task.CompletedTask;
-            }
-
-            Task IReceiveEndpointObserver.Faulted(ReceiveEndpointFaulted faulted)
-            {
-                return Task.CompletedTask;
-            }
         }
     }
 }
