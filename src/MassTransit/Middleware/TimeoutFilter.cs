@@ -32,7 +32,7 @@ namespace MassTransit.Middleware
 
                 await timeoutContext.ConsumeCompleted.ConfigureAwait(false);
             }
-            catch (OperationCanceledException ex) when (ex.CancellationToken == cts.Token)
+            catch (OperationCanceledException ex) when (ex.CancellationToken == cts.Token && !context.CancellationToken.IsCancellationRequested)
             {
                 throw new ConsumerCanceledException("The operation was canceled by the timeout filter");
             }

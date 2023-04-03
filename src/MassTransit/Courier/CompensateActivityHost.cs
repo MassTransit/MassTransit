@@ -49,18 +49,20 @@ namespace MassTransit.Courier
 
                 await next.Send(context).ConfigureAwait(false);
             }
-            catch (OperationCanceledException exception)
+            catch (Exception exception) when (exception.GetBaseException() is OperationCanceledException && !context.CancellationToken.IsCancellationRequested)
             {
                 await context.NotifyFaulted(timer.Elapsed, TypeCache<TActivity>.ShortName, exception).ConfigureAwait(false);
 
-                if (exception.CancellationToken == context.CancellationToken)
-                    throw;
+                activity?.AddExceptionEvent(exception);
 
                 throw new ConsumerCanceledException($"The operation was canceled by the activity: {TypeCache<TActivity>.ShortName}");
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                await context.NotifyFaulted(timer.Elapsed, TypeCache<TActivity>.ShortName, ex).ConfigureAwait(false);
+                await context.NotifyFaulted(timer.Elapsed, TypeCache<TActivity>.ShortName, exception).ConfigureAwait(false);
+
+                activity?.AddExceptionEvent(exception);
+
                 throw;
             }
             finally

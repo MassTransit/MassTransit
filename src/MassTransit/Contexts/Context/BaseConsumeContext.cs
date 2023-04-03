@@ -187,11 +187,12 @@ namespace MassTransit.Context
         {
             switch (exception)
             {
-                case OperationCanceledException canceledException when canceledException.CancellationToken == context.CancellationToken:
+                case OperationCanceledException canceled when canceled.CancellationToken == context.CancellationToken:
                     break;
 
                 default:
-                    await GenerateFault(context, exception).ConfigureAwait(false);
+                    if (!context.CancellationToken.IsCancellationRequested)
+                        await GenerateFault(context, exception).ConfigureAwait(false);
                     break;
             }
 
@@ -271,7 +272,7 @@ namespace MassTransit.Context
 
                 var faultEndpoint = await faultContext.GetFaultEndpoint<T>().ConfigureAwait(false);
 
-                await faultEndpoint.Send(fault, faultPipe, CancellationToken).ConfigureAwait(false);
+                await faultEndpoint.Send(fault, faultPipe, context.CancellationToken).ConfigureAwait(false);
             }
         }
 

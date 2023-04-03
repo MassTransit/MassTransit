@@ -92,7 +92,7 @@ namespace MassTransit.Transports
 
             switch (exception)
             {
-                case OperationCanceledException canceledException when canceledException.CancellationToken == context.CancellationToken:
+                case OperationCanceledException canceled when canceled.CancellationToken == context.CancellationToken:
                     context.LogCanceled(duration, consumerType);
                     break;
 

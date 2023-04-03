@@ -115,6 +115,9 @@ namespace MassTransit.Transports
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void LogTransportFaulted(this ReceiveContext context, Exception exception)
         {
+            if(exception.GetBaseException() is OperationCanceledException && context.CancellationToken.IsCancellationRequested)
+                return;
+
             _logFault(context.InputAddress, GetMessageId(context), exception);
         }
 
