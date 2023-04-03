@@ -93,7 +93,7 @@ namespace MassTransit
 
             return string.IsNullOrWhiteSpace(messageName)
                 ? GetMessageNameFromType(new StringBuilder(Prefix), type, includeScope)
-                : messageName;
+                : messageName!;
         }
 
         static string? GetMessageNameFromAttribute(Type type)
