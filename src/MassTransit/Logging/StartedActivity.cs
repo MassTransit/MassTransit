@@ -55,7 +55,7 @@ namespace MassTransit.Logging
             if (Activity.Status == ActivityStatusCode.Unset)
                 Activity.SetStatus(ActivityStatusCode.Ok);
 
-            Activity.Stop();
+            Activity.Dispose();
         }
     }
 }

@@ -54,7 +54,7 @@ namespace MassTransit.Middleware
             StartedActivity? activity = LogContext.Current?.StartSagaStateMachineActivity(behaviorContext);
             try
             {
-                if (activity != null && activity.Value.Activity.IsAllDataRequested)
+                if (activity is { Activity: { IsAllDataRequested: true } })
                 {
                     State<TSaga> beginState = await behaviorContext.StateMachine.Accessor.Get(behaviorContext).ConfigureAwait(false);
                     if (beginState != null)

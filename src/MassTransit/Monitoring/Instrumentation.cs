@@ -12,6 +12,8 @@ namespace MassTransit.Monitoring
 
     public static class Instrumentation
     {
+        public const string MeterName = "MassTransit";
+
         static readonly ConcurrentDictionary<string, string> _labelCache = new ConcurrentDictionary<string, string>();
 
         static bool _isConfigured;
@@ -305,7 +307,7 @@ namespace MassTransit.Monitoring
             if (_isConfigured)
                 return;
 
-            _meter = new Meter("MassTransit", HostMetadataCache.Host.MassTransitVersion);
+            _meter = new Meter(MeterName, HostMetadataCache.Host.MassTransitVersion);
 
             _serviceName = serviceName;
 

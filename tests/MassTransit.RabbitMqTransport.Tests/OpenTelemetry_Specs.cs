@@ -23,7 +23,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     public class OpenTelemetry_Specs
     {
         [Test]
-        public async Task Should_report_telemetry_to_jaeger()
+        public async Task Should_carry_the_baggage_with_newtonsoft()
         {
             using var tracerProvider = CreateTraceProvider("order-api");
 
@@ -36,6 +36,8 @@ namespace MassTransit.RabbitMqTransport.Tests
 
                     x.UsingRabbitMq((context, cfg) =>
                     {
+                        cfg.UseNewtonsoftJsonSerializer();
+
                         cfg.ConfigureEndpoints(context);
                     });
                 })
@@ -69,7 +71,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
 
         [Test]
-        public async Task Should_carry_the_baggage_with_newtonsoft()
+        public async Task Should_report_telemetry_to_jaeger()
         {
             using var tracerProvider = CreateTraceProvider("order-api");
 
@@ -82,8 +84,6 @@ namespace MassTransit.RabbitMqTransport.Tests
 
                     x.UsingRabbitMq((context, cfg) =>
                     {
-                        cfg.UseNewtonsoftJsonSerializer();
-
                         cfg.ConfigureEndpoints(context);
                     });
                 })
