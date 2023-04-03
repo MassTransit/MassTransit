@@ -11,6 +11,7 @@ namespace MassTransit.Testing
         /// </summary>
         /// <param name="bus"></param>
         /// <returns></returns>
+        [Obsolete("Use the InactivityTask on the test harness instead")]
         public static IBusActivityMonitor CreateBusActivityMonitor(this IBus bus)
         {
             var sendIndicator = new BusActivitySendIndicator();
@@ -27,6 +28,7 @@ namespace MassTransit.Testing
         /// <param name="bus"></param>
         /// <param name="inactivityTimeout">minimum time to wait to presume bus inactivity</param>
         /// <returns></returns>
+        [Obsolete("Use the InactivityTask on the test harness instead")]
         public static IBusActivityMonitor CreateBusActivityMonitor(this IBus bus, TimeSpan inactivityTimeout)
         {
             var sendIndicator = new BusActivitySendIndicator(inactivityTimeout);

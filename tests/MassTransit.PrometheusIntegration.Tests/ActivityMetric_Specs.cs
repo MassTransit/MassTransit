@@ -10,7 +10,6 @@ namespace MassTransit.PrometheusIntegration.Tests
     using TestFramework;
     using TestFramework.Courier;
     using Testing;
-    using Testing.Implementations;
 
 
     [TestFixture]
@@ -22,7 +21,7 @@ namespace MassTransit.PrometheusIntegration.Tests
         {
             await _completed;
 
-            await _activityMonitor.AwaitBusInactivity(TestCancellationToken);
+            await InactivityTask;
 
             using var stream = new MemoryStream();
             await Metrics.DefaultRegistry.CollectAndExportAsTextAsync(stream);
@@ -37,7 +36,6 @@ namespace MassTransit.PrometheusIntegration.Tests
 
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
         RoutingSlip _routingSlip;
-        IBusActivityMonitor _activityMonitor;
 
         protected override void SetupActivities(BusTestHarness testHarness)
         {
@@ -61,11 +59,6 @@ namespace MassTransit.PrometheusIntegration.Tests
                 Handled<RoutingSlipActivityCompleted>(x, context => context.Message.ActivityName.Equals(testActivity.Name));
                 Handled<RoutingSlipActivityCompleted>(x, context => context.Message.ActivityName.Equals(secondActivity.Name));
             });
-        }
-
-        protected override void ConnectObservers(IBus bus)
-        {
-            _activityMonitor = bus.CreateBusActivityMonitor(TimeSpan.FromMilliseconds(500));
         }
 
         [OneTimeSetUp]
