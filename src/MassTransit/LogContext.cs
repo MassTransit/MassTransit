@@ -6,6 +6,7 @@ namespace MassTransit
     using Logging;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Logging.Abstractions;
 
 
     public static class LogContext
