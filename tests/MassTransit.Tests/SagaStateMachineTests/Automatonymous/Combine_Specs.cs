@@ -50,7 +50,7 @@
 
 
         class Instance :
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
             public Guid CorrelationId { get; set; }
             public CompositeEventStatus CompositeStatus { get; set; }
@@ -146,7 +146,7 @@ SagaStateMachineInstance
 
 
         class Instance :
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
             public Guid CorrelationId { get; set; }
             public int CompositeStatus { get; set; }
@@ -181,6 +181,107 @@ SagaStateMachineInstance
             public Event First { get; private set; }
             public Event Second { get; private set; }
             public Event Third { get; private set; }
+        }
+    }
+
+
+    [TestFixture]
+    public class When_multiple_events_trigger_a_composite_event
+    {
+        [Test]
+        public async Task Should_have_called_combined_event()
+        {
+            var machine = new TestStateMachine(CompositeEventOptions.None);
+            var instance = new Instance();
+
+            await machine.RaiseEvent(instance, machine.Start);
+
+            await machine.RaiseEvent(instance, machine.First);
+            await machine.RaiseEvent(instance, machine.Second);
+
+            Assert.That(instance.TriggerCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public async Task Should_not_call_for_one_event()
+        {
+            var machine = new TestStateMachine(CompositeEventOptions.None);
+            var instance = new Instance();
+            await machine.RaiseEvent(instance, machine.Start);
+
+            await machine.RaiseEvent(instance, machine.First);
+
+            Assert.That(instance.TriggerCount, Is.EqualTo(0));
+        }
+
+        [Test]
+        public async Task Should_call_twice_for_duplicate_events()
+        {
+            var machine = new TestStateMachine(CompositeEventOptions.None);
+            var instance = new Instance();
+
+            await machine.RaiseEvent(instance, machine.Start);
+
+            await machine.RaiseEvent(instance, machine.First);
+            await machine.RaiseEvent(instance, machine.Second);
+            await machine.RaiseEvent(instance, machine.Second);
+
+            Assert.That(instance.TriggerCount, Is.EqualTo(2));
+        }
+
+        [Test]
+        public async Task Should_call_once_for_duplicate_events()
+        {
+            var machine = new TestStateMachine(CompositeEventOptions.RaiseOnce);
+            var instance = new Instance();
+
+            await machine.RaiseEvent(instance, machine.Start);
+
+            await machine.RaiseEvent(instance, machine.First);
+            await machine.RaiseEvent(instance, machine.Second);
+            await machine.RaiseEvent(instance, machine.Second);
+
+            Assert.That(instance.TriggerCount, Is.EqualTo(1));
+        }
+
+
+        class Instance :
+            SagaStateMachineInstance
+        {
+            public Guid CorrelationId { get; set; }
+            public int CurrentState { get; set; }
+            public int CompositeStatus { get; set; }
+            public int TriggerCount { get; set; }
+        }
+
+
+        sealed class TestStateMachine :
+            MassTransitStateMachine<Instance>
+        {
+            public TestStateMachine(CompositeEventOptions options)
+            {
+                InstanceState(x => x.CurrentState, Waiting);
+
+                CompositeEvent(() => Third, x => x.CompositeStatus, options, First, Second);
+
+                Initially(
+                    When(Start)
+                        .TransitionTo(Waiting));
+
+                During(Waiting,
+                    When(Third)
+                        .Then(context => context.Instance.TriggerCount++));
+            }
+
+            // ReSharper disable UnassignedGetOnlyAutoProperty
+            // ReSharper disable MemberCanBePrivate.Local
+            public State Waiting { get; }
+
+            public Event Start { get; }
+
+            public Event First { get; }
+            public Event Second { get; }
+            public Event Third { get; }
         }
     }
 }

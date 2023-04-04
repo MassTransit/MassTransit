@@ -661,7 +661,7 @@
             {
                 var flag = 1 << i;
 
-                var activity = new CompositeEventActivity<TInstance>(accessor, flag, complete, @event);
+                var activity = new CompositeEventActivity<TInstance>(accessor, flag, complete, @event, options);
 
                 bool Filter(State<TInstance> state)
                 {
