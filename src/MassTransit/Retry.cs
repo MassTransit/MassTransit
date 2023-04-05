@@ -68,11 +68,11 @@ namespace MassTransit
         /// Create an interval retry policy with the specified intervals. The retry count equals
         /// the number of intervals provided
         /// </summary>
-        /// <param name="intervals">The intervals before each subsequent retry attempt</param>
+        /// <param name="msIntervals">The intervals in milliseconds before each subsequent retry attempt</param>
         /// <returns></returns>
-        public static IRetryPolicy Intervals(params int[] intervals)
+        public static IRetryPolicy Intervals(params int[] msIntervals)
         {
-            return new IntervalRetryPolicy(All(), intervals);
+            return new IntervalRetryPolicy(All(), msIntervals);
         }
 
         /// <summary>
@@ -80,11 +80,11 @@ namespace MassTransit
         /// the number of intervals provided
         /// </summary>
         /// <param name="filter"></param>
-        /// <param name="intervals">The intervals before each subsequent retry attempt</param>
+        /// <param name="msIntervals">The intervals in milliseconds before each subsequent retry attempt</param>
         /// <returns></returns>
-        public static IRetryPolicy Intervals(this IExceptionFilter filter, params int[] intervals)
+        public static IRetryPolicy Intervals(this IExceptionFilter filter, params int[] msIntervals)
         {
-            return new IntervalRetryPolicy(filter, intervals);
+            return new IntervalRetryPolicy(filter, msIntervals);
         }
 
         /// <summary>
