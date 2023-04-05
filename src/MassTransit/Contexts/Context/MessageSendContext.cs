@@ -137,6 +137,23 @@ namespace MassTransit.Context
             return defaultValue;
         }
 
+        protected static string[] ReadStringArray(IReadOnlyDictionary<string, object> properties, string key)
+        {
+            if (properties.TryGetValue(key, out var value))
+            {
+                if (value is string text)
+                    return text.Split(';');
+
+                if (value is byte[] bytes)
+                {
+                    text = Encoding.UTF8.GetString(bytes);
+                    return text.Split(';');
+                }
+            }
+
+            return Array.Empty<string>();
+        }
+
         protected static TimeSpan? ReadTimeSpan(IReadOnlyDictionary<string, object> properties, string key, TimeSpan? defaultValue = null)
         {
             var value = ReadString(properties, key);

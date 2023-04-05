@@ -94,7 +94,7 @@ namespace MassTransit.GrpcTransport
                 }
             };
 
-            transportMessage.Deliver.Envelope.MessageType.AddRange(MessageTypeCache<T>.MessageTypeNames);
+            transportMessage.Deliver.Envelope.MessageType.AddRange(context.MessageTypes);
 
             SetHeaders(transportMessage.Deliver.Envelope.Headers, context.Headers);
 
