@@ -318,7 +318,7 @@ namespace MassTransit.Monitoring
 
             _consumeTotal = _meter.CreateCounter<long>(options.ConsumeTotal, "ea", "Number of messages consumed");
             _consumeFaultTotal = _meter.CreateCounter<long>(options.ConsumeFaultTotal, "ea", "Number of message consume faults");
-            _consumeRetryTotal = _meter.CreateCounter<long>(options.ConsumeRetryTotal, "ea", "Number of message consume faults");
+            _consumeRetryTotal = _meter.CreateCounter<long>(options.ConsumeRetryTotal, "ea", "Number of message consume retries");
 
             _publishTotal = _meter.CreateCounter<long>(options.PublishTotal, "ea", "Number of messages published");
             _publishFaultTotal = _meter.CreateCounter<long>(options.PublishFaultTotal, "ea", "Number of message publish faults");
@@ -353,7 +353,7 @@ namespace MassTransit.Monitoring
             _consumeDuration = _meter.CreateHistogram<double>(options.ConsumeDuration, "ms", "Elapsed time spent consuming a message, in seconds");
 
             _deliveryDuration = _meter.CreateHistogram<double>(options.DeliveryDuration, "ms",
-                "Elapsed time between when the message was sent and when it was consumed, in seconds.");
+                "Elapsed time between when the message was sent and when it was consumed, in seconds");
 
             _executeDuration = _meter.CreateHistogram<double>(options.ActivityExecuteDuration, "ms", "Elapsed time spent executing an activity, in seconds");
 

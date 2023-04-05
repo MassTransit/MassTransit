@@ -8,6 +8,73 @@ OpenTelemetry is an open-source standard for distributed tracing, which allows y
 
 By using OpenTelemetry with MassTransit, you can gain insights into the performance of your systems, which can help you to identify and troubleshoot issues, and to improve the overall performance of your application.
 
+#### RabbitMQ metrics instrumentation with Prometheus exporter
+
+> Requires NuGets `OpenTelemetry.Extensions.Hosting >= 1.5.0-alpha.1`, `OpenTelemetry.Exporter.Prometheus.AspNetCore >= 1.5.0-alpha.1`
+
+To use Open Telemetry instrumentation you need to add configuration in `Program.cs`:
+```csharp
+// ...
+
+services
+    .AddOpenTelemetry()
+    .WithMetrics(builder => builder.AddPrometheusExporter());
+
+services.AddMassTransit(x =>
+{
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.UseInstrumentation();
+    });
+});
+
+// ...
+
+app.UseOpenTelemetryPrometheusScrapingEndpoint();
+
+// ...
+```
+
+The OpenTelemetry metrics captured by MassTransit are listed below.
+
+`Counters`
+
+| Name                                    | Description                                                                          |
+|:----------------------------------------|:-------------------------------------------------------------------------------------|
+| messaging_masstransit_receive                       | Number of messages received                                                    |
+| messaging_masstransit_receive_errors                  | Number of messages receive faults                                              |
+| messaging_masstransit_consume            | Number of messages consumed                                    |
+| messaging_masstransit_consume_errors                  | Number of message consume faults                                                   |
+| messaging_masstransit_consume_retries                        | Number of message consume retries                                                   |
+| messaging_masstransit_publish                 | Number of messages published                                               |
+| messaging_masstransit_publish_errors                 | Number of message publish faults                                              |
+| messaging_masstransit_send            | Number of messages sent                                   |
+| messaging_masstransit_send_errors            | Number of message send faults |
+| messaging_masstransit_execute                        | Number of activities executed                                                   |
+| messaging_masstransit_execute_errors                  | Number of activity execution faults                                               |
+| messaging_masstransit_compensate                           | Number of activities compensated                                                        |
+| messaging_masstransit_compensate_errors                     | Number of activity compensation failures                                                  |
+
+`Gauges`
+
+| Name                                    | Description                                                                          |
+|:----------------------------------------|:-------------------------------------------------------------------------------------|
+| messaging_masstransit_receive_active                       | Number of messages being received                                                    |
+| messaging_masstransit_consume_active                  | Number of consumers in progress                                              |
+| messaging_masstransit_execute_active             | Number of activity executions in progress                                    |
+| messaging_masstransit_compensate_active                  | Number of activity compensations in progress                                                    |
+| messaging_masstransit_handler_active                        | Number of handlers in progress                                                    |
+| messaging_masstransit_saga_active                  | Number of sagas in progress                                               |
+
+`Histograms`
+
+| Name                                    | Description                                                                          |
+|:----------------------------------------|:-------------------------------------------------------------------------------------|
+| messaging_masstransit_receive_duration                      | Elapsed time spent receiving a message, in seconds                                                    |
+| messaging_masstransit_consume_duration                  | Elapsed time spent consuming a message, in seconds                                              |
+| messaging_masstransit_delivery_durations             | Elapsed time between when the message was sent and when it was consumed, in seconds                                    |
+| messaging_masstransit_execute_duration                  | Elapsed time spent executing an activity, in seconds                                                    |
+| messaging_masstransit_compensate_duration                        | Elapsed time spent compensating an activity, in seconds                                                    |
 
 ### Application Insights
 
@@ -125,7 +192,7 @@ services.AddMassTransit(x =>
 });
 ```
 
-To then mount the metrics to `/metrics` go to your Startup.cs and add
+To then mount the metrics to `/metrics` go to your `Program.cs` and add
 
 ```csharp
 app.UseEndpoints(endpoints =>
