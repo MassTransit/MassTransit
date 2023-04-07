@@ -233,5 +233,12 @@ namespace MassTransit.DependencyInjection.Testing
             _handles.Add(bus.ConnectReceiveObserver(_received.Value));
             _handles.Add(bus.ConnectSendObserver(_sent.Value));
         }
+
+        public void ClearMessages()
+        {
+            _consumed?.Value.ClearMessages();
+            _published?.Value.ClearMessages();
+            _sent?.Value.ClearMessages();
+        }
     }
 }

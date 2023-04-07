@@ -38,5 +38,10 @@
 
             return RestartTimer(false);
         }
+
+        public void ClearMessages()
+        {
+            _messages.Clear();
+        }
     }
 }

@@ -44,5 +44,10 @@
 
             return Interlocked.Decrement(ref _activeCount) == 0 ? NotifyInactive() : Task.CompletedTask;
         }
+
+        public void ClearMessages()
+        {
+            _messages.Clear();
+        }
     }
 }

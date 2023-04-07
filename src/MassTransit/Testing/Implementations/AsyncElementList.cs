@@ -173,6 +173,14 @@ namespace MassTransit.Testing.Implementations
             }
         }
 
+        public void Clear()
+        {
+            lock (_messages)
+            {
+                _messages.Clear();
+            }
+        }
+
         protected void Add(TElement context)
         {
             if (!context.ElementId.HasValue)
