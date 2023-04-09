@@ -13,6 +13,15 @@ services:
     ports:
       - "1433:1433"
 
+  otel-collector:
+    image: otel/opentelemetry-collector
+    restart: always
+    command: [ "--config=/etc/otelcol-config.yml" ]
+    volumes:
+      - ./configs/otel-collector/otelcol-config.yml:/etc/otelcol-config.yml
+    ports:
+      - "4317:4317"   # OTLP gRPC receiver
+
   redpanda:
     image: docker.redpanda.com/vectorized/redpanda:latest
     command:

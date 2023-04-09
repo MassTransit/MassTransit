@@ -84,6 +84,7 @@ namespace MassTransit.Transports
                 SendContext<T> sendContext = await _sendTransportContext.CreateSendContext(context, _message, _pipe, _cancellationToken).ConfigureAwait(false);
 
                 StartedActivity? activity = LogContext.Current?.StartSendActivity(_sendTransportContext, sendContext);
+                StartedInstrument? instrument = LogContext.Current?.StartSendInstrument(_sendTransportContext, sendContext);
                 try
                 {
                     if (_sendTransportContext.SendObservers.Count > 0)
@@ -105,12 +106,14 @@ namespace MassTransit.Transports
                         await _sendTransportContext.SendObservers.SendFault(sendContext, ex).ConfigureAwait(false);
 
                     activity?.AddExceptionEvent(ex);
+                    instrument?.AddException(ex);
 
                     throw;
                 }
                 finally
                 {
                     activity?.Stop();
+                    instrument?.Stop();
                 }
             }
 

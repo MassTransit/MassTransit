@@ -23,9 +23,11 @@ namespace MassTransit.Courier
 
         public async Task Send(ConsumeContext<RoutingSlip> context, IPipe<ConsumeContext<RoutingSlip>> next)
         {
-            StartedActivity? activity = LogContext.Current?.StartExecuteActivity<TActivity, TArguments>(context);
-
             var timer = Stopwatch.StartNew();
+
+            StartedActivity? activity = LogContext.Current?.StartExecuteActivity<TActivity, TArguments>(context);
+            StartedInstrument? instrument = LogContext.Current?.StartActivityExecuteInstrument<TActivity, TArguments>(context, timer);
+
             try
             {
                 ExecuteContext<TArguments> executeContext = new HostExecuteContext<TArguments>(_compensateAddress, context);
@@ -60,6 +62,8 @@ namespace MassTransit.Courier
 
                 activity?.AddExceptionEvent(exception);
 
+                instrument?.AddException(exception);
+
                 throw new ConsumerCanceledException($"The operation was canceled by the activity: {TypeCache<TActivity>.ShortName}");
             }
             catch (Exception exception)
@@ -68,11 +72,14 @@ namespace MassTransit.Courier
 
                 activity?.AddExceptionEvent(exception);
 
+                instrument?.AddException(exception);
+
                 throw;
             }
             finally
             {
                 activity?.Stop();
+                instrument?.Stop();
             }
         }
 

@@ -34,6 +34,7 @@ namespace MassTransit
             }
 
             AddHostedService(collection);
+            AddInstrumentation(collection);
 
             var configurator = new ServiceCollectionBusConfigurator(collection);
 
@@ -85,6 +86,7 @@ namespace MassTransit
             }
 
             AddHostedService(collection);
+            AddInstrumentation(collection);
 
             var configurator = new ServiceCollectionBusConfigurator<TBus, TBusInstance>(collection);
 
@@ -109,6 +111,7 @@ namespace MassTransit
                 throw new ArgumentNullException(nameof(configure));
 
             AddHostedService(collection);
+            AddInstrumentation(collection);
 
             var doIt = new Callback<TBus>(collection, configure);
 
@@ -153,6 +156,12 @@ namespace MassTransit
             where TImplementation : class, TService
         {
             services.Replace(new ServiceDescriptor(typeof(TService), typeof(TImplementation), ServiceLifetime.Scoped));
+        }
+
+        static void AddInstrumentation(IServiceCollection collection)
+        {
+            collection.AddOptions();
+            collection.AddSingleton<IConfigureOptions<InstrumentationOptions>, ConfigureDefaultInstrumentationOptions>();
         }
 
         static void AddHostedService(IServiceCollection collection)

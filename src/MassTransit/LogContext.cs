@@ -1,12 +1,12 @@
 namespace MassTransit
 {
     using System;
-    using System.Diagnostics;
     using System.Threading;
     using Logging;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Logging.Abstractions;
+    using Monitoring;
 
 
     public static class LogContext
@@ -37,7 +37,7 @@ namespace MassTransit
 
         public static void ConfigureCurrentLogContext(ILoggerFactory loggerFactory = null)
         {
-            Current = new BusLogContext(loggerFactory ?? NullLoggerFactory.Instance, Cached.Source.Value);
+            Current = new BusLogContext(loggerFactory ?? NullLoggerFactory.Instance);
         }
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace MassTransit
         /// <param name="logger">An existing logger</param>
         public static void ConfigureCurrentLogContext(ILogger logger)
         {
-            Current = new BusLogContext(new SingleLoggerFactory(logger), Cached.Source.Value);
+            Current = new BusLogContext(new SingleLoggerFactory(logger));
         }
 
         public static ILogContext CreateLogContext(string categoryName)
@@ -64,6 +64,8 @@ namespace MassTransit
         /// <param name="provider"></param>
         public static void ConfigureCurrentLogContextIfNull(IServiceProvider provider)
         {
+            LogContextInstrumentationExtensions.TryConfigure(provider);
+
             if (Current == null || Current.Logger is NullLogger)
             {
                 var loggerFactory = provider.GetService<ILoggerFactory>();
@@ -207,17 +209,9 @@ namespace MassTransit
 
         static ILogContext CreateDefaultLogContext()
         {
-            var source = Cached.Source.Value;
-
             var loggerFactory = NullLoggerFactory.Instance;
 
-            return new BusLogContext(loggerFactory, source);
-        }
-
-
-        static class Cached
-        {
-            internal static readonly Lazy<ActivitySource> Source = new Lazy<ActivitySource>(() => new ActivitySource(DiagnosticHeaders.DefaultListenerName));
+            return new BusLogContext(loggerFactory);
         }
     }
 }

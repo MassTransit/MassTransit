@@ -22,14 +22,8 @@ namespace MassTransit.Middleware
 
         public InstanceMessageFilter(TConsumer instance, IPipe<ConsumerConsumeContext<TConsumer, TMessage>> instancePipe)
         {
-            if (instance == null)
-                throw new ArgumentNullException(nameof(instance));
-
-            if (instancePipe == null)
-                throw new ArgumentNullException(nameof(instancePipe));
-
-            _instance = instance;
-            _instancePipe = instancePipe;
+            _instance = instance ?? throw new ArgumentNullException(nameof(instance));
+            _instancePipe = instancePipe ?? throw new ArgumentNullException(nameof(instancePipe));
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -43,9 +37,11 @@ namespace MassTransit.Middleware
         [DebuggerNonUserCode]
         async Task IFilter<ConsumeContext<TMessage>>.Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)
         {
-            StartedActivity? activity = LogContext.Current?.StartConsumerActivity<TConsumer, TMessage>(context);
-
             var timer = Stopwatch.StartNew();
+
+            StartedActivity? activity = LogContext.Current?.StartConsumerActivity<TConsumer, TMessage>(context);
+            StartedInstrument? instrument = LogContext.Current?.StartConsumeInstrument<TConsumer, TMessage>(context, timer);
+
             try
             {
                 await _instancePipe.Send(new ConsumerConsumeContextScope<TConsumer, TMessage>(context, _instance)).ConfigureAwait(false);
@@ -59,6 +55,7 @@ namespace MassTransit.Middleware
                 await context.NotifyFaulted(timer.Elapsed, TypeCache<TConsumer>.ShortName, exception).ConfigureAwait(false);
 
                 activity?.AddExceptionEvent(exception);
+                instrument?.AddException(exception);
 
                 throw new ConsumerCanceledException($"The operation was canceled by the consumer: {TypeCache<TConsumer>.ShortName}");
             }
@@ -67,12 +64,14 @@ namespace MassTransit.Middleware
                 await context.NotifyFaulted(timer.Elapsed, TypeCache<TConsumer>.ShortName, exception).ConfigureAwait(false);
 
                 activity?.AddExceptionEvent(exception);
+                instrument?.AddException(exception);
 
                 throw;
             }
             finally
             {
                 activity?.Stop();
+                instrument?.Stop();
             }
         }
     }
