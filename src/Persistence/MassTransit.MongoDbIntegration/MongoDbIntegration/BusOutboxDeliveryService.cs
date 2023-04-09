@@ -239,6 +239,7 @@ namespace MassTransit.MongoDbIntegration
                         var endpoint = await _busControl.GetSendEndpoint(message.DestinationAddress).ConfigureAwait(false);
 
                         StartedActivity? activity = LogContext.Current?.StartOutboxDeliverActivity(message);
+                        StartedInstrument? instrument = LogContext.Current?.StartOutboxDeliveryInstrument(message);
                         try
                         {
                             await endpoint.Send(new SerializedMessageBody(), pipe, token.Token).ConfigureAwait(false);
@@ -246,12 +247,14 @@ namespace MassTransit.MongoDbIntegration
                         catch (Exception exception)
                         {
                             activity?.AddExceptionEvent(exception);
+                            instrument?.AddException(exception);
 
                             throw;
                         }
                         finally
                         {
                             activity?.Stop();
+                            instrument?.Stop();
                         }
 
                         sentSequenceNumber = message.SequenceNumber;

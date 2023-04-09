@@ -177,6 +177,7 @@ namespace MassTransit.Middleware.Outbox
             where T : class
         {
             StartedActivity? activity = LogContext.Current?.StartOutboxSendActivity(context);
+            StartedInstrument? instrument = LogContext.Current?.StartOutboxSendInstrument(context);
             try
             {
                 await _context.AddSend(context).ConfigureAwait(false);
@@ -185,11 +186,13 @@ namespace MassTransit.Middleware.Outbox
             catch (Exception ex)
             {
                 activity?.AddExceptionEvent(ex);
+                instrument?.AddException(ex);
                 throw;
             }
             finally
             {
                 activity?.Stop();
+                instrument?.Stop();
             }
         }
 

@@ -51,6 +51,8 @@ namespace MassTransit.Transports
             var active = StartDispatch();
 
             StartedActivity? activity = LogContext.Current?.StartReceiveActivity(_activityName, _inputAddress, _endpointName, context);
+            StartedInstrument? instrument = LogContext.Current?.StartReceiveInstrument(context);
+
             try
             {
                 if (_observers.Count > 0)
@@ -85,24 +87,30 @@ namespace MassTransit.Transports
                             await receiveLockFaultedTask.ConfigureAwait(false);
 
                         activity?.AddExceptionEvent(ex);
+                        instrument?.AddException(ex);
                     }
                     catch (Exception releaseLockException)
                     {
                         var aggregateException = new AggregateException("ReceiveLock.Faulted threw an exception", releaseLockException, ex);
 
                         activity?.AddExceptionEvent(aggregateException);
+                        instrument?.AddException(aggregateException);
 
                         throw aggregateException;
                     }
                 }
                 else
+                {
                     activity?.AddExceptionEvent(ex);
+                    instrument?.AddException(ex);
+                }
 
                 throw;
             }
             finally
             {
                 activity?.Stop();
+                instrument?.Stop();
 
                 await active.Complete().ConfigureAwait(false);
             }

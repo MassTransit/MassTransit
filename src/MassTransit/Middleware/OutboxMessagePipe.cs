@@ -100,6 +100,7 @@ namespace MassTransit.Middleware
                         throw new ApplicationException("Simulated Delivery Failure Requested");
 
                     StartedActivity? activity = LogContext.Current?.StartOutboxDeliverActivity(message);
+                    StartedInstrument? instrument = LogContext.Current?.StartOutboxDeliveryInstrument(message);
                     try
                     {
                         await endpoint.Send(new SerializedMessageBody(), pipe, token.Token).ConfigureAwait(false);
@@ -107,12 +108,14 @@ namespace MassTransit.Middleware
                     catch (Exception exception)
                     {
                         activity?.AddExceptionEvent(exception);
+                        instrument?.AddException(exception);
 
                         throw;
                     }
                     finally
                     {
                         activity?.Stop();
+                        instrument?.Stop();
                     }
 
                     LogContext.Debug?.Log("Outbox Sent: {InboxMessageId} {SequenceNumber} {MessageId}", context.MessageId, message.SequenceNumber,

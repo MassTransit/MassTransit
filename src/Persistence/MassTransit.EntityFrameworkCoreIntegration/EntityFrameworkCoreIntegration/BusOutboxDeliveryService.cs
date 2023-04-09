@@ -249,13 +249,22 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                         var endpoint = await _busControl.GetSendEndpoint(message.DestinationAddress).ConfigureAwait(false);
 
                         StartedActivity? activity = LogContext.Current?.StartOutboxDeliverActivity(message);
+                        StartedInstrument? instrument = LogContext.Current?.StartOutboxDeliveryInstrument(message);
+
                         try
                         {
                             await endpoint.Send(new SerializedMessageBody(), pipe, token.Token).ConfigureAwait(false);
                         }
+                        catch (Exception ex)
+                        {
+                            activity?.AddExceptionEvent(ex);
+                            instrument?.AddException(ex);
+                            throw;
+                        }
                         finally
                         {
                             activity?.Stop();
+                            instrument?.Stop();
                         }
 
                         sentSequenceNumber = message.SequenceNumber;

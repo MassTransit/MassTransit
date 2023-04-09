@@ -22,10 +22,7 @@ namespace MassTransit.Middleware
         // TODO this needs a pipe like instance and consumer, to handle things like retry, etc.
         public HandlerMessageFilter(MessageHandler<TMessage> handler)
         {
-            if (handler == null)
-                throw new ArgumentNullException(nameof(handler));
-
-            _handler = handler;
+            _handler = handler ?? throw new ArgumentNullException(nameof(handler));
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -38,9 +35,10 @@ namespace MassTransit.Middleware
         [DebuggerNonUserCode]
         async Task IFilter<ConsumeContext<TMessage>>.Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)
         {
-            StartedActivity? activity = LogContext.Current?.StartHandlerActivity(context);
-
             var timer = Stopwatch.StartNew();
+            StartedActivity? activity = LogContext.Current?.StartHandlerActivity(context);
+            StartedInstrument? instrument = LogContext.Current?.StartHandlerInstrument(context, timer);
+
             try
             {
                 await _handler(context).ConfigureAwait(false);
@@ -55,6 +53,9 @@ namespace MassTransit.Middleware
             {
                 await context.NotifyFaulted(timer.Elapsed, TypeCache<MessageHandler<TMessage>>.ShortName, exception).ConfigureAwait(false);
 
+                activity?.AddExceptionEvent(exception);
+                instrument?.AddException(exception);
+
                 if (exception.CancellationToken == context.CancellationToken)
                     throw;
 
@@ -64,12 +65,16 @@ namespace MassTransit.Middleware
             {
                 await context.NotifyFaulted(timer.Elapsed, TypeCache<MessageHandler<TMessage>>.ShortName, ex).ConfigureAwait(false);
 
+                activity?.AddExceptionEvent(ex);
+                instrument?.AddException(ex);
+
                 Interlocked.Increment(ref _faulted);
                 throw;
             }
             finally
             {
                 activity?.Stop();
+                instrument?.Stop();
             }
         }
     }
