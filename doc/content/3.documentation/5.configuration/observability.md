@@ -8,18 +8,10 @@ OpenTelemetry is an open-source standard for distributed tracing, which allows y
 
 By using OpenTelemetry with MassTransit, you can gain insights into the performance of your systems, which can help you to identify and troubleshoot issues, and to improve the overall performance of your application.
 
-#### RabbitMQ metrics instrumentation with Prometheus exporter
-
-> Requires NuGets `OpenTelemetry.Extensions.Hosting >= 1.5.0-alpha.1`, `OpenTelemetry.Exporter.Prometheus.AspNetCore >= 1.5.0-alpha.1`
+#### RabbitMQ metrics instrumentation
 
 To use Open Telemetry instrumentation you need to add configuration in `Program.cs`:
 ```csharp
-// ...
-
-services
-    .AddOpenTelemetry()
-    .WithMetrics(builder => builder.AddPrometheusExporter());
-
 services.AddMassTransit(x =>
 {
     x.UsingRabbitMq((context, cfg) =>
@@ -27,12 +19,6 @@ services.AddMassTransit(x =>
         cfg.UseInstrumentation();
     });
 });
-
-// ...
-
-app.UseOpenTelemetryPrometheusScrapingEndpoint();
-
-// ...
 ```
 
 The OpenTelemetry metrics captured by MassTransit are listed below.
