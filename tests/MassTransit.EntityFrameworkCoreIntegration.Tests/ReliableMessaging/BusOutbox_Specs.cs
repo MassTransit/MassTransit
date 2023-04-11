@@ -1,6 +1,7 @@
 namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
 {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
     using System.Threading;
@@ -67,6 +68,67 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
                 }
 
                 Assert.That(await consumerHarness.Consumed.Any<PingMessage>(), Is.True);
+            }
+            finally
+            {
+                await harness.Stop();
+            }
+        }
+
+        [Test]
+        public async Task Should_support_baggage_in_telemetry()
+        {
+            using var tracerProvider = TraceConfig.CreateTraceProvider("ef-core-tests");
+
+            await using var provider = new ServiceCollection()
+                .AddBusOutboxServices()
+                .AddTelemetryListener()
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.AddEntityFrameworkOutbox<ReliableDbContext>(o =>
+                    {
+                        o.QueryDelay = TimeSpan.FromSeconds(1);
+
+                        o.UseBusOutbox(bo =>
+                        {
+                            bo.MessageDeliveryLimit = 10;
+                        });
+                    });
+
+                    x.AddTaskCompletionSource<string>();
+                    x.AddConsumer<PingBaggageConsumer>();
+                })
+                .BuildServiceProvider(true);
+
+            var harness = provider.GetTestHarness();
+            harness.TestInactivityTimeout = TimeSpan.FromSeconds(5);
+
+            await harness.Start();
+
+            IConsumerTestHarness<PingBaggageConsumer> consumerHarness = harness.GetConsumerHarness<PingBaggageConsumer>();
+
+            try
+            {
+                {
+                    await using var dbContext = harness.Scope.ServiceProvider.GetRequiredService<ReliableDbContext>();
+
+                    var publishEndpoint = harness.Scope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
+
+                    var activity = TraceConfig.Source.StartActivity(ActivityKind.Client);
+
+                    activity.AddBaggage("Suitcase", "Full of cash");
+
+                    await publishEndpoint.Publish(new PingMessage());
+
+                    await dbContext.SaveChangesAsync(harness.CancellationToken);
+
+                    activity.Stop();
+                }
+
+                Assert.That(await consumerHarness.Consumed.Any<PingMessage>(), Is.True);
+
+                var source = provider.GetRequiredService<TaskCompletionSource<string>>();
+                Assert.That(await source.Task, Is.EqualTo("Full of cash"));
             }
             finally
             {
@@ -375,6 +437,27 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
             }
 
             await harness.Stop();
+        }
+
+
+        class PingBaggageConsumer :
+            IConsumer<PingMessage>
+        {
+            readonly TaskCompletionSource<string> _baggage;
+
+            public PingBaggageConsumer(TaskCompletionSource<string> baggage)
+            {
+                _baggage = baggage;
+            }
+
+            public Task Consume(ConsumeContext<PingMessage> context)
+            {
+                KeyValuePair<string, string>? pair = Activity.Current?.Baggage.FirstOrDefault(x => x.Key.Equals("Suitcase"));
+                if (pair != null)
+                    _baggage.TrySetResult(pair.Value.Value);
+
+                return Task.CompletedTask;
+            }
         }
 
 

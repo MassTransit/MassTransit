@@ -31,9 +31,7 @@ namespace MassTransit.Logging
         public static StartedActivity? StartOutboxSendActivity<T>(this ILogContext logContext, SendContext<T> context)
             where T : class
         {
-            var parentActivityContext = System.Diagnostics.Activity.Current?.Context ?? default;
-
-            var activity = Cached.Source.Value.CreateActivity("outbox send", ActivityKind.Producer, parentActivityContext);
+            var activity = Cached.Source.Value.CreateActivity("outbox send", ActivityKind.Producer);
             if (activity == null)
                 return null;
 
