@@ -73,7 +73,7 @@ var bus = Bus.Factory.CreateUsingRabbitMq(sbc =>
 {
     // ...
 
-    sbc.UseEncryption(keyProvider)
+    sbc.UseEncryption(keyProvider);
 });
 ```
 
@@ -86,7 +86,22 @@ var bus = Bus.Factory.CreateUsingRabbitMq(sbc =>
 {
     // ...
     sbc.ClearMessageDeserializers();
-    sbc.UseEncryption(key)
+    sbc.UseEncryption(key);
 });
 ```
 
+### Key Rotation Support
+
+This feature enables support Key Rotation without downtime. For the encryption part the ```firstKey``` will be used. Whilst decryption will be commenced using the ```firstKey```, if decryption fails the ```secondarykey``` will be used to deserialize the message.
+
+```csharp
+var bus = Bus.Factory.CreateUsingRabbitMq(sbc =>
+{
+    // ...
+    sbc.ClearMessageDeserializers();
+    sbc.UseDualDecryptionWithNewtonsoftJson(primaryKey, secondaryKey);
+});
+```
+
+To rotate the keys simply move the ```firstKey``` value to the ```secondarykey```, making the current-key the old-key. 
+Now generate a new key and set the ```firstKey``` value, this key will now be used to encrypt new messages. Rotating the keys can be done while there are still messages in the bus which are encrypted with the old-key since both keys are used to attempt decryption. 
