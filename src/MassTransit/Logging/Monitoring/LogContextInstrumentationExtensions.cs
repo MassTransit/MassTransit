@@ -18,7 +18,7 @@ namespace MassTransit.Logging
 
     public static class LogContextInstrumentationExtensions
     {
-        static readonly ConcurrentDictionary<string, string> _labelCache = new ConcurrentDictionary<string, string>();
+        static readonly ConcurrentDictionary<string, string> _labelCache = new ConcurrentDictionary<string, string>(StringComparer.Ordinal);
 
         static bool _isConfigured;
         static Counter<long> _receiveTotal;
@@ -354,7 +354,7 @@ namespace MassTransit.Logging
 
             _consumeTotal = _meter.CreateCounter<long>(options.ConsumeTotal, "ea", "Number of messages consumed");
             _consumeFaultTotal = _meter.CreateCounter<long>(options.ConsumeFaultTotal, "ea", "Number of message consume faults");
-            _consumeRetryTotal = _meter.CreateCounter<long>(options.ConsumeRetryTotal, "ea", "Number of message consume faults");
+            _consumeRetryTotal = _meter.CreateCounter<long>(options.ConsumeRetryTotal, "ea", "Number of message consume retries");
 
             _sagaTotal = _meter.CreateCounter<long>(options.SagaTotal, "ea", "Number of sagas executed");
             _sagaFaultTotal = _meter.CreateCounter<long>(options.SagaFaultTotal, "ea", "Number of sagas faults");
