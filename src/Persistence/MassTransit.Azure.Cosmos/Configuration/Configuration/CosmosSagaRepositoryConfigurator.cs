@@ -9,6 +9,7 @@ namespace MassTransit.Configuration
     using Microsoft.Azure.Cosmos;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
+    using Microsoft.Extensions.Options;
     using Saga;
     using Serialization;
 
@@ -165,16 +166,17 @@ namespace MassTransit.Configuration
             configurator.TryAddSingleton(DatabaseContextFactory);
             configurator.RegisterSagaRepository<TSaga, DatabaseContext<TSaga>, SagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga>,
                 CosmosSagaRepositoryContextFactory<TSaga>>();
+            configurator.AddOptions<CosmosClientOptions>();
         }
 
         void RegisterNewtonsoftJsonClientFactory(ISagaRepositoryRegistrationConfigurator<TSaga> configurator)
         {
-            configurator.TryAddSingleton<ICosmosClientFactory>(provider => new NewtonsoftJsonCosmosClientFactory(_settings));
+            configurator.TryAddSingleton<ICosmosClientFactory>(provider => new NewtonsoftJsonCosmosClientFactory(_settings, provider.GetRequiredService<IOptions<CosmosClientOptions>>()));
         }
 
         void RegisterSystemTextJsonClientFactory(ISagaRepositoryRegistrationConfigurator<TSaga> configurator)
         {
-            configurator.TryAddSingleton<ICosmosClientFactory>(provider => new SystemTextJsonCosmosClientFactory(_settings, PropertyNamingPolicy));
+            configurator.TryAddSingleton<ICosmosClientFactory>(provider => new SystemTextJsonCosmosClientFactory(_settings, provider.GetRequiredService<IOptions<CosmosClientOptions>>(), PropertyNamingPolicy));
         }
 
         DatabaseContext<TSaga> DatabaseContextFactory(IServiceProvider provider)

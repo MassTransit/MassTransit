@@ -5,6 +5,7 @@ namespace MassTransit.AzureCosmos
     using System.Collections.Generic;
     using System.Text.Json;
     using Microsoft.Azure.Cosmos;
+    using Microsoft.Extensions.Options;
     using Saga;
     using Serialization;
 
@@ -18,15 +19,17 @@ namespace MassTransit.AzureCosmos
         IDisposable
     {
         readonly CosmosAuthSettings _authSettings;
-        readonly ConcurrentDictionary<Type, Lazy<CosmosClient>> _clients;
+        readonly CosmosClientOptions _clientOptions;
         readonly JsonNamingPolicy _namingPolicy;
+        readonly ConcurrentDictionary<Type, Lazy<CosmosClient>> _clients;
 
-        public SystemTextJsonCosmosClientFactory(CosmosAuthSettings authSettings, JsonNamingPolicy namingPolicy)
+        public SystemTextJsonCosmosClientFactory(CosmosAuthSettings authSettings, IOptions<CosmosClientOptions> clientOptions, JsonNamingPolicy namingPolicy)
         {
             if (authSettings == null)
                 throw new ArgumentNullException(nameof(authSettings));
 
             _authSettings = authSettings;
+            _clientOptions = clientOptions.Value;
             _namingPolicy = namingPolicy;
 
             _clients = new ConcurrentDictionary<Type, Lazy<CosmosClient>>();
@@ -52,13 +55,11 @@ namespace MassTransit.AzureCosmos
         {
             return new Lazy<CosmosClient>(() =>
             {
-                var clientOptions = new CosmosClientOptions();
-
                 var options = GetSerializerOptions<T>();
                 if (options != null)
-                    clientOptions.Serializer = new SystemTextJsonCosmosSerializer(options);
+                    _clientOptions.Serializer = new SystemTextJsonCosmosSerializer(options);
 
-                return CosmosClientFactory.CreateClient(_authSettings, clientOptions);
+                return CosmosClientFactory.CreateClient(_authSettings, _clientOptions);
             });
         }
 

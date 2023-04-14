@@ -4,7 +4,9 @@ namespace MassTransit
     using Azure.Core;
     using AzureCosmos;
     using Configuration;
+    using Microsoft.Azure.Cosmos;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Options;
     using Serialization;
 
 
@@ -176,7 +178,7 @@ namespace MassTransit
         static IServiceCollection AddCosmosClientFactory(this IServiceCollection collection, CosmosAuthSettings authSettings)
         {
             return collection.AddSingleton<ICosmosClientFactory>(provider =>
-                new SystemTextJsonCosmosClientFactory(authSettings, SystemTextJsonMessageSerializer.Options.PropertyNamingPolicy));
+                new SystemTextJsonCosmosClientFactory(authSettings, provider.GetRequiredService<IOptions<CosmosClientOptions>>(), SystemTextJsonMessageSerializer.Options.PropertyNamingPolicy));
         }
 
         /// <summary>
@@ -228,7 +230,7 @@ namespace MassTransit
         /// <param name="authSettings"></param>
         static IServiceCollection AddNewtonsoftCosmosClientFactory(this IServiceCollection collection, CosmosAuthSettings authSettings)
         {
-            return collection.AddSingleton<ICosmosClientFactory>(provider => new NewtonsoftJsonCosmosClientFactory(authSettings));
+            return collection.AddSingleton<ICosmosClientFactory>(provider => new NewtonsoftJsonCosmosClientFactory(authSettings, provider.GetRequiredService<IOptions<CosmosClientOptions>>()));
         }
 
         /// <summary>
