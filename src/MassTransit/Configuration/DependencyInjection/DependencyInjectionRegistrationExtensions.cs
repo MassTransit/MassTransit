@@ -160,7 +160,7 @@ namespace MassTransit
 
         static void AddInstrumentation(IServiceCollection collection)
         {
-            collection.AddOptions();
+            collection.AddOptions<InstrumentationOptions>();
             collection.AddSingleton<IConfigureOptions<InstrumentationOptions>, ConfigureDefaultInstrumentationOptions>();
         }
 
