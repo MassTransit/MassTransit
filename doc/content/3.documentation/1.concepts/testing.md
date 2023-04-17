@@ -62,7 +62,7 @@ In the example above, the `AddMassTransitTestHarness` method is used to configur
     
     x.UsingInMemory((context, cfg) =>
     {
-        x.UseDelayedMessageScheduler();
+        cfg.UseDelayedMessageScheduler();
         
         cfg.ConfigureEndpoints(context);
     });
