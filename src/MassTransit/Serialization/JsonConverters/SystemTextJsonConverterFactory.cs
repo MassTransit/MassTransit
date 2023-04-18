@@ -91,7 +91,7 @@
             if (_openTypeFactory.TryGetValue(typeInfo, out _))
                 return true;
 
-            if (typeToConvert.IsInterfaceOrConcreteClass() && MessageTypeCache.IsValidMessageType(typeToConvert) && !typeToConvert.IsValueTypeOrObject())
+            if (IsConvertibleInterfaceType(typeToConvert))
                 return true;
 
             return false;
@@ -157,13 +157,37 @@
                 }
             }
 
-            if (typeToConvert.IsInterfaceOrConcreteClass() && MessageTypeCache.IsValidMessageType(typeToConvert) && !typeToConvert.IsValueTypeOrObject())
+            if (IsConvertibleInterfaceType(typeToConvert))
             {
                 return (JsonConverter)Activator.CreateInstance(
                     typeof(InterfaceJsonConverter<,>).MakeGenericType(typeToConvert, TypeMetadataCache.GetImplementationType(typeToConvert)));
             }
 
             throw new MassTransitException($"Unsupported type for json serialization {TypeCache.GetShortName(typeInfo)}");
+        }
+
+        static bool IsConvertibleInterfaceType(Type typeToConvert)
+        {
+            if (!typeToConvert.IsInterfaceOrConcreteClass())
+                return false;
+
+            if (!MessageTypeCache.IsValidMessageType(typeToConvert))
+                return false;
+
+            if (typeToConvert.IsValueTypeOrObject())
+                return false;
+
+            foreach (var attribute in typeToConvert.GetCustomAttributes())
+            {
+                switch (attribute.GetType().Name)
+                {
+                    case "JsonDerivedTypeAttribute":
+                    case "JsonPolymorphicAttribute":
+                        return false;
+                }
+            }
+
+            return true;
         }
     }
 
