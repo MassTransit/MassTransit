@@ -3,6 +3,7 @@ namespace MassTransit.KafkaIntegration.Serializers
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text;
     using Confluent.Kafka;
     using Transports;
 
@@ -31,7 +32,7 @@ namespace MassTransit.KafkaIntegration.Serializers
                 return new DictionaryHeaderProvider(headers.ToDictionary(x => x.Key, x =>
                 {
                     var valueBytes = x.GetValueBytes();
-                    return valueBytes != null ? (object)MessageDefaults.Encoding.GetString(valueBytes) : null;
+                    return valueBytes != null ? (object)Encoding.UTF8.GetString(valueBytes) : null;
                 }));
             }
         }
