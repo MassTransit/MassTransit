@@ -14,18 +14,18 @@ namespace MassTransit.KafkaIntegration
         IKafkaRider
     {
         readonly IBusInstance _busInstance;
+        readonly IRiderRegistrationContext _context;
         readonly IReceiveEndpointCollection _endpoints;
         readonly IKafkaHostConfiguration _hostConfiguration;
-        readonly IRiderRegistrationContext _registrationContext;
         Lazy<ITopicProducerProvider> _producerProvider;
 
         public KafkaRider(IKafkaHostConfiguration hostConfiguration, IBusInstance busInstance, IReceiveEndpointCollection endpoints,
-            IRiderRegistrationContext registrationContext)
+            IRiderRegistrationContext context)
         {
             _hostConfiguration = hostConfiguration;
             _busInstance = busInstance;
             _endpoints = endpoints;
-            _registrationContext = registrationContext;
+            _context = context;
 
             Reset();
         }
@@ -49,7 +49,7 @@ namespace MassTransit.KafkaIntegration
         {
             var specification = _hostConfiguration.CreateSpecification<TKey, TValue>(topicName, groupId, configurator =>
             {
-                configure?.Invoke(_registrationContext, configurator);
+                configure?.Invoke(_context, configurator);
             });
 
             _endpoints.Add(specification.EndpointName, specification.CreateReceiveEndpoint(_busInstance));
@@ -63,7 +63,7 @@ namespace MassTransit.KafkaIntegration
         {
             var specification = _hostConfiguration.CreateSpecification<TKey, TValue>(topicName, consumerConfig, configurator =>
             {
-                configure?.Invoke(_registrationContext, configurator);
+                configure?.Invoke(_context, configurator);
             });
 
             _endpoints.Add(specification.EndpointName, specification.CreateReceiveEndpoint(_busInstance));

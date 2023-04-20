@@ -18,7 +18,7 @@
 
             var repositoryContextFactory = new RedisSagaRepositoryContextFactory<TSaga>(redisDbFactory, consumeContextFactory, options);
 
-            return new SagaRepository<TSaga>(repositoryContextFactory);
+            return new SagaRepository<TSaga>(repositoryContextFactory, loadSagaRepositoryContextFactory: repositoryContextFactory);
         }
 
         static IDatabase SelectDefaultDatabase(IConnectionMultiplexer multiplexer)

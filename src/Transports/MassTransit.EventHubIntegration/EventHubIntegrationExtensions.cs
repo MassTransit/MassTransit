@@ -36,7 +36,7 @@ namespace MassTransit
 
         static IEventHubProducerProvider GetCurrentProducerProvider(IEventHubRider rider, IServiceProvider provider)
         {
-            var contextProvider = provider.GetService<ScopedConsumeContextProvider>();
+            var contextProvider = provider.GetService<IScopedConsumeContextProvider>();
             if (contextProvider != null)
             {
                 return contextProvider.HasContext

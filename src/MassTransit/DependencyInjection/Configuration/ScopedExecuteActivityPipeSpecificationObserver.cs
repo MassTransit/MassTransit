@@ -9,14 +9,15 @@ namespace MassTransit.Configuration
     public class ScopedExecuteActivityPipeSpecificationObserver :
         IActivityConfigurationObserver
     {
+        readonly IRegistrationContext _context;
         readonly Type _filterType;
         readonly CompositeFilter<Type> _messageTypeFilter;
-        readonly IServiceProvider _provider;
 
-        public ScopedExecuteActivityPipeSpecificationObserver(Type filterType, IServiceProvider provider, CompositeFilter<Type> messageTypeFilter)
+        public ScopedExecuteActivityPipeSpecificationObserver(Type filterType, IRegistrationContext context,
+            CompositeFilter<Type> messageTypeFilter)
         {
             _filterType = filterType;
-            _provider = provider;
+            _context = context;
             _messageTypeFilter = messageTypeFilter;
         }
 
@@ -39,7 +40,7 @@ namespace MassTransit.Configuration
             if (!filterType.HasInterface(typeof(IFilter<ExecuteContext<TArguments>>)))
                 throw new ConfigurationException($"The scoped filter must implement {TypeCache<IFilter<ExecuteContext<TArguments>>>.ShortName} ");
 
-            var scopeProvider = new ExecuteActivityScopeProvider<TActivity, TArguments>(_provider);
+            var scopeProvider = new ExecuteActivityScopeProvider<TActivity, TArguments>(_context);
 
             var scopedFilterType = typeof(ScopedExecuteFilter<,,>).MakeGenericType(typeof(TActivity), typeof(TArguments), filterType);
 

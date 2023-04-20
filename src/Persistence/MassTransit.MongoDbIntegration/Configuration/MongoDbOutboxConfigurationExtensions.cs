@@ -27,17 +27,17 @@ namespace MassTransit
         /// Configure the Mongo DB outbox on the receive endpoint
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="provider">Configuration service provider</param>
+        /// <param name="context">Configuration service provider</param>
         /// <param name="configure"></param>
-        public static void UseMongoDbOutbox(this IReceiveEndpointConfigurator configurator, IServiceProvider provider,
+        public static void UseMongoDbOutbox(this IReceiveEndpointConfigurator configurator, IRegistrationContext context,
             Action<IOutboxOptionsConfigurator>? configure = null)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
-            if (provider == null)
-                throw new ArgumentNullException(nameof(provider));
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
 
-            var observer = new OutboxConsumePipeSpecificationObserver<MongoDbContext>(configurator, provider);
+            var observer = new OutboxConsumePipeSpecificationObserver<MongoDbContext>(configurator, context);
 
             configure?.Invoke(observer);
 

@@ -1,14 +1,16 @@
 namespace MassTransit.Configuration
 {
     using System;
+    using Microsoft.Extensions.DependencyInjection;
 
 
     public class MediatorRegistrationContext :
-        IMediatorRegistrationContext
+        IMediatorRegistrationContext,
+        ISetScopedConsumeContext
     {
-        readonly IRegistrationContext _registration;
+        readonly RegistrationContext _registration;
 
-        public MediatorRegistrationContext(IRegistrationContext registration)
+        public MediatorRegistrationContext(RegistrationContext registration)
         {
             _registration = registration;
         }
@@ -80,6 +82,11 @@ namespace MassTransit.Configuration
             where T : class, ISaga
         {
             _registration.ConfigureFuture<T>(configurator);
+        }
+
+        public IDisposable PushContext(IServiceScope scope, ConsumeContext context)
+        {
+            return _registration.PushContext(scope, context);
         }
     }
 }

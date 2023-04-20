@@ -9,9 +9,18 @@ namespace MassTransit.Configuration
     {
         readonly IConsumerConfigurator<TConsumer> _configurator;
         readonly Action<IOutboxConfigurator> _configure;
+        readonly ISetScopedConsumeContext _setter;
 
-        public InMemoryOutboxConsumerConfigurationObserver(IConsumerConfigurator<TConsumer> configurator, Action<IOutboxConfigurator> configure)
+        public InMemoryOutboxConsumerConfigurationObserver(IRegistrationContext context, IConsumerConfigurator<TConsumer> configurator,
+            Action<IOutboxConfigurator> configure)
+            : this(context as ISetScopedConsumeContext ?? throw new ArgumentException(nameof(context)), configurator, configure)
         {
+        }
+
+        public InMemoryOutboxConsumerConfigurationObserver(ISetScopedConsumeContext setter, IConsumerConfigurator<TConsumer> configurator,
+            Action<IOutboxConfigurator> configure)
+        {
+            _setter = setter;
             _configurator = configurator;
             _configure = configure;
         }
@@ -22,7 +31,7 @@ namespace MassTransit.Configuration
 
         void IConsumerConfigurationObserver.ConsumerMessageConfigured<T, TMessage>(IConsumerMessageConfigurator<T, TMessage> configurator)
         {
-            var specification = new InMemoryOutboxSpecification<TMessage>();
+            var specification = new InMemoryOutboxSpecification<TMessage>(_setter);
 
             _configure?.Invoke(specification);
 

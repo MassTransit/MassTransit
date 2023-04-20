@@ -13,11 +13,16 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         where TDbContext : DbContext
     {
         public EntityFrameworkScopedBusContextProvider(TBus bus, TDbContext dbContext, IBusOutboxNotification notification,
-            Bind<TBus, IClientFactory> clientFactory,
-            ScopedConsumeContextProvider consumeContextProvider, IServiceProvider provider)
+            Bind<TBus, IClientFactory> clientFactory, Bind<TBus, IScopedConsumeContextProvider> consumeContextProvider,
+            IScopedConsumeContextProvider globalConsumeContextProvider, IServiceProvider provider)
         {
-            if (consumeContextProvider.HasContext)
-                Context = new ConsumeContextScopedBusContext(consumeContextProvider.GetContext(), clientFactory.Value);
+            if (consumeContextProvider.Value.HasContext)
+                Context = new ConsumeContextScopedBusContext(consumeContextProvider.Value.GetContext(), clientFactory.Value);
+            else if (globalConsumeContextProvider.HasContext)
+            {
+                Context = new EntityFrameworkConsumeContextScopedBusContext<TBus, TDbContext>(bus, dbContext, notification, clientFactory.Value, provider,
+                    globalConsumeContextProvider.GetContext());
+            }
             else
                 Context = new EntityFrameworkScopedBusContext<TBus, TDbContext>(bus, dbContext, notification, clientFactory.Value, provider);
         }

@@ -84,19 +84,12 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
         public class FirstMessageConsumerDefinition :
             ConsumerDefinition<FirstMessageConsumer>
         {
-            readonly IServiceProvider _provider;
-
-            public FirstMessageConsumerDefinition(IServiceProvider provider)
-            {
-                _provider = provider;
-            }
-
             protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,
-                IConsumerConfigurator<FirstMessageConsumer> consumerConfigurator)
+                IConsumerConfigurator<FirstMessageConsumer> consumerConfigurator, IRegistrationContext context)
             {
                 endpointConfigurator.UseMessageRetry(r => r.Intervals(100, 100, 100));
 
-                endpointConfigurator.UseEntityFrameworkOutbox<ReliableDbContext>(_provider);
+                endpointConfigurator.UseEntityFrameworkOutbox<ReliableDbContext>(context);
             }
         }
 

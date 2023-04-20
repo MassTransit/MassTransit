@@ -1,7 +1,6 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
     using Saga;
 
@@ -35,13 +34,6 @@ namespace MassTransit.AzureServiceBusTransport
         {
             throw new NotImplementedException(
                 $"Query-based saga correlation is not available when using the MessageSession-based saga repository: {TypeCache<TSaga>.ShortName}");
-        }
-
-        public async Task<T> Execute<T>(Func<SagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken = default)
-            where T : class
-        {
-            throw new NotImplementedException(
-                $"Queries are not supported using the MessageSession-based saga repository: {TypeCache<TSaga>.ShortName}");
         }
     }
 }

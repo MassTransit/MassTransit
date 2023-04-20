@@ -29,7 +29,7 @@
             Assert.That(last.Name, Is.EqualTo(name));
 
             var wasDisposed = await lastConsumer.Dependency.WasDisposed;
-            Assert.That(wasDisposed, Is.True, "Dependency was not disposed" );
+            Assert.That(wasDisposed, Is.True, "Dependency was not disposed");
 
             Assert.That(lastConsumer.Dependency.SomethingDone, Is.True, "Dependency was disposed before consumer executed");
         }
@@ -52,6 +52,7 @@
             configurator.ConfigureConsumer<SimpleConsumer>(BusRegistrationContext);
         }
     }
+
 
     public class Common_Consumer_Service_Scope :
         InMemoryContainerTestFixture
@@ -163,7 +164,7 @@
         {
             configurator.UseMessageRetry(r => r.Immediate(5));
             configurator.UseMessageScope(ServiceProvider);
-            configurator.UseInMemoryOutbox();
+            configurator.UseInMemoryOutbox(BusRegistrationContext);
 
             configurator.ConfigureConsumer<PingConsumer>(BusRegistrationContext);
         }
@@ -231,6 +232,13 @@
     public class Common_Consume_Filter :
         InMemoryContainerTestFixture
     {
+        protected readonly TaskCompletionSource<MyId> TaskCompletionSource;
+
+        public Common_Consume_Filter()
+        {
+            TaskCompletionSource = GetTask<MyId>();
+        }
+
         [Test]
         public async Task Should_use_scope()
         {
@@ -238,13 +246,6 @@
 
             var result = await TaskCompletionSource.Task;
             Assert.IsNotNull(result);
-        }
-
-        protected readonly TaskCompletionSource<MyId> TaskCompletionSource;
-
-        public Common_Consume_Filter()
-        {
-            TaskCompletionSource = GetTask<MyId>();
         }
 
         protected override IServiceCollection ConfigureServices(IServiceCollection collection)
@@ -298,6 +299,17 @@
     public class Common_Consume_FilterScope :
         InMemoryContainerTestFixture
     {
+        protected readonly TaskCompletionSource<ConsumeContext<EasyA>> EasyASource;
+        protected readonly TaskCompletionSource<ConsumeContext<EasyB>> EasyBSource;
+        protected readonly TaskCompletionSource<FilterScopeScopedContext> ScopedContextSource;
+
+        public Common_Consume_FilterScope()
+        {
+            ScopedContextSource = GetTask<FilterScopeScopedContext>();
+            EasyASource = GetTask<ConsumeContext<EasyA>>();
+            EasyBSource = GetTask<ConsumeContext<EasyB>>();
+        }
+
         [Test]
         public async Task Should_use_the_same_scope_for_consume_and_send()
         {
@@ -315,17 +327,6 @@
             await context.SendContext.Task.OrCanceled(InMemoryTestHarness.InactivityToken);
 
             Assert.ThrowsAsync<TimeoutException>(async () => await context.ConsumeContextEasyB.Task.OrTimeout(s: 2));
-        }
-
-        protected readonly TaskCompletionSource<ConsumeContext<EasyA>> EasyASource;
-        protected readonly TaskCompletionSource<ConsumeContext<EasyB>> EasyBSource;
-        protected readonly TaskCompletionSource<FilterScopeScopedContext> ScopedContextSource;
-
-        public Common_Consume_FilterScope()
-        {
-            ScopedContextSource = GetTask<FilterScopeScopedContext>();
-            EasyASource = GetTask<ConsumeContext<EasyA>>();
-            EasyBSource = GetTask<ConsumeContext<EasyB>>();
         }
 
         protected override IServiceCollection ConfigureServices(IServiceCollection collection)
@@ -625,6 +626,15 @@
     public class Common_Consumer_Connect :
         InMemoryContainerTestFixture
     {
+        protected readonly TaskCompletionSource<ConsumeContext<EasyMessage>> MessageCompletion;
+
+        public Common_Consumer_Connect()
+        {
+            MessageCompletion = GetTask<ConsumeContext<EasyMessage>>();
+        }
+
+        IReceiveEndpointConnector Connector => ServiceProvider.GetRequiredService<IReceiveEndpointConnector>();
+
         [Test]
         public async Task Should_consume_on_connected_receive_endpoint()
         {
@@ -639,15 +649,6 @@
 
             await MessageCompletion.Task;
         }
-
-        protected readonly TaskCompletionSource<ConsumeContext<EasyMessage>> MessageCompletion;
-
-        public Common_Consumer_Connect()
-        {
-            MessageCompletion = GetTask<ConsumeContext<EasyMessage>>();
-        }
-
-        IReceiveEndpointConnector Connector => ServiceProvider.GetRequiredService<IReceiveEndpointConnector>();
 
         protected override IServiceCollection ConfigureServices(IServiceCollection collection)
         {
@@ -664,6 +665,17 @@
     public class Common_Consumer_FilterOrder :
         InMemoryContainerTestFixture
     {
+        readonly TaskCompletionSource<ConsumerConsumeContext<EasyConsumer>> _consumerCompletion;
+        readonly TaskCompletionSource<ConsumerConsumeContext<EasyConsumer, EasyMessage>> _consumerMessageCompletion;
+        readonly TaskCompletionSource<ConsumeContext<EasyMessage>> _messageCompletion;
+
+        public Common_Consumer_FilterOrder()
+        {
+            _messageCompletion = GetTask<ConsumeContext<EasyMessage>>();
+            _consumerCompletion = GetTask<ConsumerConsumeContext<EasyConsumer>>();
+            _consumerMessageCompletion = GetTask<ConsumerConsumeContext<EasyConsumer, EasyMessage>>();
+        }
+
         [Test]
         public async Task Should_include_container_scope()
         {
@@ -674,17 +686,6 @@
             await _consumerCompletion.Task;
 
             await _consumerMessageCompletion.Task;
-        }
-
-        readonly TaskCompletionSource<ConsumerConsumeContext<EasyConsumer>> _consumerCompletion;
-        readonly TaskCompletionSource<ConsumerConsumeContext<EasyConsumer, EasyMessage>> _consumerMessageCompletion;
-        readonly TaskCompletionSource<ConsumeContext<EasyMessage>> _messageCompletion;
-
-        public Common_Consumer_FilterOrder()
-        {
-            _messageCompletion = GetTask<ConsumeContext<EasyMessage>>();
-            _consumerCompletion = GetTask<ConsumerConsumeContext<EasyConsumer>>();
-            _consumerMessageCompletion = GetTask<ConsumerConsumeContext<EasyConsumer, EasyMessage>>();
         }
 
         IFilter<ConsumerConsumeContext<EasyConsumer, EasyMessage>> CreateConsumerMessageFilter()
@@ -816,6 +817,17 @@
     public class Common_Consumer_ScopedFilterOrder :
         InMemoryContainerTestFixture
     {
+        readonly TaskCompletionSource<ConsumerConsumeContext<EasyConsumer>> _consumerCompletion;
+        readonly TaskCompletionSource<ConsumerConsumeContext<EasyConsumer, EasyMessage>> _consumerMessageCompletion;
+        protected readonly TaskCompletionSource<ConsumeContext<EasyMessage>> MessageCompletion;
+
+        public Common_Consumer_ScopedFilterOrder()
+        {
+            MessageCompletion = GetTask<ConsumeContext<EasyMessage>>();
+            _consumerCompletion = GetTask<ConsumerConsumeContext<EasyConsumer>>();
+            _consumerMessageCompletion = GetTask<ConsumerConsumeContext<EasyConsumer, EasyMessage>>();
+        }
+
         [Test]
         public async Task Should_include_container_scope()
         {
@@ -829,17 +841,6 @@
 
             ConsumeContext<EasyMessage> messageContext = await MessageCompletion.Task;
             Assert.AreEqual(scope, messageContext.GetPayload<IServiceScope>());
-        }
-
-        readonly TaskCompletionSource<ConsumerConsumeContext<EasyConsumer>> _consumerCompletion;
-        readonly TaskCompletionSource<ConsumerConsumeContext<EasyConsumer, EasyMessage>> _consumerMessageCompletion;
-        protected readonly TaskCompletionSource<ConsumeContext<EasyMessage>> MessageCompletion;
-
-        public Common_Consumer_ScopedFilterOrder()
-        {
-            MessageCompletion = GetTask<ConsumeContext<EasyMessage>>();
-            _consumerCompletion = GetTask<ConsumerConsumeContext<EasyConsumer>>();
-            _consumerMessageCompletion = GetTask<ConsumerConsumeContext<EasyConsumer, EasyMessage>>();
         }
 
         protected override IServiceCollection ConfigureServices(IServiceCollection collection)

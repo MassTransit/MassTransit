@@ -9,9 +9,9 @@ namespace MassTransit.Configuration
         void AddConfigureAction<T>(Action<IConsumerConfigurator<T>> configure)
             where T : class, IConsumer;
 
-        void Configure(IReceiveEndpointConfigurator configurator, IServiceProvider scopeProvider);
+        void Configure(IReceiveEndpointConfigurator configurator, IRegistrationContext context);
 
-        IConsumerDefinition GetDefinition(IServiceProvider provider);
+        IConsumerDefinition GetDefinition(IRegistrationContext context);
 
         IConsumerRegistrationConfigurator GetConsumerRegistrationConfigurator(IRegistrationConfigurator registrationConfigurator);
     }

@@ -40,12 +40,13 @@ namespace MassTransit
         }
 
         void IExecuteActivityDefinition<TActivity, TArguments>.Configure(IReceiveEndpointConfigurator endpointConfigurator,
-            IExecuteActivityConfigurator<TActivity, TArguments> executeActivityConfigurator)
+            IExecuteActivityConfigurator<TActivity, TArguments> executeActivityConfigurator, IRegistrationContext context)
         {
             if (_concurrentMessageLimit.HasValue)
                 executeActivityConfigurator.ConcurrentMessageLimit = _concurrentMessageLimit;
 
             ConfigureExecuteActivity(endpointConfigurator, executeActivityConfigurator);
+            ConfigureExecuteActivity(endpointConfigurator, executeActivityConfigurator, context);
         }
 
         string IExecuteActivityDefinition.GetExecuteEndpointName(IEndpointNameFormatter formatter)
@@ -78,6 +79,17 @@ namespace MassTransit
         /// <param name="executeActivityConfigurator"></param>
         protected virtual void ConfigureExecuteActivity(IReceiveEndpointConfigurator endpointConfigurator,
             IExecuteActivityConfigurator<TActivity, TArguments> executeActivityConfigurator)
+        {
+        }
+
+        /// <summary>
+        /// Called when the compensate activity is being configured on the endpoint.
+        /// </summary>
+        /// <param name="endpointConfigurator">The receive endpoint configurator for the consumer</param>
+        /// <param name="executeActivityConfigurator"></param>
+        /// <param name="context"></param>
+        protected virtual void ConfigureExecuteActivity(IReceiveEndpointConfigurator endpointConfigurator,
+            IExecuteActivityConfigurator<TActivity, TArguments> executeActivityConfigurator, IRegistrationContext context)
         {
         }
     }

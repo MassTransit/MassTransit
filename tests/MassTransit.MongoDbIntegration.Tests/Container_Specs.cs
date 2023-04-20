@@ -74,8 +74,9 @@ namespace MassTransit.MongoDbIntegration.Tests
 
             protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
-                configurator.UseInMemoryOutbox();
-                configurator.ConfigureSaga<TestInstance>(_provider.GetRequiredService<IBusRegistrationContext>());
+                var busRegistrationContext = _provider.GetRequiredService<IBusRegistrationContext>();
+                configurator.UseInMemoryOutbox(busRegistrationContext);
+                configurator.ConfigureSaga<TestInstance>(busRegistrationContext);
             }
         }
 

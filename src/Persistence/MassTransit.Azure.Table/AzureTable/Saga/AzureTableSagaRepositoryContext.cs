@@ -136,7 +136,7 @@
 
             var (partitionKey, rowKey) = _context.Formatter.Format(instance.CorrelationId);
 
-            var operation = TableOperation.Insert(new DynamicTableEntity(partitionKey, rowKey) {Properties = entityProperties});
+            var operation = TableOperation.Insert(new DynamicTableEntity(partitionKey, rowKey) { Properties = entityProperties });
 
             return _context.Table.ExecuteAsync(operation, CancellationToken);
         }
@@ -159,7 +159,7 @@
 
     public class CosmosTableSagaRepositoryContext<TSaga> :
         BasePipeContext,
-        SagaRepositoryContext<TSaga>
+        LoadSagaRepositoryContext<TSaga>
         where TSaga : class, ISaga
     {
         readonly DatabaseContext<TSaga> _context;
@@ -168,11 +168,6 @@
             : base(cancellationToken)
         {
             _context = context;
-        }
-
-        public Task<SagaRepositoryQueryContext<TSaga>> Query(ISagaQuery<TSaga> query, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedByDesignException("Azure Table saga repository does not support queries");
         }
 
         public async Task<TSaga> Load(Guid correlationId)

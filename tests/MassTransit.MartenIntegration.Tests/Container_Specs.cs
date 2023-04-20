@@ -4,7 +4,6 @@ namespace MassTransit.MartenIntegration.Tests
     {
         using System;
         using System.Threading.Tasks;
-        using Marten;
         using Microsoft.Extensions.DependencyInjection;
         using NUnit.Framework;
         using TestFramework;

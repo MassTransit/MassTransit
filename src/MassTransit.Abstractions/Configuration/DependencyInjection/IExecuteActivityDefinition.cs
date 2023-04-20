@@ -42,6 +42,8 @@ namespace MassTransit
         /// </summary>
         /// <param name="endpointConfigurator"></param>
         /// <param name="executeActivityConfigurator"></param>
-        void Configure(IReceiveEndpointConfigurator endpointConfigurator, IExecuteActivityConfigurator<TActivity, TArguments> executeActivityConfigurator);
+        /// <param name="context"></param>
+        void Configure(IReceiveEndpointConfigurator endpointConfigurator, IExecuteActivityConfigurator<TActivity, TArguments> executeActivityConfigurator,
+            IRegistrationContext context);
     }
 }

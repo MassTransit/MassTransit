@@ -9,7 +9,9 @@ namespace MassTransit.DapperIntegration.Saga
 
 
     public class DapperSagaRepositoryContextFactory<TSaga> :
-        ISagaRepositoryContextFactory<TSaga>
+        ISagaRepositoryContextFactory<TSaga>,
+        IQuerySagaRepositoryContextFactory<TSaga>,
+        ILoadSagaRepositoryContextFactory<TSaga>
         where TSaga : class, ISaga
     {
         readonly ISagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga> _factory;
@@ -19,6 +21,18 @@ namespace MassTransit.DapperIntegration.Saga
         {
             _options = options;
             _factory = factory;
+        }
+
+        public Task<T> Execute<T>(Func<LoadSagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken = default)
+            where T : class
+        {
+            return ExecuteAsyncMethod(asyncMethod, cancellationToken);
+        }
+
+        public Task<T> Execute<T>(Func<QuerySagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken = default)
+            where T : class
+        {
+            return ExecuteAsyncMethod(asyncMethod, cancellationToken);
         }
 
         public void Probe(ProbeContext context)
@@ -54,7 +68,7 @@ namespace MassTransit.DapperIntegration.Saga
             databaseContext.Commit();
         }
 
-        public async Task<T> Execute<T>(Func<SagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken = default)
+        async Task<T> ExecuteAsyncMethod<T>(Func<DapperSagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken)
             where T : class
         {
             using DapperDatabaseContext<TSaga> databaseContext = await CreateDatabaseContext(cancellationToken).ConfigureAwait(false);

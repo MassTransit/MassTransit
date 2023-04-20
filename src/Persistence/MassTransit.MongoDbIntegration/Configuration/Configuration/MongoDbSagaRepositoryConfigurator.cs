@@ -66,8 +66,11 @@ namespace MassTransit.Configuration
 
             configurator.TryAddScoped(provider => provider.GetRequiredService<MongoDbContext>().GetCollection<TSaga>());
 
-            configurator.RegisterSagaRepository<T, MongoDbCollectionContext<T>, SagaConsumeContextFactory<MongoDbCollectionContext<T>, T>,
-                MongoDbSagaRepositoryContextFactory<T>>();
+            configurator.RegisterLoadSagaRepository<T, MongoDbSagaRepositoryContextFactory<T>>();
+            configurator.RegisterQuerySagaRepository<T, MongoDbSagaRepositoryContextFactory<T>>();
+            configurator
+                .RegisterSagaRepository<T, MongoDbCollectionContext<T>, SagaConsumeContextFactory<MongoDbCollectionContext<T>, T>,
+                    MongoDbSagaRepositoryContextFactory<T>>();
         }
     }
 }

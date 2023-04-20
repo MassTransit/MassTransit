@@ -12,8 +12,13 @@ namespace MassTransit.DependencyInjection
         where TActivity : class, IExecuteActivity<TArguments>
         where TArguments : class
     {
-        public ExecuteActivityScopeProvider(IServiceProvider serviceProvider)
-            : base(serviceProvider)
+        public ExecuteActivityScopeProvider(IRegistrationContext context)
+            : base(context)
+        {
+        }
+
+        public ExecuteActivityScopeProvider(IServiceProvider serviceProvider, ISetScopedConsumeContext setScopedConsumeContext)
+            : base(serviceProvider, setScopedConsumeContext)
         {
         }
 

@@ -101,7 +101,8 @@ namespace MassTransit.NHibernateIntegration.Saga
 
     public class NHibernateSagaRepositoryContext<TSaga> :
         BasePipeContext,
-        SagaRepositoryContext<TSaga>
+        QuerySagaRepositoryContext<TSaga>,
+        LoadSagaRepositoryContext<TSaga>
         where TSaga : class, ISaga
     {
         readonly ISession _session;

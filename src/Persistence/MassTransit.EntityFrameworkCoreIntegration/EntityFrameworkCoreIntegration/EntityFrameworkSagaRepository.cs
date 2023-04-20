@@ -55,7 +55,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             var repositoryFactory =
                 new EntityFrameworkSagaRepositoryContextFactory<TSaga>(dbContextFactory, consumeContextFactory, lockStrategy);
 
-            return new SagaRepository<TSaga>(repositoryFactory);
+            return new SagaRepository<TSaga>(repositoryFactory, repositoryFactory, repositoryFactory);
         }
     }
 }

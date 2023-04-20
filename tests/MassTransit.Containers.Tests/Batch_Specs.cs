@@ -50,10 +50,10 @@ namespace MassTransit.Containers.Tests
                 {
                     x.AddConsumer<TestOutboxBatchConsumer>();
 
-                    x.AddConfigureEndpointsCallback((_, cfg) =>
+                    x.AddConfigureEndpointsCallback((context, _, cfg) =>
                     {
                         cfg.UseMessageRetry(r => r.Immediate(2));
-                        cfg.UseInMemoryOutbox();
+                        cfg.UseInMemoryOutbox(context);
                     });
                 })
                 .BuildServiceProvider(true);
@@ -79,10 +79,10 @@ namespace MassTransit.Containers.Tests
                 {
                     x.AddConsumer<TestRetryOutboxBatchConsumer>();
 
-                    x.AddConfigureEndpointsCallback((_, cfg) =>
+                    x.AddConfigureEndpointsCallback((context, _, cfg) =>
                     {
                         cfg.UseMessageRetry(r => r.Immediate(2));
-                        cfg.UseInMemoryOutbox();
+                        cfg.UseInMemoryOutbox(context);
                     });
                 })
                 .BuildServiceProvider(true);
@@ -381,10 +381,10 @@ namespace MassTransit.Containers.Tests
                 {
                     x.AddConsumer<FailingBatchConsumer>(c => c.Options<BatchOptions>(o => o.SetMessageLimit(2)));
 
-                    x.AddConfigureEndpointsCallback((_, cfg) =>
+                    x.AddConfigureEndpointsCallback((context, _, cfg) =>
                     {
                         cfg.UseMessageRetry(r => r.Immediate(2));
-                        cfg.UseInMemoryOutbox();
+                        cfg.UseInMemoryOutbox(context);
                     });
                 })
                 .BuildServiceProvider(true);
@@ -488,9 +488,9 @@ namespace MassTransit.Containers.Tests
         ConsumerDefinition<TestBatchConsumer>
     {
         protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,
-            IConsumerConfigurator<TestBatchConsumer> consumerConfigurator)
+            IConsumerConfigurator<TestBatchConsumer> consumerConfigurator, IRegistrationContext context)
         {
-            endpointConfigurator.UseInMemoryOutbox();
+            endpointConfigurator.UseInMemoryOutbox(context);
             consumerConfigurator.Options<BatchOptions>(o => o.SetMessageLimit(5).SetTimeLimit(1000));
         }
     }

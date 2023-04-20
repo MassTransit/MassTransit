@@ -2,17 +2,21 @@ namespace MassTransit.Configuration
 {
     using System;
     using System.Linq;
+    using Microsoft.Extensions.DependencyInjection;
 
 
     public class RegistrationContext :
-        IRegistrationContext
+        IRegistrationContext,
+        ISetScopedConsumeContext
     {
         readonly IServiceProvider _provider;
+        readonly ISetScopedConsumeContext _setScopedConsumeContext;
 
-        public RegistrationContext(IServiceProvider provider, IContainerSelector selector)
+        public RegistrationContext(IServiceProvider provider, IContainerSelector selector, ISetScopedConsumeContext setScopedConsumeContext)
         {
             Selector = selector;
             _provider = provider;
+            _setScopedConsumeContext = setScopedConsumeContext;
         }
 
         protected IContainerSelector Selector { get; }
@@ -122,6 +126,11 @@ namespace MassTransit.Configuration
         public object GetService(Type serviceType)
         {
             return _provider.GetService(serviceType);
+        }
+
+        public IDisposable PushContext(IServiceScope scope, ConsumeContext context)
+        {
+            return _setScopedConsumeContext.PushContext(scope, context);
         }
     }
 }

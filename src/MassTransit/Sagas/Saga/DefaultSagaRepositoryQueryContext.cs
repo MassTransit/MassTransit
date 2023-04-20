@@ -90,13 +90,13 @@ namespace MassTransit.Saga
         SagaRepositoryQueryContext<TSaga>
         where TSaga : class, ISaga
     {
-        readonly SagaRepositoryContext<TSaga> _context;
+        readonly QuerySagaRepositoryContext<TSaga> _queryContext;
         readonly IList<Guid> _results;
 
-        public DefaultSagaRepositoryQueryContext(SagaRepositoryContext<TSaga> context, IList<Guid> results)
-            : base(context)
+        public DefaultSagaRepositoryQueryContext(QuerySagaRepositoryContext<TSaga> queryContext, IList<Guid> results)
+            : base(queryContext)
         {
-            _context = context;
+            _queryContext = queryContext;
             _results = results;
         }
 
@@ -104,12 +104,7 @@ namespace MassTransit.Saga
 
         public Task<SagaRepositoryQueryContext<TSaga>> Query(ISagaQuery<TSaga> query, CancellationToken cancellationToken)
         {
-            return _context.Query(query, cancellationToken);
-        }
-
-        public Task<TSaga> Load(Guid correlationId)
-        {
-            return _context.Load(correlationId);
+            return _queryContext.Query(query, cancellationToken);
         }
 
         public IEnumerator<Guid> GetEnumerator()

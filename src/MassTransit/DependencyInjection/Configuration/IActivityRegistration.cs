@@ -18,12 +18,12 @@ namespace MassTransit.Configuration
             where TLog : class;
 
         void Configure(IReceiveEndpointConfigurator executeEndpointConfigurator, IReceiveEndpointConfigurator compensateEndpointConfigurator,
-            IServiceProvider scopeProvider);
+            IRegistrationContext context);
 
-        IActivityDefinition GetDefinition(IServiceProvider provider);
+        IActivityDefinition GetDefinition(IRegistrationContext context);
 
-        void ConfigureCompensate(IReceiveEndpointConfigurator configurator, IServiceProvider configurationServiceProvider);
+        void ConfigureCompensate(IReceiveEndpointConfigurator configurator, IRegistrationContext context);
 
-        void ConfigureExecute(IReceiveEndpointConfigurator configurator, IServiceProvider configurationServiceProvider, Uri compensateAddress);
+        void ConfigureExecute(IReceiveEndpointConfigurator configurator, IRegistrationContext context, Uri compensateAddress);
     }
 }

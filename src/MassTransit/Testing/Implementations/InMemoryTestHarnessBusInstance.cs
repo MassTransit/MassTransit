@@ -41,7 +41,8 @@ namespace MassTransit.Testing.Implementations
         {
             return BusControl.ConnectReceiveEndpoint(definition, endpointNameFormatter, configurator =>
             {
-                _busRegistrationContext.GetConfigureReceiveEndpoints().Configure(definition.GetEndpointName(endpointNameFormatter), configurator);
+                _busRegistrationContext.GetConfigureReceiveEndpoints()
+                    .Configure(definition.GetEndpointName(endpointNameFormatter), configurator);
 
                 configure?.Invoke(_busRegistrationContext, configurator);
             });

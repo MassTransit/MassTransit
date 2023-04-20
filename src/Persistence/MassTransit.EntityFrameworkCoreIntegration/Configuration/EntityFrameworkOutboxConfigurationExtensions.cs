@@ -31,18 +31,18 @@ namespace MassTransit
         /// Configure the Entity Framework outbox on the receive endpoint
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="provider">Configuration service provider</param>
+        /// <param name="context">Configuration service provider</param>
         /// <param name="configure"></param>
-        public static void UseEntityFrameworkOutbox<TDbContext>(this IReceiveEndpointConfigurator configurator, IServiceProvider provider,
+        public static void UseEntityFrameworkOutbox<TDbContext>(this IReceiveEndpointConfigurator configurator, IRegistrationContext context,
             Action<IOutboxOptionsConfigurator>? configure = null)
             where TDbContext : DbContext
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
-            if (provider == null)
-                throw new ArgumentNullException(nameof(provider));
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
 
-            var observer = new OutboxConsumePipeSpecificationObserver<TDbContext>(configurator, provider);
+            var observer = new OutboxConsumePipeSpecificationObserver<TDbContext>(configurator, context);
 
             configure?.Invoke(observer);
 

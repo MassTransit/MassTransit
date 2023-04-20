@@ -8,7 +8,8 @@ namespace MassTransit.AzureTable.Saga
 
 
     public class AzureTableSagaRepositoryContextFactory<TSaga> :
-        ISagaRepositoryContextFactory<TSaga>
+        ISagaRepositoryContextFactory<TSaga>,
+        ILoadSagaRepositoryContextFactory<TSaga>
         where TSaga : class, ISaga
     {
         readonly ICloudTableProvider<TSaga> _cloudTableProvider;
@@ -29,6 +30,17 @@ namespace MassTransit.AzureTable.Saga
             ISagaKeyFormatter<TSaga> keyFormatter)
             : this(new ConstCloudTableProvider<TSaga>(cloudTable), factory, keyFormatter)
         {
+        }
+
+        public Task<T> Execute<T>(Func<LoadSagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken = default)
+            where T : class
+        {
+            var database = _cloudTableProvider.GetCloudTable();
+
+            var databaseContext = new AzureTableDatabaseContext<TSaga>(database, _keyFormatter);
+            var repositoryContext = new CosmosTableSagaRepositoryContext<TSaga>(databaseContext, cancellationToken);
+
+            return asyncMethod(repositoryContext);
         }
 
         public void Probe(ProbeContext context)
@@ -52,17 +64,6 @@ namespace MassTransit.AzureTable.Saga
             where T : class
         {
             throw new NotImplementedByDesignException("Azure Table repository does not support queries");
-        }
-
-        public async Task<T> Execute<T>(Func<SagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken = default)
-            where T : class
-        {
-            var database = _cloudTableProvider.GetCloudTable();
-
-            var databaseContext = new AzureTableDatabaseContext<TSaga>(database, _keyFormatter);
-            var repositoryContext = new CosmosTableSagaRepositoryContext<TSaga>(databaseContext, cancellationToken);
-
-            return await asyncMethod(repositoryContext).ConfigureAwait(false);
         }
     }
 }

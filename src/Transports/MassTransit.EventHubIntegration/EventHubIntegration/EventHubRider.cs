@@ -14,18 +14,18 @@ namespace MassTransit.EventHubIntegration
         IEventHubRider
     {
         readonly IBusInstance _busInstance;
+        readonly IRiderRegistrationContext _context;
         readonly IReceiveEndpointCollection _endpoints;
         readonly IEventHubHostConfiguration _hostConfiguration;
-        readonly IRiderRegistrationContext _registrationContext;
         Lazy<IEventHubProducerProvider> _producerProvider;
 
         public EventHubRider(IEventHubHostConfiguration hostConfiguration, IBusInstance busInstance, IReceiveEndpointCollection endpoints,
-            IRiderRegistrationContext registrationContext)
+            IRiderRegistrationContext context)
         {
             _hostConfiguration = hostConfiguration;
             _busInstance = busInstance;
             _endpoints = endpoints;
-            _registrationContext = registrationContext;
+            _context = context;
 
             Reset();
         }
@@ -42,7 +42,7 @@ namespace MassTransit.EventHubIntegration
         {
             var specification = _hostConfiguration.CreateSpecification(eventHubName, consumerGroup, configurator =>
             {
-                configure?.Invoke(_registrationContext, configurator);
+                configure?.Invoke(_context, configurator);
             });
 
             _endpoints.Add(specification.EndpointName, specification.CreateReceiveEndpoint(_busInstance));

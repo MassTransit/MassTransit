@@ -102,7 +102,7 @@ namespace MassTransit.DynamoDbIntegration.Saga
 
     public class DynamoDbSagaRepositoryContext<TSaga> :
         BasePipeContext,
-        SagaRepositoryContext<TSaga>,
+        LoadSagaRepositoryContext<TSaga>,
         IDisposable
         where TSaga : class, ISagaVersion
     {
@@ -117,11 +117,6 @@ namespace MassTransit.DynamoDbIntegration.Saga
         public void Dispose()
         {
             _context.Dispose();
-        }
-
-        public Task<SagaRepositoryQueryContext<TSaga>> Query(ISagaQuery<TSaga> query, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedByDesignException("DynamoDb saga repository does not support queries");
         }
 
         public Task<TSaga> Load(Guid correlationId)

@@ -45,7 +45,7 @@
         }
 
         readonly TestStateMachine _machine;
-        readonly InMemorySagaRepository<Instance> _repository;
+        readonly ISagaRepository<Instance> _repository;
 
         public Using_a_simple_state_machine()
         {
@@ -114,7 +114,7 @@
         InMemoryTestFixture
     {
         readonly TestStateMachine _machine;
-        readonly InMemorySagaRepository<Instance> _repository;
+        readonly ISagaRepository<Instance> _repository;
 
         public Using_a_simple_state_machine_with_topology_correlation_id()
         {
@@ -214,7 +214,7 @@
         InMemoryTestFixture
     {
         readonly TestStateMachine _machine;
-        readonly InMemorySagaRepository<Instance> _repository;
+        readonly ISagaRepository<Instance> _repository;
 
         static Using_a_simple_state_machine_with_custom_correlation_id()
         {
