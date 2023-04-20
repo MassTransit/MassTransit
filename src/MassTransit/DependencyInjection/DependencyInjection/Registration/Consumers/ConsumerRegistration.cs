@@ -37,19 +37,19 @@ namespace MassTransit.DependencyInjection.Registration
                 _configureActions.Add(action);
         }
 
-        void IConsumerRegistration.Configure(IReceiveEndpointConfigurator configurator, IServiceProvider provider)
+        void IConsumerRegistration.Configure(IReceiveEndpointConfigurator configurator, IRegistrationContext context)
         {
-            var scopeProvider = provider.GetRequiredService<IConsumeScopeProvider>();
+            IConsumeScopeProvider scopeProvider = new ConsumeScopeProvider(context);
             IConsumerFactory<TConsumer> consumerFactory = new ScopeConsumerFactory<TConsumer>(scopeProvider);
 
-            var decoratorRegistration = provider.GetService<IConsumerFactoryDecoratorRegistration<TConsumer>>();
+            var decoratorRegistration = context.GetService<IConsumerFactoryDecoratorRegistration<TConsumer>>();
             if (decoratorRegistration != null)
                 consumerFactory = decoratorRegistration.DecorateConsumerFactory(consumerFactory);
 
             var consumerConfigurator = new ConsumerConfigurator<TConsumer>(consumerFactory, configurator);
 
-            GetConsumerDefinition(provider)
-                .Configure(configurator, consumerConfigurator);
+            GetConsumerDefinition(context)
+                .Configure(configurator, consumerConfigurator, context);
 
             foreach (Action<IConsumerConfigurator<TConsumer>> action in _configureActions)
                 action(consumerConfigurator);
@@ -66,9 +66,9 @@ namespace MassTransit.DependencyInjection.Registration
             IncludeInConfigureEndpoints = false;
         }
 
-        IConsumerDefinition IConsumerRegistration.GetDefinition(IServiceProvider provider)
+        IConsumerDefinition IConsumerRegistration.GetDefinition(IRegistrationContext context)
         {
-            return GetConsumerDefinition(provider);
+            return GetConsumerDefinition(context);
         }
 
         public IConsumerRegistrationConfigurator GetConsumerRegistrationConfigurator(IRegistrationConfigurator registrationConfigurator)

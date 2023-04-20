@@ -15,12 +15,12 @@ namespace MassTransit.Configuration
         where TContext : class
     {
         readonly IReceiveEndpointConfigurator _configurator;
-        readonly IServiceProvider _provider;
+        readonly IRegistrationContext _context;
 
-        public OutboxConsumePipeSpecificationObserver(IReceiveEndpointConfigurator configurator, IServiceProvider provider)
+        public OutboxConsumePipeSpecificationObserver(IReceiveEndpointConfigurator configurator, IRegistrationContext context)
         {
             _configurator = configurator;
-            _provider = provider;
+            _context = context;
 
             MessageDeliveryLimit = 1;
             MessageDeliveryTimeout = TimeSpan.FromSeconds(30);
@@ -68,7 +68,7 @@ namespace MassTransit.Configuration
             where T : class
             where TMessage : class
         {
-            var scopeProvider = new ConsumeScopeProvider(_provider);
+            var scopeProvider = new ConsumeScopeProvider(_context);
 
             var options = new OutboxConsumeOptions
             {

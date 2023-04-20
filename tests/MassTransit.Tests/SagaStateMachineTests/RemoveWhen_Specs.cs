@@ -45,7 +45,7 @@ namespace MassTransit.Tests.SagaStateMachineTests
         }
 
         readonly TestStateMachine _machine;
-        readonly InMemorySagaRepository<Instance> _repository;
+        readonly ISagaRepository<Instance> _repository;
 
         public When_a_remove_expression_is_specified()
         {
@@ -133,7 +133,7 @@ namespace MassTransit.Tests.SagaStateMachineTests
         }
 
         readonly TestStateMachine _machine;
-        readonly InMemorySagaRepository<Instance> _repository;
+        readonly ISagaRepository<Instance> _repository;
 
         public When_a_saga_goes_straight_to_finalized()
         {

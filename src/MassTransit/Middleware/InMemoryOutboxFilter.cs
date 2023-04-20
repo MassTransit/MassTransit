@@ -2,7 +2,6 @@ namespace MassTransit.Middleware
 {
     using System;
     using System.Threading.Tasks;
-    using DependencyInjection;
     using InMemoryOutbox;
     using Microsoft.Extensions.DependencyInjection;
 
@@ -14,9 +13,11 @@ namespace MassTransit.Middleware
     {
         readonly bool _concurrentMessageDelivery;
         readonly Func<TContext, TResult> _contextFactory;
+        readonly ISetScopedConsumeContext _setter;
 
-        public InMemoryOutboxFilter(Func<TContext, TResult> contextFactory, bool concurrentMessageDelivery)
+        public InMemoryOutboxFilter(ISetScopedConsumeContext setter, Func<TContext, TResult> contextFactory, bool concurrentMessageDelivery)
         {
+            _setter = setter;
             _contextFactory = contextFactory;
             _concurrentMessageDelivery = concurrentMessageDelivery;
         }
@@ -27,7 +28,7 @@ namespace MassTransit.Middleware
 
             IDisposable pop = null;
             if (context.TryGetPayload(out IServiceScope scope))
-                pop = scope.SetCurrentConsumeContext(outboxContext);
+                pop = _setter.PushContext(scope, outboxContext);
 
             try
             {

@@ -8,7 +8,8 @@ namespace MassTransit.DynamoDbIntegration.Saga
 
 
     public class DynamoDbSagaRepositoryContextFactory<TSaga> :
-        ISagaRepositoryContextFactory<TSaga>
+        ISagaRepositoryContextFactory<TSaga>,
+        ILoadSagaRepositoryContextFactory<TSaga>
         where TSaga : class, ISagaVersion
     {
         readonly Func<IDynamoDBContext> _databaseFactory;
@@ -31,6 +32,24 @@ namespace MassTransit.DynamoDbIntegration.Saga
 
             _factory = factory;
             _options = options;
+        }
+
+        public async Task<T> Execute<T>(Func<LoadSagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken = default)
+            where T : class
+        {
+            var database = _databaseFactory();
+
+            var databaseContext = new DynamoDbDatabaseContext<TSaga>(database, _options);
+            try
+            {
+                var repositoryContext = new DynamoDbSagaRepositoryContext<TSaga>(databaseContext, cancellationToken);
+
+                return await asyncMethod(repositoryContext).ConfigureAwait(false);
+            }
+            finally
+            {
+                databaseContext.Dispose();
+            }
         }
 
         public void Probe(ProbeContext context)
@@ -60,24 +79,6 @@ namespace MassTransit.DynamoDbIntegration.Saga
             where T : class
         {
             throw new NotImplementedByDesignException("DynamoDb saga repository does not support queries");
-        }
-
-        public async Task<T> Execute<T>(Func<SagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken = default)
-            where T : class
-        {
-            var database = _databaseFactory();
-
-            var databaseContext = new DynamoDbDatabaseContext<TSaga>(database, _options);
-            try
-            {
-                var repositoryContext = new DynamoDbSagaRepositoryContext<TSaga>(databaseContext, cancellationToken);
-
-                return await asyncMethod(repositoryContext).ConfigureAwait(false);
-            }
-            finally
-            {
-                databaseContext.Dispose();
-            }
         }
     }
 }

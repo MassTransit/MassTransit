@@ -110,19 +110,12 @@ namespace MassTransit.MongoDbIntegration.Tests
         public class ResponsibleStateDefinition :
             SagaDefinition<ResponsibleState>
         {
-            readonly IServiceProvider _provider;
-
-            public ResponsibleStateDefinition(IServiceProvider provider)
-            {
-                _provider = provider;
-            }
-
             protected override void ConfigureSaga(IReceiveEndpointConfigurator endpointConfigurator,
-                ISagaConfigurator<ResponsibleState> consumerConfigurator)
+                ISagaConfigurator<ResponsibleState> consumerConfigurator, IRegistrationContext context)
             {
                 endpointConfigurator.UseMessageRetry(r => r.Intervals(100, 1000));
 
-                endpointConfigurator.UseMongoDbOutbox(_provider);
+                endpointConfigurator.UseMongoDbOutbox(context);
             }
         }
 

@@ -162,10 +162,16 @@ namespace MassTransit.TestFramework
             return ServiceProvider.GetRequiredService<IClientFactory>();
         }
 
-        protected ISagaRepository<T> GetSagaRepository<T>()
+        protected ILoadSagaRepository<T> GetLoadSagaRepository<T>()
             where T : class, ISaga
         {
-            return ServiceProvider.GetRequiredService<ISagaRepository<T>>();
+            return ServiceProvider.GetRequiredService<ILoadSagaRepository<T>>();
+        }
+
+        protected IQuerySagaRepository<T> GetQuerySagaRepository<T>()
+            where T : class, ISaga
+        {
+            return ServiceProvider.GetRequiredService<IQuerySagaRepository<T>>();
         }
 
         protected async Task<Task<ConsumeContext<T>>> ConnectPublishHandler<T>()

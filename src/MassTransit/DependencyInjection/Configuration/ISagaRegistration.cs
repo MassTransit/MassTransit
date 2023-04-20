@@ -9,8 +9,8 @@ namespace MassTransit.Configuration
         void AddConfigureAction<T>(Action<ISagaConfigurator<T>> configure)
             where T : class, ISaga;
 
-        void Configure(IReceiveEndpointConfigurator configurator, IServiceProvider provider);
+        void Configure(IReceiveEndpointConfigurator configurator, IRegistrationContext context);
 
-        ISagaDefinition GetDefinition(IServiceProvider provider);
+        ISagaDefinition GetDefinition(IRegistrationContext context);
     }
 }

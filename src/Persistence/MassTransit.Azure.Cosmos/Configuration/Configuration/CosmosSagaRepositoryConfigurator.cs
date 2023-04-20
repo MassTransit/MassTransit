@@ -164,19 +164,24 @@ namespace MassTransit.Configuration
                 _registerClientFactory(configurator);
 
             configurator.TryAddSingleton(DatabaseContextFactory);
-            configurator.RegisterSagaRepository<TSaga, DatabaseContext<TSaga>, SagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga>,
-                CosmosSagaRepositoryContextFactory<TSaga>>();
+            configurator.RegisterLoadSagaRepository<TSaga, CosmosSagaRepositoryContextFactory<TSaga>>();
+            configurator.RegisterQuerySagaRepository<TSaga, CosmosSagaRepositoryContextFactory<TSaga>>();
+            configurator
+                .RegisterSagaRepository<TSaga, DatabaseContext<TSaga>, SagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga>,
+                    CosmosSagaRepositoryContextFactory<TSaga>>();
             configurator.AddOptions<CosmosClientOptions>();
         }
 
         void RegisterNewtonsoftJsonClientFactory(ISagaRepositoryRegistrationConfigurator<TSaga> configurator)
         {
-            configurator.TryAddSingleton<ICosmosClientFactory>(provider => new NewtonsoftJsonCosmosClientFactory(_settings, provider.GetRequiredService<IOptions<CosmosClientOptions>>()));
+            configurator.TryAddSingleton<ICosmosClientFactory>(provider =>
+                new NewtonsoftJsonCosmosClientFactory(_settings, provider.GetRequiredService<IOptions<CosmosClientOptions>>()));
         }
 
         void RegisterSystemTextJsonClientFactory(ISagaRepositoryRegistrationConfigurator<TSaga> configurator)
         {
-            configurator.TryAddSingleton<ICosmosClientFactory>(provider => new SystemTextJsonCosmosClientFactory(_settings, provider.GetRequiredService<IOptions<CosmosClientOptions>>(), PropertyNamingPolicy));
+            configurator.TryAddSingleton<ICosmosClientFactory>(provider =>
+                new SystemTextJsonCosmosClientFactory(_settings, provider.GetRequiredService<IOptions<CosmosClientOptions>>(), PropertyNamingPolicy));
         }
 
         DatabaseContext<TSaga> DatabaseContextFactory(IServiceProvider provider)

@@ -105,12 +105,12 @@ namespace MassTransit.Saga
         where TSaga : class, ISaga
     {
         readonly IDictionary<Guid, TSaga> _index;
-        readonly SagaRepositoryContext<TSaga> _repositoryContext;
+        readonly QuerySagaRepositoryContext<TSaga> _querySagaRepositoryContext;
 
-        public LoadedSagaRepositoryQueryContext(SagaRepositoryContext<TSaga> repositoryContext, IEnumerable<TSaga> instances)
-            : base(repositoryContext)
+        public LoadedSagaRepositoryQueryContext(QuerySagaRepositoryContext<TSaga> querySagaRepositoryContext, IEnumerable<TSaga> instances)
+            : base(querySagaRepositoryContext)
         {
-            _repositoryContext = repositoryContext;
+            _querySagaRepositoryContext = querySagaRepositoryContext;
 
             _index = instances.ToDictionary(x => x.CorrelationId);
         }
@@ -119,15 +119,7 @@ namespace MassTransit.Saga
 
         public Task<SagaRepositoryQueryContext<TSaga>> Query(ISagaQuery<TSaga> query, CancellationToken cancellationToken = default)
         {
-            return _repositoryContext.Query(query, cancellationToken);
-        }
-
-        public Task<TSaga> Load(Guid correlationId)
-        {
-            if (_index.TryGetValue(correlationId, out var instance))
-                return Task.FromResult(instance);
-
-            return _repositoryContext.Load(correlationId);
+            return _querySagaRepositoryContext.Query(query, cancellationToken);
         }
 
         public IEnumerator<Guid> GetEnumerator()

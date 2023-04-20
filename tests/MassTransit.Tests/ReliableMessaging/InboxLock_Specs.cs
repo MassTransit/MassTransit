@@ -52,7 +52,9 @@ namespace MassTransit.Tests.ReliableMessaging
                 .AddInMemoryInboxOutbox()
                 .AddMassTransitTestHarness(x =>
                 {
-                    x.AddHandler(async (Event message) => {});
+                    x.AddHandler(async (Event message) =>
+                    {
+                    });
                     x.AddConsumer<InboxLockConsumer, InboxLockInMemoryConsumerDefinition>();
                 });
 
@@ -65,7 +67,6 @@ namespace MassTransit.Tests.ReliableMessaging
 
     namespace InboxLock
     {
-        using System;
         using System.Linq;
 
 
@@ -87,19 +88,12 @@ namespace MassTransit.Tests.ReliableMessaging
         public class InboxLockInMemoryConsumerDefinition :
             ConsumerDefinition<InboxLockConsumer>
         {
-            readonly IServiceProvider _provider;
-
-            public InboxLockInMemoryConsumerDefinition(IServiceProvider provider)
-            {
-                _provider = provider;
-            }
-
             protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,
-                IConsumerConfigurator<InboxLockConsumer> consumerConfigurator)
+                IConsumerConfigurator<InboxLockConsumer> consumerConfigurator, IRegistrationContext context)
             {
                 endpointConfigurator.UseMessageRetry(r => r.Intervals(10, 50, 100, 100, 100, 100, 100, 100));
 
-                endpointConfigurator.UseInMemoryInboxOutbox(_provider);
+                endpointConfigurator.UseInMemoryInboxOutbox(context);
             }
         }
     }

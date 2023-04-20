@@ -185,12 +185,13 @@ namespace MassTransit
 
 
             collection.RemoveAll<IBusDepot>();
-            collection.RemoveAll<ScopedConsumeContextProvider>();
+            collection.RemoveAll<IScopedConsumeContextProvider>();
+            collection.RemoveAll<Bind<IBus, ISetScopedConsumeContext>>();
+            collection.RemoveAll<Bind<IBus, IScopedConsumeContextProvider>>();
             collection.RemoveAll<IScopedBusContextProvider<IBus>>();
             collection.RemoveAll<ConsumeContext>();
             collection.RemoveAll<ISendEndpointProvider>();
             collection.RemoveAll<IPublishEndpoint>();
-            collection.RemoveAll<IConsumeScopeProvider>();
             collection.RemoveAll(typeof(IRequestClient<>));
 
             collection.RemoveAll<Bind<IBus, IBusInstance>>();

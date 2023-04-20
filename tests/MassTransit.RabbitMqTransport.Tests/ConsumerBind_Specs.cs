@@ -4,9 +4,9 @@
     {
         using System;
         using System.Threading.Tasks;
-        using MassTransit.Testing;
         using NUnit.Framework;
         using RabbitMQ.Client;
+        using Testing;
         using Util;
 
 
@@ -170,7 +170,7 @@
             [Test]
             public async Task Should_receive_the_message_a()
             {
-                Guid? sagaId = await _repository.ShouldContainSaga(_sagaId, TestTimeout);
+                Guid? sagaId = await SagaRepository.ShouldContainSaga(_sagaId, TestTimeout);
                 Assert.IsTrue(sagaId.HasValue);
 
                 var saga = _repository[sagaId.Value].Instance;
@@ -181,7 +181,7 @@
             [Test]
             public async Task Should_receive_the_message_b()
             {
-                Guid? sagaId = await _repository.ShouldContainSaga(_sagaId, TestTimeout);
+                Guid? sagaId = await SagaRepository.ShouldContainSaga(_sagaId, TestTimeout);
                 Assert.IsTrue(sagaId.HasValue);
 
                 var saga = _repository[sagaId.Value].Instance;
@@ -192,6 +192,7 @@
             }
 
             InMemorySagaRepository<TestSaga> _repository;
+            ISagaRepository<TestSaga> SagaRepository => _repository;
             Guid _sagaId;
 
             [OneTimeSetUp]

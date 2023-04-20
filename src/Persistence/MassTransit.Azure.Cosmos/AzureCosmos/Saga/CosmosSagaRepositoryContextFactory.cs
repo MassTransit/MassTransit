@@ -9,7 +9,9 @@ namespace MassTransit.AzureCosmos.Saga
 
 
     public class CosmosSagaRepositoryContextFactory<TSaga> :
-        ISagaRepositoryContextFactory<TSaga>
+        ISagaRepositoryContextFactory<TSaga>,
+        IQuerySagaRepositoryContextFactory<TSaga>,
+        ILoadSagaRepositoryContextFactory<TSaga>
         where TSaga : class, ISaga
     {
         readonly DatabaseContext<TSaga> _context;
@@ -19,6 +21,18 @@ namespace MassTransit.AzureCosmos.Saga
         {
             _context = context;
             _factory = factory;
+        }
+
+        public Task<T> Execute<T>(Func<LoadSagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken = default)
+            where T : class
+        {
+            return ExecuteAsyncMethod(asyncMethod, cancellationToken);
+        }
+
+        public Task<T> Execute<T>(Func<QuerySagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken = default)
+            where T : class
+        {
+            return ExecuteAsyncMethod(asyncMethod, cancellationToken);
         }
 
         public void Probe(ProbeContext context)
@@ -50,7 +64,7 @@ namespace MassTransit.AzureCosmos.Saga
             await next.Send(queryContext).ConfigureAwait(false);
         }
 
-        public Task<T> Execute<T>(Func<SagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken = default)
+        Task<T> ExecuteAsyncMethod<T>(Func<CosmosSagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken)
             where T : class
         {
             var repositoryContext = new CosmosSagaRepositoryContext<TSaga>(_context, cancellationToken);

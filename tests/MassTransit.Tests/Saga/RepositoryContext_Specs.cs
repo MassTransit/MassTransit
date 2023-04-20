@@ -49,25 +49,29 @@ namespace MassTransit.Tests.Saga
 
             ISagaConsumeContextFactory<IndexedSagaDictionary<T>, T> factory = new InMemorySagaConsumeContextFactory<T>();
 
-            ISagaRepositoryContextFactory<T> repositoryContextFactory = new InMemorySagaRepositoryContextFactory<T>(dictionary, factory);
+            var repositoryContextFactory = new InMemorySagaRepositoryContextFactory<T>(dictionary, factory);
 
-            return new SagaRepository<T>(repositoryContextFactory);
+            return new SagaRepository<T>(repositoryContextFactory, repositoryContextFactory, repositoryContextFactory);
         }
+
 
         public interface Create :
             CorrelatedBy<Guid>
         {
         }
 
+
         public interface CreateCompleted :
             CorrelatedBy<Guid>
         {
         }
 
+
         public interface FinallyCompleted :
             CorrelatedBy<Guid>
         {
         }
+
 
         public class Instance :
             SagaStateMachineInstance
@@ -75,6 +79,7 @@ namespace MassTransit.Tests.Saga
             public State CurrentState { get; set; }
             public Guid CorrelationId { get; set; }
         }
+
 
         class InsertOnInitialTestStateMachine :
             MassTransitStateMachine<Instance>
@@ -101,7 +106,7 @@ namespace MassTransit.Tests.Saga
                     When(Destroyed)
                         .Finalize());
 
-                Finally(binder => binder.PublishAsync(x=> x.Init<FinallyCompleted>(x.Instance)));
+                Finally(binder => binder.PublishAsync(x => x.Init<FinallyCompleted>(x.Instance)));
             }
 
             public State Active { get; private set; }
@@ -109,6 +114,7 @@ namespace MassTransit.Tests.Saga
             public Event Destroyed { get; private set; }
         }
     }
+
 
     [TestFixture]
     public class Using_the_universal_saga_repository :
@@ -120,7 +126,7 @@ namespace MassTransit.Tests.Saga
             Task<ConsumeContext<CreateCompleted>> createCompleted = await ConnectPublishHandler<CreateCompleted>();
             Task<ConsumeContext<DestroyCompleted>> destroyCompleted = await ConnectPublishHandler<DestroyCompleted>();
 
-            var values = new {InVar.CorrelationId};
+            var values = new { InVar.CorrelationId };
             await InputQueueSendEndpoint.Send<Create>(values);
 
             ConsumeContext<CreateCompleted> createContext = await createCompleted;
@@ -148,9 +154,9 @@ namespace MassTransit.Tests.Saga
 
             ISagaConsumeContextFactory<IndexedSagaDictionary<T>, T> factory = new InMemorySagaConsumeContextFactory<T>();
 
-            ISagaRepositoryContextFactory<T> repositoryContextFactory = new InMemorySagaRepositoryContextFactory<T>(dictionary, factory);
+            var repositoryContextFactory = new InMemorySagaRepositoryContextFactory<T>(dictionary, factory);
 
-            return new SagaRepository<T>(repositoryContextFactory);
+            return new SagaRepository<T>(repositoryContextFactory, repositoryContextFactory, repositoryContextFactory);
         }
 
 
@@ -184,6 +190,7 @@ namespace MassTransit.Tests.Saga
             public State CurrentState { get; set; }
             public Guid CorrelationId { get; set; }
         }
+
 
         class TestStateMachine :
             MassTransitStateMachine<Instance>

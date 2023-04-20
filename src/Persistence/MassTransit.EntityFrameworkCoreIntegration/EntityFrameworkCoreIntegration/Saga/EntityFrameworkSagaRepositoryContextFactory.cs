@@ -11,7 +11,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 
 
     public class EntityFrameworkSagaRepositoryContextFactory<TSaga> :
-        ISagaRepositoryContextFactory<TSaga>
+        ISagaRepositoryContextFactory<TSaga>,
+        IQuerySagaRepositoryContextFactory<TSaga>,
+        ILoadSagaRepositoryContextFactory<TSaga>
         where TSaga : class, ISaga
     {
         readonly ISagaConsumeContextFactory<DbContext, TSaga> _consumeContextFactory;
@@ -24,6 +26,18 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
             _dbContextFactory = dbContextFactory;
             _consumeContextFactory = consumeContextFactory;
             _lockStrategy = lockStrategy;
+        }
+
+        public Task<T> Execute<T>(Func<LoadSagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken = default)
+            where T : class
+        {
+            return ExecuteAsyncMethod(asyncMethod, cancellationToken);
+        }
+
+        public Task<T> Execute<T>(Func<QuerySagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken = default)
+            where T : class
+        {
+            return ExecuteAsyncMethod(asyncMethod, cancellationToken);
         }
 
         public void Probe(ProbeContext context)
@@ -117,7 +131,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
             }
         }
 
-        public async Task<T> Execute<T>(Func<SagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken = default)
+        async Task<T> ExecuteAsyncMethod<T>(Func<DbContextSagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken)
             where T : class
         {
             var dbContext = _dbContextFactory.Create();

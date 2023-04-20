@@ -17,6 +17,10 @@ namespace MassTransit.Containers.Tests.Common_Tests
     public class Common_ConsumeContext :
         InMemoryContainerTestFixture
     {
+        Task<ConsumeContext> ConsumeContext => ServiceProvider.GetRequiredService<TaskCompletionSource<ConsumeContext>>().Task;
+        Task<IPublishEndpoint> PublishEndpoint => ServiceProvider.GetRequiredService<TaskCompletionSource<IPublishEndpoint>>().Task;
+        Task<ISendEndpointProvider> SendEndpointProvider => ServiceProvider.GetRequiredService<TaskCompletionSource<ISendEndpointProvider>>().Task;
+
         [Test]
         public async Task Should_provide_the_consume_context()
         {
@@ -32,10 +36,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
             Assert.That(ReferenceEquals(publishEndpoint, sendEndpointProvider), "ReferenceEquals(publishEndpoint, sendEndpointProvider)");
             Assert.That(ReferenceEquals(consumeContext, sendEndpointProvider), "ReferenceEquals(messageConsumeContext, sendEndpointProvider)");
         }
-
-        Task<ConsumeContext> ConsumeContext => ServiceProvider.GetRequiredService<TaskCompletionSource<ConsumeContext>>().Task;
-        Task<IPublishEndpoint> PublishEndpoint => ServiceProvider.GetRequiredService<TaskCompletionSource<IPublishEndpoint>>().Task;
-        Task<ISendEndpointProvider> SendEndpointProvider => ServiceProvider.GetRequiredService<TaskCompletionSource<ISendEndpointProvider>>().Task;
 
         protected override IServiceCollection ConfigureServices(IServiceCollection collection)
         {
@@ -65,6 +65,10 @@ namespace MassTransit.Containers.Tests.Common_Tests
     public class Common_ConsumeContext_Outbox :
         InMemoryContainerTestFixture
     {
+        Task<ConsumeContext> ConsumeContext => ServiceProvider.GetRequiredService<TaskCompletionSource<ConsumeContext>>().Task;
+        Task<IPublishEndpoint> PublishEndpoint => ServiceProvider.GetRequiredService<TaskCompletionSource<IPublishEndpoint>>().Task;
+        Task<ISendEndpointProvider> SendEndpointProvider => ServiceProvider.GetRequiredService<TaskCompletionSource<ISendEndpointProvider>>().Task;
+
         [Test]
         public async Task Should_provide_the_outbox()
         {
@@ -87,9 +91,67 @@ namespace MassTransit.Containers.Tests.Common_Tests
             Assert.That(InMemoryTestHarness.Published.Select<ServiceDidIt>().Any(), Is.False, "Outbox Did Not Intercept!");
         }
 
+        protected override void ConfigureInMemoryTestHarness(InMemoryTestHarness harness)
+        {
+            harness.TestTimeout = TimeSpan.FromSeconds(3);
+        }
+
+        protected override IServiceCollection ConfigureServices(IServiceCollection collection)
+        {
+            TaskCompletionSource<ConsumeContext> pingTask = GetTask<ConsumeContext>();
+            TaskCompletionSource<IPublishEndpoint> sendEndpointProviderTask = GetTask<IPublishEndpoint>();
+            TaskCompletionSource<ISendEndpointProvider> publishEndpointTask = GetTask<ISendEndpointProvider>();
+
+            return collection
+                .AddSingleton(pingTask)
+                .AddSingleton(sendEndpointProviderTask)
+                .AddSingleton(publishEndpointTask)
+                .AddScoped<IService, Service>()
+                .AddScoped<IAnotherService, AnotherService>();
+        }
+
+        protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
+        {
+            configurator.AddConsumer<DependentConsumer>();
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            configurator.UseInMemoryOutbox(BusRegistrationContext);
+
+            configurator.ConfigureConsumers(BusRegistrationContext);
+        }
+    }
+
+
+    public class Common_ConsumeContext_Outbox_Without_Registration_Context :
+        InMemoryContainerTestFixture
+    {
         Task<ConsumeContext> ConsumeContext => ServiceProvider.GetRequiredService<TaskCompletionSource<ConsumeContext>>().Task;
         Task<IPublishEndpoint> PublishEndpoint => ServiceProvider.GetRequiredService<TaskCompletionSource<IPublishEndpoint>>().Task;
         Task<ISendEndpointProvider> SendEndpointProvider => ServiceProvider.GetRequiredService<TaskCompletionSource<ISendEndpointProvider>>().Task;
+
+        [Test]
+        public async Task Should_provide_the_outbox()
+        {
+            Task<ConsumeContext<Fault<PingMessage>>> fault = await ConnectPublishHandler<Fault<PingMessage>>();
+
+            await InputQueueSendEndpoint.Send(new PingMessage());
+
+            var consumeContext = await ConsumeContext;
+
+            Assert.That(consumeContext.TryGetPayload(out InMemoryOutboxConsumeContext<PingMessage> _), "Is ConsumerConsumeContext");
+
+            var publishEndpoint = await PublishEndpoint;
+            var sendEndpointProvider = await SendEndpointProvider;
+
+            Assert.That(ReferenceEquals(publishEndpoint, sendEndpointProvider), "ReferenceEquals(publishEndpoint, sendEndpointProvider)");
+            Assert.That(ReferenceEquals(consumeContext, sendEndpointProvider), "ReferenceEquals(outboxConsumeContext, sendEndpointProvider)");
+
+            await fault;
+
+            Assert.That(InMemoryTestHarness.Published.Select<ServiceDidIt>().Any(), Is.False, "Outbox Did Not Intercept!");
+        }
 
         protected override void ConfigureInMemoryTestHarness(InMemoryTestHarness harness)
         {
@@ -127,6 +189,10 @@ namespace MassTransit.Containers.Tests.Common_Tests
     public class Common_ConsumeContext_Outbox_Batch :
         InMemoryContainerTestFixture
     {
+        Task<ConsumeContext> ConsumeContext => ServiceProvider.GetRequiredService<TaskCompletionSource<ConsumeContext>>().Task;
+        Task<IPublishEndpoint> PublishEndpoint => ServiceProvider.GetRequiredService<TaskCompletionSource<IPublishEndpoint>>().Task;
+        Task<ISendEndpointProvider> SendEndpointProvider => ServiceProvider.GetRequiredService<TaskCompletionSource<ISendEndpointProvider>>().Task;
+
         [Test]
         public async Task Should_provide_the_outbox()
         {
@@ -152,9 +218,74 @@ namespace MassTransit.Containers.Tests.Common_Tests
             Assert.That(InMemoryTestHarness.Published.Select<ServiceDidIt>().Any(), Is.False, "Outbox Did Not Intercept!");
         }
 
+        protected override void ConfigureInMemoryTestHarness(InMemoryTestHarness harness)
+        {
+            harness.TestTimeout = TimeSpan.FromSeconds(3);
+        }
+
+        protected override IServiceCollection ConfigureServices(IServiceCollection collection)
+        {
+            TaskCompletionSource<ConsumeContext> pingTask = GetTask<ConsumeContext>();
+            TaskCompletionSource<IPublishEndpoint> sendEndpointProviderTask = GetTask<IPublishEndpoint>();
+            TaskCompletionSource<ISendEndpointProvider> publishEndpointTask = GetTask<ISendEndpointProvider>();
+
+            return collection
+                .AddSingleton(pingTask)
+                .AddSingleton(sendEndpointProviderTask)
+                .AddSingleton(publishEndpointTask)
+                .AddScoped<IService, Service>()
+                .AddScoped<UnitOfWork>();
+        }
+
+        protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
+        {
+            configurator.AddConsumer<DependentBatchConsumer>(x =>
+                x.Options<BatchOptions>(b => b.SetTimeLimit(200).SetMessageLimit(4)));
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            configurator.UseDelayedRedelivery(r => r.None());
+            configurator.UseMessageRetry(r => r.None());
+            configurator.UseInMemoryOutbox(BusRegistrationContext);
+            configurator.UseUnitOfWork();
+
+            configurator.ConfigureConsumers(BusRegistrationContext);
+        }
+    }
+
+
+    public class Common_ConsumeContext_Outbox_Batch_Without_Registration_Context :
+        InMemoryContainerTestFixture
+    {
         Task<ConsumeContext> ConsumeContext => ServiceProvider.GetRequiredService<TaskCompletionSource<ConsumeContext>>().Task;
         Task<IPublishEndpoint> PublishEndpoint => ServiceProvider.GetRequiredService<TaskCompletionSource<IPublishEndpoint>>().Task;
         Task<ISendEndpointProvider> SendEndpointProvider => ServiceProvider.GetRequiredService<TaskCompletionSource<ISendEndpointProvider>>().Task;
+
+        [Test]
+        public async Task Should_provide_the_outbox()
+        {
+            Task<ConsumeContext<Fault<PingMessage>>> fault = await ConnectPublishHandler<Fault<PingMessage>>();
+
+            await InputQueueSendEndpoint.Send(new PingMessage());
+            await InputQueueSendEndpoint.Send(new PingMessage());
+            await InputQueueSendEndpoint.Send(new PingMessage());
+            await InputQueueSendEndpoint.Send(new PingMessage());
+
+            var consumeContext = await ConsumeContext;
+
+            Assert.That(consumeContext.TryGetPayload(out InMemoryOutboxConsumeContext<Batch<PingMessage>> _), "Is ConsumerConsumeContext");
+
+            var publishEndpoint = await PublishEndpoint;
+            var sendEndpointProvider = await SendEndpointProvider;
+
+            Assert.That(ReferenceEquals(publishEndpoint, sendEndpointProvider), "ReferenceEquals(publishEndpoint, sendEndpointProvider)");
+            Assert.That(ReferenceEquals(consumeContext, sendEndpointProvider), "ReferenceEquals(outboxConsumeContext, sendEndpointProvider)");
+
+            await fault;
+
+            Assert.That(InMemoryTestHarness.Published.Select<ServiceDidIt>().Any(), Is.False, "Outbox Did Not Intercept!");
+        }
 
         protected override void ConfigureInMemoryTestHarness(InMemoryTestHarness harness)
         {
@@ -196,6 +327,10 @@ namespace MassTransit.Containers.Tests.Common_Tests
     public class Common_ConsumeContext_Filter_Batch :
         InMemoryContainerTestFixture
     {
+        Task<ConsumeContext> ConsumeContext => ServiceProvider.GetRequiredService<TaskCompletionSource<ConsumeContext>>().Task;
+        Task<IPublishEndpoint> PublishEndpoint => ServiceProvider.GetRequiredService<TaskCompletionSource<IPublishEndpoint>>().Task;
+        Task<ISendEndpointProvider> SendEndpointProvider => ServiceProvider.GetRequiredService<TaskCompletionSource<ISendEndpointProvider>>().Task;
+
         [Test]
         public async Task Should_provide_the_outbox()
         {
@@ -221,9 +356,72 @@ namespace MassTransit.Containers.Tests.Common_Tests
             Assert.That(InMemoryTestHarness.Published.Select<ServiceDidIt>().Any(), Is.False, "Outbox Did Not Intercept!");
         }
 
+        protected override void ConfigureInMemoryTestHarness(InMemoryTestHarness harness)
+        {
+            harness.TestTimeout = TimeSpan.FromSeconds(3);
+        }
+
+        protected override IServiceCollection ConfigureServices(IServiceCollection collection)
+        {
+            TaskCompletionSource<ConsumeContext> pingTask = GetTask<ConsumeContext>();
+            TaskCompletionSource<IPublishEndpoint> sendEndpointProviderTask = GetTask<IPublishEndpoint>();
+            TaskCompletionSource<ISendEndpointProvider> publishEndpointTask = GetTask<ISendEndpointProvider>();
+
+            return collection
+                .AddSingleton(pingTask)
+                .AddSingleton(sendEndpointProviderTask)
+                .AddSingleton(publishEndpointTask)
+                .AddScoped<IService, Service>()
+                .AddScoped<UnitOfWork>();
+        }
+
+        protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
+        {
+            configurator.AddConsumer<DependentBatchConsumer>(x =>
+                x.Options<BatchOptions>(b => b.SetTimeLimit(200).SetMessageLimit(4)));
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            configurator.UseInMemoryOutbox(BusRegistrationContext);
+            configurator.UseUnitOfWork();
+
+            configurator.ConfigureConsumers(BusRegistrationContext);
+        }
+    }
+
+
+    public class Common_ConsumeContext_Filter_Batch_Without_Registration_Context :
+        InMemoryContainerTestFixture
+    {
         Task<ConsumeContext> ConsumeContext => ServiceProvider.GetRequiredService<TaskCompletionSource<ConsumeContext>>().Task;
         Task<IPublishEndpoint> PublishEndpoint => ServiceProvider.GetRequiredService<TaskCompletionSource<IPublishEndpoint>>().Task;
         Task<ISendEndpointProvider> SendEndpointProvider => ServiceProvider.GetRequiredService<TaskCompletionSource<ISendEndpointProvider>>().Task;
+
+        [Test]
+        public async Task Should_provide_the_outbox()
+        {
+            Task<ConsumeContext<Fault<PingMessage>>> fault = await ConnectPublishHandler<Fault<PingMessage>>();
+
+            await InputQueueSendEndpoint.Send(new PingMessage());
+            await InputQueueSendEndpoint.Send(new PingMessage());
+            await InputQueueSendEndpoint.Send(new PingMessage());
+            await InputQueueSendEndpoint.Send(new PingMessage());
+
+            var consumeContext = await ConsumeContext;
+
+            Assert.That(consumeContext.TryGetPayload(out InMemoryOutboxConsumeContext<Batch<PingMessage>> _), "Is ConsumerConsumeContext");
+
+            var publishEndpoint = await PublishEndpoint;
+            var sendEndpointProvider = await SendEndpointProvider;
+
+            Assert.That(ReferenceEquals(publishEndpoint, sendEndpointProvider), "ReferenceEquals(publishEndpoint, sendEndpointProvider)");
+            Assert.That(ReferenceEquals(consumeContext, sendEndpointProvider), "ReferenceEquals(outboxConsumeContext, sendEndpointProvider)");
+
+            await fault;
+
+            Assert.That(InMemoryTestHarness.Published.Select<ServiceDidIt>().Any(), Is.False, "Outbox Did Not Intercept!");
+        }
 
         protected override void ConfigureInMemoryTestHarness(InMemoryTestHarness harness)
         {
@@ -263,6 +461,10 @@ namespace MassTransit.Containers.Tests.Common_Tests
     public class Common_ConsumeContext_Outbox_Solo :
         InMemoryContainerTestFixture
     {
+        Task<ConsumeContext> ConsumeContext => ServiceProvider.GetRequiredService<TaskCompletionSource<ConsumeContext>>().Task;
+        Task<IPublishEndpoint> PublishEndpoint => ServiceProvider.GetRequiredService<TaskCompletionSource<IPublishEndpoint>>().Task;
+        Task<ISendEndpointProvider> SendEndpointProvider => ServiceProvider.GetRequiredService<TaskCompletionSource<ISendEndpointProvider>>().Task;
+
         [Test]
         public async Task Should_provide_the_outbox_to_the_consumer()
         {
@@ -285,9 +487,67 @@ namespace MassTransit.Containers.Tests.Common_Tests
             Assert.That(InMemoryTestHarness.Published.Select<ServiceDidIt>().Any(), Is.False, "Outbox Did Not Intercept!");
         }
 
+        protected override void ConfigureInMemoryTestHarness(InMemoryTestHarness harness)
+        {
+            harness.TestTimeout = TimeSpan.FromSeconds(3);
+        }
+
+        protected override IServiceCollection ConfigureServices(IServiceCollection collection)
+        {
+            TaskCompletionSource<ConsumeContext> pingTask = GetTask<ConsumeContext>();
+            TaskCompletionSource<IPublishEndpoint> sendEndpointProviderTask = GetTask<IPublishEndpoint>();
+            TaskCompletionSource<ISendEndpointProvider> publishEndpointTask = GetTask<ISendEndpointProvider>();
+
+            return collection
+                .AddSingleton(pingTask)
+                .AddSingleton(sendEndpointProviderTask)
+                .AddSingleton(publishEndpointTask)
+                .AddScoped<IService, Service>()
+                .AddScoped<UnitOfWork>();
+        }
+
+        protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
+        {
+            configurator.AddConsumer<FlyingSoloConsumer>();
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            configurator.UseInMemoryOutbox(BusRegistrationContext);
+
+            configurator.ConfigureConsumers(BusRegistrationContext);
+        }
+    }
+
+
+    public class Common_ConsumeContext_Outbox_Solo_Without_Registration_Context :
+        InMemoryContainerTestFixture
+    {
         Task<ConsumeContext> ConsumeContext => ServiceProvider.GetRequiredService<TaskCompletionSource<ConsumeContext>>().Task;
         Task<IPublishEndpoint> PublishEndpoint => ServiceProvider.GetRequiredService<TaskCompletionSource<IPublishEndpoint>>().Task;
         Task<ISendEndpointProvider> SendEndpointProvider => ServiceProvider.GetRequiredService<TaskCompletionSource<ISendEndpointProvider>>().Task;
+
+        [Test]
+        public async Task Should_provide_the_outbox_to_the_consumer()
+        {
+            Task<ConsumeContext<Fault<PingMessage>>> fault = await ConnectPublishHandler<Fault<PingMessage>>();
+
+            await InputQueueSendEndpoint.Send(new PingMessage());
+
+            var consumeContext = await ConsumeContext;
+
+            Assert.That(consumeContext.TryGetPayload(out InMemoryOutboxConsumeContext<PingMessage> _), "Is ConsumerConsumeContext");
+
+            var publishEndpoint = await PublishEndpoint;
+            var sendEndpointProvider = await SendEndpointProvider;
+
+            Assert.That(ReferenceEquals(publishEndpoint, sendEndpointProvider), "ReferenceEquals(publishEndpoint, sendEndpointProvider)");
+            Assert.That(ReferenceEquals(consumeContext, sendEndpointProvider), "ReferenceEquals(outboxConsumeContext, sendEndpointProvider)");
+
+            await fault;
+
+            Assert.That(InMemoryTestHarness.Published.Select<ServiceDidIt>().Any(), Is.False, "Outbox Did Not Intercept!");
+        }
 
         protected override void ConfigureInMemoryTestHarness(InMemoryTestHarness harness)
         {

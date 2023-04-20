@@ -88,24 +88,12 @@ namespace MassTransit.MongoDbIntegration
             return _provider.GetService(serviceType);
         }
 
-        public ISendEndpointProvider SendEndpointProvider
-        {
-            get { return _sendEndpointProvider ??= new OutboxSendEndpointProvider(this, _bus); }
-        }
+        public ISendEndpointProvider SendEndpointProvider => _sendEndpointProvider ??= new OutboxSendEndpointProvider(this, GetSendEndpointProvider());
 
-        public IPublishEndpoint PublishEndpoint
-        {
-            get { return _publishEndpoint ??= new PublishEndpoint(new OutboxPublishEndpointProvider(this, _bus)); }
-        }
+        public IPublishEndpoint PublishEndpoint =>
+            _publishEndpoint ??= new PublishEndpoint(new OutboxPublishEndpointProvider(this, GetPublishEndpointProvider()));
 
-        public IScopedClientFactory ClientFactory
-        {
-            get
-            {
-                return _scopedClientFactory ??=
-                    new ScopedClientFactory(new ClientFactory(new ScopedClientFactoryContext(_clientFactory, _provider)), null);
-            }
-        }
+        public IScopedClientFactory ClientFactory => _scopedClientFactory ??= GetClientFactory();
 
         bool WasCommitted()
         {
@@ -127,6 +115,21 @@ namespace MassTransit.MongoDbIntegration
             await _outboxStates.InsertOne(outboxState, cancellationToken).ConfigureAwait(false);
 
             return outboxId;
+        }
+
+        protected virtual ScopedClientFactory GetClientFactory()
+        {
+            return new ScopedClientFactory(new ClientFactory(new ScopedClientFactoryContext(_clientFactory, _provider)), null);
+        }
+
+        protected virtual IPublishEndpointProvider GetPublishEndpointProvider()
+        {
+            return _bus;
+        }
+
+        protected virtual ISendEndpointProvider GetSendEndpointProvider()
+        {
+            return _bus;
         }
     }
 }

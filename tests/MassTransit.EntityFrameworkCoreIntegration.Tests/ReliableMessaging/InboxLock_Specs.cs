@@ -75,7 +75,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
                     x.AddConsumer<InboxLockConsumer, InboxLockEntityFrameworkConsumerDefinition>();
                 });
 
-           services.AddOptions<TextWriterLoggerOptions>().Configure(options => options.Disable("Microsoft"));
+            services.AddOptions<TextWriterLoggerOptions>().Configure(options => options.Disable("Microsoft"));
 
             return services;
         }
@@ -84,19 +84,12 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
         public class InboxLockEntityFrameworkConsumerDefinition :
             ConsumerDefinition<InboxLockConsumer>
         {
-            readonly IServiceProvider _provider;
-
-            public InboxLockEntityFrameworkConsumerDefinition(IServiceProvider provider)
-            {
-                _provider = provider;
-            }
-
             protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,
-                IConsumerConfigurator<InboxLockConsumer> consumerConfigurator)
+                IConsumerConfigurator<InboxLockConsumer> consumerConfigurator, IRegistrationContext context)
             {
                 endpointConfigurator.UseMessageRetry(r => r.Intervals(10, 50, 100, 100, 100, 100, 100, 100));
 
-                endpointConfigurator.UseEntityFrameworkOutbox<ReliableDbContext>(_provider);
+                endpointConfigurator.UseEntityFrameworkOutbox<ReliableDbContext>(context);
             }
         }
     }

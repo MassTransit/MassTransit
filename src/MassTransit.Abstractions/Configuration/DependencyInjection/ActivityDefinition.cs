@@ -28,12 +28,13 @@ namespace MassTransit
         IEndpointDefinition? IActivityDefinition.CompensateEndpointDefinition => CompensateEndpointDefinition;
 
         void IActivityDefinition<TActivity, TArguments, TLog>.Configure(IReceiveEndpointConfigurator endpointConfigurator,
-            ICompensateActivityConfigurator<TActivity, TLog> compensateActivityConfigurator)
+            ICompensateActivityConfigurator<TActivity, TLog> compensateActivityConfigurator, IRegistrationContext context)
         {
             if (ConcurrentMessageLimit.HasValue)
                 compensateActivityConfigurator.ConcurrentMessageLimit = ConcurrentMessageLimit;
 
             ConfigureCompensateActivity(endpointConfigurator, compensateActivityConfigurator);
+            ConfigureCompensateActivity(endpointConfigurator, compensateActivityConfigurator, context);
         }
 
         string IActivityDefinition.GetCompensateEndpointName(IEndpointNameFormatter formatter)
@@ -65,6 +66,17 @@ namespace MassTransit
         /// <param name="compensateActivityConfigurator"></param>
         protected virtual void ConfigureCompensateActivity(IReceiveEndpointConfigurator endpointConfigurator,
             ICompensateActivityConfigurator<TActivity, TLog> compensateActivityConfigurator)
+        {
+        }
+
+        /// <summary>
+        /// Called when the compensate activity is being configured on the endpoint.
+        /// </summary>
+        /// <param name="endpointConfigurator">The receive endpoint configurator for the consumer</param>
+        /// <param name="compensateActivityConfigurator"></param>
+        /// <param name="context"></param>
+        protected virtual void ConfigureCompensateActivity(IReceiveEndpointConfigurator endpointConfigurator,
+            ICompensateActivityConfigurator<TActivity, TLog> compensateActivityConfigurator, IRegistrationContext context)
         {
         }
     }

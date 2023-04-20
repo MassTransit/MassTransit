@@ -8,12 +8,13 @@ namespace MassTransit.Configuration
     using Internals;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
+    using Saga;
 
 
     /// <summary>
     /// Used for registration of consumers and sagas
     /// </summary>
-    public class RegistrationConfigurator :
+    public abstract class RegistrationConfigurator :
         IRegistrationConfigurator
     {
         readonly IServiceCollection _collection;
@@ -145,13 +146,7 @@ namespace MassTransit.Configuration
             _collection.TryAddSingleton<IConfigureReceiveEndpoint>(provider => new ConfigureReceiveEndpointDelegate(callback));
         }
 
-        public void AddConfigureEndpointsCallback(ConfigureEndpointsProviderCallback callback)
-        {
-            if (callback == null)
-                throw new ArgumentNullException(nameof(callback));
-
-            _collection.TryAddSingleton<IConfigureReceiveEndpoint>(provider => new ConfigureReceiveEndpointDelegateProvider(provider, callback));
-        }
+        public abstract void AddConfigureEndpointsCallback(ConfigureEndpointsProviderCallback callback);
 
         public void AddEndpoint(Type definitionType)
         {
@@ -271,7 +266,7 @@ namespace MassTransit.Configuration
 
                 foreach (var registration in registrations)
                 {
-                    if (_collection.Any(x => x.ServiceType == typeof(ISagaRepository<>).MakeGenericType(registration.Type)))
+                    if (_collection.Any(x => x.ServiceType == typeof(ISagaRepositoryContextFactory<>).MakeGenericType(registration.Type)))
                         continue;
 
                     var register = (IConfigureSagaRepository)Activator.CreateInstance(typeof(ConfigureSagaRepository<>).MakeGenericType(registration.Type));
@@ -279,14 +274,15 @@ namespace MassTransit.Configuration
                     register.Configure(this, _sagaRepositoryRegistrationProvider, registration);
                 }
 
-                if (Registrar.GetRegistrations<IFutureRegistration>().Any() && _collection.All(x => x.ServiceType != typeof(ISagaRepository<FutureState>)))
+                if (Registrar.GetRegistrations<IFutureRegistration>().Any()
+                    && _collection.All(x => x.ServiceType != typeof(ISagaRepositoryContextFactory<FutureState>)))
                     new ConfigureSagaRepository<FutureState>().Configure(this, _sagaRepositoryRegistrationProvider, null);
             }
         }
 
-        protected IRegistrationContext CreateRegistration(IServiceProvider provider)
+        protected RegistrationContext CreateRegistration(IServiceProvider provider, ISetScopedConsumeContext setScopedConsumeContext)
         {
-            return new RegistrationContext(provider, Registrar);
+            return new RegistrationContext(provider, Registrar, setScopedConsumeContext);
         }
 
         protected void ThrowIfAlreadyConfigured(string methodName)

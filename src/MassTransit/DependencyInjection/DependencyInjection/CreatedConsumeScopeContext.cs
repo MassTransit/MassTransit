@@ -39,11 +39,13 @@
     {
         readonly IDisposable _disposable;
         readonly IServiceScope _scope;
+        readonly ISetScopedConsumeContext _setter;
 
-        public CreatedConsumeScopeContext(IServiceScope scope, ConsumeContext<TMessage> context, IDisposable disposable)
+        public CreatedConsumeScopeContext(IServiceScope scope, ConsumeContext<TMessage> context, IDisposable disposable, ISetScopedConsumeContext setter)
         {
             _scope = scope;
             _disposable = disposable;
+            _setter = setter;
             Context = context;
         }
 
@@ -63,7 +65,7 @@
 
         public IDisposable PushConsumeContext(ConsumeContext context)
         {
-            return _scope.SetCurrentConsumeContext(context);
+            return _setter.PushContext(_scope, context);
         }
 
         public ValueTask DisposeAsync()

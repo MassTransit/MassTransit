@@ -5,18 +5,32 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using System.Linq;
     using System.Threading.Tasks;
     using Contracts;
+    using Mediator;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using NUnit.Framework;
     using Scenarios;
     using TestFramework;
     using TestFramework.Messages;
+    using Testing;
     using Transports;
 
 
     public class Using_MultiBus :
         InMemoryContainerTestFixture
     {
+        public Using_MultiBus()
+        {
+            Task1 = GetTask<ConsumeContext<SimpleMessageInterface>>();
+            Task2 = GetTask<ConsumeContext<PingMessage>>();
+        }
+
+        TaskCompletionSource<ConsumeContext<SimpleMessageInterface>> Task1 { get; }
+        TaskCompletionSource<ConsumeContext<PingMessage>> Task2 { get; }
+
+        IBusOne One => ServiceProvider.GetService<IBusOne>();
+        IEnumerable<IHostedService> HostedServices => ServiceProvider.GetService<IEnumerable<IHostedService>>();
+
         [Test]
         public async Task Should_receive()
         {
@@ -64,12 +78,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
             await client.GetResponse<Response>(new Request());
         }
 
-        TaskCompletionSource<ConsumeContext<SimpleMessageInterface>> Task1 { get; }
-        TaskCompletionSource<ConsumeContext<PingMessage>> Task2 { get; }
-
-        IBusOne One => ServiceProvider.GetService<IBusOne>();
-        IEnumerable<IHostedService> HostedServices => ServiceProvider.GetService<IEnumerable<IHostedService>>();
-
         protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
         {
             configurator.AddConsumer<RequestConsumer>();
@@ -116,12 +124,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
                 cfg.ConfigureEndpoints(context);
             });
             configurator.AddRequestClient<TwoRequest>();
-        }
-
-        public Using_MultiBus()
-        {
-            Task1 = GetTask<ConsumeContext<SimpleMessageInterface>>();
-            Task2 = GetTask<ConsumeContext<PingMessage>>();
         }
 
         [OneTimeSetUp]
@@ -201,6 +203,98 @@ namespace MassTransit.Containers.Tests.Common_Tests
             public Task Consume(ConsumeContext<TwoRequest> context)
             {
                 return context.RespondAsync(new TwoResponse());
+            }
+        }
+    }
+
+
+    public class Using_consume_context_correctly_with_components :
+        InMemoryContainerTestFixture
+    {
+        [Test]
+        public async Task Should_receive_in_bus_through_mediator_and_publish()
+        {
+            await using var provider = new ServiceCollection()
+                .AddMediator(cfg => cfg.AddConsumer<MediatorPublishConsumer>())
+                .AddMassTransitTestHarness(cfg => cfg.AddConsumer<BusConsumer>())
+                .BuildServiceProvider(true);
+
+            var harness = provider.GetTestHarness();
+            await harness.Start();
+
+            var mediator = harness.Scope.ServiceProvider.GetRequiredService<IScopedMediator>();
+            await mediator.Send(new Request());
+
+            Assert.That(await harness.Published.Any<OneRequest>(), Is.True);
+
+            IReceivedMessage<OneRequest> consumed = await harness.Consumed.SelectAsync<OneRequest>().FirstOrDefault();
+            Assert.That(consumed, Is.Not.Null);
+            Assert.That(consumed.Context.SourceAddress, Is.EqualTo(new Uri("loopback://localhost/mediator")));
+        }
+
+        [Test]
+        public async Task Should_receive_in_bus_through_mediator_and_send()
+        {
+            await using var provider = new ServiceCollection()
+                .AddMediator(cfg => cfg.AddConsumer<MediatorSendConsumer>())
+                .AddMassTransitTestHarness(cfg => cfg.AddConsumer<BusConsumer>().Endpoint(x => x.Name = "input-queue"))
+                .BuildServiceProvider(true);
+
+            var harness = provider.GetTestHarness();
+            await harness.Start();
+
+            var mediator = harness.Scope.ServiceProvider.GetRequiredService<IScopedMediator>();
+            await mediator.Send(new Request());
+
+            Assert.That(await harness.Sent.Any<OneRequest>(), Is.True);
+
+            IReceivedMessage<OneRequest> consumed = await harness.Consumed.SelectAsync<OneRequest>().FirstOrDefault();
+            Assert.That(consumed, Is.Not.Null);
+            Assert.That(consumed.Context.SourceAddress, Is.EqualTo(new Uri("loopback://localhost/mediator")));
+        }
+
+
+        class MediatorPublishConsumer :
+            IConsumer<Request>
+        {
+            readonly IPublishEndpoint _publishEndpoint;
+
+            public MediatorPublishConsumer(IPublishEndpoint publishEndpoint)
+            {
+                _publishEndpoint = publishEndpoint;
+            }
+
+            public Task Consume(ConsumeContext<Request> context)
+            {
+                return _publishEndpoint.Publish(new OneRequest());
+            }
+        }
+
+
+        class MediatorSendConsumer :
+            IConsumer<Request>
+        {
+            readonly ISendEndpointProvider _sendEndpointProvider;
+
+            public MediatorSendConsumer(ISendEndpointProvider sendEndpointProvider)
+            {
+                _sendEndpointProvider = sendEndpointProvider;
+            }
+
+            public async Task Consume(ConsumeContext<Request> context)
+            {
+                var endpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri("queue:input-queue"));
+                await endpoint.Send(new OneRequest());
+            }
+        }
+
+
+        class BusConsumer :
+            IConsumer<OneRequest>
+        {
+            public Task Consume(ConsumeContext<OneRequest> context)
+            {
+                return Task.CompletedTask;
             }
         }
     }

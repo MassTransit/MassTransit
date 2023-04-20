@@ -9,9 +9,18 @@ namespace MassTransit.Configuration
     {
         readonly ISagaConfigurator<TSaga> _configurator;
         readonly Action<IOutboxConfigurator> _configure;
+        readonly ISetScopedConsumeContext _setter;
 
-        public InMemoryOutboxSagaConfigurationObserver(ISagaConfigurator<TSaga> configurator, Action<IOutboxConfigurator> configure)
+        public InMemoryOutboxSagaConfigurationObserver(IRegistrationContext context, ISagaConfigurator<TSaga> configurator,
+            Action<IOutboxConfigurator> configure)
+            : this(context as ISetScopedConsumeContext ?? throw new ArgumentException(nameof(context)), configurator, configure)
         {
+        }
+
+        public InMemoryOutboxSagaConfigurationObserver(ISetScopedConsumeContext setter, ISagaConfigurator<TSaga> configurator,
+            Action<IOutboxConfigurator> configure)
+        {
+            _setter = setter;
             _configurator = configurator;
             _configure = configure;
         }
@@ -27,7 +36,7 @@ namespace MassTransit.Configuration
 
         void ISagaConfigurationObserver.SagaMessageConfigured<T, TMessage>(ISagaMessageConfigurator<T, TMessage> configurator)
         {
-            var specification = new InMemoryOutboxSpecification<TMessage>();
+            var specification = new InMemoryOutboxSpecification<TMessage>(_setter);
 
             _configure?.Invoke(specification);
 

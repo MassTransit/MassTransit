@@ -1,7 +1,6 @@
 namespace MassTransit.DependencyInjection
 {
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
     using Context;
     using Microsoft.Extensions.DependencyInjection;
@@ -13,13 +12,20 @@ namespace MassTransit.DependencyInjection
         where TSaga : class, ISaga
     {
         readonly IServiceProvider _serviceProvider;
+        readonly ISetScopedConsumeContext _setter;
 
-        public DependencyInjectionSagaRepositoryContextFactory(IServiceProvider serviceProvider)
+        public DependencyInjectionSagaRepositoryContextFactory(IRegistrationContext context)
+            : this(context, context as ISetScopedConsumeContext ?? throw new ArgumentException(nameof(context)))
         {
-            _serviceProvider = serviceProvider;
         }
 
-        void IProbeSite.Probe(ProbeContext context)
+        public DependencyInjectionSagaRepositoryContextFactory(IServiceProvider serviceProvider, ISetScopedConsumeContext setter)
+        {
+            _serviceProvider = serviceProvider;
+            _setter = setter;
+        }
+
+        public void Probe(ProbeContext context)
         {
             context.Add("provider", "dependencyInjection");
         }
@@ -36,26 +42,6 @@ namespace MassTransit.DependencyInjection
             return Send(context, (consumeContext, factory) => factory.SendQuery(consumeContext, query, next));
         }
 
-        public async Task<T> Execute<T>(Func<SagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken)
-            where T : class
-        {
-            var serviceScope = _serviceProvider.CreateScope();
-
-            try
-            {
-                var factory = serviceScope.ServiceProvider.GetRequiredService<ISagaRepositoryContextFactory<TSaga>>();
-
-                return await factory.Execute(asyncMethod, cancellationToken).ConfigureAwait(false);
-            }
-            finally
-            {
-                if (serviceScope is IAsyncDisposable asyncDisposable)
-                    await asyncDisposable.DisposeAsync().ConfigureAwait(false);
-                else
-                    serviceScope.Dispose();
-            }
-        }
-
         async Task Send<T>(ConsumeContext<T> context, Func<ConsumeContext<T>, ISagaRepositoryContextFactory<TSaga>, Task> send)
             where T : class
         {
@@ -65,7 +51,7 @@ namespace MassTransit.DependencyInjection
 
             if (context.TryGetPayload<IServiceScope>(out var existingScope))
             {
-                disposable = existingScope.SetCurrentConsumeContext(context);
+                disposable = _setter.PushContext(existingScope, context);
 
                 try
                 {
@@ -92,7 +78,7 @@ namespace MassTransit.DependencyInjection
                         existing => new ConsumeMessageSchedulerContext(scopeContext, existing.SchedulerFactory));
                 }
 
-                disposable = serviceScope.SetCurrentConsumeContext(scopeContext);
+                disposable = _setter.PushContext(serviceScope, scopeContext);
 
                 var consumeContextScope = new ConsumeContextScope<T>(scopeContext);
 

@@ -36,18 +36,18 @@ namespace MassTransit.DependencyInjection.Registration
                 _configureActions.Add(action);
         }
 
-        void ISagaRegistration.Configure(IReceiveEndpointConfigurator configurator, IServiceProvider provider)
+        void ISagaRegistration.Configure(IReceiveEndpointConfigurator configurator, IRegistrationContext context)
         {
-            var repository = provider.GetRequiredService<ISagaRepository<TSaga>>();
+            ISagaRepository<TSaga> repository = new DependencyInjectionSagaRepository<TSaga>(context);
 
-            var decoratorRegistration = provider.GetService<ISagaRepositoryDecoratorRegistration<TSaga>>();
+            var decoratorRegistration = context.GetService<ISagaRepositoryDecoratorRegistration<TSaga>>();
             if (decoratorRegistration != null)
                 repository = decoratorRegistration.DecorateSagaRepository(repository);
 
             var sagaConfigurator = new SagaConfigurator<TSaga>(repository, configurator);
 
-            GetSagaDefinition(provider)
-                .Configure(configurator, sagaConfigurator);
+            GetSagaDefinition(context)
+                .Configure(configurator, sagaConfigurator, context);
 
             foreach (Action<ISagaConfigurator<TSaga>> action in _configureActions)
                 action(sagaConfigurator);
@@ -60,9 +60,9 @@ namespace MassTransit.DependencyInjection.Registration
             IncludeInConfigureEndpoints = false;
         }
 
-        ISagaDefinition ISagaRegistration.GetDefinition(IServiceProvider provider)
+        ISagaDefinition ISagaRegistration.GetDefinition(IRegistrationContext context)
         {
-            return GetSagaDefinition(provider);
+            return GetSagaDefinition(context);
         }
 
         ISagaDefinition<TSaga> GetSagaDefinition(IServiceProvider provider)

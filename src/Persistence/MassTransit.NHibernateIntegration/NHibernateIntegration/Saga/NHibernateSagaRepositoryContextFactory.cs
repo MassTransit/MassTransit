@@ -10,7 +10,9 @@ namespace MassTransit.NHibernateIntegration.Saga
 
 
     public class NHibernateSagaRepositoryContextFactory<TSaga> :
-        ISagaRepositoryContextFactory<TSaga>
+        ISagaRepositoryContextFactory<TSaga>,
+        IQuerySagaRepositoryContextFactory<TSaga>,
+        ILoadSagaRepositoryContextFactory<TSaga>
         where TSaga : class, ISaga
     {
         readonly ISagaConsumeContextFactory<ISession, TSaga> _factory;
@@ -20,6 +22,18 @@ namespace MassTransit.NHibernateIntegration.Saga
         {
             _sessionFactory = sessionFactory;
             _factory = factory;
+        }
+
+        public Task<T> Execute<T>(Func<LoadSagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken = default)
+            where T : class
+        {
+            return ExecuteAsyncMethod(asyncMethod, cancellationToken);
+        }
+
+        public Task<T> Execute<T>(Func<QuerySagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken)
+            where T : class
+        {
+            return ExecuteAsyncMethod(asyncMethod, cancellationToken);
         }
 
         public async Task Send<T>(ConsumeContext<T> context, IPipe<SagaRepositoryContext<TSaga, T>> next)
@@ -109,7 +123,13 @@ namespace MassTransit.NHibernateIntegration.Saga
             }
         }
 
-        public async Task<T> Execute<T>(Func<SagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken)
+        public void Probe(ProbeContext context)
+        {
+            context.Add("persistence", "nhibernate");
+            context.Add("entities", _sessionFactory.GetAllClassMetadata().Select(x => x.Value.EntityName).ToArray());
+        }
+
+        async Task<T> ExecuteAsyncMethod<T>(Func<NHibernateSagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken)
             where T : class
         {
             var session = _sessionFactory.OpenSession();
@@ -123,12 +143,6 @@ namespace MassTransit.NHibernateIntegration.Saga
             {
                 session.Dispose();
             }
-        }
-
-        public void Probe(ProbeContext context)
-        {
-            context.Add("persistence", "nhibernate");
-            context.Add("entities", _sessionFactory.GetAllClassMetadata().Select(x => x.Value.EntityName).ToArray());
         }
     }
 }

@@ -8,10 +8,18 @@
         IMessageConfigurationObserver
     {
         readonly Action<IOutboxConfigurator> _configure;
+        readonly ISetScopedConsumeContext _setter;
 
-        public InMemoryOutboxConfigurationObserver(IConsumePipeConfigurator configurator, Action<IOutboxConfigurator> configure)
+        public InMemoryOutboxConfigurationObserver(IRegistrationContext context, IConsumePipeConfigurator configurator, Action<IOutboxConfigurator> configure)
+            : this(context as ISetScopedConsumeContext ?? throw new ArgumentException(nameof(context)), configurator, configure)
+        {
+        }
+
+        public InMemoryOutboxConfigurationObserver(ISetScopedConsumeContext setter, IConsumePipeConfigurator configurator,
+            Action<IOutboxConfigurator> configure)
             : base(configurator)
         {
+            _setter = setter;
             _configure = configure;
 
             Connect(this);
@@ -20,7 +28,7 @@
         public void MessageConfigured<TMessage>(IConsumePipeConfigurator configurator)
             where TMessage : class
         {
-            var specification = new InMemoryOutboxSpecification<TMessage>();
+            var specification = new InMemoryOutboxSpecification<TMessage>(_setter);
 
             _configure?.Invoke(specification);
 
@@ -29,7 +37,7 @@
 
         public override void BatchConsumerConfigured<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, Batch<TMessage>> configurator)
         {
-            var specification = new InMemoryOutboxSpecification<Batch<TMessage>>();
+            var specification = new InMemoryOutboxSpecification<Batch<TMessage>>(_setter);
 
             _configure?.Invoke(specification);
 
@@ -38,7 +46,7 @@
 
         public override void ActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator, Uri compensateAddress)
         {
-            var specification = new InMemoryExecuteContextOutboxSpecification<TArguments>();
+            var specification = new InMemoryExecuteContextOutboxSpecification<TArguments>(_setter);
 
             _configure?.Invoke(specification);
 
@@ -47,7 +55,7 @@
 
         public override void ExecuteActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator)
         {
-            var specification = new InMemoryExecuteContextOutboxSpecification<TArguments>();
+            var specification = new InMemoryExecuteContextOutboxSpecification<TArguments>(_setter);
 
             _configure?.Invoke(specification);
 
@@ -56,7 +64,7 @@
 
         public override void CompensateActivityConfigured<TActivity, TLog>(ICompensateActivityConfigurator<TActivity, TLog> configurator)
         {
-            var specification = new InMemoryCompensateContextOutboxSpecification<TLog>();
+            var specification = new InMemoryCompensateContextOutboxSpecification<TLog>(_setter);
 
             _configure?.Invoke(specification);
 

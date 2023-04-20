@@ -9,13 +9,14 @@ namespace MassTransit.DependencyInjection
     /// Captures the <see cref="ConsumeContext" /> for the current message as a scoped provider, so that it can be resolved
     /// by components at runtime (since MS DI doesn't support runtime configuration of scopes)
     /// </summary>
-    public class ScopedConsumeContextProvider
+    public class ScopedConsumeContextProvider :
+        IScopedConsumeContextProvider
     {
         ConsumeContext _context;
 
         public bool HasContext => _context != null && !(_context is MissingConsumeContext);
 
-        public IDisposable PushContext(ConsumeContext context)
+        public virtual IDisposable PushContext(ConsumeContext context)
         {
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
@@ -30,14 +31,14 @@ namespace MassTransit.DependencyInjection
             }
         }
 
-        void PopContext(ConsumeContext context, ConsumeContext originalContext)
-        {
-            Interlocked.CompareExchange(ref _context, originalContext, context);
-        }
-
         public ConsumeContext GetContext()
         {
             return _context;
+        }
+
+        void PopContext(ConsumeContext context, ConsumeContext originalContext)
+        {
+            Interlocked.CompareExchange(ref _context, originalContext, context);
         }
 
 

@@ -73,7 +73,7 @@ namespace MassTransit.Saga
     }
 
 
-    public interface SagaRepositoryContext<TSaga> :
+    public interface QuerySagaRepositoryContext<TSaga> :
         PipeContext
         where TSaga : class, ISaga
     {
@@ -84,7 +84,13 @@ namespace MassTransit.Saga
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<SagaRepositoryQueryContext<TSaga>> Query(ISagaQuery<TSaga> query, CancellationToken cancellationToken = default);
+    }
 
+
+    public interface LoadSagaRepositoryContext<TSaga> :
+        PipeContext
+        where TSaga : class, ISaga
+    {
         /// <summary>
         /// Load an existing saga instance
         /// </summary>

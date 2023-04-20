@@ -11,7 +11,7 @@ namespace MassTransit.Tests.SagaStateMachineTests
         InMemoryTestFixture
     {
         readonly TestStateMachine _machine;
-        readonly InMemorySagaRepository<Instance> _repository;
+        readonly ISagaRepository<Instance> _repository;
 
         static Specifying_dynamic_events_in_a_state_machine()
         {

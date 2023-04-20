@@ -9,22 +9,20 @@
         IClientFactory,
         IAsyncDisposable
     {
-        readonly ClientFactoryContext _context;
-
         public ClientFactory(ClientFactoryContext context)
         {
-            _context = context;
+            Context = context;
         }
 
         public ValueTask DisposeAsync()
         {
-            if (_context is IAsyncDisposable asyncDisposable)
+            if (Context is IAsyncDisposable asyncDisposable)
                 return asyncDisposable.DisposeAsync();
 
             return default;
         }
 
-        public ClientFactoryContext Context => _context;
+        public ClientFactoryContext Context { get; }
 
         public RequestHandle<T> CreateRequest<T>(T message, CancellationToken cancellationToken, RequestTimeout timeout)
             where T : class
@@ -98,7 +96,7 @@
             if (EndpointConvention.TryGetDestinationAddress<T>(out var destinationAddress))
                 return CreateRequestClient<T>(destinationAddress, timeout);
 
-            return new RequestClient<T>(_context, _context.GetRequestEndpoint<T>(), timeout.Or(_context.DefaultTimeout));
+            return new RequestClient<T>(Context, Context.GetRequestEndpoint<T>(), timeout.Or(Context.DefaultTimeout));
         }
 
         public IRequestClient<T> CreateRequestClient<T>(ConsumeContext consumeContext, RequestTimeout timeout)
@@ -107,21 +105,21 @@
             if (EndpointConvention.TryGetDestinationAddress<T>(out var destinationAddress))
                 return CreateRequestClient<T>(consumeContext, destinationAddress, timeout);
 
-            return new RequestClient<T>(_context, _context.GetRequestEndpoint<T>(consumeContext), timeout.Or(_context.DefaultTimeout));
+            return new RequestClient<T>(Context, Context.GetRequestEndpoint<T>(consumeContext), timeout.Or(Context.DefaultTimeout));
         }
 
         public IRequestClient<T> CreateRequestClient<T>(Uri destinationAddress, RequestTimeout timeout)
             where T : class
         {
-            IRequestSendEndpoint<T> requestSendEndpoint = _context.GetRequestEndpoint<T>(destinationAddress);
+            IRequestSendEndpoint<T> requestSendEndpoint = Context.GetRequestEndpoint<T>(destinationAddress);
 
-            return new RequestClient<T>(_context, requestSendEndpoint, timeout.Or(_context.DefaultTimeout));
+            return new RequestClient<T>(Context, requestSendEndpoint, timeout.Or(Context.DefaultTimeout));
         }
 
         public IRequestClient<T> CreateRequestClient<T>(ConsumeContext consumeContext, Uri destinationAddress, RequestTimeout timeout)
             where T : class
         {
-            return new RequestClient<T>(_context, _context.GetRequestEndpoint<T>(destinationAddress, consumeContext), timeout.Or(_context.DefaultTimeout));
+            return new RequestClient<T>(Context, Context.GetRequestEndpoint<T>(destinationAddress, consumeContext), timeout.Or(Context.DefaultTimeout));
         }
     }
 }

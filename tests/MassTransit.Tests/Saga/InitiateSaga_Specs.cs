@@ -49,7 +49,7 @@ namespace MassTransit.Tests.Saga
         }
 
         Guid _sagaId;
-        readonly InMemorySagaRepository<SimpleSaga> _repository;
+        readonly ISagaRepository<SimpleSaga> _repository;
     }
 
 
@@ -92,7 +92,7 @@ namespace MassTransit.Tests.Saga
         }
 
         Guid _sagaId;
-        readonly InMemorySagaRepository<SimpleSaga> _repository;
+        readonly ISagaRepository<SimpleSaga> _repository;
     }
 
 
@@ -131,7 +131,7 @@ namespace MassTransit.Tests.Saga
         }
 
         Guid _sagaId;
-        readonly InMemorySagaRepository<SimpleSaga> _repository;
+        readonly ISagaRepository<SimpleSaga> _repository;
     }
 
 
@@ -170,7 +170,7 @@ namespace MassTransit.Tests.Saga
         }
 
         Guid _sagaId;
-        readonly InMemorySagaRepository<SimpleSaga> _repository;
+        readonly ISagaRepository<SimpleSaga> _repository;
     }
 
 
