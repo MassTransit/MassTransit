@@ -23,7 +23,7 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="configure"></param>
         /// <typeparam name="T">The consumer type</typeparam>
-        void ConfigureConsumer<T>(IReceiveEndpointConfigurator configurator, Action<IConsumerConfigurator<T>> configure = null)
+        void ConfigureConsumer<T>(IReceiveEndpointConfigurator configurator, Action<IConsumerConfigurator<T>>? configure = null)
             where T : class, IConsumer;
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="configure"></param>
         /// <typeparam name="T">The saga type</typeparam>
-        void ConfigureSaga<T>(IReceiveEndpointConfigurator configurator, Action<ISagaConfigurator<T>> configure = null)
+        void ConfigureSaga<T>(IReceiveEndpointConfigurator configurator, Action<ISagaConfigurator<T>>? configure = null)
             where T : class, ISaga;
 
         /// <summary>

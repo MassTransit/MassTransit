@@ -13,7 +13,9 @@ namespace MassTransit
         /// <summary>Configure the future on the receive endpoint</summary>
         /// <param name="endpointConfigurator">The receive endpoint configurator for the consumer</param>
         /// <param name="sagaConfigurator">The consumer configurator</param>
-        void Configure(IReceiveEndpointConfigurator endpointConfigurator, ISagaConfigurator<FutureState> sagaConfigurator);
+        /// <param name="context"></param>
+        void Configure(IReceiveEndpointConfigurator endpointConfigurator, ISagaConfigurator<FutureState> sagaConfigurator,
+            IRegistrationContext context);
     }
 
 

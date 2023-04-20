@@ -34,8 +34,10 @@ namespace MassTransit.DapperIntegration.Configuration
             where T : class, ISaga
         {
             configurator.TryAddSingleton(new DapperOptions<T>(_connectionString, IsolationLevel));
-            configurator.RegisterSagaRepository<T, DatabaseContext<T>, SagaConsumeContextFactory<DatabaseContext<T>, T>,
-                DapperSagaRepositoryContextFactory<T>>();
+            configurator.RegisterLoadSagaRepository<T, DapperSagaRepositoryContextFactory<T>>();
+            configurator.RegisterQuerySagaRepository<T, DapperSagaRepositoryContextFactory<T>>();
+            configurator
+                .RegisterSagaRepository<T, DatabaseContext<T>, SagaConsumeContextFactory<DatabaseContext<T>, T>, DapperSagaRepositoryContextFactory<T>>();
         }
     }
 }

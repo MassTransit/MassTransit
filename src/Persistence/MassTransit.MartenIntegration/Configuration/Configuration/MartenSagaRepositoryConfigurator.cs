@@ -65,6 +65,8 @@ namespace MassTransit.Configuration
             }
 
             configurator.TryAddEnumerable(ServiceDescriptor.Singleton<IConfigureMarten, MartenSagaRepositoryStoreOptionsConfigurator>(Factory));
+            configurator.RegisterLoadSagaRepository<T, MartenSagaRepositoryContextFactory<T>>();
+            configurator.RegisterQuerySagaRepository<T, MartenSagaRepositoryContextFactory<T>>();
             configurator.RegisterSagaRepository<T, IDocumentSession, SagaConsumeContextFactory<IDocumentSession, T>, MartenSagaRepositoryContextFactory<T>>();
         }
 

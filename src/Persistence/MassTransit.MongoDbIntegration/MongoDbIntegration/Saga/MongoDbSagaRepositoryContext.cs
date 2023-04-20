@@ -113,7 +113,8 @@ namespace MassTransit.MongoDbIntegration.Saga
 
     public class MongoDbSagaRepositoryContext<TSaga> :
         BasePipeContext,
-        SagaRepositoryContext<TSaga>
+        QuerySagaRepositoryContext<TSaga>,
+        LoadSagaRepositoryContext<TSaga>
         where TSaga : class, ISagaVersion
     {
         readonly MongoDbCollectionContext<TSaga> _dbContext;
@@ -124,6 +125,13 @@ namespace MassTransit.MongoDbIntegration.Saga
             _dbContext = dbContext;
         }
 
+        public Task<TSaga> Load(Guid correlationId)
+        {
+            FilterDefinition<TSaga> filter = Builders<TSaga>.Filter.Eq(x => x.CorrelationId, correlationId);
+
+            return _dbContext.Find(filter).FirstOrDefaultAsync();
+        }
+
         public async Task<SagaRepositoryQueryContext<TSaga>> Query(ISagaQuery<TSaga> query, CancellationToken cancellationToken)
         {
             IList<Guid> instances = await _dbContext.Find(query.FilterExpression)
@@ -132,13 +140,6 @@ namespace MassTransit.MongoDbIntegration.Saga
                 .ConfigureAwait(false);
 
             return new DefaultSagaRepositoryQueryContext<TSaga>(this, instances);
-        }
-
-        public Task<TSaga> Load(Guid correlationId)
-        {
-            FilterDefinition<TSaga> filter = Builders<TSaga>.Filter.Eq(x => x.CorrelationId, correlationId);
-
-            return _dbContext.Find(filter).FirstOrDefaultAsync();
         }
     }
 }

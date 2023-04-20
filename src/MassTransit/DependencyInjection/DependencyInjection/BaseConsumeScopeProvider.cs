@@ -10,10 +10,17 @@ namespace MassTransit.DependencyInjection
     public abstract class BaseConsumeScopeProvider
     {
         readonly IServiceProvider _serviceProvider;
+        protected readonly ISetScopedConsumeContext SetScopedConsumeContext;
 
-        protected BaseConsumeScopeProvider(IServiceProvider serviceProvider)
+        protected BaseConsumeScopeProvider(IRegistrationContext context)
+            : this(context, context as ISetScopedConsumeContext ?? throw new ArgumentException(nameof(context)))
+        {
+        }
+
+        protected BaseConsumeScopeProvider(IServiceProvider serviceProvider, ISetScopedConsumeContext setScopedConsumeContext)
         {
             _serviceProvider = serviceProvider;
+            SetScopedConsumeContext = setScopedConsumeContext;
         }
 
         protected ValueTask<TScopeContext> GetScopeContext<TScopeContext, TPipeContext>(TPipeContext context,
@@ -25,7 +32,7 @@ namespace MassTransit.DependencyInjection
             if (context.TryGetPayload<IServiceScope>(out var existingServiceScope))
             {
                 return new ValueTask<TScopeContext>(existingScopeContextFactory(context, existingServiceScope,
-                    existingServiceScope.SetCurrentConsumeContext(context)));
+                    SetScopedConsumeContext.PushContext(existingServiceScope, context)));
             }
 
             var serviceProvider = context.GetPayload(_serviceProvider);
@@ -43,7 +50,7 @@ namespace MassTransit.DependencyInjection
                 }
 
                 return new ValueTask<TScopeContext>(createdScopeContextFactory(scopeContext, serviceScope,
-                    serviceScope.SetCurrentConsumeContext(scopeContext)));
+                    SetScopedConsumeContext.PushContext(serviceScope, scopeContext)));
             }
             catch (Exception ex)
             {

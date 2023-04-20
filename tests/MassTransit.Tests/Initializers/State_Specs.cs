@@ -33,7 +33,7 @@ namespace MassTransit.Tests.Initializers
         }
 
         readonly IntStateMachine _machine;
-        readonly InMemorySagaRepository<IntInstance> _repository;
+        readonly ISagaRepository<IntInstance> _repository;
 
         public Initializing_a_property_using_state_machine_state()
         {

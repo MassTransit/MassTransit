@@ -1,7 +1,6 @@
 namespace MassTransit.Configuration
 {
     using System;
-    using DependencyInjection;
     using DependencyInjection.Registration;
     using Internals;
     using Microsoft.Extensions.DependencyInjection;
@@ -91,12 +90,6 @@ namespace MassTransit.Configuration
             public virtual IActivityRegistration Register(IServiceCollection collection, IContainerRegistrar registrar)
             {
                 collection.TryAddScoped<TActivity>();
-
-                collection.TryAddTransient<IExecuteActivityScopeProvider<TActivity, TArguments>,
-                    ExecuteActivityScopeProvider<TActivity, TArguments>>();
-
-                collection.TryAddTransient<ICompensateActivityScopeProvider<TActivity, TLog>,
-                    CompensateActivityScopeProvider<TActivity, TLog>>();
 
                 return registrar.GetOrAdd<IActivityRegistration>(typeof(TActivity), _ => new ActivityRegistration<TActivity, TArguments, TLog>());
             }

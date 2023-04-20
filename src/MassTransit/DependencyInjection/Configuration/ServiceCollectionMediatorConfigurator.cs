@@ -19,7 +19,8 @@ namespace MassTransit.Configuration
         {
             IMediatorRegistrationContext CreateRegistrationContext(IServiceProvider provider)
             {
-                var registration = CreateRegistration(provider);
+                var setter = provider.GetRequiredService<Bind<IMediator, ISetScopedConsumeContext>>();
+                var registration = CreateRegistration(provider, setter.Value);
                 return new MediatorRegistrationContext(registration);
             }
 
@@ -38,14 +39,33 @@ namespace MassTransit.Configuration
             _configure = configure;
         }
 
+        public override void AddConfigureEndpointsCallback(ConfigureEndpointsProviderCallback callback)
+        {
+            if (callback == null)
+                throw new ArgumentNullException(nameof(callback));
+
+            this.TryAddSingleton<IConfigureReceiveEndpoint>(provider =>
+                new ConfigureReceiveEndpointDelegateProvider(provider.GetRequiredService<IMediatorRegistrationContext>(), callback));
+        }
+
         static void AddMassTransitComponents(IServiceCollection collection)
         {
             collection.AddScoped<IScopedMediator, ScopedMediator>();
 
             collection.TryAddScoped<ScopedConsumeContextProvider>();
-            collection.TryAddScoped(provider => provider.GetRequiredService<ScopedConsumeContextProvider>().GetContext() ?? MissingConsumeContext.Instance);
+            collection.TryAddScoped<IScopedConsumeContextProvider>(provider => provider.GetRequiredService<ScopedConsumeContextProvider>());
+            collection.AddSingleton(_ =>
+                Bind<IMediator>.Create((ISetScopedConsumeContext)new SetScopedConsumeContext(provider =>
+                    provider.GetRequiredService<Bind<IMediator, IScopedConsumeContextProvider>>().Value)));
 
-            collection.TryAddSingleton<IConsumeScopeProvider>(provider => new ConsumeScopeProvider(provider));
+            static Bind<IMediator, IScopedConsumeContextProvider> CreateScopeProvider(IServiceProvider provider)
+            {
+                var global = provider.GetRequiredService<IScopedConsumeContextProvider>();
+                return Bind<IMediator>.Create((IScopedConsumeContextProvider)new TypedScopedConsumeContextProvider(global));
+            }
+
+            collection.TryAddScoped(CreateScopeProvider);
+            collection.TryAddScoped(provider => provider.GetRequiredService<IScopedConsumeContextProvider>().GetContext() ?? MissingConsumeContext.Instance);
 
             collection.TryAddScoped(typeof(IRequestClient<>), typeof(GenericRequestClient<>));
         }

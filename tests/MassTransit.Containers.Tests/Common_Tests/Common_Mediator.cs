@@ -14,6 +14,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     public class Using_mediator_alongside_the_bus :
         InMemoryContainerTestFixture
     {
+        IMediator Mediator => ServiceProvider.GetRequiredService<IMediator>();
+
         [Test]
         public async Task Should_dispatch_to_the_consumer()
         {
@@ -26,8 +28,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             await lastConsumer.Last.OrCanceled(InMemoryTestHarness.TestCancellationToken);
         }
-
-        IMediator Mediator => ServiceProvider.GetRequiredService<IMediator>();
 
         protected override IServiceCollection ConfigureServices(IServiceCollection collection)
         {
@@ -44,6 +44,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     public class Publishing_a_message_from_a_mediator_consumer :
         InMemoryContainerTestFixture
     {
+        IMediator Mediator => ServiceProvider.GetRequiredService<IMediator>();
+
         [Test]
         public async Task Should_not_transfer_message_headers()
         {
@@ -60,8 +62,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
             // headers are not transferred from the mediator to the bus automatically
             Assert.That(submitted.InitiatorId.HasValue, Is.False);
         }
-
-        IMediator Mediator => ServiceProvider.GetRequiredService<IMediator>();
 
         protected override IServiceCollection ConfigureServices(IServiceCollection collection)
         {
@@ -109,6 +109,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     public class Common_Mediator_Request :
         InMemoryContainerTestFixture
     {
+        Guid _correlationId;
+
         [Test]
         public async Task Should_receive_the_response()
         {
@@ -125,8 +127,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
             Assert.That(response.InitiatorId.Value, Is.EqualTo(_correlationId));
             Assert.That(response.Message.OriginalInitiatorId, Is.EqualTo(_correlationId));
         }
-
-        Guid _correlationId;
 
         protected override IServiceCollection ConfigureServices(IServiceCollection collection)
         {
@@ -280,6 +280,10 @@ namespace MassTransit.Containers.Tests.Common_Tests
     public class Common_Mediator_Saga :
         InMemoryContainerTestFixture
     {
+        Guid _correlationId;
+
+        IMediator Mediator => ServiceProvider.GetRequiredService<IMediator>();
+
         [Test]
         public async Task Should_receive_the_response()
         {
@@ -291,14 +295,10 @@ namespace MassTransit.Containers.Tests.Common_Tests
                 OrderNumber = "90210"
             });
 
-            Guid? foundId = await GetSagaRepository<OrderSaga>().ShouldContainSaga(_correlationId, TestTimeout);
+            Guid? foundId = await GetLoadSagaRepository<OrderSaga>().ShouldContainSaga(_correlationId, TestTimeout);
 
             Assert.That(foundId.HasValue, Is.True);
         }
-
-        Guid _correlationId;
-
-        IMediator Mediator => ServiceProvider.GetRequiredService<IMediator>();
 
         protected override IServiceCollection ConfigureServices(IServiceCollection collection)
         {
@@ -358,6 +358,19 @@ namespace MassTransit.Containers.Tests.Common_Tests
     public class Common_Mediator_FilterScope :
         InMemoryContainerTestFixture
     {
+        readonly TaskCompletionSource<ConsumeContext<EasyA>> _easyASource;
+        readonly TaskCompletionSource<ConsumeContext<EasyB>> _easyBSource;
+        readonly TaskCompletionSource<ScopedContext> _scopedContextSource;
+
+        public Common_Mediator_FilterScope()
+        {
+            _scopedContextSource = GetTask<ScopedContext>();
+            _easyASource = GetTask<ConsumeContext<EasyA>>();
+            _easyBSource = GetTask<ConsumeContext<EasyB>>();
+        }
+
+        IMediator Mediator => ServiceProvider.GetRequiredService<IMediator>();
+
         [Test]
         public async Task Should_use_the_same_scope_for_consume_and_send()
         {
@@ -376,19 +389,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             Assert.ThrowsAsync<TimeoutException>(async () => await context.ConsumeContextEasyB.Task.OrTimeout(100));
         }
-
-        readonly TaskCompletionSource<ConsumeContext<EasyA>> _easyASource;
-        readonly TaskCompletionSource<ConsumeContext<EasyB>> _easyBSource;
-        readonly TaskCompletionSource<ScopedContext> _scopedContextSource;
-
-        public Common_Mediator_FilterScope()
-        {
-            _scopedContextSource = GetTask<ScopedContext>();
-            _easyASource = GetTask<ConsumeContext<EasyA>>();
-            _easyBSource = GetTask<ConsumeContext<EasyB>>();
-        }
-
-        IMediator Mediator => ServiceProvider.GetRequiredService<IMediator>();
 
         protected override IServiceCollection ConfigureServices(IServiceCollection collection)
         {

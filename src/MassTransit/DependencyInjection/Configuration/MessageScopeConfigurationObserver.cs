@@ -10,11 +10,19 @@ namespace MassTransit.Configuration
         IMessageConfigurationObserver
     {
         readonly IServiceProvider _serviceProvider;
+        readonly ISetScopedConsumeContext _setScopedConsumeContext;
 
         public MessageScopeConfigurationObserver(IConsumePipeConfigurator receiveEndpointConfigurator, IServiceProvider serviceProvider)
+            : this(receiveEndpointConfigurator, serviceProvider, LegacySetScopedConsumeContext.Instance)
+        {
+        }
+
+        public MessageScopeConfigurationObserver(IConsumePipeConfigurator receiveEndpointConfigurator, IServiceProvider serviceProvider,
+            ISetScopedConsumeContext setScopedConsumeContext)
             : base(receiveEndpointConfigurator)
         {
             _serviceProvider = serviceProvider;
+            _setScopedConsumeContext = setScopedConsumeContext;
 
             Connect(this);
         }
@@ -22,7 +30,7 @@ namespace MassTransit.Configuration
         public void MessageConfigured<TMessage>(IConsumePipeConfigurator configurator)
             where TMessage : class
         {
-            var scopeProvider = new ConsumeScopeProvider(_serviceProvider);
+            var scopeProvider = new ConsumeScopeProvider(_serviceProvider, _setScopedConsumeContext);
             var scopeFilter = new ScopeMessageFilter<TMessage>(scopeProvider);
             var specification = new FilterPipeSpecification<ConsumeContext<TMessage>>(scopeFilter);
 
@@ -31,11 +39,10 @@ namespace MassTransit.Configuration
 
         public override void BatchConsumerConfigured<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, Batch<TMessage>> configurator)
         {
-            var consumerSpecification = configurator as IConsumerMessageSpecification<TConsumer, Batch<TMessage>>;
-            if (consumerSpecification == null)
+            if (!(configurator is IConsumerMessageSpecification<TConsumer, Batch<TMessage>> consumerSpecification))
                 throw new ArgumentException("The configurator must be a consumer specification");
 
-            var scopeProvider = new ConsumeScopeProvider(_serviceProvider);
+            var scopeProvider = new ConsumeScopeProvider(_serviceProvider, _setScopedConsumeContext);
             var scopeFilter = new ScopeMessageFilter<Batch<TMessage>>(scopeProvider);
             var specification = new FilterPipeSpecification<ConsumeContext<Batch<TMessage>>>(scopeFilter);
 
@@ -44,7 +51,7 @@ namespace MassTransit.Configuration
 
         public override void ActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator, Uri compensateAddress)
         {
-            var scopeProvider = new ExecuteActivityScopeProvider<TActivity, TArguments>(_serviceProvider);
+            var scopeProvider = new ExecuteActivityScopeProvider<TActivity, TArguments>(_serviceProvider, _setScopedConsumeContext);
             var scopeFilter = new ScopeExecuteFilter<TActivity, TArguments>(scopeProvider);
             var specification = new FilterPipeSpecification<ExecuteContext<TArguments>>(scopeFilter);
 
@@ -53,7 +60,7 @@ namespace MassTransit.Configuration
 
         public override void ExecuteActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator)
         {
-            var scopeProvider = new ExecuteActivityScopeProvider<TActivity, TArguments>(_serviceProvider);
+            var scopeProvider = new ExecuteActivityScopeProvider<TActivity, TArguments>(_serviceProvider, _setScopedConsumeContext);
             var scopeFilter = new ScopeExecuteFilter<TActivity, TArguments>(scopeProvider);
             var specification = new FilterPipeSpecification<ExecuteContext<TArguments>>(scopeFilter);
 
@@ -62,7 +69,7 @@ namespace MassTransit.Configuration
 
         public override void CompensateActivityConfigured<TActivity, TLog>(ICompensateActivityConfigurator<TActivity, TLog> configurator)
         {
-            var scopeProvider = new CompensateActivityScopeProvider<TActivity, TLog>(_serviceProvider);
+            var scopeProvider = new CompensateActivityScopeProvider<TActivity, TLog>(_serviceProvider, _setScopedConsumeContext);
             var scopeFilter = new ScopeCompensateFilter<TActivity, TLog>(scopeProvider);
             var specification = new FilterPipeSpecification<CompensateContext<TLog>>(scopeFilter);
 

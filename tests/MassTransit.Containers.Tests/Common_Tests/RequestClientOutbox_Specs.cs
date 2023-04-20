@@ -30,7 +30,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.UseInMemoryOutbox();
+            configurator.UseInMemoryOutbox(BusRegistrationContext);
 
             configurator.ConfigureConsumer<InitialConsumer>(BusRegistrationContext);
         }
@@ -69,6 +69,20 @@ namespace MassTransit.Containers.Tests.Common_Tests
     public class Using_the_outbox_with_a_routing_slip_request :
         InMemoryContainerTestFixture
     {
+        Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
+        Task<ConsumeContext<RoutingSlipCompleted>> _completed;
+        Uri _executeAddress;
+        Guid _trackingNumber;
+
+        public Using_the_outbox_with_a_routing_slip_request()
+        {
+            RequestQueueName = "activity-request";
+            RequestQueueAddress = new Uri($"queue:{RequestQueueName}");
+        }
+
+        Uri RequestQueueAddress { get; }
+        string RequestQueueName { get; }
+
         [Test]
         public async Task Should_receive_the_response()
         {
@@ -88,20 +102,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
             await _activityCompleted;
         }
 
-        Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
-        Task<ConsumeContext<RoutingSlipCompleted>> _completed;
-        Uri _executeAddress;
-        Guid _trackingNumber;
-
-        public Using_the_outbox_with_a_routing_slip_request()
-        {
-            RequestQueueName = "activity-request";
-            RequestQueueAddress = new Uri($"queue:{RequestQueueName}");
-        }
-
-        Uri RequestQueueAddress { get; }
-        string RequestQueueName { get; }
-
         protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
         {
             configurator.SetKebabCaseEndpointNameFormatter();
@@ -110,7 +110,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             configurator.AddConfigureEndpointsCallback((name, x) =>
             {
-                x.UseInMemoryOutbox();
+                x.UseInMemoryOutbox(BusRegistrationContext);
 
                 if (name == KebabCaseEndpointNameFormatter.Instance.ExecuteActivity<SendRequestActivity, SendRequestArguments>())
                     _executeAddress = x.InputAddress;
@@ -121,7 +121,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.UseInMemoryOutbox();
+            configurator.UseInMemoryOutbox(BusRegistrationContext);
         }
 
 

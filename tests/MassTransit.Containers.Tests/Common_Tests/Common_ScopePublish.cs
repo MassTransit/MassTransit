@@ -274,7 +274,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.UseMessageScope(ServiceProvider);
-            configurator.UseInMemoryOutbox();
+            configurator.UseInMemoryOutbox(BusRegistrationContext);
             configurator.ConfigureConsumer<ProducingConsumer>(BusRegistrationContext);
         }
 

@@ -1,7 +1,5 @@
 namespace MassTransit.Saga
 {
-    using System;
-    using System.Threading;
     using System.Threading.Tasks;
 
 
@@ -31,16 +29,6 @@ namespace MassTransit.Saga
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         Task SendQuery<T>(ConsumeContext<T> context, ISagaQuery<TSaga> query, IPipe<SagaRepositoryQueryContext<TSaga, T>> next)
-            where T : class;
-
-        /// <summary>
-        /// Create a <see cref="SagaRepositoryContext{TSaga}" /> and send it to the next pipe.
-        /// </summary>
-        /// <param name="asyncMethod"></param>
-        /// <param name="cancellationToken"></param>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        Task<T> Execute<T>(Func<SagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken = default)
             where T : class;
     }
 }

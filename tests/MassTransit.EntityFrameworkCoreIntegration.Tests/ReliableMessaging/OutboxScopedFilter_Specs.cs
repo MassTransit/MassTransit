@@ -215,17 +215,10 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
         class SimplerConsumerDefinition :
             ConsumerDefinition<SimplerConsumer>
         {
-            readonly IServiceProvider _provider;
-
-            public SimplerConsumerDefinition(IServiceProvider provider)
-            {
-                _provider = provider;
-            }
-
             protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,
-                IConsumerConfigurator<SimplerConsumer> consumerConfigurator)
+                IConsumerConfigurator<SimplerConsumer> consumerConfigurator, IRegistrationContext context)
             {
-                endpointConfigurator.UseEntityFrameworkOutbox<ReliableDbContext>(_provider);
+                endpointConfigurator.UseEntityFrameworkOutbox<ReliableDbContext>(context);
             }
         }
 

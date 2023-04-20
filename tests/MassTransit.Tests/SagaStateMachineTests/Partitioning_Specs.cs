@@ -36,7 +36,7 @@
             Console.WriteLine("Total time: {0}", timer.Elapsed);
         }
 
-        InMemorySagaRepository<Instance> _repository;
+        ISagaRepository<Instance> _repository;
 
         const int Limit = 100;
 

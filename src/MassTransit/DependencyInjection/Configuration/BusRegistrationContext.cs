@@ -14,8 +14,8 @@ namespace MassTransit.Configuration
     {
         IConfigureReceiveEndpoint? _configureReceiveEndpoints;
 
-        public BusRegistrationContext(IServiceProvider provider, IContainerSelector selector)
-            : base(provider, selector)
+        public BusRegistrationContext(IServiceProvider provider, IContainerSelector selector, ISetScopedConsumeContext setScopedConsumeContext)
+            : base(provider, selector, setScopedConsumeContext)
         {
         }
 
@@ -203,8 +203,8 @@ namespace MassTransit.Configuration
             IEnumerable<IConfigureReceiveEndpoint> configureReceiveEndpoints = this.GetServices<IConfigureReceiveEndpoint>();
 
             _configureReceiveEndpoints = configureReceiveEndpoints == null
-                ? new ConfigureReceiveEndpoint(Array.Empty<IConfigureReceiveEndpoint>())
-                : new ConfigureReceiveEndpoint(configureReceiveEndpoints.ToArray());
+                ? new ConfigureReceiveEndpoint(Array.Empty<IConfigureReceiveEndpoint>(), this)
+                : new ConfigureReceiveEndpoint(configureReceiveEndpoints.ToArray(), this);
 
             return _configureReceiveEndpoints;
         }
@@ -218,10 +218,12 @@ namespace MassTransit.Configuration
             IConfigureReceiveEndpoint
         {
             readonly IConfigureReceiveEndpoint[] _configurators;
+            readonly IRegistrationContext _context;
 
-            public ConfigureReceiveEndpoint(IConfigureReceiveEndpoint[] configurators)
+            public ConfigureReceiveEndpoint(IConfigureReceiveEndpoint[] configurators, IRegistrationContext context)
             {
                 _configurators = configurators;
+                _context = context;
             }
 
             public void Configure(string name, IReceiveEndpointConfigurator configurator)

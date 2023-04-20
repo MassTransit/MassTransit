@@ -5,7 +5,8 @@ namespace MassTransit
     using System.Threading.Tasks;
 
 
-    public interface IQuerySagaRepository<TSaga>
+    public interface IQuerySagaRepository<TSaga> :
+        IProbeSite
         where TSaga : class, ISaga
     {
         Task<IEnumerable<Guid>> Find(ISagaQuery<TSaga> query);

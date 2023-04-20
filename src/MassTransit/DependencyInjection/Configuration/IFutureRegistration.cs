@@ -1,13 +1,10 @@
 namespace MassTransit.Configuration
 {
-    using System;
-
-
     public interface IFutureRegistration :
         IRegistration
     {
-        void Configure(IReceiveEndpointConfigurator configurator, IServiceProvider provider);
+        void Configure(IReceiveEndpointConfigurator configurator, IRegistrationContext context);
 
-        IFutureDefinition GetDefinition(IServiceProvider provider);
+        IFutureDefinition GetDefinition(IRegistrationContext context);
     }
 }

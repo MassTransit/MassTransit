@@ -83,12 +83,12 @@ namespace MassTransit.Tests.Saga.Locator
             _repository.ShouldContainSaga(_otherSagaId, TestTimeout)
                 .Wait(TestCancellationToken);
 
-            _observeSaga = new ObservableSagaMessage {Name = "Chris"};
+            _observeSaga = new ObservableSagaMessage { Name = "Chris" };
         }
 
         Guid _sagaId;
         InitiateSimpleSaga _initiateSaga;
-        readonly InMemorySagaRepository<SimpleSaga> _repository;
+        readonly ISagaRepository<SimpleSaga> _repository;
         Guid _otherSagaId;
         ObservableSagaMessage _observeSaga;
         InitiateSimpleSaga _initiateOtherSaga;

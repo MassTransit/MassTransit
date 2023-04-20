@@ -57,8 +57,9 @@ namespace MassTransit.Configuration
         {
             configurator.TryAddSingleton<ICloudTableProvider<TSaga>>(provider => new ConstCloudTableProvider<TSaga>(_connectionFactory(provider)));
             configurator.TryAddSingleton(_formatterFactory);
-            configurator.RegisterSagaRepository<T, DatabaseContext<T>, SagaConsumeContextFactory<DatabaseContext<T>, T>,
-                AzureTableSagaRepositoryContextFactory<T>>();
+            configurator.RegisterLoadSagaRepository<T, AzureTableSagaRepositoryContextFactory<T>>();
+            configurator
+                .RegisterSagaRepository<T, DatabaseContext<T>, SagaConsumeContextFactory<DatabaseContext<T>, T>, AzureTableSagaRepositoryContextFactory<T>>();
         }
     }
 }

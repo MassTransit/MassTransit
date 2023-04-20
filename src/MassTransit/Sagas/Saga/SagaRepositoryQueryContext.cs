@@ -18,7 +18,7 @@ namespace MassTransit.Saga
 
 
     public interface SagaRepositoryQueryContext<TSaga> :
-        SagaRepositoryContext<TSaga>,
+        QuerySagaRepositoryContext<TSaga>,
         IEnumerable<Guid>
         where TSaga : class, ISaga
     {

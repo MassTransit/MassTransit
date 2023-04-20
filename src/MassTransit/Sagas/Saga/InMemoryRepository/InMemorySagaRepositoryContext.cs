@@ -182,7 +182,8 @@ namespace MassTransit.Saga
 
     public class InMemorySagaRepositoryContext<TSaga> :
         BasePipeContext,
-        SagaRepositoryContext<TSaga>
+        QuerySagaRepositoryContext<TSaga>,
+        LoadSagaRepositoryContext<TSaga>
         where TSaga : class, ISaga
     {
         readonly IndexedSagaDictionary<TSaga> _sagas;

@@ -84,8 +84,10 @@ namespace MassTransit.Configuration
             else
                 configurator.TryAddSingleton(provider => CreatePessimisticLockStrategy());
 
-            configurator.RegisterSagaRepository<TSaga, DbContext, SagaConsumeContextFactory<DbContext, TSaga>,
-                EntityFrameworkSagaRepositoryContextFactory<TSaga>>();
+            configurator.RegisterLoadSagaRepository<TSaga, EntityFrameworkSagaRepositoryContextFactory<TSaga>>();
+            configurator.RegisterQuerySagaRepository<TSaga, EntityFrameworkSagaRepositoryContextFactory<TSaga>>();
+            configurator
+                .RegisterSagaRepository<TSaga, DbContext, SagaConsumeContextFactory<DbContext, TSaga>, EntityFrameworkSagaRepositoryContextFactory<TSaga>>();
         }
 
         ISagaRepositoryLockStrategy<TSaga> CreateOptimisticLockStrategy()

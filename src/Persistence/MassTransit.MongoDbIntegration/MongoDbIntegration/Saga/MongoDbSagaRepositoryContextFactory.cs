@@ -9,7 +9,9 @@ namespace MassTransit.MongoDbIntegration.Saga
 
 
     public class MongoDbSagaRepositoryContextFactory<TSaga> :
-        ISagaRepositoryContextFactory<TSaga>
+        ISagaRepositoryContextFactory<TSaga>,
+        IQuerySagaRepositoryContextFactory<TSaga>,
+        ILoadSagaRepositoryContextFactory<TSaga>
         where TSaga : class, ISagaVersion
     {
         readonly MongoDbCollectionContext<TSaga> _dbContext;
@@ -20,6 +22,18 @@ namespace MassTransit.MongoDbIntegration.Saga
         {
             _dbContext = dbContext;
             _factory = factory;
+        }
+
+        public Task<T> Execute<T>(Func<LoadSagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken = default)
+            where T : class
+        {
+            return ExecuteAsyncMethod(asyncMethod, cancellationToken);
+        }
+
+        public Task<T> Execute<T>(Func<QuerySagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken = default)
+            where T : class
+        {
+            return ExecuteAsyncMethod(asyncMethod, cancellationToken);
         }
 
         public void Probe(ProbeContext context)
@@ -49,12 +63,12 @@ namespace MassTransit.MongoDbIntegration.Saga
             await next.Send(queryContext).ConfigureAwait(false);
         }
 
-        public async Task<T> Execute<T>(Func<SagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken = default)
+        Task<T> ExecuteAsyncMethod<T>(Func<MongoDbSagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken)
             where T : class
         {
             var repositoryContext = new MongoDbSagaRepositoryContext<TSaga>(_dbContext, cancellationToken);
 
-            return await asyncMethod(repositoryContext).ConfigureAwait(false);
+            return asyncMethod(repositoryContext);
         }
     }
 }
