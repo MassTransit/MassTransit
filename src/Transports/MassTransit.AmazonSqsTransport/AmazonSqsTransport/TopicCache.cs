@@ -17,7 +17,7 @@ namespace MassTransit.AmazonSqsTransport
         readonly CancellationToken _cancellationToken;
         readonly IAmazonSimpleNotificationService _client;
         readonly IDictionary<string, TopicInfo> _durableTopics;
-        readonly Lazy<Task> _loadExistingTopics;
+        Lazy<Task> _loadExistingTopics;
         bool _topicsLoaded;
 
         public TopicCache(IAmazonSimpleNotificationService client, CancellationToken cancellationToken)
@@ -27,7 +27,7 @@ namespace MassTransit.AmazonSqsTransport
 
             _cache = ClientContextCacheDefaults.CreateCache<string, TopicInfo>();
 
-            _loadExistingTopics = new Lazy<Task>(() => LoadExistingTopics(cancellationToken));
+            ResetLoadExistingTopics();
 
             _durableTopics = new Dictionary<string, TopicInfo>();
         }
@@ -51,7 +51,7 @@ namespace MassTransit.AmazonSqsTransport
         public async Task<TopicInfo> Get(Topology.Topic topic)
         {
             if (!_topicsLoaded)
-                await _loadExistingTopics.Value.ConfigureAwait(false);
+                await LoadExistingTopics().ConfigureAwait(false);
 
             lock (_durableTopics)
             {
@@ -65,7 +65,7 @@ namespace MassTransit.AmazonSqsTransport
         public async Task<TopicInfo> GetByName(string entityName)
         {
             if (!_topicsLoaded)
-                await _loadExistingTopics.Value.ConfigureAwait(false);
+                await LoadExistingTopics().ConfigureAwait(false);
 
             lock (_durableTopics)
             {
@@ -117,7 +117,28 @@ namespace MassTransit.AmazonSqsTransport
             return missingTopic;
         }
 
-        async Task LoadExistingTopics(CancellationToken token)
+        Lazy<Task> ResetLoadExistingTopics()
+        {
+            return _loadExistingTopics = new Lazy<Task>(() => LoadExistingTopicsLazy(_cancellationToken));
+        }
+
+        Task LoadExistingTopics()
+        {
+            var result = _loadExistingTopics.Value;
+            if (result.IsFaulted || result.IsCanceled)
+            {
+                lock (this)
+                {
+                    result = _loadExistingTopics.Value;
+                    if (result.IsFaulted || result.IsCanceled)
+                        result = ResetLoadExistingTopics().Value;
+                }
+            }
+
+            return result;
+        }
+
+        async Task LoadExistingTopicsLazy(CancellationToken token)
         {
             var cursor = string.Empty;
             do
