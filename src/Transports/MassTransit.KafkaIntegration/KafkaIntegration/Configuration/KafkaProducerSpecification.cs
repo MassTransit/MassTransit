@@ -159,10 +159,10 @@ namespace MassTransit.KafkaIntegration.Configuration
 
         public KafkaSendTransportContext<TKey, TValue> CreateSendTransportContext(IBusInstance busInstance, Action onStop = null)
         {
-            var producerConfig = _hostConfiguration.GetProducerConfig(_producerConfig);
-
             ProducerBuilder<byte[], byte[]> CreateProducerBuilder()
             {
+                var producerConfig = _hostConfiguration.GetProducerConfig(_producerConfig);
+
                 ProducerBuilder<byte[], byte[]> producerBuilder = new ProducerBuilder<byte[], byte[]>(producerConfig)
                     .SetKeySerializer(Serializers.ByteArray)
                     .SetValueSerializer(Serializers.ByteArray);
