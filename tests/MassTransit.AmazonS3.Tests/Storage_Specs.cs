@@ -26,6 +26,7 @@ namespace MassTransit.AmazonS3.Tests
                 .AddMassTransitTestHarness(x =>
                 {
                     x.SetKebabCaseEndpointNameFormatter();
+                    x.SetTestTimeouts(testInactivityTimeout: TimeSpan.FromSeconds(5));
 
                     x.UsingInMemory((context, cfg) =>
                     {
