@@ -23,7 +23,7 @@ specifically looks for `application/json` versus the standard content-type used
 by MassTransit which is `application/vnd.masstransit+json`.
 
 ```csharp
-endpointConfigurator.UseRawJsonSerializer();
+endpointConfigurator.UseRawJsonDeserializer();
 ```
 
 If you want to have MT bind the endpoint to the correct topic you can do the following:
@@ -37,11 +37,12 @@ if(endpointConfigurator is IRabbitMqReceiveEndpointConfigurator rabbit)
 
 ## If the existing system isn't setting the content type
 
-If the messages doesn't have a content-type set, it will use the default serializer.
-In this case, you know you want it to be json, so we can simply clear the existing ones
-and then register the raw json serializer only.
+If the messages doesn't have a content-type set, you can tell MassTransit
+what the default content type should be. Since, as the app developer, you know
+the content is `application/json` you can set that manually. Then when a 
+message comes in without a header, MT will select the correct one.
 
 ```csharp
-endpointConfigurator.ClearMessageDeserializers();
-endpointConfigurator.UseRawJsonSerializer();
+endpointConfigurator.DefaultContentType = new ContentType("application/json");
+endpointConfigurator.UseRawJsonDeserializer();
 ```
