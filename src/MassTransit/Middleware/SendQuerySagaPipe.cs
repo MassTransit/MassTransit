@@ -1,7 +1,6 @@
 namespace MassTransit.Middleware
 {
     using System;
-    using System.Linq;
     using System.Threading.Tasks;
     using Logging;
     using Saga;
@@ -29,7 +28,7 @@ namespace MassTransit.Middleware
         {
             if (context.Count > 0)
             {
-                async Task LoadInstance(Guid correlationId)
+                async Task SendToInstance(Guid correlationId)
                 {
                     SagaConsumeContext<TSaga, T> sagaConsumeContext = await context.Load(correlationId).ConfigureAwait(false);
                     if (sagaConsumeContext != null)
@@ -41,9 +40,7 @@ namespace MassTransit.Middleware
                             await _policy.Existing(sagaConsumeContext, _next).ConfigureAwait(false);
 
                             if (_policy.IsReadOnly)
-                            {
                                 await context.Undo(sagaConsumeContext).ConfigureAwait(false);
-                            }
                             else
                             {
                                 if (sagaConsumeContext.IsCompleted)
@@ -71,7 +68,8 @@ namespace MassTransit.Middleware
                     }
                 }
 
-                await Task.WhenAll(context.Select(LoadInstance)).ConfigureAwait(false);
+                foreach (var correlationId in context)
+                    await SendToInstance(correlationId).ConfigureAwait(false);
             }
             else
             {

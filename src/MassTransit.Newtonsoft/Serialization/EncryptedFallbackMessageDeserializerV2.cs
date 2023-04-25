@@ -40,7 +40,7 @@ namespace MassTransit.Serialization
             return Deserialize(receiveContext, false);
         }
 
-        public SerializerContext Deserialize(MessageBody body, Headers headers, Uri? destinationAddress = null)
+        public SerializerContext Deserialize(MessageBody body, Headers headers, Uri destinationAddress = null)
         {
             return Deserialize(body, headers, false, destinationAddress);
         }
@@ -66,7 +66,7 @@ namespace MassTransit.Serialization
             }
         }
 
-        SerializerContext Deserialize(MessageBody body, Headers headers, bool isRetry, Uri? destinationAddress = null)
+        SerializerContext Deserialize(MessageBody body, Headers headers, bool isRetry, Uri destinationAddress = null)
         {
             try
             {
