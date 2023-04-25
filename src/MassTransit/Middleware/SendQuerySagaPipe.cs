@@ -1,7 +1,6 @@
 namespace MassTransit.Middleware
 {
     using System;
-    using System.Linq;
     using System.Threading.Tasks;
     using Logging;
     using Saga;
@@ -71,7 +70,8 @@ namespace MassTransit.Middleware
                     }
                 }
 
-                await Task.WhenAll(context.Select(LoadInstance)).ConfigureAwait(false);
+                foreach (var item in context)
+                    await LoadInstance(item).ConfigureAwait(false);
             }
             else
             {
