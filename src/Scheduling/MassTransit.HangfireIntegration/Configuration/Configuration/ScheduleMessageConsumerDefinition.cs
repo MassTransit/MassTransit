@@ -17,7 +17,7 @@ namespace MassTransit.Configuration
         }
 
         protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,
-            IConsumerConfigurator<ScheduleMessageConsumer> consumerConfigurator)
+            IConsumerConfigurator<ScheduleMessageConsumer> consumerConfigurator, IRegistrationContext context)
         {
             endpointConfigurator.UseMessageRetry(r => r.Interval(5, 250));
 
