@@ -3,6 +3,7 @@ namespace MassTransit
 {
     using System;
     using Configuration;
+    using DependencyInjection;
     using EntityFrameworkCoreIntegration;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -43,6 +44,29 @@ namespace MassTransit
                 throw new ArgumentNullException(nameof(context));
 
             var observer = new OutboxConsumePipeSpecificationObserver<TDbContext>(configurator, context);
+
+            configure?.Invoke(observer);
+
+            configurator.ConnectConsumerConfigurationObserver(observer);
+            configurator.ConnectSagaConfigurationObserver(observer);
+        }
+
+        /// <summary>
+        /// Configure the Entity Framework outbox on the receive endpoint
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="provider">Configuration service provider</param>
+        /// <param name="configure"></param>
+        public static void UseEntityFrameworkOutbox<TDbContext>(this IReceiveEndpointConfigurator configurator, IServiceProvider provider,
+            Action<IOutboxOptionsConfigurator>? configure = null)
+            where TDbContext : DbContext
+        {
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+            if (provider == null)
+                throw new ArgumentNullException(nameof(provider));
+
+            var observer = new OutboxConsumePipeSpecificationObserver<TDbContext>(configurator, provider, LegacySetScopedConsumeContext.Instance);
 
             configure?.Invoke(observer);
 

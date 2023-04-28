@@ -3,6 +3,7 @@ namespace MassTransit
 {
     using System;
     using Configuration;
+    using DependencyInjection;
     using MongoDbIntegration;
 
 
@@ -38,6 +39,28 @@ namespace MassTransit
                 throw new ArgumentNullException(nameof(context));
 
             var observer = new OutboxConsumePipeSpecificationObserver<MongoDbContext>(configurator, context);
+
+            configure?.Invoke(observer);
+
+            configurator.ConnectConsumerConfigurationObserver(observer);
+            configurator.ConnectSagaConfigurationObserver(observer);
+        }
+
+        /// <summary>
+        /// Configure the Entity Framework outbox on the receive endpoint
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="provider">Configuration service provider</param>
+        /// <param name="configure"></param>
+        public static void UseMongoDbOutbox(this IReceiveEndpointConfigurator configurator, IServiceProvider provider,
+            Action<IOutboxOptionsConfigurator>? configure = null)
+        {
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+            if (provider == null)
+                throw new ArgumentNullException(nameof(provider));
+
+            var observer = new OutboxConsumePipeSpecificationObserver<MongoDbContext>(configurator, provider, LegacySetScopedConsumeContext.Instance);
 
             configure?.Invoke(observer);
 

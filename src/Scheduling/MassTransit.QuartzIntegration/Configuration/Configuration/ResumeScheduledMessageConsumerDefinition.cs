@@ -17,7 +17,7 @@
         }
 
         protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,
-            IConsumerConfigurator<ResumeScheduledMessageConsumer> consumerConfigurator)
+            IConsumerConfigurator<ResumeScheduledMessageConsumer> consumerConfigurator, IRegistrationContext context)
         {
             consumerConfigurator.Message<ResumeScheduledRecurringMessage>(m =>
             {

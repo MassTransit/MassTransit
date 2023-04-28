@@ -225,5 +225,25 @@
             configurator.ConnectConsumerConfigurationObserver(observer);
             configurator.ConnectSagaConfigurationObserver(observer);
         }
+
+        /// <summary>
+        /// Includes a combination inbox/outbox in the consume pipeline, which stores outgoing messages in memory until
+        /// the message consumer completes.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="provider">Configuration service provider</param>
+        public static void UseInMemoryInboxOutbox(this IReceiveEndpointConfigurator configurator, IServiceProvider provider)
+        {
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+            if (provider == null)
+                throw new ArgumentNullException(nameof(provider));
+
+            var observer = new OutboxConsumePipeSpecificationObserver<InMemoryOutboxMessageRepository>(configurator, provider,
+                LegacySetScopedConsumeContext.Instance);
+
+            configurator.ConnectConsumerConfigurationObserver(observer);
+            configurator.ConnectSagaConfigurationObserver(observer);
+        }
     }
 }
