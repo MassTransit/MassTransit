@@ -64,7 +64,7 @@ namespace MassTransit
             configurator.ServiceInstance(options, instanceConfigurator =>
             {
                 if (options.TryGetOptions(out JobServiceOptions jobServiceOptions))
-                    instanceConfigurator.ConfigureJobServiceEndpoints(jobServiceOptions);
+                    instanceConfigurator.ConfigureJobServiceEndpoints(jobServiceOptions, registration);
 
                 registration.ConfigureEndpoints(instanceConfigurator, instanceConfigurator.EndpointNameFormatter, configureFilter);
             });

@@ -17,7 +17,7 @@ namespace MassTransit.Configuration
         }
 
         protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,
-            IConsumerConfigurator<ScheduleRecurringMessageConsumer> consumerConfigurator)
+            IConsumerConfigurator<ScheduleRecurringMessageConsumer> consumerConfigurator, IRegistrationContext context)
         {
             consumerConfigurator.Message<ScheduleRecurringMessage>(m =>
             {
