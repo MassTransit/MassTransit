@@ -55,6 +55,9 @@ namespace MassTransit.EventHubIntegration.Configuration
             _blobClient = new Lazy<BlobContainerClient>(CreateBlobClient);
 
             PublishFaults = false;
+
+            this.DiscardFaultedMessages();
+            this.DiscardSkippedMessages();
         }
 
         public override Uri HostAddress => _endpointConfiguration.HostAddress;
