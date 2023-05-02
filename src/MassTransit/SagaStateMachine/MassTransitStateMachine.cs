@@ -1488,7 +1488,7 @@
             });
             Event(propertyExpression, x => x.TimeoutExpired, x =>
             {
-                x.CorrelateById(context => context.Message.RequestId);
+                x.CorrelateBy(requestIdExpression, context => context.Message.RequestId);
                 settings.TimeoutExpired?.Invoke(x);
             });
 
@@ -1664,7 +1664,7 @@
             });
             Event(propertyExpression, x => x.TimeoutExpired, x =>
             {
-                x.CorrelateById(context => context.Message.RequestId);
+                x.CorrelateBy(requestIdExpression, context => context.Message.RequestId);
                 settings.TimeoutExpired?.Invoke(x);
             });
 
