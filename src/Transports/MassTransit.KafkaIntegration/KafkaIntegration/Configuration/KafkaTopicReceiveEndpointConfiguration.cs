@@ -55,6 +55,9 @@ namespace MassTransit.KafkaIntegration.Configuration
             _consumerConfigurator = new PipeConfigurator<ConsumerContext>();
 
             PublishFaults = false;
+
+            this.DiscardFaultedMessages();
+            this.DiscardSkippedMessages();
         }
 
         public override Uri HostAddress => _endpointConfiguration.HostAddress;
