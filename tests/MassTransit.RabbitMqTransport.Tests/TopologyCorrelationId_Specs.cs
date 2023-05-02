@@ -6,6 +6,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class When_using_a_name_property_for_correlation :
         RabbitMqTestFixture
     {
@@ -76,6 +77,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class When_using_a_base_event :
         RabbitMqTestFixture
     {

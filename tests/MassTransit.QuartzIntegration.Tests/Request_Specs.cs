@@ -91,12 +91,12 @@
 
             protected virtual void ConfigureServiceQueueEndpoint(IReceiveEndpointConfigurator configurator)
             {
-                configurator.Handler<ValidateAddress>(async context =>
+                configurator.Handler<ValidateAddress>(context =>
                 {
                     Console.WriteLine("Address validated: {0}", context.Message.CorrelationId);
 
                     if (context.IsResponseAccepted<AddressValidated>(false))
-                        await context.RespondAsync<AddressValidated>(new { });
+                        return context.RespondAsync<AddressValidated>(new { });
 
                     throw new InvalidOperationException("Response type not accepted");
                 });
@@ -112,7 +112,7 @@
 
 
         class RequestSettingsImpl :
-            RequestSettings<TestState, ValidateAddress, AddressValidated>
+            RequestSettings<TestState, ValidateAddress, AddressValidated, AddressInvalidated>
         {
             public RequestSettingsImpl(Uri serviceAddress, Uri schedulingServiceAddress, TimeSpan timeout)
             {
@@ -128,6 +128,7 @@
             public TimeSpan Timeout { get; }
             public TimeSpan? TimeToLive { get; }
             public Action<IEventCorrelationConfigurator<TestState, AddressValidated>> Completed { get; set; }
+            public Action<IEventCorrelationConfigurator<TestState, AddressInvalidated>> Completed2 { get; set; }
             public Action<IEventCorrelationConfigurator<TestState, Fault<ValidateAddress>>> Faulted { get; set; }
             public Action<IEventCorrelationConfigurator<TestState, RequestTimeoutExpired<ValidateAddress>>> TimeoutExpired { get; set; }
         }
@@ -180,6 +181,15 @@
         }
 
 
+        public interface AddressInvalidated :
+            CorrelatedBy<Guid>
+        {
+            string Address { get; }
+
+            string RequestAddress { get; }
+        }
+
+
         public interface ValidateName :
             CorrelatedBy<Guid>
         {
@@ -199,7 +209,7 @@
         class TestStateMachine :
             MassTransitStateMachine<TestState>
         {
-            public TestStateMachine(RequestSettings<TestState, ValidateAddress, AddressValidated> settings)
+            public TestStateMachine(RequestSettings<TestState, ValidateAddress, AddressValidated, AddressInvalidated> settings)
             {
                 Event(() => Register, x =>
                 {
@@ -261,7 +271,8 @@
                         .ThenAsync(async context => await Console.Out.WriteLineAsync("Request timed out"))
                         .TransitionTo(NameValidationTimeout));
             } // ReSharper disable UnassignedGetOnlyAutoProperty
-            public Request<TestState, ValidateAddress, AddressValidated> ValidateAddress { get; }
+
+            public Request<TestState, ValidateAddress, AddressValidated, AddressInvalidated> ValidateAddress { get; }
             public Request<TestState, ValidateName, NameValidated> ValidateName { get; }
 
             public Event<RegisterMember> Register { get; }
