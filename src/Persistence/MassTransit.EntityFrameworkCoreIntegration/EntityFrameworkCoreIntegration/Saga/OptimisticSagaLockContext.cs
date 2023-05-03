@@ -1,5 +1,6 @@
 namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
@@ -17,20 +18,25 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
     {
         readonly CancellationToken _cancellationToken;
         readonly DbContext _context;
-        readonly ILoadQueryProvider<TSaga> _provider;
         readonly ISagaQuery<TSaga> _query;
+        readonly Func<IQueryable<TSaga>, IQueryable<TSaga>> _queryCustomization;
 
-        public OptimisticSagaLockContext(DbContext context, ISagaQuery<TSaga> query, CancellationToken cancellationToken, ILoadQueryProvider<TSaga> provider)
+        public OptimisticSagaLockContext(DbContext context, ISagaQuery<TSaga> query, CancellationToken cancellationToken,
+            Func<IQueryable<TSaga>, IQueryable<TSaga>> queryCustomization)
         {
             _context = context;
             _query = query;
             _cancellationToken = cancellationToken;
-            _provider = provider;
+            _queryCustomization = queryCustomization;
         }
 
         public async Task<IList<TSaga>> Load()
         {
-            List<TSaga> instances = await _provider.GetQueryable(_context)
+            IQueryable<TSaga> queryable = _context.Set<TSaga>();
+            if (_queryCustomization != null)
+                queryable = _queryCustomization(queryable);
+
+            List<TSaga> instances = await queryable.AsTracking()
                 .Where(_query.FilterExpression)
                 .ToListAsync(_cancellationToken)
                 .ConfigureAwait(false);

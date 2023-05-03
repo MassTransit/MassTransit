@@ -2,6 +2,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 {
     using System;
     using System.Data;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.EntityFrameworkCore;
@@ -12,12 +13,13 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
         where TSaga : class, ISaga
     {
         readonly ILoadQueryExecutor<TSaga> _executor;
-        readonly ILoadQueryProvider<TSaga> _provider;
+        readonly Func<IQueryable<TSaga>, IQueryable<TSaga>> _queryCustomization;
 
-        public OptimisticSagaRepositoryLockStrategy(ILoadQueryProvider<TSaga> provider, ILoadQueryExecutor<TSaga> executor, IsolationLevel isolationLevel)
+        public OptimisticSagaRepositoryLockStrategy(ILoadQueryExecutor<TSaga> executor, Func<IQueryable<TSaga>, IQueryable<TSaga>> queryCustomization,
+            IsolationLevel isolationLevel)
         {
-            _provider = provider;
             _executor = executor;
+            _queryCustomization = queryCustomization;
 
             IsolationLevel = isolationLevel;
         }
@@ -31,7 +33,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 
         public async Task<SagaLockContext<TSaga>> CreateLockContext(DbContext context, ISagaQuery<TSaga> query, CancellationToken cancellationToken)
         {
-            return new OptimisticSagaLockContext<TSaga>(context, query, cancellationToken, _provider);
+            return new OptimisticSagaLockContext<TSaga>(context, query, cancellationToken, _queryCustomization);
         }
     }
 }

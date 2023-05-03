@@ -6,6 +6,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Internals;
     using Logging;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Storage;
@@ -29,7 +30,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         readonly ILogger _logger;
         readonly IBusOutboxNotification _notification;
         readonly OutboxDeliveryServiceOptions _options;
+        readonly Func<TDbContext, Guid, long, int, IAsyncEnumerable<OutboxMessage>> _outboxMessagesQuery;
         readonly IServiceProvider _provider;
+
         string _getOutboxIdStatement;
 
         public BusOutboxDeliveryService(IBusControl busControl, IOptions<OutboxDeliveryServiceOptions> options,
@@ -45,6 +48,13 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
             _lockStatementProvider = outboxOptions.Value.LockStatementProvider;
             _isolationLevel = outboxOptions.Value.IsolationLevel;
+
+            _outboxMessagesQuery = EF.CompileAsyncQuery((TDbContext context, Guid outboxId, long lastSequenceNumber, int limit) =>
+                context.Set<OutboxMessage>()
+                    .Where(x => x.OutboxId == outboxId && x.SequenceNumber > lastSequenceNumber)
+                    .OrderBy(x => x.SequenceNumber)
+                    .Take(limit)
+                    .AsNoTracking());
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -213,12 +223,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
             var lastSequenceNumber = outboxState.LastSequenceNumber ?? 0;
 
-            List<OutboxMessage> messages = await dbContext.Set<OutboxMessage>()
-                .Where(x => x.OutboxId == outboxState.OutboxId && x.SequenceNumber > lastSequenceNumber)
-                .OrderBy(x => x.SequenceNumber)
-                .Take(messageLimit)
-                .AsNoTracking()
-                .ToListAsync(cancellationToken).ConfigureAwait(false);
+            IList<OutboxMessage> messages = await _outboxMessagesQuery(dbContext, outboxState.OutboxId, lastSequenceNumber, messageLimit)
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
 
             var sentSequenceNumber = 0L;
 
