@@ -60,6 +60,8 @@ namespace MassTransit
 
             configure?.Invoke(configurator);
 
+            AddInstrumentation(collection);
+
             configurator.Complete();
 
             return collection;
