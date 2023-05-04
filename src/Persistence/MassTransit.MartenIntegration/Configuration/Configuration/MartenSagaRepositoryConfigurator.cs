@@ -87,7 +87,7 @@ namespace MassTransit.Configuration
             public void Configure(IServiceProvider services, StoreOptions options)
             {
                 MartenRegistry.DocumentMappingExpression<TSaga> mappingExpression =
-                    options.Schema.For<TSaga>().Identity(x => x.CorrelationId).IdStrategy(new NoOpIdGeneration());
+                    options.Schema.For<TSaga>().Identity(x => x.CorrelationId).IdStrategy(new NoOpIdGeneration()).UseOptimisticConcurrency(true);
 
                 _configure?.Invoke(mappingExpression);
             }
