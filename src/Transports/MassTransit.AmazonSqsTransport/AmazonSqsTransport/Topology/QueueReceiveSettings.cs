@@ -19,12 +19,16 @@ namespace MassTransit.AmazonSqsTransport.Topology
             VisibilityTimeout = 30;
             RedeliverVisibilityTimeout = 0;
 
+            ConcurrentDeliveryLimit = 1;
+
             if (AmazonSqsEndpointAddress.IsFifo(queueName))
                 IsOrdered = true;
         }
 
         public int PrefetchCount => _configuration.Transport.PrefetchCount;
         public int ConcurrentMessageLimit => _configuration.Transport.GetConcurrentMessageLimit();
+
+        public int ConcurrentDeliveryLimit { get; set; }
 
         public int WaitTimeSeconds { get; set; }
 
