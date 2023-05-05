@@ -125,6 +125,11 @@
             }
         }
 
+        public int ConcurrentDeliveryLimit
+        {
+            set => _settings.ConcurrentDeliveryLimit = value;
+        }
+
         public ushort WaitTimeSeconds
         {
             set => _settings.WaitTimeSeconds = value;
