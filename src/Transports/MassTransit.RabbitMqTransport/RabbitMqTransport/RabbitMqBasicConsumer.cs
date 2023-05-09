@@ -167,7 +167,7 @@ namespace MassTransit.RabbitMqTransport
                 try
                 {
                     await Dispatch(deliveryTag, context,
-                            _ => _receiveSettings.NoAck ? NoLockReceiveContext.Instance : new RabbitMqReceiveLockContext(_model, deliveryTag))
+                            _receiveSettings.NoAck ? NoLockReceiveContext.Instance : new RabbitMqReceiveLockContext(_model, deliveryTag))
                         .ConfigureAwait(false);
                 }
                 catch (Exception exception)

@@ -204,25 +204,23 @@ namespace MassTransit.Transports
             return true;
         }
 
-        protected Task Dispatch<TContext>(TKey key, TContext context, Func<ReceiveContext, ReceiveLockContext> receiveLockFactory)
+        protected Task Dispatch<TContext>(TKey key, TContext context, ReceiveLockContext receiveLockContext)
             where TContext : BaseReceiveContext
         {
             var added = false;
-            ReceiveLockContext lockContext;
+            var lockContext = receiveLockContext;
 
-            if (!IsTrackable(key))
-                lockContext = receiveLockFactory(context);
-            else
+            if (IsTrackable(key))
             {
                 lockContext = _pending.AddOrUpdate(key, _ =>
                 {
                     added = true;
-                    context.PushLockContext(receiveLockFactory);
+                    context.PushLockContext(receiveLockContext);
                     return context;
                 }, (_, current) =>
                 {
                     added = false;
-                    current.PushLockContext(receiveLockFactory);
+                    current.PushLockContext(receiveLockContext);
                     return current;
                 });
 
@@ -233,16 +231,10 @@ namespace MassTransit.Transports
                 }
             }
 
-
             var dispatchTask = _dispatcher.Dispatch(context, lockContext);
 
             if (added)
-            {
-                dispatchTask.ContinueWith(_ =>
-                {
-                    _pending.TryRemove(key, out var _);
-                }, TaskContinuationOptions.ExecuteSynchronously);
-            }
+                dispatchTask.ContinueWith(_ => _pending.TryRemove(key, out var _), TaskContinuationOptions.ExecuteSynchronously);
 
             return dispatchTask;
         }
