@@ -62,15 +62,19 @@ namespace MassTransit.AmazonSqsTransport.Middleware
 
             SetReady();
 
+            Task Handle(Message message, CancellationToken cancellationToken)
+            {
+                var lockContext = new AmazonSqsReceiveLockContext(_context.InputAddress, message, _receiveSettings, _client);
+
+                return _receiveSettings.IsOrdered
+                    ? _executorPool.Run(message, () => HandleMessage(message, lockContext), cancellationToken)
+                    : HandleMessage(message, lockContext);
+            }
+
             try
             {
                 while (!IsStopping)
-                {
-                    if (_receiveSettings.IsOrdered)
-                        await algorithm.Run(ReceiveMessages, (m, c) => _executorPool.Run(m, () => HandleMessage(m), c), Stopping).ConfigureAwait(false);
-                    else
-                        await algorithm.Run(ReceiveMessages, (m, _) => HandleMessage(m), Stopping).ConfigureAwait(false);
-                }
+                    await algorithm.Run(ReceiveMessages, (m, c) => Handle(m, c), Stopping).ConfigureAwait(false);
             }
             catch (OperationCanceledException exception) when (exception.CancellationToken == Stopping)
             {
@@ -97,7 +101,7 @@ namespace MassTransit.AmazonSqsTransport.Middleware
             }
         }
 
-        async Task HandleMessage(Message message)
+        async Task HandleMessage(Message message, ReceiveLockContext lockContext)
         {
             if (IsStopping)
                 return;
@@ -107,8 +111,7 @@ namespace MassTransit.AmazonSqsTransport.Middleware
             var context = new AmazonSqsReceiveContext(message, redelivered, _context, _client, _receiveSettings, _client.ConnectionContext);
             try
             {
-                await Dispatch(message.MessageId, context, ctx => new AmazonSqsReceiveLockContext(ctx, message, _receiveSettings, _client))
-                    .ConfigureAwait(false);
+                await Dispatch(message.MessageId, context, lockContext).ConfigureAwait(false);
             }
             catch (Exception exception)
             {
@@ -163,7 +166,7 @@ namespace MassTransit.AmazonSqsTransport.Middleware
 
             static byte[] MessageGroupIdProvider(Message message)
             {
-                return message.Attributes.TryGetValue(MessageSystemAttributeName.MessageGroupId, out var groupId)
+                return message.Attributes.TryGetValue(MessageSystemAttributeName.MessageGroupId, out var groupId) && !string.IsNullOrEmpty(groupId)
                     ? Encoding.UTF8.GetBytes(groupId)
                     : Array.Empty<byte>();
             }

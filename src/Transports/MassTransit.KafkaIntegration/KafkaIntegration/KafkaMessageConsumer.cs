@@ -80,7 +80,7 @@
 
             try
             {
-                await Dispatch(result.TopicPartitionOffset, context, _ => new KafkaReceiveLockContext(result, _lockContext)).ConfigureAwait(false);
+                await Dispatch(result.TopicPartitionOffset, context, new KafkaReceiveLockContext(result, _lockContext)).ConfigureAwait(false);
             }
             catch (Exception exception)
             {

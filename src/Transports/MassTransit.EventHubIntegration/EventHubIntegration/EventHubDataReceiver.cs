@@ -76,7 +76,7 @@
 
             try
             {
-                await Dispatch(eventArgs, context, _ => new EventHubReceiveLockContext(eventArgs, _lockContext)).ConfigureAwait(false);
+                await Dispatch(eventArgs, context, new EventHubReceiveLockContext(eventArgs, _lockContext)).ConfigureAwait(false);
             }
             catch (Exception exception)
             {

@@ -175,12 +175,12 @@ namespace MassTransit.Transports
             }
         }
 
-        public void PushLockContext(Func<ReceiveContext, ReceiveLockContext> lockContextFactory)
+        public void PushLockContext(ReceiveLockContext lockContext)
         {
-            if (lockContextFactory == null)
-                throw new ArgumentNullException(nameof(lockContextFactory));
+            if (lockContext == null)
+                throw new ArgumentNullException(nameof(lockContext));
 
-            _pendingLockContexts.Enqueue(lockContextFactory(this));
+            _pendingLockContexts.Enqueue(lockContext);
         }
 
 
