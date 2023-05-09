@@ -111,7 +111,7 @@ namespace MassTransit.InMemoryTransport
 
                     try
                     {
-                        await Dispatch(message.MessageId, context, _ => NoLockReceiveContext.Instance).ConfigureAwait(false);
+                        await Dispatch(message.MessageId, context, NoLockReceiveContext.Instance).ConfigureAwait(false);
                     }
                     catch (Exception exception)
                     {
