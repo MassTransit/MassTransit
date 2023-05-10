@@ -10,15 +10,14 @@
         IConsumerConnector
         where T : class
     {
-        readonly IEnumerable<IConsumerMessageConnector<T>> _connectors;
+        readonly IList<IConsumerMessageConnector<T>> _connectors;
 
         public ConsumerConnector()
         {
             if (MessageTypeCache<T>.HasSagaInterfaces)
                 throw new ConfigurationException("A saga cannot be registered as a consumer");
 
-            _connectors = Consumes()
-                .ToList();
+            _connectors = Consumes().ToList();
         }
 
         public IEnumerable<IConsumerMessageConnector> Connectors => _connectors;
@@ -26,7 +25,7 @@
         ConnectHandle IConsumerConnector.ConnectConsumer<TConsumer>(IConsumePipeConnector consumePipe, IConsumerFactory<TConsumer> consumerFactory,
             IConsumerSpecification<TConsumer> specification)
         {
-            var handles = new List<ConnectHandle>();
+            var handles = new List<ConnectHandle>(_connectors.Count);
             try
             {
                 foreach (IConsumerMessageConnector<TConsumer> connector in _connectors.Cast<IConsumerMessageConnector<TConsumer>>())
