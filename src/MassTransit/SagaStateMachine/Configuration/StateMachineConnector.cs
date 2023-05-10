@@ -43,7 +43,7 @@
         public ConnectHandle ConnectSaga<T>(IConsumePipeConnector consumePipe, ISagaRepository<T> sagaRepository, ISagaSpecification<T> specification)
             where T : class, ISaga
         {
-            var handles = new List<ConnectHandle>();
+            var handles = new List<ConnectHandle>(_connectors.Count);
             try
             {
                 foreach (ISagaMessageConnector<T> connector in _connectors.Cast<ISagaMessageConnector<T>>())

@@ -10,7 +10,7 @@
         IInstanceConnector
         where TConsumer : class
     {
-        readonly IEnumerable<IInstanceMessageConnector<TConsumer>> _connectors;
+        readonly IList<IInstanceMessageConnector<TConsumer>> _connectors;
 
         public InstanceConnector()
         {
@@ -24,7 +24,7 @@
         public ConnectHandle ConnectInstance<T>(IConsumePipeConnector pipeConnector, T instance, IConsumerSpecification<T> specification)
             where T : class
         {
-            var handles = new List<ConnectHandle>();
+            var handles = new List<ConnectHandle>(_connectors.Count);
             try
             {
                 foreach (IInstanceMessageConnector<T> connector in _connectors.Cast<IInstanceMessageConnector<T>>())
