@@ -28,8 +28,7 @@ namespace MassTransit.Configuration
 
         public IEnumerable<ValidationResult> Validate()
         {
-            foreach (var result in _specification.Validate())
-                yield return result;
+            return _specification.Validate();
         }
 
         public void Configure(IReceiveEndpointBuilder builder)
