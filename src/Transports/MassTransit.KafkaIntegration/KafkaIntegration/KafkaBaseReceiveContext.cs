@@ -22,6 +22,7 @@
             _result = result;
             _context = context;
 
+            Body = new BytesMessageBody(_result.Message.Value);
             InputAddress = context.GetInputAddress(_result.Topic);
 
             _key = new Lazy<TKey>(() => _context.KeyDeserializer.DeserializeKey(result));
@@ -38,7 +39,7 @@
 
         protected override IHeaderProvider HeaderProvider => _headerProvider.Value;
 
-        public override MessageBody Body => new NotSupportedMessageBody();
+        public override MessageBody Body { get; }
 
         public string GroupId => _context.GroupId;
 
