@@ -50,7 +50,7 @@ namespace MassTransit.MartenIntegration.Tests
                     {
                         cfg.UseMessageRetry(r => r.Immediate(5));
                         cfg.UseMessageScope(context);
-                        cfg.UseInMemoryOutbox(context);
+                        cfg.UseInMemoryOutbox();
 
                         cfg.ConfigureEndpoints(context);
                     });

@@ -76,7 +76,7 @@ namespace MassTransit.KafkaIntegration
             return Task.CompletedTask;
         }
 
-        public void OnAssigned(IConsumer<byte[], byte[]> consumer, IEnumerable<TopicPartition> partitions)
+        public IEnumerable<TopicPartitionOffset> OnAssigned(IConsumer<byte[], byte[]> consumer, IEnumerable<TopicPartition> partitions)
         {
             LogContext.SetCurrentIfNull(_context.LogContext);
 
@@ -85,11 +85,14 @@ namespace MassTransit.KafkaIntegration
                 if (!_data.TryAdd(partition, p => new PartitionCheckpointData(consumer, _receiveSettings, _pending)))
                     continue;
 
-                LogContext.Debug?.Log("Partition: {PartitionId} was assigned to: {MemberId}", partition, consumer.MemberId);
+                LogContext.Debug?.Log("Partition: {PartitionId} with {Offset} was assigned to: {MemberId}", partition, _receiveSettings.Offset,
+                    consumer.MemberId);
+
+                yield return new TopicPartitionOffset(partition, _receiveSettings.Offset);
             }
         }
 
-        public void OnPartitionLost(IConsumer<byte[], byte[]> consumer, IEnumerable<TopicPartitionOffset> partitions)
+        public IEnumerable<TopicPartitionOffset> OnPartitionLost(IConsumer<byte[], byte[]> consumer, IEnumerable<TopicPartitionOffset> partitions)
         {
             LogContext.SetCurrentIfNull(_context.LogContext);
 
@@ -103,9 +106,10 @@ namespace MassTransit.KafkaIntegration
             }
 
             TaskUtil.Await(Task.WhenAll(partitions.Select(partition => LostAndDelete(partition))));
+            return Array.Empty<TopicPartitionOffset>();
         }
 
-        public void OnUnAssigned(IConsumer<byte[], byte[]> consumer, IEnumerable<TopicPartitionOffset> partitions)
+        public IEnumerable<TopicPartitionOffset> OnUnAssigned(IConsumer<byte[], byte[]> consumer, IEnumerable<TopicPartitionOffset> partitions)
         {
             LogContext.SetCurrentIfNull(_context.LogContext);
 
@@ -119,6 +123,7 @@ namespace MassTransit.KafkaIntegration
             }
 
             TaskUtil.Await(Task.WhenAll(partitions.Select(partition => CloseAndDelete(partition))));
+            return Array.Empty<TopicPartitionOffset>();
         }
 
 
