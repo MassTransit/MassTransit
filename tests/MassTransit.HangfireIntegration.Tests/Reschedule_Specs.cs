@@ -31,12 +31,13 @@
 
                 await InputQueueSendEndpoint.Send(new StopCommand(correlationId));
 
-                Guid? saga = await _repository.ShouldNotContainSaga(correlationId, TestTimeout);
+                Guid? saga = await LoadSagaRepository.ShouldNotContainSaga(correlationId, TestTimeout);
 
                 Assert.IsNull(saga);
             }
 
             InMemorySagaRepository<TestState> _repository;
+            ILoadSagaRepository<TestState> LoadSagaRepository => _repository;
             TestStateMachine _machine;
             Task<ConsumeContext<MessageRescheduled>> _rescheduled;
 

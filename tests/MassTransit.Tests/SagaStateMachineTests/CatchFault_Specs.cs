@@ -178,7 +178,7 @@
 
             Assert.AreEqual(message.CorrelationId, context.CorrelationId);
 
-            Assert.That(await _repository.ShouldNotContainSaga(message.CorrelationId, TestTimeout), Is.Null);
+            Assert.That(await LoadSagaRepository.ShouldNotContainSaga(message.CorrelationId, TestTimeout), Is.Null);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -191,6 +191,7 @@
 
         TestStateMachine _machine;
         InMemorySagaRepository<Instance> _repository;
+        ILoadSagaRepository<Instance> LoadSagaRepository => _repository;
 
 
         class Instance :

@@ -12,8 +12,9 @@ namespace MassTransit.Testing
         readonly SagaList<TSaga> _created;
         readonly SagaList<TSaga> _sagas;
 
-        public SagaTestHarness(BusTestHarness testHarness, ISagaRepository<TSaga> repository, string queueName)
-            : base(repository, testHarness.TestTimeout)
+        public SagaTestHarness(BusTestHarness testHarness, ISagaRepository<TSaga> repository, IQuerySagaRepository<TSaga> querySagaRepository,
+            ILoadSagaRepository<TSaga> loadSagaRepository, string queueName)
+            : base(querySagaRepository, loadSagaRepository, testHarness.TestTimeout)
         {
             _consumed = new ReceivedMessageList(testHarness.TestTimeout, testHarness.InactivityToken);
             _created = new SagaList<TSaga>(testHarness.TestTimeout, testHarness.InactivityToken);

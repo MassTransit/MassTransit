@@ -13,8 +13,10 @@ namespace MassTransit.Testing.Implementations
         where TInstance : class, SagaStateMachineInstance
         where TStateMachine : SagaStateMachine<TInstance>
     {
-        public StateMachineSagaTestHarness(BusTestHarness testHarness, ISagaRepository<TInstance> repository, TStateMachine stateMachine, string queueName)
-            : base(testHarness, repository, queueName)
+        public StateMachineSagaTestHarness(BusTestHarness testHarness, ISagaRepository<TInstance> repository,
+            IQuerySagaRepository<TInstance> querySagaRepository, ILoadSagaRepository<TInstance> loadSagaRepository, TStateMachine stateMachine,
+            string queueName)
+            : base(testHarness, repository, querySagaRepository, loadSagaRepository, queueName)
         {
             StateMachine = stateMachine;
         }
