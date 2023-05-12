@@ -33,6 +33,8 @@
             configurator.AddPipeSpecification(specification);
         }
 
+        [Obsolete(
+            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
         /// <summary>
         /// Includes an outbox in the consume filter path, which delays outgoing messages until the return path
         /// of the pipeline returns to the outbox filter. At this point, the message execution pipeline should be
@@ -70,6 +72,8 @@
             var observer = new InMemoryOutboxConfigurationObserver(context, configurator, configure);
         }
 
+        [Obsolete(
+            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
         /// <summary>
         /// Includes an outbox in the consume filter path, which delays outgoing messages until the return path
         /// of the pipeline returns to the outbox filter. At this point, the message execution pipeline should be
@@ -104,6 +108,8 @@
             configurator.ConnectConsumerConfigurationObserver(observer);
         }
 
+        [Obsolete(
+            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
         /// <summary>
         /// Includes an outbox in the consume filter path, which delays outgoing messages until the return path
         /// of the pipeline returns to the outbox filter. At this point, the message execution pipeline should be
@@ -140,6 +146,8 @@
             configurator.ConnectSagaConfigurationObserver(observer);
         }
 
+        [Obsolete(
+            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
         /// <summary>
         /// Includes an outbox in the consume filter path, which delays outgoing messages until the return path
         /// of the pipeline returns to the outbox filter. At this point, the message execution pipeline should be
@@ -176,6 +184,8 @@
             configurator.ConnectHandlerConfigurationObserver(observer);
         }
 
+        [Obsolete(
+            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
         /// <summary>
         /// Includes an outbox in the consume filter path, which delays outgoing messages until the return path
         /// of the pipeline returns to the outbox filter. At this point, the message execution pipeline should be

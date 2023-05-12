@@ -28,6 +28,8 @@ namespace MassTransit
             return configurator;
         }
 
+        [Obsolete(
+            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
         /// <summary>
         /// Configures support for job consumers on the service instance, which supports executing long-running jobs without blocking the consumer pipeline.
         /// Job consumers use multiple state machines to track jobs, each of which runs on its own dedicated receive endpoint. Multiple service
@@ -72,6 +74,8 @@ namespace MassTransit
             return configurator;
         }
 
+        [Obsolete(
+            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
         /// <summary>
         /// Configures support for job consumers on the service instance, which supports executing long-running jobs without blocking the consumer pipeline.
         /// Job consumers use multiple state machines to track jobs, each of which runs on its own dedicated receive endpoint. Multiple service

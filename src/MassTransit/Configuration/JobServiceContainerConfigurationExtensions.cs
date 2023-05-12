@@ -21,6 +21,8 @@ namespace MassTransit
             return configurator;
         }
 
+        [Obsolete(
+            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
         /// <summary>
         /// Configure the job server saga repositories to resolve from the container.
         /// </summary>

@@ -51,6 +51,8 @@ namespace MassTransit
             configurator.ConnectSagaConfigurationObserver(observer);
         }
 
+        [Obsolete(
+            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
         /// <summary>
         /// Configure the Entity Framework outbox on the receive endpoint
         /// </summary>

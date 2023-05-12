@@ -19,7 +19,7 @@ namespace MassTransit.Testing
 
             var repository = new InMemorySagaRepository<TInstance>();
 
-            return new StateMachineSagaTestHarness<TInstance, TStateMachine>(harness, repository, stateMachine, queueName);
+            return new StateMachineSagaTestHarness<TInstance, TStateMachine>(harness, repository, repository, repository, stateMachine, queueName);
         }
 
         public static ISagaStateMachineTestHarness<TStateMachine, TInstance> StateMachineSaga<TInstance, TStateMachine>(this BusTestHarness harness,
@@ -33,7 +33,10 @@ namespace MassTransit.Testing
             if (repository == null)
                 throw new ArgumentNullException(nameof(repository));
 
-            return new StateMachineSagaTestHarness<TInstance, TStateMachine>(harness, repository, stateMachine, queueName);
+            var querySagaRepository = repository as IQuerySagaRepository<TInstance>;
+            var loadSagaRepository = repository as ILoadSagaRepository<TInstance>;
+            return new StateMachineSagaTestHarness<TInstance, TStateMachine>(harness, repository, querySagaRepository, loadSagaRepository, stateMachine,
+                queueName);
         }
 
         public static TInstance ContainsInState<TStateMachine, TInstance>(this ISagaList<TInstance> sagas, Guid correlationId, TStateMachine machine,

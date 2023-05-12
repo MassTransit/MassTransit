@@ -8,8 +8,9 @@ namespace MassTransit.Testing.Implementations
         ISagaTestHarness<TSaga>
         where TSaga : class, ISaga
     {
-        public RegistrationSagaTestHarness(ISagaRepositoryDecoratorRegistration<TSaga> registration, ISagaRepository<TSaga> repository)
-            : base(repository, registration.TestTimeout)
+        public RegistrationSagaTestHarness(ISagaRepositoryDecoratorRegistration<TSaga> registration, ISagaRepository<TSaga> repository,
+            ILoadSagaRepository<TSaga> loadRepository, IQuerySagaRepository<TSaga> queryRepository)
+            : base(queryRepository, loadRepository, registration.TestTimeout)
         {
             Consumed = registration.Consumed;
             Created = registration.Created;

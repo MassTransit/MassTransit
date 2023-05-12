@@ -14,6 +14,7 @@
         TestStateMachine _machine;
 
         InMemorySagaRepository<Instance> _repository;
+        ILoadSagaRepository<Instance> LoadSagaRepository => _repository;
 
         [Test]
         public async Task Should_remove_saga_when_completed_in_whenenter()
@@ -28,7 +29,7 @@
 
             _taskCompletionSource.SetResult(true);
 
-            saga = await _repository.ShouldNotContainSaga(correlationId, TestTimeout);
+            saga = await LoadSagaRepository.ShouldNotContainSaga(correlationId, TestTimeout);
             Assert.IsFalse(saga.HasValue);
         }
 

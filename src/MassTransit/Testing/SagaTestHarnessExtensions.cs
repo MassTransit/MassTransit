@@ -10,7 +10,7 @@ namespace MassTransit.Testing
         {
             var repository = new InMemorySagaRepository<T>();
 
-            return new SagaTestHarness<T>(harness, repository, queueName);
+            return new SagaTestHarness<T>(harness, repository, repository, repository, queueName);
         }
 
         public static SagaTestHarness<T> Saga<T>(this BusTestHarness harness, ISagaRepository<T> repository, string queueName = null)
@@ -19,7 +19,10 @@ namespace MassTransit.Testing
             if (repository == null)
                 throw new ArgumentNullException(nameof(repository));
 
-            return new SagaTestHarness<T>(harness, repository, queueName);
+            var querySagaRepository = repository as IQuerySagaRepository<T>;
+            var loadSagaRepository = repository as ILoadSagaRepository<T>;
+
+            return new SagaTestHarness<T>(harness, repository, querySagaRepository, loadSagaRepository, queueName);
         }
     }
 }

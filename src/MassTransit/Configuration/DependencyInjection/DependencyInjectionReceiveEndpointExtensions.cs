@@ -27,6 +27,8 @@ namespace MassTransit
             configurator.Consumer(consumerFactory, configure);
         }
 
+        [Obsolete(
+            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
         /// <summary>
         /// Registers a consumer given the lifetime scope specified
         /// </summary>
@@ -67,6 +69,8 @@ namespace MassTransit
             configurator.Consumer(consumerFactory, configure);
         }
 
+        [Obsolete(
+            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
         /// <summary>
         /// Connect a consumer with a consumer factory method
         /// </summary>
@@ -110,6 +114,8 @@ namespace MassTransit
             return connector.ConnectConsumer(consumerFactory, pipeSpecifications);
         }
 
+        [Obsolete(
+            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
         /// <summary>
         /// Connect a consumer to the bus/mediator
         /// </summary>
@@ -149,6 +155,8 @@ namespace MassTransit
             configurator.Saga(repository, configure);
         }
 
+        [Obsolete(
+            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
         /// <summary>
         /// Registers a saga using the container that has the repository resolved from the container
         /// </summary>
@@ -183,6 +191,8 @@ namespace MassTransit
             configurator.StateMachineSaga(stateMachine, repository, configure);
         }
 
+        [Obsolete(
+            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
         /// <summary>
         /// Subscribe a state machine saga to the endpoint
         /// </summary>
@@ -219,6 +229,8 @@ namespace MassTransit
             configurator.StateMachineSaga(stateMachine, repository, configure);
         }
 
+        [Obsolete(
+            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
         /// <summary>
         /// Subscribe a state machine saga to the endpoint
         /// </summary>
@@ -250,6 +262,8 @@ namespace MassTransit
             configurator.ExecuteActivityHost(compensateAddress, factory, configure);
         }
 
+        [Obsolete(
+            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
         public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, Uri compensateAddress,
             IServiceProvider provider, Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
             where TActivity : class, IExecuteActivity<TArguments>
@@ -274,6 +288,8 @@ namespace MassTransit
             configurator.ExecuteActivityHost(factory, configure);
         }
 
+        [Obsolete(
+            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
         public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, IServiceProvider provider,
             Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
             where TActivity : class, IExecuteActivity<TArguments>
@@ -298,6 +314,8 @@ namespace MassTransit
             configurator.CompensateActivityHost(factory, configure);
         }
 
+        [Obsolete(
+            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
         public static void CompensateActivityHost<TActivity, TLog>(this IReceiveEndpointConfigurator configurator, IServiceProvider provider,
             Action<ICompensateActivityConfigurator<TActivity, TLog>> configure = null)
             where TActivity : class, ICompensateActivity<TLog>

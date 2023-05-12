@@ -17,9 +17,9 @@ namespace MassTransit.Testing.Implementations
         where TInstance : class, SagaStateMachineInstance
         where TStateMachine : SagaStateMachine<TInstance>
     {
-        public RegistrationSagaStateMachineTestHarness(ISagaRepositoryDecoratorRegistration<TInstance> registration, ISagaRepository<TInstance> repository,
-            TStateMachine stateMachine)
-            : base(repository, registration.TestTimeout)
+        public RegistrationSagaStateMachineTestHarness(ISagaRepositoryDecoratorRegistration<TInstance> registration,
+            IQuerySagaRepository<TInstance> querySagaRepository, ILoadSagaRepository<TInstance> loadSagaRepository, TStateMachine stateMachine)
+            : base(querySagaRepository, loadSagaRepository, registration.TestTimeout)
         {
             StateMachine = stateMachine;
             Consumed = registration.Consumed;
