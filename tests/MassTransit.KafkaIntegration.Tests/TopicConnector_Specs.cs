@@ -1,6 +1,7 @@
 namespace MassTransit.KafkaIntegration.Tests
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Threading.Tasks;
     using Confluent.Kafka;
     using Internals;
@@ -99,6 +100,107 @@ namespace MassTransit.KafkaIntegration.Tests
         public interface KafkaMessage
         {
             string Text { get; }
+        }
+    }
+
+
+    public class TopicConnector_With_Custom_Offset_Specs :
+        InMemoryTestFixture
+    {
+        const string Topic = "endpoint-connector-with-offset";
+
+        [Test]
+        public async Task Should_receive_on_connected_topic()
+        {
+            var counters = new ConcurrentDictionary<Guid, int>();
+            await using var provider = new ServiceCollection()
+                .AddSingleton(counters)
+                .ConfigureKafkaTestOptions(options =>
+                {
+                    options.CreateTopicsIfNotExists = true;
+                    options.TopicNames = new[] { Topic };
+                })
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.AddTaskCompletionSource<ConsumeContext<KafkaMessage>>();
+                    x.SetTestTimeouts(testInactivityTimeout: TimeSpan.FromSeconds(30));
+
+                    x.AddRider(rider =>
+                    {
+                        rider.AddProducer<KafkaMessage>(Topic);
+                        rider.AddConsumer<CounterConsumer>();
+
+                        rider.UsingKafka((_, _) =>
+                        {
+                        });
+                    });
+                }).BuildServiceProvider();
+
+            var harness = provider.GetTestHarness();
+            await harness.Start();
+
+            var kafka = provider.GetRequiredService<IKafkaRider>();
+
+            var id = NewId.NextGuid();
+            ITopicProducer<KafkaMessage> producer = harness.GetProducer<KafkaMessage>();
+
+            await producer.Produce(new { Id = id }, harness.CancellationToken);
+
+            var connected = kafka.ConnectTopicEndpoint<KafkaMessage>(Topic, nameof(TopicConnector_With_Custom_Offset_Specs), (context, configurator) =>
+            {
+                configurator.AutoOffsetReset = AutoOffsetReset.Earliest;
+                configurator.ConfigureConsumer<CounterConsumer>(context);
+            });
+
+            await connected.Ready.OrCanceled(harness.CancellationToken);
+
+            IReceivedMessage<KafkaMessage> received = await harness.Consumed.SelectAsync<KafkaMessage>(harness.CancellationToken).FirstOrDefault();
+
+            Assert.That(received, Is.Not.Null);
+
+            Assert.That(received.Context.TryGetPayload(out KafkaConsumeContext kafkaConsumeContext), Is.True);
+
+            await connected.StopAsync(harness.CancellationToken);
+
+            connected = kafka.ConnectTopicEndpoint<KafkaMessage>(Topic, nameof(TopicConnector_With_Custom_Offset_Specs), (context, configurator) =>
+            {
+                configurator.Offset = kafkaConsumeContext.Offset;
+                configurator.AutoOffsetReset = AutoOffsetReset.Earliest;
+
+                configurator.ConfigureConsumer<CounterConsumer>(context);
+            });
+
+            await connected.Ready.OrCanceled(harness.CancellationToken);
+
+            while (counters.TryGetValue(id, out var count) && count < 2)
+            {
+                harness.CancellationToken.ThrowIfCancellationRequested();
+                await Task.Delay(20);
+            }
+        }
+
+
+        public interface KafkaMessage
+        {
+            Guid Id { get; }
+        }
+
+
+        class CounterConsumer :
+            IConsumer<KafkaMessage>
+        {
+            readonly ConcurrentDictionary<Guid, int> _result;
+
+            public CounterConsumer(ConcurrentDictionary<Guid, int> result)
+            {
+                _result = result;
+            }
+
+            public Task Consume(ConsumeContext<KafkaMessage> context)
+            {
+                _result.AddOrUpdate(context.Message.Id, _ => 1, (_, v) => v + 1);
+                return Task.CompletedTask;
+            }
         }
     }
 }

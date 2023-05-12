@@ -54,6 +54,9 @@ namespace MassTransit.KafkaIntegration.Configuration
 
             _consumerConfigurator = new PipeConfigurator<ConsumerContext>();
 
+            // https://github.com/confluentinc/confluent-kafka-dotnet/blob/0e6bc8be05988f0cafacfe2b71aa8950aabe8cb5/src/Confluent.Kafka/ConsumerBuilder.cs#L387
+            Offset = Confluent.Kafka.Offset.Unset;
+
             PublishFaults = false;
 
             this.DiscardFaultedMessages();
@@ -79,12 +82,12 @@ namespace MassTransit.KafkaIntegration.Configuration
 
         public TimeSpan? SessionTimeout
         {
-            set => _consumerConfig.SessionTimeoutMs = value == null ? (int?)null : Convert.ToInt32(value.Value.TotalMilliseconds);
+            set => _consumerConfig.SessionTimeoutMs = (int?)value?.TotalMilliseconds;
         }
 
         public TimeSpan? HeartbeatInterval
         {
-            set => _consumerConfig.HeartbeatIntervalMs = value == null ? (int?)null : Convert.ToInt32(value.Value.TotalMilliseconds);
+            set => _consumerConfig.HeartbeatIntervalMs = (int?)value?.TotalMilliseconds;
         }
 
         public string GroupProtocolType
@@ -94,12 +97,12 @@ namespace MassTransit.KafkaIntegration.Configuration
 
         public TimeSpan? CoordinatorQueryInterval
         {
-            set => _consumerConfig.CoordinatorQueryIntervalMs = value == null ? (int?)null : Convert.ToInt32(value.Value.TotalMilliseconds);
+            set => _consumerConfig.CoordinatorQueryIntervalMs = (int?)value?.TotalMilliseconds;
         }
 
         public TimeSpan? MaxPollInterval
         {
-            set => _consumerConfig.MaxPollIntervalMs = value == null ? (int?)null : Convert.ToInt32(value.Value.TotalMilliseconds);
+            set => _consumerConfig.MaxPollIntervalMs = (int?)value?.TotalMilliseconds;
         }
 
         public bool? EnableAutoOffsetStore
@@ -181,6 +184,7 @@ namespace MassTransit.KafkaIntegration.Configuration
 
         int ReceiveSettings.ConcurrentMessageLimit => Transport.GetConcurrentMessageLimit();
 
+        public long Offset { get; set; }
         public string Topic { get; }
         public ushort MessageLimit { get; set; }
 

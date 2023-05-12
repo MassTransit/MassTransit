@@ -28,6 +28,12 @@
         string GroupInstanceId { set; }
 
         /// <summary>
+        /// Specifies starting consume offset for the topic. <inheritdoc cref="Confluent.Kafka.Offset"/>. This is can be useful when stream needs to be rewound
+        /// default: <see cref="Confluent.Kafka.Offset.Unset"/> (<inheritdoc cref="Confluent.Kafka.Offset.Unset"/>)
+        /// </summary>
+        long Offset { set; }
+
+        /// <summary>
         /// Sets interval before checkpoint, low interval will decrease throughput (default: 1min)
         /// </summary>
         TimeSpan CheckpointInterval { set; }
