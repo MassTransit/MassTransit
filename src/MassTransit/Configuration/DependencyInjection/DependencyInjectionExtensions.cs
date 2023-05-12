@@ -24,6 +24,8 @@ namespace MassTransit
             configurator.AddPrePipeSpecification(specification);
         }
 
+        [Obsolete(
+            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
         /// <summary>
         /// Creates a single scope for the receive endpoint that is used by all consumers, sagas, messages, etc.
         /// </summary>
