@@ -148,6 +148,10 @@ namespace MassTransit.AzureServiceBusTransport
             {
                 MassTransit.LogContext.Debug?.Log("CANCEL {DestinationAddress} {TokenId} message not found", EntityName, tokenId);
             }
+            catch (InvalidOperationException exception) when (exception.Message.Contains("already being cancelled"))
+            {
+                MassTransit.LogContext.Debug?.Log("CANCEL {DestinationAddress} {TokenId} message already being canceled", EntityName, tokenId);
+            }
         }
 
         static bool IsCancelScheduledSend<T>(AzureServiceBusSendContext<T> context, out Guid tokenId, out long sequenceNumber)
