@@ -199,6 +199,8 @@ namespace MassTransit
         /// <summary>
         /// Add the In-Memory test harness to the container, and configure it using the callback specified.
         /// </summary>
+        [Obsolete(
+            "This method is deprecated, use AddMassTransitTestHarness instead. For more information, see https://masstransit.io/documentation/concepts/testing")]
         public static IServiceCollection AddMassTransitInMemoryTestHarness(this IServiceCollection services,
             Action<IBusRegistrationConfigurator>? configure = null)
         {
