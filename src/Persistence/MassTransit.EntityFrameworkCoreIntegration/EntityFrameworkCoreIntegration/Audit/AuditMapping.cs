@@ -9,15 +9,24 @@
         IEntityTypeConfiguration<AuditRecord>
     {
         readonly string _tableName;
+        readonly string _schemaName;
 
-        public AuditMapping(string tableName)
+        public AuditMapping(string tableName, string schemaName = null)
         {
             _tableName = tableName;
+            _schemaName = schemaName;
         }
 
         public void Configure(EntityTypeBuilder<AuditRecord> builder)
         {
-            builder.ToTable(_tableName);
+            if (string.IsNullOrWhiteSpace(_schemaName))
+            {
+                builder.ToTable(_tableName);
+            }
+            else
+            {
+                builder.ToTable(_tableName, _schemaName);
+            }
 
             builder.HasKey(x => x.AuditRecordId);
             builder.Property(x => x.AuditRecordId)
