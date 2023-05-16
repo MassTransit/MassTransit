@@ -128,6 +128,13 @@ namespace MassTransit
         {
             EntityTypeBuilder<InboxState> inbox = modelBuilder.Entity<InboxState>();
 
+            inbox.ConfigureInboxStateEntity();
+
+            callback?.Invoke(inbox);
+        }
+
+        public static void ConfigureInboxStateEntity(this EntityTypeBuilder<InboxState> inbox)
+        {
             inbox.Property(p => p.Id);
             inbox.HasKey(p => p.Id);
 
@@ -153,14 +160,19 @@ namespace MassTransit
             inbox.HasIndex(p => p.Delivered);
 
             inbox.Property(p => p.LastSequenceNumber);
-
-            callback?.Invoke(inbox);
         }
 
         public static void AddOutboxStateEntity(this ModelBuilder modelBuilder, Action<EntityTypeBuilder<OutboxState>>? callback = null)
         {
             EntityTypeBuilder<OutboxState> outbox = modelBuilder.Entity<OutboxState>();
 
+            outbox.ConfigureOutboxStateEntity();
+
+            callback?.Invoke(outbox);
+        }
+
+        public static void ConfigureOutboxStateEntity(this EntityTypeBuilder<OutboxState> outbox)
+        {
             outbox.Property(p => p.OutboxId);
             outbox.HasKey(p => p.OutboxId);
 
@@ -173,14 +185,19 @@ namespace MassTransit
 
             outbox.Property(p => p.Delivered);
             outbox.Property(p => p.LastSequenceNumber);
-
-            callback?.Invoke(outbox);
         }
 
         public static void AddOutboxMessageEntity(this ModelBuilder modelBuilder, Action<EntityTypeBuilder<OutboxMessage>>? callback = null)
         {
             EntityTypeBuilder<OutboxMessage> outbox = modelBuilder.Entity<OutboxMessage>();
 
+            outbox.ConfigureOutboxMessageEntity();
+
+            callback?.Invoke(outbox);
+        }
+
+        public static void ConfigureOutboxMessageEntity(this EntityTypeBuilder<OutboxMessage> outbox)
+        {
             outbox.Property(p => p.SequenceNumber);
             outbox.HasKey(p => p.SequenceNumber);
 
@@ -228,8 +245,6 @@ namespace MassTransit
                 .HasMaxLength(256);
 
             outbox.Property(p => p.Body);
-
-            callback?.Invoke(outbox);
         }
     }
 }
