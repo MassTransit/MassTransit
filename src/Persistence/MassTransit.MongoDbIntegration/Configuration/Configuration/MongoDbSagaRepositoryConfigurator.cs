@@ -46,8 +46,7 @@ namespace MassTransit.Configuration
         {
             IMongoCollection<TSaga> MongoDbCollectionFactory(IServiceProvider provider)
             {
-                if (!BsonClassMap.IsClassMapRegistered(typeof(TSaga)))
-                    BsonClassMap.RegisterClassMap(_classMapFactory(provider));
+                BsonClassMap.TryRegisterClassMap(_classMapFactory(provider));
 
                 var database = ProviderDatabaseFactory(provider);
                 var collectionNameFormatter = CollectionNameFormatterFactory(provider);
