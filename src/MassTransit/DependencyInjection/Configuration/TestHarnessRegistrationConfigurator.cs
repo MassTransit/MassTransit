@@ -169,11 +169,11 @@ namespace MassTransit.Configuration
             _configurator.AddEndpoint(endpointDefinition);
         }
 
-        public void AddEndpoint<TDefinition, T>(IEndpointSettings<IEndpointDefinition<T>> settings = null)
+        public void AddEndpoint<TDefinition, T>(IRegistration registration, IEndpointSettings<IEndpointDefinition<T>> settings = null)
             where TDefinition : class, IEndpointDefinition<T>
             where T : class
         {
-            _configurator.AddEndpoint<TDefinition, T>(settings);
+            _configurator.AddEndpoint<TDefinition, T>(registration, settings);
         }
 
         public void AddRequestClient<T>(RequestTimeout timeout = default)

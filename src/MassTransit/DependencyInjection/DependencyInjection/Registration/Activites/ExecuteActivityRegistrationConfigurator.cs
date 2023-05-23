@@ -27,7 +27,8 @@ namespace MassTransit.DependencyInjection.Registration
 
             configure?.Invoke(configurator);
 
-            _configurator.AddEndpoint<ExecuteActivityEndpointDefinition<TActivity, TArguments>, IExecuteActivity<TArguments>>(configurator.Settings);
+            _configurator.AddEndpoint<ExecuteActivityEndpointDefinition<TActivity, TArguments>, IExecuteActivity<TArguments>>(_registration,
+                configurator.Settings);
         }
 
         public void ExcludeFromConfigureEndpoints()

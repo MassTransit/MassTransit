@@ -26,7 +26,7 @@ namespace MassTransit.DependencyInjection.Registration
 
             configure?.Invoke(configurator);
 
-            _configurator.AddEndpoint<ConsumerEndpointDefinition<TConsumer>, TConsumer>(configurator.Settings);
+            _configurator.AddEndpoint<ConsumerEndpointDefinition<TConsumer>, TConsumer>(_registration, configurator.Settings);
         }
 
         public void ExcludeFromConfigureEndpoints()

@@ -9,11 +9,18 @@ namespace MassTransit.DependencyInjection.Registration
         IEndpointRegistration
         where T : class
     {
+        readonly IRegistration _registration;
+
+        public EndpointRegistration(IRegistration registration)
+        {
+            _registration = registration;
+        }
+
         public Type Type => typeof(T);
 
         public bool IncludeInConfigureEndpoints
         {
-            get => true;
+            get => _registration.IncludeInConfigureEndpoints;
             set { }
         }
 

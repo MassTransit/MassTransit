@@ -34,7 +34,8 @@ namespace MassTransit.DependencyInjection.Registration
 
             configureExecute?.Invoke(configurator);
 
-            _configurator.AddEndpoint<ExecuteActivityEndpointDefinition<TActivity, TArguments>, IExecuteActivity<TArguments>>(configurator.Settings);
+            _configurator.AddEndpoint<ExecuteActivityEndpointDefinition<TActivity, TArguments>, IExecuteActivity<TArguments>>(_registration,
+                configurator.Settings);
 
             return this;
         }
@@ -48,7 +49,8 @@ namespace MassTransit.DependencyInjection.Registration
 
             configureCompensate?.Invoke(compensateConfigurator);
 
-            _configurator.AddEndpoint<CompensateActivityEndpointDefinition<TActivity, TLog>, ICompensateActivity<TLog>>(compensateConfigurator.Settings);
+            _configurator.AddEndpoint<CompensateActivityEndpointDefinition<TActivity, TLog>, ICompensateActivity<TLog>>(_registration,
+                compensateConfigurator.Settings);
 
             return this;
         }
