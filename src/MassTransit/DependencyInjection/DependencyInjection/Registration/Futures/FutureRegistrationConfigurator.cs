@@ -36,7 +36,7 @@ namespace MassTransit.DependencyInjection.Registration
 
             configure?.Invoke(configurator);
 
-            _configurator.AddEndpoint<FutureEndpointDefinition<TFuture>, TFuture>(configurator.Settings);
+            _configurator.AddEndpoint<FutureEndpointDefinition<TFuture>, TFuture>(_registration, configurator.Settings);
 
             return this;
         }

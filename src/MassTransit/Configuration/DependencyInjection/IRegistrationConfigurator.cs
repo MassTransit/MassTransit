@@ -129,7 +129,7 @@ namespace MassTransit
         /// <param name="endpointDefinition">The endpoint definition to add</param>
         void AddEndpoint(Type endpointDefinition);
 
-        void AddEndpoint<TDefinition, T>(IEndpointSettings<IEndpointDefinition<T>> settings = null)
+        void AddEndpoint<TDefinition, T>(IRegistration registration, IEndpointSettings<IEndpointDefinition<T>> settings = null)
             where TDefinition : class, IEndpointDefinition<T>
             where T : class;
 
