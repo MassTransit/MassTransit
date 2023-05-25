@@ -49,6 +49,11 @@ namespace MassTransit.Courier
                     if (executeContext.Result == null || !executeContext.Result.IsFaulted(out var faultException) || faultException != exception)
                         executeContext.Result = executeContext.Faulted(exception);
 
+                    await context.NotifyFaulted(timer.Elapsed, TypeCache<TActivity>.ShortName, exception).ConfigureAwait(false);
+
+                    activity?.AddExceptionEvent(exception);
+                    instrument?.AddException(exception);
+
                     await executeContext.Result.Evaluate().ConfigureAwait(false);
                 }
 

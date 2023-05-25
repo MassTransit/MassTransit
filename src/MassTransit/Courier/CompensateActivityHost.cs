@@ -42,9 +42,15 @@ namespace MassTransit.Courier
 
                     await result.Evaluate().ConfigureAwait(false);
                 }
-                catch (Exception ex)
+                catch (Exception exception)
                 {
-                    await compensateContext.Failed(ex).Evaluate().ConfigureAwait(false);
+                    await context.NotifyFaulted(timer.Elapsed, TypeCache<TActivity>.ShortName, exception).ConfigureAwait(false);
+
+                    activity?.AddExceptionEvent(exception);
+
+                    instrument?.AddException(exception);
+
+                    await compensateContext.Failed(exception).Evaluate().ConfigureAwait(false);
                 }
 
                 await context.NotifyConsumed(timer.Elapsed, TypeCache<TActivity>.ShortName).ConfigureAwait(false);
