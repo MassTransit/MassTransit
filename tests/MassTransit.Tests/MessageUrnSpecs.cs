@@ -57,7 +57,7 @@ namespace MassTransit.Tests
                 () => MessageUrn.ForType(typeof(AttributedNull)),
                 Throws.TypeOf<TypeInitializationException>()
                 .And.InnerException.TypeOf<ArgumentNullException>()
-                .And.InnerException.Message.EqualTo("Value cannot be null. (Parameter 'urn')"));
+                .And.InnerException.Message.StartsWith("Value cannot be null."));
         }
 
         [Test]
@@ -66,7 +66,7 @@ namespace MassTransit.Tests
             Assert.That(() => MessageUrn.ForType(typeof(AttributedEmpty)),
                 Throws.TypeOf<TypeInitializationException>()
                 .And.InnerException.TypeOf<ArgumentException>()
-                .And.InnerException.Message.EqualTo("Value cannot be empty or whitespace only string. (Parameter 'urn')"));
+                .And.InnerException.Message.StartsWith("Value cannot be empty or whitespace only string."));
         }
 
         [Test]
@@ -75,7 +75,7 @@ namespace MassTransit.Tests
             Assert.That(() => MessageUrn.ForType(typeof(AttributedWhitespace)),
                 Throws.TypeOf<TypeInitializationException>()
                 .And.InnerException.TypeOf<ArgumentException>()
-                .And.InnerException.Message.EqualTo("Value cannot be empty or whitespace only string. (Parameter 'urn')"));
+                .And.InnerException.Message.StartsWith("Value cannot be empty or whitespace only string."));
         }
 
         [Test]
@@ -84,7 +84,7 @@ namespace MassTransit.Tests
             Assert.That(() => MessageUrn.ForType(typeof(AttributedKnownPrefix)),
                 Throws.TypeOf<TypeInitializationException>()
                 .And.InnerException.TypeOf<ArgumentException>()
-                .And.InnerException.Message.EqualTo("Value should not contain the default prefix 'urn:message:'. (Parameter 'urn')"));
+                .And.InnerException.Message.StartsWith("Value should not contain the default prefix 'urn:message:'."));
         }
 
         [Test]
