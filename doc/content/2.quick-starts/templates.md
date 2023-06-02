@@ -7,7 +7,7 @@ A video introducing the templates is available on [YouTube](https://youtu.be/nYK
 ## Installation
 
 ```sh
-dotnet new --install MassTransit.Templates
+dotnet new install MassTransit.Templates
 ```
 
 One installed, typing `dotnet new` will display the available templates:
