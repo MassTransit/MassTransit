@@ -1,6 +1,8 @@
 ﻿namespace MassTransit.ActiveMqTransport.Configuration
 {
     using System;
+    using System.Threading.Channels;
+    using Apache.NMS.ActiveMQ;
     using MassTransit.Configuration;
     using Topology;
     using Transports;
@@ -27,6 +29,8 @@
             ReceiveTransportRetryPolicy = Retry.CreatePolicy(x =>
             {
                 x.Handle<ConnectionException>();
+                x.Handle<IOException>();
+                x.Handle<ChannelClosedException>();
 
                 x.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
             });
