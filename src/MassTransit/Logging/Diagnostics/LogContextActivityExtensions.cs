@@ -186,7 +186,7 @@ namespace MassTransit.Logging
                 if (context.DestinationAddress != null)
                     activity.SetTag(DiagnosticHeaders.DestinationAddress, context.DestinationAddress.ToString());
 
-                activity.SetTag(DiagnosticHeaders.MessageTypes, string.Join(",", MessageTypeCache<T>.MessageTypeNames));
+                activity.SetTag(DiagnosticHeaders.MessageTypes, string.Join(",", context.SupportedMessageTypes));
 
                 for (var i = 0; i < tags.Length; i++)
                 {

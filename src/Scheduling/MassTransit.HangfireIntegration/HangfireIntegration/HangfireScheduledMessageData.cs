@@ -25,17 +25,20 @@ namespace MassTransit.HangfireIntegration
         public string? TokenId { get; set; }
         public string? HeadersAsJson { get; set; }
         public string? TransportProperties { get; set; }
+        public string? MessageType { get; set; }
 
         public Uri Destination => new Uri(DestinationAddress!);
 
         protected static void SetBaseProperties(HangfireScheduledMessageData data, ConsumeContext context, Uri destination, MessageBody messageBody,
-            Guid? tokenId = default)
+            string[] supportedMessageTypes, Guid? tokenId = default)
         {
             data.DestinationAddress = destination?.ToString() ?? "";
             data.Body = messageBody.GetString();
             data.ContentType = context.ReceiveContext.ContentType.ToString();
             data.FaultAddress = context.FaultAddress?.ToString() ?? "";
             data.ResponseAddress = context.ResponseAddress?.ToString() ?? "";
+
+            data.MessageType = string.Join(";", supportedMessageTypes);
 
             if (context.MessageId.HasValue)
                 data.MessageId = context.MessageId.Value.ToString();

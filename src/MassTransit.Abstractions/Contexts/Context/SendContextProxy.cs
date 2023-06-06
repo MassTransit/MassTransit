@@ -131,6 +131,12 @@ namespace MassTransit.Context
             set => _context.Serialization = value;
         }
 
+        public string[] SupportedMessageTypes
+        {
+            get => _context.SupportedMessageTypes;
+            set => _context.SupportedMessageTypes = value;
+        }
+
         public long? BodyLength => _context.BodyLength;
 
         public SendContext<T> CreateProxy<T>(T message)

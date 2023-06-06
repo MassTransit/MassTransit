@@ -35,6 +35,8 @@ namespace MassTransit.Context
             MessageId = messageId.ToGuid();
             SentTime = messageId.Timestamp;
 
+            SupportedMessageTypes = MessageTypeCache<TMessage>.MessageTypeNames;
+
             _body = new Lazy<MessageBody>(() => GetMessageBody());
         }
 
@@ -83,6 +85,8 @@ namespace MassTransit.Context
         }
 
         public ISerialization Serialization { get; set; }
+
+        public string[] SupportedMessageTypes { get; set; }
 
         public long? BodyLength => _body.IsValueCreated ? _body.Value.Length : default;
 

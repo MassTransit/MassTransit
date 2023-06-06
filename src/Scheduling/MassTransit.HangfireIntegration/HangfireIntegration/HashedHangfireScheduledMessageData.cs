@@ -17,7 +17,7 @@ namespace MassTransit.HangfireIntegration
             var messageBody = context.SerializerContext.GetMessageSerializer(context.Message.Payload, context.Message.PayloadType)
                 .GetMessageBody(new MessageSendContext<ScheduleMessage>(context.Message));
 
-            SetBaseProperties(message, context, context.Message.Destination, messageBody, context.Message.CorrelationId);
+            SetBaseProperties(message, context, context.Message.Destination, messageBody, context.Message.PayloadType, context.Message.CorrelationId);
 
             return message;
         }

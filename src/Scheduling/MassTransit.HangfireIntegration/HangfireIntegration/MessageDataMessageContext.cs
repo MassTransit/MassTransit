@@ -5,6 +5,7 @@ namespace MassTransit.HangfireIntegration
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
+    using System.Linq;
     using System.Text.Json;
     using Metadata;
     using Serialization;
@@ -41,7 +42,8 @@ namespace MassTransit.HangfireIntegration
             get
             {
                 return !string.IsNullOrWhiteSpace(_messageData.TransportProperties)
-                    ? JsonSerializer.Deserialize<IReadOnlyDictionary<string, object>>(_messageData.TransportProperties!, SystemTextJsonMessageSerializer.Options)
+                    ? JsonSerializer.Deserialize<IReadOnlyDictionary<string, object>>(_messageData.TransportProperties!,
+                        SystemTextJsonMessageSerializer.Options)
                     : null;
             }
         }
@@ -119,6 +121,8 @@ namespace MassTransit.HangfireIntegration
         public DateTime? SentTime => default;
         public Headers Headers => _headers ??= GetHeaders();
         public HostInfo Host => _hostInfo ??= HostMetadataCache.Host;
+
+        public string[] SupportedMessageTypes => _messageData.MessageType?.Split(';').ToArray() ?? Array.Empty<string>();
 
         Headers GetHeaders()
         {

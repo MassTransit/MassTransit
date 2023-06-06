@@ -29,11 +29,11 @@ namespace MassTransit.QuartzIntegration
             var contentType = new ContentType(jobData.GetString("ContentType")!);
             var destinationAddress = new Uri(jobData.GetString("Destination")!);
             var body = jobData.GetString("Body") ?? string.Empty;
-            var messageType = jobData.GetString("MessageType")?.Split(';')?.ToArray() ?? Array.Empty<string>();
+            var supportedMessageTypes = jobData.GetString("MessageType")?.Split(';').ToArray() ?? Array.Empty<string>();
 
             try
             {
-                var pipe = new ForwardScheduledMessagePipe(contentType, messageContext, body, destinationAddress);
+                var pipe = new ForwardScheduledMessagePipe(contentType, messageContext, body, destinationAddress, supportedMessageTypes);
 
                 var endpoint = await _bus.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
@@ -43,7 +43,7 @@ namespace MassTransit.QuartzIntegration
             }
             catch (Exception ex)
             {
-                LogContext.Error?.Log(ex, "Failed to send scheduled message: {MessageType} {DestinationAddress}", messageType, destinationAddress);
+                LogContext.Error?.Log(ex, "Failed to send scheduled message: {MessageType} {DestinationAddress}", supportedMessageTypes, destinationAddress);
 
                 throw new JobExecutionException(ex, context.RefireCount < 5);
             }
@@ -56,14 +56,17 @@ namespace MassTransit.QuartzIntegration
             readonly string _body;
             readonly ContentType? _contentType;
             readonly Uri? _destinationAddress;
+            readonly string[] _supportedMessageTypes;
             readonly JobDataMessageContext _messageContext;
 
-            public ForwardScheduledMessagePipe(ContentType? contentType, JobDataMessageContext messageContext, string body, Uri? destinationAddress)
+            public ForwardScheduledMessagePipe(ContentType? contentType, JobDataMessageContext messageContext, string body, Uri? destinationAddress,
+                string[] supportedMessageTypes)
             {
                 _contentType = contentType;
                 _messageContext = messageContext;
                 _body = body;
                 _destinationAddress = destinationAddress;
+                _supportedMessageTypes = supportedMessageTypes;
             }
 
             public Task Send(SendContext context)
@@ -84,6 +87,7 @@ namespace MassTransit.QuartzIntegration
                 context.SourceAddress = _messageContext.SourceAddress;
                 context.ResponseAddress = _messageContext.ResponseAddress;
                 context.FaultAddress = _messageContext.FaultAddress;
+                context.SupportedMessageTypes = _supportedMessageTypes;
 
                 if (_messageContext.ExpirationTime.HasValue)
                     context.TimeToLive = _messageContext.ExpirationTime.Value.ToUniversalTime() - DateTime.UtcNow;

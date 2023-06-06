@@ -45,6 +45,7 @@ namespace MassTransit.Middleware
             context.SourceAddress = serializerContext.SourceAddress;
             context.ResponseAddress = serializerContext.ResponseAddress;
             context.FaultAddress = serializerContext.FaultAddress;
+            context.SupportedMessageTypes = serializerContext.SupportedMessageTypes;
 
             if (serializerContext.ExpirationTime.HasValue)
                 context.TimeToLive = serializerContext.ExpirationTime.Value.ToUniversalTime() - DateTime.UtcNow;
@@ -81,6 +82,20 @@ namespace MassTransit.Middleware
 
                 if (!string.IsNullOrWhiteSpace(_message.ContentType))
                     yield return new KeyValuePair<string, object>(MessageHeaders.ContentType, _message.ContentType!);
+
+                foreach (KeyValuePair<string, object> header in _message.Headers.GetAll())
+                {
+                    switch (header.Key)
+                    {
+                        case MessageHeaders.MessageId:
+                        case MessageHeaders.ContentType:
+                            continue;
+
+                        default:
+                            yield return header;
+                            break;
+                    }
+                }
             }
 
             public bool TryGetHeader(string key, [NotNullWhen(true)] out object? value)
@@ -94,7 +109,13 @@ namespace MassTransit.Middleware
                 if (MessageHeaders.ContentType.Equals(key, StringComparison.OrdinalIgnoreCase))
                 {
                     value = _message.ContentType;
-                    return value != null;
+                    return true;
+                }
+
+                if (_message.Headers.TryGetHeader(key, out var headerValue))
+                {
+                    value = headerValue;
+                    return true;
                 }
 
                 value = null;

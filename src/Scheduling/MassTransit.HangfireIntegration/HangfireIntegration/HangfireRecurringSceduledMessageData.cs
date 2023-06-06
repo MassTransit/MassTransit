@@ -24,7 +24,7 @@ namespace MassTransit.HangfireIntegration
             var messageBody = context.SerializerContext.GetMessageSerializer(context.Message.Payload, context.Message.PayloadType)
                 .GetMessageBody(new MessageSendContext<ScheduleRecurringMessage>(context.Message));
 
-            SetBaseProperties(data, context, context.Message.Destination, messageBody);
+            SetBaseProperties(data, context, context.Message.Destination, messageBody, context.Message.PayloadType);
 
             return data;
         }

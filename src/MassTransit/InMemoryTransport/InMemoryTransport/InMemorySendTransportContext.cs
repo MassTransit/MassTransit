@@ -55,7 +55,7 @@ namespace MassTransit.InMemoryTransport
 
             var messageId = context.MessageId ?? NewId.NextGuid();
 
-            var transportMessage = new InMemoryTransportMessage(messageId, context.Body.GetBytes(), context.ContentType.ToString(), TypeCache<T>.ShortName)
+            var transportMessage = new InMemoryTransportMessage(messageId, context.Body.GetBytes(), context.ContentType.ToString())
             {
                 Delay = context.Delay,
                 RoutingKey = context.RoutingKey

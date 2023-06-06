@@ -304,16 +304,15 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
             if (messageIndex == messages.Count && messages.Count < messageLimit)
             {
+                outboxState.Delivered = DateTime.UtcNow;
+
                 if (hasLastSequenceNumber == false)
                 {
                     dbContext.Remove(outboxState);
                     dbContext.RemoveRange(messages);
                 }
                 else
-                {
-                    outboxState.Delivered = DateTime.UtcNow;
                     dbContext.Update(outboxState);
-                }
 
                 saveChanges = true;
 

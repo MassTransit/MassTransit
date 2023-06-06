@@ -45,7 +45,7 @@ namespace MassTransit.Serialization
 
             try
             {
-                var envelope = _envelope ??= new JsonMessageEnvelope(_context, _context.Message, MessageTypeCache<TMessage>.MessageTypeNames);
+                var envelope = _envelope ??= new JsonMessageEnvelope(_context, _context.Message);
 
                 _bytes = JsonSerializer.SerializeToUtf8Bytes(envelope, _options);
 
@@ -70,7 +70,7 @@ namespace MassTransit.Serialization
 
             try
             {
-                var envelope = _envelope ??= new JsonMessageEnvelope(_context, _context.Message, MessageTypeCache<TMessage>.MessageTypeNames);
+                var envelope = _envelope ??= new JsonMessageEnvelope(_context, _context.Message);
 
                 _string = JsonSerializer.Serialize(envelope, _options);
 

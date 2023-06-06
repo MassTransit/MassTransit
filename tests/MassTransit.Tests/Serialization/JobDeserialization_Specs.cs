@@ -71,7 +71,7 @@ namespace MassTransit.Tests.Serialization
         {
             var bytes = Serialize((await MessageInitializerCache<T>.Initialize(values)).Message);
 
-            var message = new InMemoryTransportMessage(NewId.NextGuid(), bytes, Serializer.ContentType.MediaType, TypeCache<ConvertVideo>.ShortName);
+            var message = new InMemoryTransportMessage(NewId.NextGuid(), bytes, Serializer.ContentType.MediaType);
             var receiveContext = new InMemoryReceiveContext(message, TestConsumeContext.GetContext());
 
             var consumeContext = Deserializer.Deserialize(receiveContext);

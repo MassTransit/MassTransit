@@ -1,4 +1,4 @@
-namespace MassTransit.Serialization
+namespace MassTransit
 {
     using System;
 

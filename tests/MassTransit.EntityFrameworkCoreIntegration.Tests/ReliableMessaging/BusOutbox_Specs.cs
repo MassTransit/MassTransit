@@ -76,6 +76,75 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
         }
 
         [Test]
+        public async Task Should_include_headers_when_using_raw_json()
+        {
+            using var tracerProvider = TraceConfig.CreateTraceProvider("ef-core-tests");
+
+            await using var provider = new ServiceCollection()
+                .AddBusOutboxServices()
+                .AddTelemetryListener()
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.AddEntityFrameworkOutbox<ReliableDbContext>(o =>
+                    {
+                        o.QueryDelay = TimeSpan.FromSeconds(1);
+
+                        o.UseBusOutbox(bo =>
+                        {
+                            bo.MessageDeliveryLimit = 10;
+                        });
+                    });
+
+                    x.AddConsumer<PingConsumer>();
+
+                    x.SetTestTimeouts(testInactivityTimeout: TimeSpan.FromSeconds(10));
+
+                    x.UsingInMemory((context, cfg) =>
+                    {
+                        cfg.UseRawJsonSerializer(RawSerializerOptions.CopyHeaders | RawSerializerOptions.AddTransportHeaders);
+                        cfg.ConfigureEndpoints(context);
+                    });
+                })
+                .BuildServiceProvider(true);
+
+            var harness = provider.GetTestHarness();
+            harness.TestInactivityTimeout = TimeSpan.FromSeconds(5);
+
+            await harness.Start();
+
+            IConsumerTestHarness<PingConsumer> consumerHarness = harness.GetConsumerHarness<PingConsumer>();
+
+            try
+            {
+                {
+                    await using var dbContext = harness.Scope.ServiceProvider.GetRequiredService<ReliableDbContext>();
+
+                    var publishEndpoint = harness.Scope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
+
+                    var activity = TraceConfig.Source.StartActivity(ActivityKind.Client);
+
+                    await publishEndpoint.Publish(new PingMessage(), x => x.Headers.Set("Test-Header", "Test-Value"));
+
+                    await dbContext.SaveChangesAsync(harness.CancellationToken);
+
+                    activity.Stop();
+                }
+
+                Assert.That(await consumerHarness.Consumed.Any<PingMessage>(), Is.True);
+
+                IReceivedMessage<PingMessage> context = await consumerHarness.Consumed.SelectAsync<PingMessage>().FirstOrDefault();
+
+                Assert.That(context.Context.Headers.TryGetHeader("Test-Header", out var header), Is.True);
+
+                Assert.That(header, Is.EqualTo("Test-Value"));
+            }
+            finally
+            {
+                await harness.Stop();
+            }
+        }
+
+        [Test]
         public async Task Should_support_baggage_in_telemetry()
         {
             using var tracerProvider = TraceConfig.CreateTraceProvider("ef-core-tests");
