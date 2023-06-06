@@ -84,7 +84,7 @@
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.UseRawJsonSerializer(RawSerializerOptions.CopyHeaders | RawSerializerOptions.AddTransportHeaders);
+            configurator.UseRawJsonSerializer();
             base.ConfigureInMemoryBus(configurator);
         }
 

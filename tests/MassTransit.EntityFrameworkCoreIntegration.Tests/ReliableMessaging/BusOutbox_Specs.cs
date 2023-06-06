@@ -101,7 +101,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
 
                     x.UsingInMemory((context, cfg) =>
                     {
-                        cfg.UseRawJsonSerializer(RawSerializerOptions.CopyHeaders | RawSerializerOptions.AddTransportHeaders);
+                        cfg.UseRawJsonSerializer();
                         cfg.ConfigureEndpoints(context);
                     });
                 })

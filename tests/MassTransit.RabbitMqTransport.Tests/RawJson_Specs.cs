@@ -42,7 +42,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             configurator.ClearSerialization();
-            configurator.UseRawJsonSerializer();
+            configurator.UseRawJsonSerializer(RawSerializerOptions.All);
 
             _receivedA = Handled<RawContract>(configurator);
         }
@@ -198,7 +198,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
-            configurator.UseRawJsonSerializer();
+            configurator.UseRawJsonSerializer(RawSerializerOptions.All);
         }
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
@@ -272,7 +272,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
-            configurator.UseNewtonsoftRawJsonDeserializer();
+            configurator.UseNewtonsoftRawJsonDeserializer(RawSerializerOptions.AnyMessageType);
 
             TaskCompletionSource<ConsumeContext<Command>> handler = GetTask<ConsumeContext<Command>>();
             _handler = handler.Task;

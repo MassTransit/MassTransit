@@ -21,7 +21,7 @@ namespace MassTransit
         /// </summary>
         CopyHeaders = 4,
 
-        Default = AnyMessageType | AddTransportHeaders,
+        Default = CopyHeaders | AddTransportHeaders,
 
         All = AnyMessageType | AddTransportHeaders | CopyHeaders
     }
