@@ -70,6 +70,7 @@
     <PackageVersion Include="OpenTelemetry.Exporter.Jaeger" Version="1.4.0" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.4.0" />
     <PackageVersion Include="prometheus-net" Version="6.0.0" />
+    <PackageVersion Include="protobuf-net" Version="3.2.26" />
     <PackageVersion Include="Quartz" Version="3.6.2" />
     <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.6.2" />
     <PackageVersion Include="Quartz.Plugins.TimeZoneConverter" Version="3.6.2" />
