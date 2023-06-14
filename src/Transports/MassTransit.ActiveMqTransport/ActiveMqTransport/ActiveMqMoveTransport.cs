@@ -40,7 +40,7 @@
 
             CloneMessage(message, messageContext.TransportMessage, preSend);
 
-            var task = Task.Run(() => producer.Send(message));
+            var task = producer.SendAsync(message);
             context.AddReceiveTask(task);
         }
 

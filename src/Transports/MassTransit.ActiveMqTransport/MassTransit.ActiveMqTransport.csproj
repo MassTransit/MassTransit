@@ -20,7 +20,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Apache.NMS.ActiveMQ.NetStd" />
+    <PackageReference Include="Apache.NMS.ActiveMQ" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
   </ItemGroup>
 
