@@ -55,7 +55,7 @@ namespace MassTransit.ActiveMqTransport
         {
             using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
 
-            return await _executor.Run(() => _connection.CreateSession(AcknowledgementMode.IndividualAcknowledge), tokenSource.Token).ConfigureAwait(false);
+            return await _executor.Run(() => _connection.CreateSessionAsync(AcknowledgementMode.IndividualAcknowledge), tokenSource.Token).ConfigureAwait(false);
         }
 
         public bool IsVirtualTopicConsumer(string name)
@@ -95,7 +95,7 @@ namespace MassTransit.ActiveMqTransport
 
             try
             {
-                _connection.Close();
+                await _connection.CloseAsync().ConfigureAwait(false);
 
                 TransportLogMessages.DisconnectedHost(Description);
 

@@ -3,7 +3,7 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="Apache.NMS.ActiveMQ.NetStd" Version="1.8.0" />
+    <PackageVersion Include="Apache.NMS.ActiveMQ" Version="2.1.0" />
     <PackageVersion Include="AWSSDK.DynamoDBv2" Version="3.7.103.12" />
     <PackageVersion Include="AWSSDK.SimpleNotificationService" Version="3.7.101.72" />
     <PackageVersion Include="AWSSDK.S3" Version="3.7.104.23" />

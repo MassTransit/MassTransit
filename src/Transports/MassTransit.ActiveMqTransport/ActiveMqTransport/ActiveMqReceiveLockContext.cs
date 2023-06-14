@@ -18,9 +18,7 @@ namespace MassTransit.ActiveMqTransport
 
         public Task Complete()
         {
-            _message.Acknowledge();
-
-            return Task.CompletedTask;
+            return _message.AcknowledgeAsync();
         }
 
         public Task Faulted(Exception exception)

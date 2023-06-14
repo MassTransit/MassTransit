@@ -43,9 +43,9 @@ namespace MassTransit.ActiveMqTransport.Tests
 
                 message.NMSCorrelationID = "AB76E632-8550-49B9-A119-BBEB84D53355";
 
-                producer.Send(message);
+                await producer.SendAsync(message);
 
-                producer.Close();
+                await producer.CloseAsync();
                 session.Close();
             }
             finally

@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.ActiveMqTransport
 {
     using System;
+    using System.Threading.Tasks;
     using Apache.NMS;
     using Caching;
 
@@ -101,6 +102,84 @@
             return _producer.CreateStreamMessage();
         }
 
+        public Task SendAsync(IMessage message)
+        {
+            Used?.Invoke();
+            return _producer.SendAsync(message);
+        }
+
+        public Task SendAsync(IMessage message, MsgDeliveryMode deliveryMode, MsgPriority priority, TimeSpan timeToLive)
+        {
+            Used?.Invoke();
+            return _producer.SendAsync(message, deliveryMode, priority, timeToLive);
+        }
+
+        public Task SendAsync(IDestination destination, IMessage message)
+        {
+            Used?.Invoke();
+            return _producer.SendAsync(destination, message);
+        }
+
+        public Task SendAsync(IDestination destination, IMessage message, MsgDeliveryMode deliveryMode, MsgPriority priority, TimeSpan timeToLive)
+        {
+            Used?.Invoke();
+            return _producer.SendAsync(destination, message, deliveryMode, priority, timeToLive);
+        }
+
+        public Task CloseAsync()
+        {
+            Used?.Invoke();
+            return _producer.CloseAsync();
+        }
+
+        public Task<IMessage> CreateMessageAsync()
+        {
+            Used?.Invoke();
+            return _producer.CreateMessageAsync();
+        }
+
+        public Task<ITextMessage> CreateTextMessageAsync()
+        {
+            Used?.Invoke();
+            return _producer.CreateTextMessageAsync();
+        }
+
+        public Task<ITextMessage> CreateTextMessageAsync(string text)
+        {
+            Used?.Invoke();
+            return _producer.CreateTextMessageAsync(text);
+        }
+
+        public Task<IMapMessage> CreateMapMessageAsync()
+        {
+            Used?.Invoke();
+            return _producer.CreateMapMessageAsync();
+        }
+
+        public Task<IObjectMessage> CreateObjectMessageAsync(object body)
+        {
+            Used?.Invoke();
+            return _producer.CreateObjectMessageAsync(body);
+        }
+
+        public Task<IBytesMessage> CreateBytesMessageAsync()
+        {
+            Used?.Invoke();
+            return _producer.CreateBytesMessageAsync();
+        }
+
+        public Task<IBytesMessage> CreateBytesMessageAsync(byte[] body)
+        {
+            Used?.Invoke();
+            return _producer.CreateBytesMessageAsync(body);
+        }
+
+        public Task<IStreamMessage> CreateStreamMessageAsync()
+        {
+            Used?.Invoke();
+            return _producer.CreateStreamMessageAsync();
+        }
+
         public ProducerTransformerDelegate ProducerTransformer
         {
             get => _producer.ProducerTransformer;
@@ -142,6 +221,7 @@
             get => _producer.DisableMessageTimestamp;
             set => _producer.DisableMessageTimestamp = value;
         }
+        public TimeSpan DeliveryDelay { get => _producer.DeliveryDelay; set => _producer.DeliveryDelay = value; }
 
         public event Action Used;
     }

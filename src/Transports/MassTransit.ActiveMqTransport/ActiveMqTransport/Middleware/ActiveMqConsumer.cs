@@ -77,7 +77,7 @@ namespace MassTransit.ActiveMqTransport.Middleware
 
             try
             {
-                _messageConsumer.Close();
+                await _messageConsumer.CloseAsync().ConfigureAwait(false);
                 _messageConsumer.Dispose();
             }
             catch (OperationCanceledException)

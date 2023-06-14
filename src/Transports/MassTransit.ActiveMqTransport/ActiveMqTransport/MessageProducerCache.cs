@@ -30,7 +30,7 @@
             return messageProducer;
         }
 
-        async Task<CachedMessageProducer> GetMessageProducerFromFactory(IDestination destination, MessageProducerFactory factory)
+        static async Task<CachedMessageProducer> GetMessageProducerFromFactory(IDestination destination, MessageProducerFactory factory)
         {
             var messageProducer = await factory(destination).ConfigureAwait(false);
 
