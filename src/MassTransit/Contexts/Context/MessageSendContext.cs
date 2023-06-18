@@ -200,6 +200,13 @@ namespace MassTransit.Context
             return longValue.HasValue ? (int)longValue.Value : defaultValue;
         }
 
+        protected static short? ReadShort(IReadOnlyDictionary<string, object> properties, string key, short? defaultValue = null)
+        {
+            var longValue = ReadLong(properties, key);
+
+            return longValue.HasValue ? (short)longValue.Value : defaultValue;
+        }
+
         protected static long? ReadLong(IReadOnlyDictionary<string, object> properties, string key, long? defaultValue = null)
         {
             if (properties.TryGetValue(key, out var value))
