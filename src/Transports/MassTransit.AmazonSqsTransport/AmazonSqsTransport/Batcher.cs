@@ -75,18 +75,22 @@ namespace MassTransit.AmazonSqsTransport
             {
                 try
                 {
-                    for (int entryId = 0,
-                         batchLength = 0;
-                         entryId < _settings.MessageLimit && batchLength < _settings.SizeLimit;
-                         entryId++)
+                    var entryId = 0;
+                    var batchLength = 0;
+
+                    while (entryId < _settings.MessageLimit && batchLength < _settings.SizeLimit)
                     {
-                        BatchEntry<TEntry> entry = await _channel.Reader.ReadAsync(batchToken.Token).ConfigureAwait(false);
-
-                        batchLength += AddingEntry(entry.Entry, entryId.ToString());
-                        batch.Add(entry);
-
-                        if (await _channel.Reader.WaitToReadAsync(batchToken.Token).ConfigureAwait(false) == false)
+                        if (_channel.Reader.TryRead(out var entry))
+                        {
+                            batchLength += AddingEntry(entry.Entry, entryId.ToString());
+                            batch.Add(entry);
+                            entryId++;
+                        }
+                        else if (await _channel.Reader.WaitToReadAsync(batchToken.Token).ConfigureAwait(false) == false)
+                        {
                             break;
+                        }
+
                     }
                 }
                 catch (OperationCanceledException exception) when (exception.CancellationToken == batchToken.Token && batch.Count > 0)
