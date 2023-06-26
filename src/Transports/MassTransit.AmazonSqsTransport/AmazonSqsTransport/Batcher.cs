@@ -70,7 +70,7 @@ namespace MassTransit.AmazonSqsTransport
         async Task ReadBatch()
         {
             var batchToken = new CancellationTokenSource(_settings.Timeout);
-            var batch = new List<BatchEntry<TEntry>>();
+            var batch = new List<BatchEntry<TEntry>>(_settings.MessageLimit);
             try
             {
                 try

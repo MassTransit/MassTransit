@@ -88,7 +88,7 @@ namespace MassTransit.RabbitMqTransport
         async Task ReadBatch()
         {
             var batchToken = new CancellationTokenSource(_settings.Timeout);
-            var batch = new List<BatchPublish>();
+            var batch = new List<BatchPublish>(_settings.MessageLimit);
             try
             {
                 try
