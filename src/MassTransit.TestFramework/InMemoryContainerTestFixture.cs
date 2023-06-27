@@ -68,6 +68,7 @@ namespace MassTransit.TestFramework
         [OneTimeSetUp]
         public async Task ContainerFixtureOneTimeSetup()
         {
+        #pragma warning disable CS0618
             var collection = new ServiceCollection()
                 .AddSingleton<ILoggerFactory>(provider => new TestOutputLoggerFactory(true))
                 .AddSingleton(typeof(ILogger<>), typeof(Logger<>))
@@ -77,6 +78,7 @@ namespace MassTransit.TestFramework
 
                     ConfigureMassTransit(cfg);
                 });
+        #pragma warning restore CS0618
 
             collection = ConfigureServices(collection);
 
