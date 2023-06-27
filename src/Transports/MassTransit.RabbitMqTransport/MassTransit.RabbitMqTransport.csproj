@@ -32,8 +32,4 @@
   <ItemGroup>
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Topology\Configuration" />
-  </ItemGroup>
 </Project>

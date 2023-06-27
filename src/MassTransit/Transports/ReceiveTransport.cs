@@ -101,8 +101,6 @@ namespace MassTransit.Transports
             {
                 LogContext.SetCurrentIfNull(_context.LogContext);
 
-                TransportLogMessages.StoppingReceiveTransport(_context.InputAddress);
-
                 if (_supervisor != null)
                     await _supervisor.Stop(context).ConfigureAwait(false);
 
