@@ -1,6 +1,8 @@
+#nullable enable
 namespace MassTransit.Context
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
     using System.Threading.Tasks;
     using Util;
 
@@ -9,12 +11,6 @@ namespace MassTransit.Context
         BaseConsumeContext
     {
         readonly PendingTaskCollection _consumeTasks;
-
-        protected DeserializerConsumeContext(ReceiveContext receiveContext)
-            : base(receiveContext)
-        {
-            _consumeTasks = new PendingTaskCollection(4);
-        }
 
         protected DeserializerConsumeContext(ReceiveContext receiveContext, SerializerContext serializerContext)
             : base(receiveContext, serializerContext)
@@ -40,7 +36,8 @@ namespace MassTransit.Context
         /// <param name="payload"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public override bool TryGetPayload<T>(out T payload)
+        public override bool TryGetPayload<T>([NotNullWhen(true)] out T? payload)
+            where T : class
         {
             if (this is T context)
             {

@@ -3,6 +3,7 @@ namespace MassTransit.Serialization
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Reflection;
     using Context;
 
@@ -24,10 +25,10 @@ namespace MassTransit.Serialization
         public override Guid? ConversationId => SerializerContext.ConversationId;
         public override Guid? InitiatorId => SerializerContext.InitiatorId;
         public override DateTime? ExpirationTime => SerializerContext.ExpirationTime;
-        public override Uri? SourceAddress => SerializerContext.SourceAddress;
-        public override Uri? DestinationAddress => SerializerContext.DestinationAddress;
-        public override Uri? ResponseAddress => SerializerContext.ResponseAddress;
-        public override Uri? FaultAddress => SerializerContext.FaultAddress;
+        public override Uri SourceAddress => SerializerContext.SourceAddress!;
+        public override Uri DestinationAddress => SerializerContext.DestinationAddress!;
+        public override Uri ResponseAddress => SerializerContext.ResponseAddress!;
+        public override Uri FaultAddress => SerializerContext.FaultAddress!;
         public override DateTime? SentTime => SerializerContext.SentTime;
         public override Headers Headers => SerializerContext.Headers;
         public override HostInfo Host => SerializerContext.Host;
@@ -44,7 +45,7 @@ namespace MassTransit.Serialization
             return SerializerContext.IsSupportedMessageType(messageType);
         }
 
-        public override bool TryGetMessage<T>(out ConsumeContext<T>? message)
+        public override bool TryGetMessage<T>([NotNullWhen(true)] out ConsumeContext<T>? message)
         {
             lock (_messageTypes)
             {
@@ -60,7 +61,7 @@ namespace MassTransit.Serialization
                     {
                         if (SerializerContext.TryGetMessage(typeof(T), out var messageObj))
                         {
-                            _messageTypes[typeof(T)] = message = new MessageConsumeContext<T>(this, ((T)messageObj)!);
+                            _messageTypes[typeof(T)] = message = new MessageConsumeContext<T>(this, (T)messageObj);
                             return true;
                         }
                     }
