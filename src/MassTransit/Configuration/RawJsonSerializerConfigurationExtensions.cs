@@ -1,7 +1,6 @@
 namespace MassTransit
 {
     using Configuration;
-    using Serialization;
 
 
     public static class RawJsonSerializerConfigurationExtensions

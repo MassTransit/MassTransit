@@ -18,13 +18,13 @@ namespace MassTransit
         }
 
         protected AbstractUriException(Uri uri, string message)
-            : base(uri + " => " + message)
+            : base($"{uri} => {message}")
         {
             Uri = uri;
         }
 
         protected AbstractUriException(Uri uri, string message, Exception innerException)
-            : base(uri + " => " + message, innerException)
+            : base($"{uri} => {message}", innerException)
         {
             Uri = uri;
         }
