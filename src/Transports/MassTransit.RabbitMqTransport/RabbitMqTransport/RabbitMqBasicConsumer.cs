@@ -239,7 +239,7 @@ namespace MassTransit.RabbitMqTransport
 
         Task OnConsumerCancelled(object obj, ConsumerEventArgs args)
         {
-            _sequentialDeliveryBlockingCollection.CompleteAdding();
+            _sequentialDeliveryBlockingCollection?.CompleteAdding();
             _onConsumerCancelled?.Invoke(obj, args);           
 
             return Task.CompletedTask;
