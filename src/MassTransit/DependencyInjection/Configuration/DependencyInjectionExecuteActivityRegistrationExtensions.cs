@@ -87,9 +87,6 @@ namespace MassTransit.Configuration
             {
                 collection.TryAddScoped<TActivity>();
 
-                collection.TryAddTransient<IExecuteActivityScopeProvider<TActivity, TArguments>,
-                    ExecuteActivityScopeProvider<TActivity, TArguments>>();
-
                 return registrar.GetOrAdd<IExecuteActivityRegistration>(typeof(TActivity), _ => new ExecuteActivityRegistration<TActivity, TArguments>());
             }
         }
