@@ -1,6 +1,7 @@
 namespace MassTransit.RabbitMqTransport
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
@@ -20,13 +21,15 @@ namespace MassTransit.RabbitMqTransport
     {
         readonly RabbitMqReceiveEndpointContext _context;
         readonly SemaphoreSlim _limit;
-
+        readonly BlockingCollection<Func<Task>> _sequentialDeliveryBlockingCollection;
+        
         readonly ModelContext _model;
         readonly ReceiveSettings _receiveSettings;
 
         string _consumerTag;
 
         EventHandler<ConsumerEventArgs> _onConsumerCancelled;
+        
 
         /// <summary>
         /// The basic consumer receives messages pushed from the broker.
@@ -44,9 +47,32 @@ namespace MassTransit.RabbitMqTransport
             if (context.ConcurrentMessageLimit.HasValue)
                 _limit = new SemaphoreSlim(context.ConcurrentMessageLimit.Value);
 
+            if(_context.ConcurrentMessageLimit == 1)
+            {
+                _sequentialDeliveryBlockingCollection = new BlockingCollection<Func<Task>>();
+                StartBackgroundQueueProcessing(_sequentialDeliveryBlockingCollection);
+            }
+
             ConsumerCancelled += OnConsumerCancelled;
 
             TrySetManualConsumeTask();
+        }
+
+        /// <summary>
+        /// Starts a background task awaiting message delivery to preserve message order processing
+        /// when ConcurrentMessageLimit is set to 1 and prefetch is higher than 1
+        /// </summary>
+        /// <param name="sequentialDeliveryBlockingCollection"></param>
+        /// <returns></returns>
+        private Task StartBackgroundQueueProcessing(BlockingCollection<Func<Task>> sequentialDeliveryBlockingCollection)
+        {
+            return Task.Run(async () =>
+            {
+                foreach (var action in sequentialDeliveryBlockingCollection.GetConsumingEnumerable())
+                {
+                    await action().ConfigureAwait(false);
+                }
+            });
         }
 
         /// <summary>
@@ -153,34 +179,49 @@ namespace MassTransit.RabbitMqTransport
             IBasicProperties properties, ReadOnlyMemory<byte> body)
         {
             var bodyBytes = body.ToArray();
-
-            Task.Run(async () =>
+            if (_context.ConcurrentMessageLimit == 1)
             {
-                LogContext.Current = _context.LogContext;
-
-                var context = new RabbitMqReceiveContext(exchange, routingKey, _consumerTag, deliveryTag, bodyBytes, redelivered, properties,
-                    _context, _receiveSettings, _model, _model.ConnectionContext);
-
-                if (_limit != null)
-                    await _limit.WaitAsync(context.CancellationToken).ConfigureAwait(false);
-
-                try
+                if(!_sequentialDeliveryBlockingCollection.IsAddingCompleted)
                 {
-                    await Dispatch(deliveryTag, context,
-                            _receiveSettings.NoAck ? NoLockReceiveContext.Instance : new RabbitMqReceiveLockContext(_model, deliveryTag))
-                        .ConfigureAwait(false);
+                    _sequentialDeliveryBlockingCollection.Add(() =>
+                        HandleBasicDeliverMessage(deliveryTag, redelivered, exchange, routingKey, properties, bodyBytes)
+                    );
                 }
-                catch (Exception exception)
-                {
-                    context.LogTransportFaulted(exception);
-                }
-                finally
-                {
-                    _limit?.Release();
+                
+            }
+            else
+            {
+                Task.Run(() => HandleBasicDeliverMessage(deliveryTag, redelivered, exchange, routingKey, properties, bodyBytes));
+            }
+            
+        }
 
-                    context.Dispose();
-                }
-            });
+        private async Task HandleBasicDeliverMessage(ulong deliveryTag, bool redelivered, string exchange, string routingKey, IBasicProperties properties, byte[] bodyBytes)
+        {
+            LogContext.Current = _context.LogContext;
+
+            var context = new RabbitMqReceiveContext(exchange, routingKey, _consumerTag, deliveryTag, bodyBytes, redelivered, properties,
+                _context, _receiveSettings, _model, _model.ConnectionContext);
+
+            if (_limit != null)
+                await _limit.WaitAsync(context.CancellationToken).ConfigureAwait(false);
+
+            try
+            {
+                await Dispatch(deliveryTag, context,
+                        _receiveSettings.NoAck ? NoLockReceiveContext.Instance : new RabbitMqReceiveLockContext(_model, deliveryTag))
+                    .ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                context.LogTransportFaulted(exception);
+            }
+            finally
+            {
+                _limit?.Release();
+
+                context.Dispose();
+            }
         }
 
         event EventHandler<ConsumerEventArgs> IBasicConsumer.ConsumerCancelled
@@ -198,7 +239,8 @@ namespace MassTransit.RabbitMqTransport
 
         Task OnConsumerCancelled(object obj, ConsumerEventArgs args)
         {
-            _onConsumerCancelled?.Invoke(obj, args);
+            _sequentialDeliveryBlockingCollection.CompleteAdding();
+            _onConsumerCancelled?.Invoke(obj, args);           
 
             return Task.CompletedTask;
         }
