@@ -59,7 +59,7 @@ namespace MassTransit.RabbitMqTransport
 
         /// <summary>
         /// Starts a background task awaiting message delivery to preserve message order processing
-        /// when ConcurrentMessageLimit is set to 1 and prefetch is higher than 1
+        /// when ConcurrentMessageLimit is set to 1 and prefetch is 0 or higher than 1
         /// </summary>
         /// <param name="sequentialDeliveryBlockingCollection"></param>
         /// <returns></returns>
