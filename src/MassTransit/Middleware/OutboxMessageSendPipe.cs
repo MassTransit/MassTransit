@@ -4,6 +4,7 @@ namespace MassTransit.Middleware
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
+    using System.Linq;
     using System.Net.Mime;
     using System.Threading.Tasks;
     using Context;
@@ -35,20 +36,20 @@ namespace MassTransit.Middleware
 
             var serializerContext = deserializer.Deserialize(body, headers, _destinationAddress);
 
-            if (serializerContext.MessageId.HasValue)
-                context.MessageId = serializerContext.MessageId;
+            context.MessageId = _message.MessageId;
+            context.RequestId = _message.RequestId;
+            context.ConversationId = _message.ConversationId;
+            context.CorrelationId = _message.CorrelationId;
+            context.InitiatorId = _message.InitiatorId;
+            context.SourceAddress = _message.SourceAddress;
+            context.ResponseAddress = _message.ResponseAddress;
+            context.FaultAddress = _message.FaultAddress;
+            context.SupportedMessageTypes = string.IsNullOrWhiteSpace(_message.MessageType)
+                ? serializerContext.SupportedMessageTypes
+                : _message.MessageType.Split(';').ToArray();
 
-            context.RequestId = serializerContext.RequestId;
-            context.ConversationId = serializerContext.ConversationId;
-            context.CorrelationId = serializerContext.CorrelationId;
-            context.InitiatorId = serializerContext.InitiatorId;
-            context.SourceAddress = serializerContext.SourceAddress;
-            context.ResponseAddress = serializerContext.ResponseAddress;
-            context.FaultAddress = serializerContext.FaultAddress;
-            context.SupportedMessageTypes = serializerContext.SupportedMessageTypes;
-
-            if (serializerContext.ExpirationTime.HasValue)
-                context.TimeToLive = serializerContext.ExpirationTime.Value.ToUniversalTime() - DateTime.UtcNow;
+            if (_message.ExpirationTime.HasValue)
+                context.TimeToLive = _message.ExpirationTime.Value.ToUniversalTime() - DateTime.UtcNow;
 
             foreach (KeyValuePair<string, object> header in serializerContext.Headers.GetAll())
                 context.Headers.Set(header.Key, header.Value);

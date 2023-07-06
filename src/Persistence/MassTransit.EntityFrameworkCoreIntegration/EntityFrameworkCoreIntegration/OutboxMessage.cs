@@ -45,6 +45,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         public Guid MessageId { get; set; }
 
         public string ContentType { get; set; } = null!;
+        public string MessageType { get; set; } = null!;
 
         public string Body { get; set; } = null!;
 

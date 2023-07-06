@@ -26,6 +26,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
                 .AddTelemetryListener()
                 .AddMassTransitTestHarness(x =>
                 {
+                    x.SetTestTimeouts(testInactivityTimeout: TimeSpan.FromSeconds(10));
+
                     x.AddEntityFrameworkOutbox<ReliableDbContext>(o =>
                     {
                         o.QueryDelay = TimeSpan.FromSeconds(1);
@@ -41,7 +43,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
                 .BuildServiceProvider(true);
 
             var harness = provider.GetTestHarness();
-            harness.TestInactivityTimeout = TimeSpan.FromSeconds(5);
 
             await harness.Start();
 
@@ -68,6 +69,13 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
                 }
 
                 Assert.That(await consumerHarness.Consumed.Any<PingMessage>(), Is.True);
+
+                IReceivedMessage<PingMessage> context = harness.Consumed.Select<PingMessage>().Single();
+
+                Assert.That(context.Context.MessageId, Is.Not.Null);
+                Assert.That(context.Context.ConversationId, Is.Not.Null);
+                Assert.That(context.Context.DestinationAddress, Is.Not.Null);
+                Assert.That(context.Context.SourceAddress, Is.Not.Null);
             }
             finally
             {
@@ -85,6 +93,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
                 .AddTelemetryListener()
                 .AddMassTransitTestHarness(x =>
                 {
+                    x.SetTestTimeouts(testInactivityTimeout: TimeSpan.FromSeconds(10));
                     x.AddEntityFrameworkOutbox<ReliableDbContext>(o =>
                     {
                         o.QueryDelay = TimeSpan.FromSeconds(1);
@@ -108,7 +117,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
                 .BuildServiceProvider(true);
 
             var harness = provider.GetTestHarness();
-            harness.TestInactivityTimeout = TimeSpan.FromSeconds(5);
 
             await harness.Start();
 
@@ -137,6 +145,11 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
                 Assert.That(context.Context.Headers.TryGetHeader("Test-Header", out var header), Is.True);
 
                 Assert.That(header, Is.EqualTo("Test-Value"));
+
+                Assert.That(context.Context.MessageId, Is.Not.Null);
+                Assert.That(context.Context.ConversationId, Is.Not.Null);
+                Assert.That(context.Context.DestinationAddress, Is.Not.Null);
+                Assert.That(context.Context.SourceAddress, Is.Not.Null);
             }
             finally
             {

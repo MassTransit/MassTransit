@@ -14,6 +14,8 @@ namespace MassTransit.Middleware
 
         string ContentType { get; }
 
+        string MessageType { get; }
+
         string Body { get; }
 
         IReadOnlyDictionary<string, object> Properties { get; }
