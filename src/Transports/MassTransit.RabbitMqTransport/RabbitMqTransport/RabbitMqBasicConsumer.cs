@@ -22,9 +22,10 @@ namespace MassTransit.RabbitMqTransport
         readonly RabbitMqReceiveEndpointContext _context;
         readonly SemaphoreSlim _limit;
         readonly BlockingCollection<Func<Task>> _sequentialDeliveryBlockingCollection;
-        
+        readonly Task _sequentialConsumeDispatcher;
         readonly ModelContext _model;
         readonly ReceiveSettings _receiveSettings;
+        readonly CancellationTokenSource _consumerCancellationTokenSource = new CancellationTokenSource();
 
         string _consumerTag;
 
@@ -47,11 +48,9 @@ namespace MassTransit.RabbitMqTransport
             if (context.ConcurrentMessageLimit.HasValue)
                 _limit = new SemaphoreSlim(context.ConcurrentMessageLimit.Value);
 
-            if(_context.ConcurrentMessageLimit == 1)
-            {
-                _sequentialDeliveryBlockingCollection = new BlockingCollection<Func<Task>>();
-                StartBackgroundQueueProcessing(_sequentialDeliveryBlockingCollection);
-            }
+            _sequentialDeliveryBlockingCollection = new BlockingCollection<Func<Task>>();
+
+            _sequentialConsumeDispatcher = Task.Run(() => StartDispatcher(_sequentialDeliveryBlockingCollection));
 
             ConsumerCancelled += OnConsumerCancelled;
 
@@ -64,15 +63,15 @@ namespace MassTransit.RabbitMqTransport
         /// </summary>
         /// <param name="sequentialDeliveryBlockingCollection"></param>
         /// <returns></returns>
-        private Task StartBackgroundQueueProcessing(BlockingCollection<Func<Task>> sequentialDeliveryBlockingCollection)
+        async Task StartDispatcher(BlockingCollection<Func<Task>> sequentialDeliveryBlockingCollection)
         {
-            return Task.Run(async () =>
+            foreach (var action in sequentialDeliveryBlockingCollection.GetConsumingEnumerable())
             {
-                foreach (var action in sequentialDeliveryBlockingCollection.GetConsumingEnumerable())
-                {
-                    await action().ConfigureAwait(false);
-                }
-            });
+                if (_limit != null)
+                    await _limit.WaitAsync(_consumerCancellationTokenSource.Token).ConfigureAwait(false);
+
+                _ = action().ConfigureAwait(false);
+            }            
         }
 
         /// <summary>
@@ -179,21 +178,10 @@ namespace MassTransit.RabbitMqTransport
             IBasicProperties properties, ReadOnlyMemory<byte> body)
         {
             var bodyBytes = body.ToArray();
-            if (_context.ConcurrentMessageLimit == 1)
-            {
-                if(!_sequentialDeliveryBlockingCollection.IsAddingCompleted)
-                {
-                    _sequentialDeliveryBlockingCollection.Add(() =>
-                        HandleBasicDeliverMessage(deliveryTag, redelivered, exchange, routingKey, properties, bodyBytes)
-                    );
-                }
-                
-            }
-            else
-            {
-                Task.Run(() => HandleBasicDeliverMessage(deliveryTag, redelivered, exchange, routingKey, properties, bodyBytes));
-            }
-            
+
+            _sequentialDeliveryBlockingCollection.Add(() =>
+                HandleBasicDeliverMessage(deliveryTag, redelivered, exchange, routingKey, properties, bodyBytes)
+            );            
         }
 
         private async Task HandleBasicDeliverMessage(ulong deliveryTag, bool redelivered, string exchange, string routingKey, IBasicProperties properties, byte[] bodyBytes)
@@ -202,9 +190,6 @@ namespace MassTransit.RabbitMqTransport
 
             var context = new RabbitMqReceiveContext(exchange, routingKey, _consumerTag, deliveryTag, bodyBytes, redelivered, properties,
                 _context, _receiveSettings, _model, _model.ConnectionContext);
-
-            if (_limit != null)
-                await _limit.WaitAsync(context.CancellationToken).ConfigureAwait(false);
 
             try
             {
@@ -237,12 +222,12 @@ namespace MassTransit.RabbitMqTransport
             return deliveryTag != 1 || _context.IsNotReplyTo;
         }
 
-        Task OnConsumerCancelled(object obj, ConsumerEventArgs args)
+        async Task OnConsumerCancelled(object obj, ConsumerEventArgs args)
         {
             _sequentialDeliveryBlockingCollection?.CompleteAdding();
-            _onConsumerCancelled?.Invoke(obj, args);           
-
-            return Task.CompletedTask;
+            _consumerCancellationTokenSource.Cancel();
+            _onConsumerCancelled?.Invoke(obj, args);            
+            await _sequentialConsumeDispatcher.ConfigureAwait(false);
         }
 
         protected override async Task StopAgent(StopContext context)

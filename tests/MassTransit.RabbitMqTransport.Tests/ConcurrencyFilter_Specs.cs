@@ -129,6 +129,7 @@
 
             _consumer = new Consumer();
             configurator.ConcurrentMessageLimit = 1;
+            configurator.Instance(_consumer, x => x.UseConcurrentMessageLimit(1));
         }
 
 
