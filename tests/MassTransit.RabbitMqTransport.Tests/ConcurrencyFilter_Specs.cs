@@ -141,7 +141,7 @@
             long _deliveryCount;
             int _maxPendingDeliveryCount;
             int _previousSequenceIndex;
-            bool _completedConsumingSequentially;
+            bool _completedConsumingSequentially = true;
 
             public int MaxDeliveryCount => _maxPendingDeliveryCount;
             public bool CompletedConsumingSequentially => _completedConsumingSequentially;
