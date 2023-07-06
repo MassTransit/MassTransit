@@ -168,7 +168,7 @@
 
                 Interlocked.Decrement(ref _currentPendingDeliveryCount);
 
-                _completedConsumingSequentially = _previousSequenceIndex == sequenceIndex - 1;
+                _completedConsumingSequentially = _completedConsumingSequentially && _previousSequenceIndex == sequenceIndex - 1;
                 _previousSequenceIndex = sequenceIndex;
 
                 if (_deliveryCount >= _messageCount * 2)
