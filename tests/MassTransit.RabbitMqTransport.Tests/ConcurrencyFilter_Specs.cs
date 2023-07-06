@@ -103,15 +103,12 @@
         {
             _complete = GetTask<bool>();
 
-            var tasks = new List<Task>(_messageCount * 2);
             int sequenceIndex = 1;
             for (var i = 0; i < _messageCount; i++)
             {
-                tasks.Add(Bus.Publish(new A(sequenceIndex++)));
-                tasks.Add(Bus.Publish(new B(sequenceIndex++)));
+                await Bus.Publish(new A(sequenceIndex++));
+                await Bus.Publish(new B(sequenceIndex++));
             }
-
-            await Task.WhenAll(tasks);
 
             await _complete.Task;
 
