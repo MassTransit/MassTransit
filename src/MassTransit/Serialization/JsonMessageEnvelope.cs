@@ -54,7 +54,7 @@ namespace MassTransit.Serialization
 
             SentTime = context.SentTime ?? DateTime.UtcNow;
 
-            Headers = new Dictionary<string, object?>();
+            Headers = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
 
             foreach (KeyValuePair<string, object> header in context.Headers.GetAll())
                 Headers[header.Key] = header.Value;
@@ -100,7 +100,7 @@ namespace MassTransit.Serialization
 
             SentTime = context.SentTime ?? DateTime.UtcNow;
 
-            Headers = new Dictionary<string, object?>();
+            Headers = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
 
             foreach (KeyValuePair<string, object> header in context.Headers.GetAll())
                 Headers[header.Key] = header.Value;
@@ -150,7 +150,7 @@ namespace MassTransit.Serialization
 
         public Dictionary<string, object?> Headers
         {
-            get => _headers ??= new Dictionary<string, object?>();
+            get => _headers ??= new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
             set => _headers = value;
         }
 
@@ -189,6 +189,9 @@ namespace MassTransit.Serialization
 
             foreach (KeyValuePair<string, object> header in context.Headers.GetAll())
                 Headers[header.Key] = header.Value;
+
+            if (MessageType != null)
+                context.SupportedMessageTypes = MessageType;
         }
     }
 }

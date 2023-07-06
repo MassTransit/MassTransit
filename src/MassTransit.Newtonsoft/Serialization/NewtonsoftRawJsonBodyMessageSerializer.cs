@@ -15,8 +15,7 @@ namespace MassTransit.Serialization
         readonly RawSerializerOptions _options;
         JToken _message;
 
-        public NewtonsoftRawJsonBodyMessageSerializer(JToken message, ContentType contentType, RawSerializerOptions options,
-            string[]? messageTypes = null)
+        public NewtonsoftRawJsonBodyMessageSerializer(JToken message, ContentType contentType, RawSerializerOptions options, string[]? messageTypes = null)
         {
             _message = message;
             _options = options;
@@ -30,8 +29,8 @@ namespace MassTransit.Serialization
         public MessageBody GetMessageBody<T>(SendContext<T> context)
             where T : class
         {
-            if (_messageTypes != null && _options.HasFlag(RawSerializerOptions.AddTransportHeaders))
-                context.Headers.Set(MessageHeaders.MessageType, string.Join(";", _messageTypes));
+            if (_messageTypes != null)
+                context.SupportedMessageTypes = _messageTypes;
 
             return new NewtonsoftRawJsonMessageBody<T>(context, _message);
         }

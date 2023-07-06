@@ -1,5 +1,6 @@
 namespace MassTransit.Testing
 {
+    using System;
     using System.Threading.Tasks;
     using Microsoft.Extensions.DependencyInjection;
 
@@ -61,11 +62,35 @@ namespace MassTransit.Testing
             where T : class, IConsumer;
 
         /// <summary>
+        /// Returns the endpoint address for the specified consumer type
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        Uri GetConsumerAddress<T>()
+            where T : class, IConsumer;
+
+        /// <summary>
+        /// Returns the endpoint address for the specified handler type
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        Uri GetHandlerAddress<T>()
+            where T : class;
+
+        /// <summary>
         /// Use the endpoint name formatter to get the send endpoint for the saga type
         /// </summary>
         /// <typeparam name="T">The saga type</typeparam>
         /// <returns></returns>
         Task<ISendEndpoint> GetSagaEndpoint<T>()
+            where T : class, ISaga;
+
+        /// <summary>
+        /// Returns the endpoint address for the saga
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        Uri GetSagaAddress<T>()
             where T : class, ISaga;
 
         /// <summary>
@@ -75,6 +100,16 @@ namespace MassTransit.Testing
         /// <typeparam name="TArguments">The argument type</typeparam>
         /// <returns></returns>
         Task<ISendEndpoint> GetExecuteActivityEndpoint<T, TArguments>()
+            where T : class, IExecuteActivity<TArguments>
+            where TArguments : class;
+
+        /// <summary>
+        /// Returns the endpoint address for the execute activity
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TArguments"></typeparam>
+        /// <returns></returns>
+        Uri GetExecuteActivityAddress<T, TArguments>()
             where T : class, IExecuteActivity<TArguments>
             where TArguments : class;
 

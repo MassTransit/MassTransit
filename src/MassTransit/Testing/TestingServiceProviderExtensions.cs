@@ -15,6 +15,15 @@ namespace MassTransit.Testing
             return provider.GetRequiredService<ITestHarness>();
         }
 
+        public static async Task<ITestHarness> StartTestHarness(this IServiceProvider provider)
+        {
+            var testHarness = provider.GetRequiredService<ITestHarness>();
+
+            await testHarness.Start().ConfigureAwait(false);
+
+            return testHarness;
+        }
+
         public static async Task<Task<ConsumeContext<T>>> ConnectPublishHandler<T>(this ITestHarness harness, Func<ConsumeContext<T>, bool> filter)
             where T : class
         {

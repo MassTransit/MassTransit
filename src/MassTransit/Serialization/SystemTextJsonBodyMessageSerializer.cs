@@ -17,24 +17,36 @@ namespace MassTransit.Serialization
     {
         readonly JsonMessageEnvelope? _envelope;
         readonly JsonSerializerOptions _options;
-        readonly RawSerializerOptions _rawOptions;
+        readonly RawSerializerOptions? _rawOptions;
+        readonly string[]? _messageTypes;
         object? _message;
 
-        public SystemTextJsonBodyMessageSerializer(MessageEnvelope envelope, ContentType contentType, JsonSerializerOptions options)
+        public SystemTextJsonBodyMessageSerializer(MessageEnvelope envelope, ContentType contentType, JsonSerializerOptions options,
+            string[]? messageTypes = null)
         {
             _message = envelope.Message;
             _options = options;
+            _messageTypes = messageTypes;
 
             _envelope = new JsonMessageEnvelope(envelope);
 
             ContentType = contentType;
         }
 
-        public SystemTextJsonBodyMessageSerializer(object message, ContentType contentType, JsonSerializerOptions options, RawSerializerOptions rawOptions)
+        public SystemTextJsonBodyMessageSerializer(object message, ContentType contentType, JsonSerializerOptions options, RawSerializerOptions rawOptions,
+            string[]? messageTypes = null)
         {
-            _message = message;
+            if (message is MessageEnvelope envelope)
+            {
+                _message = envelope.Message;
+                _envelope = new JsonMessageEnvelope(envelope);
+            }
+            else
+                _message = message;
+
             _options = options;
             _rawOptions = rawOptions;
+            _messageTypes = messageTypes;
 
             ContentType = contentType;
         }
@@ -44,17 +56,20 @@ namespace MassTransit.Serialization
         public MessageBody GetMessageBody<T>(SendContext<T> context)
             where T : class
         {
-            if (_envelope != null)
-            {
-                _envelope.Update(context);
+            _envelope?.Update(context);
 
-                return new SystemTextJsonMessageBody<T>(context, _options, _envelope);
+            if(_messageTypes != null)
+                context.SupportedMessageTypes = _messageTypes;
+
+            if (_rawOptions.HasValue)
+            {
+                if (_rawOptions.Value.HasFlag(RawSerializerOptions.AddTransportHeaders))
+                    SetRawMessageHeaders<T>(context);
+
+                return new SystemTextJsonRawMessageBody<T>(context, _options, _message);
             }
 
-            if (_rawOptions.HasFlag(RawSerializerOptions.AddTransportHeaders))
-                SetRawMessageHeaders<T>(context);
-
-            return new SystemTextJsonRawMessageBody<T>(context, _options, _message);
+            return new SystemTextJsonMessageBody<T>(context, _options, _envelope);
         }
 
         public void Overlay(object message)

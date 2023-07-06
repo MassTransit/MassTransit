@@ -139,6 +139,61 @@ namespace MassTransit.Containers.Tests.Common_Tests
     }
 
 
+    public class Courier_Activity_Custom_Subscription :
+        InMemoryContainerTestFixture
+    {
+        [Test]
+        public async Task Should_register_and_execute_the_activity()
+        {
+            _completed = SubscribeHandler<RegistrationCompleted>();
+
+            _trackingNumber = NewId.NextGuid();
+            var builder = new RoutingSlipBuilder(_trackingNumber);
+            await builder.AddSubscription(Bus.Address, RoutingSlipEvents.Completed, RoutingSlipEventContents.All, async (x) =>
+            {
+                await x.Send<RegistrationCompleted>(new {Value = "Secret Value"});
+            });
+
+            builder.AddActivity("TestActivity", _executeAddress, new { Value = "Hello" });
+
+            await Bus.Execute(builder.Build());
+
+            ConsumeContext<RegistrationCompleted> completed = await _completed;
+
+            Assert.That(completed.Message.Value, Is.EqualTo("Secret Value"));
+        }
+
+        Task<ConsumeContext<RegistrationCompleted>> _completed;
+        Uri _executeAddress;
+        Guid _trackingNumber;
+
+        protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
+        {
+            configurator.AddActivity<TestActivity, TestArguments, TestLog>();
+        }
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.ReceiveEndpoint("execute_testactivity", endpointConfigurator =>
+            {
+                configurator.ReceiveEndpoint("compensate_testactivity", compensateConfigurator =>
+                {
+                    endpointConfigurator.ConfigureActivity(compensateConfigurator, BusRegistrationContext, typeof(TestActivity));
+                });
+
+                _executeAddress = endpointConfigurator.InputAddress;
+            });
+        }
+    }
+
+
+    public interface RegistrationCompleted :
+        RoutingSlipCompleted
+    {
+        string Value { get; }
+    }
+
+
     public class Common_Activity_Filter :
         InMemoryContainerTestFixture
     {

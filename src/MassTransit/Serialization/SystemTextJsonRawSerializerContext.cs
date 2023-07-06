@@ -49,5 +49,14 @@ namespace MassTransit.Serialization
 
             return new SystemTextJsonBodyMessageSerializer(message, ContentType, Options, _rawOptions);
         }
+
+        public override IMessageSerializer GetMessageSerializer<T>(MessageEnvelope envelope, T message)
+        {
+            var serializer = new SystemTextJsonBodyMessageSerializer(envelope, ContentType, Options, _rawOptions);
+
+            serializer.Overlay(message);
+
+            return serializer;
+        }
     }
 }

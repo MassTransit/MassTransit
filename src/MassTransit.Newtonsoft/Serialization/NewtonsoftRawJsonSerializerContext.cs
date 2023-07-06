@@ -49,7 +49,7 @@ namespace MassTransit.Serialization
 
         public override IMessageSerializer GetMessageSerializer<T>(MessageEnvelope envelope, T message)
         {
-            var serializer = new NewtonsoftJsonBodyMessageSerializer(envelope, _contentType);
+            var serializer = new NewtonsoftRawJsonBodyMessageSerializer(envelope.Message as JToken, _contentType, _options, envelope.MessageType);
 
             serializer.Overlay(message);
 

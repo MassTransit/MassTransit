@@ -12,6 +12,7 @@
     <ProjectReference Include="..\..\src\Scheduling\MassTransit.QuartzIntegration\MassTransit.QuartzIntegration.csproj" />
     <ProjectReference Include="..\..\src\MassTransit.TestFramework\MassTransit.TestFramework.csproj" />
     <ProjectReference Include="..\..\src\MassTransit\MassTransit.csproj" />
+    <ProjectReference Include="..\MassTransit.Tests\MassTransit.Tests.csproj" />
   </ItemGroup>
 
   <ItemGroup>

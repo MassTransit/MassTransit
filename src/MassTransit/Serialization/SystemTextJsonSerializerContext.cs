@@ -88,7 +88,7 @@ namespace MassTransit.Serialization
 
             var envelope = new JsonMessageEnvelope(this, message, messageTypes);
 
-            return new SystemTextJsonBodyMessageSerializer(envelope, ContentType, Options);
+            return new SystemTextJsonBodyMessageSerializer(envelope, ContentType, Options, messageTypes);
         }
 
         public override Dictionary<string, object> ToDictionary<T>(T? message)

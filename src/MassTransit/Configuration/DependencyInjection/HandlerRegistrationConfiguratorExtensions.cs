@@ -9,6 +9,22 @@ namespace MassTransit
     public static class HandlerRegistrationConfiguratorExtensions
     {
         /// <summary>
+        /// Adds an empty message handler, which consumes the messages and does nothing else. Useful with the test harness to ensure
+        /// that produced messages are consumed, which can then be asserted in unit tests.
+        /// </summary>
+        /// <param name="configurator"></param>
+        public static IConsumerRegistrationConfigurator AddHandler<T>(this IRegistrationConfigurator configurator)
+            where T : class
+        {
+            if (!MessageTypeCache<T>.IsValidMessageType)
+                throw new ArgumentException(MessageTypeCache<T>.InvalidMessageTypeReason, nameof(T));
+
+            configurator.TryAddSingleton(new MessageHandlerMethod<T>((ConsumeContext<T> context) => Task.CompletedTask));
+
+            return configurator.AddConsumer<MessageHandlerConsumer<T>, MessageHandlerConsumerDefinition<MessageHandlerConsumer<T>, T>>();
+        }
+
+        /// <summary>
         /// Adds a method handler, using the first parameter to determine the message type
         /// </summary>
         /// <param name="configurator"></param>
