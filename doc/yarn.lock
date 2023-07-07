@@ -1135,16 +1135,16 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@nuxt-themes/docus@^1.0.2":
-  version "1.13.0"
-  resolved "https://registry.yarnpkg.com/@nuxt-themes/docus/-/docus-1.13.0.tgz#712975af7fb7baa7782bada061c027ddd6db850d"
-  integrity sha512-baEsGZnMrbAfT4ChTTuAxsSQUr+AooDrpG9WfbykuE+lxCTUhjfodtzUy1lPFPp5CZXm+TcSeN9P5ZK5l+JJDA==
+"@nuxt-themes/docus@^1.13.1":
+  version "1.13.1"
+  resolved "https://registry.yarnpkg.com/@nuxt-themes/docus/-/docus-1.13.1.tgz#cf9c96a649885c2381f26a0ea8baef0e617b25d7"
+  integrity sha512-8mS8tQK0KKB1QNBwUUXub2Gb0xIJt5djZv6HsD4jf+4XUp1wLwMqFuNKGvbL8+Rc6G6nc9A93BbsOTCSPubcSA==
   dependencies:
     "@nuxt-themes/elements" "^0.9.4"
     "@nuxt-themes/tokens" "^1.9.1"
     "@nuxt-themes/typography" "^0.11.0"
     "@nuxt/content" "^2.7.0"
-    "@nuxthq/studio" "^0.13.2"
+    "@nuxthq/studio" "^0.13.3"
     "@vueuse/nuxt" "^10.2.1"
 
 "@nuxt-themes/elements@^0.9.4":
@@ -1331,7 +1331,7 @@
     vite-plugin-checker "^0.6.1"
     vue-bundle-renderer "^1.0.3"
 
-"@nuxthq/studio@^0.13.2":
+"@nuxthq/studio@^0.13.3":
   version "0.13.3"
   resolved "https://registry.yarnpkg.com/@nuxthq/studio/-/studio-0.13.3.tgz#428c0fc2fe9f461a9212314deb98361573b485c9"
   integrity sha512-wehkz6xLIi+ncwCxDy83siUzOkKZKnew1OxDGN7OGQ4Ak1FOJhW2S6HmXmtztE5vAcn2sKaBK0AGljmqWR+Esw==
