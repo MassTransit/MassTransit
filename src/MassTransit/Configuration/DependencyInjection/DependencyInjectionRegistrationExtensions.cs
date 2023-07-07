@@ -195,6 +195,7 @@ namespace MassTransit
             collection.RemoveAll<ISendEndpointProvider>();
             collection.RemoveAll<IPublishEndpoint>();
             collection.RemoveAll(typeof(IRequestClient<>));
+            collection.RemoveAll<IMessageScheduler>();
 
             collection.RemoveAll<Bind<IBus, IBusInstance>>();
             collection.RemoveAll<IBusInstance>();
