@@ -79,13 +79,10 @@ namespace MassTransit.ActiveMqTransport
             sendContext.CancellationToken.ThrowIfCancellationRequested();
 
             var destination = context.ReplyDestination ?? await sessionContext.GetDestination(EntityName, _destinationType).ConfigureAwait(false);
-            var producer = await sessionContext.CreateMessageProducer(destination).ConfigureAwait(false);
 
-            var transportMessage = sessionContext.CreateBytesMessage();
+            var transportMessage = sessionContext.CreateBytesMessage(context.Body.GetBytes());
 
             SetResponseTo(transportMessage, context, sessionContext);
-
-            transportMessage.Content = context.Body.GetBytes();
 
             transportMessage.Properties.SetHeaders(context.Headers);
 
@@ -123,9 +120,7 @@ namespace MassTransit.ActiveMqTransport
                     transportMessage.Properties["AMQ_SCHEDULED_DELAY"] = (long)delay.Value;
             }
 
-            var publishTask = producer.SendAsync(transportMessage);
-
-            await publishTask.OrCanceled(context.CancellationToken).ConfigureAwait(false);
+            await sessionContext.SendAsync(destination, transportMessage, context.CancellationToken).ConfigureAwait(false);
         }
 
         static void SetResponseTo(IMessage transportMessage, SendContext context, SessionContext sessionContext)

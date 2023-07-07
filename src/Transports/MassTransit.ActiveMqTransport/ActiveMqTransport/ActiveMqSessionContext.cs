@@ -5,6 +5,7 @@
     using System.Threading.Tasks;
     using Apache.NMS;
     using Apache.NMS.Util;
+    using Internals;
     using MassTransit.Middleware;
     using Topology;
     using Transports;
@@ -91,19 +92,32 @@
             return _executor.Run(() => SessionUtil.GetDestination(_session, destinationName, destinationType), CancellationToken);
         }
 
-        public Task<IMessageProducer> CreateMessageProducer(IDestination destination)
-        {
-            return _messageProducerCache.GetMessageProducer(destination, x => _executor.Run(() => _session.CreateProducerAsync(x), CancellationToken));
-        }
-
         public Task<IMessageConsumer> CreateMessageConsumer(IDestination destination, string selector, bool noLocal)
         {
             return _executor.Run(() => _session.CreateConsumerAsync(destination, selector, noLocal), CancellationToken);
         }
 
-        public IBytesMessage CreateBytesMessage()
+        public async Task SendAsync(IDestination destination, IMessage transportMessage, CancellationToken cancellationToken)
         {
-            return _session.CreateBytesMessage();
+            var producer = await _messageProducerCache.GetMessageProducer(destination,
+                x => _executor.Run(() => _session.CreateProducerAsync(x), cancellationToken)).ConfigureAwait(false);
+
+            await _executor.Run(() => producer.SendAsync(transportMessage).OrCanceled(cancellationToken), cancellationToken).ConfigureAwait(false);
+        }
+
+        public IBytesMessage CreateBytesMessage(byte[] content)
+        {
+            return _session.CreateBytesMessage(content);
+        }
+
+        public ITextMessage CreateTextMessage(string content)
+        {
+            return _session.CreateTextMessage(content);
+        }
+
+        public IMessage CreateMessage()
+        {
+            return _session.CreateMessage();
         }
 
         public Task DeleteTopic(string topicName)

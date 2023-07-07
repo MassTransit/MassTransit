@@ -22,45 +22,45 @@ namespace MassTransit.ActiveMqTransport
 
         public override CancellationToken CancellationToken { get; }
 
-        ISession SessionContext.Session => _context.Session;
-        ConnectionContext SessionContext.ConnectionContext => _context.ConnectionContext;
+        public ISession Session => _context.Session;
+        public ConnectionContext ConnectionContext => _context.ConnectionContext;
 
-        Task<ITopic> SessionContext.GetTopic(Topic topic)
+        public Task<ITopic> GetTopic(Topic topic)
         {
             return _context.GetTopic(topic);
         }
 
-        Task<IQueue> SessionContext.GetQueue(Queue queue)
+        public Task<IQueue> GetQueue(Queue queue)
         {
             return _context.GetQueue(queue);
         }
 
-        Task<IDestination> SessionContext.GetDestination(string destinationName, DestinationType destinationType)
+        public Task<IDestination> GetDestination(string destinationName, DestinationType destinationType)
         {
             return _context.GetDestination(destinationName, destinationType);
         }
 
-        Task<IMessageProducer> SessionContext.CreateMessageProducer(IDestination destination)
-        {
-            return _context.CreateMessageProducer(destination);
-        }
-
-        Task<IMessageConsumer> SessionContext.CreateMessageConsumer(IDestination destination, string selector, bool noLocal)
+        public Task<IMessageConsumer> CreateMessageConsumer(IDestination destination, string selector, bool noLocal)
         {
             return _context.CreateMessageConsumer(destination, selector, noLocal);
         }
 
-        public IBytesMessage CreateBytesMessage()
+        public Task SendAsync(IDestination destination, IMessage transportMessage, CancellationToken cancellationToken)
         {
-            return _context.CreateBytesMessage();
+            return _context.SendAsync(destination, transportMessage, cancellationToken);
         }
 
-        Task SessionContext.DeleteTopic(string topicName)
+        public IBytesMessage CreateBytesMessage(byte[] content)
+        {
+            return _context.CreateBytesMessage(content);
+        }
+
+        public Task DeleteTopic(string topicName)
         {
             return _context.DeleteTopic(topicName);
         }
 
-        Task SessionContext.DeleteQueue(string queueName)
+        public Task DeleteQueue(string queueName)
         {
             return _context.DeleteQueue(queueName);
         }
@@ -68,6 +68,16 @@ namespace MassTransit.ActiveMqTransport
         public IDestination GetTemporaryDestination(string name)
         {
             return _context.GetTemporaryDestination(name);
+        }
+
+        public ITextMessage CreateTextMessage(string content)
+        {
+            return _context.CreateTextMessage(content);
+        }
+
+        public IMessage CreateMessage()
+        {
+            return _context.CreateMessage();
         }
     }
 }

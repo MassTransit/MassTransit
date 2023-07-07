@@ -1,5 +1,6 @@
 ﻿namespace MassTransit.ActiveMqTransport
 {
+    using System.Threading;
     using System.Threading.Tasks;
     using Apache.NMS;
     using Topology;
@@ -18,11 +19,15 @@
 
         Task<IDestination> GetDestination(string destinationName, DestinationType destinationType);
 
-        Task<IMessageProducer> CreateMessageProducer(IDestination destination);
-
         Task<IMessageConsumer> CreateMessageConsumer(IDestination destination, string selector, bool noLocal);
 
-        IBytesMessage CreateBytesMessage();
+        Task SendAsync(IDestination destination, IMessage transportMessage, CancellationToken cancellationToken);
+
+        IBytesMessage CreateBytesMessage(byte[] content);
+
+        ITextMessage CreateTextMessage(string content);
+
+        IMessage CreateMessage();
 
         Task DeleteTopic(string topicName);
 
