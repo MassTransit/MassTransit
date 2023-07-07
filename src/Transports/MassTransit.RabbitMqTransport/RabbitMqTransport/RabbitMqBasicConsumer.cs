@@ -152,6 +152,8 @@ namespace MassTransit.RabbitMqTransport
         public void HandleBasicDeliver(string consumerTag, ulong deliveryTag, bool redelivered, string exchange, string routingKey,
             IBasicProperties properties, ReadOnlyMemory<byte> body)
         {
+            _limit?.Wait();
+
             var bodyBytes = body.ToArray();
 
             Task.Run(async () =>
@@ -160,9 +162,6 @@ namespace MassTransit.RabbitMqTransport
 
                 var context = new RabbitMqReceiveContext(exchange, routingKey, _consumerTag, deliveryTag, bodyBytes, redelivered, properties,
                     _context, _receiveSettings, _model, _model.ConnectionContext);
-
-                if (_limit != null)
-                    await _limit.WaitAsync(context.CancellationToken).ConfigureAwait(false);
 
                 try
                 {
