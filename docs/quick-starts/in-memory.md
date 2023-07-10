@@ -23,7 +23,7 @@ This example requires the following:
 MassTransit includes project and item [templates](/usage/templates) simplifying the creation of new projects. Install the templates by executing `dotnet new -i MassTransit.Templates` at the console. A video introducing the templates is available on [YouTube](https://youtu.be/nYKq61-DFBQ).
 
 ```
-dotnet new --install MassTransit.Templates
+dotnet new install MassTransit.Templates
 ```
 
 ## Initial Project Creation
