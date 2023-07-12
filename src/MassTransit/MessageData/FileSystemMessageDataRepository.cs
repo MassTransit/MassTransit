@@ -25,7 +25,7 @@ namespace MassTransit.MessageData
 
             var fullPath = Path.Combine(_dataDirectory.FullName, filePath);
             if (!File.Exists(fullPath))
-                throw new FileNotFoundException("The file was not found", fullPath);
+                throw new MessageDataNotFoundException(address,new FileNotFoundException("The file was not found", fullPath));
 
             var stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read, DefaultBufferSize, FileOptions.Asynchronous);
 
@@ -83,7 +83,7 @@ namespace MassTransit.MessageData
             return Path.Combine(elements);
         }
 
-        async Task IMessageDataRepository.Delete(Uri address, CancellationToken cancellationToken = default)
+        async Task IMessageDataRepository.Delete(Uri address, CancellationToken cancellationToken)
         {
             if (address == null)
                 return;
@@ -92,7 +92,7 @@ namespace MassTransit.MessageData
 
             var fullPath = Path.Combine(_dataDirectory.FullName, filePath);
             if (!File.Exists(fullPath))
-                throw new FileNotFoundException("The file was not found", fullPath);
+                throw new MessageDataNotFoundException(address, new FileNotFoundException("The file was not found", fullPath));
 
             File.Delete(fullPath);
         }

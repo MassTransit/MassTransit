@@ -63,5 +63,22 @@
 
             return new GridFSUploadOptions { Metadata = metadata };
         }
+
+        public async Task Delete(Uri address, CancellationToken cancellationToken = default)
+        {
+            if (address == null)
+                return;
+
+            var id = _resolver.GetObjectId(address);
+            try
+            {
+                await _bucket.DeleteAsync(id, cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            
+        }
     }
 }

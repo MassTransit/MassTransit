@@ -41,7 +41,7 @@ namespace MassTransit.MessageData
             return address;
         }
 
-        async Task IMessageDataRepository.Delete(Uri address, CancellationToken cancellationToken = default)
+        async Task IMessageDataRepository.Delete(Uri address, CancellationToken cancellationToken)
         {
             if (address == null)
                 return;

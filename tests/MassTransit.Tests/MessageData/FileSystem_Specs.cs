@@ -16,8 +16,8 @@
             MessageData<string> property = await _repository.PutString(new string('8', 10000));
 
             MessageData<string> loaded = await _repository.GetString(property.Address);
-            Assert.That(property.Address, Is.Not.Null);
 
+            Assert.That(property.Address, Is.Not.Null);
 
             Assert.That(await loaded.Value, Is.Not.Null);
         }
@@ -32,11 +32,47 @@
             Assert.That(await loaded.Value, Is.Not.Null);
         }
 
+        [Test]
+        public async Task Should_set_and_delete_data()
+        {
+            var data = new string('8', 10000);
+            MessageData<string> property = await _repository.PutString(data);
+
+            Assert.That(property.Address, Is.Not.Null);
+
+            var dataFromRepository = await _repository.Get(property.Address);
+
+            {
+                using var reader = new StreamReader(dataFromRepository);
+                var stringFromRepository = await reader.ReadToEndAsync();
+
+                Assert.That(stringFromRepository, Is.EqualTo(data));
+            }
+
+            await _repository.Delete(property.Address);
+
+            Assert.ThrowsAsync<MessageDataNotFoundException>(async () => await _repository.Get(property.Address));
+        }
+
+        [Test]
+        public async Task Should_not_throw_on_inline_data()
+        {
+            var data = new string('8', 256);
+            MessageData<string> property = await _repository.PutString(data);
+
+            Assert.That(property.Address, Is.Null);
+
+            Assert.DoesNotThrowAsync(async () => await _repository.Delete(property.Address));
+        }
+
         IMessageDataRepository _repository;
 
         [OneTimeSetUp]
         public void Setup()
         {
+            MessageDataDefaults.AlwaysWriteToRepository = false;
+            MessageDataDefaults.Threshold = 8194;
+
             var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
             var messageDataPath = Path.Combine(baseDirectory, "MessageData");
 

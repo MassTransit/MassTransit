@@ -119,7 +119,7 @@ namespace MassTransit.AzureStorage.MessageData
             }
             catch (RequestFailedException exception)
             {
-                throw new MessageDataException($"MessageData content not found: {blob.BlobContainerName}/{blob.Name}", exception);
+                throw new MessageDataNotFoundException(address, new MessageDataException($"MessageData content not found: {blob.BlobContainerName}/{blob.Name}", exception));
             }
         }
 
@@ -160,9 +160,16 @@ namespace MassTransit.AzureStorage.MessageData
             var blobName = new BlobUriBuilder(address).BlobName;
             var blob = _container.GetBlobClient(blobName);
 
-            LogContext.Debug?.Log("DELETE Message Data: {Address} ({Blob})", address, blobName);
+            try
+            {
+                LogContext.Debug?.Log("DELETE Message Data: {Address} ({Blob})", address, blobName);
 
-            await blob.DeleteAsync(DeleteSnapshotsOption.IncludeSnapshots, default, cancellationToken).ConfigureAwait(false);
+                await blob.DeleteAsync(DeleteSnapshotsOption.IncludeSnapshots, default, cancellationToken).ConfigureAwait(false);
+            }
+            catch (RequestFailedException exception)
+            {
+                throw new MessageDataNotFoundException(address, new MessageDataException($"MessageData content not found: {blob.BlobContainerName}/{blob.Name}", exception));
+            }
         }
     }
 }

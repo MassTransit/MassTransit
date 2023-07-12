@@ -15,5 +15,10 @@
             : base($"The message data was not found: {address}")
         {
         }
+
+        public MessageDataNotFoundException(Uri address, Exception innerException)
+            : base($"The message data was not found: {address}", innerException)
+        {
+        }
     }
 }

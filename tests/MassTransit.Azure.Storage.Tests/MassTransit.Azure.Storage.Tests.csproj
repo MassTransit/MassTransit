@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\MassTransit.TestFramework\MassTransit.TestFramework.csproj" />
+    <ProjectReference Include="..\..\src\MassTransit\MassTransit.csproj" />
+    <ProjectReference Include="..\..\src\Persistence\MassTransit.Azure.Storage\MassTransit.Azure.Storage.csproj" />
+    <ProjectReference Include="..\MassTransit.Tests\MassTransit.Tests.csproj" />
+  </ItemGroup>
+
+</Project>
