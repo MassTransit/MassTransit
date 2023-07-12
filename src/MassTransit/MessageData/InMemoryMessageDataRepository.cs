@@ -46,8 +46,7 @@ namespace MassTransit.MessageData
             if (address == null)
                 return;
 
-            if (!_values.TryRemove(address, out byte[] value))
-                throw new MessageDataNotFoundException();
+            _values.TryRemove(address, out byte[] value);
         }
     }
 }

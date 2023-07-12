@@ -91,10 +91,8 @@ namespace MassTransit.MessageData
             var filePath = ParseFilePath(address);
 
             var fullPath = Path.Combine(_dataDirectory.FullName, filePath);
-            if (!File.Exists(fullPath))
-                throw new MessageDataNotFoundException(address, new FileNotFoundException("The file was not found", fullPath));
-
-            File.Delete(fullPath);
+            if (File.Exists(fullPath))
+                File.Delete(fullPath);
         }
     }
 }

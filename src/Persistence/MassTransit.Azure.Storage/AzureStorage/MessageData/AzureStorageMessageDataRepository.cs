@@ -160,16 +160,8 @@ namespace MassTransit.AzureStorage.MessageData
             var blobName = new BlobUriBuilder(address).BlobName;
             var blob = _container.GetBlobClient(blobName);
 
-            try
-            {
-                LogContext.Debug?.Log("DELETE Message Data: {Address} ({Blob})", address, blobName);
-
-                await blob.DeleteAsync(DeleteSnapshotsOption.IncludeSnapshots, default, cancellationToken).ConfigureAwait(false);
-            }
-            catch (RequestFailedException exception)
-            {
-                throw new MessageDataNotFoundException(address, new MessageDataException($"MessageData content not found: {blob.BlobContainerName}/{blob.Name}", exception));
-            }
+            LogContext.Debug?.Log("DELETE Message Data: {Address} ({Blob})", address, blobName);
+            await blob.DeleteIfExistsAsync(DeleteSnapshotsOption.IncludeSnapshots, default, cancellationToken).ConfigureAwait(false);
         }
     }
 }
