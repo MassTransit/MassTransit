@@ -1,8 +1,5 @@
 ﻿namespace MassTransit
 {
-    using System;
-
-
     public interface IServiceBusBusTopology :
         IBusTopology
     {
@@ -15,13 +12,5 @@
 
         new IServiceBusMessageSendTopology<T> Send<T>()
             where T : class;
-
-        /// <summary>
-        /// Returns the destination address for the specified queue
-        /// </summary>
-        /// <param name="queueName"></param>
-        /// <param name="configure">Callback to configure queue settings</param>
-        /// <returns></returns>
-        Uri GetDestinationAddress(string queueName, Action<IServiceBusQueueConfigurator> configure = null);
     }
 }

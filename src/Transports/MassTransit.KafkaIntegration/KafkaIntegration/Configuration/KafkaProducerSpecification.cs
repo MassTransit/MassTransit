@@ -62,7 +62,7 @@ namespace MassTransit.KafkaIntegration.Configuration
 
         public TimeSpan? RetryBackoff
         {
-            set => _producerConfig.RetryBackoffMs = value == null ? null : (int?)value.Value.TotalMilliseconds;
+            set => _producerConfig.RetryBackoffMs = (int?)value?.TotalMilliseconds;
         }
 
         public int? MessageSendMaxRetries
@@ -72,7 +72,7 @@ namespace MassTransit.KafkaIntegration.Configuration
 
         public TimeSpan? Linger
         {
-            set => _producerConfig.LingerMs = value == null ? null : (int?)value.Value.TotalMilliseconds;
+            set => _producerConfig.LingerMs = (int?)value?.TotalMilliseconds;
         }
 
         public int? QueueBufferingMaxKbytes
@@ -97,7 +97,7 @@ namespace MassTransit.KafkaIntegration.Configuration
 
         public TimeSpan? TransactionTimeout
         {
-            set => _producerConfig.TransactionTimeoutMs = value == null ? null : (int?)value.Value.TotalMilliseconds;
+            set => _producerConfig.TransactionTimeoutMs = (int?)value?.TotalMilliseconds;
         }
 
         public string TransactionalId
@@ -112,12 +112,12 @@ namespace MassTransit.KafkaIntegration.Configuration
 
         public TimeSpan? MessageTimeout
         {
-            set => _producerConfig.MessageTimeoutMs = value == null ? null : (int?)value.Value.TotalMilliseconds;
+            set => _producerConfig.MessageTimeoutMs = (int?)value?.TotalMilliseconds;
         }
 
         public TimeSpan? RequestTimeout
         {
-            set => _producerConfig.RequestTimeoutMs = value == null ? null : (int?)value.Value.TotalMilliseconds;
+            set => _producerConfig.RequestTimeoutMs = (int?)value?.TotalMilliseconds;
         }
 
         public string DeliveryReportFields
@@ -159,10 +159,10 @@ namespace MassTransit.KafkaIntegration.Configuration
 
         public KafkaSendTransportContext<TKey, TValue> CreateSendTransportContext(IBusInstance busInstance, Action onStop = null)
         {
-            var producerConfig = _hostConfiguration.GetProducerConfig(_producerConfig);
-
             ProducerBuilder<byte[], byte[]> CreateProducerBuilder()
             {
+                var producerConfig = _hostConfiguration.GetProducerConfig(_producerConfig);
+
                 ProducerBuilder<byte[], byte[]> producerBuilder = new ProducerBuilder<byte[], byte[]>(producerConfig)
                     .SetKeySerializer(Serializers.ByteArray)
                     .SetValueSerializer(Serializers.ByteArray);

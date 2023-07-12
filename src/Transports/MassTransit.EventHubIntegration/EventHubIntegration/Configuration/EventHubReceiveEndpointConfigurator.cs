@@ -6,6 +6,7 @@ namespace MassTransit.EventHubIntegration.Configuration
     using Azure.Messaging.EventHubs.Processor;
     using Azure.Storage.Blobs;
     using MassTransit.Configuration;
+    using MassTransit.Middleware;
     using Middleware;
     using Transports;
 
@@ -54,6 +55,9 @@ namespace MassTransit.EventHubIntegration.Configuration
             _blobClient = new Lazy<BlobContainerClient>(CreateBlobClient);
 
             PublishFaults = false;
+
+            this.DiscardFaultedMessages();
+            this.DiscardSkippedMessages();
         }
 
         public override Uri HostAddress => _endpointConfiguration.HostAddress;
@@ -110,6 +114,7 @@ namespace MassTransit.EventHubIntegration.Configuration
             var context = CreateEventHubReceiveContext();
 
             _processorConfigurator.UseFilter(new EventHubBlobContainerFactoryFilter(_blobClient.Value));
+            _processorConfigurator.UseFilter(new ReceiveEndpointDependencyFilter<ProcessorContext>(context));
             _processorConfigurator.UseFilter(new EventHubConsumerFilter(context));
 
             IPipe<ProcessorContext> processorPipe = _processorConfigurator.Build();

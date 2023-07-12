@@ -27,8 +27,6 @@ namespace MassTransit.Azure.Table.Tests.SlowConcurrentSaga
         [Test]
         public async Task Two_Initiating_Messages_Deadlock_Results_In_One_Instance()
         {
-            var activityMonitor = Bus.CreateBusActivityMonitor(TimeSpan.FromMilliseconds(3000));
-
             var sagaId = NewId.NextGuid();
             var message = new Begin { CorrelationId = sagaId };
 
@@ -45,7 +43,7 @@ namespace MassTransit.Azure.Table.Tests.SlowConcurrentSaga
 
             _sagaTestHarness.Consumed.Select<IncrementCounterSlowly>().Take(2).ToList();
 
-            await activityMonitor.AwaitBusInactivity(TestTimeout);
+            await InactivityTask;
 
             await _sagaRepository.Value.ShouldContainSaga(sagaId, s => s.Counter == 3, TestTimeout);
         }

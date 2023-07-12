@@ -47,7 +47,7 @@
 
         public ConnectHandle Connect(IConsumePipeConnector bus)
         {
-            var handles = new List<ConnectHandle>();
+            var handles = new List<ConnectHandle>(_configures.Count);
             try
             {
                 foreach (var configure in _configures)

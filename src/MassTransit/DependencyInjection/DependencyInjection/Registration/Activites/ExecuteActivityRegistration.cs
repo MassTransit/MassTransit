@@ -32,9 +32,9 @@ namespace MassTransit.DependencyInjection.Registration
                 _configureActions.Add(action);
         }
 
-        public void Configure(IReceiveEndpointConfigurator configurator, IServiceProvider configurationServiceProvider)
+        public void Configure(IReceiveEndpointConfigurator configurator, IRegistrationContext context)
         {
-            var executeActivityScopeProvider = configurationServiceProvider.GetRequiredService<IExecuteActivityScopeProvider<TActivity, TArguments>>();
+            var executeActivityScopeProvider = new ExecuteActivityScopeProvider<TActivity, TArguments>(context);
 
             var executeActivityFactory = new ScopeExecuteActivityFactory<TActivity, TArguments>(executeActivityScopeProvider);
 
@@ -42,8 +42,8 @@ namespace MassTransit.DependencyInjection.Registration
 
             configurator.ConfigureConsumeTopology = false;
 
-            GetActivityDefinition(configurationServiceProvider)
-                .Configure(configurator, specification);
+            GetActivityDefinition(context)
+                .Configure(configurator, specification, context);
 
             foreach (Action<IExecuteActivityConfigurator<TActivity, TArguments>> action in _configureActions)
                 action(specification);
@@ -56,9 +56,9 @@ namespace MassTransit.DependencyInjection.Registration
             IncludeInConfigureEndpoints = false;
         }
 
-        IExecuteActivityDefinition IExecuteActivityRegistration.GetDefinition(IServiceProvider provider)
+        IExecuteActivityDefinition IExecuteActivityRegistration.GetDefinition(IRegistrationContext context)
         {
-            return GetActivityDefinition(provider);
+            return GetActivityDefinition(context);
         }
 
         IExecuteActivityDefinition<TActivity, TArguments> GetActivityDefinition(IServiceProvider provider)

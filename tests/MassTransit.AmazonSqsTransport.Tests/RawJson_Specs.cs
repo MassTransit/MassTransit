@@ -78,7 +78,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
 
         protected override void ConfigureAmazonSqsBus(IAmazonSqsBusFactoryConfigurator configurator)
         {
-            configurator.UseRawJsonSerializer();
+            configurator.UseRawJsonSerializer(RawSerializerOptions.All);
         }
 
         protected override void ConfigureAmazonSqsReceiveEndpoint(IAmazonSqsReceiveEndpointConfigurator configurator)

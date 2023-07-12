@@ -22,8 +22,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SlowConcurrentSaga
         [Test]
         public async Task Two_Initiating_Messages_Deadlock_Results_In_One_Instance()
         {
-            var activityMonitor = Bus.CreateBusActivityMonitor(TimeSpan.FromMilliseconds(3000));
-
             var sagaId = NewId.NextGuid();
             var message = new Begin { CorrelationId = sagaId };
 
@@ -40,7 +38,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SlowConcurrentSaga
 
             _sagaTestHarness.Consumed.Select<IncrementCounterSlowly>().Take(2).ToList();
 
-            await activityMonitor.AwaitBusInactivity(TestTimeout);
+            await InactivityTask;
 
             await _sagaRepository.Value.ShouldContainSagaInState(s => s.CorrelationId == sagaId && s.Counter == 2, _machine, _machine.DidIncrement,
                 TestTimeout);
@@ -52,6 +50,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SlowConcurrentSaga
 
         public SlowConcurrentSaga_Specs()
         {
+            TestInactivityTimeout = TimeSpan.FromSeconds(3);
+
             // rowlock statements that don't work to cause a deadlock.
             var notWorkingRowLockStatements = new SqlLockStatementProvider("dbo", new NoLockStatementFormatter());
 

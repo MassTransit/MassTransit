@@ -61,6 +61,7 @@
                 if (_settings.PurgeOnStartup)
                     _clientConfigurator.UseFilter(new PurgeOnStartupFilter(_settings.EntityName));
 
+                _clientConfigurator.UseFilter(new ReceiveEndpointDependencyFilter<ClientContext>(context));
                 _clientConfigurator.UseFilter(new AmazonSqsConsumerFilter(context));
             }
 
@@ -122,6 +123,11 @@
 
                 Changed("AutoDelete");
             }
+        }
+
+        public int ConcurrentDeliveryLimit
+        {
+            set => _settings.ConcurrentDeliveryLimit = value;
         }
 
         public ushort WaitTimeSeconds

@@ -88,23 +88,26 @@ namespace MassTransit.RabbitMqTransport
         async Task ReadBatch()
         {
             var batchToken = new CancellationTokenSource(_settings.Timeout);
-            var batch = new List<BatchPublish>();
+            var batch = new List<BatchPublish>(_settings.MessageLimit);
             try
             {
                 try
                 {
-                    for (int i = 0,
-                        batchLength = 0;
-                        i < _settings.MessageLimit && batchLength < _settings.SizeLimit;
-                        i++)
+                    var messageCount = 0;
+                    var batchLength = 0;
+
+                    while (messageCount < _settings.MessageLimit && batchLength < _settings.SizeLimit)
                     {
-                        var publish = await _publishChannel.Reader.ReadAsync(batchToken.Token).ConfigureAwait(false);
-
-                        batch.Add(publish);
-                        batchLength += publish.Length;
-
-                        if (await _publishChannel.Reader.WaitToReadAsync(batchToken.Token).ConfigureAwait(false) == false)
+                        if (_publishChannel.Reader.TryRead(out var publish))
+                        {
+                            batch.Add(publish);
+                            batchLength += publish.Length;
+                            messageCount++;
+                        }
+                        else if (await _publishChannel.Reader.WaitToReadAsync(batchToken.Token).ConfigureAwait(false) == false)
+                        {
                             break;
+                        }
                     }
                 }
                 catch (OperationCanceledException exception) when (exception.CancellationToken == batchToken.Token && batch.Count > 0)

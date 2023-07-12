@@ -11,6 +11,8 @@ namespace MassTransit
     public class MessageUrn :
         Uri
     {
+        public const string Prefix = "urn:message:";
+
         static readonly ConcurrentDictionary<Type, Cached> _cache = new ConcurrentDictionary<Type, Cached>();
 
         MessageUrn(string uriString)
@@ -82,16 +84,29 @@ namespace MassTransit
 
         static string GetUrnForType(Type type)
         {
-            var sb = new StringBuilder("urn:message:");
-
-            return GetMessageName(sb, type, true);
+            return GetMessageName(type, true);
         }
 
-        static string GetMessageName(StringBuilder sb, Type type, bool includeScope)
+        static string GetMessageName(Type type, bool includeScope)
+        {
+            var messageName = GetMessageNameFromAttribute(type);
+
+            return string.IsNullOrWhiteSpace(messageName)
+                ? GetMessageNameFromType(new StringBuilder(Prefix), type, includeScope)
+                : messageName!;
+        }
+
+        static string? GetMessageNameFromAttribute(Type type)
+        {
+            return type.GetCustomAttribute<MessageUrnAttribute>()?.Urn.ToString();
+        }
+
+        static string GetMessageNameFromType(StringBuilder sb, Type type, bool includeScope)
         {
             var typeInfo = type.GetTypeInfo();
+
             if (typeInfo.IsGenericParameter)
-                return "";
+                return string.Empty;
 
             if (includeScope && typeInfo.Namespace != null)
             {
@@ -103,7 +118,7 @@ namespace MassTransit
 
             if (typeInfo.IsNested && typeInfo.DeclaringType != null)
             {
-                GetMessageName(sb, typeInfo.DeclaringType, false);
+                GetMessageNameFromType(sb, typeInfo.DeclaringType, false);
                 sb.Append('+');
             }
 
@@ -127,7 +142,7 @@ namespace MassTransit
                         sb.Append(',');
 
                     sb.Append('[');
-                    GetMessageName(sb, arguments[i], true);
+                    GetMessageNameFromType(sb, arguments[i], true);
                     sb.Append(']');
                 }
 

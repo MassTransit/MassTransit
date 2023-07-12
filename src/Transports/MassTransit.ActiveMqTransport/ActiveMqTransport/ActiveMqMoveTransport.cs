@@ -33,15 +33,14 @@
 
             var message = messageContext.TransportMessage switch
             {
-                IBytesMessage _ => producer.CreateBytesMessage(context.Body.GetBytes()),
-                ITextMessage _ => producer.CreateTextMessage(context.Body.GetString()),
-                _ => producer.CreateMessage(),
+                IBytesMessage _ => await producer.CreateBytesMessageAsync(context.Body.GetBytes()).ConfigureAwait(false),
+                ITextMessage _ => await producer.CreateTextMessageAsync(context.Body.GetString()).ConfigureAwait(false),
+                _ => await producer.CreateMessageAsync().ConfigureAwait(false),
             };
 
             CloneMessage(message, messageContext.TransportMessage, preSend);
 
-            var task = Task.Run(() => producer.Send(message));
-            context.AddReceiveTask(task);
+            await producer.SendAsync(message).ConfigureAwait(false);
         }
 
         static void CloneMessage(IMessage message, IMessage source, Action<IMessage, SendHeaders> preSend)

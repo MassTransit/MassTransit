@@ -11,9 +11,10 @@ namespace MassTransit.Testing.Implementations
     public abstract class BaseSagaTestHarness<TSaga>
         where TSaga : class, ISaga
     {
-        protected BaseSagaTestHarness(ISagaRepository<TSaga> repository, TimeSpan testTimeout)
+        protected BaseSagaTestHarness(IQuerySagaRepository<TSaga> querySagaRepository, ILoadSagaRepository<TSaga> loadSagaRepository, TimeSpan testTimeout)
         {
-            QuerySagaRepository = repository as IQuerySagaRepository<TSaga>;
+            QuerySagaRepository = querySagaRepository;
+            LoadSagaRepository = loadSagaRepository;
 
             TestTimeout = testTimeout;
         }
@@ -21,6 +22,7 @@ namespace MassTransit.Testing.Implementations
         protected TimeSpan TestTimeout { get; }
 
         protected IQuerySagaRepository<TSaga> QuerySagaRepository { get; }
+        protected ILoadSagaRepository<TSaga> LoadSagaRepository { get; }
 
         /// <summary>
         /// Waits until a saga exists with the specified correlationId
@@ -30,18 +32,16 @@ namespace MassTransit.Testing.Implementations
         /// <returns></returns>
         public async Task<Guid?> Exists(Guid correlationId, TimeSpan? timeout = default)
         {
-            if (QuerySagaRepository == null)
-                throw new InvalidOperationException("The repository does not support Query operations");
+            if (LoadSagaRepository == null)
+                throw new InvalidOperationException("The repository does not support Load operations");
 
             var giveUpAt = DateTime.Now + (timeout ?? TestTimeout);
 
-            var query = new SagaQuery<TSaga>(x => x.CorrelationId == correlationId);
-
             while (DateTime.Now < giveUpAt)
             {
-                var saga = (await QuerySagaRepository.Find(query).ConfigureAwait(false)).FirstOrDefault();
-                if (saga != Guid.Empty)
-                    return saga;
+                var saga = await LoadSagaRepository.Load(correlationId).ConfigureAwait(false);
+                if (saga != null)
+                    return saga.CorrelationId;
 
                 await Task.Delay(10).ConfigureAwait(false);
             }
@@ -84,24 +84,22 @@ namespace MassTransit.Testing.Implementations
         /// <returns></returns>
         public async Task<Guid?> NotExists(Guid correlationId, TimeSpan? timeout = default)
         {
-            if (QuerySagaRepository == null)
-                throw new InvalidOperationException("The repository does not support Query operations");
+            if (LoadSagaRepository == null)
+                throw new InvalidOperationException("The repository does not support Load operations");
 
             var giveUpAt = DateTime.Now + (timeout ?? TestTimeout);
 
-            var query = new SagaQuery<TSaga>(x => x.CorrelationId == correlationId);
-
-            Guid? saga = default;
+            TSaga saga = default;
             while (DateTime.Now < giveUpAt)
             {
-                saga = (await QuerySagaRepository.Find(query).ConfigureAwait(false)).FirstOrDefault();
-                if (saga == Guid.Empty)
+                saga = await LoadSagaRepository.Load(correlationId).ConfigureAwait(false);
+                if (saga == null)
                     return default;
 
                 await Task.Delay(10).ConfigureAwait(false);
             }
 
-            return saga;
+            return saga.CorrelationId;
         }
     }
 }

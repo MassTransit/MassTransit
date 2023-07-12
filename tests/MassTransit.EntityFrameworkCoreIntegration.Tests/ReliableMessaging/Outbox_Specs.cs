@@ -204,7 +204,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
 
     namespace Responsible
     {
-        using System;
         using System.Collections.Generic;
         using System.Reflection;
         using DependencyInjection;
@@ -218,20 +217,13 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
         public class ResponsibleStateDefinition :
             SagaDefinition<ResponsibleState>
         {
-            readonly IServiceProvider _provider;
-
-            public ResponsibleStateDefinition(IServiceProvider provider)
-            {
-                _provider = provider;
-            }
-
             protected override void ConfigureSaga(IReceiveEndpointConfigurator endpointConfigurator,
-                ISagaConfigurator<ResponsibleState> consumerConfigurator)
+                ISagaConfigurator<ResponsibleState> consumerConfigurator, IRegistrationContext context)
             {
                 endpointConfigurator.UseMessageRetry(r => r.Intervals(10, 50, 100, 100, 100, 100, 100, 100));
 
-                endpointConfigurator.UseEntityFrameworkOutbox<ResponsibleDbContext>(_provider);
-                endpointConfigurator.UseSendFilter(typeof(SendFilter<>), _provider);
+                endpointConfigurator.UseEntityFrameworkOutbox<ResponsibleDbContext>(context);
+                endpointConfigurator.UseSendFilter(typeof(SendFilter<>), context);
             }
         }
 

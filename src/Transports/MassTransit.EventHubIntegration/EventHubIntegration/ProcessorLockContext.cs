@@ -10,18 +10,36 @@ namespace MassTransit.EventHubIntegration
 
     public class ProcessorLockContext :
         IProcessorLockContext,
-        ProcessorClientBuilderContext
+        ProcessorClientBuilderContext,
+        IChannelExecutorPool<ProcessEventArgs>
     {
-        readonly CancellationToken _cancellationToken;
         readonly ProcessorContext _context;
-        readonly SingleThreadedDictionary<string, PartitionCheckpointData> _data = new SingleThreadedDictionary<string, PartitionCheckpointData>();
+        readonly SingleThreadedDictionary<string, PartitionCheckpointData> _data;
+        readonly PendingConfirmationCollection _pending;
         readonly ReceiveSettings _receiveSettings;
 
         public ProcessorLockContext(ProcessorContext context, ReceiveSettings receiveSettings, CancellationToken cancellationToken)
         {
             _context = context;
             _receiveSettings = receiveSettings;
-            _cancellationToken = cancellationToken;
+            _pending = new PendingConfirmationCollection(cancellationToken);
+            _data = new SingleThreadedDictionary<string, PartitionCheckpointData>(StringComparer.Ordinal);
+        }
+
+        public Task Push(ProcessEventArgs partition, Func<Task> method, CancellationToken cancellationToken = default)
+        {
+            return _data.TryGetValue(partition.Partition.PartitionId, out var data) ? data.Push(method) : Task.CompletedTask;
+        }
+
+        public Task Run(ProcessEventArgs partition, Func<Task> method, CancellationToken cancellationToken = default)
+        {
+            return _data.TryGetValue(partition.Partition.PartitionId, out var data) ? data.Run(method) : Task.CompletedTask;
+        }
+
+        public ValueTask DisposeAsync()
+        {
+            _pending.Dispose();
+            return default;
         }
 
         public Task Pending(ProcessEventArgs eventArgs)
@@ -35,8 +53,7 @@ namespace MassTransit.EventHubIntegration
         {
             LogContext.SetCurrentIfNull(_context.LogContext);
 
-            if (_data.TryGetValue(eventArgs.Partition.PartitionId, out var data))
-                data.Faulted(eventArgs, exception);
+            _pending.Faulted(eventArgs, exception);
 
             return Task.CompletedTask;
         }
@@ -45,83 +62,55 @@ namespace MassTransit.EventHubIntegration
         {
             LogContext.SetCurrentIfNull(_context.LogContext);
 
-            if (_data.TryGetValue(eventArgs.Partition.PartitionId, out var data))
-                data.Complete(eventArgs);
+            _pending.Complete(eventArgs);
 
             return Task.CompletedTask;
         }
 
-        public ValueTask DisposeAsync()
+        public void Canceled(ProcessEventArgs eventArgs, CancellationToken cancellationToken)
         {
-            return default;
-        }
+            LogContext.SetCurrentIfNull(_context.LogContext);
 
-        public Task Push(ProcessEventArgs partition, Func<Task> method, CancellationToken cancellationToken = default)
-        {
-            return _data[partition.Partition.PartitionId].Push(method);
-        }
-
-        public Task Run(ProcessEventArgs partition, Func<Task> method, CancellationToken cancellationToken = default)
-        {
-            return _data[partition.Partition.PartitionId].Run(method);
+            _pending.Canceled(eventArgs, cancellationToken);
         }
 
         public Task OnPartitionInitializing(PartitionInitializingEventArgs eventArgs)
         {
             LogContext.SetCurrentIfNull(_context.LogContext);
 
-            if (_data.TryAdd(eventArgs.PartitionId, _ => new PartitionCheckpointData(_receiveSettings, _cancellationToken)))
+            if (_data.TryAdd(eventArgs.PartitionId, _ => new PartitionCheckpointData(_receiveSettings, _pending)))
                 LogContext.Info?.Log("Partition: {PartitionId} was initialized", eventArgs.PartitionId);
 
             return Task.CompletedTask;
         }
 
-        public async Task OnPartitionClosing(PartitionClosingEventArgs eventArgs)
+        public Task OnPartitionClosing(PartitionClosingEventArgs eventArgs)
         {
             LogContext.SetCurrentIfNull(_context.LogContext);
 
-            if (!_data.TryGetValue(eventArgs.PartitionId, out var data))
-                return;
-
-            await data.Close(eventArgs).ConfigureAwait(false);
-            _data.TryRemove(eventArgs.PartitionId, out _);
+            return _data.TryRemove(eventArgs.PartitionId, out var data) ? data.Close(eventArgs) : Task.CompletedTask;
         }
 
 
         sealed class PartitionCheckpointData
         {
-            readonly CancellationToken _cancellationToken;
             readonly CancellationTokenSource _cancellationTokenSource;
             readonly ICheckpointer _checkpointer;
             readonly ChannelExecutor _executor;
             readonly PendingConfirmationCollection _pending;
 
-            public PartitionCheckpointData(ReceiveSettings settings, CancellationToken cancellationToken)
+            public PartitionCheckpointData(ReceiveSettings settings, PendingConfirmationCollection pending)
             {
-                _cancellationToken = cancellationToken;
                 _cancellationTokenSource = new CancellationTokenSource();
                 _executor = new ChannelExecutor(settings.PrefetchCount, settings.ConcurrentMessageLimit);
                 _checkpointer = new BatchCheckpointer(settings, _cancellationTokenSource.Token);
-                _pending = new PendingConfirmationCollection(settings.EventHubName, cancellationToken);
+                _pending = pending;
             }
 
             public Task Pending(ProcessEventArgs eventArgs)
             {
-                if (_cancellationToken.IsCancellationRequested)
-                    return Task.CompletedTask;
-
                 var pendingConfirmation = _pending.Add(eventArgs);
                 return _checkpointer.Pending(pendingConfirmation);
-            }
-
-            public void Complete(ProcessEventArgs eventArgs)
-            {
-                _pending.Complete(eventArgs.Data.Offset);
-            }
-
-            public void Faulted(ProcessEventArgs eventArgs, Exception exception)
-            {
-                _pending.Faulted(eventArgs.Data.Offset, exception);
             }
 
             public async Task Close(PartitionClosingEventArgs args)
@@ -134,7 +123,6 @@ namespace MassTransit.EventHubIntegration
 
                 LogContext.Info?.Log("Partition: {PartitionId} was closed, reason: {Reason}", args.PartitionId, args.Reason);
 
-                _pending.Dispose();
                 _cancellationTokenSource.Cancel();
                 _cancellationTokenSource.Dispose();
             }

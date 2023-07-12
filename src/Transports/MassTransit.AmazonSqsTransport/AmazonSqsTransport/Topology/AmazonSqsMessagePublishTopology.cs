@@ -3,6 +3,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using Configuration;
     using Internals;
     using MassTransit.Topology;
@@ -52,7 +53,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
             return _amazonSqsTopic.GetEndpointAddress(hostAddress);
         }
 
-        public override bool TryGetPublishAddress(Uri baseAddress, out Uri? publishAddress)
+        public override bool TryGetPublishAddress(Uri baseAddress, [NotNullWhen(true)] out Uri? publishAddress)
         {
             publishAddress = _amazonSqsTopic.GetEndpointAddress(baseAddress);
             return true;

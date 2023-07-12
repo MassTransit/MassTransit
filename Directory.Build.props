@@ -9,7 +9,7 @@
   <PropertyGroup>
     <LangVersion>8</LangVersion>
     <WarningLevel>4</WarningLevel>
-    <NoWarn>CS1587,CS1591,CS1998,NU5105</NoWarn>
+    <NoWarn>CS1587,CS1591,CS1998,NU5105,NETSDK1188</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

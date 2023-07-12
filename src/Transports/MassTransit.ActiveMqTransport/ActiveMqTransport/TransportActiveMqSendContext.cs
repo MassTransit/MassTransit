@@ -25,9 +25,9 @@
         {
             base.ReadPropertiesFrom(properties);
 
-            Priority = ReadEnum<MsgPriority>(properties, PropertyNames.Priority);
-            GroupId = ReadString(properties, PropertyNames.GroupId);
-            GroupSequence = ReadInt(properties, PropertyNames.GroupSequence);
+            Priority = ReadEnum<MsgPriority>(properties, ActiveMqTransportPropertyNames.Priority);
+            GroupId = ReadString(properties, ActiveMqTransportPropertyNames.GroupId);
+            GroupSequence = ReadInt(properties, ActiveMqTransportPropertyNames.GroupSequence);
         }
 
         public override void WritePropertiesTo(IDictionary<string, object> properties)
@@ -35,19 +35,11 @@
             base.WritePropertiesTo(properties);
 
             if (Priority != null)
-                properties[PropertyNames.Priority] = Priority.ToString();
+                properties[ActiveMqTransportPropertyNames.Priority] = Priority.ToString();
             if (GroupId != null)
-                properties[PropertyNames.GroupId] = GroupId;
+                properties[ActiveMqTransportPropertyNames.GroupId] = GroupId;
             if (GroupSequence != null)
-                properties[PropertyNames.GroupSequence] = GroupSequence.Value;
-        }
-
-
-        static class PropertyNames
-        {
-            public const string Priority = "AMQ-Priority";
-            public const string GroupId = "AMQ-GroupId";
-            public const string GroupSequence = "AMQ-GroupSequence";
+                properties[ActiveMqTransportPropertyNames.GroupSequence] = GroupSequence.Value;
         }
     }
 }

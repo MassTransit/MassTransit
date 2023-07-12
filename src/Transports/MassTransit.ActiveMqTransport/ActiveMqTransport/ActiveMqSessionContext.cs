@@ -40,7 +40,7 @@
                 {
                     await _messageProducerCache.Stop(CancellationToken.None).ConfigureAwait(false);
 
-                    _session.Close();
+                    await _session.CloseAsync().ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -93,12 +93,12 @@
 
         public Task<IMessageProducer> CreateMessageProducer(IDestination destination)
         {
-            return _messageProducerCache.GetMessageProducer(destination, x => _executor.Run(() => _session.CreateProducer(x), CancellationToken));
+            return _messageProducerCache.GetMessageProducer(destination, x => _executor.Run(() => _session.CreateProducerAsync(x), CancellationToken));
         }
 
         public Task<IMessageConsumer> CreateMessageConsumer(IDestination destination, string selector, bool noLocal)
         {
-            return _executor.Run(() => _session.CreateConsumer(destination, selector, noLocal), CancellationToken);
+            return _executor.Run(() => _session.CreateConsumerAsync(destination, selector, noLocal), CancellationToken);
         }
 
         public IBytesMessage CreateBytesMessage()

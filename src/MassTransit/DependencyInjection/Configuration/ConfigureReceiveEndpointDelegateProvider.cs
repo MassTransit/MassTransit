@@ -6,21 +6,21 @@ namespace MassTransit.Configuration
     public class ConfigureReceiveEndpointDelegateProvider :
         IConfigureReceiveEndpoint
     {
-        readonly IServiceProvider _provider;
         readonly ConfigureEndpointsProviderCallback _callback;
+        readonly IRegistrationContext _context;
 
-        public ConfigureReceiveEndpointDelegateProvider(IServiceProvider provider, ConfigureEndpointsProviderCallback callback)
+        public ConfigureReceiveEndpointDelegateProvider(IRegistrationContext context, ConfigureEndpointsProviderCallback callback)
         {
             if (callback == null)
                 throw new ArgumentNullException(nameof(callback));
 
-            _provider = provider;
+            _context = context;
             _callback = callback;
         }
 
         public void Configure(string name, IReceiveEndpointConfigurator configurator)
         {
-            _callback(_provider, name, configurator);
+            _callback(_context, name, configurator);
         }
     }
 }

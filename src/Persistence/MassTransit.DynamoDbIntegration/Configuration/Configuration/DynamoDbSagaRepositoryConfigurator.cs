@@ -52,8 +52,9 @@ namespace MassTransit.Configuration
         {
             configurator.TryAddSingleton(_contextFactory);
             configurator.TryAddSingleton(new DynamoDbSagaRepositoryOptions<T>(TableName, Expiration));
-            configurator.RegisterSagaRepository<T, DatabaseContext<T>, SagaConsumeContextFactory<DatabaseContext<T>, T>,
-                DynamoDbSagaRepositoryContextFactory<T>>();
+            configurator.RegisterLoadSagaRepository<T, DynamoDbSagaRepositoryContextFactory<T>>();
+            configurator
+                .RegisterSagaRepository<T, DatabaseContext<T>, SagaConsumeContextFactory<DatabaseContext<T>, T>, DynamoDbSagaRepositoryContextFactory<T>>();
         }
     }
 }

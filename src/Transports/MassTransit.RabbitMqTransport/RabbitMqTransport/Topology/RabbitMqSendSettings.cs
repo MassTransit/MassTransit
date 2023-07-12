@@ -35,7 +35,7 @@ namespace MassTransit.RabbitMqTransport.Topology
             }
 
             if (!string.IsNullOrWhiteSpace(address.AlternateExchange))
-                SetExchangeArgument("alternate-exchange", address.AlternateExchange);
+                SetExchangeArgument(Headers.AlternateExchange, address.AlternateExchange);
 
             if (address.SingleActiveConsumer)
                 SetQueueArgument(Headers.XSingleActiveConsumer, true);
@@ -46,8 +46,9 @@ namespace MassTransit.RabbitMqTransport.Topology
         public RabbitMqEndpointAddress GetSendAddress(Uri hostAddress)
         {
             return new RabbitMqEndpointAddress(hostAddress, ExchangeName, ExchangeType, Durable, AutoDelete, _bindToQueue, _queueName,
-                ExchangeArguments.ContainsKey("x-delayed-type") ? (string)ExchangeArguments["x-delayed-type"] : default,
-                _exchangeBindings.Count > 0 ? _exchangeBindings.Select(x => x.ExchangeName).ToArray() : default);
+                ExchangeArguments.TryGetValue("x-delayed-type", out var argument) ? (string)argument : default,
+                _exchangeBindings.Count > 0 ? _exchangeBindings.Select(x => x.ExchangeName).ToArray() : default,
+                alternateExchange: ExchangeArguments.TryGetValue(Headers.AlternateExchange, out argument) ? (string)argument : default);
         }
 
         public BrokerTopology GetBrokerTopology()

@@ -102,7 +102,7 @@ namespace MassTransit.RedisIntegration.Saga
 
     public class RedisSagaRepositoryContext<TSaga> :
         BasePipeContext,
-        SagaRepositoryContext<TSaga>,
+        LoadSagaRepositoryContext<TSaga>,
         IAsyncDisposable
         where TSaga : class, ISagaVersion
     {
@@ -117,11 +117,6 @@ namespace MassTransit.RedisIntegration.Saga
         public ValueTask DisposeAsync()
         {
             return _context.DisposeAsync();
-        }
-
-        public Task<SagaRepositoryQueryContext<TSaga>> Query(ISagaQuery<TSaga> query, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedByDesignException("Redis saga repository does not support queries");
         }
 
         public Task<TSaga> Load(Guid correlationId)

@@ -29,17 +29,20 @@
         readonly EventObservable<TInstance> _eventObservers;
         readonly State<TInstance> _final;
         readonly State<TInstance> _initial;
-        readonly Lazy<ConfigurationHelpers.StateMachineRegistration[]> _registrations;
+        readonly Lazy<StateMachineRegistration[]> _registrations;
         readonly Dictionary<string, State<TInstance>> _stateCache;
         readonly StateObservable<TInstance> _stateObservers;
         IStateAccessor<TInstance> _accessor;
+
+        List<FieldInfo> _backingFields;
         Func<BehaviorContext<TInstance>, Task<bool>> _isCompleted;
         string _name;
+        List<PropertyInfo> _stateMachineProperties;
         UnhandledEventCallback<TInstance> _unhandledEventCallback;
 
         protected MassTransitStateMachine()
         {
-            _registrations = new Lazy<ConfigurationHelpers.StateMachineRegistration[]>(() => ConfigurationHelpers.GetRegistrations(this));
+            _registrations = new Lazy<StateMachineRegistration[]>(() => GetRegistrations());
             _stateCache = new Dictionary<string, State<TInstance>>();
             _eventCache = new Dictionary<string, StateMachineEvent<TInstance>>();
             _compositeEvents = new HashSet<string>();
@@ -328,11 +331,14 @@
             return DeclareEvent(_ => new MessageEvent<T>(name), name);
         }
 
-        void DeclarePropertyBasedEvent<TEvent>(Func<PropertyInfo, TEvent> ctor, PropertyInfo property)
+        TEvent DeclarePropertyBasedEvent<TEvent>(Func<PropertyInfo, TEvent> ctor, PropertyInfo property)
             where TEvent : Event
         {
             var @event = ctor(property);
-            ConfigurationHelpers.InitializeEvent(this, property, @event);
+
+            InitializeEvent(this, property, @event);
+
+            return @event;
         }
 
         TEvent DeclareEvent<TEvent>(Func<string, TEvent> ctor, string name)
@@ -421,7 +427,7 @@
 
             var @event = new MessageEvent<T>(name);
 
-            ConfigurationHelpers.InitializeEventProperty<TProperty, T>(eventProperty, propertyValue, @event);
+            InitializeEventProperty<TProperty, T>(eventProperty, propertyValue, @event);
 
             _eventCache[name] = new StateMachineEvent<TInstance>(@event, false);
         }
@@ -618,7 +624,7 @@
 
                 var @event = new TriggerEvent(eventProperty.Name);
 
-                ConfigurationHelpers.InitializeEvent(this, eventProperty, @event);
+                InitializeEvent(this, eventProperty, @event);
 
                 _eventCache[eventProperty.Name] = new StateMachineEvent<TInstance>(@event, false);
 
@@ -661,7 +667,7 @@
             {
                 var flag = 1 << i;
 
-                var activity = new CompositeEventActivity<TInstance>(accessor, flag, complete, @event);
+                var activity = new CompositeEventActivity<TInstance>(accessor, flag, complete, @event, options);
 
                 bool Filter(State<TInstance> state)
                 {
@@ -722,7 +728,7 @@
 
             var state = new StateMachineState<TInstance>((c, s) => UnhandledEvent(c, s), name, _eventObservers);
 
-            ConfigurationHelpers.InitializeState(this, property, state);
+            InitializeState(this, property, state);
 
             SetState(name, state);
         }
@@ -751,7 +757,7 @@
 
             var state = new StateMachineState<TInstance>((c, s) => UnhandledEvent(c, s), name, _eventObservers);
 
-            ConfigurationHelpers.InitializeStateProperty(stateProperty, propertyValue, state);
+            InitializeStateProperty(stateProperty, propertyValue, state);
 
             SetState(name, state);
         }
@@ -795,7 +801,7 @@
 
             var state = new StateMachineState<TInstance>((c, s) => UnhandledEvent(c, s), name, _eventObservers, superStateInstance);
 
-            ConfigurationHelpers.InitializeState(this, property, state);
+            InitializeState(this, property, state);
 
             SetState(name, state);
         }
@@ -849,7 +855,7 @@
 
             var state = new StateMachineState<TInstance>((c, s) => UnhandledEvent(c, s), name, _eventObservers, superStateInstance);
 
-            ConfigurationHelpers.InitializeStateProperty(stateProperty, propertyValue, state);
+            InitializeStateProperty(stateProperty, propertyValue, state);
 
             SetState(name, state);
         }
@@ -1272,11 +1278,11 @@
         /// <param name="configureRequest">Allow the request settings to be specified inline</param>
         protected void Request<TRequest, TResponse>(Expression<Func<Request<TInstance, TRequest, TResponse>>> propertyExpression,
             Expression<Func<TInstance, Guid?>> requestIdExpression,
-            Action<IRequestConfigurator> configureRequest = default)
+            Action<IRequestConfigurator<TInstance, TRequest, TResponse>> configureRequest = default)
             where TRequest : class
             where TResponse : class
         {
-            var configurator = new StateMachineRequestConfigurator<TRequest>();
+            var configurator = new StateMachineRequestConfigurator<TInstance, TRequest, TResponse>();
 
             configureRequest?.Invoke(configurator);
 
@@ -1294,11 +1300,11 @@
         /// <param name="propertyExpression">The request property on the state machine</param>
         /// <param name="configureRequest">Allow the request settings to be specified inline</param>
         protected void Request<TRequest, TResponse>(Expression<Func<Request<TInstance, TRequest, TResponse>>> propertyExpression,
-            Action<IRequestConfigurator> configureRequest = default)
+            Action<IRequestConfigurator<TInstance, TRequest, TResponse>> configureRequest = default)
             where TRequest : class
             where TResponse : class
         {
-            var configurator = new StateMachineRequestConfigurator<TRequest>();
+            var configurator = new StateMachineRequestConfigurator<TInstance, TRequest, TResponse>();
 
             configureRequest?.Invoke(configurator);
 
@@ -1316,7 +1322,7 @@
         /// <param name="requestIdExpression">The property where the requestId is stored</param>
         /// <param name="settings">The request settings (which can be read from configuration, etc.)</param>
         protected void Request<TRequest, TResponse>(Expression<Func<Request<TInstance, TRequest, TResponse>>> propertyExpression,
-            Expression<Func<TInstance, Guid?>> requestIdExpression, RequestSettings settings)
+            Expression<Func<TInstance, Guid?>> requestIdExpression, RequestSettings<TInstance, TRequest, TResponse> settings)
             where TRequest : class
             where TResponse : class
         {
@@ -1326,9 +1332,21 @@
 
             InitializeRequest(this, property, request);
 
-            Event(propertyExpression, x => x.Completed, x => x.CorrelateBy(requestIdExpression, context => context.RequestId));
-            Event(propertyExpression, x => x.Faulted, x => x.CorrelateBy(requestIdExpression, context => context.RequestId));
-            Event(propertyExpression, x => x.TimeoutExpired, x => x.CorrelateBy(requestIdExpression, context => context.Message.RequestId));
+            Event(propertyExpression, x => x.Completed, x =>
+            {
+                x.CorrelateBy(requestIdExpression, context => context.RequestId);
+                settings.Completed?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.Faulted, x =>
+            {
+                x.CorrelateBy(requestIdExpression, context => context.RequestId);
+                settings.Faulted?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.TimeoutExpired, x =>
+            {
+                x.CorrelateBy(requestIdExpression, context => context.Message.RequestId);
+                settings.TimeoutExpired?.Invoke(x);
+            });
 
             State(propertyExpression, x => x.Pending);
 
@@ -1351,7 +1369,7 @@
         /// <param name="propertyExpression">The request property on the state machine</param>
         /// <param name="settings">The request settings (which can be read from configuration, etc.)</param>
         protected internal void Request<TRequest, TResponse>(Expression<Func<Request<TInstance, TRequest, TResponse>>> propertyExpression,
-            RequestSettings settings)
+            RequestSettings<TInstance, TRequest, TResponse> settings)
             where TRequest : class
             where TResponse : class
         {
@@ -1361,9 +1379,21 @@
 
             InitializeRequest(this, property, request);
 
-            Event(propertyExpression, x => x.Completed, x => x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId")));
-            Event(propertyExpression, x => x.Faulted, x => x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId")));
-            Event(propertyExpression, x => x.TimeoutExpired, x => x.CorrelateById(context => context.Message.RequestId));
+            Event(propertyExpression, x => x.Completed, x =>
+            {
+                x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId"));
+                settings.Completed?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.Faulted, x =>
+            {
+                x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId"));
+                settings.Faulted?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.TimeoutExpired, x =>
+            {
+                x.CorrelateById(context => context.Message.RequestId);
+                settings.TimeoutExpired?.Invoke(x);
+            });
 
             State(propertyExpression, x => x.Pending);
 
@@ -1387,12 +1417,12 @@
         /// <param name="configureRequest">Allow the request settings to be specified inline</param>
         protected void Request<TRequest, TResponse, TResponse2>(Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2>>> propertyExpression,
             Expression<Func<TInstance, Guid?>> requestIdExpression,
-            Action<IRequestConfigurator> configureRequest = default)
+            Action<IRequestConfigurator<TInstance, TRequest, TResponse, TResponse2>> configureRequest = default)
             where TRequest : class
             where TResponse : class
             where TResponse2 : class
         {
-            var configurator = new StateMachineRequestConfigurator<TRequest>();
+            var configurator = new StateMachineRequestConfigurator<TInstance, TRequest, TResponse, TResponse2>();
 
             configureRequest?.Invoke(configurator);
 
@@ -1411,12 +1441,12 @@
         /// <param name="propertyExpression">The request property on the state machine</param>
         /// <param name="configureRequest">Allow the request settings to be specified inline</param>
         protected void Request<TRequest, TResponse, TResponse2>(Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2>>> propertyExpression,
-            Action<IRequestConfigurator> configureRequest = default)
+            Action<IRequestConfigurator<TInstance, TRequest, TResponse, TResponse2>> configureRequest = default)
             where TRequest : class
             where TResponse : class
             where TResponse2 : class
         {
-            var configurator = new StateMachineRequestConfigurator<TRequest>();
+            var configurator = new StateMachineRequestConfigurator<TInstance, TRequest, TResponse, TResponse2>();
 
             configureRequest?.Invoke(configurator);
 
@@ -1436,7 +1466,7 @@
         /// <param name="settings">The request settings (which can be read from configuration, etc.)</param>
         protected internal void Request<TRequest, TResponse, TResponse2>(
             Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2>>> propertyExpression,
-            Expression<Func<TInstance, Guid?>> requestIdExpression, RequestSettings settings)
+            Expression<Func<TInstance, Guid?>> requestIdExpression, RequestSettings<TInstance, TRequest, TResponse, TResponse2> settings)
             where TRequest : class
             where TResponse : class
             where TResponse2 : class
@@ -1447,10 +1477,26 @@
 
             InitializeRequest(this, property, request);
 
-            Event(propertyExpression, x => x.Completed, x => x.CorrelateBy(requestIdExpression, context => context.RequestId));
-            Event(propertyExpression, x => x.Completed2, x => x.CorrelateBy(requestIdExpression, context => context.RequestId));
-            Event(propertyExpression, x => x.Faulted, x => x.CorrelateBy(requestIdExpression, context => context.RequestId));
-            Event(propertyExpression, x => x.TimeoutExpired, x => x.CorrelateBy(requestIdExpression, context => context.Message.RequestId));
+            Event(propertyExpression, x => x.Completed, x =>
+            {
+                x.CorrelateBy(requestIdExpression, context => context.RequestId);
+                settings.Completed?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.Completed2, x =>
+            {
+                x.CorrelateBy(requestIdExpression, context => context.RequestId);
+                settings.Completed2?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.Faulted, x =>
+            {
+                x.CorrelateBy(requestIdExpression, context => context.RequestId);
+                settings.Faulted?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.TimeoutExpired, x =>
+            {
+                x.CorrelateBy(requestIdExpression, context => context.Message.RequestId);
+                settings.TimeoutExpired?.Invoke(x);
+            });
 
             State(propertyExpression, x => x.Pending);
 
@@ -1478,7 +1524,7 @@
         /// <param name="settings">The request settings (which can be read from configuration, etc.)</param>
         protected internal void Request<TRequest, TResponse, TResponse2>(
             Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2>>> propertyExpression,
-            RequestSettings settings)
+            RequestSettings<TInstance, TRequest, TResponse, TResponse2> settings)
             where TRequest : class
             where TResponse : class
             where TResponse2 : class
@@ -1489,10 +1535,26 @@
 
             InitializeRequest(this, property, request);
 
-            Event(propertyExpression, x => x.Completed, x => x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId")));
-            Event(propertyExpression, x => x.Completed2, x => x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId")));
-            Event(propertyExpression, x => x.Faulted, x => x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId")));
-            Event(propertyExpression, x => x.TimeoutExpired, x => x.CorrelateById(context => context.Message.RequestId));
+            Event(propertyExpression, x => x.Completed, x =>
+            {
+                x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId"));
+                settings.Completed?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.Completed2, x =>
+            {
+                x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId"));
+                settings.Completed2?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.Faulted, x =>
+            {
+                x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId"));
+                settings.Faulted?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.TimeoutExpired, x =>
+            {
+                x.CorrelateById(context => context.Message.RequestId);
+                settings.TimeoutExpired?.Invoke(x);
+            });
 
             State(propertyExpression, x => x.Pending);
 
@@ -1520,13 +1582,13 @@
         protected void Request<TRequest, TResponse, TResponse2, TResponse3>(
             Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2, TResponse3>>> propertyExpression,
             Expression<Func<TInstance, Guid?>> requestIdExpression,
-            Action<IRequestConfigurator> configureRequest = default)
+            Action<IRequestConfigurator<TInstance, TRequest, TResponse, TResponse2, TResponse3>> configureRequest = default)
             where TRequest : class
             where TResponse : class
             where TResponse2 : class
             where TResponse3 : class
         {
-            var configurator = new StateMachineRequestConfigurator<TRequest>();
+            var configurator = new StateMachineRequestConfigurator<TInstance, TRequest, TResponse, TResponse2, TResponse3>();
 
             configureRequest?.Invoke(configurator);
 
@@ -1547,13 +1609,13 @@
         /// <param name="configureRequest">Allow the request settings to be specified inline</param>
         protected void Request<TRequest, TResponse, TResponse2, TResponse3>(
             Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2, TResponse3>>> propertyExpression,
-            Action<IRequestConfigurator> configureRequest = default)
+            Action<IRequestConfigurator<TInstance, TRequest, TResponse, TResponse2, TResponse3>> configureRequest = default)
             where TRequest : class
             where TResponse : class
             where TResponse2 : class
             where TResponse3 : class
         {
-            var configurator = new StateMachineRequestConfigurator<TRequest>();
+            var configurator = new StateMachineRequestConfigurator<TInstance, TRequest, TResponse, TResponse2, TResponse3>();
 
             configureRequest?.Invoke(configurator);
 
@@ -1574,7 +1636,7 @@
         /// <param name="settings">The request settings (which can be read from configuration, etc.)</param>
         protected internal void Request<TRequest, TResponse, TResponse2, TResponse3>(
             Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2, TResponse3>>> propertyExpression,
-            Expression<Func<TInstance, Guid?>> requestIdExpression, RequestSettings settings)
+            Expression<Func<TInstance, Guid?>> requestIdExpression, RequestSettings<TInstance, TRequest, TResponse, TResponse2, TResponse3> settings)
             where TRequest : class
             where TResponse : class
             where TResponse2 : class
@@ -1586,11 +1648,31 @@
 
             InitializeRequest(this, property, request);
 
-            Event(propertyExpression, x => x.Completed, x => x.CorrelateBy(requestIdExpression, context => context.RequestId));
-            Event(propertyExpression, x => x.Completed2, x => x.CorrelateBy(requestIdExpression, context => context.RequestId));
-            Event(propertyExpression, x => x.Completed3, x => x.CorrelateBy(requestIdExpression, context => context.RequestId));
-            Event(propertyExpression, x => x.Faulted, x => x.CorrelateBy(requestIdExpression, context => context.RequestId));
-            Event(propertyExpression, x => x.TimeoutExpired, x => x.CorrelateBy(requestIdExpression, context => context.Message.RequestId));
+            Event(propertyExpression, x => x.Completed, x =>
+            {
+                x.CorrelateBy(requestIdExpression, context => context.RequestId);
+                settings.Completed?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.Completed2, x =>
+            {
+                x.CorrelateBy(requestIdExpression, context => context.RequestId);
+                settings.Completed2?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.Completed3, x =>
+            {
+                x.CorrelateBy(requestIdExpression, context => context.RequestId);
+                settings.Completed3?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.Faulted, x =>
+            {
+                x.CorrelateBy(requestIdExpression, context => context.RequestId);
+                settings.Faulted?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.TimeoutExpired, x =>
+            {
+                x.CorrelateBy(requestIdExpression, context => context.Message.RequestId);
+                settings.TimeoutExpired?.Invoke(x);
+            });
 
             State(propertyExpression, x => x.Pending);
 
@@ -1622,7 +1704,7 @@
         /// <param name="settings">The request settings (which can be read from configuration, etc.)</param>
         protected internal void Request<TRequest, TResponse, TResponse2, TResponse3>(
             Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2, TResponse3>>> propertyExpression,
-            RequestSettings settings)
+            RequestSettings<TInstance, TRequest, TResponse, TResponse2, TResponse3> settings)
             where TRequest : class
             where TResponse : class
             where TResponse2 : class
@@ -1634,11 +1716,31 @@
 
             InitializeRequest(this, property, request);
 
-            Event(propertyExpression, x => x.Completed, x => x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId")));
-            Event(propertyExpression, x => x.Completed2, x => x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId")));
-            Event(propertyExpression, x => x.Completed3, x => x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId")));
-            Event(propertyExpression, x => x.Faulted, x => x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId")));
-            Event(propertyExpression, x => x.TimeoutExpired, x => x.CorrelateById(context => context.Message.RequestId));
+            Event(propertyExpression, x => x.Completed, x =>
+            {
+                x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId"));
+                settings.Completed?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.Completed2, x =>
+            {
+                x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId"));
+                settings.Completed2?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.Completed3, x =>
+            {
+                x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId"));
+                settings.Completed3?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.Faulted, x =>
+            {
+                x.CorrelateById(context => context.RequestId ?? throw new RequestException("Missing RequestId"));
+                settings.Faulted?.Invoke(x);
+            });
+            Event(propertyExpression, x => x.TimeoutExpired, x =>
+            {
+                x.CorrelateById(context => context.Message.RequestId);
+                settings.TimeoutExpired?.Invoke(x);
+            });
 
             State(propertyExpression, x => x.Pending);
 
@@ -1739,25 +1841,25 @@
             return TaskUtil.False;
         }
 
-        static void InitializeSchedule<T>(MassTransitStateMachine<TInstance> stateMachine, PropertyInfo property, Schedule<TInstance, T> schedule)
+        void InitializeSchedule<T>(MassTransitStateMachine<TInstance> stateMachine, PropertyInfo property, Schedule<TInstance, T> schedule)
             where T : class
         {
             if (property.CanWrite)
                 property.SetValue(stateMachine, schedule);
-            else if (ConfigurationHelpers.TryGetBackingField(stateMachine.GetType().GetTypeInfo(), property, out var backingField))
+            else if (TryGetBackingField(property, out var backingField))
                 backingField.SetValue(stateMachine, schedule);
             else
                 throw new ArgumentException($"The schedule property is not writable: {property.Name}");
         }
 
-        static void InitializeRequest<TRequest, TResponse>(MassTransitStateMachine<TInstance> stateMachine, PropertyInfo property,
+        void InitializeRequest<TRequest, TResponse>(MassTransitStateMachine<TInstance> stateMachine, PropertyInfo property,
             Request<TInstance, TRequest, TResponse> request)
             where TRequest : class
             where TResponse : class
         {
             if (property.CanWrite)
                 property.SetValue(stateMachine, request);
-            else if (ConfigurationHelpers.TryGetBackingField(stateMachine.GetType().GetTypeInfo(), property, out var backingField))
+            else if (TryGetBackingField(property, out var backingField))
                 backingField.SetValue(stateMachine, request);
             else
                 throw new ArgumentException($"The request property is not writable: {property.Name}");
@@ -1770,27 +1872,6 @@
         {
             foreach (var declaration in _registrations.Value)
                 declaration.Declare(this);
-
-            var machineType = GetType().GetTypeInfo();
-
-            IEnumerable<PropertyInfo> properties = ConfigurationHelpers.GetStateMachineProperties(machineType);
-
-            foreach (var propertyInfo in properties)
-            {
-                var propertyType = propertyInfo.PropertyType.GetTypeInfo();
-                if (!propertyType.IsGenericType)
-                    continue;
-
-                if (!propertyType.ClosesType(typeof(Event<>), out Type[] arguments))
-                    continue;
-
-                var @event = (Event)propertyInfo.GetValue(this);
-                if (@event == null)
-                    continue;
-
-                var registration = GetEventRegistration(@event, arguments[0]);
-                registration.RegisterCorrelation(this);
-            }
         }
 
         static EventRegistration GetEventRegistration(Event @event, Type messageType)
@@ -1835,212 +1916,200 @@
             return machine;
         }
 
-
-        protected static class ConfigurationHelpers
+        StateMachineRegistration[] GetRegistrations()
         {
-            public static StateMachineRegistration[] GetRegistrations(MassTransitStateMachine<TInstance> stateMachine)
+            var events = new List<StateMachineRegistration>();
+
+            var machineType = GetType().GetTypeInfo();
+
+            IEnumerable<PropertyInfo> properties = GetStateMachineProperties();
+
+            foreach (var propertyInfo in properties)
             {
-                var events = new List<StateMachineRegistration>();
-
-                var machineType = stateMachine.GetType().GetTypeInfo();
-
-                IEnumerable<PropertyInfo> properties = GetStateMachineProperties(machineType);
-
-                foreach (var propertyInfo in properties)
+                if (propertyInfo.PropertyType.GetTypeInfo().IsGenericType)
                 {
-                    if (propertyInfo.PropertyType.GetTypeInfo().IsGenericType)
+                    if (propertyInfo.PropertyType.GetGenericTypeDefinition() == typeof(Event<>))
                     {
-                        if (propertyInfo.PropertyType.GetGenericTypeDefinition() == typeof(Event<>))
-                        {
-                            var declarationType = typeof(DataEventRegistration<,>).MakeGenericType(typeof(TInstance), machineType,
-                                propertyInfo.PropertyType.GetGenericArguments().First());
-                            var declaration = Activator.CreateInstance(declarationType, propertyInfo);
-                            events.Add((StateMachineRegistration)declaration);
-                        }
-                    }
-                    else
-                    {
-                        if (propertyInfo.PropertyType == typeof(Event))
-                        {
-                            var declarationType = typeof(TriggerEventRegistration<>).MakeGenericType(typeof(TInstance), machineType);
-                            var declaration = Activator.CreateInstance(declarationType, propertyInfo);
-                            events.Add((StateMachineRegistration)declaration);
-                        }
-                        else if (propertyInfo.PropertyType == typeof(State))
-                        {
-                            var declarationType = typeof(StateRegistration<>).MakeGenericType(typeof(TInstance), machineType);
-                            var declaration = Activator.CreateInstance(declarationType, propertyInfo);
-                            events.Add((StateMachineRegistration)declaration);
-                        }
+                        var declarationType = typeof(DataEventRegistration<,>).MakeGenericType(typeof(TInstance), machineType,
+                            propertyInfo.PropertyType.GetGenericArguments().First());
+                        var declaration = Activator.CreateInstance(declarationType, propertyInfo);
+                        events.Add((StateMachineRegistration)declaration);
                     }
                 }
-
-                return events.ToArray();
-            }
-
-            public static IEnumerable<PropertyInfo> GetStateMachineProperties(TypeInfo typeInfo)
-            {
-                if (typeInfo.IsInterface)
-                    yield break;
-
-                if (typeInfo.BaseType != null)
-                {
-                    foreach (var propertyInfo in GetStateMachineProperties(typeInfo.BaseType.GetTypeInfo()))
-                        yield return propertyInfo;
-                }
-
-                IEnumerable<PropertyInfo> properties = typeInfo.DeclaredMethods
-                    .Where(x => x.IsSpecialName && x.Name.StartsWith("get_") && !x.IsStatic)
-                    .Select(x => typeInfo.GetDeclaredProperty(x.Name.Substring("get_".Length)))
-                    .Where(x => x.CanRead && (x.CanWrite || TryGetBackingField(typeInfo, x, out _)));
-
-                foreach (var propertyInfo in properties)
-                    yield return propertyInfo;
-            }
-
-            public static bool TryGetBackingField(TypeInfo typeInfo, PropertyInfo property, out FieldInfo backingField)
-            {
-                backingField = typeInfo
-                    .GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
-                    .FirstOrDefault(field =>
-                        field.Attributes.HasFlag(FieldAttributes.Private) &&
-                        field.Attributes.HasFlag(FieldAttributes.InitOnly) &&
-                        field.CustomAttributes.Any(attr => attr.AttributeType == typeof(CompilerGeneratedAttribute)) &&
-                        field.DeclaringType == property.DeclaringType &&
-                        field.FieldType.IsAssignableFrom(property.PropertyType) &&
-                        field.Name.StartsWith("<" + property.Name + ">")
-                    );
-
-                return backingField != null;
-            }
-
-            public static void InitializeState(MassTransitStateMachine<TInstance> stateMachine, PropertyInfo property,
-                StateMachineState<TInstance> state)
-            {
-                if (property.CanWrite)
-                    property.SetValue(stateMachine, state);
-                else if (TryGetBackingField(stateMachine.GetType().GetTypeInfo(), property, out var backingField))
-                    backingField.SetValue(stateMachine, state);
-                else
-                    throw new ArgumentException($"The state property is not writable: {property.Name}");
-            }
-
-            public static void InitializeStateProperty<TProperty>(PropertyInfo stateProperty, TProperty propertyValue,
-                StateMachineState<TInstance> state)
-                where TProperty : class
-            {
-                if (stateProperty.CanWrite)
-                    stateProperty.SetValue(propertyValue, state);
                 else
                 {
-                    var objectProperty = propertyValue.GetType().GetProperty(stateProperty.Name, typeof(State));
-                    if (objectProperty == null || !objectProperty.CanWrite)
-                        throw new ArgumentException($"The state property is not writable: {stateProperty.Name}");
-
-                    objectProperty.SetValue(propertyValue, state);
+                    if (propertyInfo.PropertyType == typeof(Event))
+                    {
+                        var declarationType = typeof(TriggerEventRegistration<>).MakeGenericType(typeof(TInstance), machineType);
+                        var declaration = Activator.CreateInstance(declarationType, propertyInfo);
+                        events.Add((StateMachineRegistration)declaration);
+                    }
+                    else if (propertyInfo.PropertyType == typeof(State))
+                    {
+                        var declarationType = typeof(StateRegistration<>).MakeGenericType(typeof(TInstance), machineType);
+                        var declaration = Activator.CreateInstance(declarationType, propertyInfo);
+                        events.Add((StateMachineRegistration)declaration);
+                    }
                 }
             }
 
-            public static void InitializeEvent(MassTransitStateMachine<TInstance> stateMachine, PropertyInfo property, Event @event)
+            return events.ToArray();
+        }
+
+        IEnumerable<PropertyInfo> GetStateMachineProperties()
+        {
+            return _stateMachineProperties ??= GetType().GetTypeInfo().GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                .Where(x => x.CanRead && (x.CanWrite || TryGetBackingField(x, out _))).ToList();
+        }
+
+        bool TryGetBackingField(PropertyInfo property, out FieldInfo backingField)
+        {
+            _backingFields ??= GetType().GetTypeInfo()
+                .GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
+                .Where(field =>
+                    field.Attributes.HasFlag(FieldAttributes.Private) &&
+                    field.Attributes.HasFlag(FieldAttributes.InitOnly) &&
+                    field.CustomAttributes.Any(attr => attr.AttributeType == typeof(CompilerGeneratedAttribute)) &&
+                    field.Name.StartsWith("<")
+                ).ToList();
+
+            backingField = _backingFields
+                .FirstOrDefault(field =>
+                    field.DeclaringType == property.DeclaringType &&
+                    field.FieldType.IsAssignableFrom(property.PropertyType) &&
+                    field.Name.StartsWith("<" + property.Name + ">")
+                );
+
+            return backingField != null;
+        }
+
+        void InitializeState(MassTransitStateMachine<TInstance> stateMachine, PropertyInfo property, StateMachineState<TInstance> state)
+        {
+            if (property.CanWrite)
+                property.SetValue(stateMachine, state);
+            else if (TryGetBackingField(property, out var backingField))
+                backingField.SetValue(stateMachine, state);
+            else
+                throw new ArgumentException($"The state property is not writable: {property.Name}");
+        }
+
+        void InitializeStateProperty<TProperty>(PropertyInfo stateProperty, TProperty propertyValue, StateMachineState<TInstance> state)
+            where TProperty : class
+        {
+            if (stateProperty.CanWrite)
+                stateProperty.SetValue(propertyValue, state);
+            else
             {
-                if (property.CanWrite)
-                    property.SetValue(stateMachine, @event);
-                else if (TryGetBackingField(stateMachine.GetType().GetTypeInfo(), property, out var backingField))
-                    backingField.SetValue(stateMachine, @event);
-                else
-                    throw new ArgumentException($"The event property is not writable: {property.Name}");
+                var objectProperty = propertyValue.GetType().GetProperty(stateProperty.Name, typeof(State));
+                if (objectProperty == null || !objectProperty.CanWrite)
+                    throw new ArgumentException($"The state property is not writable: {stateProperty.Name}");
+
+                objectProperty.SetValue(propertyValue, state);
+            }
+        }
+
+        void InitializeEvent(MassTransitStateMachine<TInstance> stateMachine, PropertyInfo property, Event @event)
+        {
+            if (property.CanWrite)
+                property.SetValue(stateMachine, @event);
+            else if (TryGetBackingField(property, out var backingField))
+                backingField.SetValue(stateMachine, @event);
+            else
+                throw new ArgumentException($"The event property is not writable: {property.Name}");
+        }
+
+        void InitializeEventProperty<TProperty, T>(PropertyInfo eventProperty, TProperty propertyValue, Event @event)
+            where TProperty : class
+            where T : class
+        {
+            if (eventProperty.CanWrite)
+                eventProperty.SetValue(propertyValue, @event);
+            else
+            {
+                var objectProperty = propertyValue.GetType().GetProperty(eventProperty.Name, typeof(Event<T>));
+                if (objectProperty == null || !objectProperty.CanWrite)
+                    throw new ArgumentException($"The event property is not writable: {eventProperty.Name}");
+
+                objectProperty.SetValue(propertyValue, @event);
+            }
+        }
+
+
+        interface StateMachineRegistration
+        {
+            void Declare(object stateMachine);
+        }
+
+
+        class StateRegistration<TStateMachine> :
+            StateMachineRegistration
+            where TStateMachine : MassTransitStateMachine<TInstance>
+        {
+            readonly PropertyInfo _propertyInfo;
+
+            public StateRegistration(PropertyInfo propertyInfo)
+            {
+                _propertyInfo = propertyInfo;
             }
 
-            public static void InitializeEventProperty<TProperty, T>(PropertyInfo eventProperty, TProperty propertyValue, Event @event)
-                where TProperty : class
-                where T : class
+            public void Declare(object stateMachine)
             {
-                if (eventProperty.CanWrite)
-                    eventProperty.SetValue(propertyValue, @event);
-                else
-                {
-                    var objectProperty = propertyValue.GetType().GetProperty(eventProperty.Name, typeof(Event<T>));
-                    if (objectProperty == null || !objectProperty.CanWrite)
-                        throw new ArgumentException($"The event property is not writable: {eventProperty.Name}");
+                var machine = (TStateMachine)stateMachine;
+                var existing = _propertyInfo.GetValue(machine);
+                if (existing != null)
+                    return;
 
-                    objectProperty.SetValue(propertyValue, @event);
-                }
+                machine.DeclareState(_propertyInfo);
+            }
+        }
+
+
+        class TriggerEventRegistration<TStateMachine> :
+            StateMachineRegistration
+            where TStateMachine : MassTransitStateMachine<TInstance>
+        {
+            readonly PropertyInfo _propertyInfo;
+
+            public TriggerEventRegistration(PropertyInfo propertyInfo)
+            {
+                _propertyInfo = propertyInfo;
             }
 
-
-            public interface StateMachineRegistration
+            public void Declare(object stateMachine)
             {
-                void Declare(object stateMachine);
+                var machine = (TStateMachine)stateMachine;
+                var existing = _propertyInfo.GetValue(machine);
+                if (existing != null)
+                    return;
+
+                machine.DeclarePropertyBasedEvent(prop => machine.DeclareTriggerEvent(prop.Name), _propertyInfo);
+            }
+        }
+
+
+        class DataEventRegistration<TStateMachine, TData> :
+            StateMachineRegistration
+            where TStateMachine : MassTransitStateMachine<TInstance>
+            where TData : class
+        {
+            readonly PropertyInfo _propertyInfo;
+
+            public DataEventRegistration(PropertyInfo propertyInfo)
+            {
+                _propertyInfo = propertyInfo;
             }
 
-
-            class StateRegistration<TStateMachine> :
-                StateMachineRegistration
-                where TStateMachine : MassTransitStateMachine<TInstance>
+            public void Declare(object stateMachine)
             {
-                readonly PropertyInfo _propertyInfo;
+                var machine = (TStateMachine)stateMachine;
+                var existing = _propertyInfo.GetValue(machine);
+                if (existing != null)
+                    return;
 
-                public StateRegistration(PropertyInfo propertyInfo)
-                {
-                    _propertyInfo = propertyInfo;
-                }
+                Event<TData> @event = machine.DeclarePropertyBasedEvent(prop => machine.DeclareDataEvent<TData>(prop.Name), _propertyInfo);
 
-                public void Declare(object stateMachine)
-                {
-                    var machine = (TStateMachine)stateMachine;
-                    var existing = _propertyInfo.GetValue(machine);
-                    if (existing != null)
-                        return;
-
-                    machine.DeclareState(_propertyInfo);
-                }
-            }
-
-
-            class TriggerEventRegistration<TStateMachine> :
-                StateMachineRegistration
-                where TStateMachine : MassTransitStateMachine<TInstance>
-            {
-                readonly PropertyInfo _propertyInfo;
-
-                public TriggerEventRegistration(PropertyInfo propertyInfo)
-                {
-                    _propertyInfo = propertyInfo;
-                }
-
-                public void Declare(object stateMachine)
-                {
-                    var machine = (TStateMachine)stateMachine;
-                    var existing = _propertyInfo.GetValue(machine);
-                    if (existing != null)
-                        return;
-
-                    machine.DeclarePropertyBasedEvent(prop => machine.DeclareTriggerEvent(prop.Name), _propertyInfo);
-                }
-            }
-
-
-            class DataEventRegistration<TStateMachine, TData> :
-                StateMachineRegistration
-                where TStateMachine : MassTransitStateMachine<TInstance>
-                where TData : class
-            {
-                readonly PropertyInfo _propertyInfo;
-
-                public DataEventRegistration(PropertyInfo propertyInfo)
-                {
-                    _propertyInfo = propertyInfo;
-                }
-
-                public void Declare(object stateMachine)
-                {
-                    var machine = (TStateMachine)stateMachine;
-                    var existing = _propertyInfo.GetValue(machine);
-                    if (existing != null)
-                        return;
-
-                    machine.DeclarePropertyBasedEvent(prop => machine.DeclareDataEvent<TData>(prop.Name), _propertyInfo);
-                }
+                var eventRegistration = GetEventRegistration(@event, typeof(TData));
+                eventRegistration.RegisterCorrelation(machine);
             }
         }
 
@@ -2106,9 +2175,7 @@
                     machine._eventCorrelations[_event] = builder.Build();
                 }
                 else
-                {
                     machine._eventCorrelations[_event] = new UncorrelatedEventCorrelation<TInstance, TData>(_event);
-                }
             }
         }
 
@@ -2134,9 +2201,7 @@
                     machine._eventCorrelations[_event] = builder.Build();
                 }
                 else
-                {
                     machine._eventCorrelations[_event] = new UncorrelatedEventCorrelation<TInstance, Fault<TData>>(_event);
-                }
             }
         }
 

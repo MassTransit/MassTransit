@@ -162,7 +162,7 @@ namespace MassTransit.Analyzers
 
             foreach (var inputProperty in inputProperties)
             {
-                var contractProperty = contractProperties.FirstOrDefault(m => m.Name == inputProperty.Name);
+                var contractProperty = contractProperties.FirstOrDefault(m => m.Name.Equals(inputProperty.Name, StringComparison.OrdinalIgnoreCase));
 
                 var propertyPath = Append(path, inputProperty.Name);
 
@@ -210,8 +210,7 @@ namespace MassTransit.Analyzers
             {
                 if (contractPropertyType.TypeKind.IsClassOrInterface())
                 {
-                    if (!TypesAreStructurallyCompatible(typeConverterHelper, contractPropertyType,
-                            inputPropertyType, path, incompatibleProperties))
+                    if (!TypesAreStructurallyCompatible(typeConverterHelper, contractPropertyType, inputPropertyType, path, incompatibleProperties))
                         return false;
                 }
                 else
@@ -309,8 +308,7 @@ namespace MassTransit.Analyzers
 
             if (contractValueType.TypeKind.IsClassOrInterface())
             {
-                if (!TypesAreStructurallyCompatible(typeConverterHelper, contractValueType,
-                        inputValueType, path, incompatibleProperties))
+                if (!TypesAreStructurallyCompatible(typeConverterHelper, contractValueType, inputValueType, path, incompatibleProperties))
                     return false;
             }
             else
@@ -357,7 +355,7 @@ namespace MassTransit.Analyzers
 
             foreach (var contractProperty in contractProperties)
             {
-                var inputProperty = inputProperties.FirstOrDefault(m => m.Name == contractProperty.Name);
+                var inputProperty = inputProperties.FirstOrDefault(m => m.Name.Equals(contractProperty.Name, StringComparison.OrdinalIgnoreCase));
 
                 var propertyPath = Append(path, contractProperty.Name);
 

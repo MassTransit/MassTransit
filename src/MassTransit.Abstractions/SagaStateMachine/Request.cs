@@ -11,7 +11,7 @@
     /// <typeparam name="TRequest">The request type</typeparam>
     /// <typeparam name="TResponse">The response type</typeparam>
     /// <typeparam name="TSaga"></typeparam>
-    public interface Request<in TSaga, TRequest, TResponse>
+    public interface Request<TSaga, TRequest, TResponse>
         where TSaga : class, SagaStateMachineInstance
         where TRequest : class
         where TResponse : class
@@ -24,7 +24,7 @@
         /// <summary>
         /// The settings that are used for the request, including the timeout
         /// </summary>
-        RequestSettings Settings { get; }
+        RequestSettings<TSaga, TRequest, TResponse> Settings { get; }
 
         /// <summary>
         /// The event that is raised when the request completes and the response is received
@@ -68,7 +68,7 @@
         Guid GenerateRequestId(TSaga instance);
 
         /// <summary>
-        /// Set the headers on the outgoing request <see cref="SendContext{TRequest}"/>
+        /// Set the headers on the outgoing request <see cref="SendContext{TRequest}" />
         /// </summary>
         /// <param name="context"></param>
         void SetSendContextHeaders(SendContext<TRequest> context);
@@ -83,13 +83,18 @@
     /// <typeparam name="TResponse">The response type</typeparam>
     /// <typeparam name="TSaga"></typeparam>
     /// <typeparam name="TResponse2"></typeparam>
-    public interface Request<in TSaga, TRequest, TResponse, TResponse2> :
+    public interface Request<TSaga, TRequest, TResponse, TResponse2> :
         Request<TSaga, TRequest, TResponse>
         where TSaga : class, SagaStateMachineInstance
         where TRequest : class
         where TResponse : class
         where TResponse2 : class
     {
+        /// <summary>
+        /// The settings that are used for the request, including the timeout
+        /// </summary>
+        new RequestSettings<TSaga, TRequest, TResponse, TResponse2> Settings { get; }
+
         /// <summary>
         /// The event that is raised when the request completes and the response is received
         /// </summary>
@@ -106,7 +111,7 @@
     /// <typeparam name="TSaga"></typeparam>
     /// <typeparam name="TResponse2"></typeparam>
     /// <typeparam name="TResponse3"></typeparam>
-    public interface Request<in TSaga, TRequest, TResponse, TResponse2, TResponse3> :
+    public interface Request<TSaga, TRequest, TResponse, TResponse2, TResponse3> :
         Request<TSaga, TRequest, TResponse, TResponse2>
         where TSaga : class, SagaStateMachineInstance
         where TRequest : class
@@ -114,6 +119,11 @@
         where TResponse2 : class
         where TResponse3 : class
     {
+        /// <summary>
+        /// The settings that are used for the request, including the timeout
+        /// </summary>
+        new RequestSettings<TSaga, TRequest, TResponse, TResponse2, TResponse3> Settings { get; }
+
         /// <summary>
         /// The event that is raised when the request completes and the response is received
         /// </summary>

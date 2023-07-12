@@ -1,7 +1,14 @@
 namespace MassTransit.Monitoring
 {
+    using System;
+
+
     public class InstrumentationOptions
     {
+        public const string MeterName = "MassTransit";
+
+        public string ServiceName { get; set; }
+
         public string EndpointLabel { get; set; }
         public string ConsumerTypeLabel { get; set; }
         public string ExceptionTypeLabel { get; set; }
@@ -19,8 +26,21 @@ namespace MassTransit.Monitoring
         public string ConsumeTotal { get; set; }
         public string ConsumeFaultTotal { get; set; }
         public string ConsumeRetryTotal { get; set; }
+
+        public string SagaTotal { get; set; }
+        public string SagaFaultTotal { get; set; }
+        public string SagaDuration { get; set; }
+
+        public string HandlerTotal { get; set; }
+        public string HandlerFaultTotal { get; set; }
+        public string HandlerDuration { get; set; }
+
+        [Obsolete]
         public string PublishTotal { get; set; }
+
+        [Obsolete]
         public string PublishFaultTotal { get; set; }
+
         public string SendTotal { get; set; }
         public string SendFaultTotal { get; set; }
         public string ActivityExecuteTotal { get; set; }
@@ -41,45 +61,10 @@ namespace MassTransit.Monitoring
         public string ConsumeDuration { get; set; }
         public string DeliveryDuration { get; set; }
 
-        public static InstrumentationOptions CreateDefault()
-        {
-            return new InstrumentationOptions
-            {
-                EndpointLabel = "messaging.destination",
-                ConsumerTypeLabel = "messaging.masstransit.consumer_type",
-                ExceptionTypeLabel = "messaging.masstransit.exception_type",
-                MessageTypeLabel = "messaging.masstransit.message_type",
-                ActivityNameLabel = "messaging.masstransit.activity_type",
-                ArgumentTypeLabel = "messaging.masstransit.argument_type",
-                LogTypeLabel = "messaging.masstransit.log_type",
-                ServiceNameLabel = "messaging.service",
-                ReceiveTotal = "messaging.receive",
-                ReceiveFaultTotal = "messaging.receive.errors",
-                ReceiveDuration = "messaging.receive.duration",
-                ReceiveInProgress = "messaging.receive.active",
-                ConsumeTotal = "messaging.consume",
-                ConsumeFaultTotal = "messaging.consume.errors",
-                ConsumeRetryTotal = "messaging.consume.retries",
-                ConsumeDuration = "messaging.consume.duration",
-                ConsumerInProgress = "messaging.consume.active",
-                DeliveryDuration = "messaging.delivery.duration",
-                PublishTotal = "messaging.publish",
-                PublishFaultTotal = "messaging.publish.errors",
-                SendTotal = "messaging.send",
-                SendFaultTotal = "messaging.send.errors",
-                ActivityExecuteTotal = "messaging.masstransit.execute",
-                ActivityExecuteFaultTotal = "messaging.masstransit.execute.errors",
-                ActivityExecuteDuration = "messaging.masstransit.execute.duration",
-                ExecuteInProgress = "messaging.masstransit.execute.active",
-                ActivityCompensateTotal = "messaging.masstransit.compensate",
-                ActivityCompensateFailureTotal = "messaging.masstransit.compensate.errors",
-                ActivityCompensateDuration = "messaging.masstransit.compensate.duration",
-                CompensateInProgress = "messaging.masstransit.compensate.active",
-                BusInstances = "messaging.masstransit.bus",
-                EndpointInstances = "messaging.masstransit.endpoint",
-                HandlerInProgress = "messaging.masstransit.handler.active",
-                SagaInProgress = "messaging.masstransit.saga.active",
-            };
-        }
+        public string OutboxSendTotal { get; set; }
+        public string OutboxSendFaultTotal { get; set; }
+
+        public string OutboxDeliveryTotal { get; set; }
+        public string OutboxDeliveryFaultTotal { get; set; }
     }
 }

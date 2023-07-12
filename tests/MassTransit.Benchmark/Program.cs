@@ -8,7 +8,13 @@
     using System.Threading.Tasks;
     using BusOutbox;
     using Latency;
+    using MassTransit.Logging;
+    using MassTransit.Monitoring;
     using NDesk.Options;
+    using OpenTelemetry;
+    using OpenTelemetry.Metrics;
+    using OpenTelemetry.Resources;
+    using OpenTelemetry.Trace;
     using RequestResponse;
 
 
@@ -23,6 +29,7 @@
 
             var optionSet = new ProgramOptionSet();
 
+            var disposables = new List<IDisposable>();
             try
             {
                 _remaining = optionSet.Parse(args);
@@ -35,6 +42,24 @@
 
                 if (optionSet.Verbose)
                 {
+                }
+
+                if (optionSet.EnableMetrics)
+                {
+                    disposables.Add(Sdk.CreateMeterProviderBuilder()
+                        .AddMeter(InstrumentationOptions.MeterName)
+                        .ConfigureResource(r => r.AddService("MassTransit.Benchmark"))
+                        .AddOtlpExporter()
+                        .Build());
+                }
+
+                if (optionSet.EnableTraces)
+                {
+                    disposables.Add(Sdk.CreateTracerProviderBuilder()
+                        .AddSource(DiagnosticHeaders.DefaultListenerName)
+                        .ConfigureResource(r => r.AddService("MassTransit.Benchmark"))
+                        .AddOtlpExporter()
+                        .Build());
                 }
 
                 optionSet.ShowOptions();
@@ -69,6 +94,10 @@
             catch (Exception ex)
             {
                 Console.WriteLine("Crashed: {0}", ex.Message);
+            }
+            finally
+            {
+                disposables.ForEach(x => x.Dispose());
             }
         }
 

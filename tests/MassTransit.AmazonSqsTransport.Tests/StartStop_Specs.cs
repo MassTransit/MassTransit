@@ -4,10 +4,10 @@ namespace MassTransit.AmazonSqsTransport.Tests
     using System.Threading.Tasks;
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
-    using MassTransit.Testing;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
+    using Testing;
 
 
     [TestFixture]
@@ -20,12 +20,14 @@ namespace MassTransit.AmazonSqsTransport.Tests
         {
             var bus = MassTransit.Bus.Factory.CreateUsingAmazonSqs(x =>
             {
+                x.AutoStart = true;
+
                 x.Host(new Uri("amazonsqs://localhost:4566"), h =>
                 {
                     h.AccessKey("admin");
                     h.SecretKey("admin");
-                    h.Config(new AmazonSimpleNotificationServiceConfig {ServiceURL = "http://localhost:4566"});
-                    h.Config(new AmazonSQSConfig {ServiceURL = "http://localhost:4566"});
+                    h.Config(new AmazonSimpleNotificationServiceConfig { ServiceURL = "http://localhost:4566" });
+                    h.Config(new AmazonSQSConfig { ServiceURL = "http://localhost:4566" });
                 });
 
                 ConfigureBusDiagnostics(x);

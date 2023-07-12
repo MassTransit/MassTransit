@@ -78,7 +78,7 @@ namespace MassTransit.AmazonSqsTransport
 
             sendContext.CancellationToken.ThrowIfCancellationRequested();
 
-            var request = await transportContext.CreatePublishRequest(EntityName, context.Body.GetString()).ConfigureAwait(false);
+            var request = new PublishBatchRequestEntry { Message = context.Body.GetString() };
 
             _headerAdapter.Set(request.MessageAttributes, context.Headers);
             _headerAdapter.Set(request.MessageAttributes, MessageHeaders.ContentType, context.ContentType.ToString());
@@ -90,7 +90,7 @@ namespace MassTransit.AmazonSqsTransport
             if (!string.IsNullOrEmpty(context.GroupId))
                 request.MessageGroupId = context.GroupId;
 
-            await transportContext.Publish(request, context.CancellationToken).ConfigureAwait(false);
+            await transportContext.Publish(EntityName, request, context.CancellationToken).ConfigureAwait(false);
         }
     }
 }

@@ -9,15 +9,17 @@
         IMessageAuditStore
     {
         readonly string _auditTableName;
+        readonly string _auditTableSchema;
         readonly DbContextOptions _contextOptions;
 
-        public EntityFrameworkAuditStore(DbContextOptions contextOptions, string auditTableName)
+        public EntityFrameworkAuditStore(DbContextOptions contextOptions, string auditTableName, string auditTableSchema = null)
         {
             _contextOptions = contextOptions;
             _auditTableName = auditTableName;
+            _auditTableSchema = auditTableSchema;
         }
 
-        public DbContext AuditContext => new AuditDbContext(_contextOptions, _auditTableName);
+        public DbContext AuditContext => new AuditDbContext(_contextOptions, _auditTableName, _auditTableSchema);
 
         async Task IMessageAuditStore.StoreMessage<T>(T message, MessageAuditMetadata metadata)
         {

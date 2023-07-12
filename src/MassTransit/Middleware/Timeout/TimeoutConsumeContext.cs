@@ -6,14 +6,14 @@ namespace MassTransit.Middleware.Timeout
     using Context;
 
 
-    public class TimeoutConsumeContext<T> :
+    public class TimeoutConsumeContext<TMessage> :
         ConsumeContextProxy,
-        ConsumeContext<T>
-        where T : class
+        ConsumeContext<TMessage>
+        where TMessage : class
     {
-        readonly ConsumeContext<T> _context;
+        readonly ConsumeContext<TMessage> _context;
 
-        public TimeoutConsumeContext(ConsumeContext<T> context, CancellationToken cancellationToken)
+        public TimeoutConsumeContext(ConsumeContext<TMessage> context, CancellationToken cancellationToken)
             : base(context)
         {
             CancellationToken = cancellationToken;
@@ -22,7 +22,23 @@ namespace MassTransit.Middleware.Timeout
 
         public override CancellationToken CancellationToken { get; }
 
-        public T Message => _context.Message;
+        public TMessage Message => _context.Message;
+
+        public override async Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
+        {
+            switch (exception)
+            {
+                case OperationCanceledException canceledException when canceledException.CancellationToken == _context.CancellationToken:
+                    break;
+
+                default:
+                    if (!_context.CancellationToken.IsCancellationRequested)
+                        await GenerateFault(_context, exception).ConfigureAwait(false);
+                    break;
+            }
+
+            await ReceiveContext.NotifyFaulted(context, duration, consumerType, exception).ConfigureAwait(false);
+        }
 
         public virtual Task NotifyConsumed(TimeSpan duration, string consumerType)
         {

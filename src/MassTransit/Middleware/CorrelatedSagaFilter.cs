@@ -27,7 +27,7 @@ namespace MassTransit.Middleware
             _policy = policy;
         }
 
-        void IProbeSite.Probe(ProbeContext context)
+        public void Probe(ProbeContext context)
         {
             var scope = context.CreateFilterScope("saga");
             scope.Set(new { Correlation = "Id" });
@@ -37,30 +37,27 @@ namespace MassTransit.Middleware
             _messagePipe.Probe(scope);
         }
 
-        async Task IFilter<ConsumeContext<TMessage>>.Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)
+        public async Task Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)
         {
             var timer = Stopwatch.StartNew();
             try
             {
-                await Task.Yield();
                 await _sagaRepository.Send(context, _policy, _messagePipe).ConfigureAwait(false);
 
                 await next.Send(context).ConfigureAwait(false);
 
                 await context.NotifyConsumed(timer.Elapsed, TypeCache<TSaga>.ShortName).ConfigureAwait(false);
             }
-            catch (OperationCanceledException exception)
+            catch (Exception exception) when (exception.GetBaseException() is OperationCanceledException && !context.CancellationToken.IsCancellationRequested)
             {
                 await context.NotifyFaulted(timer.Elapsed, TypeCache<TSaga>.ShortName, exception).ConfigureAwait(false);
 
-                if (exception.CancellationToken == context.CancellationToken)
-                    throw;
-
-                throw new ConsumerCanceledException($"The operation was canceled by the consumer: {TypeCache<TSaga>.ShortName}");
+                throw new ConsumerCanceledException($"The operation was canceled by the saga: {TypeCache<TSaga>.ShortName}");
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                await context.NotifyFaulted(timer.Elapsed, TypeCache<TSaga>.ShortName, ex).ConfigureAwait(false);
+                await context.NotifyFaulted(timer.Elapsed, TypeCache<TSaga>.ShortName, exception).ConfigureAwait(false);
+
                 throw;
             }
         }

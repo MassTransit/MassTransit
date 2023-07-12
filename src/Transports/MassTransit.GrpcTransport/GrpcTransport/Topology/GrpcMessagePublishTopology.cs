@@ -3,6 +3,7 @@ namespace MassTransit.GrpcTransport.Topology
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using MassTransit.Configuration;
     using MassTransit.Topology;
     using Transports.Fabric;
@@ -46,7 +47,7 @@ namespace MassTransit.GrpcTransport.Topology
                 configurator.Apply(builder);
         }
 
-        public override bool TryGetPublishAddress(Uri baseAddress, out Uri? publishAddress)
+        public override bool TryGetPublishAddress(Uri baseAddress, [NotNullWhen(true)] out Uri? publishAddress)
         {
             publishAddress = new GrpcEndpointAddress(new GrpcHostAddress(baseAddress), _messageTopology.EntityName, exchangeType: ExchangeType);
             return true;

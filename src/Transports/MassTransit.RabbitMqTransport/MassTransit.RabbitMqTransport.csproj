@@ -2,7 +2,7 @@
   <Import Project="../../../signing.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(IsWindows)' == 'true' ">
@@ -21,19 +21,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="RabbitMQ.Client"/>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All"/>
+    <PackageReference Include="RabbitMQ.Client" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net462' ">
-    <PackageReference Include="System.Net.Http"/>
+    <PackageReference Include="System.Net.Http" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj"/>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Topology\Configuration"/>
+    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 </Project>

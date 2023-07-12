@@ -52,9 +52,11 @@ namespace MassTransit.Middleware
             BehaviorContext<TSaga, TMessage> behaviorContext = new BehaviorContextProxy<TSaga, TMessage>(_machine, context, context, _event);
 
             StartedActivity? activity = LogContext.Current?.StartSagaStateMachineActivity(behaviorContext);
+            StartedInstrument? instrument = LogContext.Current?.StartSagaStateMachineInstrument(behaviorContext);
+
             try
             {
-                if (activity != null && activity.Value.Activity.IsAllDataRequested)
+                if (activity is { Activity: { IsAllDataRequested: true } })
                 {
                     State<TSaga> beginState = await behaviorContext.StateMachine.Accessor.Get(behaviorContext).ConfigureAwait(false);
                     if (beginState != null)
@@ -74,12 +76,14 @@ namespace MassTransit.Middleware
                     context.CorrelationId ?? Guid.Empty, currentState.Name, ex);
 
                 activity?.AddExceptionEvent(stateMachineException);
+                instrument?.AddException(ex);
 
                 throw stateMachineException;
             }
             catch (Exception exception)
             {
                 activity?.AddExceptionEvent(exception);
+                instrument?.AddException(exception);
 
                 throw;
             }
@@ -96,6 +100,8 @@ namespace MassTransit.Middleware
 
                     activity.Value.Stop();
                 }
+
+                instrument?.Stop();
             }
         }
     }

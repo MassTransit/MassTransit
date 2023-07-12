@@ -30,6 +30,8 @@
             set => _scheduledMessageId = value;
         }
 
+        public Guid? MessageId => _context?.MessageId;
+
         protected override void Send(SendContext<TMessage> context)
         {
             _context = context;

@@ -82,7 +82,7 @@
         {
             base.ConfigureActiveMqBus(configurator);
 
-            configurator.UseRawJsonSerializer(RawSerializerOptions.AddTransportHeaders, true);
+            configurator.UseRawJsonSerializer();
         }
     }
 }

@@ -44,8 +44,7 @@ namespace MassTransit.Tests.Serialization
             {
                 byte[] data = Serialize(sendContext);
 
-                var transportMessage = new InMemoryTransportMessage(Guid.NewGuid(), data, Serializer.ContentType.MediaType,
-                    TypeCache<SerializationTestMessage>.ShortName);
+                var transportMessage = new InMemoryTransportMessage(Guid.NewGuid(), data, Serializer.ContentType.MediaType);
                 receiveContext = new InMemoryReceiveContext(transportMessage, TestConsumeContext.GetContext());
 
                 Deserialize<SerializationTestMessage>(receiveContext);

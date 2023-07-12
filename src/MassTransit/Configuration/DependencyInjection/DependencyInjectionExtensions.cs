@@ -15,13 +15,43 @@ namespace MassTransit
         /// Creates a single scope for the receive endpoint that is used by all consumers, sagas, messages, etc.
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="serviceProvider"></param>
-        public static void UseServiceScope(this IConsumePipeConfigurator configurator, IServiceProvider serviceProvider)
+        /// <param name="context"></param>
+        public static void UseServiceScope(this IConsumePipeConfigurator configurator, IRegistrationContext context)
         {
-            var scopeProvider = new ConsumeScopeProvider(serviceProvider);
+            var scopeProvider = new ConsumeScopeProvider(context);
             var specification = new FilterPipeSpecification<ConsumeContext>(new ScopeConsumeFilter(scopeProvider));
 
             configurator.AddPrePipeSpecification(specification);
+        }
+
+        [Obsolete(
+            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
+        /// <summary>
+        /// Creates a single scope for the receive endpoint that is used by all consumers, sagas, messages, etc.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="serviceProvider"></param>
+        public static void UseServiceScope(this IConsumePipeConfigurator configurator, IServiceProvider serviceProvider)
+        {
+            var scopeProvider = new ConsumeScopeProvider(serviceProvider, LegacySetScopedConsumeContext.Instance);
+            var specification = new FilterPipeSpecification<ConsumeContext>(new ScopeConsumeFilter(scopeProvider));
+
+            configurator.AddPrePipeSpecification(specification);
+        }
+
+        /// <summary>
+        /// Creates a scope for each message type, compatible with UseMessageRetry and UseInMemoryOutbox
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="context"></param>
+        public static void UseMessageScope(this IConsumePipeConfigurator configurator, IRegistrationContext context)
+        {
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
+
+            var observer = new MessageScopeConfigurationObserver(configurator, context);
         }
 
         /// <summary>
@@ -48,6 +78,8 @@ namespace MassTransit
             where T : class, ISaga
         {
             collection.TryAddSingleton(new IndexedSagaDictionary<T>());
+            collection.RegisterLoadSagaRepository<T, InMemorySagaRepositoryContextFactory<T>>();
+            collection.RegisterQuerySagaRepository<T, InMemorySagaRepositoryContextFactory<T>>();
             collection.RegisterSagaRepository<T, IndexedSagaDictionary<T>, InMemorySagaConsumeContextFactory<T>, InMemorySagaRepositoryContextFactory<T>>();
         }
 

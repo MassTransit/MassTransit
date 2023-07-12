@@ -16,7 +16,7 @@
 
             var repositoryContextFactory = new AzureTableSagaRepositoryContextFactory<TSaga>(cloudTableProvider, consumeContextFactory, keyFormatter);
 
-            return new SagaRepository<TSaga>(repositoryContextFactory);
+            return new SagaRepository<TSaga>(repositoryContextFactory, loadSagaRepositoryContextFactory: repositoryContextFactory);
         }
 
         public static ISagaRepository<TSaga> Create(Func<CloudTable> tableFactory)

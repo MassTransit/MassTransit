@@ -25,7 +25,8 @@ namespace MassTransit.Serialization
             if (context.RequestId.HasValue)
                 context.Headers.Set(MessageHeaders.RequestId, context.RequestId.Value.ToString());
 
-            context.Headers.Set(MessageHeaders.MessageType, string.Join(";", MessageTypeCache<T>.MessageTypeNames));
+            if (context.SupportedMessageTypes?.Length > 0)
+                context.Headers.Set(MessageHeaders.MessageType, string.Join(";", context.SupportedMessageTypes));
 
             if (context.ResponseAddress != null)
                 context.Headers.Set(MessageHeaders.ResponseAddress, context.ResponseAddress);

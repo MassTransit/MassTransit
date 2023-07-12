@@ -23,6 +23,9 @@ namespace MassTransit.Transports
         static readonly LogMessage<Uri, string, TimeSpan> _logReceiveFault = LogContext.Define<Uri, string, TimeSpan>(LogLevel.Error,
             "R-FAULT {InputAddress} {MessageId} {Duration}");
 
+        static readonly LogMessage<Uri, string, object> _logReceiveDupe = LogContext.Define<Uri, string, object>(LogLevel.Warning,
+            "R-DUPE {InputAddress} {MessageId} {TransportMessageId}");
+
         static readonly LogMessage<Uri, Guid?, string> _logSent = LogContext.DefineMessage<Uri, Guid?, string>(LogLevel.Debug,
             "SEND {DestinationAddress} {MessageId} {MessageType}");
 
@@ -104,8 +107,17 @@ namespace MassTransit.Transports
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void LogTransportDupe<TTransportMessageId>(this ReceiveContext context, TTransportMessageId transportMessageId)
+        {
+            _logReceiveDupe(context.InputAddress, GetMessageId(context), transportMessageId);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void LogTransportFaulted(this ReceiveContext context, Exception exception)
         {
+            if(exception.GetBaseException() is OperationCanceledException && context.CancellationToken.IsCancellationRequested)
+                return;
+
             _logFault(context.InputAddress, GetMessageId(context), exception);
         }
 

@@ -198,8 +198,8 @@ const mapping: { [key: string]: string } = {
     '/architecture/packages.html': '/support/packages',
     '/architecture/green-cache.html': '/documentation/concepts/messages',
     '/architecture/nservicebus.html': '/documentation/configuration/integrations/nsb',
-    '/architecture/interoperability.html': '/documentation/configuration/integrations/serialization',
-    '/advanced/interoperability.html': '/documentation/configuration/integrations/serialization',
+    '/architecture/interoperability.html': '/documentation/configuration/serialization',
+    '/advanced/interoperability.html': '/documentation/configuration/serialization',
     '/architecture/history.html': '/documentation/concepts/messages',
     '/architecture/encrypted-messages.html': '/documentation/concepts/messages',
     '/architecture/newid.html': '/documentation/patterns/newid',
@@ -208,7 +208,9 @@ const mapping: { [key: string]: string } = {
     '/getting-started/upgrade-v6.html': '/support/upgrade',
     '/getting-started/index.html': '/documentation/concepts/messages',
     '/getting-started/live-coding.html': '/documentation/concepts/messages',
-    '/discord.html': '/support/support-channels'
+    '/discord.html': '/support/support-channels',
+
+    '/documentation/configuration/integrations/serialization': '/documentation/configuration/serialization'
 }
 
 // flip the map, so we ignore good routes

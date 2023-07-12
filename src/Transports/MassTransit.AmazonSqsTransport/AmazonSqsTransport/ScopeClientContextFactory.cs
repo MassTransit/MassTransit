@@ -45,7 +45,9 @@ namespace MassTransit.AmazonSqsTransport
                 return Task.FromResult<ClientContext>(new SharedClientContext(context, createCancellationToken));
             }
 
+        #pragma warning disable CS4014
             _supervisor.CreateAgent(asyncContext, Create, cancellationToken);
+        #pragma warning restore CS4014
         }
     }
 }

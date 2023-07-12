@@ -23,11 +23,7 @@ namespace MassTransit.InMemoryTransport
 
             var body = context.GetBody();
 
-            var messageType = "Unknown";
-            if (context.TryGetPayload(out InMemoryTransportMessage receivedMessage))
-                messageType = receivedMessage.MessageType;
-
-            var transportMessage = new InMemoryTransportMessage(messageId, body, context.ContentType?.MediaType, messageType);
+            var transportMessage = new InMemoryTransportMessage(messageId, body, context.ContentType?.MediaType);
 
             transportMessage.Headers.SetHostHeaders();
 

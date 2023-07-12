@@ -34,11 +34,7 @@ namespace MassTransit.Containers.Tests
         public async Task Should_exclude_consumer_by_attribute()
         {
             await using var provider = new ServiceCollection()
-                .AddMassTransitTestHarness(x =>
-                {
-                    x.AddConsumer<ExcludedByAttributeConsumer>()
-                        .ExcludeFromConfigureEndpoints();
-                })
+                .AddMassTransitTestHarness(x => x.AddConsumer<ExcludedByAttributeConsumer>())
                 .BuildServiceProvider(true);
 
             var harness = provider.GetTestHarness();

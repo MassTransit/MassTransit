@@ -68,6 +68,7 @@ namespace MassTransit.TestFramework
         [OneTimeSetUp]
         public async Task ContainerFixtureOneTimeSetup()
         {
+        #pragma warning disable CS0618
             var collection = new ServiceCollection()
                 .AddSingleton<ILoggerFactory>(provider => new TestOutputLoggerFactory(true))
                 .AddSingleton(typeof(ILogger<>), typeof(Logger<>))
@@ -77,6 +78,7 @@ namespace MassTransit.TestFramework
 
                     ConfigureMassTransit(cfg);
                 });
+        #pragma warning restore CS0618
 
             collection = ConfigureServices(collection);
 
@@ -162,10 +164,16 @@ namespace MassTransit.TestFramework
             return ServiceProvider.GetRequiredService<IClientFactory>();
         }
 
-        protected ISagaRepository<T> GetSagaRepository<T>()
+        protected ILoadSagaRepository<T> GetLoadSagaRepository<T>()
             where T : class, ISaga
         {
-            return ServiceProvider.GetRequiredService<ISagaRepository<T>>();
+            return ServiceProvider.GetRequiredService<ILoadSagaRepository<T>>();
+        }
+
+        protected IQuerySagaRepository<T> GetQuerySagaRepository<T>()
+            where T : class, ISaga
+        {
+            return ServiceProvider.GetRequiredService<IQuerySagaRepository<T>>();
         }
 
         protected async Task<Task<ConsumeContext<T>>> ConnectPublishHandler<T>()

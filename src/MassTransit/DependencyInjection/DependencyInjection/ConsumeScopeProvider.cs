@@ -10,8 +10,13 @@ namespace MassTransit.DependencyInjection
         BaseConsumeScopeProvider,
         IConsumeScopeProvider
     {
-        public ConsumeScopeProvider(IServiceProvider serviceProvider)
-            : base(serviceProvider)
+        public ConsumeScopeProvider(IRegistrationContext context)
+            : base(context)
+        {
+        }
+
+        public ConsumeScopeProvider(IServiceProvider serviceProvider, ISetScopedConsumeContext setScopedConsumeContext)
+            : base(serviceProvider, setScopedConsumeContext)
         {
         }
 
@@ -59,16 +64,16 @@ namespace MassTransit.DependencyInjection
             return new ConsumeContextScope<T>(consumeContext, serviceScope, serviceScope.ServiceProvider, serviceProvider);
         }
 
-        static IConsumeScopeContext<T> ExistingScopeContextFactory<T>(ConsumeContext<T> consumeContext, IServiceScope serviceScope, IDisposable disposable)
+        IConsumeScopeContext<T> ExistingScopeContextFactory<T>(ConsumeContext<T> consumeContext, IServiceScope serviceScope, IDisposable disposable)
             where T : class
         {
-            return new ExistingConsumeScopeContext<T>(consumeContext, serviceScope, disposable);
+            return new ExistingConsumeScopeContext<T>(consumeContext, serviceScope, disposable, SetScopedConsumeContext);
         }
 
-        static IConsumeScopeContext<T> CreatedScopeContextFactory<T>(ConsumeContext<T> consumeContext, IServiceScope serviceScope, IDisposable disposable)
+        IConsumeScopeContext<T> CreatedScopeContextFactory<T>(ConsumeContext<T> consumeContext, IServiceScope serviceScope, IDisposable disposable)
             where T : class
         {
-            return new CreatedConsumeScopeContext<T>(serviceScope, consumeContext, disposable);
+            return new CreatedConsumeScopeContext<T>(serviceScope, consumeContext, disposable, SetScopedConsumeContext);
         }
 
         static IConsumerConsumeScopeContext<TConsumer, T> ExistingScopeContextFactory<TConsumer, T>(ConsumeContext<T> consumeContext,

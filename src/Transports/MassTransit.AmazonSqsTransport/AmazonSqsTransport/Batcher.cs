@@ -16,9 +16,9 @@ namespace MassTransit.AmazonSqsTransport
         readonly ChannelExecutor _executor;
         readonly BatchSettings _settings;
 
-        protected Batcher()
+        protected Batcher(BatchSettings settings = null)
         {
-            _settings = ClientContextBatchSettings.GetBatchSettings();
+            _settings = settings ?? ClientContextBatchSettings.GetBatchSettings();
 
             var channelOptions = new BoundedChannelOptions(_settings.MessageLimit)
             {
@@ -70,23 +70,27 @@ namespace MassTransit.AmazonSqsTransport
         async Task ReadBatch()
         {
             var batchToken = new CancellationTokenSource(_settings.Timeout);
-            var batch = new List<BatchEntry<TEntry>>();
+            var batch = new List<BatchEntry<TEntry>>(_settings.MessageLimit);
             try
             {
                 try
                 {
-                    for (int entryId = 0,
-                        batchLength = 0;
-                        entryId < _settings.MessageLimit && batchLength < _settings.SizeLimit;
-                        entryId++)
+                    var entryId = 0;
+                    var batchLength = 0;
+
+                    while (entryId < _settings.MessageLimit && batchLength < _settings.SizeLimit)
                     {
-                        BatchEntry<TEntry> entry = await _channel.Reader.ReadAsync(batchToken.Token).ConfigureAwait(false);
-
-                        batchLength += AddingEntry(entry.Entry, entryId.ToString());
-                        batch.Add(entry);
-
-                        if (await _channel.Reader.WaitToReadAsync(batchToken.Token).ConfigureAwait(false) == false)
+                        if (_channel.Reader.TryRead(out var entry))
+                        {
+                            batchLength += AddingEntry(entry.Entry, entryId.ToString());
+                            batch.Add(entry);
+                            entryId++;
+                        }
+                        else if (await _channel.Reader.WaitToReadAsync(batchToken.Token).ConfigureAwait(false) == false)
+                        {
                             break;
+                        }
+
                     }
                 }
                 catch (OperationCanceledException exception) when (exception.CancellationToken == batchToken.Token && batch.Count > 0)

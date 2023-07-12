@@ -2,6 +2,7 @@ namespace MassTransit.Context
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -16,7 +17,7 @@ namespace MassTransit.Context
             throw new ConsumeContextNotAvailableException();
         }
 
-        public bool TryGetPayload<T>(out T? payload)
+        public bool TryGetPayload<T>([NotNullWhen(true)] out T? payload)
             where T : class
         {
             throw new ConsumeContextNotAvailableException();

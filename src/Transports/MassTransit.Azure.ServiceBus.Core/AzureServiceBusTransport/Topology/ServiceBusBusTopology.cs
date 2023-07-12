@@ -1,6 +1,5 @@
 ﻿namespace MassTransit.AzureServiceBusTransport.Topology
 {
-    using System;
     using Configuration;
     using Transports;
 
@@ -21,15 +20,6 @@
 
         IServiceBusPublishTopology IServiceBusBusTopology.PublishTopology => _configuration.Publish;
         IServiceBusSendTopology IServiceBusBusTopology.SendTopology => _configuration.Send;
-
-        public Uri GetDestinationAddress(string queueName, Action<IServiceBusQueueConfigurator> configure = null)
-        {
-            var configurator = new ServiceBusQueueConfigurator(queueName);
-
-            configure?.Invoke(configurator);
-
-            return configurator.GetQueueAddress(_hostConfiguration.HostAddress);
-        }
 
         IServiceBusMessagePublishTopology<T> IServiceBusBusTopology.Publish<T>()
         {

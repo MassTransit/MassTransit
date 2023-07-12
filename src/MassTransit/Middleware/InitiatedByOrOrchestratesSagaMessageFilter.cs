@@ -24,6 +24,7 @@ namespace MassTransit.Middleware
         public async Task Send(SagaConsumeContext<TSaga, TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next)
         {
             StartedActivity? activity = LogContext.Current?.StartSagaActivity(context);
+            StartedInstrument? instrument = LogContext.Current?.StartSagaInstrument(context);
             try
             {
                 await context.Saga.Consume(context).ConfigureAwait(false);
@@ -33,12 +34,14 @@ namespace MassTransit.Middleware
             catch (Exception ex)
             {
                 activity?.AddExceptionEvent(ex);
+                instrument?.AddException(ex);
 
                 throw;
             }
             finally
             {
                 activity?.Stop();
+                instrument?.Stop();
             }
         }
     }

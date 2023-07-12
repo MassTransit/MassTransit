@@ -11,8 +11,8 @@ namespace MassTransit.AmazonSqsTransport
     public class QueueInfo :
         IAsyncDisposable
     {
-        readonly IBatcher<DeleteMessageBatchRequestEntry> _batchDeleter;
-        readonly IBatcher<SendMessageBatchRequestEntry> _batchSender;
+        readonly Lazy<IBatcher<DeleteMessageBatchRequestEntry>> _batchDeleter;
+        readonly Lazy<IBatcher<SendMessageBatchRequestEntry>> _batchSender;
         bool _disposed;
 
         public QueueInfo(string entityName, string url, IDictionary<string, string> attributes, IAmazonSQS client, CancellationToken cancellationToken)
@@ -25,8 +25,8 @@ namespace MassTransit.AmazonSqsTransport
                 ? queueArn
                 : throw new ArgumentException($"The queueArn was not found: {url}", nameof(attributes));
 
-            _batchSender = new SendBatcher(client, url, cancellationToken);
-            _batchDeleter = new DeleteBatcher(client, url, cancellationToken);
+            _batchSender = new Lazy<IBatcher<SendMessageBatchRequestEntry>>(() => new SendBatcher(client, url, cancellationToken));
+            _batchDeleter = new Lazy<IBatcher<DeleteMessageBatchRequestEntry>>(() => new DeleteBatcher(client, url, cancellationToken));
 
             SubscriptionArns = new List<string>();
         }
@@ -44,20 +44,22 @@ namespace MassTransit.AmazonSqsTransport
 
             _disposed = true;
 
-            await _batchSender.DisposeAsync().ConfigureAwait(false);
-            await _batchDeleter.DisposeAsync().ConfigureAwait(false);
+            if (_batchSender.IsValueCreated)
+                await _batchSender.Value.DisposeAsync().ConfigureAwait(false);
+            if (_batchDeleter.IsValueCreated)
+                await _batchDeleter.Value.DisposeAsync().ConfigureAwait(false);
         }
 
         public Task Send(SendMessageBatchRequestEntry entry, CancellationToken cancellationToken)
         {
-            return _batchSender.Execute(entry, cancellationToken);
+            return _batchSender.Value.Execute(entry, cancellationToken);
         }
 
         public Task Delete(string receiptHandle, CancellationToken cancellationToken)
         {
             var entry = new DeleteMessageBatchRequestEntry("", receiptHandle);
 
-            return _batchDeleter.Execute(entry, cancellationToken);
+            return _batchDeleter.Value.Execute(entry, cancellationToken);
         }
     }
 }

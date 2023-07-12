@@ -3,6 +3,7 @@ namespace MassTransit
 {
     using System;
     using Configuration;
+    using DependencyInjection;
     using EntityFrameworkCoreIntegration;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -31,6 +32,31 @@ namespace MassTransit
         /// Configure the Entity Framework outbox on the receive endpoint
         /// </summary>
         /// <param name="configurator"></param>
+        /// <param name="context">Configuration service provider</param>
+        /// <param name="configure"></param>
+        public static void UseEntityFrameworkOutbox<TDbContext>(this IReceiveEndpointConfigurator configurator, IRegistrationContext context,
+            Action<IOutboxOptionsConfigurator>? configure = null)
+            where TDbContext : DbContext
+        {
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
+
+            var observer = new OutboxConsumePipeSpecificationObserver<TDbContext>(configurator, context);
+
+            configure?.Invoke(observer);
+
+            configurator.ConnectConsumerConfigurationObserver(observer);
+            configurator.ConnectSagaConfigurationObserver(observer);
+        }
+
+        [Obsolete(
+            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
+        /// <summary>
+        /// Configure the Entity Framework outbox on the receive endpoint
+        /// </summary>
+        /// <param name="configurator"></param>
         /// <param name="provider">Configuration service provider</param>
         /// <param name="configure"></param>
         public static void UseEntityFrameworkOutbox<TDbContext>(this IReceiveEndpointConfigurator configurator, IServiceProvider provider,
@@ -42,7 +68,7 @@ namespace MassTransit
             if (provider == null)
                 throw new ArgumentNullException(nameof(provider));
 
-            var observer = new OutboxConsumePipeSpecificationObserver<TDbContext>(configurator, provider);
+            var observer = new OutboxConsumePipeSpecificationObserver<TDbContext>(configurator, provider, LegacySetScopedConsumeContext.Instance);
 
             configure?.Invoke(observer);
 
@@ -86,10 +112,29 @@ namespace MassTransit
             return configurator;
         }
 
+        /// <summary>
+        /// Configure the outbox for use with SQLite
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <returns></returns>
+        public static IEntityFrameworkOutboxConfigurator UseSqlite(this IEntityFrameworkOutboxConfigurator configurator)
+        {
+            configurator.LockStatementProvider = new SqliteLockStatementProvider();
+
+            return configurator;
+        }
+
         public static void AddInboxStateEntity(this ModelBuilder modelBuilder, Action<EntityTypeBuilder<InboxState>>? callback = null)
         {
             EntityTypeBuilder<InboxState> inbox = modelBuilder.Entity<InboxState>();
 
+            inbox.ConfigureInboxStateEntity();
+
+            callback?.Invoke(inbox);
+        }
+
+        public static void ConfigureInboxStateEntity(this EntityTypeBuilder<InboxState> inbox)
+        {
             inbox.Property(p => p.Id);
             inbox.HasKey(p => p.Id);
 
@@ -115,14 +160,19 @@ namespace MassTransit
             inbox.HasIndex(p => p.Delivered);
 
             inbox.Property(p => p.LastSequenceNumber);
-
-            callback?.Invoke(inbox);
         }
 
         public static void AddOutboxStateEntity(this ModelBuilder modelBuilder, Action<EntityTypeBuilder<OutboxState>>? callback = null)
         {
             EntityTypeBuilder<OutboxState> outbox = modelBuilder.Entity<OutboxState>();
 
+            outbox.ConfigureOutboxStateEntity();
+
+            callback?.Invoke(outbox);
+        }
+
+        public static void ConfigureOutboxStateEntity(this EntityTypeBuilder<OutboxState> outbox)
+        {
             outbox.Property(p => p.OutboxId);
             outbox.HasKey(p => p.OutboxId);
 
@@ -135,14 +185,19 @@ namespace MassTransit
 
             outbox.Property(p => p.Delivered);
             outbox.Property(p => p.LastSequenceNumber);
-
-            callback?.Invoke(outbox);
         }
 
         public static void AddOutboxMessageEntity(this ModelBuilder modelBuilder, Action<EntityTypeBuilder<OutboxMessage>>? callback = null)
         {
             EntityTypeBuilder<OutboxMessage> outbox = modelBuilder.Entity<OutboxMessage>();
 
+            outbox.ConfigureOutboxMessageEntity();
+
+            callback?.Invoke(outbox);
+        }
+
+        public static void ConfigureOutboxMessageEntity(this EntityTypeBuilder<OutboxMessage> outbox)
+        {
             outbox.Property(p => p.SequenceNumber);
             outbox.HasKey(p => p.SequenceNumber);
 
@@ -188,10 +243,9 @@ namespace MassTransit
 
             outbox.Property(p => p.ContentType)
                 .HasMaxLength(256);
+            outbox.Property(p => p.MessageType);
 
             outbox.Property(p => p.Body);
-
-            callback?.Invoke(outbox);
         }
     }
 }

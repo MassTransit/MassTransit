@@ -138,15 +138,26 @@ namespace MassTransit.Configuration
             return turnoutOptions.Validate();
         }
 
-        public void ConfigureJobServiceEndpoints()
+        public void ConfigureJobServiceEndpoints(IRegistrationContext context = null)
         {
             if (_endpointsConfigured)
                 return;
 
+            void UseInMemoryOutbox(IReceiveEndpointConfigurator configurator)
+            {
+                if (context == null)
+            #pragma warning disable CS0618
+                    configurator.UseInMemoryOutbox();
+            #pragma warning restore CS0618
+                else
+                    configurator.UseInMemoryOutbox(context);
+            }
+
             _busConfigurator.ReceiveEndpoint(_options.JobStateSagaEndpointName, e =>
             {
                 e.UseMessageRetry(r => r.Intervals(100, 1000, 2000, 5000));
-                e.UseInMemoryOutbox();
+
+                UseInMemoryOutbox(e);
 
                 if (_options.SagaPartitionCount.HasValue)
                 {
@@ -186,7 +197,8 @@ namespace MassTransit.Configuration
             _busConfigurator.ReceiveEndpoint(_options.JobAttemptSagaEndpointName, e =>
             {
                 e.UseMessageRetry(r => r.Intervals(100, 1000, 2000, 5000));
-                e.UseInMemoryOutbox();
+
+                UseInMemoryOutbox(e);
 
                 if (_options.SagaPartitionCount.HasValue)
                 {
@@ -217,7 +229,8 @@ namespace MassTransit.Configuration
             _busConfigurator.ReceiveEndpoint(_options.JobTypeSagaEndpointName, e =>
             {
                 e.UseMessageRetry(r => r.Intervals(100, 200, 300, 500, 1000, 2000, 5000));
-                e.UseInMemoryOutbox();
+
+                UseInMemoryOutbox(e);
 
                 if (_options.SagaPartitionCount.HasValue)
                 {

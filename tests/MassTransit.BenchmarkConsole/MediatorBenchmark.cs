@@ -10,7 +10,7 @@ namespace MassTransit.BenchmarkConsole
 
 
     public class ExampleCommand :
-        IRequest
+        IRequest<Unit>
     {
         public ExampleCommand(string arg1, int arg2)
         {
@@ -37,7 +37,7 @@ namespace MassTransit.BenchmarkConsole
         public void Setup()
         {
             var services = new ServiceCollection();
-            services.AddMediatR(typeof(MediatorBenchmark));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<MediatorBenchmark>());
 
             _mediator = Bus.Factory.CreateMediator(cfg =>
             {
@@ -123,7 +123,7 @@ namespace MassTransit.BenchmarkConsole
 
 
     public class ExampleCommandHandler :
-        IRequestHandler<ExampleCommand>,
+        IRequestHandler<ExampleCommand, Unit>,
         IConsumer<ExampleCommand>
     {
         public Task Consume(ConsumeContext<ExampleCommand> context)

@@ -16,21 +16,21 @@ namespace MassTransit.Tests.SagaStateMachineTests
         {
             var sagaId = NewId.NextGuid();
 
-            await Bus.Publish(new Start {CorrelationId = sagaId});
+            await Bus.Publish(new Start { CorrelationId = sagaId });
 
             Guid? saga = await _repository.ShouldContainSaga(sagaId, TestTimeout);
             Assert.IsTrue(saga.HasValue);
 
             var handler = await ConnectPublishHandler<Suspend>();
 
-            await Bus.Publish(new Suspend {CorrelationId = sagaId});
+            await Bus.Publish(new Suspend { CorrelationId = sagaId });
 
             await handler;
 
             saga = await _repository.ShouldContainSagaInState(sagaId, _machine, x => x.Running, TestTimeout);
             Assert.IsTrue(saga.HasValue);
 
-            await Bus.Publish(new Stop() {CorrelationId = sagaId});
+            await Bus.Publish(new Stop() { CorrelationId = sagaId });
 
             saga = await _repository.ShouldContainSagaInState(sagaId, _machine, x => x.Final, TestTimeout);
             Assert.IsTrue(saga.HasValue);
@@ -42,7 +42,7 @@ namespace MassTransit.Tests.SagaStateMachineTests
         }
 
         readonly TestStateMachine _machine;
-        readonly InMemorySagaRepository<Instance> _repository;
+        readonly ISagaRepository<Instance> _repository;
 
         public Specifying_no_topology()
         {
@@ -79,9 +79,7 @@ namespace MassTransit.Tests.SagaStateMachineTests
                         .TransitionTo(Sus),
                     When(Stopped)
                         .Finalize());
-            }
-
-            // ReSharper disable UnassignedGetOnlyAutoProperty
+            } // ReSharper disable UnassignedGetOnlyAutoProperty
             public State Running { get; }
             public State Sus { get; }
 

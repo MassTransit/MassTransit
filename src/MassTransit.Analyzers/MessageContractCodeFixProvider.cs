@@ -1,5 +1,6 @@
 namespace MassTransit.Analyzers
 {
+    using System;
     using System.Collections.Generic;
     using System.Collections.Immutable;
     using System.Composition;
@@ -53,9 +54,9 @@ namespace MassTransit.Analyzers
         }
 
         static async Task<Document> AddMissingProperties(Document document,
-                                                         AnonymousObjectCreationExpressionSyntax anonymousObject,
-                                                         string fullType,
-                                                         CancellationToken cancellationToken)
+            AnonymousObjectCreationExpressionSyntax anonymousObject,
+            string fullType,
+            CancellationToken cancellationToken)
         {
             var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
             var semanticModel = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
@@ -92,7 +93,7 @@ namespace MassTransit.Analyzers
             {
                 var name = GetName(initializer);
 
-                var contractProperty = contractProperties.FirstOrDefault(p => p.Name == name);
+                var contractProperty = contractProperties.FirstOrDefault(m => m.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 
                 if (contractProperty != null)
                 {
@@ -122,9 +123,9 @@ namespace MassTransit.Analyzers
                     .ConfigureAwait(false);
             }
             else if (initializer.Expression is InvocationExpressionSyntax invocationExpressionSyntax
-                && semanticModel.GetSymbolInfo(invocationExpressionSyntax).Symbol is IMethodSymbol method
-                && method.ReturnType.IsList(out var methodReturnTypeArgument)
-                && methodReturnTypeArgument.IsAnonymousType)
+                     && semanticModel.GetSymbolInfo(invocationExpressionSyntax).Symbol is IMethodSymbol method
+                     && method.ReturnType.IsList(out var methodReturnTypeArgument)
+                     && methodReturnTypeArgument.IsAnonymousType)
             {
                 if (contractProperty.Type.IsImmutableArray(out var contractElementType) ||
                     contractProperty.Type.IsList(out contractElementType) ||
@@ -198,7 +199,8 @@ namespace MassTransit.Analyzers
             var propertiesToAdd = new List<AnonymousObjectMemberDeclaratorSyntax>();
             foreach (var messageContractProperty in contractProperties)
             {
-                var initializer = anonymousObject.Initializers.FirstOrDefault(i => GetName(i) == messageContractProperty.Name);
+                var initializer = anonymousObject.Initializers
+                    .FirstOrDefault(i => GetName(i).Equals(messageContractProperty.Name, StringComparison.OrdinalIgnoreCase));
                 if (initializer == null)
                 {
                     var path = Enumerable.Empty<ITypeSymbol>();
@@ -237,8 +239,8 @@ namespace MassTransit.Analyzers
             ExpressionSyntax expression;
 
             if (contractProperty.Type.IsImmutableArray(out var contractElementType) ||
-                    contractProperty.Type.IsList(out contractElementType) ||
-                    contractProperty.Type.IsArray(out contractElementType))
+                contractProperty.Type.IsList(out contractElementType) ||
+                contractProperty.Type.IsArray(out contractElementType))
             {
                 if (path.Contains(contractElementType, SymbolEqualityComparer.Default))
                     expression = CreateEmptyArray(contractElementType);
@@ -265,16 +267,16 @@ namespace MassTransit.Analyzers
         static ExpressionSyntax CreateEmptyArray(ITypeSymbol type)
         {
             return SyntaxFactory.InvocationExpression(
-                SyntaxFactory.MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    SyntaxFactory.IdentifierName("Array"),
-                    SyntaxFactory.GenericName(
-                        SyntaxFactory.Identifier("Empty"))
-                    .WithTypeArgumentList(
-                        SyntaxFactory.TypeArgumentList(
-                           SyntaxFactory.SingletonSeparatedList<TypeSyntax>(
-                                SyntaxFactory.IdentifierName(type.Name))))))
-            .NormalizeWhitespace();
+                    SyntaxFactory.MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        SyntaxFactory.IdentifierName("Array"),
+                        SyntaxFactory.GenericName(
+                                SyntaxFactory.Identifier("Empty"))
+                            .WithTypeArgumentList(
+                                SyntaxFactory.TypeArgumentList(
+                                    SyntaxFactory.SingletonSeparatedList<TypeSyntax>(
+                                        SyntaxFactory.IdentifierName(type.Name))))))
+                .NormalizeWhitespace();
         }
 
         static ImplicitArrayCreationExpressionSyntax CreateImplicitArray(ITypeSymbol type, IEnumerable<ITypeSymbol> path)

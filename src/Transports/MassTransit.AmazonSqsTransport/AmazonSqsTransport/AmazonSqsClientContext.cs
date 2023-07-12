@@ -141,11 +141,11 @@ namespace MassTransit.AmazonSqsTransport
             return new PublishRequest(topicInfo.Arn, body);
         }
 
-        public async Task Publish(PublishRequest request, CancellationToken cancellationToken)
+        public async Task Publish(string topicName, PublishBatchRequestEntry request, CancellationToken cancellationToken)
         {
-            var response = await _snsClient.PublishAsync(request, cancellationToken).ConfigureAwait(false);
+            var topicInfo = await ConnectionContext.GetTopicByName(topicName).ConfigureAwait(false);
 
-            response.EnsureSuccessfulResponse();
+            await topicInfo.Publish(request, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task SendMessage(string queueName, SendMessageBatchRequestEntry request, CancellationToken cancellationToken)

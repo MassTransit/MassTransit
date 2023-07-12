@@ -132,7 +132,7 @@ namespace MassTransit.Tests.Serialization
         protected T Return<T>(byte[] serializedMessageData)
             where T : class
         {
-            var message = new InMemoryTransportMessage(Guid.NewGuid(), serializedMessageData, Serializer.ContentType.MediaType, TypeCache<T>.ShortName);
+            var message = new InMemoryTransportMessage(Guid.NewGuid(), serializedMessageData, Serializer.ContentType.MediaType);
             var receiveContext = new InMemoryReceiveContext(message, TestConsumeContext.GetContext());
 
             var consumeContext = Deserializer.Deserialize(receiveContext);

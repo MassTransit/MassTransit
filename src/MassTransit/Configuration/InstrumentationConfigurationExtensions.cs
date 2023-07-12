@@ -1,9 +1,8 @@
 namespace MassTransit
 {
     using System;
-    using Metadata;
+    using Logging;
     using Monitoring;
-    using Monitoring.Configuration;
 
 
     public static class InstrumentationConfigurationExtensions
@@ -20,25 +19,16 @@ namespace MassTransit
         public static void UseInstrumentation(this IBusFactoryConfigurator configurator, Action<InstrumentationOptions> configureOptions = null,
             string serviceName = default)
         {
-            var options = InstrumentationOptions.CreateDefault();
+            var options = new InstrumentationOptions();
+            var configureDefault = new ConfigureDefaultInstrumentationOptions();
 
+            configureDefault.Configure(options);
             configureOptions?.Invoke(options);
 
-            Instrumentation.TryConfigure(GetServiceName(serviceName), options);
+            if (!string.IsNullOrWhiteSpace(serviceName))
+                options.ServiceName = serviceName;
 
-            configurator.ConnectConsumerConfigurationObserver(new InstrumentConsumerConfigurationObserver());
-            configurator.ConnectHandlerConfigurationObserver(new InstrumentHandlerConfigurationObserver());
-            configurator.ConnectSagaConfigurationObserver(new InstrumentSagaConfigurationObserver());
-            configurator.ConnectActivityConfigurationObserver(new InstrumentActivityConfigurationObserver());
-            configurator.ConnectEndpointConfigurationObserver(new InstrumentReceiveEndpointConfiguratorObserver());
-            configurator.ConnectBusObserver(new InstrumentBusObserver());
-        }
-
-        static string GetServiceName(string serviceName)
-        {
-            return string.IsNullOrWhiteSpace(serviceName)
-                ? HostMetadataCache.Host.ProcessName
-                : serviceName;
+            LogContextInstrumentationExtensions.TryConfigure(options);
         }
     }
 }

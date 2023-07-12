@@ -4,6 +4,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Azure.Messaging.EventHubs;
+    using Context;
     using Transports;
 
 
@@ -52,11 +53,10 @@
 
             try
             {
-                await _dispatcher.Dispatch(context).ConfigureAwait(false);
+                await _dispatcher.Dispatch(context, NoLockReceiveContext.Instance).ConfigureAwait(false);
             }
             finally
             {
-                // ReSharper disable once MethodHasAsyncOverload
                 registration.Dispose();
 
                 context.Dispose();

@@ -4,7 +4,7 @@
     <ServerGarbageCollection>true</ServerGarbageCollection>
     <AssemblyName>mtbench</AssemblyName>
     <RootNamespace>MassTransitBenchmark</RootNamespace>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
@@ -20,5 +20,6 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol"/>
   </ItemGroup>
 </Project>

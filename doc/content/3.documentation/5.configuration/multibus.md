@@ -25,19 +25,7 @@ services.AddMassTransit(x =>
 });
 ```
 
-This configures the container so that there is a bus, using RabbitMQ, with a single consumer _SubmitOrderConsumer_, using automatic endpoint configuration. The MassTransit hosted service, which configures the bus health checks and starts/stop the bus via `IHostedService`, is also added to the container.
-
-There are several interfaces added to the container using this configuration:
-
-| Interface                     | Lifestyle | Notes                                                                  |
-|:------------------------------|:----------|:-----------------------------------------------------------------------|
-| `IBusControl`                 | Singleton | Used to start/stop the bus (not typically used)                        |
-| `IBus`                        | Singleton | Publish/Send on this bus, starting a new conversation                  |
-| `ISendEndpointProvider`       | Scoped    | Send messages from consumer dependencies, ASP.NET Controllers          |
-| `IPublishEndpoint`            | Scoped    | Publish messages from consumer dependencies, ASP.NET Controllers       |
-| `IClientFactory`              | Singleton | Used to create request clients (singleton, or within scoped consumers) |
-| `IRequestClient<SubmitOrder>` | Scoped    | Used to send requests                                                  |
-| `ConsumeContext`              | Scoped    | Available in any message scope, such as a consumer, saga, or activity  |
+This configures the container so that there is a bus, using RabbitMQ, with a single consumer `SubmitOrderConsumer`, using automatic endpoint configuration. The MassTransit hosted service, which configures the bus health checks and starts/stop the bus via `IHostedService`, is also added to the container.
 
 When a consumer, a saga, or an activity is consuming a message the _ConsumeContext_ is available in the container scope. When the consumer is created using the container, the consumer and any dependencies are created within that scope. If a dependency includes _ISendEndpointProvider_, _IPublishEndpoint_, or even _ConsumeContext_ (should not be the first choice, but totally okay) on the constructor, all three of those interfaces result in the same reference which is great because it ensures that messages sent and/or published by the consumer or its dependencies includes the proper correlation identifiers and monitoring activity headers.
 
@@ -86,18 +74,7 @@ Notable differences in the new method:
 
 - The generic argument, _ISecondBus_, is the type that will be added to the container instead of _IBus_. This ensures that access to the additional bus is directly available without confusion.
 
-The registered interfaces are slightly different for additional bus instances.
-
-| Interface                     | Lifestyle | Notes                                                                   |
-|:------------------------------|:----------|:------------------------------------------------------------------------|
-| `IBusControl`                 | N/A       | Not registered, but automatically started/stopped by the hosted service |
-| `IBus`                        | N/A       | Not registered, the new bus interface is registered instead             |
-| `ISecondBus`                  | Singleton | Publish/Send on this bus, starting a new conversation                   |
-| `ISendEndpointProvider`       | Scoped    | Send messages from consumer dependencies only                           |
-| `IPublishEndpoint`            | Scoped    | Publish messages from consumer dependencies only                        |
-| `IClientFactory`              | N/A       | Registered as an instance-specific client factory                       |
-| `IRequestClient<SubmitOrder>` | Scoped    | Created using the specific bus instance                                 |
-| `ConsumeContext`              | Scoped    | Available in any message scope, such as a consumer, saga, or activity   |
+## Using your MultiBus
 
 For consumers or dependencies that need to send or publish messages to a different bus instance, a dependency on that specific bus interface (such as _IBus_, or _ISecondBus_) would be added.
 
@@ -105,7 +82,44 @@ For consumers or dependencies that need to send or publish messages to a differe
 Some things do not work across bus instances. As stated above, calling Send or Publish on an IBus (or other bus instance interface) starts a new conversation. Middleware components such as the _InMemoryOutbox_ currently do not buffer messages across bus instances.
 ::
 
-### Bus Interface Types
+### Controller
+
+```csharp
+[ApiController]
+[Route("/inventory")]
+public class InventoryController : ControllerBase
+{
+    readonly Bind<ISecondBus, IPublishEndpoint> _publishEndpoint;
+
+    public InventoryController(Bind<ISecondBus, IPublishEndpoint> publishEndpoint)
+    {
+        _publishEndpoint = publishEndpoint;
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Post() 
+    {
+        // .. do stuff
+    }
+}
+```
+
+### Razor Page
+
+```csharp
+public class InventoryPage : PageModel
+{
+    public void OnPost([FromServices] Bind<ISecondBus, IPublishEndpoint> publishEndpoint)
+    {
+        await publishEndpoint.Value.Publish<AllocateInventory>(new 
+        {
+            SomeData = { }
+        })
+    }
+}
+```
+
+## Advanced Bus Types
 
 In the example above, which should be the most common of this hopefully uncommon use, the _ISecondBus_ interface is all that is required. MassTransit creates a dynamic class to delegate the `IBus` methods to the bus instance. However, it is possible to specify a class that implements _ISecondBus_ instead.
 
@@ -150,3 +164,42 @@ This would add a third bus instance, the same as the second, but using the insta
 
 
 
+## Container Registration Details
+
+To support a first class experience with `Microsoft.Extensions.DependencyInjection` MassTransit registers common interfaces
+for MultiBus instances using a `Bind<TKey, TValue>` that allows you to specify the owner of the type you are interested in. This
+allows you to access various pieces of MassTransit outside of a Consumer. Below are two tables that list out the various items 
+you might be interested in.
+
+### First Bus
+
+There are several interfaces added to the container using this configuration:
+
+| Interface                     | Lifestyle | Notes                                                                  |
+|:------------------------------|:----------|:-----------------------------------------------------------------------|
+| `IBusControl`                 | Singleton | Used to start/stop the bus (not typically used)                        |
+| `IBus`                        | Singleton | Publish/Send on this bus, starting a new conversation                  |
+| `ISendEndpointProvider`       | Scoped    | Send messages from consumer dependencies, ASP.NET Controllers          |
+| `IPublishEndpoint`            | Scoped    | Publish messages from consumer dependencies, ASP.NET Controllers       |
+| `IClientFactory`              | Singleton | Used to create request clients (singleton, or within scoped consumers) |
+| `IRequestClient<SubmitOrder>` | Scoped    | Used to send requests                                                  |
+| `ConsumeContext`              | Scoped    | Available in any message scope, such as a consumer, saga, or activity  |
+
+### Multibus
+
+The registered interfaces are slightly different for additional bus instances.
+
+| Interface                     | Lifestyle | Notes                                                                   |
+|:------------------------------|:----------|:------------------------------------------------------------------------|
+| `IBusControl`                 | N/A       | Not registered, but automatically started/stopped by the hosted service |
+| ~~`IBus`~~                        | N/A       | Not registered, the new bus interface is registered instead             |
+| `ISecondBus`                  | Singleton | Publish/Send on this bus, starting a new conversation                   |
+| `ISendEndpointProvider`       | Scoped    | Send messages from consumer dependencies only                           |
+| `IPublishEndpoint`            | Scoped    | Publish messages from consumer dependencies only                        |
+| `IClientFactory`              | N/A       | Registered as an instance-specific client factory                       |
+| `IRequestClient<SubmitOrder>` | Scoped    | Created using the specific bus instance                                 |
+| `ConsumeContext`              | Scoped    | Available in any message scope, such as a consumer, saga, or activity   |
+| `Bind<ISecondBus, ISendEndpointProvider>`  | Scoped    | Send messages from controllers or outside of a consumer context |
+| `Bind<ISecondBus, IPublishEndpoint>`  | Scoped    | Publish messages from controllers or outside of a consumer context |
+| `Bind<ISecondBus, IClientFactory>`  | Scoped    | Registered as an instance-specific client factory |
+| `Bind<ISecondBus, IRequestClient<SubmitOrder>>`  | Scoped    | Created using the bound bus instance |

@@ -10,21 +10,21 @@ namespace MassTransit.AzureServiceBusTransport.Middleware
     public class MessageReceiverFilter :
         IFilter<ClientContext>
     {
-        readonly ServiceBusReceiveEndpointContext _context;
-        readonly IServiceBusMessageReceiver _messageReceiver;
         readonly IReceiveTransportObserver _transportObserver;
+        protected readonly ServiceBusReceiveEndpointContext Context;
 
-        public MessageReceiverFilter(IServiceBusMessageReceiver messageReceiver, ServiceBusReceiveEndpointContext context)
+        public MessageReceiverFilter(ServiceBusReceiveEndpointContext context)
         {
-            _messageReceiver = messageReceiver;
             _transportObserver = context.TransportObservers;
-            _context = context;
+            Context = context;
         }
 
-        void IProbeSite.Probe(ProbeContext context)
+        public virtual void Probe(ProbeContext context)
         {
             var scope = context.CreateFilterScope("messageReceiver");
-            _messageReceiver.Probe(scope);
+            scope.Add("type", "brokeredMessage");
+
+            Context.ReceivePipe.Probe(scope);
         }
 
         async Task IFilter<ClientContext>.Send(ClientContext context, IPipe<ClientContext> next)
@@ -32,15 +32,15 @@ namespace MassTransit.AzureServiceBusTransport.Middleware
             if (context.IsClosedOrClosing)
                 return;
 
-            var receiver = CreateMessageReceiver(context, _messageReceiver);
+            var receiver = CreateMessageReceiver(context);
 
-            await receiver.Start().ConfigureAwait(false);
+            receiver.Start();
 
             await receiver.Ready.ConfigureAwait(false);
 
-            _context.AddConsumeAgent(receiver);
+            Context.AddConsumeAgent(receiver);
 
-            await _transportObserver.NotifyReady(_context.InputAddress).ConfigureAwait(false);
+            await _transportObserver.NotifyReady(Context.InputAddress).ConfigureAwait(false);
 
             try
             {
@@ -48,19 +48,19 @@ namespace MassTransit.AzureServiceBusTransport.Middleware
             }
             finally
             {
-                var metrics = receiver.GetDeliveryMetrics();
+                DeliveryMetrics metrics = receiver;
 
-                await _transportObserver.NotifyCompleted(_context.InputAddress, metrics).ConfigureAwait(false);
+                await _transportObserver.NotifyCompleted(Context.InputAddress, metrics).ConfigureAwait(false);
 
-                _context.LogConsumerCompleted(metrics.DeliveryCount, metrics.ConcurrentDeliveryCount);
+                Context.LogConsumerCompleted(metrics.DeliveryCount, metrics.ConcurrentDeliveryCount);
             }
 
             await next.Send(context).ConfigureAwait(false);
         }
 
-        protected virtual IReceiver CreateMessageReceiver(ClientContext context, IServiceBusMessageReceiver messageReceiver)
+        protected virtual IReceiver CreateMessageReceiver(ClientContext context)
         {
-            return new Receiver(context, messageReceiver);
+            return new Receiver(context, Context);
         }
     }
 }

@@ -41,5 +41,13 @@ namespace MassTransit.Serialization
                 || SupportedMessageTypes.Length == 0
                 || SupportedMessageTypes.Any(x => typeUrn.Equals(x, StringComparison.OrdinalIgnoreCase));
         }
+
+        public override IMessageSerializer GetMessageSerializer(object message, string[] messageTypes)
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            return new SystemTextJsonBodyMessageSerializer(message, ContentType, Options, _rawOptions);
+        }
     }
 }

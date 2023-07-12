@@ -32,48 +32,35 @@ namespace MassTransit.RabbitMqTransport
         {
             base.ReadPropertiesFrom(properties);
 
-            Exchange = ReadString(properties, PropertyNames.Exchange, Exchange);
-            RoutingKey = ReadString(properties, PropertyNames.RoutingKey, "");
+            Exchange = ReadString(properties, RabbitMqTransportPropertyNames.Exchange, Exchange);
+            RoutingKey = ReadString(properties, RabbitMqTransportPropertyNames.RoutingKey, "");
 
-            BasicProperties.AppId = ReadString(properties, PropertyNames.AppId);
-            BasicProperties.Priority = ReadByte(properties, PropertyNames.Priority);
-            BasicProperties.ReplyTo = ReadString(properties, PropertyNames.ReplyTo);
-            BasicProperties.Type = ReadString(properties, PropertyNames.Type);
-            BasicProperties.UserId = ReadString(properties, PropertyNames.UserId);
+            BasicProperties.AppId = ReadString(properties, RabbitMqTransportPropertyNames.AppId);
+            BasicProperties.Priority = ReadByte(properties, RabbitMqTransportPropertyNames.Priority);
+            BasicProperties.ReplyTo = ReadString(properties, RabbitMqTransportPropertyNames.ReplyTo);
+            BasicProperties.Type = ReadString(properties, RabbitMqTransportPropertyNames.Type);
+            BasicProperties.UserId = ReadString(properties, RabbitMqTransportPropertyNames.UserId);
         }
 
         public override void WritePropertiesTo(IDictionary<string, object> properties)
         {
             base.WritePropertiesTo(properties);
 
-            properties[PropertyNames.Exchange] = Exchange;
+            properties[RabbitMqTransportPropertyNames.Exchange] = Exchange;
 
             if (!string.IsNullOrWhiteSpace(RoutingKey))
-                properties[PropertyNames.RoutingKey] = RoutingKey;
+                properties[RabbitMqTransportPropertyNames.RoutingKey] = RoutingKey;
 
             if (BasicProperties.IsAppIdPresent())
-                properties[PropertyNames.AppId] = BasicProperties.AppId;
+                properties[RabbitMqTransportPropertyNames.AppId] = BasicProperties.AppId;
             if (BasicProperties.IsPriorityPresent())
-                properties[PropertyNames.Priority] = BasicProperties.Priority;
+                properties[RabbitMqTransportPropertyNames.Priority] = BasicProperties.Priority;
             if (BasicProperties.IsReplyToPresent())
-                properties[PropertyNames.ReplyTo] = BasicProperties.ReplyTo;
+                properties[RabbitMqTransportPropertyNames.ReplyTo] = BasicProperties.ReplyTo;
             if (BasicProperties.IsTypePresent())
-                properties[PropertyNames.Type] = BasicProperties.Type;
+                properties[RabbitMqTransportPropertyNames.Type] = BasicProperties.Type;
             if (BasicProperties.IsUserIdPresent())
-                properties[PropertyNames.UserId] = BasicProperties.UserId;
-        }
-
-
-        static class PropertyNames
-        {
-            public const string Exchange = "RMQ-Exchange";
-            public const string RoutingKey = "RMQ-RoutingKey";
-
-            public const string AppId = "RMQ-AppId";
-            public const string Priority = "RMQ-Priority";
-            public const string ReplyTo = "RMQ-ReplyTo";
-            public const string Type = "RMQ-Type";
-            public const string UserId = "RMQ-UserId";
+                properties[RabbitMqTransportPropertyNames.UserId] = BasicProperties.UserId;
         }
     }
 }

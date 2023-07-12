@@ -123,7 +123,7 @@ namespace MassTransit.ActiveMqTransport
                     transportMessage.Properties["AMQ_SCHEDULED_DELAY"] = (long)delay.Value;
             }
 
-            var publishTask = Task.Run(() => producer.Send(transportMessage), context.CancellationToken);
+            var publishTask = producer.SendAsync(transportMessage);
 
             await publishTask.OrCanceled(context.CancellationToken).ConfigureAwait(false);
         }

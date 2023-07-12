@@ -2,6 +2,7 @@ namespace MassTransit.Middleware
 {
     using System.Threading.Tasks;
     using DependencyInjection;
+    using Metadata;
 
 
     public class ScopedConsumeFilter<T, TFilter> :
@@ -28,6 +29,7 @@ namespace MassTransit.Middleware
         public void Probe(ProbeContext context)
         {
             var scope = context.CreateFilterScope("scopedFilter");
+            scope.Add("filter", TypeMetadataCache<TFilter>.ShortName);
 
             _scopeProvider.Probe(scope);
         }

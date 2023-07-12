@@ -39,28 +39,28 @@ namespace MassTransit.DependencyInjection.Registration
                 _configureActions.Add(action);
         }
 
-        public void Configure(IReceiveEndpointConfigurator configurator, IServiceProvider provider)
+        public void Configure(IReceiveEndpointConfigurator configurator, IRegistrationContext context)
         {
-            var stateMachine = provider.GetRequiredService<SagaStateMachine<TInstance>>();
-            var repository = provider.GetRequiredService<ISagaRepository<TInstance>>();
+            var stateMachine = context.GetRequiredService<SagaStateMachine<TInstance>>();
+            ISagaRepository<TInstance> repository = new DependencyInjectionSagaRepository<TInstance>(context);
 
-            var decoratorRegistration = provider.GetService<ISagaRepositoryDecoratorRegistration<TInstance>>();
+            var decoratorRegistration = context.GetService<ISagaRepositoryDecoratorRegistration<TInstance>>();
             if (decoratorRegistration != null)
                 repository = decoratorRegistration.DecorateSagaRepository(repository);
 
             var stateMachineConfigurator = new StateMachineSagaConfigurator<TInstance>(stateMachine, repository, configurator);
 
-            GetSagaDefinition(provider)
-                .Configure(configurator, stateMachineConfigurator);
+            GetSagaDefinition(context)
+                .Configure(configurator, stateMachineConfigurator, context);
 
             foreach (Action<ISagaConfigurator<TInstance>> action in _configureActions)
                 action(stateMachineConfigurator);
 
-            IEnumerable<IEventObserver<TInstance>> eventObservers = provider.GetServices<IEventObserver<TInstance>>();
+            IEnumerable<IEventObserver<TInstance>> eventObservers = context.GetServices<IEventObserver<TInstance>>();
             foreach (IEventObserver<TInstance> eventObserver in eventObservers)
                 stateMachine.ConnectEventObserver(eventObserver);
 
-            IEnumerable<IStateObserver<TInstance>> stateObservers = provider.GetServices<IStateObserver<TInstance>>();
+            IEnumerable<IStateObserver<TInstance>> stateObservers = context.GetServices<IStateObserver<TInstance>>();
             foreach (IStateObserver<TInstance> stateObserver in stateObservers)
                 stateMachine.ConnectStateObserver(stateObserver);
 
@@ -73,9 +73,9 @@ namespace MassTransit.DependencyInjection.Registration
             IncludeInConfigureEndpoints = false;
         }
 
-        ISagaDefinition ISagaRegistration.GetDefinition(IServiceProvider provider)
+        ISagaDefinition ISagaRegistration.GetDefinition(IRegistrationContext context)
         {
-            return GetSagaDefinition(provider);
+            return GetSagaDefinition(context);
         }
 
         ISagaDefinition<TInstance> GetSagaDefinition(IServiceProvider provider)

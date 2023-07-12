@@ -7,6 +7,7 @@ namespace MassTransit
     using System.IO;
     using System.Linq;
     using Configuration;
+    using DependencyInjection;
     using DependencyInjection.Registration;
     using DependencyInjection.Testing;
     using Internals;
@@ -60,6 +61,8 @@ namespace MassTransit
             {
                 options.WaitUntilStarted = true;
             });
+
+            services.TryAddSingleton<IValidateOptions<MassTransitHostOptions>, ValidateMassTransitHostOptions>();
 
             // If the bus was already configured, well, let's use it and any existing registrations
             if (services.Any(d => d.ServiceType == typeof(IBus)))
@@ -196,6 +199,8 @@ namespace MassTransit
         /// <summary>
         /// Add the In-Memory test harness to the container, and configure it using the callback specified.
         /// </summary>
+        [Obsolete(
+            "This method is deprecated, use AddMassTransitTestHarness instead. For more information, see https://masstransit.io/documentation/concepts/testing")]
         public static IServiceCollection AddMassTransitInMemoryTestHarness(this IServiceCollection services,
             Action<IBusRegistrationConfigurator>? configure = null)
         {

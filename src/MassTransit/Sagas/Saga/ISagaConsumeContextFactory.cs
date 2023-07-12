@@ -4,7 +4,7 @@ namespace MassTransit.Saga
 
 
     /// <summary>
-    /// Creates the <see cref="SagaConsumeContext{TSaga,T}" /> as needed by the <see cref="SagaRepositoryContext{TSaga}" />.
+    /// Creates the <see cref="SagaConsumeContext{TSaga,T}" /> as needed by the <see cref="QuerySagaRepositoryContext{TSaga}" />.
     /// </summary>
     /// <typeparam name="TContext"></typeparam>
     /// <typeparam name="TSaga"></typeparam>
@@ -15,7 +15,7 @@ namespace MassTransit.Saga
         /// <summary>
         /// Create a new <see cref="SagaConsumeContext{TSaga,T}" />.
         /// </summary>
-        /// <param name="context">The <see cref="SagaRepositoryContext{TSaga}" /></param>
+        /// <param name="context">The <see cref="QuerySagaRepositoryContext{TSaga}" /></param>
         /// <param name="consumeContext">The message consume context being delivered to the saga</param>
         /// <param name="instance">The saga instance</param>
         /// <param name="mode">The creation mode of the saga instance</param>
@@ -28,7 +28,7 @@ namespace MassTransit.Saga
 
 
     /// <summary>
-    /// Creates the <see cref="SagaConsumeContext{TSaga,T}" /> as needed by the <see cref="SagaRepositoryContext{TSaga}" />.
+    /// Creates the <see cref="SagaConsumeContext{TSaga,T}" /> as needed by the <see cref="QuerySagaRepositoryContext{TSaga}" />.
     /// </summary>
     /// <typeparam name="TSaga"></typeparam>
     public interface ISagaConsumeContextFactory<TSaga>

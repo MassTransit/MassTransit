@@ -8,8 +8,6 @@ namespace MassTransit.PrometheusIntegration.Tests
     using Prometheus;
     using TestFramework;
     using TestFramework.Messages;
-    using Testing;
-    using Testing.Implementations;
 
 
     [TestFixture]
@@ -29,9 +27,9 @@ namespace MassTransit.PrometheusIntegration.Tests
             await Bus.Publish(new PingMessage());
             await Bus.Publish(new PingMessage());
 
-            await Bus.Publish<GenericMessage<LongMessage>>(new {Message = new LongMessage()});
+            await Bus.Publish<GenericMessage<LongMessage>>(new { Message = new LongMessage() });
 
-            await _activityMonitor.AwaitBusInactivity(TestCancellationToken);
+            await InactivityTask;
 
             using var stream = new MemoryStream();
             await Metrics.DefaultRegistry.CollectAndExportAsTextAsync(stream);
@@ -46,16 +44,9 @@ namespace MassTransit.PrometheusIntegration.Tests
             Assert.That(text.Contains("mt_consume_total{service_name=\"unit_test\",message_type=\"PingMessage\",consumer_type=\"TestConsumer\"} 8"), "consume");
         }
 
-        IBusActivityMonitor _activityMonitor;
-
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.UsePrometheusMetrics(serviceName: "unit_test");
-        }
-
-        protected override void ConnectObservers(IBus bus)
-        {
-            _activityMonitor = bus.CreateBusActivityMonitor(TimeSpan.FromMilliseconds(500));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

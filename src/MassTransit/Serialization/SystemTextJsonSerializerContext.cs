@@ -3,6 +3,7 @@ namespace MassTransit.Serialization
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Net.Mime;
     using System.Text.Json;
     using System.Text.Json.Nodes;
@@ -54,7 +55,7 @@ namespace MassTransit.Serialization
             return false;
         }
 
-        public override bool TryGetMessage(Type messageType, out object? message)
+        public override bool TryGetMessage(Type messageType, [NotNullWhen(true)] out object? message)
         {
             var jsonElement = GetJsonElement(Message);
 

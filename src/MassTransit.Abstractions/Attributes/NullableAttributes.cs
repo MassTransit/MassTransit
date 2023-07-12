@@ -1,4 +1,5 @@
-namespace MassTransit
+#if !NET6_0_OR_GREATER && !NETSTANDARD2_1
+namespace System.Diagnostics.CodeAnalysis
 {
     using System;
 
@@ -20,3 +21,4 @@ namespace MassTransit
         public bool ReturnValue { get; }
     }
 }
+#endif

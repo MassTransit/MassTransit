@@ -1,6 +1,7 @@
 namespace MassTransit.Transports
 {
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
 
 
     /// <summary>

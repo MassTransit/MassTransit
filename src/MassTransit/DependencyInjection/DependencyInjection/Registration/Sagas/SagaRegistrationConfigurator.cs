@@ -37,7 +37,7 @@ namespace MassTransit.DependencyInjection.Registration
 
             configure?.Invoke(configurator);
 
-            _configurator.AddEndpoint<SagaEndpointDefinition<TSaga>, TSaga>(configurator.Settings);
+            _configurator.AddEndpoint<SagaEndpointDefinition<TSaga>, TSaga>(_registration, configurator.Settings);
 
             return this;
         }

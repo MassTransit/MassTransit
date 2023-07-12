@@ -58,5 +58,10 @@ namespace MassTransit
         {
             _bits |= flag;
         }
+
+        public bool IsSet(int flag)
+        {
+            return (_bits & flag) == flag;
+        }
     }
 }

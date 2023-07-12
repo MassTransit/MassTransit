@@ -1,12 +1,7 @@
 namespace MassTransit.Azure.ServiceBus.Core.Tests
 {
-    using System;
-    using System.Reflection;
     using System.Threading.Tasks;
-    using AzureServiceBusTransport;
     using FunctionComponents;
-    using global::Azure.Core.Amqp;
-    using global::Azure.Messaging.ServiceBus;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
     using TestFramework;
@@ -20,11 +15,12 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         public async Task Should_retry_if_configured()
         {
             await using var provider = new ServiceCollection()
-                .AddSingleton<IAsyncBusHandle, AsyncBusHandle>()
-                .AddSingleton<IMessageReceiver, MessageReceiver>()
                 .AddMassTransitTestHarness(x =>
                 {
+                    x.AddAzureFunctionsTestComponents();
+
                     x.AddConsumer<FaultyFunctionConsumer, FaultyFunctionConsumerDefinition>();
+
                     x.UsingTestAzureServiceBus((context, cfg) =>
                     {
                         cfg.UseRawJsonDeserializer(isDefault: true);
@@ -34,19 +30,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
             var harness = provider.GetTestHarness();
 
-            var receiver = provider.GetRequiredService<IMessageReceiver>();
-
-            var messageBody = new AmqpMessageBody(new[] { new BinaryData("{}").ToMemory() });
-            var annotatedMessage = new AmqpAnnotatedMessage(messageBody);
-            annotatedMessage.Header.DeliveryCount = 1;
-            annotatedMessage.Properties.MessageId = new AmqpMessageId(NewId.NextGuid().ToString());
-            annotatedMessage.Properties.ContentType = "application/json";
-
-            var message = (ServiceBusReceivedMessage)typeof(ServiceBusReceivedMessage).GetConstructor(
-                BindingFlags.NonPublic | BindingFlags.Instance,
-                null, new[] { typeof(AmqpAnnotatedMessage) }, null).Invoke(new object[] { annotatedMessage });
-
-            Assert.That(async () => await receiver.HandleConsumer<FaultyFunctionConsumer>("input-queue", message, harness.CancellationToken),
+            Assert.That(async () => await harness.HandleConsumer<FaultyFunctionConsumer>(new FunctionMessage()),
                 Throws.TypeOf<IntentionalTestException>());
 
             IConsumerTestHarness<FaultyFunctionConsumer> consumerHarness = harness.GetConsumerHarness<FaultyFunctionConsumer>();
@@ -60,6 +44,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
     namespace FunctionComponents
     {
+        using System;
+
+
         public class FunctionMessage
         {
         }

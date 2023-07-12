@@ -3,6 +3,7 @@ namespace MassTransit.Serialization
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
 
 
@@ -69,7 +70,7 @@ namespace MassTransit.Serialization
         public abstract bool TryGetMessage<T>(out T? message)
             where T : class;
 
-        public abstract bool TryGetMessage(Type messageType, out object? message);
+        public abstract bool TryGetMessage(Type messageType, [NotNullWhen(true)] out object? message);
 
         public abstract IMessageSerializer GetMessageSerializer();
 

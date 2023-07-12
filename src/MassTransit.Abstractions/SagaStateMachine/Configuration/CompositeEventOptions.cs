@@ -16,6 +16,11 @@
         /// <summary>
         /// Include the composite event in the final state
         /// </summary>
-        IncludeFinal = 2
+        IncludeFinal = 2,
+
+        /// <summary>
+        /// Specifies that the composite event should only be raised once and ignore any subsequent events
+        /// </summary>
+        RaiseOnce = 4,
     }
 }

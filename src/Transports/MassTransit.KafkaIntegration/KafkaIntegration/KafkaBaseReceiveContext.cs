@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.KafkaIntegration
 {
     using System;
-    using System.Threading.Tasks;
     using Confluent.Kafka;
     using Serialization;
     using Transports;
@@ -9,23 +8,21 @@
 
     public sealed class KafkaReceiveContext<TKey, TValue> :
         BaseReceiveContext,
-        KafkaConsumeContext<TKey>,
-        ReceiveLockContext
+        KafkaConsumeContext<TKey>
         where TValue : class
     {
         readonly KafkaReceiveEndpointContext<TKey, TValue> _context;
-        readonly Lazy<TKey> _key;
-        readonly IConsumerLockContext _lockContext;
-        readonly ConsumeResult<byte[], byte[]> _result;
         readonly Lazy<IHeaderProvider> _headerProvider;
+        readonly Lazy<TKey> _key;
+        readonly ConsumeResult<byte[], byte[]> _result;
 
-        public KafkaReceiveContext(ConsumeResult<byte[], byte[]> result, KafkaReceiveEndpointContext<TKey, TValue> context, IConsumerLockContext lockContext)
+        public KafkaReceiveContext(ConsumeResult<byte[], byte[]> result, KafkaReceiveEndpointContext<TKey, TValue> context)
             : base(false, context)
         {
             _result = result;
             _context = context;
-            _lockContext = lockContext;
 
+            Body = new BytesMessageBody(_result.Message.Value);
             InputAddress = context.GetInputAddress(_result.Topic);
 
             _key = new Lazy<TKey>(() => _context.KeyDeserializer.DeserializeKey(result));
@@ -42,7 +39,7 @@
 
         protected override IHeaderProvider HeaderProvider => _headerProvider.Value;
 
-        public override MessageBody Body => new NotSupportedMessageBody();
+        public override MessageBody Body { get; }
 
         public string GroupId => _context.GroupId;
 
@@ -55,20 +52,5 @@
         public long Offset => _result.Offset;
 
         public DateTime CheckpointUtcDateTime => _result.Message.Timestamp.UtcDateTime;
-
-        public Task Complete()
-        {
-            return _lockContext.Complete(_result);
-        }
-
-        public Task Faulted(Exception exception)
-        {
-            return _lockContext.Faulted(_result, exception);
-        }
-
-        public Task ValidateLockStatus()
-        {
-            return Task.CompletedTask;
-        }
     }
 }

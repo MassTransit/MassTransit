@@ -132,9 +132,12 @@
 
         public Task BasicAck(ulong deliveryTag, bool multiple)
         {
-            return _model.IsClosed
-                ? TaskUtil.Faulted<bool>(new InvalidOperationException($"The channel was closed: {_model.CloseReason} {_model.ChannelNumber}"))
-                : _executor.Run(() => _model.BasicAck(deliveryTag, multiple), CancellationToken);
+            if (_model.IsClosed)
+                return TaskUtil.Faulted<bool>(new InvalidOperationException($"The channel was closed: {_model.CloseReason} {_model.ChannelNumber}"));
+
+            _model.BasicAck(deliveryTag, multiple);
+
+            return Task.CompletedTask;
         }
 
         public async Task BasicNack(ulong deliveryTag, bool multiple, bool requeue)
@@ -144,7 +147,7 @@
 
             try
             {
-                await _executor.Run(() => _model.BasicNack(deliveryTag, multiple, requeue), CancellationToken).ConfigureAwait(false);
+                _model.BasicNack(deliveryTag, multiple, requeue);
             }
             catch (ChannelClosedException) // if we are shutting down, the broker would already nack prefetched messages anyway
             {

@@ -16,7 +16,7 @@ namespace MassTransit.DynamoDbIntegration.Saga
 
             var repositoryContextFactory = new DynamoDbSagaRepositoryContextFactory<TSaga>(dynamoDbFactory, consumeContextFactory, options);
 
-            return new SagaRepository<TSaga>(repositoryContextFactory);
+            return new SagaRepository<TSaga>(repositoryContextFactory, loadSagaRepositoryContextFactory: repositoryContextFactory);
         }
     }
 }

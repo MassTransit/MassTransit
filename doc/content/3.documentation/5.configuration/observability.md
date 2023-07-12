@@ -8,95 +8,264 @@ OpenTelemetry is an open-source standard for distributed tracing, which allows y
 
 By using OpenTelemetry with MassTransit, you can gain insights into the performance of your systems, which can help you to identify and troubleshoot issues, and to improve the overall performance of your application.
 
+There is a good set of examples [opentelemetry-dotnet](https://github.com/open-telemetry/opentelemetry-dotnet/tree/main/examples) how it can be used for different cases
 
-### Application Insights
-
-Application Insights (part of Azure Monitor) is able to capture and record metrics from MassTransit. It can also be configured as a log sink for logging.
-
-[Create an Application Insights resource](https://docs.microsoft.com/en-us/azure/application-insights/app-insights-create-new-resource#create-an-application-insights-resource-1)
-
-[Copy the instrumentation key](https://docs.microsoft.com/en-us/azure/application-insights/app-insights-create-new-resource#copy-the-instrumentation-key)
-
-To configure an application to use Application Insights with MassTransit:
-
-> Requires NuGets `MassTransit`, `Microsoft.ApplicationInsights.DependencyCollector`
->
-> (for logging, add `Microsoft.Extensions.Logging.ApplicationInsights`)
+#### Tracing
+##### ASP.NET Core application
+This example is using following packages:
+- `OpenTelemetry.Extensions.Hosting`
+- `OpenTelemetry.Exporter.Console`
 
 ```csharp
-using System;
-using System.Reflection;
-using System.Threading.Tasks;
-using MassTransit;
+var builder = WebApplication.CreateBuilder(args);
 
-namespace Example
+void ConfigureResource(ResourceBuilder r)
 {
-    public class MyMessageConsumerConsumer : 
-        MassTransit.IConsumer<MyMessage>
-    {
-        public async Task Consume(ConsumeContext<MyMessage> context)
-        {
-             await Console.Out.WriteLineAsync($"Received: {context.Message.Value}");
-        }
-    }
-
-    // Message Definition
-    public class MyMessage
-    {
-        public string Value { get; set; }
-    }
-
-    public class Program
-    {
-        public static async Task Main(string[] args)
-        {
-            var module = new DependencyTrackingTelemetryModule();
-            module.IncludeDiagnosticSourceActivities.Add("MassTransit");
-
-            TelemetryConfiguration configuration = TelemetryConfiguration.CreateDefault();
-            configuration.InstrumentationKey = "<your instrumentation key>";
-            configuration.TelemetryInitializers.Add(new HttpDependenciesParsingTelemetryInitializer());
-
-            var telemetryClient = new TelemetryClient(configuration);
-            module.Initialize(configuration);
-
-            var loggerOptions = new ApplicationInsightsLoggerOptions();
-
-            var applicationInsightsLoggerProvider = new ApplicationInsightsLoggerProvider(Options.Create(configuration),
-                Options.Create(loggerOptions));
-
-            ILoggerFactory factory = new LoggerFactory();
-            factory.AddProvider(applicationInsightsLoggerProvider);
-
-            LogContext.ConfigureCurrentLogContext(factory);
-
-            var busControl = Bus.Factory.CreateUsingInMemory(cfg =>
-            {
-                cfg.ReceiveEndpoint("my_queue", ec =>
-                {
-                    ec.Consumer<MyMessageConsumer>();
-                });
-            });
-
-            using(busControl.StartAsync())
-            {
-                await busControl.Publish(new MyMessage{Value = "Hello, World."});
-
-                await Task.Run(() => Console.ReadLine());
-            }
-
-            module.Dispose();
-
-            telemetryClient.Flush();
-            await Task.Delay(5000);
-
-            configuration.Dispose();
-        }
-    }
+    r.AddService("Service Name",
+        serviceVersion: "Version",
+        serviceInstanceId: Environment.MachineName);
 }
+
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(ConfigureResource)
+    .WithTracing(b => b
+        .AddSource(DiagnosticHeaders.DefaultListenerName) // MassTransit ActivitySource
+        .AddConsoleExporter() // Any OTEL suportable exporter can be used here
+    );
 ```
 
+##### Console application
+This example is using following packages:
+- `OpenTelemetry`
+- `OpenTelemetry.Exporter.Console`
+
+```csharp
+void ConfigureResource(ResourceBuilder r)
+{
+    r.AddService("Service Name",
+        serviceVersion: "Version",
+        serviceInstanceId: Environment.MachineName);
+}
+
+Sdk.CreateTracerProviderBuilder()
+    .ConfigureResource(ConfigureResource)
+    .AddSource(DiagnosticHeaders.DefaultListenerName) // MassTransit ActivitySource
+    .AddConsoleExporter() // Any OTEL suportable exporter can be used here
+    .Build()
+```
+
+That's it you application will start exporting MassTransit related traces within your application
+
+#### Metrics
+##### ASP.NET Core application
+This example is using following packages:
+- `OpenTelemetry.Extensions.Hosting`
+- `OpenTelemetry.Exporter.Console`
+
+```csharp
+var builder = WebApplication.CreateBuilder(args);
+
+void ConfigureResource(ResourceBuilder r)
+{
+    r.AddService("Service Name",
+        serviceVersion: "Version",
+        serviceInstanceId: Environment.MachineName);
+}
+
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(ConfigureResource)
+    .WithMetrics(b => b
+        .AddMeter(InstrumentationOptions.MeterName) // MassTransit Meter
+        .AddConsoleExporter() // Any OTEL suportable exporter can be used here
+    );
+```
+
+##### Console application
+This example is using following packages:
+- `OpenTelemetry`
+- `OpenTelemetry.Exporter.Console`
+
+```csharp
+void ConfigureResource(ResourceBuilder r)
+{
+    r.AddService("Service Name",
+        serviceVersion: "Version",
+        serviceInstanceId: Environment.MachineName);
+}
+
+Sdk.CreateTracerProviderBuilder()
+    .ConfigureResource(ConfigureResource)
+    .AddMeter(InstrumentationOptions.MeterName) // MassTransit Meter
+    .AddConsoleExporter() // Any OTEL suportable exporter can be used here
+    .Build()
+```
+
+The OpenTelemetry metrics captured by MassTransit:
+
+`Counters`
+
+| Name                                         | Description                                 |
+|:---------------------------------------------|:--------------------------------------------|
+| messaging_masstransit_receive                | Number of messages received                 |
+| messaging_masstransit_receive_errors         | Number of messages receive faults           |
+| messaging_masstransit_consume                | Number of messages consumed                 |
+| messaging_masstransit_consume_errors         | Number of message consume faults            |
+| messaging_masstransit_saga                   | Number of messages processed by saga        |
+| messaging_masstransit_saga_errors            | Number of message faults by saga            |
+| messaging_masstransit_consume_retries        | Number of message consume retries           |
+| messaging_masstransit_handler                | Number of messages handled                  |
+| messaging_masstransit_handler_errors         | Number of message handler faults            |
+| messaging_masstransit_outbox_delivery        | Number of messages delivered by outbox      |
+| messaging_masstransit_outbox_delivery_errors | Number of message delivery faults by outbox |
+| messaging_masstransit_send                   | Number of messages sent                     |
+| messaging_masstransit_send_errors            | Number of message send faults               |
+| messaging_masstransit_outbox_send            | Number of messages sent to outbox           |
+| messaging_masstransit_outbox_send_errors     | Number of message send faults to outbox     |
+| messaging_masstransit_execute                | Number of activities executed               |
+| messaging_masstransit_execute_errors         | Number of activity execution faults         |
+| messaging_masstransit_compensate             | Number of activities compensated            |
+| messaging_masstransit_compensate_errors      | Number of activity compensation failures    |
+
+`Gauges`
+
+| Name                                    | Description                                             |
+|:----------------------------------------|:--------------------------------------------------------|
+| messaging_masstransit_receive_active    | Number of messages being received                       |
+| messaging_masstransit_consume_active    | Number of consumers in progress                         |
+| messaging_masstransit_execute_active    | Number of activity executions in progress               |
+| messaging_masstransit_compensate_active | Number of activity compensations in progress            |
+| messaging_masstransit_handler_active    | Number of handlers in progress                          |
+| messaging_masstransit_saga_active       | Number of sagas in progress                             |
+
+`Histograms`
+
+| Name                                      | Description                                                                        |
+|:------------------------------------------|:-----------------------------------------------------------------------------------|
+| messaging_masstransit_receive_duration    | Elapsed time spent receiving a message, in millis                                  |
+| messaging_masstransit_consume_duration    | Elapsed time spent consuming a message, in millis                                  |
+| messaging_masstransit_saga_duration       | Elapsed time spent saga processing a message, in millis                            |
+| messaging_masstransit_handler_duration    | Elapsed time spent handler processing a message, in millis                         |
+| messaging_masstransit_delivery_durations  | Elapsed time between when the message was sent and when it was consumed, in millis |
+| messaging_masstransit_execute_duration    | Elapsed time spent executing an activity, in millis                                |
+| messaging_masstransit_compensate_duration | Elapsed time spent compensating an activity, in millis                             |
+
+Metric names and labels can be configured with `Options`:
+```csharp
+services.Configure<InstrumentationOptions>(options =>
+{
+    // Configure
+});
+```
+
+### Application Insights
+Azure Monitor has direct integration with Open Telemetry: 
+- [OpenTelemetry overview](https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-overview)
+- [Enable Azure Monitor OpenTelemetry for .NET](https://learn.microsoft.com/en-us/azure/azure-monitor/app/opentelemetry-enable?tabs=net)
+
+##### ASP.NET Core application
+This example is using following packages:
+- `OpenTelemetry.Extensions.Hosting`
+- `Azure.Monitor.OpenTelemetry.Exporter`
+
+```csharp
+var builder = WebApplication.CreateBuilder(args);
+
+void ConfigureResource(ResourceBuilder r)
+{
+    r.AddService("Service Name",
+        serviceVersion: "Version",
+        serviceInstanceId: Environment.MachineName);
+}
+
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(ConfigureResource)
+    .WithTracing(b => b
+        .AddSource(DiagnosticHeaders.DefaultListenerName) // MassTransit ActivitySource
+        .AddAzureMonitorTraceExporter(
+        {
+            o.ConnectionString = "<Your Connection String>";
+        }))
+    .WithMetrics(b => b
+        .AddMeter(InstrumentationOptions.MeterName) // MassTransit Meter
+        .AddAzureMonitorMetricExporter(o =>
+        {
+            o.ConnectionString = "<Your Connection String>";
+        }));
+```
+
+##### Console application
+This example is using following packages:
+- `OpenTelemetry`
+- `Azure.Monitor.OpenTelemetry.Exporter`
+
+```csharp
+void ConfigureResource(ResourceBuilder r)
+{
+    r.AddService("Service Name",
+        serviceVersion: "Version",
+        serviceInstanceId: Environment.MachineName);
+}
+
+Sdk.CreateTracerProviderBuilder()
+    .ConfigureResource(ConfigureResource)
+    .AddSource(DiagnosticHeaders.DefaultListenerName) // MassTransit ActivitySource
+    .AddAzureMonitorTraceExporter(
+    {
+        o.ConnectionString = "<Your Connection String>";
+    })
+    .Build();
+
+Sdk.CreateTracerProviderBuilder()
+    .ConfigureResource(ConfigureResource)
+    .AddMeter(InstrumentationOptions.MeterName) // MassTransit Meter
+    .AddAzureMonitorMetricExporter(o =>
+    {
+        o.ConnectionString = "<Your Connection String>";
+    })
+    .Build()
+```
+You can also refer to the sample: [Sample-ApplicationInsights](https://github.com/MassTransit/Sample-ApplicationInsights) 
+
 ### Prometheus
+
+Open Telemetry is more preferable choice of integration
+
+#### Open Telemetry integration
+
+This example is using following packages:
+- `OpenTelemetry.Extensions.Hosting`
+- `OpenTelemetry.Exporter.Prometheus`
+- `OpenTelemetry.Exporter.Prometheus.AspNetCore`
+
+```csharp
+void ConfigureResource(ResourceBuilder r)
+{
+    r.AddService("Service Name",
+        serviceVersion: "Version",
+        serviceInstanceId: Environment.MachineName);
+}
+
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(ConfigureResource)
+    .WithMetrics(b => b
+        .AddMeter(InstrumentationOptions.MeterName) // MassTransit Meter
+        .AddPrometheusExporter()
+    );
+    
+var app = builder.Build();
+
+app.UseOpenTelemetryPrometheusScrapingEndpoint(); // Map prometheus metrics endpoint
+```
+In case you want to migrate from direct integration to using Open Telemetry, and use previous metric names, just configure them through `Options`:
+```csharp
+builder.Services.Configure<InstrumentationOptions>(options =>
+{
+    ReceiveTotal = "mt.receive.total";
+    // Configure other names by using similar approach
+});
+```
+
+#### Direct integration
 
 [![alt NuGet](https://img.shields.io/nuget/v/MassTransit.Prometheus.svg "NuGet")](https://nuget.org/packages/MassTransit.Prometheus/)
 
@@ -125,7 +294,7 @@ services.AddMassTransit(x =>
 });
 ```
 
-To then mount the metrics to `/metrics` go to your Startup.cs and add
+To then mount the metrics to `/metrics` go to your `Program.cs` and add
 
 ```csharp
 app.UseEndpoints(endpoints =>

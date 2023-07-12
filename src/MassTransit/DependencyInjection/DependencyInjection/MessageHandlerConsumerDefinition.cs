@@ -12,7 +12,8 @@ namespace MassTransit.DependencyInjection
         public int? ConcurrentMessageLimit => default;
         public Type ConsumerType => typeof(TConsumer);
 
-        public void Configure(IReceiveEndpointConfigurator endpointConfigurator, IConsumerConfigurator<TConsumer> consumerConfigurator)
+        public void Configure(IReceiveEndpointConfigurator endpointConfigurator, IConsumerConfigurator<TConsumer> consumerConfigurator,
+            IRegistrationContext context)
         {
         }
 

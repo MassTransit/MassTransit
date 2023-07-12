@@ -23,7 +23,7 @@ namespace MassTransit.Testing
             return TaskUtil.Faulted<Guid?>(new ArgumentException("Does not support IQuerySagaRepository", nameof(repository)));
         }
 
-        static async Task<Guid?> ShouldContainSaga<TSaga>(this ILoadSagaRepository<TSaga> repository, Guid correlationId, TimeSpan timeout)
+        public static async Task<Guid?> ShouldContainSaga<TSaga>(this ILoadSagaRepository<TSaga> repository, Guid correlationId, TimeSpan timeout)
             where TSaga : class, ISaga
         {
             var giveUpAt = DateTime.Now + timeout;
@@ -40,7 +40,7 @@ namespace MassTransit.Testing
             return default;
         }
 
-        static async Task<Guid?> ShouldContainSaga<TSaga>(this IQuerySagaRepository<TSaga> repository, Guid correlationId, TimeSpan timeout)
+        public static async Task<Guid?> ShouldContainSaga<TSaga>(this IQuerySagaRepository<TSaga> repository, Guid correlationId, TimeSpan timeout)
             where TSaga : class, ISaga
         {
             var giveUpAt = DateTime.Now + timeout;
@@ -69,7 +69,7 @@ namespace MassTransit.Testing
             return TaskUtil.Faulted<Guid?>(new ArgumentException("Does not support IQuerySagaRepository", nameof(repository)));
         }
 
-        static async Task<Guid?> ShouldContainSaga<TSaga>(this ILoadSagaRepository<TSaga> repository, Guid correlationId, Func<TSaga, bool> condition,
+        public static async Task<Guid?> ShouldContainSaga<TSaga>(this ILoadSagaRepository<TSaga> repository, Guid correlationId, Func<TSaga, bool> condition,
             TimeSpan timeout)
             where TSaga : class, ISaga
         {
@@ -99,7 +99,7 @@ namespace MassTransit.Testing
             return TaskUtil.Faulted<Guid?>(new ArgumentException("Does not support IQuerySagaRepository", nameof(repository)));
         }
 
-        static async Task<Guid?> ShouldNotContainSaga<TSaga>(this ILoadSagaRepository<TSaga> repository, Guid correlationId, TimeSpan timeout)
+        public static async Task<Guid?> ShouldNotContainSaga<TSaga>(this ILoadSagaRepository<TSaga> repository, Guid correlationId, TimeSpan timeout)
             where TSaga : class, ISaga
         {
             var giveUpAt = DateTime.Now + timeout;
@@ -119,7 +119,7 @@ namespace MassTransit.Testing
             return instance.CorrelationId;
         }
 
-        static async Task<Guid?> ShouldNotContainSaga<TSaga>(this IQuerySagaRepository<TSaga> repository, Guid correlationId, TimeSpan timeout)
+        public static async Task<Guid?> ShouldNotContainSaga<TSaga>(this IQuerySagaRepository<TSaga> repository, Guid correlationId, TimeSpan timeout)
             where TSaga : class, ISaga
         {
             var giveUpAt = DateTime.Now + timeout;
@@ -149,7 +149,7 @@ namespace MassTransit.Testing
             return TaskUtil.Faulted<Guid?>(new ArgumentException("Does not support IQuerySagaRepository", nameof(repository)));
         }
 
-        static async Task<Guid?> ShouldContainSaga<TSaga>(this IQuerySagaRepository<TSaga> repository, Expression<Func<TSaga, bool>> filter,
+        public static async Task<Guid?> ShouldContainSaga<TSaga>(this IQuerySagaRepository<TSaga> repository, Expression<Func<TSaga, bool>> filter,
             TimeSpan timeout)
             where TSaga : class, ISaga
         {

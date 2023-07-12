@@ -73,8 +73,9 @@ namespace MassTransit.Configuration
         {
             configurator.TryAddSingleton(_connectionFactory);
             configurator.TryAddSingleton(new RedisSagaRepositoryOptions<T>(ConcurrencyMode, LockTimeout, LockSuffix, KeyPrefix, _databaseSelector, Expiry));
-            configurator.RegisterSagaRepository<T, DatabaseContext<T>, SagaConsumeContextFactory<DatabaseContext<T>, T>,
-                RedisSagaRepositoryContextFactory<T>>();
+            configurator.RegisterLoadSagaRepository<T, RedisSagaRepositoryContextFactory<T>>();
+            configurator
+                .RegisterSagaRepository<T, DatabaseContext<T>, SagaConsumeContextFactory<DatabaseContext<T>, T>, RedisSagaRepositoryContextFactory<T>>();
         }
 
         static IDatabase SelectDefaultDatabase(IConnectionMultiplexer multiplexer)

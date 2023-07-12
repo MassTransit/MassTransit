@@ -42,12 +42,14 @@ namespace MassTransit
             protected set => _concurrentMessageLimit = value;
         }
 
-        void IConsumerDefinition<TConsumer>.Configure(IReceiveEndpointConfigurator endpointConfigurator, IConsumerConfigurator<TConsumer> consumerConfigurator)
+        void IConsumerDefinition<TConsumer>.Configure(IReceiveEndpointConfigurator endpointConfigurator, IConsumerConfigurator<TConsumer> consumerConfigurator,
+            IRegistrationContext context)
         {
             if (_concurrentMessageLimit.HasValue)
                 consumerConfigurator.ConcurrentMessageLimit = _concurrentMessageLimit;
 
             ConfigureConsumer(endpointConfigurator, consumerConfigurator);
+            ConfigureConsumer(endpointConfigurator, consumerConfigurator, context);
         }
 
         Type IConsumerDefinition.ConsumerType => typeof(TConsumer);
@@ -79,6 +81,18 @@ namespace MassTransit
         /// <param name="endpointConfigurator">The receive endpoint configurator for the consumer</param>
         /// <param name="consumerConfigurator">The consumer configurator</param>
         protected virtual void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator, IConsumerConfigurator<TConsumer> consumerConfigurator)
+        {
+        }
+
+        /// <summary>
+        /// Called when the consumer is being configured on the endpoint. Configuration only applies to this consumer, and does not apply to
+        /// the endpoint.
+        /// </summary>
+        /// <param name="endpointConfigurator">The receive endpoint configurator for the consumer</param>
+        /// <param name="consumerConfigurator">The consumer configurator</param>
+        /// <param name="context"></param>
+        protected virtual void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator, IConsumerConfigurator<TConsumer> consumerConfigurator,
+            IRegistrationContext context)
         {
         }
     }

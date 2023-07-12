@@ -23,5 +23,11 @@ namespace MassTransit
         /// The bus is still stopped, only the wait is canceled.
         /// </summary>
         public TimeSpan? StopTimeout { get; set; }
+
+        /// <summary>
+        /// If specified, the timeout will be used to wait for Consumers to complete their work
+        /// After this timeout ConsumeContext.CancellationToken will be cancelled <seealso cref="PipeContext.CancellationToken"/>
+        /// </summary>
+        public TimeSpan? ConsumerStopTimeout { get; set; }
     }
 }

@@ -35,7 +35,7 @@ namespace MassTransit.Serialization
 
             try
             {
-                var envelope = _envelope ??= new JsonMessageEnvelope(_context, _context.Message, MessageTypeCache<TMessage>.MessageTypeNames);
+                var envelope = _envelope ??= new JsonMessageEnvelope(_context, _context.Message);
 
                 using var stream = new MemoryStream();
                 using var jsonWriter = new BsonDataWriter(stream);

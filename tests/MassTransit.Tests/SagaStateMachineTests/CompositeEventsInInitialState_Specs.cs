@@ -30,7 +30,7 @@
             await received;
         }
 
-        InMemorySagaRepository<Instance> _repository;
+        ISagaRepository<Instance> _repository;
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {

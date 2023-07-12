@@ -10,7 +10,8 @@ namespace MassTransit.Initializers.PropertyConverters
         IPropertyConverter<List<TElement>, IEnumerable<TElement>>,
         IPropertyConverter<IList<TElement>, IEnumerable<TElement>>,
         IPropertyConverter<IReadOnlyList<TElement>, IEnumerable<TElement>>,
-        IPropertyConverter<IEnumerable<TElement>, IEnumerable<TElement>>
+        IPropertyConverter<IEnumerable<TElement>, IEnumerable<TElement>>,
+        IPropertyConverter<ICollection<TElement>, IEnumerable<TElement>>
     {
         Task<IEnumerable<TElement>> IPropertyConverter<IEnumerable<TElement>, IEnumerable<TElement>>.Convert<T>(InitializeContext<T> context,
             IEnumerable<TElement> input)
@@ -64,6 +65,19 @@ namespace MassTransit.Initializers.PropertyConverters
                     return Task.FromResult(input.ToList());
             }
         }
+
+        Task<ICollection<TElement>> IPropertyConverter<ICollection<TElement>, IEnumerable<TElement>>.Convert<T>(InitializeContext<T> context, IEnumerable<TElement> input)
+        {
+            switch (input)
+            {
+                case null:
+                    return TaskUtil.Default<ICollection<TElement>>();
+                case ICollection<TElement> list:
+                    return Task.FromResult(list);
+                default:
+                    return Task.FromResult<ICollection<TElement>>(input.ToList());
+            }
+        }
     }
 
 
@@ -71,7 +85,8 @@ namespace MassTransit.Initializers.PropertyConverters
         IPropertyConverter<List<TElement>, IEnumerable<TInputElement>>,
         IPropertyConverter<IList<TElement>, IEnumerable<TInputElement>>,
         IPropertyConverter<IReadOnlyList<TElement>, IEnumerable<TInputElement>>,
-        IPropertyConverter<IEnumerable<TElement>, IEnumerable<TInputElement>>
+        IPropertyConverter<IEnumerable<TElement>, IEnumerable<TInputElement>>,
+        IPropertyConverter<ICollection<TElement>, IEnumerable<TInputElement>>
     {
         readonly IPropertyConverter<TElement, TInputElement> _converter;
 
@@ -118,6 +133,21 @@ namespace MassTransit.Initializers.PropertyConverters
                 return Task.FromResult<IReadOnlyList<TElement>>(resultTask.Result);
 
             async Task<IReadOnlyList<TElement>> ConvertAsync()
+            {
+                return await resultTask.ConfigureAwait(false);
+            }
+
+            return ConvertAsync();
+        }
+
+        public Task<ICollection<TElement>> Convert<T>(InitializeContext<T> context, IEnumerable<TInputElement> elements)
+            where T : class
+        {
+            Task<List<TElement>> resultTask = ConvertSync(context, elements);
+            if (resultTask.Status == TaskStatus.RanToCompletion)
+                return Task.FromResult<ICollection<TElement>>(resultTask.Result);
+
+            async Task<ICollection<TElement>> ConvertAsync()
             {
                 return await resultTask.ConfigureAwait(false);
             }

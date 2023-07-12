@@ -11,8 +11,8 @@ namespace MassTransit.MartenIntegration.Saga
         {
             var consumeContextFactory = new SagaConsumeContextFactory<IDocumentSession, TSaga>();
 
-            ISagaRepositoryContextFactory<TSaga> repositoryContextFactory = new MartenSagaRepositoryContextFactory<TSaga>(documentStore, consumeContextFactory);
-            return new SagaRepository<TSaga>(repositoryContextFactory);
+            var repositoryContextFactory = new MartenSagaRepositoryContextFactory<TSaga>(documentStore, consumeContextFactory);
+            return new SagaRepository<TSaga>(repositoryContextFactory, repositoryContextFactory, repositoryContextFactory);
         }
     }
 }

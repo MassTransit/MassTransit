@@ -43,7 +43,8 @@ namespace MassTransit.QuartzIntegration
                 .WithSchedule(SimpleScheduleBuilder.Create().WithMisfireHandlingInstructionFireNow())
                 .WithIdentity(triggerKey);
 
-            var trigger = PopulateTrigger(context, builder, messageBody, context.Message.Destination, context.MessageId, context.Message.CorrelationId);
+            var trigger = PopulateTrigger(context, builder, messageBody, context.Message.Destination, context.Message.PayloadType, messageId: context.MessageId,
+                tokenId: context.Message.CorrelationId);
 
             var scheduler = await _schedulerFactory.GetScheduler(context.CancellationToken).ConfigureAwait(false);
 
@@ -92,8 +93,8 @@ namespace MassTransit.QuartzIntegration
             if (schedule.EndTime.HasValue)
                 triggerBuilder.EndAt(schedule.EndTime);
 
-            var trigger = PopulateTrigger(context, triggerBuilder, messageBody, context.Message.Destination, context.MessageId,
-                context.Message.CorrelationId);
+            var trigger = PopulateTrigger(context, triggerBuilder, messageBody, context.Message.Destination, context.Message.PayloadType,
+                messageId: context.MessageId, tokenId: context.Message.CorrelationId);
 
             var scheduler = await _schedulerFactory.GetScheduler(context.CancellationToken).ConfigureAwait(false);
 
@@ -106,12 +107,13 @@ namespace MassTransit.QuartzIntegration
         }
 
         static ITrigger PopulateTrigger(ConsumeContext context, TriggerBuilder builder, MessageBody messageBody, Uri destination,
-            Guid? messageId = default, Guid? tokenId = default)
+            string[] messageTypes, Guid? messageId = default, Guid? tokenId = default)
         {
             builder = builder
                 .UsingJobData("Destination", ToString(destination))
                 .UsingJobData("Body", messageBody.GetString())
-                .UsingJobData("ContentType", context.ReceiveContext.ContentType.ToString());
+                .UsingJobData("ContentType", context.ReceiveContext.ContentType.ToString())
+                .UsingJobData("MessageType", string.Join(";", messageTypes));
 
             if (messageId.HasValue)
                 builder = builder.UsingJobData("MessageId", messageId.Value.ToString());
@@ -146,6 +148,13 @@ namespace MassTransit.QuartzIntegration
             IEnumerable<KeyValuePair<string, object>> headers = context.Headers.GetAll().ToList();
             if (headers.Any())
                 builder = builder.UsingJobData("HeadersAsJson", JsonSerializer.Serialize(headers, SystemTextJsonMessageSerializer.Options));
+
+            if (context.ReceiveContext.TryGetPayload<TransportReceiveContext>(out var transportReceiveContext))
+            {
+                IDictionary<string, object>? properties = transportReceiveContext.GetTransportProperties();
+                if (properties != null)
+                    builder = builder.UsingJobData("TransportProperties", JsonSerializer.Serialize(properties, SystemTextJsonMessageSerializer.Options));
+            }
 
             var trigger = builder
                 .Build();

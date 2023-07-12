@@ -9,11 +9,13 @@ namespace MassTransit.AzureServiceBusTransport
     public class ServiceBusReceiveLockContext :
         ReceiveLockContext
     {
+        readonly Uri _inputAddress;
         readonly MessageLockContext _lockContext;
-        readonly ServiceBusReceiveContext _message;
+        readonly ServiceBusReceivedMessage _message;
 
-        public ServiceBusReceiveLockContext(MessageLockContext lockContext, ServiceBusReceiveContext message)
+        public ServiceBusReceiveLockContext(Uri inputAddress, MessageLockContext lockContext, ServiceBusReceivedMessage message)
         {
+            _inputAddress = inputAddress;
             _lockContext = lockContext;
             _message = message;
         }
@@ -51,10 +53,10 @@ namespace MassTransit.AzureServiceBusTransport
         public Task ValidateLockStatus()
         {
             if (_message.LockedUntil <= DateTime.UtcNow)
-                throw new MessageLockExpiredException(_message.InputAddress, $"The message lock expired: {_message.MessageId}");
+                throw new MessageLockExpiredException(_inputAddress, $"The message lock expired: {_message.MessageId}");
 
             if (_message.ExpiresAt < DateTime.UtcNow)
-                throw new MessageTimeToLiveExpiredException(_message.InputAddress, $"The message expired: {_message.MessageId}");
+                throw new MessageTimeToLiveExpiredException(_inputAddress, $"The message expired: {_message.MessageId}");
 
             return Task.CompletedTask;
         }

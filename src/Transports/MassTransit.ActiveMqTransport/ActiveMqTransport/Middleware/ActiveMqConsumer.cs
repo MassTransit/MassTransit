@@ -4,8 +4,6 @@ namespace MassTransit.ActiveMqTransport.Middleware
     using System.Threading.Tasks;
     using Apache.NMS;
     using Apache.NMS.ActiveMQ;
-    using Internals;
-    using MassTransit.Middleware;
     using Transports;
     using Util;
 
@@ -14,12 +12,9 @@ namespace MassTransit.ActiveMqTransport.Middleware
     /// Receives messages from ActiveMQ, pushing them to the InboundPipe of the service endpoint.
     /// </summary>
     public sealed class ActiveMqConsumer :
-        Agent,
-        DeliveryMetrics
+        ConsumerAgent<string>
     {
         readonly ActiveMqReceiveEndpointContext _context;
-        readonly TaskCompletionSource<bool> _deliveryComplete;
-        readonly IReceivePipeDispatcher _dispatcher;
         readonly ChannelExecutor _executor;
         readonly MessageConsumer _messageConsumer;
         readonly ReceiveSettings _receiveSettings;
@@ -33,6 +28,7 @@ namespace MassTransit.ActiveMqTransport.Middleware
         /// <param name="context">The topology</param>
         /// <param name="executor"></param>
         public ActiveMqConsumer(SessionContext session, MessageConsumer messageConsumer, ActiveMqReceiveEndpointContext context, ChannelExecutor executor)
+            : base(context, StringComparer.Ordinal)
         {
             _session = session;
             _messageConsumer = messageConsumer;
@@ -41,18 +37,12 @@ namespace MassTransit.ActiveMqTransport.Middleware
 
             _receiveSettings = session.GetPayload<ReceiveSettings>();
 
-            _deliveryComplete = TaskUtil.GetTask<bool>();
-
-            _dispatcher = context.CreateReceivePipeDispatcher();
-            _dispatcher.ZeroActivity += HandleDeliveryComplete;
-
             messageConsumer.Listener += HandleMessage;
+
+            TrySetManualConsumeTask();
 
             SetReady();
         }
-
-        long DeliveryMetrics.DeliveryCount => _dispatcher.DispatchCount;
-        int DeliveryMetrics.ConcurrentDeliveryCount => _dispatcher.MaxConcurrentDispatchCount;
 
         void HandleMessage(IMessage message)
         {
@@ -64,7 +54,7 @@ namespace MassTransit.ActiveMqTransport.Middleware
 
                 try
                 {
-                    await _dispatcher.Dispatch(context, context).ConfigureAwait(false);
+                    await Dispatch(message.NMSMessageId, context, new ActiveMqReceiveLockContext(message)).ConfigureAwait(false);
                 }
                 catch (Exception exception)
                 {
@@ -77,42 +67,17 @@ namespace MassTransit.ActiveMqTransport.Middleware
             }, Stopping);
         }
 
-        Task HandleDeliveryComplete()
-        {
-            if (IsStopping)
-                _deliveryComplete.TrySetResult(true);
-
-            return Task.CompletedTask;
-        }
-
-        protected override Task StopAgent(StopContext context)
+        protected override async Task ActiveAndActualAgentsCompleted(StopContext context)
         {
             _messageConsumer.Stop();
             _messageConsumer.Listener -= HandleMessage;
             _messageConsumer.Start();
 
-            SetCompleted(ActiveAndActualAgentsCompleted(context));
-
-            return Completed;
-        }
-
-        async Task ActiveAndActualAgentsCompleted(StopContext context)
-        {
-            if (_dispatcher.ActiveDispatchCount > 0)
-            {
-                try
-                {
-                    await _deliveryComplete.Task.OrCanceled(context.CancellationToken).ConfigureAwait(false);
-                }
-                catch (OperationCanceledException)
-                {
-                    LogContext.Warning?.Log("Stop canceled waiting for message consumers to complete: {InputAddress}", _context.InputAddress);
-                }
-            }
+            await base.ActiveAndActualAgentsCompleted(context).ConfigureAwait(false);
 
             try
             {
-                _messageConsumer.Close();
+                await _messageConsumer.CloseAsync().ConfigureAwait(false);
                 _messageConsumer.Dispose();
             }
             catch (OperationCanceledException)

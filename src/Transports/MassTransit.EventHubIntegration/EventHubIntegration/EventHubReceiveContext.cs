@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Threading.Tasks;
     using Azure.Messaging.EventHubs;
     using Azure.Messaging.EventHubs.Processor;
     using Transports;
@@ -10,19 +9,16 @@
 
     public sealed class EventHubReceiveContext :
         BaseReceiveContext,
-        EventHubConsumeContext,
-        ReceiveLockContext
+        EventHubConsumeContext
     {
         readonly ProcessEventArgs _eventArgs;
         readonly EventData _eventData;
-        readonly IProcessorLockContext _lockContext;
 
-        public EventHubReceiveContext(ProcessEventArgs eventArgs, ReceiveEndpointContext receiveEndpointContext, IProcessorLockContext lockContext)
+        public EventHubReceiveContext(ProcessEventArgs eventArgs, ReceiveEndpointContext receiveEndpointContext)
             : base(false, receiveEndpointContext)
         {
             _eventArgs = eventArgs;
             _eventData = eventArgs.Data;
-            _lockContext = lockContext;
 
             Body = new BytesMessageBody(eventArgs.Data.Body.ToArray());
         }
@@ -38,20 +34,5 @@
         public IDictionary<string, object> Properties => _eventData.Properties;
         public long SequenceNumber => _eventData.SequenceNumber;
         public IReadOnlyDictionary<string, object> SystemProperties => _eventData.SystemProperties;
-
-        public Task Complete()
-        {
-            return _lockContext.Complete(_eventArgs);
-        }
-
-        public Task Faulted(Exception exception)
-        {
-            return _lockContext.Faulted(_eventArgs, exception);
-        }
-
-        public Task ValidateLockStatus()
-        {
-            return Task.CompletedTask;
-        }
     }
 }

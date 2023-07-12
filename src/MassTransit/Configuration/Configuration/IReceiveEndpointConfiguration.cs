@@ -8,6 +8,7 @@
 
     public interface IReceiveEndpointConfiguration :
         IEndpointConfiguration,
+        IReceiveEndpointObserverConnector,
         IReceiveEndpointDependentConnector
     {
         IConsumePipe ConsumePipe { get; }

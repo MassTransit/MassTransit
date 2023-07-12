@@ -35,7 +35,7 @@ namespace MassTransit.MongoDbIntegration.Saga
 
             var repositoryContextFactory = new MongoDbSagaRepositoryContextFactory<TSaga>(mongoDbContext, mongoDbSagaConsumeContextFactory);
 
-            return new SagaRepository<TSaga>(repositoryContextFactory);
+            return new SagaRepository<TSaga>(repositoryContextFactory, repositoryContextFactory, repositoryContextFactory);
         }
     }
 }

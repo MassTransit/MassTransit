@@ -190,8 +190,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Create an immediate retry policy with the specified number of retries, with no
-        /// delay between attempts.
+        /// Create a policy that does not retry any messages.
         /// </summary>
         /// <param name="configurator"></param>
         /// <returns></returns>

@@ -22,19 +22,19 @@ namespace MassTransit.DependencyInjection.Registration
 
         public bool IncludeInConfigureEndpoints { get; set; }
 
-        public void Configure(IReceiveEndpointConfigurator configurator, IServiceProvider provider)
+        public void Configure(IReceiveEndpointConfigurator configurator, IRegistrationContext context)
         {
-            var stateMachine = provider.GetRequiredService<TFuture>();
-            var repository = provider.GetRequiredService<ISagaRepository<FutureState>>();
+            var stateMachine = context.GetRequiredService<TFuture>();
+            ISagaRepository<FutureState> repository = new DependencyInjectionSagaRepository<FutureState>(context);
 
-            var decoratorRegistration = provider.GetService<ISagaRepositoryDecoratorRegistration<FutureState>>();
+            var decoratorRegistration = context.GetService<ISagaRepositoryDecoratorRegistration<FutureState>>();
             if (decoratorRegistration != null)
                 repository = decoratorRegistration.DecorateSagaRepository(repository);
 
             var sagaConfigurator = new StateMachineSagaConfigurator<FutureState>(stateMachine, repository, configurator);
 
-            GetFutureDefinition(provider)
-                .Configure(configurator, sagaConfigurator);
+            GetFutureDefinition(context)
+                .Configure(configurator, sagaConfigurator, context);
 
             LogContext.Info?.Log("Configured endpoint {Endpoint}, Future: {FutureType}",
                 configurator.InputAddress.GetEndpointName(), TypeCache<TFuture>.ShortName);
@@ -44,9 +44,9 @@ namespace MassTransit.DependencyInjection.Registration
             IncludeInConfigureEndpoints = false;
         }
 
-        public IFutureDefinition GetDefinition(IServiceProvider provider)
+        public IFutureDefinition GetDefinition(IRegistrationContext context)
         {
-            return GetFutureDefinition(provider);
+            return GetFutureDefinition(context);
         }
 
         IFutureDefinition<TFuture> GetFutureDefinition(IServiceProvider provider)

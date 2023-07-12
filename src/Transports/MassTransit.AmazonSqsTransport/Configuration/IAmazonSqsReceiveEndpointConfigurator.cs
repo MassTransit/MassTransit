@@ -18,6 +18,12 @@
         int RedeliverVisibilityTimeout { set; }
 
         /// <summary>
+        /// Set number of concurrent messages per MessageGroupId, higher value will increase throughput but will break delivery order (default: 1).
+        /// This applies to FIFO queues only.
+        /// </summary>
+        int ConcurrentDeliveryLimit { set; }
+
+        /// <summary>
         /// Bind an existing exchange for the message type to the receive endpoint by name
         /// </summary>
         /// <typeparam name="T"></typeparam>

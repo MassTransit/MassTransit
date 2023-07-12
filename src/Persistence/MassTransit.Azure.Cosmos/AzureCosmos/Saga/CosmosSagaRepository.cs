@@ -32,7 +32,7 @@
 
             var repositoryFactory = new CosmosSagaRepositoryContextFactory<TSaga>(databaseContext, consumeContextFactory);
 
-            return new SagaRepository<TSaga>(repositoryFactory);
+            return new SagaRepository<TSaga>(repositoryFactory, repositoryFactory, repositoryFactory);
         }
     }
 }

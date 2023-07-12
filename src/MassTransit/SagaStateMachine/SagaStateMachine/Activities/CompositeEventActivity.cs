@@ -10,13 +10,16 @@ namespace MassTransit.SagaStateMachine
     {
         readonly ICompositeEventStatusAccessor<TSaga> _accessor;
         readonly CompositeEventStatus _complete;
+        readonly CompositeEventOptions _options;
         readonly int _flag;
 
-        public CompositeEventActivity(ICompositeEventStatusAccessor<TSaga> accessor, int flag, CompositeEventStatus complete, Event @event)
+        public CompositeEventActivity(ICompositeEventStatusAccessor<TSaga> accessor, int flag, CompositeEventStatus complete, Event @event,
+            CompositeEventOptions options)
         {
             _accessor = accessor;
             _flag = flag;
             _complete = complete;
+            _options = options;
             Event = @event;
         }
 
@@ -66,6 +69,10 @@ namespace MassTransit.SagaStateMachine
         Task Execute(BehaviorContext<TSaga> context)
         {
             var value = _accessor.Get(context.Saga);
+
+            if (value.IsSet(_flag) && _options.HasFlag(CompositeEventOptions.RaiseOnce))
+                return Task.CompletedTask;
+
             value.Set(_flag);
 
             _accessor.Set(context.Saga, value);

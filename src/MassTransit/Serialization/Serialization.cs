@@ -3,6 +3,7 @@ namespace MassTransit.Serialization
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Net.Mime;
 
 
@@ -57,7 +58,7 @@ namespace MassTransit.Serialization
             return _defaultSerializer;
         }
 
-        public bool TryGetMessageSerializer(ContentType contentType, out IMessageSerializer? serializer)
+        public bool TryGetMessageSerializer(ContentType contentType, [NotNullWhen(true)] out IMessageSerializer? serializer)
         {
             var mediaType = contentType.MediaType;
 
@@ -74,7 +75,7 @@ namespace MassTransit.Serialization
             return _defaultDeserializer;
         }
 
-        public bool TryGetMessageDeserializer(ContentType contentType, out IMessageDeserializer? deserializer)
+        public bool TryGetMessageDeserializer(ContentType contentType, [NotNullWhen(true)] out IMessageDeserializer? deserializer)
         {
             var mediaType = contentType.MediaType;
 

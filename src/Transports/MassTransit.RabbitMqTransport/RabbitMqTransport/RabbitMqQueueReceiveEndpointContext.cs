@@ -25,12 +25,15 @@
             ExclusiveConsumer = configuration.Settings.ExclusiveConsumer;
             BrokerTopology = brokerTopology;
 
+            IsNotReplyTo = configuration.Settings.QueueName != RabbitMqExchangeNames.ReplyTo;
+
             _modelContext = new Recycle<IModelContextSupervisor>(() => new ModelContextSupervisor(hostConfiguration.ConnectionContextSupervisor));
         }
 
         public BrokerTopology BrokerTopology { get; }
 
         public bool ExclusiveConsumer { get; }
+        public bool IsNotReplyTo { get; }
 
         public IModelContextSupervisor ModelContextSupervisor => _modelContext.Supervisor;
 

@@ -1,8 +1,6 @@
 namespace MassTransit.Azure.ServiceBus.Core.Tests
 {
     using System;
-    using System.Linq;
-    using AzureServiceBusTransport;
     using Internals;
     using NUnit.Framework;
     using TestFramework.Messages;
@@ -13,34 +11,17 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         AzureServiceBusTestFixture
     {
         [Test]
-        public void Should_get_the_bus_address()
+        public void Should_handle_a_topic_address()
         {
-            var queueName = Bus.Address.AbsolutePath.Split('/').Last();
+            var address = new ServiceBusEndpointAddress(AzureServiceBusTestHarness.HostAddress, new Uri("topic:private-topic"));
 
-            var address = Bus.GetServiceBusBusTopology().GetDestinationAddress(queueName, x => x.AutoDeleteOnIdle = Defaults.TemporaryAutoDeleteOnIdle);
+            Assert.That(address.Type, Is.EqualTo(ServiceBusEndpointAddress.AddressType.Topic));
 
-            Assert.That(address, Is.EqualTo(Bus.Address));
-        }
+            Uri uri = address;
+            Assert.That(uri.TryGetValueFromQueryString("type", out var type), Is.True);
+            Assert.That(type, Is.EqualTo("topic"));
 
-        [Test]
-        public void Should_get_the_queue_address()
-        {
-            var address = Bus.GetServiceBusBusTopology().GetDestinationAddress("input_queue");
-
-            Assert.That(address, Is.EqualTo(InputQueueAddress));
-        }
-
-        [Test]
-        public void Should_have_the_full_path()
-        {
-            var address = new ServiceBusEndpointAddress(HostAddress, "input_queue");
-
-            Assert.That((Uri)address, Is.EqualTo(InputQueueAddress));
-
-            Assert.That(address.Name, Is.EqualTo("input_queue"));
-            Assert.That(address.Scope, Is.EqualTo(typeof(An_address).Namespace));
-
-            Assert.That(address.Path, Is.EqualTo(InputQueueAddress.AbsolutePath.Substring(1)));
+            Assert.That(uri.AbsolutePath, Is.EqualTo("/private-topic"));
         }
 
         [Test]
@@ -60,17 +41,16 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         }
 
         [Test]
-        public void Should_handle_a_topic_address()
+        public void Should_have_the_full_path()
         {
-            var address = new ServiceBusEndpointAddress(AzureServiceBusTestHarness.HostAddress, new Uri("topic:private-topic"));
+            var address = new ServiceBusEndpointAddress(HostAddress, "input_queue");
 
-            Assert.That(address.Type, Is.EqualTo(ServiceBusEndpointAddress.AddressType.Topic));
+            Assert.That((Uri)address, Is.EqualTo(InputQueueAddress));
 
-            Uri uri = address;
-            Assert.That(uri.TryGetValueFromQueryString("type", out var type), Is.True);
-            Assert.That(type, Is.EqualTo("topic"));
+            Assert.That(address.Name, Is.EqualTo("input_queue"));
+            Assert.That(address.Scope, Is.EqualTo(typeof(An_address).Namespace));
 
-            Assert.That(uri.AbsolutePath, Is.EqualTo("/private-topic"));
+            Assert.That(address.Path, Is.EqualTo(InputQueueAddress.AbsolutePath.Substring(1)));
         }
     }
 }

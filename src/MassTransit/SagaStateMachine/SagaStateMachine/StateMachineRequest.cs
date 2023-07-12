@@ -17,7 +17,8 @@ namespace MassTransit.SagaStateMachine
         readonly IReadProperty<TInstance, Guid?> _read;
         readonly IWriteProperty<TInstance, Guid?> _write;
 
-        public StateMachineRequest(string name, RequestSettings settings, Expression<Func<TInstance, Guid?>> requestIdExpression = default)
+        public StateMachineRequest(string name, RequestSettings<TInstance, TRequest, TResponse> settings,
+            Expression<Func<TInstance, Guid?>> requestIdExpression = default)
         {
             Name = name;
             Settings = settings;
@@ -36,7 +37,7 @@ namespace MassTransit.SagaStateMachine
         }
 
         public string Name { get; }
-        public RequestSettings Settings { get; }
+        public RequestSettings<TInstance, TRequest, TResponse> Settings { get; }
         public Event<TResponse> Completed { get; set; }
         public Event<Fault<TRequest>> Faulted { get; set; }
         public Event<RequestTimeoutExpired<TRequest>> TimeoutExpired { get; set; }
@@ -101,11 +102,16 @@ namespace MassTransit.SagaStateMachine
         where TResponse : class
         where TResponse2 : class
     {
-        public StateMachineRequest(string name, RequestSettings settings, Expression<Func<TInstance, Guid?>> requestIdExpression = default)
+        public StateMachineRequest(string name, RequestSettings<TInstance, TRequest, TResponse, TResponse2> settings,
+            Expression<Func<TInstance, Guid?>> requestIdExpression = default)
             : base(name, settings, requestIdExpression)
         {
+            Settings = settings;
+
             AcceptResponse<TResponse2>();
         }
+
+        public new RequestSettings<TInstance, TRequest, TResponse, TResponse2> Settings { get; }
 
         public Event<TResponse2> Completed2 { get; set; }
     }
@@ -120,11 +126,16 @@ namespace MassTransit.SagaStateMachine
         where TResponse2 : class
         where TResponse3 : class
     {
-        public StateMachineRequest(string name, RequestSettings settings, Expression<Func<TInstance, Guid?>> requestIdExpression = default)
+        public StateMachineRequest(string name, RequestSettings<TInstance, TRequest, TResponse, TResponse2, TResponse3> settings,
+            Expression<Func<TInstance, Guid?>> requestIdExpression = default)
             : base(name, settings, requestIdExpression)
         {
+            Settings = settings;
+
             AcceptResponse<TResponse3>();
         }
+
+        public new RequestSettings<TInstance, TRequest, TResponse, TResponse2, TResponse3> Settings { get; }
 
         public Event<TResponse3> Completed3 { get; set; }
     }

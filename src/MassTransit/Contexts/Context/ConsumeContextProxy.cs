@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -82,7 +83,8 @@
         /// <param name="payload"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public override bool TryGetPayload<T>(out T payload)
+        public override bool TryGetPayload<T>([NotNullWhen(true)] out T payload)
+            where T : class
         {
             if (this is T context)
             {

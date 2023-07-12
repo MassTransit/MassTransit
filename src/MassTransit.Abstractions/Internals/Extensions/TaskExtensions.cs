@@ -105,15 +105,18 @@ namespace MassTransit.Internals
 
             async Task WaitAsync()
             {
-                var delayTask = Task.Delay(Debugger.IsAttached ? Timeout.InfiniteTimeSpan : timeout, cancellationToken);
-
+                using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                var delayTask = Task.Delay(Debugger.IsAttached ? Timeout.InfiniteTimeSpan : timeout, cts.Token);
                 var completed = await Task.WhenAny(task, delayTask).ConfigureAwait(false);
+
                 if (completed == delayTask)
                 {
                     task.IgnoreUnobservedExceptions();
 
                     throw new TimeoutException(FormatTimeoutMessage(memberName, filePath, lineNumber));
                 }
+
+                cts.Cancel();
 
                 task.GetAwaiter().GetResult();
             }
@@ -153,15 +156,18 @@ namespace MassTransit.Internals
 
             async Task<T> WaitAsync()
             {
-                var delayTask = Task.Delay(Debugger.IsAttached ? Timeout.InfiniteTimeSpan : timeout, cancellationToken);
-
+                using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                var delayTask = Task.Delay(Debugger.IsAttached ? Timeout.InfiniteTimeSpan : timeout, cts.Token);
                 var completed = await Task.WhenAny(task, delayTask).ConfigureAwait(false);
+
                 if (completed == delayTask)
                 {
                     task.IgnoreUnobservedExceptions();
 
                     throw new TimeoutException(FormatTimeoutMessage(memberName, filePath, lineNumber));
                 }
+
+                cts.Cancel();
 
                 return task.GetAwaiter().GetResult();
             }

@@ -1,17 +1,18 @@
 ﻿namespace MassTransit.ActiveMqTransport
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Apache.NMS;
     using Apache.NMS.ActiveMQ.Commands;
+    using Context;
     using Transports;
 
 
     public sealed class ActiveMqReceiveContext :
         BaseReceiveContext,
         ActiveMqMessageContext,
-        ReceiveContext,
-        ReceiveLockContext
+        TransportReceiveContext
     {
         public ActiveMqReceiveContext(IMessage transportMessage, ActiveMqReceiveEndpointContext context, params object[] payloads)
             : base(transportMessage.NMSRedelivered, context, payloads)
@@ -23,6 +24,8 @@
 
         protected override IHeaderProvider HeaderProvider => new ActiveMqHeaderProvider(TransportMessage);
 
+        public override MessageBody Body { get; }
+
         public IMessage TransportMessage { get; }
 
         public IPrimitiveMap Properties => TransportMessage.Properties;
@@ -31,23 +34,18 @@
 
         public int GroupSequence => TransportMessage is Message message ? message.GroupSequence : default;
 
-        public override MessageBody Body { get; }
-
-        public Task Complete()
+        public IDictionary<string, object> GetTransportProperties()
         {
-            TransportMessage.Acknowledge();
+            var properties = new Lazy<Dictionary<string, object>>(() => new Dictionary<string, object>());
 
-            return Task.CompletedTask;
-        }
+            if (TransportMessage.NMSPriority != MsgPriority.Normal)
+                properties.Value[ActiveMqTransportPropertyNames.Priority] = TransportMessage.NMSPriority.ToString();
+            if (GroupId != null)
+                properties.Value[ActiveMqTransportPropertyNames.GroupId] = GroupId;
+            if (GroupSequence != default)
+                properties.Value[ActiveMqTransportPropertyNames.GroupSequence] = GroupSequence;
 
-        public Task Faulted(Exception exception)
-        {
-            return Task.CompletedTask;
-        }
-
-        public Task ValidateLockStatus()
-        {
-            return Task.CompletedTask;
+            return properties.IsValueCreated ? properties.Value : null;
         }
 
         protected override ISendEndpointProvider GetSendEndpointProvider()

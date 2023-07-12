@@ -9,13 +9,16 @@ namespace MassTransit.Configuration
     public class ScopedCompensateActivityPipeSpecificationObserver :
         IActivityConfigurationObserver
     {
+        readonly IRegistrationContext _context;
         readonly Type _filterType;
-        readonly IServiceProvider _provider;
+        readonly CompositeFilter<Type> _messageTypeFilter;
 
-        public ScopedCompensateActivityPipeSpecificationObserver(Type filterType, IServiceProvider provider)
+        public ScopedCompensateActivityPipeSpecificationObserver(Type filterType, IRegistrationContext context,
+            CompositeFilter<Type> messageTypeFilter)
         {
             _filterType = filterType;
-            _provider = provider;
+            _context = context;
+            _messageTypeFilter = messageTypeFilter;
         }
 
         public void ActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator, Uri compensateAddress)
@@ -34,15 +37,15 @@ namespace MassTransit.Configuration
             where TActivity : class, ICompensateActivity<TLog>
             where TLog : class
         {
-            if (!_filterType.IsGenericType || !_filterType.IsGenericTypeDefinition)
-                throw new ConfigurationException("The scoped filter must be a generic type definition");
+            if (!_messageTypeFilter.Matches(typeof(TLog)))
+                return;
 
             var filterType = _filterType.MakeGenericType(typeof(TLog));
 
             if (!filterType.HasInterface(typeof(IFilter<CompensateContext<TLog>>)))
                 throw new ConfigurationException($"The scoped filter must implement {TypeCache<IFilter<CompensateContext<TLog>>>.ShortName} ");
 
-            var scopeProvider = new CompensateActivityScopeProvider<TActivity, TLog>(_provider);
+            var scopeProvider = new CompensateActivityScopeProvider<TActivity, TLog>(_context);
 
             var scopedFilterType = typeof(ScopedCompensateFilter<,,>).MakeGenericType(typeof(TActivity), typeof(TLog), filterType);
 

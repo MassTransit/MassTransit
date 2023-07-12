@@ -9,13 +9,16 @@ namespace MassTransit.Configuration
     public class ScopedExecuteActivityPipeSpecificationObserver :
         IActivityConfigurationObserver
     {
+        readonly IRegistrationContext _context;
         readonly Type _filterType;
-        readonly IServiceProvider _provider;
+        readonly CompositeFilter<Type> _messageTypeFilter;
 
-        public ScopedExecuteActivityPipeSpecificationObserver(Type filterType, IServiceProvider provider)
+        public ScopedExecuteActivityPipeSpecificationObserver(Type filterType, IRegistrationContext context,
+            CompositeFilter<Type> messageTypeFilter)
         {
             _filterType = filterType;
-            _provider = provider;
+            _context = context;
+            _messageTypeFilter = messageTypeFilter;
         }
 
         public void ActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator, Uri compensateAddress)
@@ -29,15 +32,15 @@ namespace MassTransit.Configuration
             where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
-            if (!_filterType.IsGenericType || !_filterType.IsGenericTypeDefinition)
-                throw new ConfigurationException("The scoped filter must be a generic type definition");
+            if (!_messageTypeFilter.Matches(typeof(TArguments)))
+                return;
 
             var filterType = _filterType.MakeGenericType(typeof(TArguments));
 
             if (!filterType.HasInterface(typeof(IFilter<ExecuteContext<TArguments>>)))
                 throw new ConfigurationException($"The scoped filter must implement {TypeCache<IFilter<ExecuteContext<TArguments>>>.ShortName} ");
 
-            var scopeProvider = new ExecuteActivityScopeProvider<TActivity, TArguments>(_provider);
+            var scopeProvider = new ExecuteActivityScopeProvider<TActivity, TArguments>(_context);
 
             var scopedFilterType = typeof(ScopedExecuteFilter<,,>).MakeGenericType(typeof(TActivity), typeof(TArguments), filterType);
 

@@ -1,7 +1,7 @@
 namespace MassTransit.AmazonSqsTransport
 {
     using System;
-    using Caching;
+    using Internals.Caching;
 
 
     public static class ClientContextCacheDefaults
@@ -17,9 +17,13 @@ namespace MassTransit.AmazonSqsTransport
         public static TimeSpan MinAge { get; set; }
         public static TimeSpan MaxAge { get; set; }
 
-        public static CacheSettings GetCacheSettings()
+        public static ICache<TKey, TValue, ITimeToLiveCacheValue<TValue>> CreateCache<TKey, TValue>()
+            where TValue : class
         {
-            return new CacheSettings(Capacity, MinAge, MaxAge);
+            var options = new CacheOptions { Capacity = Capacity };
+            var policy = new TimeToLiveCachePolicy<TValue>(MaxAge);
+
+            return new MassTransitCache<TKey, TValue, ITimeToLiveCacheValue<TValue>>(policy, options);
         }
     }
 }

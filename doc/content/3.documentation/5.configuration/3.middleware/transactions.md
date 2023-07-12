@@ -1,4 +1,8 @@
-# Transaction
+---
+navigation.title: Transaction
+---
+
+# Transaction Filter
 
 ::alert{type="warning"}
 Transactions, and using a shared transaction, is an advanced concept. Every scenario is different, so this is more of a guideline than a rule.

@@ -8,7 +8,8 @@ namespace MassTransit.MongoDbIntegration.Audit
     using MongoDB.Driver;
 
 
-    public class MongoDbAuditStore : IMessageAuditStore
+    public class MongoDbAuditStore :
+        IMessageAuditStore
     {
         readonly IMongoCollection<AuditDocument> _collection;
 
@@ -17,14 +18,14 @@ namespace MassTransit.MongoDbIntegration.Audit
             if (BsonClassMap.IsClassMapRegistered(typeof(AuditDocument)))
                 return;
 
-            // easiest way to metadata since keys wont become element names, therefore subject to validation
-            // will allow keys like $correlationId to be kept
-            var headersSerializer = new DictionaryInterfaceImplementerSerializer<AuditHeaders, string, string>(
-                DictionaryRepresentation.ArrayOfDocuments
-            );
-
-            BsonClassMap.RegisterClassMap<AuditDocument>(x =>
+            BsonClassMap.TryRegisterClassMap<AuditDocument>(x =>
             {
+                // easiest way to metadata since keys wont become element names, therefore subject to validation
+                // will allow keys like $correlationId to be kept
+                var headersSerializer = new DictionaryInterfaceImplementerSerializer<AuditHeaders, string, string>(
+                    DictionaryRepresentation.ArrayOfDocuments
+                );
+
                 x.AutoMap();
                 x.MapIdMember(doc => doc.AuditId);
                 x.MapMember(doc => doc.Headers).SetSerializer(headersSerializer);

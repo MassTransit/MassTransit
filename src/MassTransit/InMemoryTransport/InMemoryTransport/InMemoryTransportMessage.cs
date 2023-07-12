@@ -7,18 +7,15 @@ namespace MassTransit.InMemoryTransport
 
     public class InMemoryTransportMessage
     {
-        public InMemoryTransportMessage(Guid messageId, byte[] body, string contentType, string messageType)
+        public InMemoryTransportMessage(Guid messageId, byte[] body, string contentType)
         {
             Headers = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
             MessageId = messageId;
             Body = body;
-            MessageType = messageType;
 
             Headers[MessageHeaders.MessageId] = messageId.ToString();
             Headers[MessageHeaders.ContentType] = contentType;
         }
-
-        public string MessageType { get; }
 
         public Guid MessageId { get; }
 

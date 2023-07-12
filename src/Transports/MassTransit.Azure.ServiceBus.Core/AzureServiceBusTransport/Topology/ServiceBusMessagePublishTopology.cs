@@ -3,6 +3,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using Azure.Messaging.ServiceBus.Administration;
     using Configuration;
     using MassTransit.Topology;
@@ -29,7 +30,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology
             _createTopicOptions = new Lazy<CreateTopicOptions>(() => _topicConfigurator.GetCreateTopicOptions());
         }
 
-        public override bool TryGetPublishAddress(Uri baseAddress, out Uri? publishAddress)
+        public override bool TryGetPublishAddress(Uri baseAddress, [NotNullWhen(true)] out Uri? publishAddress)
         {
             publishAddress = new ServiceBusEndpointAddress(new Uri(baseAddress.GetLeftPart(UriPartial.Authority)),
                 _topicConfigurator.FullPath, _topicConfigurator.AutoDeleteOnIdle, ServiceBusEndpointAddress.AddressType.Topic);

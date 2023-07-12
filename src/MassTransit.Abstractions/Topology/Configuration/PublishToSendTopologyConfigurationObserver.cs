@@ -1,6 +1,7 @@
 namespace MassTransit.Configuration
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
     using Middleware;
 
 
@@ -43,7 +44,7 @@ namespace MassTransit.Configuration
 
             public bool Exclude => false;
 
-            public bool TryGetPublishAddress(Uri baseAddress, out Uri? publishAddress)
+            public bool TryGetPublishAddress(Uri baseAddress, [NotNullWhen(true)] out Uri? publishAddress)
             {
                 publishAddress = null;
                 return false;

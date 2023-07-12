@@ -46,8 +46,7 @@ namespace MassTransit.Configuration
         {
             IMongoCollection<TSaga> MongoDbCollectionFactory(IServiceProvider provider)
             {
-                if (!BsonClassMap.IsClassMapRegistered(typeof(TSaga)))
-                    BsonClassMap.RegisterClassMap(_classMapFactory(provider));
+                BsonClassMap.TryRegisterClassMap(_classMapFactory(provider));
 
                 var database = ProviderDatabaseFactory(provider);
                 var collectionNameFormatter = CollectionNameFormatterFactory(provider);
@@ -67,8 +66,11 @@ namespace MassTransit.Configuration
 
             configurator.TryAddScoped(provider => provider.GetRequiredService<MongoDbContext>().GetCollection<TSaga>());
 
-            configurator.RegisterSagaRepository<T, MongoDbCollectionContext<T>, SagaConsumeContextFactory<MongoDbCollectionContext<T>, T>,
-                MongoDbSagaRepositoryContextFactory<T>>();
+            configurator.RegisterLoadSagaRepository<T, MongoDbSagaRepositoryContextFactory<T>>();
+            configurator.RegisterQuerySagaRepository<T, MongoDbSagaRepositoryContextFactory<T>>();
+            configurator
+                .RegisterSagaRepository<T, MongoDbCollectionContext<T>, SagaConsumeContextFactory<MongoDbCollectionContext<T>, T>,
+                    MongoDbSagaRepositoryContextFactory<T>>();
         }
     }
 }

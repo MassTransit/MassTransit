@@ -11,7 +11,16 @@ services:
       - "ACCEPT_EULA=Y"
       - "SA_PASSWORD=Password12!"
     ports:
-      - 1433:1433
+      - "1433:1433"
+
+  otel-collector:
+    image: otel/opentelemetry-collector
+    restart: always
+    command: [ "--config=/etc/otelcol-config.yml" ]
+    volumes:
+      - ./configs/otel-collector/otelcol-config.yml:/etc/otelcol-config.yml
+    ports:
+      - "4317:4317"   # OTLP gRPC receiver
 
   redpanda:
     image: docker.redpanda.com/vectorized/redpanda:latest
@@ -24,8 +33,8 @@ services:
       - --pandaproxy-addr 0.0.0.0:8082
       - --advertise-pandaproxy-addr localhost:8082
     ports:
-      - 8081:8081
-      - 8082:8082
-      - 9092:9092
-      - 9644:9644
-      - 29092:29092
+      - "8081:8081"
+      - "8082:8082"
+      - "9092:9092"
+      - "9644:9644"
+      - "29092:29092"

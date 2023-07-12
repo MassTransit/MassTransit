@@ -14,7 +14,7 @@ namespace MassTransit.NHibernateIntegration
 
             var repositoryContextFactory = new NHibernateSagaRepositoryContextFactory<TSaga>(sessionFactory, consumeContextFactory);
 
-            return new SagaRepository<TSaga>(repositoryContextFactory);
+            return new SagaRepository<TSaga>(repositoryContextFactory, repositoryContextFactory, repositoryContextFactory);
         }
     }
 }

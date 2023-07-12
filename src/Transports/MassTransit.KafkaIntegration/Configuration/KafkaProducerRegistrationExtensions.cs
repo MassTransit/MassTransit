@@ -143,7 +143,7 @@ namespace MassTransit
         {
             ITopicProducer<TKey, T> GetProducerFromRider()
             {
-                var contextProvider = provider.GetService<ScopedConsumeContextProvider>();
+                var contextProvider = provider.GetService<IScopedConsumeContextProvider>();
                 if (contextProvider != null)
                 {
                     return contextProvider.HasContext

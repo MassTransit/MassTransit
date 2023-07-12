@@ -90,32 +90,23 @@ namespace MassTransit.Configuration
 
         static void RegisterClassMaps()
         {
-            if (!BsonClassMap.IsClassMapRegistered(typeof(InboxState)))
+            BsonClassMap.TryRegisterClassMap(new BsonClassMap<InboxState>(cfg =>
             {
-                BsonClassMap.RegisterClassMap(new BsonClassMap<InboxState>(cfg =>
-                {
-                    cfg.AutoMap();
-                    cfg.MapIdProperty(x => x.Id);
-                }));
-            }
+                cfg.AutoMap();
+                cfg.MapIdProperty(x => x.Id);
+            }));
 
-            if (!BsonClassMap.IsClassMapRegistered(typeof(OutboxState)))
+            BsonClassMap.TryRegisterClassMap(new BsonClassMap<OutboxState>(cfg =>
             {
-                BsonClassMap.RegisterClassMap(new BsonClassMap<OutboxState>(cfg =>
-                {
-                    cfg.AutoMap();
-                    cfg.MapIdProperty(x => x.OutboxId);
-                }));
-            }
+                cfg.AutoMap();
+                cfg.MapIdProperty(x => x.OutboxId);
+            }));
 
-            if (!BsonClassMap.IsClassMapRegistered(typeof(OutboxMessage)))
+            BsonClassMap.TryRegisterClassMap(new BsonClassMap<OutboxMessage>(cfg =>
             {
-                BsonClassMap.RegisterClassMap(new BsonClassMap<OutboxMessage>(cfg =>
-                {
-                    cfg.AutoMap();
-                    cfg.MapIdProperty(x => x.Id);
-                }));
-            }
+                cfg.AutoMap();
+                cfg.MapIdProperty(x => x.Id);
+            }));
         }
     }
 }

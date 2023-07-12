@@ -177,7 +177,8 @@ namespace MassTransit.AzureCosmos.Saga
 
     public class CosmosSagaRepositoryContext<TSaga> :
         BasePipeContext,
-        SagaRepositoryContext<TSaga>
+        QuerySagaRepositoryContext<TSaga>,
+        LoadSagaRepositoryContext<TSaga>
         where TSaga : class, ISaga
     {
         readonly DatabaseContext<TSaga> _context;
@@ -186,6 +187,26 @@ namespace MassTransit.AzureCosmos.Saga
             : base(cancellationToken)
         {
             _context = context;
+        }
+
+        public async Task<TSaga> Load(Guid correlationId)
+        {
+            try
+            {
+                var options = _context.GetItemRequestOptions();
+
+                var id = correlationId.ToString();
+                var partitionKey = new PartitionKey(id);
+
+                ItemResponse<TSaga> response = await _context.Container.ReadItemAsync<TSaga>(id, partitionKey, options, CancellationToken)
+                    .ConfigureAwait(false);
+
+                return response.Resource;
+            }
+            catch (CosmosException e) when (e.StatusCode == HttpStatusCode.NotFound)
+            {
+                return default;
+            }
         }
 
         public async Task<SagaRepositoryQueryContext<TSaga>> Query(ISagaQuery<TSaga> query, CancellationToken cancellationToken = default)
@@ -207,26 +228,6 @@ namespace MassTransit.AzureCosmos.Saga
                 .ConfigureAwait(false);
 
             return new LoadedSagaRepositoryQueryContext<TSaga>(this, instances);
-        }
-
-        public async Task<TSaga> Load(Guid correlationId)
-        {
-            try
-            {
-                var options = _context.GetItemRequestOptions();
-
-                var id = correlationId.ToString();
-                var partitionKey = new PartitionKey(id);
-
-                ItemResponse<TSaga> response = await _context.Container.ReadItemAsync<TSaga>(id, partitionKey, options, CancellationToken)
-                    .ConfigureAwait(false);
-
-                return response.Resource;
-            }
-            catch (CosmosException e) when (e.StatusCode == HttpStatusCode.NotFound)
-            {
-                return default;
-            }
         }
     }
 }

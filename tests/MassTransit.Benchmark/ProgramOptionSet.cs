@@ -35,6 +35,9 @@ namespace MassTransitBenchmark
             Add<string>("v|verbose", "Verbose output", x => Verbose = x != null);
             Add<string>("?|help", "Display this help and exit", x => Help = x != null);
             Add<int>("threads:", "The minimum number of thread pool threads", value => Threads = value);
+            Add<string>("traces", "Enable traces capturing to OTel exporter", x => EnableTraces = x != null);
+            Add<string>("metrics", "Enable metrics capturing to OTel exporter", x => EnableMetrics = x != null);
+
             Add<TransportOptions>("t|transport:", "Transport (RabbitMQ, AzureServiceBus, Mediator, AmazonSqs, InMemory, Grpc)",
                 value => Transport = value);
             Add("rabbitmq", "Use RabbitMQ", x => Transport = TransportOptions.RabbitMq);
@@ -59,6 +62,8 @@ namespace MassTransitBenchmark
         public int? Threads { get; set; }
         public bool Verbose { get; set; }
         public bool Help { get; set; }
+        public bool EnableTraces { get; set; }
+        public bool EnableMetrics { get; set; }
 
         public TransportOptions Transport { get; private set; }
 

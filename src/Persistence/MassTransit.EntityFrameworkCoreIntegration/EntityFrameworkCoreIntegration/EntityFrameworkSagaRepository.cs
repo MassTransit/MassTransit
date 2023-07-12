@@ -14,12 +14,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         public static ISagaRepository<TSaga> CreateOptimistic(ISagaDbContextFactory<TSaga> dbContextFactory,
             Func<IQueryable<TSaga>, IQueryable<TSaga>> queryCustomization = null)
         {
-            ILoadQueryProvider<TSaga> queryProvider = new DefaultSagaLoadQueryProvider<TSaga>();
-            if (queryCustomization != null)
-                queryProvider = new CustomSagaLoadQueryProvider<TSaga>(queryProvider, queryCustomization);
-
-            var queryExecutor = new OptimisticLoadQueryExecutor<TSaga>(queryProvider);
-            var lockStrategy = new OptimisticSagaRepositoryLockStrategy<TSaga>(queryProvider, queryExecutor, IsolationLevel.ReadCommitted);
+            var queryExecutor = new OptimisticLoadQueryExecutor<TSaga>(queryCustomization);
+            var lockStrategy = new OptimisticSagaRepositoryLockStrategy<TSaga>(queryExecutor, queryCustomization, IsolationLevel.ReadCommitted);
 
             return CreateRepository(dbContextFactory, lockStrategy);
         }
@@ -55,7 +51,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             var repositoryFactory =
                 new EntityFrameworkSagaRepositoryContextFactory<TSaga>(dbContextFactory, consumeContextFactory, lockStrategy);
 
-            return new SagaRepository<TSaga>(repositoryFactory);
+            return new SagaRepository<TSaga>(repositoryFactory, repositoryFactory, repositoryFactory);
         }
     }
 }

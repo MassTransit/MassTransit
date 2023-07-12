@@ -53,7 +53,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         public virtual RabbitMqEndpointAddress GetEndpointAddress(Uri hostAddress)
         {
-            return new RabbitMqEndpointAddress(hostAddress, ExchangeName, ExchangeType, Durable, AutoDelete);
+            return new RabbitMqEndpointAddress(hostAddress, ExchangeName, ExchangeType, Durable, AutoDelete,
+                delayedType: ExchangeArguments.TryGetValue("x-delayed-type", out var argument) ? (string)argument : default,
+                alternateExchange: ExchangeArguments.TryGetValue(RabbitMQ.Client.Headers.AlternateExchange, out argument) ? (string)argument : default);
         }
     }
 }

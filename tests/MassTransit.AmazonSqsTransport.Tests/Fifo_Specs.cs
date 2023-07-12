@@ -1,16 +1,19 @@
 namespace MassTransit.AmazonSqsTransport.Tests
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
-    using MassTransit.Testing;
+    using Internals;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Logging;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
+    using Testing;
 
 
     [TestFixture]
@@ -26,7 +29,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
                 Value = "Hello"
             };
 
-            await Bus.Publish(message);
+            await Bus.Publish(message, Pipe.Execute<SendContext>(ctx => ctx.SetGroupId(message.CorrelationId.ToString())));
 
             await AmazonSqsTestHarness.Consumed.Any<PingMessage>(x => x.Context.Message.CorrelationId == message.CorrelationId);
 
@@ -77,9 +80,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
                 x.AddConfigureEndpointsCallback((name, _) =>
                 {
                     if (_ is IAmazonSqsReceiveEndpointConfigurator configurator)
-                    {
                         configurator.QueueAttributes[QueueAttributeName.ContentBasedDeduplication] = true;
-                    }
                 });
 
                 x.UsingAmazonSqs((context, cfg) =>
@@ -107,7 +108,8 @@ namespace MassTransit.AmazonSqsTransport.Tests
             await busControl.StartAsync(TestCancellationToken);
             try
             {
-                await busControl.Publish(new MessageInOrder());
+                var id = NewId.NextGuid();
+                await busControl.Publish(new MessageInOrder(), Pipe.Execute<SendContext>(ctx => ctx.SetGroupId(id.ToString())));
 
                 var source = provider.GetRequiredService<TaskCompletionSource<ConsumeContext<MessageInOrder>>>();
 
@@ -211,6 +213,154 @@ namespace MassTransit.AmazonSqsTransport.Tests
             public string SanitizeName(string name)
             {
                 return _formatter.SanitizeName(name);
+            }
+        }
+    }
+
+
+    [TestFixture]
+    public class When_sending_a_bunch_of_messages_in_the_same_group
+    {
+        [Test]
+        public async Task Should_arrive_in_order()
+        {
+            await using var provider = new ServiceCollection()
+                .AddSingleton<IList<ConsumeContext<MessageInOrder>>, List<ConsumeContext<MessageInOrder>>>()
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.AddConsumer<MessageInOrderConsumer>()
+                        .Endpoint(e =>
+                        {
+                            e.ConfigureConsumeTopology = false;
+
+                            e.Name = "in-order.fifo";
+                        });
+
+                    x.UsingAmazonSqs((context, cfg) =>
+                    {
+                        cfg.LocalstackHost();
+
+                        cfg.ConfigureEndpoints(context);
+                    });
+                }).BuildServiceProvider(true);
+
+            var harness = provider.GetTestHarness();
+
+            await harness.Start();
+
+            var groupId = NewId.NextGuid().ToString();
+
+            var endpoint = await harness.Bus.GetSendEndpoint(new Uri("queue:in-order.fifo"));
+
+            const int limit = 20;
+
+            for (var i = 0; i < limit; i++)
+            {
+                await endpoint.Send(new MessageInOrder
+                {
+                    Track = true,
+                    Index = i
+                }, x =>
+                {
+                    x.SetGroupId(groupId);
+                    x.SetDeduplicationId(x.MessageId.ToString());
+                });
+            }
+
+            await harness.Consumed.SelectAsync<MessageInOrder>().Take(limit).ToListAsync();
+
+            var results = provider.GetRequiredService<IList<ConsumeContext<MessageInOrder>>>();
+
+            Assert.That(results.Select(x => x.Message.Index), Is.EqualTo(Enumerable.Range(0, limit)));
+        }
+
+        [Test]
+        public async Task Should_handle_multiple_groups_in_order()
+        {
+            await using var provider = new ServiceCollection()
+                .AddSingleton<IList<ConsumeContext<MessageInOrder>>, List<ConsumeContext<MessageInOrder>>>()
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.AddConsumer<MessageInOrderConsumer>()
+                        .Endpoint(e =>
+                        {
+                            e.ConfigureConsumeTopology = false;
+
+                            e.Name = "in-order-many.fifo";
+                        });
+
+                    x.UsingAmazonSqs((context, cfg) =>
+                    {
+                        cfg.LocalstackHost();
+
+                        cfg.ConfigureEndpoints(context);
+                    });
+                }).BuildServiceProvider(true);
+
+            var harness = provider.GetTestHarness();
+
+            await harness.Start();
+
+
+            var endpoint = await harness.Bus.GetSendEndpoint(new Uri("queue:in-order-many.fifo"));
+
+            const int groupLimit = 5;
+            const int limit = 10;
+
+            var groupIds = NewId.NextGuid(groupLimit).Select(x => x.ToString()).ToArray();
+
+            for (var i = 0; i < limit; i++)
+            {
+                for (var j = 0; j < groupLimit; j++)
+                {
+                    await endpoint.Send(new MessageInOrder
+                    {
+                        Track = j == groupLimit - 1,
+                        Index = i
+                    }, x =>
+                    {
+                        x.SetGroupId(groupIds[j]);
+                        x.SetDeduplicationId(x.MessageId.ToString());
+                    });
+                }
+            }
+
+            await harness.Consumed.SelectAsync<MessageInOrder>().Take(limit * groupLimit).ToListAsync();
+
+            var results = provider.GetRequiredService<IList<ConsumeContext<MessageInOrder>>>();
+
+            Assert.That(results.Select(x => x.Message.Index), Is.EqualTo(Enumerable.Range(0, limit)));
+        }
+
+
+        public class MessageInOrder
+        {
+            public bool Track { get; set; }
+            public int Index { get; set; }
+        }
+
+
+        class MessageInOrderConsumer :
+            IConsumer<MessageInOrder>
+        {
+            readonly ILogger<MessageInOrderConsumer> _logger;
+            readonly IList<ConsumeContext<MessageInOrder>> _messages;
+
+            public MessageInOrderConsumer(IList<ConsumeContext<MessageInOrder>> messages, ILogger<MessageInOrderConsumer> logger)
+            {
+                _messages = messages;
+                _logger = logger;
+            }
+
+            public async Task Consume(ConsumeContext<MessageInOrder> context)
+            {
+                await Task.Delay(100);
+
+                if (context.Message.Track)
+                {
+                    lock (_messages)
+                        _messages.Add(context);
+                }
             }
         }
     }

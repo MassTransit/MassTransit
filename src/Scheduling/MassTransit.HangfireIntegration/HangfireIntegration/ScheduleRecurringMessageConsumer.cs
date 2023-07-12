@@ -41,7 +41,7 @@ namespace MassTransit.HangfireIntegration
                 jobKey,
                 x => x.SendMessage(message, null!),
                 context.Message.Schedule.CronExpression,
-                tz);
+                new RecurringJobOptions { TimeZone = tz });
 
             LogContext.Debug?.Log("Scheduled: {Key}", jobKey);
             return Task.CompletedTask;

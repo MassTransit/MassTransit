@@ -18,12 +18,12 @@
         {
             var sagaId = Guid.NewGuid();
 
-            await Bus.Publish(new Start {CorrelationId = sagaId});
+            await Bus.Publish(new Start { CorrelationId = sagaId });
 
             Guid? saga = await _repository.ShouldContainSagaInState(sagaId, _machine, x => x.Running, TestTimeout);
             Assert.IsTrue(saga.HasValue);
 
-            await Bus.Publish(new Start {CorrelationId = sagaId});
+            await Bus.Publish(new Start { CorrelationId = sagaId });
 
             var faultMessage = await GetFaultMessage(TimeSpan.FromSeconds(3));
             Assert.IsNull(faultMessage?.Exceptions.Select(ex => $"{ex.ExceptionType}: {ex.Message}").First());
@@ -59,7 +59,7 @@
         }
 
         readonly TestStateMachine _machine;
-        readonly InMemorySagaRepository<Instance> _repository;
+        readonly ISagaRepository<Instance> _repository;
         readonly List<ConsumeContext<Fault>> _faultMessageContexts;
 
         public When_an_event_is_defined_as_ignored_for_state()

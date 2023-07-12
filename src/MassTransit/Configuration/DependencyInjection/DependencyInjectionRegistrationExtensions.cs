@@ -34,6 +34,7 @@ namespace MassTransit
             }
 
             AddHostedService(collection);
+            AddInstrumentation(collection);
 
             var configurator = new ServiceCollectionBusConfigurator(collection);
 
@@ -58,6 +59,8 @@ namespace MassTransit
             var configurator = new ServiceCollectionMediatorConfigurator(collection);
 
             configure?.Invoke(configurator);
+
+            AddInstrumentation(collection);
 
             configurator.Complete();
 
@@ -85,6 +88,7 @@ namespace MassTransit
             }
 
             AddHostedService(collection);
+            AddInstrumentation(collection);
 
             var configurator = new ServiceCollectionBusConfigurator<TBus, TBusInstance>(collection);
 
@@ -109,6 +113,7 @@ namespace MassTransit
                 throw new ArgumentNullException(nameof(configure));
 
             AddHostedService(collection);
+            AddInstrumentation(collection);
 
             var doIt = new Callback<TBus>(collection, configure);
 
@@ -155,6 +160,12 @@ namespace MassTransit
             services.Replace(new ServiceDescriptor(typeof(TService), typeof(TImplementation), ServiceLifetime.Scoped));
         }
 
+        static void AddInstrumentation(IServiceCollection collection)
+        {
+            collection.AddOptions<InstrumentationOptions>();
+            collection.AddSingleton<IConfigureOptions<InstrumentationOptions>, ConfigureDefaultInstrumentationOptions>();
+        }
+
         static void AddHostedService(IServiceCollection collection)
         {
             collection.AddOptions();
@@ -162,6 +173,7 @@ namespace MassTransit
             collection.TryAddEnumerable(ServiceDescriptor.Singleton<IConfigureOptions<HealthCheckServiceOptions>, ConfigureBusHealthCheckServiceOptions>());
 
             collection.AddOptions<MassTransitHostOptions>();
+            collection.TryAddSingleton<IValidateOptions<MassTransitHostOptions>, ValidateMassTransitHostOptions>();
             collection.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, MassTransitHostedService>());
         }
 
@@ -175,12 +187,13 @@ namespace MassTransit
 
 
             collection.RemoveAll<IBusDepot>();
-            collection.RemoveAll<ScopedConsumeContextProvider>();
+            collection.RemoveAll<IScopedConsumeContextProvider>();
+            collection.RemoveAll<Bind<IBus, ISetScopedConsumeContext>>();
+            collection.RemoveAll<Bind<IBus, IScopedConsumeContextProvider>>();
             collection.RemoveAll<IScopedBusContextProvider<IBus>>();
             collection.RemoveAll<ConsumeContext>();
             collection.RemoveAll<ISendEndpointProvider>();
             collection.RemoveAll<IPublishEndpoint>();
-            collection.RemoveAll<IConsumeScopeProvider>();
             collection.RemoveAll(typeof(IRequestClient<>));
 
             collection.RemoveAll<Bind<IBus, IBusInstance>>();

@@ -84,7 +84,7 @@
             {
             });
 
-            configurator.Settings.SslProtocol.ShouldBe(SslProtocols.Tls);
+            configurator.Settings.SslProtocol.ShouldBe(SslProtocols.Tls12);
         }
 
         [Test]

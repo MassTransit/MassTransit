@@ -180,7 +180,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
         protected override void ConfigureServiceBusBus(IServiceBusBusFactoryConfigurator configurator)
         {
-            configurator.UseRawJsonSerializer(RawSerializerOptions.AddTransportHeaders | RawSerializerOptions.CopyHeaders);
+            configurator.UseRawJsonSerializer();
 
             configurator.ReceiveEndpoint("input_queue_dl_fault", x =>
             {

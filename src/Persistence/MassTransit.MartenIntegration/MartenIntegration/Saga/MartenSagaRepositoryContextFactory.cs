@@ -10,7 +10,9 @@ namespace MassTransit.MartenIntegration.Saga
 
 
     public class MartenSagaRepositoryContextFactory<TSaga> :
-        ISagaRepositoryContextFactory<TSaga>
+        ISagaRepositoryContextFactory<TSaga>,
+        IQuerySagaRepositoryContextFactory<TSaga>,
+        ILoadSagaRepositoryContextFactory<TSaga>
         where TSaga : class, ISaga
     {
         readonly IDocumentStore _documentStore;
@@ -20,6 +22,18 @@ namespace MassTransit.MartenIntegration.Saga
         {
             _documentStore = documentStore;
             _factory = factory;
+        }
+
+        public Task<T> Execute<T>(Func<LoadSagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken = default)
+            where T : class
+        {
+            return ExecuteAsyncMethod(asyncMethod, cancellationToken);
+        }
+
+        public Task<T> Execute<T>(Func<QuerySagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken)
+            where T : class
+        {
+            return ExecuteAsyncMethod(asyncMethod, cancellationToken);
         }
 
         public async Task Send<T>(ConsumeContext<T> context, IPipe<SagaRepositoryContext<TSaga, T>> next)
@@ -49,7 +63,12 @@ namespace MassTransit.MartenIntegration.Saga
             await next.Send(queryContext).ConfigureAwait(false);
         }
 
-        public async Task<T> Execute<T>(Func<SagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken)
+        public void Probe(ProbeContext context)
+        {
+            context.Add("persistence", "marten");
+        }
+
+        async Task<T> ExecuteAsyncMethod<T>(Func<MartenSagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken)
             where T : class
         {
             var session = _documentStore.OpenSession();
@@ -63,11 +82,6 @@ namespace MassTransit.MartenIntegration.Saga
             {
                 session.Dispose();
             }
-        }
-
-        public void Probe(ProbeContext context)
-        {
-            context.Add("persistence", "marten");
         }
     }
 }

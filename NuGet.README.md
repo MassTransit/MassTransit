@@ -41,6 +41,7 @@ The following NuGet packages are the currently supported.
 
 ### Saga Persistence
 
+* [MassTransit.AmazonS3](https://nuget.org/packages/MassTransit.AmazonS3/)
 * [MassTransit.Azure.Cosmos](https://nuget.org/packages/MassTransit.Azure.Cosmos/)
 * [MassTransit.Azure.Cosmos.Table](https://nuget.org/packages/MassTransit.Azure.Cosmos.Table/)
 * [MassTransit.DapperIntegration](https://nuget.org/packages/MassTransit.DapperIntegration/)

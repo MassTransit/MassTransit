@@ -11,6 +11,7 @@
         where TSaga : class, SagaStateMachineInstance
         where TMessage : class
     {
+        readonly Lazy<bool> _includesInitial;
         readonly bool _insertOnInitial;
         readonly SagaStateMachine<TSaga> _machine;
         readonly IPipe<ConsumeContext<TMessage>> _missingPipe;
@@ -33,6 +34,7 @@
             _machine = machine;
 
             _policy = new Lazy<ISagaPolicy<TSaga, TMessage>>(GetSagaPolicy);
+            _includesInitial = new Lazy<bool>(() => IncludesInitial());
         }
 
         public bool ConfigureConsumeTopology { get; }
@@ -52,13 +54,13 @@
             if (_insertOnInitial && _readOnly)
                 yield return this.Failure("ReadOnly", "ReadOnly cannot be set when InsertOnInitial is true");
 
-            if (IncludesInitial() && _readOnly)
+            if (_includesInitial.Value && _readOnly)
                 yield return this.Failure("ReadOnly", "ReadOnly cannot be used for events in the initial state");
         }
 
         ISagaPolicy<TSaga, TMessage> GetSagaPolicy()
         {
-            if (IncludesInitial())
+            if (_includesInitial.Value)
                 return new NewOrExistingSagaPolicy<TSaga, TMessage>(_sagaFactory, _insertOnInitial);
 
             return new AnyExistingSagaPolicy<TSaga, TMessage>(_missingPipe, _readOnly);
@@ -66,9 +68,7 @@
 
         bool IncludesInitial()
         {
-            return _machine.States
-                .Where(state => _machine.NextEvents(state).Contains(Event))
-                .Any(x => x.Name.Equals(_machine.Initial.Name));
+            return _machine.NextEvents(_machine.Initial).Contains(Event);
         }
     }
 }

@@ -169,7 +169,7 @@
 
             public MessageEnvelope GetMessageEnvelope()
             {
-                var envelope = new JsonMessageEnvelope(this, Message, MessageTypeCache<T>.MessageTypeNames);
+                var envelope = new JsonMessageEnvelope(this, Message);
 
                 return envelope;
             }

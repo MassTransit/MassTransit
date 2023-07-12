@@ -46,21 +46,21 @@ namespace MassTransit.DependencyInjection.Registration
         }
 
         public void Configure(IReceiveEndpointConfigurator executeEndpointConfigurator, IReceiveEndpointConfigurator compensateEndpointConfigurator,
-            IServiceProvider scopeProvider)
+            IRegistrationContext context)
         {
-            ConfigureCompensate(compensateEndpointConfigurator, scopeProvider);
+            ConfigureCompensate(compensateEndpointConfigurator, context);
 
-            ConfigureExecute(executeEndpointConfigurator, scopeProvider, compensateEndpointConfigurator.InputAddress);
+            ConfigureExecute(executeEndpointConfigurator, context, compensateEndpointConfigurator.InputAddress);
         }
 
-        IActivityDefinition IActivityRegistration.GetDefinition(IServiceProvider provider)
+        IActivityDefinition IActivityRegistration.GetDefinition(IRegistrationContext context)
         {
-            return GetActivityDefinition(provider);
+            return GetActivityDefinition(context);
         }
 
-        public void ConfigureCompensate(IReceiveEndpointConfigurator configurator, IServiceProvider configurationServiceProvider)
+        public void ConfigureCompensate(IReceiveEndpointConfigurator configurator, IRegistrationContext context)
         {
-            var activityScopeProvider = configurationServiceProvider.GetRequiredService<ICompensateActivityScopeProvider<TActivity, TLog>>();
+            var activityScopeProvider = new CompensateActivityScopeProvider<TActivity, TLog>(context);
 
             var activityFactory = new ScopeCompensateActivityFactory<TActivity, TLog>(activityScopeProvider);
 
@@ -68,8 +68,8 @@ namespace MassTransit.DependencyInjection.Registration
 
             configurator.ConfigureConsumeTopology = false;
 
-            GetActivityDefinition(configurationServiceProvider)
-                .Configure(configurator, specification);
+            GetActivityDefinition(context)
+                .Configure(configurator, specification, context);
 
             foreach (Action<ICompensateActivityConfigurator<TActivity, TLog>> action in _compensateActions)
                 action(specification);
@@ -82,10 +82,10 @@ namespace MassTransit.DependencyInjection.Registration
             IncludeInConfigureEndpoints = false;
         }
 
-        public void ConfigureExecute(IReceiveEndpointConfigurator configurator, IServiceProvider configurationServiceProvider,
+        public void ConfigureExecute(IReceiveEndpointConfigurator configurator, IRegistrationContext context,
             Uri compensateAddress)
         {
-            var activityScopeProvider = configurationServiceProvider.GetRequiredService<IExecuteActivityScopeProvider<TActivity, TArguments>>();
+            var activityScopeProvider = new ExecuteActivityScopeProvider<TActivity, TArguments>(context);
 
             var activityFactory = new ScopeExecuteActivityFactory<TActivity, TArguments>(activityScopeProvider);
 
@@ -93,8 +93,8 @@ namespace MassTransit.DependencyInjection.Registration
 
             configurator.ConfigureConsumeTopology = false;
 
-            GetActivityDefinition(configurationServiceProvider)
-                .Configure(configurator, specification);
+            GetActivityDefinition(context)
+                .Configure(configurator, specification, context);
 
             foreach (Action<IExecuteActivityConfigurator<TActivity, TArguments>> action in _executeActions)
                 action(specification);

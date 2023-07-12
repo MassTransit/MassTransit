@@ -12,8 +12,7 @@ namespace MassTransit
         ILoadSagaRepository<TSaga>
         where TSaga : class, ISaga
     {
-        readonly ISagaRepository<TSaga> _repository;
-        readonly ISagaRepositoryContextFactory<TSaga> _repositoryContextFactory;
+        readonly SagaRepository<TSaga> _repository;
         readonly IndexedSagaDictionary<TSaga> _sagas;
 
         public InMemorySagaRepository()
@@ -22,9 +21,9 @@ namespace MassTransit
 
             var factory = new InMemorySagaConsumeContextFactory<TSaga>();
 
-            _repositoryContextFactory = new InMemorySagaRepositoryContextFactory<TSaga>(_sagas, factory);
+            var repositoryContextFactory = new InMemorySagaRepositoryContextFactory<TSaga>(_sagas, factory);
 
-            _repository = new SagaRepository<TSaga>(_repositoryContextFactory);
+            _repository = new SagaRepository<TSaga>(repositoryContextFactory, repositoryContextFactory, repositoryContextFactory);
         }
 
         public SagaInstance<TSaga> this[Guid id] => _sagas[id];
@@ -33,12 +32,12 @@ namespace MassTransit
 
         public Task<TSaga> Load(Guid correlationId)
         {
-            return _repositoryContextFactory.Execute(context => context.Load(correlationId));
+            return _repository.Load(correlationId);
         }
 
         public Task<IEnumerable<Guid>> Find(ISagaQuery<TSaga> query)
         {
-            return _repositoryContextFactory.Execute<IEnumerable<Guid>>(async context => await context.Query(query).ConfigureAwait(false));
+            return _repository.Find(query);
         }
 
         void IProbeSite.Probe(ProbeContext context)

@@ -3,6 +3,8 @@ namespace MassTransit.Middleware
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Linq;
     using System.Net.Mime;
     using System.Threading.Tasks;
     using Context;
@@ -34,19 +36,20 @@ namespace MassTransit.Middleware
 
             var serializerContext = deserializer.Deserialize(body, headers, _destinationAddress);
 
-            if (serializerContext.MessageId.HasValue)
-                context.MessageId = serializerContext.MessageId;
+            context.MessageId = _message.MessageId;
+            context.RequestId = _message.RequestId;
+            context.ConversationId = _message.ConversationId;
+            context.CorrelationId = _message.CorrelationId;
+            context.InitiatorId = _message.InitiatorId;
+            context.SourceAddress = _message.SourceAddress;
+            context.ResponseAddress = _message.ResponseAddress;
+            context.FaultAddress = _message.FaultAddress;
+            context.SupportedMessageTypes = string.IsNullOrWhiteSpace(_message.MessageType)
+                ? serializerContext.SupportedMessageTypes
+                : _message.MessageType.Split(';').ToArray();
 
-            context.RequestId = serializerContext.RequestId;
-            context.ConversationId = serializerContext.ConversationId;
-            context.CorrelationId = serializerContext.CorrelationId;
-            context.InitiatorId = serializerContext.InitiatorId;
-            context.SourceAddress = serializerContext.SourceAddress;
-            context.ResponseAddress = serializerContext.ResponseAddress;
-            context.FaultAddress = serializerContext.FaultAddress;
-
-            if (serializerContext.ExpirationTime.HasValue)
-                context.TimeToLive = serializerContext.ExpirationTime.Value.ToUniversalTime() - DateTime.UtcNow;
+            if (_message.ExpirationTime.HasValue)
+                context.TimeToLive = _message.ExpirationTime.Value.ToUniversalTime() - DateTime.UtcNow;
 
             foreach (KeyValuePair<string, object> header in serializerContext.Headers.GetAll())
                 context.Headers.Set(header.Key, header.Value);
@@ -80,9 +83,23 @@ namespace MassTransit.Middleware
 
                 if (!string.IsNullOrWhiteSpace(_message.ContentType))
                     yield return new KeyValuePair<string, object>(MessageHeaders.ContentType, _message.ContentType!);
+
+                foreach (KeyValuePair<string, object> header in _message.Headers.GetAll())
+                {
+                    switch (header.Key)
+                    {
+                        case MessageHeaders.MessageId:
+                        case MessageHeaders.ContentType:
+                            continue;
+
+                        default:
+                            yield return header;
+                            break;
+                    }
+                }
             }
 
-            public bool TryGetHeader(string key, out object? value)
+            public bool TryGetHeader(string key, [NotNullWhen(true)] out object? value)
             {
                 if (nameof(_message.MessageId).Equals(key, StringComparison.OrdinalIgnoreCase))
                 {
@@ -93,7 +110,13 @@ namespace MassTransit.Middleware
                 if (MessageHeaders.ContentType.Equals(key, StringComparison.OrdinalIgnoreCase))
                 {
                     value = _message.ContentType;
-                    return value != null;
+                    return true;
+                }
+
+                if (_message.Headers.TryGetHeader(key, out var headerValue))
+                {
+                    value = headerValue;
+                    return true;
                 }
 
                 value = null;

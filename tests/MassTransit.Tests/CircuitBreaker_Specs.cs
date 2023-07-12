@@ -3,8 +3,6 @@
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using MassTransit.Testing;
-    using MassTransit.Testing.Implementations;
     using NUnit.Framework;
     using TestFramework;
 
@@ -22,14 +20,13 @@
                 await Task.Delay(50);
             }
 
-            await _activityMonitor.AwaitBusInactivity();
+            await InactivityTask;
 
             // this is broken, because the faults aren't produced by an open circuit breaker
             Assert.That(_faultCount, Is.GreaterThanOrEqualTo(3));
         }
 
         int _faultCount;
-        IBusActivityMonitor _activityMonitor;
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
@@ -44,11 +41,6 @@
             });
 
             configurator.Consumer(() => new BreakingConsumer());
-        }
-
-        protected override void ConnectObservers(IBus bus)
-        {
-            _activityMonitor = bus.CreateBusActivityMonitor(TimeSpan.FromMilliseconds(500));
         }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)

@@ -17,7 +17,7 @@ namespace MassTransit.AmazonSqsTransport
         readonly CancellationToken _cancellationToken;
         readonly IAmazonSimpleNotificationService _client;
         readonly IDictionary<string, TopicInfo> _durableTopics;
-        readonly Lazy<Task> _loadExistingTopics;
+        Lazy<Task> _loadExistingTopics;
         bool _topicsLoaded;
 
         public TopicCache(IAmazonSimpleNotificationService client, CancellationToken cancellationToken)
@@ -25,20 +25,25 @@ namespace MassTransit.AmazonSqsTransport
             _client = client;
             _cancellationToken = cancellationToken;
 
-            var options = new CacheOptions { Capacity = ClientContextCacheDefaults.Capacity };
-            var policy = new TimeToLiveCachePolicy<TopicInfo>(ClientContextCacheDefaults.MaxAge);
+            _cache = ClientContextCacheDefaults.CreateCache<string, TopicInfo>();
 
-            _cache = new MassTransitCache<string, TopicInfo, ITimeToLiveCacheValue<TopicInfo>>(policy, options);
-
-            _loadExistingTopics = new Lazy<Task>(() => LoadExistingTopics(cancellationToken));
+            ResetLoadExistingTopics();
 
             _durableTopics = new Dictionary<string, TopicInfo>();
         }
 
         public async ValueTask DisposeAsync()
         {
+            TopicInfo[] topicInfos;
             lock (_durableTopics)
+            {
+                topicInfos = _durableTopics.Values.ToArray();
+
                 _durableTopics.Clear();
+            }
+
+            foreach (var topicInfo in topicInfos)
+                await topicInfo.DisposeAsync().ConfigureAwait(false);
 
             await _cache.Clear().ConfigureAwait(false);
         }
@@ -46,7 +51,7 @@ namespace MassTransit.AmazonSqsTransport
         public async Task<TopicInfo> Get(Topology.Topic topic)
         {
             if (!_topicsLoaded)
-                await _loadExistingTopics.Value.ConfigureAwait(false);
+                await LoadExistingTopics().ConfigureAwait(false);
 
             lock (_durableTopics)
             {
@@ -60,7 +65,7 @@ namespace MassTransit.AmazonSqsTransport
         public async Task<TopicInfo> GetByName(string entityName)
         {
             if (!_topicsLoaded)
-                await _loadExistingTopics.Value.ConfigureAwait(false);
+                await LoadExistingTopics().ConfigureAwait(false);
 
             lock (_durableTopics)
             {
@@ -101,7 +106,7 @@ namespace MassTransit.AmazonSqsTransport
 
             attributesResponse.EnsureSuccessfulResponse();
 
-            var missingTopic = new TopicInfo(topic.EntityName, createResponse.TopicArn);
+            var missingTopic = new TopicInfo(topic.EntityName, createResponse.TopicArn, _client, _cancellationToken);
 
             if (topic.Durable && topic.AutoDelete == false)
             {
@@ -112,7 +117,28 @@ namespace MassTransit.AmazonSqsTransport
             return missingTopic;
         }
 
-        async Task LoadExistingTopics(CancellationToken token)
+        Lazy<Task> ResetLoadExistingTopics()
+        {
+            return _loadExistingTopics = new Lazy<Task>(() => LoadExistingTopicsLazy(_cancellationToken));
+        }
+
+        Task LoadExistingTopics()
+        {
+            var result = _loadExistingTopics.Value;
+            if (result.IsFaulted || result.IsCanceled)
+            {
+                lock (this)
+                {
+                    result = _loadExistingTopics.Value;
+                    if (result.IsFaulted || result.IsCanceled)
+                        result = ResetLoadExistingTopics().Value;
+                }
+            }
+
+            return result;
+        }
+
+        async Task LoadExistingTopicsLazy(CancellationToken token)
         {
             var cursor = string.Empty;
             do
@@ -131,7 +157,7 @@ namespace MassTransit.AmazonSqsTransport
 
                     await _cache.GetOrAdd(topicName, async key =>
                     {
-                        var topicInfo = new TopicInfo(topicName, topic.TopicArn);
+                        var topicInfo = new TopicInfo(topicName, topic.TopicArn, _client, _cancellationToken);
 
                         lock (_durableTopics)
                             _durableTopics[topicInfo.EntityName] = topicInfo;

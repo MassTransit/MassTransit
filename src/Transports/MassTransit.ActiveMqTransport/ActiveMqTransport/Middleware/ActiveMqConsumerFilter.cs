@@ -72,10 +72,7 @@ namespace MassTransit.ActiveMqTransport.Middleware
 
         Supervisor CreateConsumerSupervisor(SessionContext context, ActiveMqConsumer[] actualConsumers)
         {
-            var supervisor = new Supervisor();
-
-            foreach (var consumer in actualConsumers)
-                supervisor.Add(consumer);
+            var supervisor = new ConsumerSupervisor(actualConsumers);
 
             _context.AddConsumeAgent(supervisor);
 
@@ -107,6 +104,32 @@ namespace MassTransit.ActiveMqTransport.Middleware
             await consumer.Ready.ConfigureAwait(false);
 
             return consumer;
+        }
+
+
+        class ConsumerSupervisor :
+            Supervisor
+        {
+            public ConsumerSupervisor(ActiveMqConsumer[] consumers)
+            {
+                foreach (var consumer in consumers)
+                {
+                    consumer.Completed.ContinueWith(async _ =>
+                    {
+                        try
+                        {
+                            if (!IsStopping)
+                                await this.Stop("Consumer stopped, stopping supervisor").ConfigureAwait(false);
+                        }
+                        catch (Exception exception)
+                        {
+                            LogContext.Warning?.Log(exception, "Stop Faulted");
+                        }
+                    }, TaskContinuationOptions.RunContinuationsAsynchronously);
+
+                    Add(consumer);
+                }
+            }
         }
 
 

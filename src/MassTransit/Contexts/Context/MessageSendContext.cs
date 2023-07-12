@@ -35,6 +35,8 @@ namespace MassTransit.Context
             MessageId = messageId.ToGuid();
             SentTime = messageId.Timestamp;
 
+            SupportedMessageTypes = MessageTypeCache<TMessage>.MessageTypeNames;
+
             _body = new Lazy<MessageBody>(() => GetMessageBody());
         }
 
@@ -83,6 +85,8 @@ namespace MassTransit.Context
         }
 
         public ISerialization Serialization { get; set; }
+
+        public string[] SupportedMessageTypes { get; set; }
 
         public long? BodyLength => _body.IsValueCreated ? _body.Value.Length : default;
 
@@ -137,6 +141,23 @@ namespace MassTransit.Context
             return defaultValue;
         }
 
+        protected static string[] ReadStringArray(IReadOnlyDictionary<string, object> properties, string key)
+        {
+            if (properties.TryGetValue(key, out var value))
+            {
+                if (value is string text)
+                    return text.Split(';');
+
+                if (value is byte[] bytes)
+                {
+                    text = Encoding.UTF8.GetString(bytes);
+                    return text.Split(';');
+                }
+            }
+
+            return Array.Empty<string>();
+        }
+
         protected static TimeSpan? ReadTimeSpan(IReadOnlyDictionary<string, object> properties, string key, TimeSpan? defaultValue = null)
         {
             var value = ReadString(properties, key);
@@ -177,6 +198,13 @@ namespace MassTransit.Context
             var longValue = ReadLong(properties, key);
 
             return longValue.HasValue ? (int)longValue.Value : defaultValue;
+        }
+
+        protected static short? ReadShort(IReadOnlyDictionary<string, object> properties, string key, short? defaultValue = null)
+        {
+            var longValue = ReadLong(properties, key);
+
+            return longValue.HasValue ? (short)longValue.Value : defaultValue;
         }
 
         protected static long? ReadLong(IReadOnlyDictionary<string, object> properties, string key, long? defaultValue = null)

@@ -111,7 +111,8 @@ namespace MassTransit.MartenIntegration.Saga
 
     public class MartenSagaRepositoryContext<TSaga> :
         BasePipeContext,
-        SagaRepositoryContext<TSaga>
+        QuerySagaRepositoryContext<TSaga>,
+        LoadSagaRepositoryContext<TSaga>
         where TSaga : class, ISaga
     {
         readonly IQuerySession _session;

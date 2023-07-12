@@ -123,6 +123,8 @@ namespace MassTransit.EventHubIntegration
                 sendContext.CancellationToken.ThrowIfCancellationRequested();
 
                 StartedActivity? activity = LogContext.Current?.StartSendActivity(_context, sendContext);
+                StartedInstrument? instrument = LogContext.Current?.StartSendInstrument(_context, sendContext);
+
                 try
                 {
                     if (_context.SendObservers.Count > 0)
@@ -144,12 +146,14 @@ namespace MassTransit.EventHubIntegration
                         await _context.SendObservers.SendFault(sendContext, exception).ConfigureAwait(false);
 
                     activity?.AddExceptionEvent(exception);
+                    instrument?.AddException(exception);
 
                     throw;
                 }
                 finally
                 {
                     activity?.Stop();
+                    instrument?.Stop();
                 }
             }
 

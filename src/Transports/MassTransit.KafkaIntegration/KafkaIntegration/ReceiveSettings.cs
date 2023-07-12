@@ -5,6 +5,7 @@ namespace MassTransit.KafkaIntegration
 
     public interface ReceiveSettings
     {
+        long Offset { get; }
         string Topic { get; }
         ushort MessageLimit { get; }
         ushort CheckpointMessageCount { get; }

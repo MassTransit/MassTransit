@@ -4,6 +4,7 @@ namespace MassTransit.GrpcTransport
     using System.Threading;
     using System.Threading.Channels;
     using System.Threading.Tasks;
+    using Context;
     using Fabric;
     using Internals;
     using MassTransit.Middleware;
@@ -143,7 +144,7 @@ namespace MassTransit.GrpcTransport
                             var context = new GrpcReceiveContext(message, _context);
                             try
                             {
-                                await _dispatcher.Dispatch(context).ConfigureAwait(false);
+                                await _dispatcher.Dispatch(context, NoLockReceiveContext.Instance).ConfigureAwait(false);
                             }
                             catch (Exception exception)
                             {

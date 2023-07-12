@@ -12,8 +12,13 @@ namespace MassTransit.DependencyInjection
         where TActivity : class, ICompensateActivity<TLog>
         where TLog : class
     {
-        public CompensateActivityScopeProvider(IServiceProvider serviceProvider)
-            : base(serviceProvider)
+        public CompensateActivityScopeProvider(IRegistrationContext context)
+            : base(context)
+        {
+        }
+
+        public CompensateActivityScopeProvider(IServiceProvider serviceProvider, ISetScopedConsumeContext setScopedConsumeContext)
+            : base(serviceProvider, setScopedConsumeContext)
         {
         }
 

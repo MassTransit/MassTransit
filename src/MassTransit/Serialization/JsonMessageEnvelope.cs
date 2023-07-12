@@ -16,7 +16,7 @@ namespace MassTransit.Serialization
         {
         }
 
-        public JsonMessageEnvelope(SendContext context, object message, string[] messageTypeNames)
+        public JsonMessageEnvelope(SendContext context, object message)
         {
             if (context.MessageId.HasValue)
                 MessageId = context.MessageId.Value.ToString();
@@ -45,7 +45,7 @@ namespace MassTransit.Serialization
             if (context.FaultAddress != null)
                 FaultAddress = context.FaultAddress.ToString();
 
-            MessageType = messageTypeNames;
+            MessageType = context.SupportedMessageTypes;
 
             Message = message;
 

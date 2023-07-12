@@ -21,9 +21,11 @@ namespace MassTransit.Courier
 
         public async Task Send(ConsumeContext<RoutingSlip> context, IPipe<ConsumeContext<RoutingSlip>> next)
         {
-            StartedActivity? activity = LogContext.Current?.StartCompensateActivity<TActivity, TLog>(context);
-
             var timer = Stopwatch.StartNew();
+
+            StartedActivity? activity = LogContext.Current?.StartCompensateActivity<TActivity, TLog>(context);
+            StartedInstrument? instrument = LogContext.Current?.StartActivityCompensateInstrument<TActivity, TLog>(context, timer);
+
             try
             {
                 CompensateContext<TLog> compensateContext = new HostCompensateContext<TLog>(context);
@@ -40,32 +42,45 @@ namespace MassTransit.Courier
 
                     await result.Evaluate().ConfigureAwait(false);
                 }
-                catch (Exception ex)
+                catch (Exception exception)
                 {
-                    await compensateContext.Failed(ex).Evaluate().ConfigureAwait(false);
+                    await context.NotifyFaulted(timer.Elapsed, TypeCache<TActivity>.ShortName, exception).ConfigureAwait(false);
+
+                    activity?.AddExceptionEvent(exception);
+
+                    instrument?.AddException(exception);
+
+                    await compensateContext.Failed(exception).Evaluate().ConfigureAwait(false);
                 }
 
                 await context.NotifyConsumed(timer.Elapsed, TypeCache<TActivity>.ShortName).ConfigureAwait(false);
 
                 await next.Send(context).ConfigureAwait(false);
             }
-            catch (OperationCanceledException exception)
+            catch (Exception exception) when (exception.GetBaseException() is OperationCanceledException && !context.CancellationToken.IsCancellationRequested)
             {
                 await context.NotifyFaulted(timer.Elapsed, TypeCache<TActivity>.ShortName, exception).ConfigureAwait(false);
 
-                if (exception.CancellationToken == context.CancellationToken)
-                    throw;
+                activity?.AddExceptionEvent(exception);
+
+                instrument?.AddException(exception);
 
                 throw new ConsumerCanceledException($"The operation was canceled by the activity: {TypeCache<TActivity>.ShortName}");
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                await context.NotifyFaulted(timer.Elapsed, TypeCache<TActivity>.ShortName, ex).ConfigureAwait(false);
+                await context.NotifyFaulted(timer.Elapsed, TypeCache<TActivity>.ShortName, exception).ConfigureAwait(false);
+
+                activity?.AddExceptionEvent(exception);
+
+                instrument?.AddException(exception);
+
                 throw;
             }
             finally
             {
                 activity?.Stop();
+                instrument?.Stop();
             }
         }
 

@@ -1,7 +1,9 @@
+#nullable enable
 namespace MassTransit.Context
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -15,14 +17,8 @@ namespace MassTransit.Context
         PublishEndpoint,
         ConsumeContext
     {
-        protected BaseConsumeContext(ReceiveContext receiveContext)
-            : base(receiveContext?.PublishEndpointProvider)
-        {
-            ReceiveContext = receiveContext;
-        }
-
         protected BaseConsumeContext(ReceiveContext receiveContext, SerializerContext serializerContext)
-            : base(receiveContext?.PublishEndpointProvider)
+            : base(receiveContext.PublishEndpointProvider)
         {
             ReceiveContext = receiveContext;
             SerializerContext = serializerContext;
@@ -32,7 +28,7 @@ namespace MassTransit.Context
 
         public abstract bool HasPayloadType(Type payloadType);
 
-        public abstract bool TryGetPayload<T>(out T payload)
+        public abstract bool TryGetPayload<T>([NotNullWhen(true)] out T? payload)
             where T : class;
 
         public abstract T GetOrAddPayload<T>(PayloadFactory<T> payloadFactory)
@@ -63,7 +59,7 @@ namespace MassTransit.Context
         public abstract IEnumerable<string> SupportedMessageTypes { get; }
         public abstract bool HasMessageType(Type messageType);
 
-        public abstract bool TryGetMessage<T>(out ConsumeContext<T> consumeContext)
+        public abstract bool TryGetMessage<T>([NotNullWhen(true)] out ConsumeContext<T>? consumeContext)
             where T : class;
 
         public virtual Task RespondAsync<T>(T message)
@@ -186,11 +182,12 @@ namespace MassTransit.Context
         {
             switch (exception)
             {
-                case OperationCanceledException canceledException when canceledException.CancellationToken == context.CancellationToken:
+                case OperationCanceledException canceled when canceled.CancellationToken == context.CancellationToken:
                     break;
 
                 default:
-                    await GenerateFault(context, exception).ConfigureAwait(false);
+                    if (!context.CancellationToken.IsCancellationRequested)
+                        await GenerateFault(context, exception).ConfigureAwait(false);
                     break;
             }
 
@@ -204,7 +201,7 @@ namespace MassTransit.Context
 
         public abstract void AddConsumeTask(Task task);
 
-        Task RespondInternal<T>(T message, IPipe<SendContext<T>> pipe = null)
+        Task RespondInternal<T>(T message, IPipe<SendContext<T>>? pipe = null)
             where T : class
         {
             Task<ISendEndpoint> sendEndpointTask = this.GetResponseEndpoint<T>();
@@ -213,7 +210,7 @@ namespace MassTransit.Context
                 var sendEndpoint = sendEndpointTask.Result;
 
                 return pipe.IsNotEmpty()
-                    ? sendEndpoint.Send(message, pipe, CancellationToken)
+                    ? sendEndpoint.Send(message, pipe!, CancellationToken)
                     : sendEndpoint.Send(message, CancellationToken);
             }
 
@@ -222,7 +219,7 @@ namespace MassTransit.Context
                 var sendEndpoint = await sendEndpointTask.ConfigureAwait(false);
 
                 if (pipe.IsNotEmpty())
-                    await sendEndpoint.Send(message, pipe, CancellationToken).ConfigureAwait(false);
+                    await sendEndpoint.Send(message, pipe!, CancellationToken).ConfigureAwait(false);
                 else
                     await sendEndpoint.Send(message, CancellationToken).ConfigureAwait(false);
             }
@@ -230,7 +227,7 @@ namespace MassTransit.Context
             return RespondInternalAsync();
         }
 
-        Task RespondInternal<T>(object values, IPipe<SendContext<T>> pipe = null)
+        Task RespondInternal<T>(object values, IPipe<SendContext<T>>? pipe = null)
             where T : class
         {
             Task<ISendEndpoint> sendEndpointTask = this.GetResponseEndpoint<T>();
@@ -239,7 +236,7 @@ namespace MassTransit.Context
                 var sendEndpoint = sendEndpointTask.Result;
 
                 return pipe.IsNotEmpty()
-                    ? sendEndpoint.Send(values, pipe, CancellationToken)
+                    ? sendEndpoint.Send(values, pipe!, CancellationToken)
                     : sendEndpoint.Send<T>(values, CancellationToken);
             }
 
@@ -248,7 +245,7 @@ namespace MassTransit.Context
                 var sendEndpoint = await sendEndpointTask.ConfigureAwait(false);
 
                 if (pipe.IsNotEmpty())
-                    await sendEndpoint.Send(values, pipe, CancellationToken).ConfigureAwait(false);
+                    await sendEndpoint.Send(values, pipe!, CancellationToken).ConfigureAwait(false);
                 else
                     await sendEndpoint.Send<T>(values, CancellationToken).ConfigureAwait(false);
             }
@@ -270,7 +267,7 @@ namespace MassTransit.Context
 
                 var faultEndpoint = await faultContext.GetFaultEndpoint<T>().ConfigureAwait(false);
 
-                await faultEndpoint.Send(fault, faultPipe, CancellationToken).ConfigureAwait(false);
+                await faultEndpoint.Send(fault, faultPipe, context.CancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -307,9 +304,9 @@ namespace MassTransit.Context
                 context.CorrelationId = _context.CorrelationId;
                 context.RequestId = _context.RequestId;
 
-                if (_context.TryGetPayload(out ConsumeRetryContext consumeRetryContext) && consumeRetryContext.RetryCount > 0)
+                if (_context.TryGetPayload(out ConsumeRetryContext? consumeRetryContext) && consumeRetryContext.RetryCount > 0)
                     context.Headers.Set(MessageHeaders.FaultRetryCount, consumeRetryContext.RetryCount);
-                else if (_context.TryGetPayload(out RetryContext retryContext) && retryContext.RetryCount > 0)
+                else if (_context.TryGetPayload(out RetryContext? retryContext) && retryContext.RetryCount > 0)
                     context.Headers.Set(MessageHeaders.FaultRetryCount, retryContext.RetryCount);
 
                 var redeliveryCount = _context.Headers.Get<int>(MessageHeaders.RedeliveryCount);

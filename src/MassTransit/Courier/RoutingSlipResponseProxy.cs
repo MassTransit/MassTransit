@@ -42,7 +42,7 @@
             var faultAddress = context.GetVariable<Uri>("FaultAddress") ?? context.GetVariable<Uri>("ResponseAddress")
                 ?? throw new ArgumentException($"The (Fault|Response)Address was not found on the faulted routing slip: {context.Message.TrackingNumber}");
 
-            var endpoint = await context.GetFaultEndpoint<TResponse>(faultAddress, requestId).ConfigureAwait(false);
+            var endpoint = await context.GetFaultEndpoint<TRequest>(faultAddress, requestId).ConfigureAwait(false);
 
             var response = await CreateFaultedResponseMessage(context, request, requestId.Value);
 
