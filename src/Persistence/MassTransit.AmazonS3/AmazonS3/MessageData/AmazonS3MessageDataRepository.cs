@@ -147,5 +147,11 @@ namespace MassTransit.AmazonS3.MessageData
 
             return Path.Combine(elements);
         }
+
+        public async Task Delete(Uri address, CancellationToken cancellationToken = default)
+        {
+            var filePath = ParseFilePath(address);
+            await _s3Client.DeleteAsync(_bucket, filePath, null, cancellationToken);
+        }
     }
 }

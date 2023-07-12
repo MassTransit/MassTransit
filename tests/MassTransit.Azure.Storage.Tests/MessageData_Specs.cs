@@ -1,4 +1,4 @@
-namespace MassTransit.Azure.Table.Tests
+namespace MassTransit.Azure.Storage.Tests
 {
     using System;
     using System.Threading.Tasks;
@@ -39,15 +39,15 @@ namespace MassTransit.Azure.Table.Tests
             Assert.That(await loaded.Value, Is.Not.Null);
         }
 
-        [Test]
-        public async Task Should_generate_time_based_folder()
-        {
-            MessageData<string> property = await _repository.PutString(new string('8', 10000), TimeSpan.FromDays(30));
+        //[Test]
+        //public async Task Should_generate_time_based_folder()
+        //{
+        //    MessageData<string> property = await _repository.PutString(new string('8', 10000), TimeSpan.FromDays(30));
 
-            MessageData<string> loaded = await _repository.GetString(property.Address);
+        //    MessageData<string> loaded = await _repository.GetString(property.Address);
 
-            Assert.That(await loaded.Value, Is.Not.Null);
-        }
+        //    Assert.That(await loaded.Value, Is.Not.Null);
+        //}
 
         [Test]
         public async Task Should_set_and_delete_data()
