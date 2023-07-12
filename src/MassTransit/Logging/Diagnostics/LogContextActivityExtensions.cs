@@ -17,7 +17,7 @@ namespace MassTransit.Logging
             params (string Key, object? Value)[] tags)
             where T : class
         {
-            var parentActivityContext = System.Diagnostics.Activity.Current?.Context ?? GetParentActivityContext(context.Headers);
+            var parentActivityContext = GetParentActivityContext(context.Headers, defaultContext: System.Diagnostics.Activity.Current?.Context);
 
             var activity = Cached.Source.Value.CreateActivity(transportContext.ActivityName, ActivityKind.Producer, parentActivityContext);
             if (activity == null)
@@ -33,7 +33,7 @@ namespace MassTransit.Logging
         public static StartedActivity? StartOutboxSendActivity<T>(this ILogContext logContext, SendContext<T> context)
             where T : class
         {
-            var parentActivityContext = System.Diagnostics.Activity.Current?.Context ?? GetParentActivityContext(context.Headers);
+            var parentActivityContext = GetParentActivityContext(context.Headers);
 
             var activity = Cached.Source.Value.CreateActivity("outbox send", ActivityKind.Producer, parentActivityContext);
             if (activity == null)
@@ -223,12 +223,12 @@ namespace MassTransit.Logging
             return new StartedActivity(activity);
         }
 
-        static ActivityContext GetParentActivityContext(Headers headers)
+        static ActivityContext GetParentActivityContext(Headers headers, ActivityContext? defaultContext = null)
         {
             return headers.TryGetHeader(DiagnosticHeaders.ActivityId, out var headerValue) && headerValue is string activityId
                 && ActivityContext.TryParse(activityId, null, out var activityContext)
                     ? activityContext
-                    : default;
+                    : defaultContext ?? default;
         }
 
         static StartedActivity? StartActivity(Action<System.Diagnostics.Activity> started)
