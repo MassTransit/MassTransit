@@ -20,5 +20,10 @@ namespace MassTransit.Contracts.JobService
         /// How long a overridden limit should be in effect
         /// </summary>
         TimeSpan? Duration { get; }
+
+        /// <summary>
+        /// If present, the job type name
+        /// </summary>
+        string? JobTypeName { get; }
     }
 }

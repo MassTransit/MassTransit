@@ -30,6 +30,11 @@ namespace MassTransit
         public int ConcurrentJobLimit { get; set; }
 
         /// <summary>
+        /// The name of the job type
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
         /// The job limit may be overridden temporarily, to either reduce or increase the number of concurrent jobs. Once the
         /// override job limit expires, the concurrent job limit returns to the original value.
         /// </summary>
