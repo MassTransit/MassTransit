@@ -17,7 +17,8 @@ namespace MassTransit.Logging
             params (string Key, object? Value)[] tags)
             where T : class
         {
-            var parentActivityContext = GetParentActivityContext(context.Headers, defaultContext: System.Diagnostics.Activity.Current?.Context);
+            ActivityContext parentActivityContext = default;
+            if (System.Diagnostics.Activity.Current == null) parentActivityContext = GetParentActivityContext(context.Headers);
 
             var activity = Cached.Source.Value.CreateActivity(transportContext.ActivityName, ActivityKind.Producer, parentActivityContext);
             if (activity == null)
@@ -33,7 +34,8 @@ namespace MassTransit.Logging
         public static StartedActivity? StartOutboxSendActivity<T>(this ILogContext logContext, SendContext<T> context)
             where T : class
         {
-            var parentActivityContext = GetParentActivityContext(context.Headers);
+            ActivityContext parentActivityContext = default;
+            if (System.Diagnostics.Activity.Current == null) parentActivityContext = GetParentActivityContext(context.Headers);
 
             var activity = Cached.Source.Value.CreateActivity("outbox send", ActivityKind.Producer, parentActivityContext);
             if (activity == null)
@@ -223,12 +225,12 @@ namespace MassTransit.Logging
             return new StartedActivity(activity);
         }
 
-        static ActivityContext GetParentActivityContext(Headers headers, ActivityContext? defaultContext = null)
+        static ActivityContext GetParentActivityContext(Headers headers)
         {
             return headers.TryGetHeader(DiagnosticHeaders.ActivityId, out var headerValue) && headerValue is string activityId
                 && ActivityContext.TryParse(activityId, null, out var activityContext)
                     ? activityContext
-                    : defaultContext ?? default;
+                    : default;
         }
 
         static StartedActivity? StartActivity(Action<System.Diagnostics.Activity> started)
