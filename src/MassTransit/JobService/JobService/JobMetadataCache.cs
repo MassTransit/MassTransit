@@ -11,16 +11,22 @@ namespace MassTransit.JobService
     {
         public static Guid GenerateJobTypeId(string queueName)
         {
-            var consumerTypeName = TypeCache<TConsumer>.ShortName;
-            var jobTypeName = TypeCache<TJob>.ShortName;
-
-            var key = $"{consumerTypeName}:{jobTypeName}:{queueName}";
+            var key = GenerateJobTypeName(queueName);
 
             using var hasher = MD5.Create();
 
             var data = hasher.ComputeHash(Encoding.UTF8.GetBytes(key));
 
             return new Guid(data);
+        }
+        public static string GenerateJobTypeName(string queueName)
+        {
+            var consumerTypeName = TypeCache<TConsumer>.ShortName;
+            var jobTypeName = TypeCache<TJob>.ShortName;
+
+            var name = $"{consumerTypeName}:{jobTypeName}:{queueName}";
+
+            return name;
         }
     }
 }

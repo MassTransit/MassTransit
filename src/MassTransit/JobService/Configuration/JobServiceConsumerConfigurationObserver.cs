@@ -52,8 +52,9 @@ namespace MassTransit.Configuration
                 var options = consumerConfigurator.Options<JobOptions<TMessage>>();
 
                 var jobTypeId = JobMetadataCache<T, TMessage>.GenerateJobTypeId(_configurator.InputAddress.GetEndpointName());
+                var jobTypeName = JobMetadataCache<T, TMessage>.GenerateJobTypeName(_configurator.InputAddress.GetEndpointName());
 
-                _jobServiceOptions.JobService.RegisterJobType(_configurator, options, jobTypeId);
+                _jobServiceOptions.JobService.RegisterJobType(_configurator, options, jobTypeId, jobTypeName);
             }
         }
     }

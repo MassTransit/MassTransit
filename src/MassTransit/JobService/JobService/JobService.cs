@@ -104,13 +104,13 @@
             await Task.WhenAll(_jobTypes.Values.Select(x => x.PublishJobInstanceStopped(publishEndpoint, InstanceAddress))).ConfigureAwait(false);
         }
 
-        public void RegisterJobType<T>(IReceiveEndpointConfigurator configurator, JobOptions<T> options, Guid jobTypeId)
+        public void RegisterJobType<T>(IReceiveEndpointConfigurator configurator, JobOptions<T> options, Guid jobTypeId, string jobTypeName)
             where T : class
         {
             if (_jobTypes.ContainsKey(typeof(T)))
                 throw new ConfigurationException($"A job type can only be registered once per service instance: {TypeCache<T>.ShortName}");
 
-            _jobTypes.Add(typeof(T), new JobTypeRegistration<T>(configurator, options, jobTypeId));
+            _jobTypes.Add(typeof(T), new JobTypeRegistration<T>(configurator, options, jobTypeId, jobTypeName));
         }
 
         public async Task BusStarted(IPublishEndpoint publishEndpoint)
@@ -181,12 +181,15 @@
             readonly IReceiveEndpointConfigurator _configurator;
             readonly JobOptions<T> _options;
 
-            public JobTypeRegistration(IReceiveEndpointConfigurator configurator, JobOptions<T> options, Guid jobTypeId)
+            public JobTypeRegistration(IReceiveEndpointConfigurator configurator, JobOptions<T> options, Guid jobTypeId, string jobTypeName)
             {
                 _configurator = configurator;
                 _options = options;
                 JobTypeId = jobTypeId;
+                JobTypeName = jobTypeName;
             }
+
+
 
             public Task PublishConcurrentJobLimit(IPublishEndpoint publishEndpoint, Uri instanceAddress)
             {
@@ -195,6 +198,7 @@
                 return publishEndpoint.Publish<SetConcurrentJobLimit>(new
                 {
                     JobTypeId,
+                    JobTypeName,
                     instanceAddress,
                     ServiceAddress = _configurator.InputAddress,
                     _options.ConcurrentJobLimit,
@@ -207,6 +211,7 @@
                 return publishEndpoint.Publish<SetConcurrentJobLimit>(new
                 {
                     JobTypeId,
+                    JobTypeName,
                     instanceAddress,
                     ServiceAddress = _configurator.InputAddress,
                     _options.ConcurrentJobLimit,
@@ -219,6 +224,7 @@
                 return publishEndpoint.Publish<SetConcurrentJobLimit>(new
                 {
                     JobTypeId,
+                    JobTypeName,
                     instanceAddress,
                     ServiceAddress = _configurator.InputAddress,
                     _options.ConcurrentJobLimit,
@@ -227,6 +233,7 @@
             }
 
             public Guid JobTypeId { get; }
+            string JobTypeName { get; }
         }
     }
 }

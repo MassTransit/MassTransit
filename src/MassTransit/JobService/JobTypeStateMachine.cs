@@ -180,6 +180,7 @@ namespace MassTransit
                 if (context.Message.Kind == ConcurrentLimitKind.Configured)
                 {
                     context.Saga.ConcurrentJobLimit = context.Message.ConcurrentJobLimit;
+                    context.Saga.Name = context.Message.JobTypeName;
 
                     LogContext.Debug?.Log("Concurrent Job Limit: {ConcurrencyLimit}", context.Saga.ConcurrentJobLimit);
                 }

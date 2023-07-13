@@ -10,6 +10,8 @@ namespace MassTransit.Contracts.JobService
     {
         Guid JobTypeId { get; }
 
+        string JobTypeName { get; }
+
         Uri InstanceAddress { get; }
 
         int ConcurrentJobLimit { get; }
