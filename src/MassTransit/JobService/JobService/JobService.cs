@@ -16,19 +16,19 @@
     {
         readonly ConcurrentDictionary<Guid, JobHandle> _jobs;
         readonly Dictionary<Type, IJobTypeRegistration> _jobTypes;
-        readonly JobServiceOptions _options;
         Timer _heartbeat;
 
-        public JobService(IServiceInstanceConfigurator configurator, JobServiceOptions options)
+        public JobService(JobServiceSettings settings)
         {
-            _options = options;
-            InstanceAddress = configurator.InstanceAddress;
+            Settings = settings;
 
             _jobTypes = new Dictionary<Type, IJobTypeRegistration>();
             _jobs = new ConcurrentDictionary<Guid, JobHandle>();
-
-            ConfigureSuperviseJobConsumer(configurator.InstanceEndpointConfigurator);
         }
+
+        public JobServiceSettings Settings { get; }
+
+        public Uri InstanceAddress => Settings.InstanceAddress;
 
         public bool TryGetJob(Guid jobId, out JobHandle jobReference)
         {
@@ -47,8 +47,6 @@
 
             return false;
         }
-
-        public Uri InstanceAddress { get; }
 
         public async Task<JobHandle> StartJob<T>(ConsumeContext<StartJob> context, T job, IPipe<ConsumeContext<T>> jobPipe, TimeSpan timeout)
             where T : class
@@ -132,7 +130,7 @@
                 });
             }
 
-            _heartbeat = new Timer(PublishHeartbeats, null, _options.HeartbeatInterval, _options.HeartbeatInterval);
+            _heartbeat = new Timer(PublishHeartbeats, null, Settings.HeartbeatInterval, Settings.HeartbeatInterval);
         }
 
         public Guid GetJobTypeId<T>()
@@ -144,6 +142,15 @@
             throw new ConfigurationException($"The job type was not registered: {TypeCache<T>.ShortName}");
         }
 
+        public void ConfigureSuperviseJobConsumer(IReceiveEndpointConfigurator configurator)
+        {
+            var consumerFactory = new DelegateConsumerFactory<SuperviseJobConsumer>(() => new SuperviseJobConsumer(this));
+
+            var consumerConfigurator = new ConsumerConfigurator<SuperviseJobConsumer>(consumerFactory, configurator);
+
+            configurator.AddEndpointSpecification(consumerConfigurator);
+        }
+
         void Add(JobHandle jobHandle)
         {
             if (!_jobs.TryAdd(jobHandle.JobId, jobHandle))
@@ -153,15 +160,6 @@
             {
                 TryRemoveJob(jobHandle.JobId, out _);
             });
-        }
-
-        void ConfigureSuperviseJobConsumer(IReceiveEndpointConfigurator configurator)
-        {
-            var consumerFactory = new DelegateConsumerFactory<SuperviseJobConsumer>(() => new SuperviseJobConsumer(this));
-
-            var consumerConfigurator = new ConsumerConfigurator<SuperviseJobConsumer>(consumerFactory, configurator);
-
-            configurator.AddEndpointSpecification(consumerConfigurator);
         }
 
 

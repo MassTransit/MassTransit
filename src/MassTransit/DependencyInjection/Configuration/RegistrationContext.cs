@@ -125,6 +125,9 @@ namespace MassTransit.Configuration
 
         public object GetService(Type serviceType)
         {
+            if (serviceType == typeof(IContainerSelector))
+                return Selector;
+
             return _provider.GetService(serviceType);
         }
 

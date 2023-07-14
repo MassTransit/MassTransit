@@ -15,7 +15,7 @@ namespace MassTransit
         /// </summary>
         Uri InstanceAddress { get; }
 
-        IBusFactoryConfigurator BusConfigurator { get; }
+        IReceiveConfigurator BusConfigurator { get; }
         IReceiveEndpointConfigurator InstanceEndpointConfigurator { get; }
 
         /// <summary>
@@ -31,7 +31,7 @@ namespace MassTransit
         IReceiveConfigurator<TEndpointConfigurator>
         where TEndpointConfigurator : IReceiveEndpointConfigurator
     {
-        new IBusFactoryConfigurator<TEndpointConfigurator> BusConfigurator { get; }
+        new IReceiveConfigurator<TEndpointConfigurator> BusConfigurator { get; }
         new TEndpointConfigurator InstanceEndpointConfigurator { get; }
     }
 }

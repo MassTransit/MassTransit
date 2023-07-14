@@ -15,14 +15,12 @@ namespace MassTransit.Configuration
         readonly IConsumerConnector _finalizeJobConsumerConnector;
         readonly IConsumerConnector _startJobConsumerConnector;
         readonly IConsumerConnector _submitJobConsumerConnector;
-        readonly IConsumerConnector _superviseJobConsumerConnector;
 
         public JobConsumerMessageConnector()
         {
             _submitJobConsumerConnector = ConsumerConnectorCache<SubmitJobConsumer<TJob>>.Connector;
             _startJobConsumerConnector = ConsumerConnectorCache<StartJobConsumer<TJob>>.Connector;
             _finalizeJobConsumerConnector = ConsumerConnectorCache<FinalizeJobConsumer<TJob>>.Connector;
-            _superviseJobConsumerConnector = ConsumerConnectorCache<SuperviseJobConsumer>.Connector;
         }
 
         public Type MessageType => typeof(TJob);
@@ -35,33 +33,29 @@ namespace MassTransit.Configuration
         public ConnectHandle ConnectConsumer(IConsumePipeConnector consumePipe, IConsumerFactory<TConsumer> consumerFactory,
             IConsumerSpecification<TConsumer> specification)
         {
-            var jobServiceOptions = specification.Options<JobServiceOptions>();
-            var jobService = jobServiceOptions.JobService;
-
-            if (jobService == null || jobServiceOptions.InstanceEndpointConfigurator == null)
+            if (!specification.TryGetOptions(out JobServiceSettings settings) || settings.JobService == null || settings.InstanceEndpointConfigurator == null)
             {
                 throw new ConfigurationException(
-                    "The job service must be configured prior to configuring a job consumer, using either ConfigureJobServiceEndpoints or ConfigureJobService");
+                    "The job service must be configured when adding job consumers. See https://masstransit.io/documentation/patterns/job-consumers");
             }
 
             var options = specification.Options<JobOptions<TJob>>();
 
-            var jobTypeId = jobService.GetJobTypeId<TJob>();
+            var jobTypeId = settings.JobService.GetJobTypeId<TJob>();
 
             IConsumerMessageSpecification<TConsumer, TJob> messageSpecification = specification.GetMessageSpecification<TJob>();
 
-            var jobSpecification = messageSpecification as JobConsumerMessageSpecification<TConsumer, TJob>;
-            if (jobSpecification == null)
+            if (!(messageSpecification is JobConsumerMessageSpecification<TConsumer, TJob> jobSpecification))
                 throw new ArgumentException("The consumer specification did not match the message specification type");
 
             var submitJobHandle = ConnectSubmitJobConsumer(consumePipe, jobSpecification.SubmitJobSpecification, options, jobTypeId);
 
             IPipe<ConsumeContext<TJob>> jobPipe = CreateJobPipe(consumerFactory, specification);
-            var startJobHandle = ConnectStartJobConsumer(consumePipe, jobSpecification.StartJobSpecification, options, jobTypeId, jobService, jobPipe);
+            var startJobHandle = ConnectStartJobConsumer(consumePipe, jobSpecification.StartJobSpecification, options, jobTypeId, settings.JobService, jobPipe);
 
-            ConfigureInstanceStartJobConsumer(jobServiceOptions.InstanceEndpointConfigurator, options, jobTypeId, jobService, jobPipe);
+            ConfigureInstanceStartJobConsumer(settings.InstanceEndpointConfigurator, options, jobTypeId, settings.JobService, jobPipe);
 
-            var finalizeJobHandle = ConnectFinalizeJobConsumer(consumePipe, jobSpecification.FinalizeJobSpecification, options, jobTypeId, jobService);
+            var finalizeJobHandle = ConnectFinalizeJobConsumer(consumePipe, jobSpecification.FinalizeJobSpecification, jobTypeId);
 
             return new MultipleConnectHandle(submitJobHandle, startJobHandle, finalizeJobHandle);
         }
@@ -103,7 +97,7 @@ namespace MassTransit.Configuration
         }
 
         ConnectHandle ConnectFinalizeJobConsumer(IConsumePipeConnector consumePipe, IConsumerSpecification<FinalizeJobConsumer<TJob>> specification,
-            JobOptions<TJob> options, Guid jobTypeId, IJobService jobService)
+            Guid jobTypeId)
         {
             var consumerFactory = new DelegateConsumerFactory<FinalizeJobConsumer<TJob>>(() => new FinalizeJobConsumer<TJob>(jobTypeId,
                 TypeCache<TConsumer>.ShortName));
@@ -112,8 +106,7 @@ namespace MassTransit.Configuration
         }
 
         static void ConfigureInstanceStartJobConsumer(IReceiveEndpointConfigurator configurator, JobOptions<TJob> options, Guid jobTypeId,
-            IJobService jobService,
-            IPipe<ConsumeContext<TJob>> pipe)
+            IJobService jobService, IPipe<ConsumeContext<TJob>> pipe)
         {
             var consumerFactory = new DelegateConsumerFactory<StartJobConsumer<TJob>>(() => new StartJobConsumer<TJob>(jobService, options, jobTypeId, pipe));
 

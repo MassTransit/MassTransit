@@ -13,26 +13,28 @@ namespace MassTransit.Configuration
         readonly IReceiveEndpointConfigurator _configurator;
         readonly Action<IReceiveEndpointConfigurator> _configureEndpoint;
         readonly Dictionary<Type, IConsumeConfigurator> _consumerConfigurators;
-        readonly JobServiceOptions _jobServiceOptions;
+        readonly JobServiceSettings _settings;
         bool _endpointConfigured;
 
-        public JobServiceConsumerConfigurationObserver(IReceiveEndpointConfigurator configurator, JobServiceOptions jobServiceOptions,
+        public JobServiceConsumerConfigurationObserver(IReceiveEndpointConfigurator configurator, JobServiceSettings settings,
             Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
             _configurator = configurator;
-            _jobServiceOptions = jobServiceOptions;
             _configureEndpoint = configureEndpoint;
+
+            _settings = settings;
 
             _consumerConfigurators = new Dictionary<Type, IConsumeConfigurator>();
         }
 
-        void IConsumerConfigurationObserver.ConsumerConfigured<T>(IConsumerConfigurator<T> configurator)
+        public void ConsumerConfigured<T>(IConsumerConfigurator<T> configurator)
+            where T : class
         {
             if (typeof(T).HasInterface(typeof(IJobConsumer<>)))
             {
                 _consumerConfigurators.Add(typeof(T), configurator);
 
-                configurator.Options(_jobServiceOptions);
+                configurator.Options(_settings);
 
                 if (_endpointConfigured)
                     return;
@@ -43,7 +45,9 @@ namespace MassTransit.Configuration
             }
         }
 
-        void IConsumerConfigurationObserver.ConsumerMessageConfigured<T, TMessage>(IConsumerMessageConfigurator<T, TMessage> configurator)
+        public void ConsumerMessageConfigured<T, TMessage>(IConsumerMessageConfigurator<T, TMessage> configurator)
+            where T : class
+            where TMessage : class
         {
             if (typeof(T).HasInterface<IJobConsumer<TMessage>>()
                 && _consumerConfigurators.TryGetValue(typeof(T), out var value)
@@ -53,7 +57,7 @@ namespace MassTransit.Configuration
 
                 var jobTypeId = JobMetadataCache<T, TMessage>.GenerateJobTypeId(_configurator.InputAddress.GetEndpointName());
 
-                _jobServiceOptions.JobService.RegisterJobType(_configurator, options, jobTypeId);
+                _settings.JobService.RegisterJobType(_configurator, options, jobTypeId);
             }
         }
     }

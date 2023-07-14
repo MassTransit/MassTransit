@@ -11,7 +11,7 @@ namespace MassTransit.Configuration
     {
         readonly ServiceInstanceOptions _options;
 
-        public ServiceInstanceConfigurator(IBusFactoryConfigurator<TEndpointConfigurator> configurator, ServiceInstanceOptions options,
+        public ServiceInstanceConfigurator(IReceiveConfigurator<TEndpointConfigurator> configurator, ServiceInstanceOptions options,
             TEndpointConfigurator instanceEndpointConfigurator)
         {
             if (instanceEndpointConfigurator == null)
@@ -24,10 +24,10 @@ namespace MassTransit.Configuration
 
         public Uri InstanceAddress => InstanceEndpointConfigurator.InputAddress;
 
-        IBusFactoryConfigurator IServiceInstanceConfigurator.BusConfigurator => BusConfigurator;
+        IReceiveConfigurator IServiceInstanceConfigurator.BusConfigurator => BusConfigurator;
         IReceiveEndpointConfigurator IServiceInstanceConfigurator.InstanceEndpointConfigurator => InstanceEndpointConfigurator;
 
-        public IBusFactoryConfigurator<TEndpointConfigurator> BusConfigurator { get; }
+        public IReceiveConfigurator<TEndpointConfigurator> BusConfigurator { get; }
         public TEndpointConfigurator InstanceEndpointConfigurator { get; }
 
         public void AddSpecification(ISpecification specification)

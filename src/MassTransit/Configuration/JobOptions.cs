@@ -35,7 +35,7 @@ namespace MassTransit
 
         public IRetryPolicy RetryPolicy { get; private set; }
 
-        public IEnumerable<ValidationResult> Validate()
+        IEnumerable<ValidationResult> ISpecification.Validate()
         {
             if (ConcurrentJobLimit <= 0)
                 yield return this.Failure("JobOptions", "ConcurrentJobLimit", "Must be > 0");

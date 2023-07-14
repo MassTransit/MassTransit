@@ -73,6 +73,22 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Configure the Job Service saga state machines to use Entity Framework Core as the saga repository
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        public static IJobSagaRegistrationConfigurator EntityFrameworkRepository(this IJobSagaRegistrationConfigurator configurator,
+            Action<IEntityFrameworkSagaRepositoryConfigurator>? configure = null)
+        {
+            var registrationProvider = new EntityFrameworkSagaRepositoryRegistrationProvider(configure);
+
+            configurator.UseRepositoryRegistrationProvider(registrationProvider);
+
+            return configurator;
+        }
+
+        /// <summary>
         /// Use the EntityFramework saga repository for sagas configured by type (without a specific generic call to AddSaga/AddSagaStateMachine)
         /// </summary>
         /// <param name="configurator"></param>

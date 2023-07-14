@@ -68,6 +68,66 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Configure the Job Service saga state machines to use MongoDB
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        public static IJobSagaRegistrationConfigurator MongoDbRepository(this IJobSagaRegistrationConfigurator configurator,
+            Action<IMongoDbSagaRepositoryConfigurator> configure)
+        {
+            var registrationProvider = new MongoDbSagaRepositoryRegistrationProvider(configure);
+
+            configurator.UseRepositoryRegistrationProvider(registrationProvider);
+
+            return configurator;
+        }
+
+        /// <summary>
+        /// Configure the Job Service saga state machines to use MongoDB
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="connectionString">The connection string for the MongoDB database</param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        public static IJobSagaRegistrationConfigurator MongoDbRepository(this IJobSagaRegistrationConfigurator configurator, string connectionString,
+            Action<IMongoDbSagaRepositoryConfigurator> configure)
+        {
+            var registrationProvider = new MongoDbSagaRepositoryRegistrationProvider(r =>
+            {
+                r.Connection = connectionString;
+
+                configure?.Invoke(r);
+            });
+
+            configurator.UseRepositoryRegistrationProvider(registrationProvider);
+
+            return configurator;
+        }
+
+        /// <summary>
+        /// Configure the Job Service saga state machines to use MongoDB
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="database">A ready to use MongoDB database</param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        public static IJobSagaRegistrationConfigurator MongoDbRepository(this IJobSagaRegistrationConfigurator configurator, IMongoDatabase database,
+            Action<IMongoDbSagaRepositoryConfigurator> configure)
+        {
+            var registrationProvider = new MongoDbSagaRepositoryRegistrationProvider(r =>
+            {
+                r.Database(database);
+
+                configure?.Invoke(r);
+            });
+
+            configurator.UseRepositoryRegistrationProvider(registrationProvider);
+
+            return configurator;
+        }
+
+        /// <summary>
         /// Use the MongoDB saga repository for sagas configured by type (without a specific generic call to AddSaga/AddSagaStateMachine)
         /// </summary>
         /// <param name="configurator"></param>
