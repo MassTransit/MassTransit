@@ -2,6 +2,7 @@ namespace MassTransit
 {
     using System;
     using System.Linq;
+    using Configuration;
     using Contracts.JobService;
     using Events;
 
@@ -9,15 +10,8 @@ namespace MassTransit
     public sealed class JobAttemptStateMachine :
         MassTransitStateMachine<JobAttemptSaga>
     {
-        readonly JobServiceOptions _options;
-
-        public JobAttemptStateMachine(JobServiceOptions options)
+        public JobAttemptStateMachine()
         {
-            _options = options;
-
-            SuspectJobRetryCount = options.SuspectJobRetryCount;
-            SuspectJobRetryDelay = options.SuspectJobRetryDelay ?? options.SlotWaitTime;
-
             Event(() => StartJobAttempt, x =>
             {
                 x.CorrelateById(context => context.Message.AttemptId);
@@ -42,7 +36,7 @@ namespace MassTransit
 
             Schedule(() => StatusCheckRequested, instance => instance.StatusCheckTokenId, x =>
             {
-                x.Delay = options.StatusCheckInterval;
+                x.DelayProvider = context => context.GetPayload<JobSagaSettings>().StatusCheckInterval;
                 x.Received = r =>
                 {
                     r.CorrelateById(context => context.Message.AttemptId);
@@ -61,7 +55,7 @@ namespace MassTransit
                         context.Saga.InstanceAddress ??= context.Message.InstanceAddress;
                         context.Saga.ServiceAddress ??= context.Message.ServiceAddress;
                     })
-                    .SendStartJob(this)
+                    .SendStartJob()
                     .ScheduleJobStatusCheck(this)
                     .TransitionTo(Starting));
 
@@ -70,14 +64,14 @@ namespace MassTransit
                     .Then(context =>
                     {
                         context.Saga.Faulted = context.Message.Timestamp;
-                        context.Saga.InstanceAddress ??= context.GetPayload<ConsumeContext>().SourceAddress;
+                        context.Saga.InstanceAddress ??= context.SourceAddress;
                     })
-                    .SendJobAttemptFaulted(this)
+                    .SendJobAttemptFaulted()
                     .TransitionTo(Faulted));
 
             During(Starting,
                 When(StatusCheckRequested.Received)
-                    .SendJobAttemptStartTimeout(this)
+                    .SendJobAttemptStartTimeout()
                     .TransitionTo(Faulted));
 
             During(Initial, Starting, Running,
@@ -111,21 +105,21 @@ namespace MassTransit
                     .Then(context =>
                     {
                         context.Saga.Faulted = context.Message.Timestamp;
-                        context.Saga.InstanceAddress ??= context.GetPayload<ConsumeContext>().SourceAddress;
+                        context.Saga.InstanceAddress ??= context.SourceAddress;
                     })
                     .Unschedule(StatusCheckRequested)
                     .TransitionTo(Faulted));
 
             During(Running,
                 When(StatusCheckRequested.Received)
-                    .SendCheckJobStatus(this)
+                    .SendCheckJobStatus()
                     .TransitionTo(CheckingStatus)
                     .Catch<Exception>(eb => eb.TransitionTo(Suspect))
                     .ScheduleJobStatusCheck(this));
 
             During(CheckingStatus,
                 When(StatusCheckRequested.Received)
-                    .SendCheckJobStatus(this)
+                    .SendCheckJobStatus()
                     .TransitionTo(Suspect)
                     .Catch<Exception>(eb => eb.TransitionTo(Suspect))
                     .ScheduleJobStatusCheck(this));
@@ -142,7 +136,7 @@ namespace MassTransit
 
             During(Suspect,
                 When(StatusCheckRequested.Received)
-                    .SendJobAttemptFaulted(this)
+                    .SendJobAttemptFaulted()
                     .TransitionTo(Faulted));
 
             During(Faulted,
@@ -162,13 +156,8 @@ namespace MassTransit
             SetCompletedWhenFinalized();
         }
 
-        public int SuspectJobRetryCount { get; }
-        public TimeSpan SuspectJobRetryDelay { get; }
-
-        public Uri JobSagaEndpointAddress => _options.JobSagaEndpointAddress;
-        public Uri JobTypeSagaEndpointAddress => _options.JobTypeSagaEndpointAddress;
-        public Uri JobAttemptSagaEndpointAddress => _options.JobAttemptSagaEndpointAddress; // ReSharper disable UnassignedGetOnlyAutoProperty
         // ReSharper disable MemberCanBePrivate.Global
+        // ReSharper disable UnassignedGetOnlyAutoProperty
         public State Starting { get; }
         public State Running { get; }
         public State CheckingStatus { get; }
@@ -191,29 +180,47 @@ namespace MassTransit
 
     static class JobAttemptStateMachineBehaviorExtensions
     {
-        public static EventActivityBinder<JobAttemptSaga, StartJobAttempt> SendStartJob(this EventActivityBinder<JobAttemptSaga, StartJobAttempt> binder,
-            JobAttemptStateMachine machine)
+        public static TimeSpan? GetRetryDelay<T>(this BehaviorContext<JobAttemptSaga, T> context)
+            where T : class
         {
-            return binder.SendAsync(context => context.Saga.InstanceAddress ?? context.Saga.ServiceAddress,
-                context => context.Init<StartJob>(new
-                {
-                    context.Message.JobId,
-                    context.Message.AttemptId,
-                    context.Message.RetryAttempt,
-                    context.Message.Job,
-                    context.Message.JobTypeId,
-                }), context => context.ResponseAddress = machine.JobAttemptSagaEndpointAddress);
+            var settings = context.GetPayload<JobSagaSettings>();
+
+            return context.Saga.RetryAttempt < settings.SuspectJobRetryCount
+                ? settings.SuspectJobRetryDelay ?? settings.SlotWaitTime
+                : default(TimeSpan?);
+        }
+
+        static Uri GetJobSagaAddress(this SagaConsumeContext<JobAttemptSaga> context)
+        {
+            return context.GetPayload<JobSagaSettings>().JobSagaEndpointAddress;
+        }
+
+        static Uri GetJobAttemptSagaAddress(this SagaConsumeContext<JobAttemptSaga> context)
+        {
+            return context.GetPayload<JobSagaSettings>().JobAttemptSagaEndpointAddress;
+        }
+
+        public static EventActivityBinder<JobAttemptSaga, StartJobAttempt> SendStartJob(this EventActivityBinder<JobAttemptSaga, StartJobAttempt> binder)
+        {
+            return binder.SendAsync(context => context.Saga.InstanceAddress ?? context.Saga.ServiceAddress, context => context.Init<StartJob>(new
+            {
+                context.Message.JobId,
+                context.Message.AttemptId,
+                context.Message.RetryAttempt,
+                context.Message.Job,
+                context.Message.JobTypeId,
+            }), (behaviorContext, context) => context.ResponseAddress = behaviorContext.GetJobAttemptSagaAddress());
         }
 
         public static EventActivityBinder<JobAttemptSaga, JobStatusCheckRequested> SendCheckJobStatus(this EventActivityBinder<JobAttemptSaga,
-            JobStatusCheckRequested> binder, JobAttemptStateMachine machine)
+            JobStatusCheckRequested> binder)
         {
             return binder.SendAsync(context => context.Saga.InstanceAddress ?? context.Saga.ServiceAddress,
                     context => context.Init<GetJobAttemptStatus>(new
                     {
                         context.Saga.JobId,
                         AttemptId = context.Saga.CorrelationId
-                    }), context => context.ResponseAddress = machine.JobAttemptSagaEndpointAddress)
+                    }), (behaviorContext, context) => context.ResponseAddress = behaviorContext.GetJobAttemptSagaAddress())
                 .Catch<Exception>(ex => ex.Then(context => LogContext.Error?.Log(context.Exception, "Failed sending GetJobAttemptStatus")));
         }
 
@@ -225,9 +232,9 @@ namespace MassTransit
         }
 
         public static EventActivityBinder<JobAttemptSaga, Fault<StartJob>> SendJobAttemptFaulted(
-            this EventActivityBinder<JobAttemptSaga, Fault<StartJob>> binder, JobAttemptStateMachine machine)
+            this EventActivityBinder<JobAttemptSaga, Fault<StartJob>> binder)
         {
-            return binder.SendAsync(context => machine.JobSagaEndpointAddress, context => context.Init<JobAttemptFaulted>(new
+            return binder.SendAsync(context => context.GetJobSagaAddress(), context => context.Init<JobAttemptFaulted>(new
             {
                 context.Saga.JobId,
                 AttemptId = context.Saga.CorrelationId,
@@ -237,32 +244,30 @@ namespace MassTransit
             }));
         }
 
-        public static EventActivityBinder<JobAttemptSaga, T> SendJobAttemptFaulted<T>(this EventActivityBinder<JobAttemptSaga, T> binder,
-            JobAttemptStateMachine machine)
+        public static EventActivityBinder<JobAttemptSaga, T> SendJobAttemptFaulted<T>(this EventActivityBinder<JobAttemptSaga, T> binder)
             where T : class
         {
-            return binder.SendAsync(context => machine.JobSagaEndpointAddress, context => context.Init<JobAttemptFaulted>(new
+            return binder.SendAsync(context => context.GetJobSagaAddress(), context => context.Init<JobAttemptFaulted>(new
             {
                 context.Saga.JobId,
                 AttemptId = context.Saga.CorrelationId,
                 context.Saga.RetryAttempt,
                 InVar.Timestamp,
-                RetryDelay = context.Saga.RetryAttempt < machine.SuspectJobRetryCount ? machine.SuspectJobRetryDelay : default(TimeSpan?),
+                RetryDelay = context.GetRetryDelay(),
                 Exceptions = new FaultExceptionInfo(new TimeoutException("The job status check timed out."))
             }));
         }
 
-        public static EventActivityBinder<JobAttemptSaga, T> SendJobAttemptStartTimeout<T>(this EventActivityBinder<JobAttemptSaga, T> binder,
-            JobAttemptStateMachine machine)
+        public static EventActivityBinder<JobAttemptSaga, T> SendJobAttemptStartTimeout<T>(this EventActivityBinder<JobAttemptSaga, T> binder)
             where T : class
         {
-            return binder.SendAsync(context => machine.JobSagaEndpointAddress, context => context.Init<JobAttemptFaulted>(new
+            return binder.SendAsync(context => context.GetJobSagaAddress(), context => context.Init<JobAttemptFaulted>(new
             {
                 context.Saga.JobId,
                 AttemptId = context.Saga.CorrelationId,
                 context.Saga.RetryAttempt,
                 InVar.Timestamp,
-                RetryDelay = context.Saga.RetryAttempt < machine.SuspectJobRetryCount ? machine.SuspectJobRetryDelay : default(TimeSpan?),
+                RetryDelay = context.GetRetryDelay(),
                 Exceptions = new FaultExceptionInfo(new TimeoutException($"The job service failed to respond: {context.Saga.InstanceAddress} (Suspect)"))
             }));
         }

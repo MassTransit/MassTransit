@@ -9,6 +9,8 @@
     {
         Uri InstanceAddress { get; }
 
+        JobServiceSettings Settings { get; }
+
         /// <summary>
         /// Starts a job
         /// </summary>
@@ -55,5 +57,7 @@
         /// <returns></returns>
         Guid GetJobTypeId<T>()
             where T : class;
+
+        void ConfigureSuperviseJobConsumer(IReceiveEndpointConfigurator configurator);
     }
 }

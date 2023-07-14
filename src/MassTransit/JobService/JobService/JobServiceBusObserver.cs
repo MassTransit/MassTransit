@@ -29,9 +29,9 @@ namespace MassTransit.JobService
 
         public async Task PostStart(IBus bus, Task<BusReady> busReady)
         {
-            LogContext.Debug?.Log("Job Service starting: {InstanceAddress}", _jobService.InstanceAddress);
-
             await busReady.ConfigureAwait(false);
+
+            LogContext.Debug?.Log("Job Service starting: {InstanceAddress}", _jobService.InstanceAddress);
 
             await _jobService.BusStarted(bus).ConfigureAwait(false);
 

@@ -12,7 +12,7 @@ namespace MassTransit.Configuration
         ISpecification
         where TReceiveEndpointConfigurator : IReceiveEndpointConfigurator
     {
-        readonly IBusFactoryConfigurator<TReceiveEndpointConfigurator> _busConfigurator;
+        readonly IReceiveConfigurator<TReceiveEndpointConfigurator> _busConfigurator;
         readonly JobServiceOptions _options;
         bool _endpointsConfigured;
         ISagaRepository<JobAttemptSaga> _jobAttemptRepository;
@@ -30,19 +30,27 @@ namespace MassTransit.Configuration
                 ? instanceConfigurator.Options(options)
                 : instanceConfigurator.Options<JobServiceOptions>();
 
-            JobService = new JobService(instanceConfigurator, _options);
+            var settings = new InstanceJobServiceSettings(new JobConsumerOptions() { HeartbeatInterval = _options.HeartbeatInterval })
+            {
+                InstanceEndpointConfigurator = instanceConfigurator.InstanceEndpointConfigurator,
+                InstanceAddress = instanceConfigurator.InstanceAddress
+            };
 
-            instanceConfigurator.BusConfigurator.ConnectBusObserver(new JobServiceBusObserver(JobService));
+            settings.JobService.ConfigureSuperviseJobConsumer(instanceConfigurator.InstanceEndpointConfigurator);
+
+            if (instanceConfigurator.BusConfigurator is IBusObserverConnector connector)
+                connector.ConnectBusObserver(new JobServiceBusObserver(settings.JobService));
+
             instanceConfigurator.AddSpecification(this);
 
-            _options.JobService = JobService;
+            _options.JobService = settings.JobService;
             _options.InstanceEndpointConfigurator = instanceConfigurator.InstanceEndpointConfigurator;
 
             _options.JobTypeSagaEndpointName = instanceConfigurator.EndpointNameFormatter.Saga<JobTypeSaga>();
             _options.JobStateSagaEndpointName = instanceConfigurator.EndpointNameFormatter.Saga<JobSaga>();
             _options.JobAttemptSagaEndpointName = instanceConfigurator.EndpointNameFormatter.Saga<JobAttemptSaga>();
 
-            instanceConfigurator.ConnectEndpointConfigurationObserver(new JobServiceEndpointConfigurationObserver(_options, cfg =>
+            instanceConfigurator.ConnectEndpointConfigurationObserver(new JobServiceEndpointConfigurationObserver(settings, cfg =>
             {
                 if (_jobTypeSagaEndpointConfigurator != null)
                     cfg.AddDependency(_jobTypeSagaEndpointConfigurator);
@@ -52,8 +60,6 @@ namespace MassTransit.Configuration
                     cfg.AddDependency(_jobAttemptSagaEndpointConfigurator);
             }));
         }
-
-        IJobService JobService { get; }
 
         public ISagaRepository<JobTypeSaga> Repository
         {
@@ -85,11 +91,6 @@ namespace MassTransit.Configuration
             set => _options.JobAttemptSagaEndpointName = value;
         }
 
-        public TimeSpan SlotRequestTimeout
-        {
-            set => _options.SlotRequestTimeout = value;
-        }
-
         public TimeSpan SlotWaitTime
         {
             set => _options.SlotWaitTime = value;
@@ -98,11 +99,6 @@ namespace MassTransit.Configuration
         public TimeSpan StatusCheckInterval
         {
             set => _options.StatusCheckInterval = value;
-        }
-
-        public TimeSpan StartJobTimeout
-        {
-            set => _options.StartJobTimeout = value;
         }
 
         public int SuspectJobRetryCount
@@ -136,6 +132,11 @@ namespace MassTransit.Configuration
             ISpecification turnoutOptions = _options;
 
             return turnoutOptions.Validate();
+        }
+
+        public void OnConfigureEndpoint(Action<IReceiveEndpointConfigurator> callback)
+        {
+            _options.OnConfigureEndpoint = callback;
         }
 
         public void ConfigureJobServiceEndpoints(IRegistrationContext context = null)
@@ -186,8 +187,9 @@ namespace MassTransit.Configuration
                     e.UsePartitioner<JobRetryDelayElapsed>(partition, p => p.Message.JobId);
                 }
 
-                var stateMachine = new JobStateMachine(_options);
-                e.StateMachineSaga(stateMachine, _jobRepository ?? new InMemorySagaRepository<JobSaga>());
+                var stateMachine = new JobStateMachine();
+                e.StateMachineSaga(stateMachine, _jobRepository ?? new InMemorySagaRepository<JobSaga>(),
+                    s => s.UseFilter(new PayloadFilter<SagaConsumeContext<JobSaga>, JobSagaSettings>(_options)));
 
                 _jobSagaEndpointConfigurator = e;
 
@@ -218,8 +220,9 @@ namespace MassTransit.Configuration
                     e.UsePartitioner<JobStatusCheckRequested>(partition, p => p.Message.AttemptId);
                 }
 
-                var stateMachine = new JobAttemptStateMachine(_options);
-                e.StateMachineSaga(stateMachine, _jobAttemptRepository ?? new InMemorySagaRepository<JobAttemptSaga>());
+                var stateMachine = new JobAttemptStateMachine();
+                e.StateMachineSaga(stateMachine, _jobAttemptRepository ?? new InMemorySagaRepository<JobAttemptSaga>(),
+                    s => s.UseFilter(new PayloadFilter<SagaConsumeContext<JobAttemptSaga>, JobSagaSettings>(_options)));
 
                 _jobAttemptSagaEndpointConfigurator = e;
 
@@ -243,9 +246,10 @@ namespace MassTransit.Configuration
                     e.UsePartitioner<SetConcurrentJobLimit>(partition, p => p.Message.JobTypeId);
                 }
 
-                var stateMachine = new JobTypeStateMachine(_options);
+                var stateMachine = new JobTypeStateMachine();
 
-                e.StateMachineSaga(stateMachine, _jobTypeRepository ?? new InMemorySagaRepository<JobTypeSaga>());
+                e.StateMachineSaga(stateMachine, _jobTypeRepository ?? new InMemorySagaRepository<JobTypeSaga>(),
+                    s => s.UseFilter(new PayloadFilter<SagaConsumeContext<JobTypeSaga>, JobSagaSettings>(_options)));
 
                 _jobTypeSagaEndpointConfigurator = e;
 

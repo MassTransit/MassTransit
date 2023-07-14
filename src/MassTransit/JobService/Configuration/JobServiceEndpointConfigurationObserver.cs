@@ -1,25 +1,25 @@
 namespace MassTransit.Configuration
 {
     using System;
+    using JobService;
 
 
     public class JobServiceEndpointConfigurationObserver :
         IEndpointConfigurationObserver
     {
         readonly Action<IReceiveEndpointConfigurator> _configureEndpoint;
-        readonly JobServiceOptions _jobServiceOptions;
+        readonly JobServiceSettings _settings;
 
-        public JobServiceEndpointConfigurationObserver(JobServiceOptions jobServiceOptions, Action<IReceiveEndpointConfigurator> configureEndpoint)
+        public JobServiceEndpointConfigurationObserver(JobServiceSettings settings, Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
-            _jobServiceOptions = jobServiceOptions;
+            _settings = settings;
             _configureEndpoint = configureEndpoint;
         }
 
         public void EndpointConfigured<T>(T configurator)
             where T : IReceiveEndpointConfigurator
         {
-            var observer = new JobServiceConsumerConfigurationObserver(configurator, _jobServiceOptions, _configureEndpoint);
-            configurator.ConnectConsumerConfigurationObserver(observer);
+            configurator.ConnectConsumerConfigurationObserver(new JobServiceConsumerConfigurationObserver(configurator, _settings, _configureEndpoint));
         }
     }
 }

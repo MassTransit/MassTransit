@@ -54,11 +54,50 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Configure the Job Service saga state machines to use Redis
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        public static IJobSagaRegistrationConfigurator RedisRepository(this IJobSagaRegistrationConfigurator configurator,
+            Action<IRedisSagaRepositoryConfigurator> configure = null)
+        {
+            var registrationProvider = new RedisSagaRepositoryRegistrationProvider(configure);
+
+            configurator.UseRepositoryRegistrationProvider(registrationProvider);
+
+            return configurator;
+        }
+
+        /// <summary>
+        /// Configure the Job Service saga state machines to use Redis
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configuration">The Redis configuration string</param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        public static IJobSagaRegistrationConfigurator RedisRepository(this IJobSagaRegistrationConfigurator configurator, string configuration,
+            Action<IRedisSagaRepositoryConfigurator> configure = null)
+        {
+            var registrationProvider = new RedisSagaRepositoryRegistrationProvider(r =>
+            {
+                r.DatabaseConfiguration(configuration);
+
+                configure?.Invoke(r);
+            });
+
+            configurator.UseRepositoryRegistrationProvider(registrationProvider);
+
+            return configurator;
+        }
+
+        /// <summary>
         /// Use the Redis saga repository for sagas configured by type (without a specific generic call to AddSaga/AddSagaStateMachine)
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="configure"></param>
-        public static void SetRedisSagaRepositoryProvider(this IRegistrationConfigurator configurator, Action<IRedisSagaRepositoryConfigurator> configure)
+        public static void SetRedisSagaRepositoryProvider(this IRegistrationConfigurator configurator,
+            Action<IRedisSagaRepositoryConfigurator> configure = null)
         {
             configurator.SetSagaRepositoryProvider(new RedisSagaRepositoryRegistrationProvider(configure));
         }
@@ -70,7 +109,7 @@ namespace MassTransit
         /// <param name="configuration">The Redis configuration string</param>
         /// <param name="configure"></param>
         public static void SetRedisSagaRepositoryProvider(this IRegistrationConfigurator configurator, string configuration,
-            Action<IRedisSagaRepositoryConfigurator> configure)
+            Action<IRedisSagaRepositoryConfigurator> configure = null)
         {
             configurator.SetSagaRepositoryProvider(new RedisSagaRepositoryRegistrationProvider(r =>
             {

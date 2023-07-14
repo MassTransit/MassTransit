@@ -101,6 +101,95 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Configure the Job Service saga state machines to use Azure Cosmos
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="accountEndpoint">The cosmos service endpoint to use</param>
+        /// <param name="authKeyOrResourceToken">The cosmos account key or resource token to use to create the client.</param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        public static IJobSagaRegistrationConfigurator CosmosRepository(this IJobSagaRegistrationConfigurator configurator, string accountEndpoint,
+            string authKeyOrResourceToken, Action<ICosmosSagaRepositoryConfigurator> configure)
+        {
+            var registrationProvider = new CosmosSagaRepositoryRegistrationProvider(x =>
+            {
+                x.AccountEndpoint = accountEndpoint;
+                x.AuthKeyOrResourceToken = authKeyOrResourceToken;
+
+                configure?.Invoke(x);
+            });
+
+            configurator.UseRepositoryRegistrationProvider(registrationProvider);
+
+            return configurator;
+        }
+
+        /// <summary>
+        /// Configure the Job Service saga state machines to use Azure Cosmos
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="connectionString">
+        /// The connection string to the cosmos account. ex:
+        /// AccountEndpoint=https://XXXXX.documents.azure.com:443/;AccountKey=SuperSecretKey;
+        /// </param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        public static IJobSagaRegistrationConfigurator CosmosRepository(this IJobSagaRegistrationConfigurator configurator, string connectionString,
+            Action<ICosmosSagaRepositoryConfigurator> configure)
+        {
+            var registrationProvider = new CosmosSagaRepositoryRegistrationProvider(x =>
+            {
+                x.ConnectionString = connectionString;
+
+                configure?.Invoke(x);
+            });
+
+            configurator.UseRepositoryRegistrationProvider(registrationProvider);
+
+            return configurator;
+        }
+
+        /// <summary>
+        /// Configure the Job Service saga state machines to use Azure Cosmos
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="accountEndpoint">The cosmos service endpoint to use</param>
+        /// <param name="tokenCredential"><see cref="TokenCredential" />The token to provide AAD token for authorization.</param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        public static IJobSagaRegistrationConfigurator CosmosRepository(this IJobSagaRegistrationConfigurator configurator, string accountEndpoint,
+            TokenCredential tokenCredential, Action<ICosmosSagaRepositoryConfigurator> configure)
+        {
+            var registrationProvider = new CosmosSagaRepositoryRegistrationProvider(x =>
+            {
+                x.AccountEndpoint = accountEndpoint;
+                x.TokenCredential = tokenCredential;
+
+                configure?.Invoke(x);
+            });
+
+            configurator.UseRepositoryRegistrationProvider(registrationProvider);
+
+            return configurator;
+        }
+
+        /// <summary>
+        /// Configure the Job Service saga state machines to use Azure Cosmos
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        public static IJobSagaRegistrationConfigurator CosmosRepository(this IJobSagaRegistrationConfigurator configurator,
+            Action<ICosmosSagaRepositoryConfigurator> configure)
+        {
+            var registrationProvider = new CosmosSagaRepositoryRegistrationProvider(configure);
+
+            configurator.UseRepositoryRegistrationProvider(registrationProvider);
+
+            return configurator;
+        }
+
+        /// <summary>
         /// Use the Cosmos saga repository for sagas configured by type (without a specific generic call to AddSaga/AddSagaStateMachine)
         /// </summary>
         /// <param name="configurator"></param>
@@ -178,7 +267,8 @@ namespace MassTransit
         static IServiceCollection AddCosmosClientFactory(this IServiceCollection collection, CosmosAuthSettings authSettings)
         {
             return collection.AddSingleton<ICosmosClientFactory>(provider =>
-                new SystemTextJsonCosmosClientFactory(authSettings, provider.GetRequiredService<IOptions<CosmosClientOptions>>(), SystemTextJsonMessageSerializer.Options.PropertyNamingPolicy));
+                new SystemTextJsonCosmosClientFactory(authSettings, provider.GetRequiredService<IOptions<CosmosClientOptions>>(),
+                    SystemTextJsonMessageSerializer.Options.PropertyNamingPolicy));
         }
 
         /// <summary>
@@ -230,7 +320,8 @@ namespace MassTransit
         /// <param name="authSettings"></param>
         static IServiceCollection AddNewtonsoftCosmosClientFactory(this IServiceCollection collection, CosmosAuthSettings authSettings)
         {
-            return collection.AddSingleton<ICosmosClientFactory>(provider => new NewtonsoftJsonCosmosClientFactory(authSettings, provider.GetRequiredService<IOptions<CosmosClientOptions>>()));
+            return collection.AddSingleton<ICosmosClientFactory>(provider =>
+                new NewtonsoftJsonCosmosClientFactory(authSettings, provider.GetRequiredService<IOptions<CosmosClientOptions>>()));
         }
 
         /// <summary>
