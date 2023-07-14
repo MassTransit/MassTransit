@@ -15,13 +15,15 @@
             _context = context;
             _exception = exception;
 
+            ElementId = _context.MessageId;
+
             ElapsedTime = context.ReceiveContext.ElapsedTime;
             StartTime = DateTime.UtcNow - ElapsedTime;
             if (StartTime < context.SentTime)
                 StartTime = context.SentTime.Value;
         }
 
-        Guid? IAsyncListElement.ElementId => _context.MessageId;
+        public Guid? ElementId { get; }
         ConsumeContext IReceivedMessage.Context => _context;
         public DateTime StartTime { get; }
         public TimeSpan ElapsedTime { get; }

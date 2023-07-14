@@ -15,11 +15,13 @@ namespace MassTransit.Testing
             _context = context;
             _exception = exception;
 
+            ElementId = _context.MessageId;
+
             StartTime = context.SentTime ?? DateTime.UtcNow;
             ElapsedTime = DateTime.UtcNow - StartTime;
         }
 
-        Guid? IAsyncListElement.ElementId => _context.MessageId;
+        public Guid? ElementId { get; }
         SendContext ISentMessage.Context => _context;
         public DateTime StartTime { get; }
         public TimeSpan ElapsedTime { get; }
