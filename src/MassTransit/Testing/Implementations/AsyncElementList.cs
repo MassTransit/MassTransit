@@ -16,8 +16,9 @@ namespace MassTransit.Testing.Implementations
     {
         readonly Connectable<Channel<TElement>> _channels;
         readonly IList<TElement> _messages;
+        readonly IDictionary<Guid, TElement> _messageLookup;
         readonly TimeSpan _timeout;
-        CancellationToken _testCompleted;
+        readonly CancellationToken _testCompleted;
 
         protected AsyncElementList(TimeSpan timeout, CancellationToken testCompleted = default)
         {
@@ -25,6 +26,7 @@ namespace MassTransit.Testing.Implementations
             _testCompleted = testCompleted;
 
             _messages = new List<TElement>();
+            _messageLookup = new Dictionary<Guid, TElement>();
             _channels = new Connectable<Channel<TElement>>();
         }
 
@@ -44,15 +46,20 @@ namespace MassTransit.Testing.Implementations
 
             try
             {
+                var index = 0;
+
                 TElement[] messages;
                 lock (_messages)
                     messages = _messages.ToArray();
 
-                foreach (var entry in messages)
+                for (; index < messages.Length; index++)
                 {
-                    if (filter(entry) && !returned.Contains(entry.ElementId.Value))
+                    var entry = messages[index];
+                    var elementId = entry.ElementId.Value;
+
+                    if (filter(entry) && !returned.Contains(elementId))
                     {
-                        returned.Add(entry.ElementId.Value);
+                        returned.Add(elementId);
                         yield return entry;
                     }
                 }
@@ -81,11 +88,14 @@ namespace MassTransit.Testing.Implementations
                     lock (_messages)
                         messages = _messages.ToArray();
 
-                    foreach (var entry in messages)
+                    for (; index < messages.Length; index++)
                     {
-                        if (filter(entry) && !returned.Contains(entry.ElementId.Value))
+                        var entry = messages[index];
+                        var elementId = entry.ElementId.Value;
+
+                        if (filter(entry) && !returned.Contains(elementId))
                         {
-                            returned.Add(entry.ElementId.Value);
+                            returned.Add(elementId);
                             yield return entry;
                         }
                     }
@@ -180,10 +190,13 @@ namespace MassTransit.Testing.Implementations
 
             lock (_messages)
             {
-                if (_messages.Any(x => x.ElementId == context.ElementId))
+                var elementId = context.ElementId.Value;
+
+                if(_messageLookup.ContainsKey(elementId))
                     return;
 
                 _messages.Add(context);
+                _messageLookup.Add(elementId, context);
 
                 Monitor.PulseAll(_messages);
             }
