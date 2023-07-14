@@ -20,8 +20,8 @@ namespace MassTransit.Configuration
 
             IEnumerable<ValidationResult> warningForMessages = ConsumerMetadataCache<TConsumer>
                 .ConsumerTypes
-                .Where(x => !IntrospectionExtensions.GetTypeInfo(x.MessageType).IsInterface)
-                .Where(x => !(HasProtectedDefaultConstructor(x.MessageType) || HasSinglePublicConstructor(x.MessageType)))
+                .Where(x => !x.MessageType.GetTypeInfo().IsInterface)
+                .Where(x => !HasProtectedDefaultConstructor(x.MessageType))
                 .Select(x =>
                     $"The {TypeCache.GetShortName(x.MessageType)} message should have a public or protected default constructor."
                     + " Without an available constructor, MassTransit will initialize new message instances"
@@ -45,15 +45,8 @@ namespace MassTransit.Configuration
 
         static bool HasProtectedDefaultConstructor(Type type)
         {
-            return type.GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance)
+            return type.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
                 .Any(constructorInfo => !constructorInfo.GetParameters().Any());
-        }
-
-        static bool HasSinglePublicConstructor(Type type)
-        {
-            return type.GetConstructors(BindingFlags.Public | BindingFlags.Instance)
-                    .All(constructorInfo => !constructorInfo.GetParameters().Any())
-                && type.GetConstructors().Length == 1;
         }
     }
 }
