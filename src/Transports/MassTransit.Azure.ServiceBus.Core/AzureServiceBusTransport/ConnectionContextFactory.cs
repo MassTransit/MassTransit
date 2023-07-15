@@ -67,34 +67,44 @@ namespace MassTransit.AzureServiceBusTransport
                 EnableCrossEntityTransactions = false,
             };
 
+            var managementOptions = new ServiceBusAdministrationClientOptions
+            {
+                Retry =
+                {
+                    MaxRetries = settings.RetryLimit,
+                    Mode = Azure.Core.RetryMode.Exponential,
+                    MaxDelay = settings.RetryMaxBackoff
+                }
+            };
+
             if (settings.TokenCredential != null)
             {
                 client ??= new ServiceBusClient(endpoint, settings.TokenCredential, clientOptions);
-                managementClient ??= new ServiceBusAdministrationClient(endpoint, settings.TokenCredential);
+                managementClient ??= new ServiceBusAdministrationClient(endpoint, settings.TokenCredential, managementOptions);
             }
             else if (settings.NamedKeyCredential != null)
             {
                 client ??= new ServiceBusClient(endpoint, settings.NamedKeyCredential, clientOptions);
-                managementClient ??= new ServiceBusAdministrationClient(endpoint, settings.NamedKeyCredential);
+                managementClient ??= new ServiceBusAdministrationClient(endpoint, settings.NamedKeyCredential, managementOptions);
             }
             else if (settings.SasCredential != null)
             {
                 client ??= new ServiceBusClient(endpoint, settings.SasCredential, clientOptions);
-                managementClient ??= new ServiceBusAdministrationClient(endpoint, settings.SasCredential);
+                managementClient ??= new ServiceBusAdministrationClient(endpoint, settings.SasCredential, managementOptions);
             }
             else
             {
                 if (settings.ConnectionString != null && HasSharedAccess(settings.ConnectionString))
                 {
                     client ??= new ServiceBusClient(settings.ConnectionString, clientOptions);
-                    managementClient ??= new ServiceBusAdministrationClient(settings.ConnectionString);
+                    managementClient ??= new ServiceBusAdministrationClient(settings.ConnectionString, managementOptions);
                 }
                 else
                 {
                     var defaultAzureCredential = new DefaultAzureCredential();
 
                     client ??= new ServiceBusClient(endpoint, defaultAzureCredential, clientOptions);
-                    managementClient ??= new ServiceBusAdministrationClient(endpoint, defaultAzureCredential);
+                    managementClient ??= new ServiceBusAdministrationClient(endpoint, defaultAzureCredential, managementOptions);
                 }
             }
 
