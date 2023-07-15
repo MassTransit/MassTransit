@@ -1,8 +1,5 @@
-namespace MassTransit.GrpcTransport.Configuration
+namespace MassTransit.Configuration
 {
-    using MassTransit.Configuration;
-
-
     public class RoutingKeySendTopologyConvention :
         IRoutingKeySendTopologyConvention
     {
@@ -10,17 +7,14 @@ namespace MassTransit.GrpcTransport.Configuration
 
         public RoutingKeySendTopologyConvention()
         {
-            DefaultFormatter = new EmptyRoutingKeyFormatter();
-
             _cache = new TopologyConventionCache<IMessageSendTopologyConvention>(typeof(IRoutingKeyMessageSendTopologyConvention<>), new Factory());
         }
 
-        bool IMessageSendTopologyConvention.TryGetMessageSendTopologyConvention<T>(out IMessageSendTopologyConvention<T> convention)
+        public bool TryGetMessageSendTopologyConvention<T>(out IMessageSendTopologyConvention<T> convention)
+            where T : class
         {
             return _cache.GetOrAdd<T, IMessageSendTopologyConvention<T>>().TryGetMessageSendTopologyConvention(out convention);
         }
-
-        public IRoutingKeyFormatter DefaultFormatter { get; set; }
 
 
         class Factory :

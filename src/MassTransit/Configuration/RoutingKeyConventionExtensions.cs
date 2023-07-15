@@ -1,11 +1,11 @@
 namespace MassTransit
 {
     using System;
-    using RabbitMqTransport;
-    using RabbitMqTransport.Configuration;
+    using Configuration;
+    using Transports;
 
 
-    public static class RabbitMqRoutingKeyConventionExtensions
+    public static class RoutingKeyConventionExtensions
     {
         public static void UseRoutingKeyFormatter<T>(this IMessageSendTopologyConfigurator<T> configurator, IMessageRoutingKeyFormatter<T> formatter)
             where T : class
@@ -32,7 +32,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Use the delegate to format the routing key, using Empty if the string is null upon return
+        /// Use the delegate to format the routing key
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="configurator"></param>
@@ -44,7 +44,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Use the delegate to format the routing key, using Empty if the string is null upon return
+        /// Use the delegate to format the routing key
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="configurator"></param>

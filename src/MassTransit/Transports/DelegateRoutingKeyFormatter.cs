@@ -1,4 +1,4 @@
-namespace MassTransit.GrpcTransport
+namespace MassTransit.Transports
 {
     using System;
 
@@ -14,9 +14,9 @@ namespace MassTransit.GrpcTransport
             _formatter = formatter;
         }
 
-        public string FormatRoutingKey(GrpcSendContext<TMessage> context)
+        public string FormatRoutingKey(SendContext<TMessage> context)
         {
-            return _formatter(context) ?? "";
+            return _formatter(context);
         }
     }
 }

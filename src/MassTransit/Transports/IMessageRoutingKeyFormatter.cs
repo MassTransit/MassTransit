@@ -1,8 +1,8 @@
-﻿namespace MassTransit.GrpcTransport
+﻿namespace MassTransit.Transports
 {
     public interface IMessageRoutingKeyFormatter<in TMessage>
         where TMessage : class
     {
-        string FormatRoutingKey(GrpcSendContext<TMessage> context);
+        string FormatRoutingKey(SendContext<TMessage> context);
     }
 }

@@ -1,6 +1,6 @@
-﻿namespace MassTransit.GrpcTransport.Configuration
+﻿namespace MassTransit.Configuration
 {
-    using MassTransit.Configuration;
+    using Transports;
 
 
     public interface IRoutingKeyMessageSendTopologyConvention<TMessage> :

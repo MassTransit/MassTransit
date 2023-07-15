@@ -1,4 +1,4 @@
-namespace MassTransit.RabbitMqTransport
+namespace MassTransit.Transports
 {
     public class MessageRoutingKeyFormatter<TMessage> :
         IMessageRoutingKeyFormatter<TMessage>
@@ -11,7 +11,7 @@ namespace MassTransit.RabbitMqTransport
             _formatter = formatter;
         }
 
-        public string FormatRoutingKey(RabbitMqSendContext<TMessage> context)
+        public string FormatRoutingKey(SendContext<TMessage> context)
         {
             return _formatter.FormatRoutingKey(context);
         }

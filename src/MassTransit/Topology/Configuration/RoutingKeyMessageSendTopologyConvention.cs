@@ -1,6 +1,6 @@
-namespace MassTransit.RabbitMqTransport.Configuration
+namespace MassTransit.Configuration
 {
-    using MassTransit.Configuration;
+    using Transports;
 
 
     public class RoutingKeyMessageSendTopologyConvention<TMessage> :
