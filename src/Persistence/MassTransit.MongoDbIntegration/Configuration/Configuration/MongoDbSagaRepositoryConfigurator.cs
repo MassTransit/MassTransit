@@ -24,6 +24,7 @@ namespace MassTransit.Configuration
             {
                 cfg.AutoMap();
                 cfg.MapIdProperty(x => x.CorrelationId);
+                cfg.MapProperty(x => x.Version).SetIgnoreIfDefault(false);
             }));
         }
 
