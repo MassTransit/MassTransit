@@ -1,7 +1,9 @@
 ﻿namespace MassTransit.HangfireIntegration.Tests
 {
     using System;
+    using System.Diagnostics;
     using System.Threading.Tasks;
+    using Logging;
     using NUnit.Framework;
 
 
@@ -22,6 +24,37 @@
             });
 
             await handled;
+        }
+
+        [Test]
+        public async Task Should_preserve_parent_trace_id()
+        {
+            using var source = new ActivitySource(nameof(Should_preserve_parent_trace_id));
+            using var listener = new ActivityListener
+            {
+                ShouldListenTo = x => x.Name == DiagnosticHeaders.DefaultListenerName || x.Name == nameof(Should_preserve_parent_trace_id),
+                Sample = (ref ActivityCreationOptions<ActivityContext> options) => ActivitySamplingResult.AllDataAndRecorded
+            };
+
+            ActivitySource.AddActivityListener(listener);
+
+            using var parentActivity = source.StartActivity();
+
+            Task<ConsumeContext<SomeMessage>> handled = SubscribeHandler<SomeMessage>();
+
+            Bus.ConnectConsumer(() => new SomeMessageConsumer());
+
+            await Scheduler.ScheduleSend(Bus.Address, DateTime.Now, new SomeMessage
+            {
+                SendDate = DateTime.Now,
+                Source = "Schedule"
+            });
+
+            var context = await handled;
+
+            var parentContext = ActivityContext.Parse(context.GetHeader(DiagnosticHeaders.ActivityId), null);
+
+            Assert.That(parentContext.TraceId, Is.EqualTo(parentActivity.TraceId));
         }
 
 

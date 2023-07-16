@@ -17,7 +17,10 @@ namespace MassTransit.Logging
             params (string Key, object? Value)[] tags)
             where T : class
         {
-            var activity = Cached.Source.Value.CreateActivity(transportContext.ActivityName, ActivityKind.Producer);
+            ActivityContext parentActivityContext = default;
+            if (System.Diagnostics.Activity.Current == null) parentActivityContext = GetParentActivityContext(context.Headers);
+
+            var activity = Cached.Source.Value.CreateActivity(transportContext.ActivityName, ActivityKind.Producer, parentActivityContext);
             if (activity == null)
                 return null;
 
@@ -31,7 +34,10 @@ namespace MassTransit.Logging
         public static StartedActivity? StartOutboxSendActivity<T>(this ILogContext logContext, SendContext<T> context)
             where T : class
         {
-            var activity = Cached.Source.Value.CreateActivity("outbox send", ActivityKind.Producer);
+            ActivityContext parentActivityContext = default;
+            if (System.Diagnostics.Activity.Current == null) parentActivityContext = GetParentActivityContext(context.Headers);
+
+            var activity = Cached.Source.Value.CreateActivity("outbox send", ActivityKind.Producer, parentActivityContext);
             if (activity == null)
                 return null;
 
