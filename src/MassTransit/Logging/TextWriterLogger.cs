@@ -16,11 +16,18 @@ namespace MassTransit.Logging
             _factory = factory;
             _logLevel = logLevel;
         }
-
+    #if NET7_0_OR_GREATER
+        public IDisposable BeginScope<TState>(TState state)
+            where TState : notnull
+        {
+            return TestDisposable.Instance;
+        }
+    #else
         public IDisposable BeginScope<TState>(TState state)
         {
             return TestDisposable.Instance;
         }
+    #endif
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
         {
