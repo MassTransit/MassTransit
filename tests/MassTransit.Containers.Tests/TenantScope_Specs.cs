@@ -47,6 +47,39 @@ namespace MassTransit.Containers.Tests
         }
 
         [Test]
+        public async Task It_should_be_resolved_prior_to_resolving_the_consumer_for_message_type()
+        {
+            await using var provider = new ServiceCollection()
+                .AddScoped<TenantContext>()
+                .AddScoped<FakeTenantDbContext>()
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.AddConsumer<TenantConsumer>();
+
+                    x.AddConfigureEndpointsCallback((context, name, cfg) =>
+                    {
+                        cfg.UseConsumeFilter<TenantConsumeContextFilter>(context);
+                    });
+
+                    x.UsingInMemory((context, cfg) =>
+                    {
+                        cfg.UsePublishFilter(typeof(PublishTenantHeaderFilter<>), context);
+
+                        cfg.ConfigureEndpoints(context);
+                    });
+                })
+                .BuildServiceProvider(true);
+
+            var harness = provider.GetTestHarness();
+
+            await harness.Start();
+
+            IRequestClient<TenantRequest> client = harness.GetRequestClient<TenantRequest>();
+
+            await client.GetResponse<TenantResponse>(new TenantRequest());
+        }
+
+        [Test]
         public async Task It_should_be_resolved_prior_to_resolving_the_consumer_with_send()
         {
             await using var provider = new ServiceCollection()
@@ -310,6 +343,34 @@ namespace MassTransit.Containers.Tests
             }
 
             public Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
+            {
+                var tenantId = context.Headers.Get("X-TenantId", string.Empty);
+                _tenantContext.TenantId = tenantId;
+                _logger.LogInformation($"{tenantId} Reading header for tenant");
+                return next.Send(context);
+            }
+        }
+
+
+        class TenantConsumeContextFilter :
+            IFilter<ConsumeContext<TenantRequest>>
+        {
+            readonly ILogger<TenantConsumeContextFilter> _logger;
+            readonly TenantContext _tenantContext;
+
+            public TenantConsumeContextFilter(TenantContext tenantContext, ILogger<TenantConsumeContextFilter> logger)
+            {
+                _tenantContext = tenantContext;
+                _logger = logger;
+                _logger.LogInformation("Creating TenantContextFilter");
+            }
+
+            public void Probe(ProbeContext context)
+            {
+                context.CreateScope("TenantConsumeContextFilter");
+            }
+
+            public Task Send(ConsumeContext<TenantRequest> context, IPipe<ConsumeContext<TenantRequest>> next)
             {
                 var tenantId = context.Headers.Get("X-TenantId", string.Empty);
                 _tenantContext.TenantId = tenantId;

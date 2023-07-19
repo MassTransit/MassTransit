@@ -59,8 +59,10 @@ namespace MassTransit
                 throw new ArgumentNullException(nameof(context));
 
             var filterType = typeof(TFilter);
+
             var messageTypeFilterConfigurator = new MessageTypeFilterConfigurator();
-            messageTypeFilterConfigurator.Include(type => filterType.HasInterface(typeof(ConsumeContext<>).MakeGenericType(type)));
+            messageTypeFilterConfigurator.Include(type =>
+                typeof(IFilter<>).MakeGenericType(typeof(ConsumeContext<>).MakeGenericType(type)).IsAssignableFrom(filterType));
 
             var observer = new ScopedConsumePipeSpecificationObserver(filterType, context, messageTypeFilterConfigurator.Filter);
 
