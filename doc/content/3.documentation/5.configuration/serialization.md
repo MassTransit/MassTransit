@@ -21,6 +21,23 @@ _System.Text.Json_ is the default message serializer/deserializer.
 | **application/vnd.masstransit+json** | **JSON (w/envelope)** | `UseJsonSerializer` **(default)** |
 | application/json                     | JSON                  | `UseRawJsonSerializer`            |
 
+#### Customize the Serializer Support
+
+```csharp
+services.AddMassTransit(cfg =>
+{
+    cfg.Using[Broker](broker => 
+    {
+        broker.ConfigureJsonSerializerOptions(options =>
+        {
+            // customize the JsonSerializerOptions here
+            return options;
+        });
+    })
+    
+})
+```
+
 ### Newtonsoft
 
 The [MassTransit.Newtonsoft](https://nuget.org/packages/MassTransit.Newtonsoft) package adds the serialization formats listed below. 
