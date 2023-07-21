@@ -155,13 +155,14 @@ namespace MassTransit.EventHubIntegration
 
                 eventData.Properties.Set(context.Headers);
 
-                while (!eventDataBatch.TryAdd(eventData) && eventDataBatch.Count > 0)
-                {
-                    await FlushAsync(eventDataBatch).ConfigureAwait(false);
+                if (eventDataBatch.TryAdd(eventData))
+                    continue;
 
-                    if (sendContexts.Length - i > 1)
-                        eventDataBatch = await producerContext.CreateBatch(options, context.CancellationToken).ConfigureAwait(false);
-                }
+                await FlushAsync(eventDataBatch).ConfigureAwait(false);
+                eventDataBatch = await producerContext.CreateBatch(options, context.CancellationToken).ConfigureAwait(false);
+
+                if (!eventDataBatch.TryAdd(eventData))
+                    throw new ApplicationException("Message can not be added to the empty EventDataBatch");
             }
 
             if (eventDataBatch.Count > 0)
