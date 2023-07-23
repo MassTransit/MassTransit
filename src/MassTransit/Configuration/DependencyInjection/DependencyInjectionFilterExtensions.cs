@@ -2,7 +2,6 @@ namespace MassTransit
 {
     using System;
     using Configuration;
-    using Internals;
 
 
     public static class DependencyInjectionFilterExtensions
@@ -121,7 +120,9 @@ namespace MassTransit
 
             var filterType = typeof(TFilter);
             var messageTypeFilterConfigurator = new MessageTypeFilterConfigurator();
-            messageTypeFilterConfigurator.Include(type => filterType.HasInterface(typeof(SendContext<>).MakeGenericType(type)));
+
+            messageTypeFilterConfigurator.Include(type =>
+                typeof(IFilter<>).MakeGenericType(typeof(SendContext<>).MakeGenericType(type)).IsAssignableFrom(filterType));
 
             var observer = new ScopedFilterSpecificationObserver(filterType, context, messageTypeFilterConfigurator.Filter);
             configurator.ConfigureSend(cfg => cfg.ConnectSendPipeSpecificationObserver(observer));
@@ -178,7 +179,9 @@ namespace MassTransit
 
             var filterType = typeof(TFilter);
             var messageTypeFilterConfigurator = new MessageTypeFilterConfigurator();
-            messageTypeFilterConfigurator.Include(type => filterType.HasInterface(typeof(PublishContext<>).MakeGenericType(type)));
+
+            messageTypeFilterConfigurator.Include(type =>
+                typeof(IFilter<>).MakeGenericType(typeof(PublishContext<>).MakeGenericType(type)).IsAssignableFrom(filterType));
 
             var observer = new ScopedFilterSpecificationObserver(filterType, context, messageTypeFilterConfigurator.Filter);
             configurator.ConfigurePublish(cfg => cfg.ConnectPublishPipeSpecificationObserver(observer));
@@ -235,7 +238,9 @@ namespace MassTransit
 
             var filterType = typeof(TFilter);
             var messageTypeFilterConfigurator = new MessageTypeFilterConfigurator();
-            messageTypeFilterConfigurator.Include(type => filterType.HasInterface(typeof(ExecuteContext<>).MakeGenericType(type)));
+
+            messageTypeFilterConfigurator.Include(type =>
+                typeof(IFilter<>).MakeGenericType(typeof(ExecuteContext<>).MakeGenericType(type)).IsAssignableFrom(filterType));
 
             var observer = new ScopedExecuteActivityPipeSpecificationObserver(filterType, context, messageTypeFilterConfigurator.Filter);
             configurator.ConnectActivityConfigurationObserver(observer);
@@ -292,7 +297,9 @@ namespace MassTransit
 
             var filterType = typeof(TFilter);
             var messageTypeFilterConfigurator = new MessageTypeFilterConfigurator();
-            messageTypeFilterConfigurator.Include(type => filterType.HasInterface(typeof(CompensateContext<>).MakeGenericType(type)));
+
+            messageTypeFilterConfigurator.Include(type =>
+                typeof(IFilter<>).MakeGenericType(typeof(CompensateContext<>).MakeGenericType(type)).IsAssignableFrom(filterType));
 
             var observer = new ScopedCompensateActivityPipeSpecificationObserver(filterType, context, messageTypeFilterConfigurator.Filter);
             configurator.ConnectActivityConfigurationObserver(observer);
