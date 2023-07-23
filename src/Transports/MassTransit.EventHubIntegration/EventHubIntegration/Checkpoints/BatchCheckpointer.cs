@@ -73,15 +73,12 @@ namespace MassTransit.EventHubIntegration.Checkpoints
             {
                 try
                 {
-                    var messageCount = 0;
-
-                    while (messageCount < _settings.CheckpointMessageCount)
+                    while (batch.Count < _settings.CheckpointMessageCount)
                     {
                         if (_channel.Reader.TryRead(out var confirmation))
                         {
                             await confirmation.Confirmed.OrCanceled(_cancellationToken).ConfigureAwait(false);
                             batch.Add(confirmation);
-                            messageCount++;
                         }
                         else if (await _channel.Reader.WaitToReadAsync(batchToken.Token).ConfigureAwait(false) == false)
                         {
