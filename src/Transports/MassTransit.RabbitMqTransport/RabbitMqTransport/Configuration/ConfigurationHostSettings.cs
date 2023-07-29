@@ -12,13 +12,15 @@ namespace MassTransit.RabbitMqTransport.Configuration
     class ConfigurationHostSettings :
         RabbitMqHostSettings
     {
+        internal const SslProtocols DefaultSslProtocols = SslProtocols.Tls12;
+
         readonly ConfigurationBatchSettings _batchSettings;
         readonly Lazy<Uri> _hostAddress;
 
         public ConfigurationHostSettings()
         {
             var defaultOptions = new SslOption();
-            SslProtocol = SslProtocols.Tls12;
+            SslProtocol = DefaultSslProtocols;
 
             AcceptablePolicyErrors = defaultOptions.AcceptablePolicyErrors | SslPolicyErrors.RemoteCertificateChainErrors;
 
