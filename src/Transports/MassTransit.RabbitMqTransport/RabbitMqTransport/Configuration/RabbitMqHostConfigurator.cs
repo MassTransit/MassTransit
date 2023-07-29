@@ -1,7 +1,6 @@
 namespace MassTransit.RabbitMqTransport.Configuration
 {
     using System;
-    using System.Security.Authentication;
 
 
     public class RabbitMqHostConfigurator :
@@ -18,7 +17,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
             {
                 UseSsl(s =>
                 {
-                    s.Protocol = SslProtocols.Tls12;
                 });
             }
 
@@ -36,6 +34,13 @@ namespace MassTransit.RabbitMqTransport.Configuration
                 Port = port,
                 VirtualHost = virtualHost
             };
+
+            if (_settings.Port == 5671)
+            {
+                UseSsl(s =>
+                {
+                });
+            }
 
             if (!string.IsNullOrEmpty(connectionName))
                 _settings.ClientProvidedName = connectionName;
