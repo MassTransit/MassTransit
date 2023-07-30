@@ -8,8 +8,8 @@ export default defineNuxtConfig({
         documentDriven: true,
         highlight: {
             theme: {
-                dark: 'material-darker',
-                default: 'material-lighter'
+                dark: 'github-dark',
+                default: 'github-light'
             },
             preload: ['json', 'shell', 'markdown', 'yaml', 'bash', 'csharp']
         },
