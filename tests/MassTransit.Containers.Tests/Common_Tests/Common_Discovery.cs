@@ -95,7 +95,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
         public class PingSagaDefinition :
             SagaDefinition<DiscoveryPingSaga>
         {
-            protected override void ConfigureSaga(IReceiveEndpointConfigurator endpointConfigurator, ISagaConfigurator<DiscoveryPingSaga> sagaConfigurator)
+            protected override void ConfigureSaga(IReceiveEndpointConfigurator endpointConfigurator, ISagaConfigurator<DiscoveryPingSaga> sagaConfigurator,
+                IRegistrationContext context)
             {
                 var partition = endpointConfigurator.CreatePartitioner(Environment.ProcessorCount);
 
@@ -143,7 +144,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
                 EndpointName = "discovery-ping-state";
             }
 
-            protected override void ConfigureSaga(IReceiveEndpointConfigurator endpointConfigurator, ISagaConfigurator<DiscoveryPingState> sagaConfigurator)
+            protected override void ConfigureSaga(IReceiveEndpointConfigurator endpointConfigurator, ISagaConfigurator<DiscoveryPingState> sagaConfigurator,
+                IRegistrationContext context)
             {
                 var partition = endpointConfigurator.CreatePartitioner(Environment.ProcessorCount);
 
@@ -164,7 +166,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
             }
 
             protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,
-                IConsumerConfigurator<DiscoveryPingConsumer> consumerConfigurator)
+                IConsumerConfigurator<DiscoveryPingConsumer> consumerConfigurator,
+                IRegistrationContext context)
             {
             }
         }

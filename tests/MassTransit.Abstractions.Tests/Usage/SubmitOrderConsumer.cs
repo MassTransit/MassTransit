@@ -33,7 +33,8 @@ namespace MassTransit.Abstractions.Tests.Usage
         }
 
         protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,
-            IConsumerConfigurator<SubmitOrderConsumer> consumerConfigurator)
+            IConsumerConfigurator<SubmitOrderConsumer> consumerConfigurator,
+            IRegistrationContext context)
         {
         }
     }

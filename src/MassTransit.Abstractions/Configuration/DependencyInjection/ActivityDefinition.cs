@@ -33,7 +33,9 @@ namespace MassTransit
             if (ConcurrentMessageLimit.HasValue)
                 compensateActivityConfigurator.ConcurrentMessageLimit = ConcurrentMessageLimit;
 
+        #pragma warning disable CS0618
             ConfigureCompensateActivity(endpointConfigurator, compensateActivityConfigurator);
+        #pragma warning restore CS0618
             ConfigureCompensateActivity(endpointConfigurator, compensateActivityConfigurator, context);
         }
 
@@ -59,6 +61,8 @@ namespace MassTransit
             CompensateEndpointDefinition = new CompensateActivityEndpointDefinition<TActivity, TLog>(configurator.Settings);
         }
 
+        [Obsolete(
+            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
         /// <summary>
         /// Called when the compensate activity is being configured on the endpoint.
         /// </summary>

@@ -40,7 +40,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
     public class AzureServiceBusFutureDefinition<TFuture> : DefaultFutureDefinition<TFuture>
         where TFuture : class, SagaStateMachine<FutureState>
     {
-        protected override void ConfigureSaga(IReceiveEndpointConfigurator endpointConfigurator, ISagaConfigurator<FutureState> sagaConfigurator)
+        protected override void ConfigureSaga(IReceiveEndpointConfigurator endpointConfigurator, ISagaConfigurator<FutureState> sagaConfigurator,
+            IRegistrationContext context)
         {
             if (endpointConfigurator is IServiceBusEndpointConfigurator configurator)
                 configurator.RequiresSession = true;

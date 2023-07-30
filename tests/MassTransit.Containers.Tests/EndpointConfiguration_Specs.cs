@@ -204,7 +204,8 @@ namespace MassTransit.Containers.Tests
             }
 
             protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,
-                IConsumerConfigurator<PingConsumer> consumerConfigurator)
+                IConsumerConfigurator<PingConsumer> consumerConfigurator,
+                IRegistrationContext context)
             {
             }
         }
@@ -223,7 +224,8 @@ namespace MassTransit.Containers.Tests
             }
 
             protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,
-                IConsumerConfigurator<PingConsumer> consumerConfigurator)
+                IConsumerConfigurator<PingConsumer> consumerConfigurator,
+                IRegistrationContext context)
             {
             }
         }
@@ -232,12 +234,9 @@ namespace MassTransit.Containers.Tests
         class EmptyPingConsumerDefinition :
             ConsumerDefinition<PingConsumer>
         {
-            public EmptyPingConsumerDefinition()
-            {
-            }
-
             protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,
-                IConsumerConfigurator<PingConsumer> consumerConfigurator)
+                IConsumerConfigurator<PingConsumer> consumerConfigurator,
+                IRegistrationContext context)
             {
             }
         }

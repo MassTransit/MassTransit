@@ -49,7 +49,9 @@ namespace MassTransit
             if (_concurrentMessageLimit.HasValue)
                 sagaConfigurator.ConcurrentMessageLimit = _concurrentMessageLimit;
 
+        #pragma warning disable CS0618
             ConfigureSaga(endpointConfigurator, sagaConfigurator);
+        #pragma warning restore CS0618
             ConfigureSaga(endpointConfigurator, sagaConfigurator, context);
         }
 
@@ -62,6 +64,8 @@ namespace MassTransit
                 : _endpointName!;
         }
 
+        [Obsolete(
+            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
         /// <summary>
         /// Called when configuring the saga on the endpoint. Configuration only applies to this saga, and does not apply to
         /// the endpoint.

@@ -48,7 +48,9 @@ namespace MassTransit
             if (_concurrentMessageLimit.HasValue)
                 consumerConfigurator.ConcurrentMessageLimit = _concurrentMessageLimit;
 
+        #pragma warning disable CS0618
             ConfigureConsumer(endpointConfigurator, consumerConfigurator);
+        #pragma warning restore CS0618
             ConfigureConsumer(endpointConfigurator, consumerConfigurator, context);
         }
 
@@ -74,6 +76,8 @@ namespace MassTransit
             EndpointDefinition = new ConsumerEndpointDefinition<TConsumer>(configurator.Settings);
         }
 
+        [Obsolete(
+            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
         /// <summary>
         /// Called when the consumer is being configured on the endpoint. Configuration only applies to this consumer, and does not apply to
         /// the endpoint.

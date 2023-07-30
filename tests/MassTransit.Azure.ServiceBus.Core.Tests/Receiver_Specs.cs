@@ -66,7 +66,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
             ConsumerDefinition<FaultyFunctionConsumer>
         {
             protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,
-                IConsumerConfigurator<FaultyFunctionConsumer> consumerConfigurator)
+                IConsumerConfigurator<FaultyFunctionConsumer> consumerConfigurator,
+                IRegistrationContext context)
             {
                 endpointConfigurator.UseMessageRetry(r => r.Interval(3, TimeSpan.FromMilliseconds(1)));
             }
