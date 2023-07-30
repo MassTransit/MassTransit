@@ -204,7 +204,8 @@ namespace MassTransit.RabbitMqTransport.Tests
             }
 
             protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,
-                IConsumerConfigurator<PingConsumer> consumerConfigurator)
+                IConsumerConfigurator<PingConsumer> consumerConfigurator,
+                IRegistrationContext context)
             {
             }
         }
@@ -223,7 +224,8 @@ namespace MassTransit.RabbitMqTransport.Tests
             }
 
             protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,
-                IConsumerConfigurator<PingConsumer> consumerConfigurator)
+                IConsumerConfigurator<PingConsumer> consumerConfigurator,
+                IRegistrationContext context)
             {
             }
         }
@@ -233,7 +235,8 @@ namespace MassTransit.RabbitMqTransport.Tests
             ConsumerDefinition<PingConsumer>
         {
             protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,
-                IConsumerConfigurator<PingConsumer> consumerConfigurator)
+                IConsumerConfigurator<PingConsumer> consumerConfigurator,
+                IRegistrationContext context)
             {
             }
         }

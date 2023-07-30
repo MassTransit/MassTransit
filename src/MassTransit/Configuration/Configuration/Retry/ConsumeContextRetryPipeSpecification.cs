@@ -74,6 +74,9 @@
 
         public void Apply(IPipeBuilder<TFilter> builder)
         {
+            if(_policyFactory == null)
+                throw new ConfigurationException("The retry policy was not configured");
+
             var retryPolicy = _policyFactory(Filter);
 
             var contextRetryPolicy = new ConsumeContextRetryPolicy<TFilter, TContext>(retryPolicy, _cancellationToken, _contextFactory);

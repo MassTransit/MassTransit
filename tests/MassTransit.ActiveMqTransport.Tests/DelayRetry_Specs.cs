@@ -131,7 +131,7 @@
                 Interlocked.Increment(ref _count);
 
                 throw new IntentionalTestException();
-            }, x => x.UseRetry(r => r.Intervals(100, 200)));
+            }, x => x.UseMessageRetry(r => r.Intervals(100, 200)));
         }
     }
 

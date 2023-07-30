@@ -119,7 +119,8 @@ namespace MassTransit.Containers.Tests
             ConsumerDefinition<StuckConsumer>
         {
             protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,
-                IConsumerConfigurator<StuckConsumer> consumerConfigurator)
+                IConsumerConfigurator<StuckConsumer> consumerConfigurator,
+                IRegistrationContext context)
             {
                 endpointConfigurator.UseMessageRetry(r => r.Interval(10, TimeSpan.FromMinutes(1)));
             }

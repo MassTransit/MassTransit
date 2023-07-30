@@ -91,7 +91,7 @@
 
             var persister = new RoutingSlipEventPersister(_collection);
 
-            configurator.UseRetry(x =>
+            configurator.UseMessageRetry(x =>
             {
                 x.Handle<MongoWriteException>();
                 x.Interval(10, TimeSpan.FromMilliseconds(20));

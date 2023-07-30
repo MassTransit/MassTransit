@@ -45,7 +45,9 @@ namespace MassTransit
             if (_concurrentMessageLimit.HasValue)
                 executeActivityConfigurator.ConcurrentMessageLimit = _concurrentMessageLimit;
 
+        #pragma warning disable CS0618
             ConfigureExecuteActivity(endpointConfigurator, executeActivityConfigurator);
+        #pragma warning restore CS0618
             ConfigureExecuteActivity(endpointConfigurator, executeActivityConfigurator, context);
         }
 
@@ -77,6 +79,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="endpointConfigurator">The receive endpoint configurator for the consumer</param>
         /// <param name="executeActivityConfigurator"></param>
+        [Obsolete("Use the IRegistrationContext overload instead. Visit https://masstransit.io/obsolete for details.")]
         protected virtual void ConfigureExecuteActivity(IReceiveEndpointConfigurator endpointConfigurator,
             IExecuteActivityConfigurator<TActivity, TArguments> executeActivityConfigurator)
         {

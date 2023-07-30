@@ -69,7 +69,8 @@ namespace MassTransit.Containers.Tests
             }
 
             protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,
-                IConsumerConfigurator<DependentConsumer> consumerConfigurator)
+                IConsumerConfigurator<DependentConsumer> consumerConfigurator,
+                IRegistrationContext context)
             {
                 endpointConfigurator.AddDependency(_dependency);
             }

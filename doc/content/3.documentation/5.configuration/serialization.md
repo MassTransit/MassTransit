@@ -64,7 +64,7 @@ superclasses of the message type are included. The namespace and name are format
 
 A few examples of valid message types:
 
-```text
+```
 urn:message:MyProject.Messages:UpdateAccount
 urn:message:MyProject.Messages.Events:AccountUpdated
 urn:message:MyProject:ChangeAccount

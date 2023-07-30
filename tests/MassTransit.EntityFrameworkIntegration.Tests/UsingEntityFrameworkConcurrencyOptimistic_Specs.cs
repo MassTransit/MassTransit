@@ -123,7 +123,7 @@
         {
             _machine = new ChoirStateMachine();
 
-            configurator.UseRetry(x =>
+            configurator.UseMessageRetry(x =>
             {
                 x.Handle<DbUpdateConcurrencyException>();
                 x.Immediate(5);

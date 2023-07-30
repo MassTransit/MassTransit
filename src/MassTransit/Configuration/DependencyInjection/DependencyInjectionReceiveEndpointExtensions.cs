@@ -27,8 +27,6 @@ namespace MassTransit
             configurator.Consumer(consumerFactory, configure);
         }
 
-        [Obsolete(
-            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
         /// <summary>
         /// Registers a consumer given the lifetime scope specified
         /// </summary>
@@ -37,6 +35,7 @@ namespace MassTransit
         /// <param name="provider">The LifetimeScope of the provider</param>
         /// <param name="configure"></param>
         /// <returns></returns>
+        [Obsolete("Use the IRegistrationContext overload instead. Visit https://masstransit.io/obsolete for details.")]
         public static void Consumer<T>(this IReceiveEndpointConfigurator configurator, IServiceProvider provider,
             Action<IConsumerConfigurator<T>> configure = null)
             where T : class, IConsumer
@@ -69,8 +68,6 @@ namespace MassTransit
             configurator.Consumer(consumerFactory, configure);
         }
 
-        [Obsolete(
-            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
         /// <summary>
         /// Connect a consumer with a consumer factory method
         /// </summary>
@@ -80,6 +77,7 @@ namespace MassTransit
         /// <param name="provider"></param>
         /// <param name="configure"></param>
         /// <returns></returns>
+        [Obsolete("Use the IRegistrationContext overload instead. Visit https://masstransit.io/obsolete for details.")]
         public static void Consumer<TConsumer, TMessage>(this IBatchConfigurator<TMessage> configurator, IServiceProvider provider,
             Action<IConsumerMessageConfigurator<TConsumer, Batch<TMessage>>> configure = null)
             where TConsumer : class, IConsumer<Batch<TMessage>>
@@ -114,8 +112,6 @@ namespace MassTransit
             return connector.ConnectConsumer(consumerFactory, pipeSpecifications);
         }
 
-        [Obsolete(
-            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
         /// <summary>
         /// Connect a consumer to the bus/mediator
         /// </summary>
@@ -124,6 +120,7 @@ namespace MassTransit
         /// <param name="provider"></param>
         /// <param name="pipeSpecifications"></param>
         /// <returns></returns>
+        [Obsolete("Use the IRegistrationContext overload instead. Visit https://masstransit.io/obsolete for details.")]
         public static ConnectHandle ConnectConsumer<TConsumer>(this IConsumePipeConnector connector, IServiceProvider provider,
             params IPipeSpecification<ConsumerConsumeContext<TConsumer>>[] pipeSpecifications)
             where TConsumer : class, IConsumer
@@ -155,8 +152,6 @@ namespace MassTransit
             configurator.Saga(repository, configure);
         }
 
-        [Obsolete(
-            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
         /// <summary>
         /// Registers a saga using the container that has the repository resolved from the container
         /// </summary>
@@ -165,6 +160,7 @@ namespace MassTransit
         /// <param name="provider"></param>
         /// <param name="configure"></param>
         /// <returns></returns>
+        [Obsolete("Use the IRegistrationContext overload instead. Visit https://masstransit.io/obsolete for details.")]
         public static void Saga<T>(this IReceiveEndpointConfigurator configurator, IServiceProvider provider, Action<ISagaConfigurator<T>> configure = null)
             where T : class, ISaga
         {
@@ -191,8 +187,6 @@ namespace MassTransit
             configurator.StateMachineSaga(stateMachine, repository, configure);
         }
 
-        [Obsolete(
-            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
         /// <summary>
         /// Subscribe a state machine saga to the endpoint
         /// </summary>
@@ -202,6 +196,7 @@ namespace MassTransit
         /// <param name="serviceProvider">The Container reference to resolve the repository</param>
         /// <param name="configure">Optionally configure the saga</param>
         /// <returns></returns>
+        [Obsolete("Use the IRegistrationContext overload instead. Visit https://masstransit.io/obsolete for details.")]
         public static void StateMachineSaga<TInstance>(this IReceiveEndpointConfigurator configurator, SagaStateMachine<TInstance> stateMachine,
             IServiceProvider serviceProvider, Action<ISagaConfigurator<TInstance>> configure = null)
             where TInstance : class, SagaStateMachineInstance
@@ -229,8 +224,6 @@ namespace MassTransit
             configurator.StateMachineSaga(stateMachine, repository, configure);
         }
 
-        [Obsolete(
-            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
         /// <summary>
         /// Subscribe a state machine saga to the endpoint
         /// </summary>
@@ -239,6 +232,7 @@ namespace MassTransit
         /// <param name="provider">The Container reference to resolve the repository</param>
         /// <param name="configure">Optionally configure the saga</param>
         /// <returns></returns>
+        [Obsolete("Use the IRegistrationContext overload instead. Visit https://masstransit.io/obsolete for details.")]
         public static void StateMachineSaga<TInstance>(this IReceiveEndpointConfigurator configurator, IServiceProvider provider,
             Action<ISagaConfigurator<TInstance>> configure = null)
             where TInstance : class, SagaStateMachineInstance
@@ -262,8 +256,7 @@ namespace MassTransit
             configurator.ExecuteActivityHost(compensateAddress, factory, configure);
         }
 
-        [Obsolete(
-            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
+        [Obsolete("Use the IRegistrationContext overload instead. Visit https://masstransit.io/obsolete for details.")]
         public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, Uri compensateAddress,
             IServiceProvider provider, Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
             where TActivity : class, IExecuteActivity<TArguments>
@@ -288,8 +281,7 @@ namespace MassTransit
             configurator.ExecuteActivityHost(factory, configure);
         }
 
-        [Obsolete(
-            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
+        [Obsolete("Use the IRegistrationContext overload instead. Visit https://masstransit.io/obsolete for details.")]
         public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, IServiceProvider provider,
             Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
             where TActivity : class, IExecuteActivity<TArguments>
@@ -314,8 +306,7 @@ namespace MassTransit
             configurator.CompensateActivityHost(factory, configure);
         }
 
-        [Obsolete(
-            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
+        [Obsolete("Use the IRegistrationContext overload instead. Visit https://masstransit.io/obsolete for details.")]
         public static void CompensateActivityHost<TActivity, TLog>(this IReceiveEndpointConfigurator configurator, IServiceProvider provider,
             Action<ICompensateActivityConfigurator<TActivity, TLog>> configure = null)
             where TActivity : class, ICompensateActivity<TLog>

@@ -48,7 +48,9 @@ namespace MassTransit
             if (_concurrentMessageLimit.HasValue)
                 consumerConfigurator.ConcurrentMessageLimit = _concurrentMessageLimit;
 
+        #pragma warning disable CS0618
             ConfigureConsumer(endpointConfigurator, consumerConfigurator);
+        #pragma warning restore CS0618
             ConfigureConsumer(endpointConfigurator, consumerConfigurator, context);
         }
 
@@ -80,6 +82,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="endpointConfigurator">The receive endpoint configurator for the consumer</param>
         /// <param name="consumerConfigurator">The consumer configurator</param>
+        [Obsolete("Use the IRegistrationContext overload instead. Visit https://masstransit.io/obsolete for details.")]
         protected virtual void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator, IConsumerConfigurator<TConsumer> consumerConfigurator)
         {
         }

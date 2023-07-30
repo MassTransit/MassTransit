@@ -22,7 +22,7 @@ namespace MassTransit.Tests
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             var sec5 = TimeSpan.FromSeconds(5);
-            configurator.UseRetry(x => x.Exponential(2, sec5, sec5, sec5));
+            configurator.UseMessageRetry(x => x.Exponential(2, sec5, sec5, sec5));
 
             base.ConfigureInMemoryBus(configurator);
         }

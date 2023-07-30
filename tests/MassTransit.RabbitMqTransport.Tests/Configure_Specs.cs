@@ -2,6 +2,7 @@
 {
     using System;
     using NUnit.Framework;
+    using TestFramework.Messages;
 
 
     [TestFixture]
@@ -52,28 +53,6 @@
         }
 
         [Test]
-        public void Should_fail_with_invalid_middleware()
-        {
-            var exception = Assert.Throws<ConfigurationException>(() =>
-            {
-                Bus.Factory.CreateUsingRabbitMq(x =>
-                {
-                    x.Host(new Uri("rabbitmq://[::1]/test/"), h =>
-                    {
-                        h.RequestedConnectionTimeout(2000);
-                    });
-
-                    x.UseRetry(r =>
-                    {
-                    });
-                });
-            });
-
-
-            Console.WriteLine(string.Join(Environment.NewLine, exception.Results));
-        }
-
-        [Test]
         public void Should_fail_with_invalid_middleware_on_endpoint()
         {
             var exception = Assert.Throws<ConfigurationException>(() =>
@@ -86,7 +65,11 @@
 
                     x.ReceiveEndpoint("input_queue", e =>
                     {
-                        e.UseRetry(r =>
+                        e.UseMessageRetry(r =>
+                        {
+                        });
+
+                        e.Handler<PingMessage>(async _ =>
                         {
                         });
                     });

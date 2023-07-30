@@ -158,7 +158,7 @@
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.UseRetry(x => x.Immediate(1));
+            configurator.UseMessageRetry(x => x.Immediate(1));
             configurator.UseTransaction();
 
             configurator.Consumer<Consumer>();

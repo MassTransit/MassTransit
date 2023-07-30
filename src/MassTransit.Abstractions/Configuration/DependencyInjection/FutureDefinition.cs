@@ -49,7 +49,9 @@ namespace MassTransit
             if (_concurrentMessageLimit.HasValue)
                 sagaConfigurator.ConcurrentMessageLimit = _concurrentMessageLimit;
 
+        #pragma warning disable CS0618
             ConfigureSaga(endpointConfigurator, sagaConfigurator);
+        #pragma warning restore CS0618
             ConfigureSaga(endpointConfigurator, sagaConfigurator, context);
         }
 
@@ -68,6 +70,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="endpointConfigurator">The receive endpoint configurator for the consumer</param>
         /// <param name="sagaConfigurator">The saga configurator</param>
+        [Obsolete("Use the IRegistrationContext overload instead. Visit https://masstransit.io/obsolete for details.")]
         protected virtual void ConfigureSaga(IReceiveEndpointConfigurator endpointConfigurator, ISagaConfigurator<FutureState> sagaConfigurator)
         {
         }

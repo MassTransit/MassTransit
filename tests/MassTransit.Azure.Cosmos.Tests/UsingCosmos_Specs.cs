@@ -66,7 +66,7 @@
         {
             _machine = new SuperShopper();
 
-            configurator.UseRetry(x =>
+            configurator.UseMessageRetry(x =>
             {
                 x.Immediate(5);
             });

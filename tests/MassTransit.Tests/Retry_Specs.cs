@@ -33,7 +33,7 @@
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.UseRetry(x => x.None());
+            configurator.UseMessageRetry(x => x.None());
 
             Handler<PingMessage>(configurator, async context =>
             {
@@ -105,7 +105,7 @@
         {
             configurator.Consumer(() => new Consumer(), x =>
             {
-                x.UseRetry(r => r.Immediate(5));
+                x.UseMessageRetry(r => r.Immediate(5));
             });
         }
 
@@ -149,7 +149,7 @@
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.UseRetry(x => x.Immediate(1));
+            configurator.UseMessageRetry(x => x.Immediate(1));
 
             base.ConfigureInMemoryBus(configurator);
         }
@@ -189,7 +189,7 @@
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.UseRetry(x => x.Immediate(1));
+            configurator.UseMessageRetry(x => x.Immediate(1));
 
             base.ConfigureInMemoryBus(configurator);
         }
@@ -245,14 +245,14 @@
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.UseRetry(x => x.Immediate(1));
+            configurator.UseMessageRetry(x => x.Immediate(1));
 
             base.ConfigureInMemoryBus(configurator);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.UseRetry(x => x.Immediate(3));
+            configurator.UseMessageRetry(x => x.Immediate(3));
             Handler<PingMessage>(configurator, async context =>
             {
                 Interlocked.Increment(ref _attempts);
@@ -379,7 +379,7 @@
         {
             configurator.Consumer<Consumer>(cfg =>
             {
-                cfg.UseRetry(x => x.Immediate(3));
+                cfg.UseMessageRetry(x => x.Immediate(3));
             });
         }
 
@@ -435,7 +435,7 @@
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.UseRetry(x =>
+            configurator.UseMessageRetry(x =>
             {
                 x.Ignore<IntentionalTestException>();
                 x.Immediate(1);
@@ -486,7 +486,7 @@
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.UseRetry(x =>
+            configurator.UseMessageRetry(x =>
             {
                 x.Ignore<IntentionalTestException>();
                 x.Immediate(1);
@@ -530,7 +530,7 @@
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.UseRetry(x => x.Immediate(1));
+            configurator.UseMessageRetry(x => x.Immediate(1));
 
             base.ConfigureInMemoryBus(configurator);
         }
@@ -587,7 +587,7 @@
         {
             _observed = GetTask<RetryContext>();
             _payload = GetTask<RetryPayload>();
-            configurator.UseRetry(x =>
+            configurator.UseMessageRetry(x =>
             {
                 x.Immediate(5);
                 x.ConnectRetryObserver(new RetryObserver(_observed, _payload));
@@ -715,7 +715,7 @@
         {
             _retryObserver = new RetryObserver();
 
-            configurator.UseRetry(x =>
+            configurator.UseMessageRetry(x =>
             {
                 x.Interval(1, TimeSpan.FromMinutes(1));
                 x.ConnectRetryObserver(_retryObserver);

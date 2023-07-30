@@ -52,7 +52,7 @@ namespace MassTransit.Tests
                 {
                     e.Consumer<Consumer>(cc =>
                     {
-                        cc.UseRetry(r =>
+                        cc.UseMessageRetry(r =>
                         {
                         });
                     });
@@ -83,7 +83,7 @@ namespace MassTransit.Tests
             {
                 cfg.ReceiveEndpoint("Hello", e =>
                 {
-                    e.UseRetry(r =>
+                    e.UseMessageRetry(r =>
                     {
                     });
 

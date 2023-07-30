@@ -20,7 +20,7 @@ namespace MassTransit.Tests.Configuration
 
                 cfg.ReceiveEndpoint("hello", e =>
                 {
-                    e.UseRetry(x => x.Immediate(1));
+                    e.UseMessageRetry(x => x.Immediate(1));
 
                     e.Saga(new InMemorySagaRepository<MySaga>(), x =>
                     {

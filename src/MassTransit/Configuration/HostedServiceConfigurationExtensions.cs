@@ -13,7 +13,7 @@ namespace MassTransit
         /// Adds the MassTransit <see cref="Microsoft.Extensions.Hosting.IHostedService" />, which includes a bus and endpoint health check.
         /// </summary>
         /// <param name="services"></param>
-        [Obsolete("Deprecated, hosted service is automatically added to the container")]
+        [Obsolete("Remove, the hosted service is automatically registered. Visit https://masstransit.io/obsolete for details.")]
         public static IServiceCollection AddMassTransitHostedService(this IServiceCollection services)
         {
             services.AddOptions<MassTransitHostOptions>();
@@ -26,7 +26,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="services"></param>
         /// <param name="waitUntilStarted">Await until bus fully started. (It will block application until bus becomes ready)</param>
-        [Obsolete("Deprecated, hosted service is automatically added to the container. Configure MassTransitHostOptions to modify the default options.")]
+        [Obsolete("Remove, the hosted service is automatically registered. Visit https://masstransit.io/obsolete for details.")]
         public static IServiceCollection AddMassTransitHostedService(this IServiceCollection services, bool waitUntilStarted)
         {
             services.AddOptions<MassTransitHostOptions>()
@@ -53,7 +53,7 @@ namespace MassTransit
         /// In other words, bus shutdown will complete gracefully (subject to the specified timeout) even if instructed by ASP.NET Core
         /// to no longer be graceful.
         /// </param>
-        [Obsolete("Deprecated, hosted service is automatically added to the container. Configure MassTransitHostOptions to modify the default options.")]
+        [Obsolete("Remove, the hosted service is automatically registered. Visit https://masstransit.io/obsolete for details.")]
         public static IServiceCollection AddMassTransitHostedService(this IServiceCollection services, bool waitUntilStarted, TimeSpan? startTimeout,
             TimeSpan? stopTimeout = null)
         {

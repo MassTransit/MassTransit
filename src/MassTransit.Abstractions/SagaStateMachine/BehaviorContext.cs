@@ -16,7 +16,7 @@
 
         Event Event { get; }
 
-        [Obsolete("Deprecated, use Saga instead")]
+        [Obsolete("Use Saga instead. Visit https://masstransit.io/obsolete for details.")]
         TSaga Instance { get; }
 
         /// <summary>
@@ -70,7 +70,7 @@
     {
         new Event<TMessage> Event { get; }
 
-        [Obsolete("Deprecated, use Message instead")]
+        [Obsolete("Use Message instead. Visit https://masstransit.io/obsolete for details.")]
         TMessage Data { get; }
 
         new Task<SendTuple<T>> Init<T>(object values)

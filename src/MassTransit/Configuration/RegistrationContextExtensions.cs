@@ -51,7 +51,7 @@ namespace MassTransit
         /// <param name="registration">The registration for this bus instance</param>
         /// <param name="endpointNameFormatter">Optional, the endpoint name formatter</param>
         /// <typeparam name="T">The bus factory type (depends upon the transport)</typeparam>
-        [Obsolete("Job Consumers are no longer required to be configured using a service instance. Visit https://masstransit.io/support/upgrade#version-8.1")]
+        [Obsolete("Job Consumers no longer require a service instance. Visit https://masstransit.io/obsolete for details.")]
         public static void ConfigureEndpoints<T>(this IServiceInstanceConfigurator<T> configurator, IBusRegistrationContext registration,
             IEndpointNameFormatter endpointNameFormatter = null)
             where T : IReceiveEndpointConfigurator
@@ -70,7 +70,7 @@ namespace MassTransit
         /// <param name="configureFilter">Filter the configured consumers, sagas, and activities</param>
         /// <param name="endpointNameFormatter">Optional, the endpoint name formatter</param>
         /// <typeparam name="T">The bus factory type (depends upon the transport)</typeparam>
-        [Obsolete("Job Consumers are no longer required to be configured using a service instance. Visit https://masstransit.io/support/upgrade#version-8.1")]
+        [Obsolete("Job Consumers no longer require a service instance. Visit https://masstransit.io/obsolete for details.")]
         public static void ConfigureEndpoints<T>(this IServiceInstanceConfigurator<T> configurator, IBusRegistrationContext registration,
             Action<IRegistrationFilterConfigurator> configureFilter, IEndpointNameFormatter endpointNameFormatter = null)
             where T : IReceiveEndpointConfigurator
@@ -86,7 +86,7 @@ namespace MassTransit
         /// <param name="configureFilter">Filter the configured consumers, sagas, and activities</param>
         /// <param name="options">Optional service instance options to start</param>
         /// <typeparam name="T">The bus factory type (depends upon the transport)</typeparam>
-        [Obsolete("Job Consumers are no longer required to be configured using a service instance. Visit https://masstransit.io/support/upgrade#version-8.1")]
+        [Obsolete("Job Consumers no longer require a service instance. Visit https://masstransit.io/obsolete for details.")]
         public static void ConfigureServiceEndpoints<T>(this IBusFactoryConfigurator<T> configurator, IBusRegistrationContext registration,
             Action<IRegistrationFilterConfigurator> configureFilter, ServiceInstanceOptions options = null)
             where T : IReceiveEndpointConfigurator
@@ -115,7 +115,7 @@ namespace MassTransit
         /// <param name="registration">The registration for this bus instance</param>
         /// <param name="options">Optional service instance options to start</param>
         /// <typeparam name="T">The bus factory type (depends upon the transport)</typeparam>
-        [Obsolete("Job Consumers are no longer required to be configured using a service instance. Visit https://masstransit.io/support/upgrade#version-8.1")]
+        [Obsolete("Job Consumers no longer require a service instance. Visit https://masstransit.io/obsolete for details.")]
         public static void ConfigureServiceEndpoints<T>(this IBusFactoryConfigurator<T> configurator, IBusRegistrationContext registration,
             ServiceInstanceOptions options = null)
             where T : IReceiveEndpointConfigurator

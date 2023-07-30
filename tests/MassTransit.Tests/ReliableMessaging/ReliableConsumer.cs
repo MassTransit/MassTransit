@@ -75,7 +75,8 @@ namespace MassTransit.Tests.ReliableMessaging
         ConsumerDefinition<ReliableEventConsumer>
     {
         protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,
-            IConsumerConfigurator<ReliableEventConsumer> consumerConfigurator)
+            IConsumerConfigurator<ReliableEventConsumer> consumerConfigurator,
+            IRegistrationContext context)
         {
             if (endpointConfigurator is IInMemoryReceiveEndpointConfigurator configurator)
             {

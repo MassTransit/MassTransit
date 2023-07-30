@@ -33,8 +33,6 @@
             configurator.AddPipeSpecification(specification);
         }
 
-        [Obsolete(
-            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
         /// <summary>
         /// Includes an outbox in the consume filter path, which delays outgoing messages until the return path
         /// of the pipeline returns to the outbox filter. At this point, the message execution pipeline should be
@@ -42,6 +40,7 @@
         /// </summary>
         /// <param name="configurator">The pipe configurator</param>
         /// <param name="configure">Configure the outbox</param>
+        [Obsolete("Use the IRegistrationContext overload instead. Visit https://masstransit.io/obsolete for details.")]
         public static void UseInMemoryOutbox<T>(this IPipeConfigurator<ConsumeContext<T>> configurator, Action<IOutboxConfigurator> configure = default)
             where T : class
         {
@@ -72,8 +71,6 @@
             var observer = new InMemoryOutboxConfigurationObserver(context, configurator, configure);
         }
 
-        [Obsolete(
-            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
         /// <summary>
         /// Includes an outbox in the consume filter path, which delays outgoing messages until the return path
         /// of the pipeline returns to the outbox filter. At this point, the message execution pipeline should be
@@ -81,6 +78,7 @@
         /// </summary>
         /// <param name="configurator">The pipe configurator</param>
         /// <param name="configure">Configure the outbox</param>
+        [Obsolete("Use the IRegistrationContext overload instead. Visit https://masstransit.io/obsolete for details.")]
         public static void UseInMemoryOutbox(this IConsumePipeConfigurator configurator, Action<IOutboxConfigurator> configure = default)
         {
             if (configurator == null)
@@ -108,8 +106,6 @@
             configurator.ConnectConsumerConfigurationObserver(observer);
         }
 
-        [Obsolete(
-            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
         /// <summary>
         /// Includes an outbox in the consume filter path, which delays outgoing messages until the return path
         /// of the pipeline returns to the outbox filter. At this point, the message execution pipeline should be
@@ -117,6 +113,7 @@
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="configure">Configure the outbox</param>
+        [Obsolete("Use the IRegistrationContext overload instead. Visit https://masstransit.io/obsolete for details.")]
         public static void UseInMemoryOutbox<TConsumer>(this IConsumerConfigurator<TConsumer> configurator, Action<IOutboxConfigurator> configure = default)
             where TConsumer : class
         {
@@ -146,8 +143,6 @@
             configurator.ConnectSagaConfigurationObserver(observer);
         }
 
-        [Obsolete(
-            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
         /// <summary>
         /// Includes an outbox in the consume filter path, which delays outgoing messages until the return path
         /// of the pipeline returns to the outbox filter. At this point, the message execution pipeline should be
@@ -155,6 +150,7 @@
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="configure">Configure the outbox</param>
+        [Obsolete("Use the IRegistrationContext overload instead. Visit https://masstransit.io/obsolete for details.")]
         public static void UseInMemoryOutbox<TSaga>(this ISagaConfigurator<TSaga> configurator, Action<IOutboxConfigurator> configure = default)
             where TSaga : class, ISaga
         {
@@ -184,8 +180,6 @@
             configurator.ConnectHandlerConfigurationObserver(observer);
         }
 
-        [Obsolete(
-            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
         /// <summary>
         /// Includes an outbox in the consume filter path, which delays outgoing messages until the return path
         /// of the pipeline returns to the outbox filter. At this point, the message execution pipeline should be
@@ -193,6 +187,7 @@
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="configure">Configure the outbox</param>
+        [Obsolete("Use the IRegistrationContext overload instead. Visit https://masstransit.io/obsolete for details.")]
         public static void UseInMemoryOutbox<TMessage>(this IHandlerConfigurator<TMessage> configurator, Action<IOutboxConfigurator> configure = default)
             where TMessage : class
         {
@@ -242,6 +237,7 @@
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="provider">Configuration service provider</param>
+        [Obsolete("Obsolete, use the IRegistrationContext overload instead. Visit https://masstransit.io/obsolete for details.")]
         public static void UseInMemoryInboxOutbox(this IReceiveEndpointConfigurator configurator, IServiceProvider provider)
         {
             if (configurator == null)

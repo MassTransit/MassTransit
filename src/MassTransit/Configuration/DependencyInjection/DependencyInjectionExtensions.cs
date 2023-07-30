@@ -24,13 +24,12 @@ namespace MassTransit
             configurator.AddPrePipeSpecification(specification);
         }
 
-        [Obsolete(
-            "Use the IRegistrationContext overload to ensure message scope is properly handled. For more information, visit https://masstransit.io/support/upgrade#version-8.1")]
         /// <summary>
         /// Creates a single scope for the receive endpoint that is used by all consumers, sagas, messages, etc.
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="serviceProvider"></param>
+        [Obsolete("Use the IRegistrationContext overload instead. Visit https://masstransit.io/obsolete for details.")]
         public static void UseServiceScope(this IConsumePipeConfigurator configurator, IServiceProvider serviceProvider)
         {
             var scopeProvider = new ConsumeScopeProvider(serviceProvider, LegacySetScopedConsumeContext.Instance);
@@ -59,6 +58,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="serviceProvider"></param>
+        [Obsolete("Use the IRegistrationContext overload instead. Visit https://masstransit.io/obsolete for details.")]
         public static void UseMessageScope(this IConsumePipeConfigurator configurator, IServiceProvider serviceProvider)
         {
             if (configurator == null)
@@ -115,7 +115,7 @@ namespace MassTransit
         /// client that is not explicitly registered using AddRequestClient.
         /// </summary>
         /// <param name="collection"></param>
-        [Obsolete("This method is no longer required, the Generic Request Client is automatically registered")]
+        [Obsolete("Remove, the generic request client is automatically registered. Visit https://masstransit.io/obsolete for details.")]
         public static IServiceCollection AddGenericRequestClient(this IServiceCollection collection)
         {
             return collection;

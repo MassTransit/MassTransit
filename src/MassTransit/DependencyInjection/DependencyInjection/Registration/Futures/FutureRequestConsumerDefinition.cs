@@ -15,13 +15,14 @@ namespace MassTransit.DependencyInjection.Registration
             _requestAddress?.Value ??
             throw new ConfigurationException($"The future consumer definition was not configured: {TypeCache<TConsumer>.ShortName}");
 
-        protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator, IConsumerConfigurator<TConsumer> consumerConfigurator)
+        protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator, IConsumerConfigurator<TConsumer> consumerConfigurator,
+            IRegistrationContext context)
         {
             endpointConfigurator.ConfigureConsumeTopology = false;
 
             _requestAddress = new Lazy<Uri>(() => endpointConfigurator.InputAddress);
 
-            base.ConfigureConsumer(endpointConfigurator, consumerConfigurator);
+            base.ConfigureConsumer(endpointConfigurator, consumerConfigurator, context);
         }
     }
 }

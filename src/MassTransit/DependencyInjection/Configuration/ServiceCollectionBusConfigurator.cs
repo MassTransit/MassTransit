@@ -61,7 +61,7 @@ namespace MassTransit.Configuration
             AddMassTransitComponents(collection);
         }
 
-        [Obsolete("This method is deprecated, please use 'Using[TransportName]' instead", true)]
+        [Obsolete("Use 'Using[TransportName]' instead. Visit https://masstransit.io/obsolete for details.", true)]
         public virtual void AddBus(Func<IBusRegistrationContext, IBusControl> busFactory)
         {
             SetBusFactory(new RegistrationBusFactory(busFactory));

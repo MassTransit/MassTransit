@@ -21,7 +21,7 @@ namespace MassTransit.Tests.Configuration
 
                 cfg.ReceiveEndpoint("hello", e =>
                 {
-                    e.UseRetry(x => x.Immediate(1));
+                    e.UseMessageRetry(x => x.Immediate(1));
 
                     e.Consumer<MyConsumer>(x =>
                     {
@@ -52,7 +52,7 @@ namespace MassTransit.Tests.Configuration
 
                 cfg.ReceiveEndpoint("hello", e =>
                 {
-                    e.UseRetry(x => x.Immediate(1));
+                    e.UseMessageRetry(x => x.Immediate(1));
 
                     e.Consumer(typeof(MyConsumer), _ => new MyConsumer());
                 });
@@ -74,7 +74,7 @@ namespace MassTransit.Tests.Configuration
 
                 cfg.ReceiveEndpoint("hello", e =>
                 {
-                    e.UseRetry(x => x.Immediate(1));
+                    e.UseMessageRetry(x => x.Immediate(1));
 
                     e.Handler<PingMessage>(async context =>
                     {
@@ -96,7 +96,7 @@ namespace MassTransit.Tests.Configuration
 
                 cfg.ReceiveEndpoint("hello", e =>
                 {
-                    e.UseRetry(x => x.Immediate(1));
+                    e.UseMessageRetry(x => x.Immediate(1));
 
                     e.Consumer<MyConsumer>();
                 });

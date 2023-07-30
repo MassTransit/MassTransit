@@ -232,7 +232,8 @@ namespace MassTransit.AmazonSqsTransport.Tests
             }
 
             protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,
-                IConsumerConfigurator<PingConsumer> consumerConfigurator)
+                IConsumerConfigurator<PingConsumer> consumerConfigurator,
+                IRegistrationContext context)
             {
             }
         }
@@ -251,7 +252,8 @@ namespace MassTransit.AmazonSqsTransport.Tests
             }
 
             protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,
-                IConsumerConfigurator<PingConsumer> consumerConfigurator)
+                IConsumerConfigurator<PingConsumer> consumerConfigurator,
+                IRegistrationContext context)
             {
             }
         }
@@ -261,7 +263,8 @@ namespace MassTransit.AmazonSqsTransport.Tests
             ConsumerDefinition<PingConsumer>
         {
             protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,
-                IConsumerConfigurator<PingConsumer> consumerConfigurator)
+                IConsumerConfigurator<PingConsumer> consumerConfigurator,
+                IRegistrationContext context)
             {
             }
         }

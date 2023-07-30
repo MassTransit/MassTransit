@@ -25,7 +25,8 @@ namespace MassTransit.Abstractions.Tests.Usage
     public class OrderDeliverySagaDefinition :
         SagaDefinition<OrderDeliverySaga>
     {
-        protected override void ConfigureSaga(IReceiveEndpointConfigurator endpointConfigurator, ISagaConfigurator<OrderDeliverySaga> sagaConfigurator)
+        protected override void ConfigureSaga(IReceiveEndpointConfigurator endpointConfigurator, ISagaConfigurator<OrderDeliverySaga> sagaConfigurator,
+            IRegistrationContext context)
         {
         }
     }

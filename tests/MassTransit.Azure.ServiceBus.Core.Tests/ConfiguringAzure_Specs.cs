@@ -111,7 +111,7 @@
                         // if an exception is thrown
                         e.Handler<A>(Handle, h =>
                         {
-                            h.UseRetry(r => r.Interval(5, 100));
+                            h.UseMessageRetry(r => r.Interval(5, 100));
                         });
                     });
                 });
@@ -191,7 +191,7 @@
                         // if an exception is thrown
                         e.Handler<A>(Handle, h =>
                         {
-                            h.UseRetry(r => r.Interval(5, 100));
+                            h.UseMessageRetry(r => r.Interval(5, 100));
                         });
                     });
                 });

@@ -15,7 +15,7 @@ namespace MassTransit
         /// <param name="configurator">The service instance</param>
         /// <param name="configure"></param>
         /// <param name="context"></param>
-        [Obsolete("Use AddJobSagaStateMachines() instead, this method will be removed soon. Visit https://masstransit.io/support/upgrade#version-8.1")]
+        [Obsolete("Use AddJobSagaStateMachines instead. Visit https://masstransit.io/obsolete for details.")]
         public static IServiceInstanceConfigurator<T> ConfigureJobServiceEndpoints<T>(this IServiceInstanceConfigurator<T> configurator,
             IRegistrationContext context, Action<IJobServiceConfigurator> configure = default)
             where T : IReceiveEndpointConfigurator
@@ -60,7 +60,7 @@ namespace MassTransit
         /// <param name="options"></param>
         /// <param name="context"></param>
         /// <param name="configure"></param>
-        [Obsolete("Use AddJobSagaStateMachines() instead, this method will be removed soon. Visit https://masstransit.io/support/upgrade#version-8.1")]
+        [Obsolete("Use AddJobSagaStateMachines instead. Visit https://masstransit.io/obsolete for details.")]
         public static IServiceInstanceConfigurator<T> ConfigureJobServiceEndpoints<T>(this IServiceInstanceConfigurator<T> configurator,
             JobServiceOptions options, IRegistrationContext context, Action<IJobServiceConfigurator> configure = default)
             where T : IReceiveEndpointConfigurator
@@ -83,6 +83,7 @@ namespace MassTransit
         /// <param name="configurator">The service instance</param>
         /// <param name="options"></param>
         /// <param name="configure"></param>
+        [Obsolete("Use AddJobSagaStateMachines instead. Visit https://masstransit.io/obsolete for details.")]
         public static IServiceInstanceConfigurator<T> ConfigureJobServiceEndpoints<T>(this IServiceInstanceConfigurator<T> configurator,
             JobServiceOptions options, Action<IJobServiceConfigurator> configure = default)
             where T : IReceiveEndpointConfigurator
@@ -106,6 +107,7 @@ namespace MassTransit
         /// <typeparam name="T">The transport receive endpoint configurator type</typeparam>
         /// <param name="configurator">The service instance</param>
         /// <param name="configure"></param>
+        [Obsolete("Job Consumers no longer require a service instance. Visit https://masstransit.io/obsolete for details.")]
         public static IServiceInstanceConfigurator<T> ConfigureJobService<T>(this IServiceInstanceConfigurator<T> configurator,
             Action<IJobServiceConfigurator> configure = default)
             where T : IReceiveEndpointConfigurator
@@ -128,6 +130,7 @@ namespace MassTransit
         /// <param name="configurator">The service instance</param>
         /// <param name="options"></param>
         /// <param name="configure"></param>
+        [Obsolete("Job Consumers no longer require a service instance. Visit https://masstransit.io/obsolete for details.")]
         public static IServiceInstanceConfigurator<T> ConfigureJobService<T>(this IServiceInstanceConfigurator<T> configurator,
             JobServiceOptions options, Action<IJobServiceConfigurator> configure = default)
             where T : IReceiveEndpointConfigurator

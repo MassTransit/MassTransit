@@ -36,7 +36,7 @@
             _machine = new TestStateMachine();
             _repository = new InMemorySagaRepository<Instance>();
 
-            configurator.UseRetry(x =>
+            configurator.UseMessageRetry(x =>
             {
                 x.Ignore<NotSupportedException>();
                 x.Immediate(2);

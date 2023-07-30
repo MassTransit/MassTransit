@@ -37,8 +37,6 @@
         public string RoutingKey { get; }
         public IBasicProperties Properties { get; }
 
-        byte[] RabbitMqBasicConsumeContext.Body => Body.GetBytes();
-
         public IDictionary<string, object> GetTransportProperties()
         {
             var properties = new Lazy<Dictionary<string, object>>(() => new Dictionary<string, object>());

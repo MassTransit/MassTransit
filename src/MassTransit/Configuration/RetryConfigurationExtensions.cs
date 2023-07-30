@@ -9,6 +9,7 @@ namespace MassTransit
 
     public static class RetryConfigurationExtensions
     {
+        [Obsolete("Use UseMessageRetry instead. Visit https://masstransit.io/obsolete for details.")]
         public static void UseRetry(this IPipeConfigurator<ConsumeContext> configurator, Action<IRetryConfigurator> configure)
         {
             if (configurator == null)
@@ -21,6 +22,7 @@ namespace MassTransit
             configurator.AddPipeSpecification(specification);
         }
 
+        [Obsolete("Use UseMessageRetry instead. Visit https://masstransit.io/obsolete for details.")]
         public static void UseRetry<T>(this IPipeConfigurator<ConsumeContext<T>> configurator, Action<IRetryConfigurator> configure)
             where T : class
         {
@@ -34,6 +36,20 @@ namespace MassTransit
             configurator.AddPipeSpecification(specification);
         }
 
+        public static void UseMessageRetry<T>(this IPipeConfigurator<ConsumeContext<T>> configurator, Action<IRetryConfigurator> configure)
+            where T : class
+        {
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+
+            var specification = new ConsumeContextRetryPipeSpecification<ConsumeContext<T>, RetryConsumeContext<T>>(Factory);
+
+            configure?.Invoke(specification);
+
+            configurator.AddPipeSpecification(specification);
+        }
+
+        [Obsolete("Use UseMessageRetry instead. Visit https://masstransit.io/obsolete for details.")]
         public static void UseRetry<T>(this IConsumePipeConfigurator configurator, Action<IRetryConfigurator> configure)
             where T : class
         {
@@ -53,6 +69,7 @@ namespace MassTransit
             return new RetryConsumeContext<T>(context, retryPolicy, retryContext);
         }
 
+        [Obsolete("Use UseMessageRetry instead. Visit https://masstransit.io/obsolete for details.")]
         public static void UseRetry<TConsumer>(this IPipeConfigurator<ConsumerConsumeContext<TConsumer>> configurator, Action<IRetryConfigurator> configure)
             where TConsumer : class
         {
@@ -74,6 +91,7 @@ namespace MassTransit
             return new RetryConsumerConsumeContext<TConsumer>(context, retryPolicy, retryContext);
         }
 
+        [Obsolete("Use UseMessageRetry instead. Visit https://masstransit.io/obsolete for details.")]
         public static void UseRetry<TSaga>(this IPipeConfigurator<SagaConsumeContext<TSaga>> configurator, Action<IRetryConfigurator> configure)
             where TSaga : class, ISaga
         {
@@ -106,6 +124,7 @@ namespace MassTransit
             configurator.AddPipeSpecification(specification);
         }
 
+        [Obsolete("Use UseMessageRetry instead. Visit https://masstransit.io/obsolete for details.")]
         public static void UseRetry(this IPipeConfigurator<ConsumeContext> configurator, IBusFactoryConfigurator connector,
             Action<IRetryConfigurator> configure)
         {
@@ -122,6 +141,7 @@ namespace MassTransit
             configurator.AddPipeSpecification(specification);
         }
 
+        [Obsolete("Use UseMessageRetry instead. Visit https://masstransit.io/obsolete for details.")]
         public static void UseRetry(this IBusFactoryConfigurator configurator, Action<IRetryConfigurator> configure)
         {
             if (configurator == null)
@@ -137,6 +157,7 @@ namespace MassTransit
             configurator.AddPipeSpecification(specification);
         }
 
+        [Obsolete("Use UseMessageRetry instead. Visit https://masstransit.io/obsolete for details.")]
         public static void UseRetry<T>(this IPipeConfigurator<ConsumeContext<T>> configurator, IBusFactoryConfigurator connector,
             Action<IRetryConfigurator> configure)
             where T : class
@@ -154,6 +175,7 @@ namespace MassTransit
             configurator.AddPipeSpecification(specification);
         }
 
+        [Obsolete("Use UseMessageRetry instead. Visit https://masstransit.io/obsolete for details.")]
         public static void UseRetry<TConsumer>(this IPipeConfigurator<ConsumerConsumeContext<TConsumer>> configurator, IBusFactoryConfigurator connector,
             Action<IRetryConfigurator> configure)
             where TConsumer : class
@@ -172,6 +194,7 @@ namespace MassTransit
             configurator.AddPipeSpecification(specification);
         }
 
+        [Obsolete("Use UseMessageRetry instead. Visit https://masstransit.io/obsolete for details.")]
         public static void UseRetry<TSaga>(this IPipeConfigurator<SagaConsumeContext<TSaga>> configurator, IBusFactoryConfigurator connector,
             Action<IRetryConfigurator> configure)
             where TSaga : class, ISaga

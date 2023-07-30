@@ -28,7 +28,7 @@
 
                 cfg.ReceiveEndpoint("hello", e =>
                 {
-                    e.UseRetry(x => x.Immediate(1));
+                    e.UseMessageRetry(x => x.Immediate(1));
 
                     e.StateMachineSaga(_machine, _repository, x =>
                     {

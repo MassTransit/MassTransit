@@ -28,7 +28,7 @@
         {
             _consumer = new PingConsumer(TimeSpan.FromSeconds(5), InMemoryTestHarness.InactivityToken);
 
-            configurator.UseRetry(r => r.Immediate(5));
+            configurator.UseMessageRetry(r => r.Immediate(5));
             _consumer.Configure(configurator);
         }
 
@@ -72,7 +72,7 @@
 
             _consumer = new PingConsumer(TimeSpan.FromSeconds(5), InMemoryTestHarness.InactivityToken);
 
-            configurator.UseRetry(r => r.Immediate(5));
+            configurator.UseMessageRetry(r => r.Immediate(5));
             _consumer.Configure(configurator);
         }
 

@@ -9,7 +9,7 @@ namespace MassTransit
     public static class MartenSagaRepositoryRegistrationExtensions
     {
         /// <summary>
-        /// Configures the <typeparamref name="T"/> saga to use the Marten saga repository.
+        /// Configures the <typeparamref name="T" /> saga to use the Marten saga repository.
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="configure">Optional, allows additional configuration on the saga schema</param>

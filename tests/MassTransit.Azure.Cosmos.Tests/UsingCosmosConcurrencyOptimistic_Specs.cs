@@ -134,7 +134,7 @@
         {
             _machine = new ChoirStateMachine();
 
-            configurator.UseRetry(x =>
+            configurator.UseMessageRetry(x =>
             {
                 x.Handle<CosmosConcurrencyException>();
                 x.Interval(5, 300);
