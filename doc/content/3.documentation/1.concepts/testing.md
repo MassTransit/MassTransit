@@ -161,6 +161,40 @@ public async Task ASampleTest()
 }
 ```
 
+### Request / Response
+
+To test a Request using the MassTransit Test Harness:
+
+```csharp
+[Test]
+public async Task ASampleTest()
+{
+    await using var provider = new ServiceCollection()
+        .AddMassTransitTestHarness(cfg =>
+        {
+            cfg.Handler<SubmitOrder>(async cxt => 
+            {
+                await cxt.RespondAsync(new OrderResponse("OK"));
+            });
+        })
+        .BuildServiceProvider(true);
+
+    var harness = provider.GetRequiredService<ITestHarness>();
+
+    await harness.Start();
+
+    var client = harness.GetRequestClient<SubmitOrder>();
+
+    var response = await client.GetResponse<OrderResponse>(new SubmitOrder
+    {
+        OrderNumber = "123"
+    });
+
+    Assert.That(response.Message.Status, Is.EqualTo("OK"));
+}
+```
+[Short Addresses](https://masstransit.io/documentation/concepts/producers#short-addresses)
+
 ### Saga State Machine
 
 To test a saga state machine using the MassTransit Test Harness:
