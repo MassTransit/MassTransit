@@ -3,6 +3,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using Contracts;
     using Mediator;
@@ -203,6 +204,108 @@ namespace MassTransit.Containers.Tests.Common_Tests
             public Task Consume(ConsumeContext<TwoRequest> context)
             {
                 return context.RespondAsync(new TwoResponse());
+            }
+        }
+    }
+
+
+    public class Using_MultiBus_With_ConfigureEndpoint :
+        InMemoryContainerTestFixture
+    {
+        int _busOneConfigured;
+        int _busTwoConfigured;
+        int _globalConfigured;
+
+        IEnumerable<IHostedService> HostedServices => ServiceProvider.GetService<IEnumerable<IHostedService>>();
+
+        [Test]
+        public async Task Should_configure_endpoints_correctly()
+        {
+            Assert.AreEqual(1, _busOneConfigured);
+            Assert.AreEqual(1, _busTwoConfigured);
+            Assert.AreEqual(2, _globalConfigured);
+        }
+
+        protected override IServiceCollection ConfigureServices(IServiceCollection collection)
+        {
+            collection = base.ConfigureServices(collection);
+
+            collection.AddMassTransit<IBusOne, BusOne>(ConfigureOne);
+            collection.AddMassTransit<IBusTwo>(ConfigureTwo);
+            collection.AddSingleton<IConfigureReceiveEndpoint>(new GlobalConfigureReceiveEndpoint(() => Interlocked.Increment(ref _globalConfigured)));
+
+            return collection;
+        }
+
+        void ConfigureOne(IBusRegistrationConfigurator configurator)
+        {
+            configurator.AddConsumer<Consumer1>();
+            configurator.AddConfigureEndpointsCallback((_, _, _) => Interlocked.Increment(ref _busOneConfigured));
+            configurator.UsingInMemory((context, cfg) =>
+            {
+                cfg.Host(new Uri("loopback://bus-one/"));
+                cfg.ConfigureEndpoints(context);
+            });
+        }
+
+        void ConfigureTwo(IBusRegistrationConfigurator configurator)
+        {
+            configurator.AddConsumer<Consumer2>();
+            configurator.AddConfigureEndpointsCallback((_, _, _) => Interlocked.Increment(ref _busTwoConfigured));
+            configurator.UsingInMemory((context, cfg) =>
+            {
+                cfg.Host(new Uri("loopback://bus-two/"));
+                cfg.ConfigureEndpoints(context);
+            });
+        }
+
+
+        class GlobalConfigureReceiveEndpoint :
+            IConfigureReceiveEndpoint
+        {
+            readonly Action _action;
+
+            public GlobalConfigureReceiveEndpoint(Action action)
+            {
+                _action = action;
+            }
+
+            public void Configure(string name, IReceiveEndpointConfigurator configurator)
+            {
+                _action();
+            }
+        }
+
+
+        [OneTimeSetUp]
+        public async Task Setup()
+        {
+            await Task.WhenAll(HostedServices.Select(x => x.StartAsync(InMemoryTestHarness.TestCancellationToken)));
+        }
+
+        [OneTimeTearDown]
+        public async Task TearDown()
+        {
+            await Task.WhenAll(HostedServices.Select(x => x.StopAsync(InMemoryTestHarness.TestCancellationToken)));
+        }
+
+
+        class Consumer1 :
+            IConsumer<PingMessage>
+        {
+            public Task Consume(ConsumeContext<PingMessage> context)
+            {
+                return Task.CompletedTask;
+            }
+        }
+
+
+        class Consumer2 :
+            IConsumer<PingMessage>
+        {
+            public Task Consume(ConsumeContext<PingMessage> context)
+            {
+                return Task.CompletedTask;
             }
         }
     }

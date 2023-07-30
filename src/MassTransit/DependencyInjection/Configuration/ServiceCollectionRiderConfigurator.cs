@@ -56,14 +56,6 @@ namespace MassTransit.Configuration
             this.AddSingleton(provider => provider.GetRequiredService<Bind<IBus, TRider>>().Value);
         }
 
-        public override void AddConfigureEndpointsCallback(ConfigureEndpointsProviderCallback callback)
-        {
-            if (callback == null)
-                throw new ArgumentNullException(nameof(callback));
-
-            throw new NotSupportedException("Rider does not support endpoint callback");
-        }
-
         protected void ThrowIfAlreadyConfigured(Type serviceType)
         {
             ThrowIfAlreadyConfigured(nameof(SetRiderFactory));
@@ -116,14 +108,6 @@ namespace MassTransit.Configuration
             this.AddSingleton(provider =>
                 Bind<TBus>.Create(riderFactory.CreateRider(provider.GetRequiredService<Bind<TBus, TRider, IRiderRegistrationContext>>().Value)));
             this.AddSingleton(provider => Bind<TBus>.Create(provider.GetRequiredService<IBusInstance<TBus>>().GetRider<TRider>()));
-        }
-
-        public override void AddConfigureEndpointsCallback(ConfigureEndpointsProviderCallback callback)
-        {
-            if (callback == null)
-                throw new ArgumentNullException(nameof(callback));
-
-            throw new NotSupportedException("Rider does not support endpoint callback");
         }
     }
 }

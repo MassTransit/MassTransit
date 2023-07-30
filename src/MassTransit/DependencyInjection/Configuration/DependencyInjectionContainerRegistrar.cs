@@ -70,6 +70,18 @@ namespace MassTransit.Configuration
             return provider.GetService<IEnumerable<T>>() ?? Array.Empty<T>();
         }
 
+        public IConfigureReceiveEndpoint GetConfigureReceiveEndpoints(IServiceProvider provider)
+        {
+            IConfigureReceiveEndpoint[] globalConfigureReceiveEndpoints = provider.GetServices<IConfigureReceiveEndpoint>().ToArray();
+
+            return new ConfigureReceiveEndpoint(globalConfigureReceiveEndpoints, GetBusConfigureReceiveEndpoints(provider));
+        }
+
+        protected virtual IConfigureReceiveEndpoint[] GetBusConfigureReceiveEndpoints(IServiceProvider provider)
+        {
+            return provider.GetServices<Bind<IBus, IConfigureReceiveEndpoint>>().Select(x => x.Value).ToArray();
+        }
+
         bool TryGetValue<T>(Type type, out T value)
             where T : class, IRegistration
         {
@@ -87,6 +99,29 @@ namespace MassTransit.Configuration
         protected virtual IScopedClientFactory GetScopedBusContext(IServiceProvider provider)
         {
             return provider.GetRequiredService<IScopedBusContextProvider<IBus>>().Context.ClientFactory;
+        }
+
+
+        class ConfigureReceiveEndpoint :
+            IConfigureReceiveEndpoint
+        {
+            readonly IConfigureReceiveEndpoint[] _global;
+            readonly IConfigureReceiveEndpoint[] _typed;
+
+            public ConfigureReceiveEndpoint(IConfigureReceiveEndpoint[] global, IConfigureReceiveEndpoint[] typed)
+            {
+                _global = global;
+                _typed = typed;
+            }
+
+            public void Configure(string name, IReceiveEndpointConfigurator configurator)
+            {
+                for (var i = 0; i < _global.Length; i++)
+                    _global[i].Configure(name, configurator);
+
+                for (var i = 0; i < _typed.Length; i++)
+                    _typed[i].Configure(name, configurator);
+            }
         }
     }
 
@@ -120,6 +155,11 @@ namespace MassTransit.Configuration
         protected override IScopedClientFactory GetScopedBusContext(IServiceProvider provider)
         {
             return provider.GetRequiredService<IScopedBusContextProvider<TBus>>().Context.ClientFactory;
+        }
+
+        protected override IConfigureReceiveEndpoint[] GetBusConfigureReceiveEndpoints(IServiceProvider provider)
+        {
+            return provider.GetServices<Bind<TBus, IConfigureReceiveEndpoint>>().Select(x => x.Value).ToArray();
         }
     }
 }
