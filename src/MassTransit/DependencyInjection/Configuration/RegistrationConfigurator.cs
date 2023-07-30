@@ -138,16 +138,6 @@ namespace MassTransit.Configuration
             return new FutureRegistrationConfigurator<TFuture>(this, registration);
         }
 
-        public void AddConfigureEndpointsCallback(ConfigureEndpointsCallback callback)
-        {
-            if (callback == null)
-                throw new ArgumentNullException(nameof(callback));
-
-            _collection.TryAddSingleton<IConfigureReceiveEndpoint>(provider => new ConfigureReceiveEndpointDelegate(callback));
-        }
-
-        public abstract void AddConfigureEndpointsCallback(ConfigureEndpointsProviderCallback callback);
-
         public void AddEndpoint(Type definitionType)
         {
             _collection.RegisterEndpoint(Registrar, definitionType);

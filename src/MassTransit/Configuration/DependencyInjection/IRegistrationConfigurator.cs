@@ -200,19 +200,5 @@ namespace MassTransit
         /// <typeparam name="TFuture"></typeparam>
         IFutureRegistrationConfigurator<TFuture> AddFuture<TFuture>(Type futureDefinitionType = null)
             where TFuture : class, SagaStateMachine<FutureState>;
-
-        /// <summary>
-        /// Adds a method that is called for each receive endpoint when it is configured, allowing additional
-        /// configuration to be specified.
-        /// </summary>
-        /// <param name="callback">Callback invoked for each receive endpoint</param>
-        void AddConfigureEndpointsCallback(ConfigureEndpointsCallback callback);
-
-        /// <summary>
-        /// Adds a method that is called for each receive endpoint when it is configured, allowing additional
-        /// configuration to be specified.
-        /// </summary>
-        /// <param name="callback">Callback invoked for each receive endpoint</param>
-        void AddConfigureEndpointsCallback(ConfigureEndpointsProviderCallback callback);
     }
 }

@@ -11,11 +11,8 @@ namespace MassTransit.Configuration
 
         public ConfigureReceiveEndpointDelegateProvider(IRegistrationContext context, ConfigureEndpointsProviderCallback callback)
         {
-            if (callback == null)
-                throw new ArgumentNullException(nameof(callback));
-
             _context = context;
-            _callback = callback;
+            _callback = callback ?? throw new ArgumentNullException(nameof(callback));
         }
 
         public void Configure(string name, IReceiveEndpointConfigurator configurator)

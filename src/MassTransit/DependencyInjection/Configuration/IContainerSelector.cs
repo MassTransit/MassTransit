@@ -5,7 +5,7 @@ namespace MassTransit.Configuration
 
 
     /// <summary>
-    /// Used to pull registrations from the container, scoped to the bus, multi-bus, or mediator
+    /// Used to pull configuration from the container, scoped to the bus, multi-bus, or mediator
     /// </summary>
     public interface IContainerSelector
     {
@@ -22,5 +22,7 @@ namespace MassTransit.Configuration
 
         IEnumerable<T> GetRegistrations<T>(IServiceProvider provider)
             where T : class, IRegistration;
+
+        IConfigureReceiveEndpoint GetConfigureReceiveEndpoints(IServiceProvider provider);
     }
 }

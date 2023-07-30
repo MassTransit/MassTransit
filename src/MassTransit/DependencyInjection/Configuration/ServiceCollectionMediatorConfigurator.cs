@@ -39,15 +39,6 @@ namespace MassTransit.Configuration
             _configure = configure;
         }
 
-        public override void AddConfigureEndpointsCallback(ConfigureEndpointsProviderCallback callback)
-        {
-            if (callback == null)
-                throw new ArgumentNullException(nameof(callback));
-
-            this.TryAddSingleton<IConfigureReceiveEndpoint>(provider =>
-                new ConfigureReceiveEndpointDelegateProvider(provider.GetRequiredService<IMediatorRegistrationContext>(), callback));
-        }
-
         static void AddMassTransitComponents(IServiceCollection collection)
         {
             collection.AddScoped<IScopedMediator, ScopedMediator>();

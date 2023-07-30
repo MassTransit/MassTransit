@@ -152,9 +152,7 @@ namespace MassTransit.Configuration
             if (_configureReceiveEndpoints != null)
                 return _configureReceiveEndpoints;
 
-            IEnumerable<IConfigureReceiveEndpoint> configureReceiveEndpoints = this.GetServices<IConfigureReceiveEndpoint>();
-
-            _configureReceiveEndpoints = new ConfigureReceiveEndpoint(configureReceiveEndpoints.ToArray());
+            _configureReceiveEndpoints = Selector.GetConfigureReceiveEndpoints(this);
 
             return _configureReceiveEndpoints;
         }
@@ -220,25 +218,6 @@ namespace MassTransit.Configuration
         static void NoFilter(IRegistrationFilterConfigurator configurator)
         {
         }
-
-
-        class ConfigureReceiveEndpoint :
-            IConfigureReceiveEndpoint
-        {
-            readonly IConfigureReceiveEndpoint[] _configurators;
-
-            public ConfigureReceiveEndpoint(IConfigureReceiveEndpoint[] configurators)
-            {
-                _configurators = configurators;
-            }
-
-            public void Configure(string name, IReceiveEndpointConfigurator configurator)
-            {
-                for (var i = 0; i < _configurators.Length; i++)
-                    _configurators[i].Configure(name, configurator);
-            }
-        }
-
 
         class Endpoint
         {
