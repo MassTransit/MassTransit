@@ -29,8 +29,9 @@ namespace MassTransit
 
             configurator.TryAddScoped(provider =>
             {
+                var bus = provider.GetRequiredService<IBus>();
                 var sendEndpointProvider = provider.GetRequiredService<ISendEndpointProvider>();
-                return new EndpointRecurringMessageScheduler(sendEndpointProvider, schedulerEndpointAddress);
+                return new EndpointRecurringMessageScheduler(sendEndpointProvider, schedulerEndpointAddress, bus.Topology);
             });
         }
 
@@ -55,8 +56,9 @@ namespace MassTransit
 
             configurator.TryAddScoped(provider =>
             {
+                var bus = provider.GetRequiredService<TBus>();
                 var sendEndpointProvider = provider.GetRequiredService<Bind<TBus, ISendEndpointProvider>>().Value;
-                return Bind<TBus>.Create(new EndpointRecurringMessageScheduler(sendEndpointProvider, schedulerEndpointAddress));
+                return Bind<TBus>.Create(new EndpointRecurringMessageScheduler(sendEndpointProvider, schedulerEndpointAddress, bus.Topology));
             });
         }
 
@@ -76,8 +78,9 @@ namespace MassTransit
 
             configurator.TryAddScoped(provider =>
             {
+                var bus = provider.GetRequiredService<IBus>();
                 var publishEndpoint = provider.GetRequiredService<IPublishEndpoint>();
-                return new PublishRecurringMessageScheduler(publishEndpoint);
+                return new PublishRecurringMessageScheduler(publishEndpoint, bus.Topology);
             });
         }
 
@@ -98,8 +101,9 @@ namespace MassTransit
 
             configurator.TryAddScoped(provider =>
             {
+                var bus = provider.GetRequiredService<TBus>();
                 var publishEndpoint = provider.GetRequiredService<Bind<TBus, IPublishEndpoint>>().Value;
-                return Bind<TBus>.Create(new PublishRecurringMessageScheduler(publishEndpoint));
+                return Bind<TBus>.Create(new PublishRecurringMessageScheduler(publishEndpoint, bus.Topology));
             });
         }
     }
