@@ -58,14 +58,12 @@
 
         public override bool CanConvert(Type typeToConvert)
         {
-            var typeInfo = typeToConvert.GetTypeInfo();
-
-            if (typeInfo.IsGenericType)
+            if (typeToConvert.IsGenericType)
             {
-                if (typeInfo.ClosesType(typeof(IDictionary<,>), out Type[] elementTypes)
-                    || typeInfo.ClosesType(typeof(IReadOnlyDictionary<,>), out elementTypes)
-                    || typeInfo.ClosesType(typeof(Dictionary<,>), out elementTypes)
-                    || (typeInfo.ClosesType(typeof(IEnumerable<>), out Type[] enumerableType)
+                if (typeToConvert.ClosesType(typeof(IDictionary<,>), out Type[] elementTypes)
+                    || typeToConvert.ClosesType(typeof(IReadOnlyDictionary<,>), out elementTypes)
+                    || typeToConvert.ClosesType(typeof(Dictionary<,>), out elementTypes)
+                    || (typeToConvert.ClosesType(typeof(IEnumerable<>), out Type[] enumerableType)
                         && enumerableType[0].ClosesType(typeof(KeyValuePair<,>), out elementTypes)
                         && elementTypes[1] == typeof(object)))
                 {
@@ -75,20 +73,20 @@
                     if (keyType != typeof(string) && keyType != typeof(Uri))
                         return false;
 
-                    if (typeInfo.IsFSharpType())
+                    if (typeToConvert.IsFSharpType())
                         return false;
 
                     return true;
                 }
             }
 
-            if (!typeInfo.IsInterface)
+            if (!typeToConvert.IsInterface)
                 return false;
 
-            if (_converterFactory.TryGetValue(typeInfo, out Func<JsonConverter> _))
+            if (_converterFactory.TryGetValue(typeToConvert, out Func<JsonConverter> _))
                 return true;
 
-            if (_openTypeFactory.TryGetValue(typeInfo, out _))
+            if (_openTypeFactory.TryGetValue(typeToConvert, out _))
                 return true;
 
             if (IsConvertibleInterfaceType(typeToConvert))
@@ -99,14 +97,12 @@
 
         public override JsonConverter CreateConverter(Type typeToConvert, JsonSerializerOptions options)
         {
-            var typeInfo = typeToConvert.GetTypeInfo();
-
-            if (_converterFactory.TryGetValue(typeInfo, out Func<JsonConverter> converterFactory))
+            if (_converterFactory.TryGetValue(typeToConvert, out Func<JsonConverter> converterFactory))
                 return converterFactory();
 
-            if (typeInfo.IsGenericType)
+            if (typeToConvert.IsGenericType)
             {
-                if (!typeInfo.IsFSharpType())
+                if (!typeToConvert.IsFSharpType())
                 {
                     if (typeToConvert == typeof(IDictionary<string, object>))
                         return new CaseInsensitiveDictionaryStringObjectJsonConverter<IDictionary<string, object>>();
@@ -117,10 +113,10 @@
                     if (typeToConvert == typeof(IEnumerable<KeyValuePair<string, object>>))
                         return new CaseInsensitiveDictionaryStringObjectJsonConverter<IEnumerable<KeyValuePair<string, object>>>();
 
-                    if (typeInfo.ClosesType(typeof(IDictionary<,>), out Type[] elementTypes)
-                        || typeInfo.ClosesType(typeof(IReadOnlyDictionary<,>), out elementTypes)
-                        || typeInfo.ClosesType(typeof(Dictionary<,>), out elementTypes)
-                        || (typeInfo.ClosesType(typeof(IEnumerable<>), out Type[] enumerableTypes)
+                    if (typeToConvert.ClosesType(typeof(IDictionary<,>), out Type[] elementTypes)
+                        || typeToConvert.ClosesType(typeof(IReadOnlyDictionary<,>), out elementTypes)
+                        || typeToConvert.ClosesType(typeof(Dictionary<,>), out elementTypes)
+                        || (typeToConvert.ClosesType(typeof(IEnumerable<>), out Type[] enumerableTypes)
                             && enumerableTypes[0].ClosesType(typeof(KeyValuePair<,>), out elementTypes)
                             && elementTypes[1] == typeof(object)))
                     {
@@ -139,13 +135,13 @@
                 }
             }
 
-            if (typeInfo.IsGenericType && !typeInfo.IsGenericTypeDefinition)
+            if (typeToConvert.IsGenericType && !typeToConvert.IsGenericTypeDefinition)
             {
-                var interfaceType = typeInfo.GetGenericTypeDefinition();
+                var interfaceType = typeToConvert.GetGenericTypeDefinition();
 
                 if (_openTypeFactory.TryGetValue(interfaceType, out var concreteType))
                 {
-                    Type[] arguments = typeInfo.GetGenericArguments();
+                    Type[] arguments = typeToConvert.GetGenericArguments();
 
                     if (arguments.Length == 1 && !arguments[0].IsGenericParameter)
                     {
@@ -163,7 +159,7 @@
                     typeof(InterfaceJsonConverter<,>).MakeGenericType(typeToConvert, TypeMetadataCache.GetImplementationType(typeToConvert)));
             }
 
-            throw new MassTransitException($"Unsupported type for json serialization {TypeCache.GetShortName(typeInfo)}");
+            throw new MassTransitException($"Unsupported type for json serialization {TypeCache.GetShortName(typeToConvert)}");
         }
 
         static bool IsConvertibleInterfaceType(Type typeToConvert)

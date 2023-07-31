@@ -25,13 +25,12 @@ namespace MassTransit.Serialization.JsonConverters
 
         static bool CanConvert(Type objectType, out Type keyType, out Type valueType)
         {
-            var typeInfo = objectType.GetTypeInfo();
-            if (typeInfo.IsGenericType)
+            if (objectType.IsGenericType)
             {
-                if (typeInfo.ClosesType(typeof(IDictionary<,>), out Type[] elementTypes)
-                    || typeInfo.ClosesType(typeof(IReadOnlyDictionary<,>), out elementTypes)
-                    || typeInfo.ClosesType(typeof(Dictionary<,>), out elementTypes)
-                    || (typeInfo.ClosesType(typeof(IEnumerable<>), out Type[] enumerableType)
+                if (objectType.ClosesType(typeof(IDictionary<,>), out Type[] elementTypes)
+                    || objectType.ClosesType(typeof(IReadOnlyDictionary<,>), out elementTypes)
+                    || objectType.ClosesType(typeof(Dictionary<,>), out elementTypes)
+                    || (objectType.ClosesType(typeof(IEnumerable<>), out Type[] enumerableType)
                         && enumerableType[0].ClosesType(typeof(KeyValuePair<,>), out elementTypes)))
                 {
                     keyType = elementTypes[0];
@@ -40,7 +39,7 @@ namespace MassTransit.Serialization.JsonConverters
                     if (keyType != typeof(string))
                         return false;
 
-                    if (typeInfo.IsFSharpType())
+                    if (objectType.IsFSharpType())
                         return false;
 
                     return true;

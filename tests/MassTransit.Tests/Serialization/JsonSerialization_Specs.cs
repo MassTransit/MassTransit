@@ -480,7 +480,7 @@ namespace MassTransit.Tests.Serialization
 
             public override bool CanConvert(Type objectType)
             {
-                return typeof(string).GetTypeInfo().IsAssignableFrom(objectType);
+                return typeof(string).IsAssignableFrom(objectType);
             }
         }
 

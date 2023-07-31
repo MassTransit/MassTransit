@@ -37,7 +37,7 @@
 
         Type CreateImplementation(Type interfaceType)
         {
-            if (!interfaceType.GetTypeInfo().IsInterface)
+            if (!interfaceType.IsInterface)
                 throw new ArgumentException("Proxies can only be created for interfaces: " + interfaceType.Name, nameof(interfaceType));
 
             return GetModuleBuilderForType(interfaceType, moduleBuilder => CreateTypeFromInterface(moduleBuilder, interfaceType));

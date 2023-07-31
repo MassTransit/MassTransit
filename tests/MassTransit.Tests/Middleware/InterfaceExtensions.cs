@@ -22,8 +22,7 @@
         /// <returns>True if the type is an open generic</returns>
         public static bool IsOpenGeneric(this Type type)
         {
-            var typeInfo = type.GetTypeInfo();
-            return typeInfo.IsGenericTypeDefinition || typeInfo.ContainsGenericParameters;
+            return type.IsGenericTypeDefinition || type.ContainsGenericParameters;
         }
 
         public static Type GetInterface(this Type type, Type interfaceType)
@@ -33,8 +32,7 @@
             if (interfaceType == null)
                 throw new ArgumentNullException(nameof(interfaceType));
 
-            var interfaceTypeInfo = interfaceType.GetTypeInfo();
-            if (!interfaceTypeInfo.IsInterface)
+            if (!interfaceType.IsInterface)
                 throw new ArgumentException("The interface type must be an interface: " + interfaceType.Name);
 
             return _cache.Get(type, interfaceType);
@@ -50,7 +48,7 @@
             if (!openType.IsOpenGeneric())
                 throw new ArgumentException("The interface type must be an open generic interface: " + openType.Name);
 
-            if (openType.GetTypeInfo().IsInterface)
+            if (openType.IsInterface)
             {
                 if (!openType.IsOpenGeneric())
                     throw new ArgumentException("The interface type must be an open generic interface: " + openType.Name);
@@ -59,20 +57,19 @@
                 if (interfaceType == null)
                     throw new ArgumentException("The interface type is not implemented by: " + type.Name);
 
-                return interfaceType.GetTypeInfo().GetGenericArguments().Where(x => !x.IsGenericParameter);
+                return interfaceType.GetGenericArguments().Where(x => !x.IsGenericParameter);
             }
 
             var baseType = type;
             while (baseType != null && baseType != typeof(object))
             {
-                var baseTypeInfo = baseType.GetTypeInfo();
-                if (baseTypeInfo.IsGenericType && baseType.GetGenericTypeDefinition() == openType)
-                    return baseTypeInfo.GetGenericArguments().Where(x => !x.IsGenericParameter);
+                if (baseType.IsGenericType && baseType.GetGenericTypeDefinition() == openType)
+                    return baseType.GetGenericArguments().Where(x => !x.IsGenericParameter);
 
-                if (!baseTypeInfo.IsGenericType && baseType == openType)
-                    return baseTypeInfo.GetGenericArguments().Where(x => !x.IsGenericParameter);
+                if (!baseType.IsGenericType && baseType == openType)
+                    return baseType.GetGenericArguments().Where(x => !x.IsGenericParameter);
 
-                baseType = baseTypeInfo.BaseType;
+                baseType = baseType.BaseType;
             }
 
             throw new ArgumentException("Could not find open type in type: " + type.Name);

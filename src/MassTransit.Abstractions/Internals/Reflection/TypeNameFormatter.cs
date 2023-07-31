@@ -39,7 +39,7 @@ namespace MassTransit.Internals
 
         string FormatTypeName(Type type)
         {
-            if (type.GetTypeInfo().IsGenericTypeDefinition)
+            if (type.IsGenericTypeDefinition)
                 throw new ArgumentException("An open generic type cannot be used as a message name");
 
             var sb = new StringBuilder("");
@@ -68,7 +68,7 @@ namespace MassTransit.Internals
                 sb.Append(_nestedTypeSeparator);
             }
 
-            if (type.GetTypeInfo().IsGenericType)
+            if (type.IsGenericType)
             {
                 var name = type.GetGenericTypeDefinition().Name;
 
@@ -79,7 +79,7 @@ namespace MassTransit.Internals
 
                 sb.Append(name);
                 sb.Append(_genericOpen);
-                Type[] arguments = type.GetTypeInfo().GenericTypeArguments;
+                Type[] arguments = type.GenericTypeArguments;
                 for (var i = 0; i < arguments.Length; i++)
                 {
                     if (i > 0)

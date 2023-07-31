@@ -176,7 +176,7 @@
             foreach (var baseInterface in GetImplementedInterfaces(typeof(TMessage)))
                 yield return baseInterface;
 
-            var baseType = typeof(TMessage).GetTypeInfo().BaseType;
+            var baseType = typeof(TMessage).BaseType;
             while (baseType != null && MessageTypeCache.IsValidMessageType(baseType))
             {
                 yield return baseType;
@@ -184,7 +184,7 @@
                 foreach (var baseInterface in GetImplementedInterfaces(baseType))
                     yield return baseInterface;
 
-                baseType = baseType.GetTypeInfo().BaseType;
+                baseType = baseType.BaseType;
             }
         }
 
@@ -195,10 +195,10 @@
                 .Where(MessageTypeCache.IsValidMessageType)
                 .ToArray();
 
-            if (baseType.GetTypeInfo().BaseType != null && baseType.GetTypeInfo().BaseType != typeof(object))
+            if (baseType.BaseType != null && baseType.BaseType != typeof(object))
             {
                 baseInterfaces = baseInterfaces
-                    .Except(baseType.GetTypeInfo().BaseType.GetInterfaces())
+                    .Except(baseType.BaseType.GetInterfaces())
                     .Except(baseInterfaces.SelectMany(x => x.GetInterfaces()))
                     .ToArray();
             }

@@ -469,7 +469,7 @@ namespace MassTransit
             if (type.IsGenericParameter)
                 return "";
 
-            if (type.GetTypeInfo().IsGenericType)
+            if (type.IsGenericType)
             {
                 var name = type.GetGenericTypeDefinition().Name;
 
@@ -480,7 +480,7 @@ namespace MassTransit
 
                 sb.Append(name);
                 sb.Append('_');
-                Type[] arguments = type.GetTypeInfo().GenericTypeArguments;
+                Type[] arguments = type.GenericTypeArguments;
                 for (var i = 0; i < arguments.Length; i++)
                 {
                     if (i > 0)

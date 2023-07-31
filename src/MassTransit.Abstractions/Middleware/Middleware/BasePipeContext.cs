@@ -107,7 +107,7 @@ namespace MassTransit.Middleware
         /// <returns></returns>
         public virtual bool HasPayloadType(Type payloadType)
         {
-            return payloadType.GetTypeInfo().IsInstanceOfType(this) || PayloadCache.HasPayloadType(payloadType);
+            return payloadType.IsInstanceOfType(this) || PayloadCache.HasPayloadType(payloadType);
         }
 
         /// <summary>

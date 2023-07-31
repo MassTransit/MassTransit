@@ -17,20 +17,20 @@ namespace MassTransit.Configuration
     {
         public IEnumerable<IMessageInterfaceType> GetMessageTypes()
         {
-            var typeInfo = typeof(T).GetTypeInfo();
-            if (typeInfo.IsGenericType && typeInfo.GetGenericTypeDefinition() == typeof(IConsumer<>))
+            var consumerType = typeof(T);
+            if (consumerType.IsGenericType && consumerType.GetGenericTypeDefinition() == typeof(IConsumer<>))
             {
-                var messageType = typeof(T).GetGenericArguments()[0];
+                var messageType = consumerType.GetGenericArguments()[0];
                 if (messageType.ClosesType(typeof(Batch<>), out Type[] batchTypes))
                 {
-                    var interfaceType = new BatchConsumerInterfaceType(messageType, batchTypes[0], typeof(T));
+                    var interfaceType = new BatchConsumerInterfaceType(messageType, batchTypes[0], consumerType);
                     if (MessageTypeCache.IsValidMessageType(interfaceType.MessageType))
                         yield return interfaceType;
                 }
             }
 
-            IEnumerable<IMessageInterfaceType> types = typeof(T).GetInterfaces()
-                .Where(x => IntrospectionExtensions.GetTypeInfo(x).IsGenericType)
+            IEnumerable<IMessageInterfaceType> types = consumerType.GetInterfaces()
+                .Where(x => x.IsGenericType)
                 .Where(x => x.GetGenericTypeDefinition() == typeof(IConsumer<>))
                 .Select(x => new
                 {
@@ -44,7 +44,7 @@ namespace MassTransit.Configuration
                     BatchMessageType = x.MessageType,
                     MessageType = x.MessageType.GetClosingArgument(typeof(Batch<>))
                 })
-                .Select(x => new BatchConsumerInterfaceType(x.BatchMessageType, x.MessageType, typeof(T)))
+                .Select(x => new BatchConsumerInterfaceType(x.BatchMessageType, x.MessageType, consumerType))
                 .Where(x => MessageTypeCache.IsValidMessageType(x.MessageType));
 
             foreach (var type in types)

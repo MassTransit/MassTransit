@@ -52,7 +52,7 @@ namespace MassTransit.Middleware
 
         public virtual bool HasPayloadType(Type payloadType)
         {
-            return payloadType.GetTypeInfo().IsInstanceOfType(this) || PayloadCache.HasPayloadType(payloadType) || _context.HasPayloadType(payloadType);
+            return payloadType.IsInstanceOfType(this) || PayloadCache.HasPayloadType(payloadType) || _context.HasPayloadType(payloadType);
         }
 
         public virtual bool TryGetPayload<T>([NotNullWhen(true)] out T? payload)

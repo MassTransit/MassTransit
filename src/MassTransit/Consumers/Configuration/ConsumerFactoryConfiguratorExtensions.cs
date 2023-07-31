@@ -20,7 +20,7 @@ namespace MassTransit.Configuration
 
             IEnumerable<ValidationResult> warningForMessages = ConsumerMetadataCache<TConsumer>
                 .ConsumerTypes
-                .Where(x => !x.MessageType.GetTypeInfo().IsInterface)
+                .Where(x => !x.MessageType.IsInterface)
                 .Where(x => !HasProtectedDefaultConstructor(x.MessageType))
                 .Select(x =>
                     $"The {TypeCache.GetShortName(x.MessageType)} message should have a public or protected default constructor."

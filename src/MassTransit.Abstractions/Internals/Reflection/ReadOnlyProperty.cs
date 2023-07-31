@@ -30,7 +30,7 @@ namespace MassTransit.Internals
                 return _ => throw new InvalidOperationException("No GetMethod available on " + property.Name);
 
             var instance = Expression.Parameter(typeof(object), "instance");
-            var instanceCast = property.DeclaringType.GetTypeInfo().IsValueType
+            var instanceCast = property.DeclaringType.IsValueType
                 ? Expression.Convert(instance, property.DeclaringType)
                 : Expression.TypeAs(instance, property.DeclaringType);
 

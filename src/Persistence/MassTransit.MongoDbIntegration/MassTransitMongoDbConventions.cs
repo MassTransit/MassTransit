@@ -51,7 +51,7 @@
 
         static bool IsSagaClass(Type type)
         {
-            return type.GetTypeInfo().IsClass && typeof(ISagaVersion).IsAssignableFrom(type);
+            return type.IsClass && typeof(ISagaVersion).IsAssignableFrom(type);
         }
 
         public static void RegisterClass<T>(Expression<Func<T, Guid>> id)

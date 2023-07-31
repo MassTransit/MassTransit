@@ -122,7 +122,7 @@ namespace MassTransit
             _properties = new Lazy<List<PropertyInfo>>(PropertyListFactory);
 
             _isValidMessageType = new Lazy<bool>(CheckIfValidMessageType);
-            _isTemporaryMessageType = new Lazy<bool>(() => CheckIfTemporaryMessageType(typeof(T).GetTypeInfo()));
+            _isTemporaryMessageType = new Lazy<bool>(() => CheckIfTemporaryMessageType(typeof(T)));
             _messageTypes = new Lazy<Type[]>(() => GetMessageTypes().ToArray());
             _messageTypeNames = new Lazy<string[]>(() => GetMessageTypeNames().ToArray());
             _diagnosticAddress = new Lazy<string>(GetDiagnosticAddress);
@@ -151,7 +151,7 @@ namespace MassTransit
         static bool CheckIfTemporaryMessageType(Type messageTypeInfo)
         {
             return (!messageTypeInfo.IsVisible && messageTypeInfo.IsClass)
-                || (messageTypeInfo.IsGenericType && messageTypeInfo.GetGenericArguments().Any(x => CheckIfTemporaryMessageType(x.GetTypeInfo())));
+                || (messageTypeInfo.IsGenericType && messageTypeInfo.GetGenericArguments().Any(x => CheckIfTemporaryMessageType(x)));
         }
 
         /// <summary>
@@ -175,16 +175,15 @@ namespace MassTransit
                 }
             }
 
-            var baseType = typeof(T).GetTypeInfo().BaseType;
+            var baseType = typeof(T).BaseType;
             while (baseType != null && MessageTypeCache.IsValidMessageType(baseType))
             {
                 yield return baseType;
 
-                baseType = baseType.GetTypeInfo().BaseType;
+                baseType = baseType.BaseType;
             }
 
             IEnumerable<Type> interfaces = typeof(T)
-                .GetTypeInfo()
                 .GetInterfaces()
                 .Where(MessageTypeCache.IsValidMessageType);
 
@@ -200,54 +199,54 @@ namespace MassTransit
         /// <returns>True if the message can be sent, otherwise false</returns>
         bool CheckIfValidMessageType()
         {
-            var typeInfo = typeof(T).GetTypeInfo();
+            var type = typeof(T);
 
-            if (typeInfo.IsAnonymousType())
+            if (type.IsAnonymousType())
             {
                 _invalidMessageTypeReason = $"Message types must not be anonymous types: {TypeCache<T>.ShortName}";
                 return false;
             }
 
-            if (typeInfo.Namespace == null)
+            if (type.Namespace == null)
             {
                 _invalidMessageTypeReason = $"Messages types must have a valid namespace: {TypeCache<T>.ShortName}";
                 return false;
             }
 
-            if (typeof(object).GetTypeInfo().Assembly.Equals(typeInfo.Assembly))
+            if (typeof(object).Assembly.Equals(type.Assembly))
             {
                 _invalidMessageTypeReason = $"Messages types must not be System types: {TypeCache<T>.ShortName}";
                 return false;
             }
 
-            if (typeInfo.Namespace == "System")
+            var ns = type.Namespace;
+            if (ns == "System")
             {
                 _invalidMessageTypeReason = $"Messages types must not be in the System namespace: {TypeCache<T>.ShortName}";
                 return false;
             }
 
-            var ns = typeInfo.Namespace;
             if (ns != null && ns.StartsWith("System."))
             {
                 _invalidMessageTypeReason = $"Messages types must not be in the System namespace: {TypeCache<T>.ShortName}";
                 return false;
             }
 
-            if (typeInfo.HasInterface<SendContext>()
-                || typeInfo.HasInterface<ConsumeContext>()
-                || typeInfo.HasInterface<ReceiveContext>())
+            if (type.HasInterface<SendContext>()
+                || type.HasInterface<ConsumeContext>()
+                || type.HasInterface<ReceiveContext>())
             {
                 _invalidMessageTypeReason = $"ConsumeContext, ReceiveContext, and SendContext are not valid message types: {TypeCache<T>.ShortName}";
                 return false;
             }
 
-            if (typeInfo.IsGenericType)
+            if (type.IsGenericType)
             {
-                var typeDefinition = typeInfo.GetGenericTypeDefinition();
+                var typeDefinition = type.GetGenericTypeDefinition();
                 if (typeDefinition == typeof(CorrelatedBy<>))
                 {
                     _invalidMessageTypeReason =
-                        $"CorrelatedBy<{typeof(T).GetClosingArgument(typeof(CorrelatedBy<>)).Name}> is not a valid message type";
+                        $"CorrelatedBy<{type.GetClosingArgument(typeof(CorrelatedBy<>)).Name}> is not a valid message type";
 
                     return false;
                 }
@@ -255,7 +254,7 @@ namespace MassTransit
                 if (typeDefinition == typeof(Orchestrates<>))
                 {
                     _invalidMessageTypeReason =
-                        $"Orchestrates<{typeof(T).GetClosingArgument(typeof(Orchestrates<>)).Name}> is not a valid message type";
+                        $"Orchestrates<{type.GetClosingArgument(typeof(Orchestrates<>)).Name}> is not a valid message type";
 
                     return false;
                 }
@@ -263,7 +262,7 @@ namespace MassTransit
                 if (typeDefinition == typeof(InitiatedBy<>))
                 {
                     _invalidMessageTypeReason =
-                        $"InitiatedBy<{typeof(T).GetClosingArgument(typeof(InitiatedBy<>)).Name}> is not a valid message type";
+                        $"InitiatedBy<{type.GetClosingArgument(typeof(InitiatedBy<>)).Name}> is not a valid message type";
 
                     return false;
                 }
@@ -271,19 +270,19 @@ namespace MassTransit
                 if (typeDefinition == typeof(InitiatedByOrOrchestrates<>))
                 {
                     _invalidMessageTypeReason =
-                        $"InitiatedByOrOrchestrates<{typeof(T).GetClosingArgument(typeof(InitiatedByOrOrchestrates<>)).Name}> is not a valid message type";
+                        $"InitiatedByOrOrchestrates<{type.GetClosingArgument(typeof(InitiatedByOrOrchestrates<>)).Name}> is not a valid message type";
 
                     return false;
                 }
 
                 if (typeDefinition == typeof(Observes<,>))
                 {
-                    Type[] closingArguments = typeof(T).GetClosingArguments(typeof(Observes<,>)).ToArray();
+                    Type[] closingArguments = type.GetClosingArguments(typeof(Observes<,>)).ToArray();
                     _invalidMessageTypeReason = $"Observes<{closingArguments[0].Name},{closingArguments[1].Name}> is not a valid message type";
                     return false;
                 }
 
-                if (typeInfo.IsOpenGeneric())
+                if (type.IsOpenGeneric())
                 {
                     _invalidMessageTypeReason = $"Message types must not be open generic types: {TypeCache<T>.ShortName}";
                     return false;
@@ -317,7 +316,7 @@ namespace MassTransit
 
         static bool ScanForConsumerInterfaces()
         {
-            Type[] interfaces = typeof(T).GetTypeInfo().GetInterfaces();
+            Type[] interfaces = typeof(T).GetInterfaces();
 
             return interfaces.Any(t => t.HasInterface(typeof(IConsumer<>))
                 || t.HasInterface(typeof(IJobConsumer<>)));
@@ -325,7 +324,7 @@ namespace MassTransit
 
         static bool ScanForSagaInterfaces()
         {
-            Type[] interfaces = typeof(T).GetTypeInfo().GetInterfaces();
+            Type[] interfaces = typeof(T).GetInterfaces();
 
             if (interfaces.Contains(typeof(ISaga)))
                 return true;

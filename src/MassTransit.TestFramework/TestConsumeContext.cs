@@ -161,7 +161,7 @@
 
         public bool HasMessageType(Type messageType)
         {
-            return messageType.GetTypeInfo().IsAssignableFrom(typeof(TMessage));
+            return messageType.IsAssignableFrom(typeof(TMessage));
         }
 
         public bool TryGetMessage<T>(out ConsumeContext<T> consumeContext)

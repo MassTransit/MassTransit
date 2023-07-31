@@ -17,7 +17,7 @@ namespace MassTransit.Internals
 
         public Type? GetGenericInterface(Type type, Type interfaceType)
         {
-            if (!interfaceType.GetTypeInfo().IsGenericTypeDefinition)
+            if (!interfaceType.IsGenericTypeDefinition)
             {
                 throw new ArgumentException($"The interface must be a generic interface definition: {TypeCache.GetShortName(interfaceType)}",
                     nameof(interfaceType));
@@ -26,7 +26,7 @@ namespace MassTransit.Internals
             // our contract states that we will not return generic interface definitions without generic type arguments
             if (type == interfaceType)
                 return null;
-            if (type.GetTypeInfo().IsGenericType)
+            if (type.IsGenericType)
             {
                 if (type.GetGenericTypeDefinition() == interfaceType)
                     return type;
@@ -34,7 +34,7 @@ namespace MassTransit.Internals
 
             Type[] interfaces = type.GetTypeInfo().ImplementedInterfaces.ToArray();
 
-            return interfaces.Where(t => t.GetTypeInfo().IsGenericType)
+            return interfaces.Where(t => t.IsGenericType)
                 .FirstOrDefault(t => t.GetGenericTypeDefinition() == interfaceType);
         }
 
@@ -47,7 +47,7 @@ namespace MassTransit.Internals
 
         Type? GetInterfaceInternal(Type type, Type interfaceType)
         {
-            if (interfaceType.GetTypeInfo().IsGenericTypeDefinition)
+            if (interfaceType.IsGenericTypeDefinition)
                 return GetGenericInterface(type, interfaceType);
 
             Type[] interfaces = type.GetTypeInfo().ImplementedInterfaces.ToArray();

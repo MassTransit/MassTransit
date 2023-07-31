@@ -11,7 +11,7 @@ namespace MassTransit.MongoDbIntegration
     {
         public void Apply(BsonClassMap classMap)
         {
-            if (classMap.ClassType.GetTypeInfo().IsClass && typeof(ISaga).IsAssignableFrom(classMap.ClassType))
+            if (classMap.ClassType.IsClass && typeof(ISaga).IsAssignableFrom(classMap.ClassType))
                 classMap.MapIdProperty(nameof(ISaga.CorrelationId));
         }
     }

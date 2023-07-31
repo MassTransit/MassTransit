@@ -12,18 +12,18 @@ namespace MassTransit.Configuration
     {
         public IEnumerable<IMessageInterfaceType> GetMessageTypes()
         {
-            var typeInfo = typeof(T).GetTypeInfo();
-            if (typeInfo.IsGenericType && typeInfo.GetGenericTypeDefinition() == typeof(IJobConsumer<>))
+            var consumerType = typeof(T);
+            if (consumerType.IsGenericType && consumerType.GetGenericTypeDefinition() == typeof(IJobConsumer<>))
             {
-                var interfaceType = new JobInterfaceType(typeof(T).GetGenericArguments()[0], typeof(T));
+                var interfaceType = new JobInterfaceType(consumerType.GetGenericArguments()[0], consumerType);
                 if (MessageTypeCache.IsValidMessageType(interfaceType.MessageType))
                     yield return interfaceType;
             }
 
-            IEnumerable<IMessageInterfaceType> types = typeof(T).GetInterfaces()
-                .Where(x => IntrospectionExtensions.GetTypeInfo(x).IsGenericType)
+            IEnumerable<IMessageInterfaceType> types = consumerType.GetInterfaces()
+                .Where(x => x.IsGenericType)
                 .Where(x => x.GetGenericTypeDefinition() == typeof(IJobConsumer<>))
-                .Select(x => new JobInterfaceType(x.GetGenericArguments()[0], typeof(T)))
+                .Select(x => new JobInterfaceType(x.GetGenericArguments()[0], consumerType))
                 .Where(x => MessageTypeCache.IsValidMessageType(x.MessageType))
                 .Where(x => !x.MessageType.ClosesType(typeof(Batch<>)));
 
