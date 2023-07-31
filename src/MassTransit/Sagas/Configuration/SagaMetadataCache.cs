@@ -119,7 +119,7 @@ namespace MassTransit.Configuration
         static IEnumerable<SagaInterfaceType> GetInitiatingTypes()
         {
             return typeof(TSaga).GetInterfaces()
-                .Where(x => x.GetTypeInfo().IsGenericType)
+                .Where(x => x.IsGenericType)
                 .Where(x => x.GetGenericTypeDefinition() == typeof(InitiatedBy<>))
                 .Select(x => new SagaInterfaceType(x, x.GetGenericArguments()[0], typeof(TSaga)))
                 .Where(x => MessageTypeCache.IsValidMessageType(x.MessageType));
@@ -128,7 +128,7 @@ namespace MassTransit.Configuration
         static IEnumerable<SagaInterfaceType> GetOrchestratingTypes()
         {
             return typeof(TSaga).GetInterfaces()
-                .Where(x => x.GetTypeInfo().IsGenericType)
+                .Where(x => x.IsGenericType)
                 .Where(x => x.GetGenericTypeDefinition() == typeof(Orchestrates<>))
                 .Select(x => new SagaInterfaceType(x, x.GetGenericArguments()[0], typeof(TSaga)))
                 .Where(x => MessageTypeCache.IsValidMessageType(x.MessageType));
@@ -137,7 +137,7 @@ namespace MassTransit.Configuration
         static IEnumerable<SagaInterfaceType> GetObservingTypes()
         {
             return typeof(TSaga).GetInterfaces()
-                .Where(x => x.GetTypeInfo().IsGenericType)
+                .Where(x => x.IsGenericType)
                 .Where(x => x.GetGenericTypeDefinition() == typeof(Observes<,>))
                 .Select(x => new SagaInterfaceType(x, x.GetGenericArguments()[0], typeof(TSaga)))
                 .Where(x => MessageTypeCache.IsValidMessageType(x.MessageType));
@@ -146,7 +146,7 @@ namespace MassTransit.Configuration
         static IEnumerable<SagaInterfaceType> GetInitiatingOrOrchestratingTypes()
         {
             return typeof(TSaga).GetInterfaces()
-                .Where(x => x.GetTypeInfo().IsGenericType)
+                .Where(x => x.IsGenericType)
                 .Where(x => x.GetGenericTypeDefinition() == typeof(InitiatedByOrOrchestrates<>))
                 .Select(x => new SagaInterfaceType(x, x.GetGenericArguments()[0], typeof(TSaga)))
                 .Where(x => MessageTypeCache.IsValidMessageType(x.MessageType));

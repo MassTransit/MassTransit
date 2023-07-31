@@ -183,7 +183,7 @@ namespace MassTransit.Tests.Serialization
                 return false;
             if (ReferenceEquals(this, obj))
                 return true;
-            if (!typeof(ComplaintAdded).GetTypeInfo().IsAssignableFrom(obj.GetType()))
+            if (!typeof(ComplaintAdded).IsAssignableFrom(obj.GetType()))
                 return false;
             return Equals((ComplaintAdded)obj);
         }

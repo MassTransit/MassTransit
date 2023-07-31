@@ -16,7 +16,7 @@
 
         protected override IConverter ValueFactory(Type objectType)
         {
-            if (objectType.GetTypeInfo().IsInterface && MessageTypeCache.IsValidMessageType(objectType))
+            if (objectType.IsInterface && MessageTypeCache.IsValidMessageType(objectType))
                 return (IConverter)Activator.CreateInstance(typeof(CachedConverter<>).MakeGenericType(objectType));
 
             return new Unsupported();

@@ -15,18 +15,18 @@ namespace MassTransit.Configuration
     {
         public IEnumerable<IMessageInterfaceType> GetMessageTypes()
         {
-            var typeInfo = typeof(T).GetTypeInfo();
-            if (typeInfo.IsGenericType && typeInfo.GetGenericTypeDefinition() == typeof(IConsumer<>))
+            var consumerType = typeof(T);
+            if (consumerType.IsGenericType && consumerType.GetGenericTypeDefinition() == typeof(IConsumer<>))
             {
-                var interfaceType = new ConsumerInterfaceType(typeof(T).GetGenericArguments()[0], typeof(T));
+                var interfaceType = new ConsumerInterfaceType(consumerType.GetGenericArguments()[0], consumerType);
                 if (MessageTypeCache.IsValidMessageType(interfaceType.MessageType))
                     yield return interfaceType;
             }
 
-            IEnumerable<IMessageInterfaceType> types = typeof(T).GetInterfaces()
-                .Where(x => IntrospectionExtensions.GetTypeInfo(x).IsGenericType)
+            IEnumerable<IMessageInterfaceType> types = consumerType.GetInterfaces()
+                .Where(x => x.IsGenericType)
                 .Where(x => x.GetGenericTypeDefinition() == typeof(IConsumer<>))
-                .Select(x => new ConsumerInterfaceType(x.GetGenericArguments()[0], typeof(T)))
+                .Select(x => new ConsumerInterfaceType(x.GetGenericArguments()[0], consumerType))
                 .Where(x => MessageTypeCache.IsValidMessageType(x.MessageType));
 
             foreach (var type in types)

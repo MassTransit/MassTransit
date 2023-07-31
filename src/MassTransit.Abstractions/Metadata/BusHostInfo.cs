@@ -20,7 +20,7 @@ namespace MassTransit.Metadata
             OperatingSystemVersion = Environment.OSVersion.ToString();
             var entryAssembly = System.Reflection.Assembly.GetEntryAssembly() ?? System.Reflection.Assembly.GetCallingAssembly();
             MachineName = Environment.MachineName;
-            MassTransitVersion = typeof(HostInfo).GetTypeInfo().Assembly.GetName().Version?.ToString();
+            MassTransitVersion = typeof(HostInfo).Assembly.GetName().Version?.ToString();
 
             try
             {

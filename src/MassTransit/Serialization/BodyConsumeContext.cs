@@ -55,7 +55,7 @@ namespace MassTransit.Serialization
                     return message != null;
                 }
 
-                if (typeof(T).GetTypeInfo().IsInterface && MessageTypeCache<T>.IsValidMessageType)
+                if (typeof(T).IsInterface && MessageTypeCache<T>.IsValidMessageType)
                 {
                     if (SerializerContext.IsSupportedMessageType<T>())
                     {

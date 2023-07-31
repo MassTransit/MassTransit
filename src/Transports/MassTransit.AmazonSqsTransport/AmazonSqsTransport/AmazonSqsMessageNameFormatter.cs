@@ -34,7 +34,7 @@ namespace MassTransit.AmazonSqsTransport
 
         string CreateMessageName(Type type)
         {
-            if (type.GetTypeInfo().IsGenericTypeDefinition)
+            if (type.IsGenericTypeDefinition)
                 throw new ArgumentException("An open generic type cannot be used as a message name");
 
             var sb = new StringBuilder("");
@@ -44,26 +44,25 @@ namespace MassTransit.AmazonSqsTransport
 
         string GetMessageName(StringBuilder sb, Type type, string scope)
         {
-            var typeInfo = type.GetTypeInfo();
-            if (typeInfo.IsGenericParameter)
+            if (type.IsGenericParameter)
                 return "";
 
-            var ns = typeInfo.Namespace?.Replace(".", _nestedTypeSeparator);
+            var ns = type.Namespace?.Replace(".", _nestedTypeSeparator);
             if (ns != null && !ns.Equals(scope))
             {
                 sb.Append(ns);
                 sb.Append(_namespaceSeparator);
             }
 
-            if (typeInfo.IsNested)
+            if (type.IsNested)
             {
-                GetMessageName(sb, typeInfo.DeclaringType, ns);
+                GetMessageName(sb, type.DeclaringType, ns);
                 sb.Append(_nestedTypeSeparator);
             }
 
-            if (typeInfo.IsGenericType)
+            if (type.IsGenericType)
             {
-                var name = typeInfo.GetGenericTypeDefinition().Name;
+                var name = type.GetGenericTypeDefinition().Name;
 
                 //remove `1
                 var index = name.IndexOf('`');
@@ -73,7 +72,7 @@ namespace MassTransit.AmazonSqsTransport
                 sb.Append(name);
                 sb.Append(_genericTypeSeparator);
 
-                Type[] arguments = typeInfo.GetGenericArguments();
+                Type[] arguments = type.GetGenericArguments();
                 for (var i = 0; i < arguments.Length; i++)
                 {
                     if (i > 0)
@@ -85,7 +84,7 @@ namespace MassTransit.AmazonSqsTransport
                 sb.Append(_genericTypeSeparator);
             }
             else
-                sb.Append(typeInfo.Name);
+                sb.Append(type.Name);
 
             return sb.ToString();
         }

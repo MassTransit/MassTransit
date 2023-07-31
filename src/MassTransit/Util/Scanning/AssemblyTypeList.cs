@@ -42,11 +42,11 @@
 
         public void Add(Type type)
         {
-            if (type.GetTypeInfo().IsInterface)
+            if (type.IsInterface)
                 Interface.Add(type);
-            else if (type.GetTypeInfo().IsAbstract)
+            else if (type.IsAbstract)
                 Abstract.Add(type);
-            else if (type.GetTypeInfo().IsClass)
+            else if (type.IsClass)
                 Concrete.Add(type);
         }
     }

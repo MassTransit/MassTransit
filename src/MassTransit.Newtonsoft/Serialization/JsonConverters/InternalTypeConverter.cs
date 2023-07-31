@@ -21,9 +21,7 @@ namespace MassTransit.Serialization.JsonConverters
 
         protected override IConverter ValueFactory(Type objectType)
         {
-            var typeInfo = objectType.GetTypeInfo();
-
-            if (typeInfo.IsInterface)
+            if (objectType.IsInterface)
             {
                 if (objectType == typeof(Fault))
                     return new CachedConverter<FaultEvent>();
@@ -78,11 +76,11 @@ namespace MassTransit.Serialization.JsonConverters
                 if (objectType == typeof(RoutingSlipRevised))
                     return new CachedConverter<RoutingSlipRevisedMessage>();
 
-                if (typeInfo.IsGenericType && !typeInfo.IsGenericTypeDefinition)
+                if (objectType.IsGenericType && !objectType.IsGenericTypeDefinition)
                 {
-                    if (typeInfo.GetGenericTypeDefinition() == typeof(Fault<>))
+                    if (objectType.GetGenericTypeDefinition() == typeof(Fault<>))
                     {
-                        Type[] arguments = typeInfo.GetGenericArguments();
+                        Type[] arguments = objectType.GetGenericArguments();
                         if (arguments.Length == 1 && !arguments[0].IsGenericParameter)
                         {
                             return (IConverter)Activator.CreateInstance(typeof(CachedConverter<>).MakeGenericType(
@@ -90,9 +88,9 @@ namespace MassTransit.Serialization.JsonConverters
                         }
                     }
 
-                    if (typeInfo.GetGenericTypeDefinition() == typeof(Batch<>))
+                    if (objectType.GetGenericTypeDefinition() == typeof(Batch<>))
                     {
-                        Type[] arguments = typeInfo.GetGenericArguments();
+                        Type[] arguments = objectType.GetGenericArguments();
                         if (arguments.Length == 1 && !arguments[0].IsGenericParameter)
                         {
                             return (IConverter)Activator.CreateInstance(typeof(CachedConverter<>).MakeGenericType(

@@ -50,15 +50,13 @@ namespace MassTransit.DependencyInjection
 
         Type CreateImplementation(Type interfaceType)
         {
-            var typeInfo = interfaceType.GetTypeInfo();
-
-            if (!typeInfo.IsInterface)
+            if (!interfaceType.IsInterface)
                 throw new ArgumentException("Bus instance types can only be created for interfaces: " + interfaceType.Name, nameof(interfaceType));
 
-            if (typeInfo.IsGenericType)
+            if (interfaceType.IsGenericType)
                 throw new ArgumentException("Bus instance types can not be generic: " + interfaceType.Name, nameof(interfaceType));
 
-            if (!typeInfo.HasInterface<IBus>())
+            if (!interfaceType.HasInterface<IBus>())
                 throw new ArgumentException("Bus instance types must include the IBus interface: " + interfaceType.Name, nameof(interfaceType));
 
             return GetModuleBuilderForType(interfaceType, moduleBuilder => CreateTypeFromInterface(moduleBuilder, interfaceType));
@@ -98,7 +96,7 @@ namespace MassTransit.DependencyInjection
                 il.Emit(OpCodes.Call, ctorParent);
                 il.Emit(OpCodes.Ret);
 
-                Type[] extraInterfaces = interfaceType.GetTypeInfo().GetAllInterfaces().Except(typeof(IBus).GetTypeInfo().GetAllInterfaces()).ToArray();
+                Type[] extraInterfaces = interfaceType.GetAllInterfaces().Except(typeof(IBus).GetTypeInfo().GetAllInterfaces()).ToArray();
 
                 IEnumerable<PropertyInfo> properties = interfaceType.GetAllProperties();
                 foreach (var property in properties)

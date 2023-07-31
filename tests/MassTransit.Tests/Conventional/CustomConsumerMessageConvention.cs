@@ -12,18 +12,18 @@ namespace MassTransit.Tests.Conventional
     {
         public IEnumerable<IMessageInterfaceType> GetMessageTypes()
         {
-            var typeInfo = typeof(T).GetTypeInfo();
-            if (typeInfo.IsGenericType && typeInfo.GetGenericTypeDefinition() == typeof(IHandler<>))
+            var consumerType = typeof(T);
+            if (consumerType.IsGenericType && consumerType.GetGenericTypeDefinition() == typeof(IHandler<>))
             {
-                var interfaceType = new CustomConsumerInterfaceType(typeInfo.GetGenericArguments()[0], typeof(T));
+                var interfaceType = new CustomConsumerInterfaceType(consumerType.GetGenericArguments()[0], consumerType);
                 if (MessageTypeCache.IsValidMessageType(interfaceType.MessageType))
                     yield return interfaceType;
             }
 
-            IEnumerable<CustomConsumerInterfaceType> types = typeof(T).GetInterfaces()
-                .Where(x => x.GetTypeInfo().IsGenericType)
-                .Where(x => x.GetTypeInfo().GetGenericTypeDefinition() == typeof(IHandler<>))
-                .Select(x => new CustomConsumerInterfaceType(x.GetTypeInfo().GetGenericArguments()[0], typeof(T)))
+            IEnumerable<CustomConsumerInterfaceType> types = consumerType.GetInterfaces()
+                .Where(x => x.IsGenericType)
+                .Where(x => x.GetGenericTypeDefinition() == typeof(IHandler<>))
+                .Select(x => new CustomConsumerInterfaceType(x.GetGenericArguments()[0], consumerType))
                 .Where(x => MessageTypeCache.IsValidMessageType(x.MessageType));
 
             foreach (var type in types)

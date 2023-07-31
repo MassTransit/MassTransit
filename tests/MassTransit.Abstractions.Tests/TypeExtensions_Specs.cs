@@ -13,15 +13,15 @@
         [Test]
         public void Should_accept_multiple_this_operators()
         {
-            var typeInfo = typeof(TypeWithMultipleThisOperators).GetTypeInfo();
-            Assert.That(() => typeInfo.GetAllProperties().ToList(), Throws.Nothing);
+            var type = typeof(TypeWithMultipleThisOperators);
+            Assert.That(() => type.GetAllProperties().ToList(), Throws.Nothing);
         }
 
         [Test]
         public void Should_accept_multiple_this_operators_subclass()
         {
-            var typeInfo = typeof(SubclassWithThisOperator).GetTypeInfo();
-            Assert.That(() => typeInfo.GetAllProperties().ToList(), Throws.Nothing);
+            var type = typeof(SubclassWithThisOperator);
+            Assert.That(() => type.GetAllProperties().ToList(), Throws.Nothing);
         }
     }
 

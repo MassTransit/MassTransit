@@ -68,31 +68,29 @@ namespace MassTransit.Metadata
             foreach (var baseInterface in implementedInterfaces.SelectMany(x => x.GetInterfaces()).Distinct().Where(MessageTypeCache.IsValidMessageType))
                 yield return new ImplementedType(baseInterface, false);
 
-            var baseType = typeof(TMessage).GetTypeInfo().BaseType;
+            var baseType = typeof(TMessage).BaseType;
             while (baseType != null && MessageTypeCache.IsValidMessageType(baseType))
             {
-                yield return new ImplementedType(baseType, typeof(TMessage).GetTypeInfo().BaseType == baseType);
+                yield return new ImplementedType(baseType, typeof(TMessage).BaseType == baseType);
 
                 foreach (var baseInterface in GetImplementedInterfaces(baseType).Where(MessageTypeCache.IsValidMessageType))
                     yield return new ImplementedType(baseInterface, false);
 
-                baseType = baseType.GetTypeInfo().BaseType;
+                baseType = baseType.BaseType;
             }
         }
 
         static IEnumerable<Type> GetImplementedInterfaces(Type baseType)
         {
-            var baseTypeInfo = baseType.GetTypeInfo();
-
-            IEnumerable<Type> baseInterfaces = baseTypeInfo
+            IEnumerable<Type> baseInterfaces = baseType
                 .GetInterfaces()
                 .Where(MessageTypeCache.IsValidMessageType)
                 .ToArray();
 
-            if (baseTypeInfo.BaseType != null && baseTypeInfo.BaseType != typeof(object))
+            if (baseType.BaseType != null && baseType.BaseType != typeof(object))
             {
                 baseInterfaces = baseInterfaces
-                    .Except(baseTypeInfo.BaseType.GetInterfaces())
+                    .Except(baseType.BaseType.GetInterfaces())
                     .Except(baseInterfaces.SelectMany(x => x.GetInterfaces()))
                     .ToArray();
             }

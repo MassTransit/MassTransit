@@ -29,14 +29,13 @@
             if (interfaceType == null)
                 throw new ArgumentNullException(nameof(interfaceType));
 
-            var interfaceTypeInfo = interfaceType.GetTypeInfo();
-            if (!interfaceTypeInfo.IsInterface)
+            if (!interfaceType.IsInterface)
                 throw new ArgumentException("The interface type must be an interface: " + interfaceType.Name);
 
-            if (interfaceTypeInfo.IsGenericTypeDefinition)
+            if (interfaceType.IsGenericTypeDefinition)
                 return _cache.GetGenericInterface(type, interfaceType) != null;
 
-            return interfaceTypeInfo.IsAssignableFrom(type.GetTypeInfo());
+            return interfaceType.IsAssignableFrom(type);
         }
 
         public static Type? GetInterface<T>(this Type type)
@@ -52,8 +51,7 @@
             if (interfaceType == null)
                 throw new ArgumentNullException(nameof(interfaceType));
 
-            var interfaceTypeInfo = interfaceType.GetTypeInfo();
-            if (!interfaceTypeInfo.IsInterface)
+            if (!interfaceType.IsInterface)
                 throw new ArgumentException("The interface type must be an interface: " + interfaceType.Name);
 
             return _cache.Get(type, interfaceType);
@@ -106,7 +104,7 @@
             if (!openType.IsOpenGeneric())
                 throw new ArgumentException("The interface type must be an open generic interface: " + openType.Name);
 
-            if (openType.GetTypeInfo().IsInterface)
+            if (openType.IsInterface)
             {
                 if (!openType.IsOpenGeneric())
                     throw new ArgumentException("The interface type must be an open generic interface: " + openType.Name);
@@ -118,10 +116,9 @@
                     return false;
                 }
 
-                var typeInfo = interfaceType.GetTypeInfo();
-                if (!typeInfo.IsGenericTypeDefinition && !typeInfo.ContainsGenericParameters)
+                if (interfaceType is {IsGenericTypeDefinition: false, ContainsGenericParameters: false})
                 {
-                    closedType = typeInfo;
+                    closedType = interfaceType;
                     return true;
                 }
 
@@ -132,12 +129,11 @@
             var baseType = type;
             while (baseType != null && baseType != typeof(object))
             {
-                var baseTypeInfo = baseType.GetTypeInfo();
-                if (baseTypeInfo.IsGenericType && baseTypeInfo.GetGenericTypeDefinition() == openType)
+                if (baseType.IsGenericType && baseType.GetGenericTypeDefinition() == openType)
                 {
-                    if (!baseTypeInfo.IsGenericTypeDefinition && !baseTypeInfo.ContainsGenericParameters)
+                    if (!baseType.IsGenericTypeDefinition && !baseType.ContainsGenericParameters)
                     {
-                        closedType = baseTypeInfo;
+                        closedType = baseType;
                         return true;
                     }
 
@@ -145,13 +141,13 @@
                     return false;
                 }
 
-                if (!baseTypeInfo.IsGenericType && baseType == openType)
+                if (!baseType.IsGenericType && baseType == openType)
                 {
-                    closedType = baseTypeInfo;
+                    closedType = baseType;
                     return true;
                 }
 
-                baseType = baseTypeInfo.BaseType;
+                baseType = baseType.BaseType;
             }
 
             closedType = default;
@@ -174,7 +170,7 @@
             if (!openType.IsOpenGeneric())
                 throw new ArgumentException("The interface type must be an open generic interface: " + openType.Name);
 
-            if (openType.GetTypeInfo().IsInterface)
+            if (openType.IsInterface)
             {
                 if (!openType.IsOpenGeneric())
                     throw new ArgumentException("The interface type must be an open generic interface: " + openType.Name);
@@ -183,20 +179,19 @@
                 if (interfaceType == null)
                     throw new ArgumentException("The interface type is not implemented by: " + type.Name);
 
-                return interfaceType.GetTypeInfo().GetGenericArguments().Where(x => !x.IsGenericParameter);
+                return interfaceType.GetGenericArguments().Where(x => !x.IsGenericParameter);
             }
 
             var baseType = type;
             while (baseType != null && baseType != typeof(object))
             {
-                var baseTypeInfo = baseType.GetTypeInfo();
-                if (baseTypeInfo.IsGenericType && baseType.GetGenericTypeDefinition() == openType)
-                    return baseTypeInfo.GetGenericArguments().Where(x => !x.IsGenericParameter);
+                if (baseType.IsGenericType && baseType.GetGenericTypeDefinition() == openType)
+                    return baseType.GetGenericArguments().Where(x => !x.IsGenericParameter);
 
-                if (!baseTypeInfo.IsGenericType && baseType == openType)
-                    return baseTypeInfo.GetGenericArguments().Where(x => !x.IsGenericParameter);
+                if (!baseType.IsGenericType && baseType == openType)
+                    return baseType.GetGenericArguments().Where(x => !x.IsGenericParameter);
 
-                baseType = baseTypeInfo.BaseType;
+                baseType = baseType.BaseType;
             }
 
             throw new ArgumentException("Could not find open type in type: " + type.Name);

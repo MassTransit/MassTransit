@@ -28,38 +28,37 @@ namespace MassTransit.Serialization.JsonConverters
 
         static bool CanConvert(Type objectType, out Type elementType)
         {
-            var typeInfo = objectType.GetTypeInfo();
-            if (typeInfo.IsGenericType)
+            if (objectType.IsGenericType)
             {
-                if (typeInfo.ClosesType(typeof(IDictionary<,>))
-                    || typeInfo.ClosesType(typeof(IReadOnlyDictionary<,>))
-                    || typeInfo.ClosesType(typeof(Dictionary<,>))
-                    || typeInfo.ClosesType(typeof(IEnumerable<>), out Type[] enumerableType) && enumerableType[0].ClosesType(typeof(KeyValuePair<,>)))
+                if (objectType.ClosesType(typeof(IDictionary<,>))
+                    || objectType.ClosesType(typeof(IReadOnlyDictionary<,>))
+                    || objectType.ClosesType(typeof(Dictionary<,>))
+                    || objectType.ClosesType(typeof(IEnumerable<>), out Type[] enumerableType) && enumerableType[0].ClosesType(typeof(KeyValuePair<,>)))
                 {
                     elementType = default;
                     return false;
                 }
 
-                if (typeInfo.ClosesType(typeof(IList<>), out Type[] elementTypes)
-                    || typeInfo.ClosesType(typeof(IReadOnlyList<>), out elementTypes)
-                    || typeInfo.ClosesType(typeof(List<>), out elementTypes)
-                    || typeInfo.ClosesType(typeof(IReadOnlyCollection<>), out elementTypes)
-                    || typeInfo.ClosesType(typeof(IEnumerable<>), out elementTypes))
+                if (objectType.ClosesType(typeof(IList<>), out Type[] elementTypes)
+                    || objectType.ClosesType(typeof(IReadOnlyList<>), out elementTypes)
+                    || objectType.ClosesType(typeof(List<>), out elementTypes)
+                    || objectType.ClosesType(typeof(IReadOnlyCollection<>), out elementTypes)
+                    || objectType.ClosesType(typeof(IEnumerable<>), out elementTypes))
                 {
                     elementType = elementTypes[0];
                     if (elementType.IsAbstract)
                         return false;
 
-                    if (typeInfo.IsFSharpType())
+                    if (objectType.IsFSharpType())
                         return false;
 
                     return true;
                 }
             }
 
-            if (typeInfo.IsArray && typeInfo.HasElementType && typeInfo.GetArrayRank() == 1)
+            if (objectType.IsArray && objectType.HasElementType && objectType.GetArrayRank() == 1)
             {
-                elementType = typeInfo.GetElementType();
+                elementType = objectType.GetElementType();
                 if (elementType == typeof(byte))
                     return false;
 

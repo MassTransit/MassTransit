@@ -40,7 +40,7 @@ namespace MassTransit.Util.Scanning
 
         public void AssemblyContainingType(Type type)
         {
-            _assemblies.Add(type.GetTypeInfo().Assembly);
+            _assemblies.Add(type.Assembly);
         }
 
         public void Exclude(Func<Type, bool> exclude)
@@ -184,7 +184,7 @@ namespace MassTransit.Util.Scanning
         {
             var trace = new StackTrace(false);
             var thisAssembly = System.Reflection.Assembly.GetExecutingAssembly();
-            var mtAssembly = typeof(IBus).GetTypeInfo().Assembly;
+            var mtAssembly = typeof(IBus).Assembly;
 
             Assembly callingAssembly = null;
             for (var i = 0; i < trace.FrameCount; i++)
@@ -193,7 +193,7 @@ namespace MassTransit.Util.Scanning
                 var declaringType = frame.GetMethod().DeclaringType;
                 if (declaringType != null)
                 {
-                    var assembly = declaringType.GetTypeInfo().Assembly;
+                    var assembly = declaringType.Assembly;
                     if (assembly != thisAssembly && assembly != mtAssembly)
                     {
                         callingAssembly = assembly;

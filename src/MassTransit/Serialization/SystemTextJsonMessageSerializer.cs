@@ -163,7 +163,7 @@ namespace MassTransit.Serialization
         static T? GetObject<T>(JsonElement jsonElement)
             where T : class
         {
-            if (typeof(T).GetTypeInfo().IsInterface && MessageTypeCache<T>.IsValidMessageType)
+            if (typeof(T).IsInterface && MessageTypeCache<T>.IsValidMessageType)
             {
                 var messageType = TypeMetadataCache<T>.ImplementationType;
 
