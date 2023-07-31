@@ -23,7 +23,7 @@ namespace MassTransit.Internals
 
         public static IEnumerable<PropertyInfo> GetAllProperties(this Type type)
         {
-            return GetAllProperties(type);
+            return GetAllProperties(type.GetTypeInfo());
         }
 
         public static IEnumerable<PropertyInfo> GetAllProperties(this TypeInfo typeInfo)
@@ -59,15 +59,10 @@ namespace MassTransit.Internals
 
         public static IEnumerable<Type> GetAllInterfaces(this Type type)
         {
-            return GetAllInterfaces(type);
-        }
+            if (type.IsInterface)
+                yield return type;
 
-        public static IEnumerable<Type> GetAllInterfaces(this TypeInfo typeInfo)
-        {
-            if (typeInfo.IsInterface)
-                yield return typeInfo;
-
-            foreach (var interfaceType in typeInfo.GetInterfaces())
+            foreach (var interfaceType in type.GetInterfaces())
                 yield return interfaceType;
         }
 
@@ -171,16 +166,6 @@ namespace MassTransit.Internals
         }
 
         /// <summary>
-        /// Determines if the TypeInfo is an open generic with at least one unspecified generic argument
-        /// </summary>
-        /// <param name="typeInfo">The TypeInfo</param>
-        /// <returns>True if the TypeInfo is an open generic</returns>
-        public static bool IsOpenGeneric(this TypeInfo typeInfo)
-        {
-            return typeInfo.IsGenericTypeDefinition || typeInfo.ContainsGenericParameters;
-        }
-
-        /// <summary>
         /// Determines if a type can be null
         /// </summary>
         /// <param name="type">The type</param>
@@ -224,17 +209,7 @@ namespace MassTransit.Internals
         /// <returns></returns>
         public static bool IsAnonymousType(this Type type)
         {
-            return type.IsAnonymousType();
-        }
-
-        /// <summary>
-        /// Returns true if the TypeInfo is an anonymous type
-        /// </summary>
-        /// <param name="typeInfo"></param>
-        /// <returns></returns>
-        public static bool IsAnonymousType(this TypeInfo typeInfo)
-        {
-            return typeInfo.FullName != null && typeInfo.HasAttribute<CompilerGeneratedAttribute>() && typeInfo.FullName.Contains("AnonymousType");
+            return type.FullName != null && type.HasAttribute<CompilerGeneratedAttribute>() && type.FullName.Contains("AnonymousType");
         }
 
         /// <summary>

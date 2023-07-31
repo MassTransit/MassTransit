@@ -96,7 +96,7 @@ namespace MassTransit.DependencyInjection
                 il.Emit(OpCodes.Call, ctorParent);
                 il.Emit(OpCodes.Ret);
 
-                Type[] extraInterfaces = interfaceType.GetAllInterfaces().Except(typeof(IBus).GetTypeInfo().GetAllInterfaces()).ToArray();
+                Type[] extraInterfaces = interfaceType.GetAllInterfaces().Except(typeof(IBus).GetAllInterfaces()).ToArray();
 
                 IEnumerable<PropertyInfo> properties = interfaceType.GetAllProperties();
                 foreach (var property in properties)
