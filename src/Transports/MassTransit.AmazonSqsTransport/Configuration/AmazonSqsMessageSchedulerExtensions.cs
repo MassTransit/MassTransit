@@ -27,7 +27,7 @@
         /// </summary>
         /// <param name="configurator"></param>
         [Obsolete("Use the transport independent AddDelayedMessageScheduler")]
-        public static void AddAmazonSqsMessageScheduler(this IRegistrationConfigurator configurator)
+        public static void AddAmazonSqsMessageScheduler(this IBusRegistrationConfigurator configurator)
         {
             configurator.AddDelayedMessageScheduler();
         }
