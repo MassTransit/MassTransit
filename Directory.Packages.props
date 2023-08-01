@@ -25,8 +25,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>
-    <PackageVersion Include="Hangfire.AspNetCore" Version="1.8.3" />
-    <PackageVersion Include="Hangfire.Core" Version="1.8.3" />
+    <PackageVersion Include="Hangfire.AspNetCore" Version="1.8.4" />
+    <PackageVersion Include="Hangfire.Core" Version="1.8.4" />
     <PackageVersion Include="Hangfire.MemoryStorage" Version="1.8.0" />
     <PackageVersion Include="Iesi.Collections" Version="4.0.5" />
     <PackageVersion Include="Ionic.Zlib.Core" Version="1.0.0" />
@@ -36,7 +36,7 @@
     <PackageVersion Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.21.0" />
     <PackageVersion Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
     <PackageVersion Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="7.0.9" />
-    <PackageVersion Include="Microsoft.Azure.Cosmos" Version="3.35.1" />
+    <PackageVersion Include="Microsoft.Azure.Cosmos" Version="3.35.2" />
     <PackageVersion Include="Microsoft.Azure.Cosmos.Table" Version="1.0.8" />
     <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions.EventHubs" Version="5.4.0" />
     <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="5.11.0" />
@@ -44,16 +44,16 @@
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.1.0" />
     <PackageVersion Include="Microsoft.Data.SqlClient" Version="2.1.5" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.4">
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.5">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.18" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.1" Condition="'$(TargetFramework)' == 'net6.0'" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="7.0.4" Condition="'$(TargetFramework)' == 'net7.0'" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.4" />
-    <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="6.0.1"  Condition="'$(TargetFramework)' != 'net7.0'" />
-    <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="7.0.0"  Condition="'$(TargetFramework)' == 'net7.0'" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="7.0.5" Condition="'$(TargetFramework)' == 'net7.0'" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.5" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="6.0.1" Condition="'$(TargetFramework)' != 'net7.0'" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="7.0.0" Condition="'$(TargetFramework)' == 'net7.0'" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="6.0.1" Condition="'$(TargetFramework)' != 'net7.0'" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" Condition="'$(TargetFramework)' == 'net7.0'" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" Condition="'$(TargetFramework)' != 'net7.0'" />
@@ -61,7 +61,7 @@
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="6.0.1" Condition="'$(TargetFramework)' != 'net7.0'" />
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="7.0.1" Condition="'$(TargetFramework)' == 'net7.0'" />
     <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0" Condition="'$(TargetFramework)' != 'net7.0'" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="7.0.0" Condition="'$(TargetFramework)' == 'net7.0'"  />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="7.0.0" Condition="'$(TargetFramework)' == 'net7.0'" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="6.0.0" Condition="'$(TargetFramework)' != 'net7.0'" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="7.0.0" Condition="'$(TargetFramework)' == 'net7.0'" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" Condition="'$(TargetFramework)' != 'net7.0'" />
@@ -74,7 +74,7 @@
     <PackageVersion Include="MongoDB.Driver.GridFS" Version="2.20.0" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="Newtonsoft.Json.Bson" Version="1.0.2" />
-    <PackageVersion Include="NHibernate" Version="5.4.3" />
+    <PackageVersion Include="NHibernate" Version="5.4.4" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.4" />
     <PackageVersion Include="NUnit" Version="3.13.3" />
     <PackageVersion Include="NUnit.Analyzers" Version="3.3.0" />
