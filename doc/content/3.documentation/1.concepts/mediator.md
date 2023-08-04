@@ -35,7 +35,8 @@ _Publish_, on the other hand, does not require the message to be consumed and do
 
 ### Scoped Mediator
 
-Main mediator interface `IMediator` is registered as a singleton but there is another scoped version of it `IScopedMediator`. This interface is registered as a part of current IoC scope (`HttpContext` or manually created) and can be used in order to share it for the entire pipeline.
+Main mediator interface `IMediator` is registered as a singleton but there is another scoped version of it `IScopedMediator`. This interface is registered as a part of current IoC scope (`HttpContext` or manually created) and can be used in order to share the scope for the entire pipeline.
+By default with `IMediator`, each consumer has its own scope. By using `IScopedMediator`, the scope is shared between several consumers.
 
 ::alert{type="success"}
 No additional configuration is required as long as Mediator is configured via `services.AddMediator()`
