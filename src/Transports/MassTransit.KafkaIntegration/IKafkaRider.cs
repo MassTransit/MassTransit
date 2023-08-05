@@ -1,14 +1,13 @@
 namespace MassTransit
 {
-    using System;
+    using KafkaIntegration;
     using Transports;
 
 
     public interface IKafkaRider :
         IRiderControl,
+        ITopicProducerProvider,
         IKafkaTopicEndpointConnector
     {
-        ITopicProducer<TKey, TValue> GetProducer<TKey, TValue>(Uri address, ConsumeContext consumeContext = default)
-            where TValue : class;
     }
 }

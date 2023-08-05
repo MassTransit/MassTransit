@@ -2,7 +2,6 @@
 {
     using System;
     using Confluent.Kafka;
-    using Serialization;
     using Transports;
 
 
