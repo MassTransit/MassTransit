@@ -18,11 +18,13 @@ namespace MassTransit.KafkaIntegration.Configuration
         readonly ReceiveEndpointObservable _endpointObservers;
         readonly IHeadersDeserializer _headersDeserializer;
         readonly IKafkaHostConfiguration _hostConfiguration;
+        readonly IKafkaSerializerFactory _kafkaSerializerFactory;
         readonly Action<IClient, string> _oAuthBearerTokenRefreshHandler;
         readonly string _topicName;
 
         public KafkaConsumerSpecification(IKafkaHostConfiguration hostConfiguration, ConsumerConfig consumerConfig, string topicName,
-            IHeadersDeserializer headersDeserializer, Action<IKafkaTopicReceiveEndpointConfigurator<TKey, TValue>> configure,
+            IHeadersDeserializer headersDeserializer, IKafkaSerializerFactory kafkaSerializerFactory,
+            Action<IKafkaTopicReceiveEndpointConfigurator<TKey, TValue>> configure,
             Action<IClient, string> oAuthBearerTokenRefreshHandler)
         {
             _hostConfiguration = hostConfiguration;
@@ -30,6 +32,7 @@ namespace MassTransit.KafkaIntegration.Configuration
             _topicName = topicName;
             _endpointObservers = new ReceiveEndpointObservable();
             _headersDeserializer = headersDeserializer;
+            _kafkaSerializerFactory = kafkaSerializerFactory;
             _configure = configure;
             _oAuthBearerTokenRefreshHandler = oAuthBearerTokenRefreshHandler;
             EndpointName = $"{KafkaTopicAddress.PathPrefix}/{_topicName}";
@@ -47,6 +50,8 @@ namespace MassTransit.KafkaIntegration.Configuration
                 endpointConfiguration, _oAuthBearerTokenRefreshHandler);
             configurator.ConnectReceiveEndpointObserver(_endpointObservers);
             configurator.SetHeadersDeserializer(_headersDeserializer);
+            configurator.SetKeyDeserializer(_kafkaSerializerFactory.GetDeserializer<TKey>());
+            configurator.SetValueDeserializer(_kafkaSerializerFactory.GetDeserializer<TValue>());
             _configure?.Invoke(configurator);
 
             IReadOnlyList<ValidationResult> result = Validate().Concat(configurator.Validate())

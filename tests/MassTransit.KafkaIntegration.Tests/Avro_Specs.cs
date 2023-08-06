@@ -5,11 +5,10 @@ namespace MassTransit.KafkaIntegration.Tests
     using System.Threading.Tasks;
     using AvroContracts.AvroContracts;
     using Confluent.Kafka;
-    using Confluent.Kafka.SyncOverAsync;
     using Confluent.SchemaRegistry;
-    using Confluent.SchemaRegistry.Serdes;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
+    using Serializers;
     using TestFramework;
     using Testing;
 
@@ -22,21 +21,12 @@ namespace MassTransit.KafkaIntegration.Tests
         [Test]
         public async Task Should_produce()
         {
-            static IAsyncSerializer<T> GetSerializer<T>(IServiceProvider provider)
-            {
-                return new AvroSerializer<T>(provider.GetService<ISchemaRegistryClient>());
-            }
-
-            static IDeserializer<T> GetDeserializer<T>(IServiceProvider provider)
-            {
-                return new AvroDeserializer<T>(provider.GetService<ISchemaRegistryClient>()).AsSyncOverAsync();
-            }
-
             await using var provider = new ServiceCollection()
                 .AddSingleton<ISchemaRegistryClient>(new CachedSchemaRegistryClient(new Dictionary<string, string>
                 {
                     { "schema.registry.url", "localhost:8081" },
                 }))
+                .AddSingleton<IKafkaSerializerFactory, AvroKafkaSerializerFactory>()
                 .ConfigureKafkaTestOptions(options =>
                 {
                     options.CreateTopicsIfNotExists = true;
@@ -50,20 +40,15 @@ namespace MassTransit.KafkaIntegration.Tests
                     {
                         rider.AddConsumer<TestKafkaMessageConsumer<KafkaMessage>>();
 
-                        rider.AddProducer<string, KafkaMessage>(Topic, context => context.MessageId.ToString(), (context, cfg) =>
-                        {
-                            cfg.SetKeySerializer(GetSerializer<string>(context));
-                            cfg.SetValueSerializer(GetSerializer<KafkaMessage>(context));
-                        });
+                        rider.AddProducer<string, KafkaMessage>(Topic, context => context.MessageId.ToString());
 
                         rider.UsingKafka((context, k) =>
                         {
+                            k.SetSerializationFactory(context.GetRequiredService<IKafkaSerializerFactory>());
+
                             k.TopicEndpoint<string, KafkaMessage>(Topic, nameof(Avro_Specs), c =>
                             {
                                 c.AutoOffsetReset = AutoOffsetReset.Earliest;
-
-                                c.SetKeyDeserializer(GetDeserializer<string>(context));
-                                c.SetValueDeserializer(GetDeserializer<KafkaMessage>(context));
 
                                 c.ConfigureConsumer<TestKafkaMessageConsumer<KafkaMessage>>(context);
                             });
@@ -111,21 +96,12 @@ namespace MassTransit.KafkaIntegration.Tests
         [Test]
         public async Task Should_use_the_default_endpoint_serializer()
         {
-            static IAsyncSerializer<T> GetSerializer<T>(IServiceProvider provider)
-            {
-                return new AvroSerializer<T>(provider.GetService<ISchemaRegistryClient>());
-            }
-
-            static IDeserializer<T> GetDeserializer<T>(IServiceProvider provider)
-            {
-                return new AvroDeserializer<T>(provider.GetService<ISchemaRegistryClient>()).AsSyncOverAsync();
-            }
-
             await using var provider = new ServiceCollection()
                 .AddSingleton<ISchemaRegistryClient>(new CachedSchemaRegistryClient(new Dictionary<string, string>
                 {
                     { "schema.registry.url", "localhost:8081" },
                 }))
+                .AddSingleton<IKafkaSerializerFactory, AvroKafkaSerializerFactory>()
                 .ConfigureKafkaTestOptions(options =>
                 {
                     options.CreateTopicsIfNotExists = true;
@@ -144,22 +120,16 @@ namespace MassTransit.KafkaIntegration.Tests
                     {
                         rider.AddConsumer<MessageHandler>();
 
-                        rider.AddProducer<string, KafkaMessage>(Topic, context => context.MessageId.ToString(), (context, cfg) =>
-                        {
-                            cfg.SetKeySerializer(GetSerializer<string>(context));
-                            cfg.SetValueSerializer(GetSerializer<KafkaMessage>(context));
-                        });
+                        rider.AddProducer<string, KafkaMessage>(Topic, context => context.MessageId.ToString());
 
                         rider.AddInMemoryInboxOutbox();
 
                         rider.UsingKafka((context, k) =>
                         {
+                            k.SetSerializationFactory(context.GetRequiredService<IKafkaSerializerFactory>());
                             k.TopicEndpoint<string, KafkaMessage>(Topic, nameof(Avro_Specs), c =>
                             {
                                 c.AutoOffsetReset = AutoOffsetReset.Earliest;
-
-                                c.SetKeyDeserializer(GetDeserializer<string>(context));
-                                c.SetValueDeserializer(GetDeserializer<KafkaMessage>(context));
 
                                 c.UseInMemoryInboxOutbox(context);
 
