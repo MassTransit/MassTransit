@@ -18,6 +18,13 @@ namespace MassTransit
         KafkaSendTransportContext<TKey, TValue> CreateSendTransportContext<TKey, TValue>(IBusInstance busInstance, string topic)
             where TValue : class;
 
+        IKafkaProducerSpecification CreateSpecification<TKey, TValue>(string topicName, Action<IKafkaProducerConfigurator<TKey, TValue>> configure)
+            where TValue : class;
+
+        IKafkaProducerSpecification CreateSpecification<TKey, TValue>(string topicName, ProducerConfig producerConfig,
+            Action<IKafkaProducerConfigurator<TKey, TValue>> configure)
+            where TValue : class;
+
         IKafkaConsumerSpecification CreateSpecification<TKey, TValue>(string topicName, string groupId,
             Action<IKafkaTopicReceiveEndpointConfigurator<TKey, TValue>> configure)
             where TValue : class;
