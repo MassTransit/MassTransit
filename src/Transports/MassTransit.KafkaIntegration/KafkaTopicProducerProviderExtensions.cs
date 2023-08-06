@@ -1,12 +1,13 @@
-namespace MassTransit.KafkaIntegration
+namespace MassTransit
 {
     using System;
     using Confluent.Kafka;
     using DependencyInjection;
+    using KafkaIntegration;
     using Microsoft.Extensions.DependencyInjection;
 
 
-    public static class TopicProducerProviderExtensions
+    public static class KafkaTopicProducerProviderExtensions
     {
         public static ITopicProducer<TValue> GetProducer<TValue>(this ITopicProducerProvider provider, Uri address)
             where TValue : class
@@ -22,7 +23,7 @@ namespace MassTransit.KafkaIntegration
             return new KeyedTopicProducer<TKey, TValue>(producer, keyResolver);
         }
 
-        public static ITopicProducerProvider GetScopedTopicProducerProvider(this ITopicProducerProvider producerProvider, IServiceProvider provider)
+        internal static ITopicProducerProvider GetScopedTopicProducerProvider(this ITopicProducerProvider producerProvider, IServiceProvider provider)
         {
             var contextProvider = provider.GetService<IScopedConsumeContextProvider>();
             return contextProvider is { HasContext: true }

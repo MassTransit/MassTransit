@@ -34,7 +34,6 @@ namespace MassTransit.KafkaIntegration.Tests
                         r.AddConsumer<TestKafkaMessageConsumer<KafkaMessage>>();
 
                         r.AddProducer<KafkaMessage>(Topic, producerConfig);
-
                         r.UsingKafka((context, k) =>
                         {
                             k.TopicEndpoint<KafkaMessage>(Topic, consumerConfig, c =>
@@ -110,7 +109,6 @@ namespace MassTransit.KafkaIntegration.Tests
         public async Task Should_receive_messages()
         {
             var consumerConfig = new ConsumerConfig { GroupId = nameof(Producer_Provider_Specs) };
-            var producerConfig = new ProducerConfig();
 
             await using var provider = new ServiceCollection()
                 .ConfigureKafkaTestOptions(options =>
@@ -125,8 +123,6 @@ namespace MassTransit.KafkaIntegration.Tests
                     x.SetTestTimeouts(testInactivityTimeout: TimeSpan.FromSeconds(15));
                     x.AddRider(r =>
                     {
-                        r.AddProducer<KafkaMessage>(Topic, producerConfig);
-
                         r.UsingKafka((_, k) =>
                         {
                             k.TopicEndpoint<KafkaMessage>(Topic, consumerConfig, c =>

@@ -106,17 +106,7 @@ namespace MassTransit.KafkaIntegration.Configuration
             if (producerConfig == null)
                 throw new ArgumentNullException(nameof(producerConfig));
 
-            var added = _producers.TryAdd(topicName, topic =>
-            {
-                var configurator = new KafkaProducerSpecification<TKey, TValue>(this, producerConfig, topicName, _oAuthBearerTokenRefreshHandler);
-                configurator.SetHeadersSerializer(_headersSerializer);
-                configure?.Invoke(configurator);
-
-                configurator.ConnectSendObserver(_sendObservers);
-                if (_configureSend != null)
-                    configurator.ConfigureSend(_configureSend);
-                return configurator;
-            });
+            var added = _producers.TryAdd(topicName, topic => CreateSpecification(topic, producerConfig, configure));
 
             if (!added)
                 throw new ConfigurationException($"A topic producer with the same key was already added: {topicName}");
@@ -271,12 +261,33 @@ namespace MassTransit.KafkaIntegration.Configuration
             where TValue : class
         {
             if (!_producers.TryGetValue(topic, out var spec))
-                throw new ConfigurationException($"Producer for topic: {topic} is not configured.");
+                spec = CreateSpecification<TKey, TValue>(topic);
 
             if (spec is IKafkaProducerSpecification<TKey, TValue> specification)
                 return specification.CreateSendTransportContext(busInstance);
 
             throw new ConfigurationException($"Producer for topic: {topic} is not configured for ${typeof(Message<TKey, TValue>).Name} message");
+        }
+
+        public IKafkaProducerSpecification CreateSpecification<TKey, TValue>(string topicName,
+            Action<IKafkaProducerConfigurator<TKey, TValue>> configure = null)
+            where TValue : class
+        {
+            return CreateSpecification(topicName, new ProducerConfig(), configure);
+        }
+
+        public IKafkaProducerSpecification CreateSpecification<TKey, TValue>(string topicName, ProducerConfig producerConfig,
+            Action<IKafkaProducerConfigurator<TKey, TValue>> configure = null)
+            where TValue : class
+        {
+            var configurator = new KafkaProducerSpecification<TKey, TValue>(this, producerConfig, topicName, _oAuthBearerTokenRefreshHandler);
+            configurator.SetHeadersSerializer(_headersSerializer);
+            configure?.Invoke(configurator);
+
+            configurator.ConnectSendObserver(_sendObservers);
+            if (_configureSend != null)
+                configurator.ConfigureSend(_configureSend);
+            return configurator;
         }
 
         public IKafkaConsumerSpecification CreateSpecification<TKey, TValue>(string topicName, string groupId,
