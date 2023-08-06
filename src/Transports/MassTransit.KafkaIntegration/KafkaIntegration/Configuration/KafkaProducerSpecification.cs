@@ -33,10 +33,6 @@ namespace MassTransit.KafkaIntegration.Configuration
             TopicName = topicName;
             _oAuthBearerTokenRefreshHandler = oAuthBearerTokenRefreshHandler;
             _sendObservers = new SendObservable();
-
-            SetKeySerializer(SerializerTypes.TryGet<TKey>() ?? new MassTransitAsyncJsonSerializer<TKey>());
-            SetValueSerializer(new MassTransitAsyncJsonSerializer<TValue>());
-
             _serialization = new SerializationConfiguration();
         }
 
@@ -189,6 +185,15 @@ namespace MassTransit.KafkaIntegration.Configuration
         {
             if (string.IsNullOrEmpty(TopicName))
                 yield return this.Failure("Topic", "should not be empty");
+
+            if (_headersSerializer == null)
+                yield return this.Failure("HeadersSerializer", "should not be null");
+
+            if (_keySerializer == null)
+                yield return this.Failure("KeySerializer", "should not be null");
+
+            if (_valueSerializer == null)
+                yield return this.Failure("ValueSerializer", "should not be null");
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)

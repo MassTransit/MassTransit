@@ -26,6 +26,7 @@ namespace MassTransit.KafkaIntegration.Configuration
         IHeadersSerializer _headersSerializer;
         bool _isHostConfigured;
         Action<IClient, string> _oAuthBearerTokenRefreshHandler;
+        IKafkaSerializerFactory _serializerFactory;
 
         public KafkaFactoryConfigurator(ClientConfig clientConfig)
         {
@@ -34,6 +35,7 @@ namespace MassTransit.KafkaIntegration.Configuration
             _producers = new SingleThreadedDictionary<string, IKafkaProducerSpecification>();
             _endpointObservers = new ReceiveEndpointObservable();
             _sendObservers = new SendObservable();
+            _serializerFactory = new DefaultKafkaSerializerFactory();
 
             SetHeadersDeserializer(DictionaryHeadersSerialize.Deserializer);
             SetHeadersSerializer(DictionaryHeadersSerialize.Serializer);
@@ -120,6 +122,11 @@ namespace MassTransit.KafkaIntegration.Configuration
         public void SetHeadersSerializer(IHeadersSerializer serializer)
         {
             _headersSerializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
+        }
+
+        public void SetSerializationFactory(IKafkaSerializerFactory factory)
+        {
+            _serializerFactory = factory ?? throw new ArgumentNullException(nameof(factory));
         }
 
         public Acks? Acks
@@ -282,6 +289,8 @@ namespace MassTransit.KafkaIntegration.Configuration
         {
             var configurator = new KafkaProducerSpecification<TKey, TValue>(this, producerConfig, topicName, _oAuthBearerTokenRefreshHandler);
             configurator.SetHeadersSerializer(_headersSerializer);
+            configurator.SetKeySerializer(_serializerFactory.GetSerializer<TKey>());
+            configurator.SetValueSerializer(_serializerFactory.GetSerializer<TValue>());
             configure?.Invoke(configurator);
 
             configurator.ConnectSendObserver(_sendObservers);
@@ -311,7 +320,8 @@ namespace MassTransit.KafkaIntegration.Configuration
             consumerConfig.EnableAutoCommit = false;
 
             var specification =
-                new KafkaConsumerSpecification<TKey, TValue>(this, consumerConfig, topicName, _headersDeserializer, configure, _oAuthBearerTokenRefreshHandler);
+                new KafkaConsumerSpecification<TKey, TValue>(this, consumerConfig, topicName, _headersDeserializer, _serializerFactory, configure,
+                    _oAuthBearerTokenRefreshHandler);
             specification.ConnectReceiveEndpointObserver(_endpointObservers);
             return specification;
         }

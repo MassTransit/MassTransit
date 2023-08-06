@@ -41,9 +41,6 @@ namespace MassTransit.KafkaIntegration.Configuration
             _options = new OptionsSet();
             Topic = topic;
 
-            SetKeyDeserializer(DeserializerTypes.TryGet<TKey>() ?? new MassTransitJsonDeserializer<TKey>());
-            SetValueDeserializer(new MassTransitJsonDeserializer<TValue>());
-
             CheckpointInterval = TimeSpan.FromMinutes(1);
             CheckpointMessageCount = 5000;
             MessageLimit = 10000;
@@ -194,6 +191,12 @@ namespace MassTransit.KafkaIntegration.Configuration
         {
             if (_headersDeserializer == null)
                 yield return this.Failure("HeadersDeserializer", "should not be null");
+
+            if (_keyDeserializer == null)
+                yield return this.Failure("KeyDeserializer", "should not be null");
+
+            if (_valueDeserializer == null)
+                yield return this.Failure("ValueDeserializer", "should not be null");
 
             if (_options.TryGetOptions(out KafkaTopicOptions options))
             {
