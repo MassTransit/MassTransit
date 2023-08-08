@@ -53,6 +53,7 @@ namespace MassTransit
             Event(() => GetJobState, x =>
             {
                 x.CorrelateById(m => m.Message.JobId);
+                x.ReadOnly = true;
                 x.OnMissingInstance(i => i.ExecuteAsync(context => context.RespondAsync<JobState>(new
                 {
                     context.Message.JobId,
