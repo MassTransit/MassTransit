@@ -30,6 +30,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
             entity.Property(x => x.ActiveJobCount);
             entity.Property(x => x.ConcurrentJobLimit);
+            entity.Property(x => x.Name);
 
             entity.Property(x => x.OverrideJobLimit);
             entity.Property(x => x.OverrideLimitExpiration);
