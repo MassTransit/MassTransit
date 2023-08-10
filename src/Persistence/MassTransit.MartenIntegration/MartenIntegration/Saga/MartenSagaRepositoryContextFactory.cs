@@ -71,7 +71,12 @@ namespace MassTransit.MartenIntegration.Saga
         async Task<T> ExecuteAsyncMethod<T>(Func<MartenSagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken)
             where T : class
         {
+
+#if NET6_0_OR_GREATER
+            var session = _documentStore.LightweightSession();
+#else
             var session = _documentStore.OpenSession();
+#endif
             try
             {
                 var repositoryContext = new MartenSagaRepositoryContext<TSaga>(session, cancellationToken);

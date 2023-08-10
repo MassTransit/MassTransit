@@ -74,7 +74,7 @@
         [OneTimeSetUp]
         public async Task OneTime()
         {
-            await _store.Schema.ApplyAllConfiguredChangesToDatabaseAsync();
+            await _store.Storage.ApplyAllConfiguredChangesToDatabaseAsync();
         }
 
         public LocatingAnExistingSaga()

@@ -30,7 +30,8 @@
     <PackageVersion Include="Hangfire.MemoryStorage" Version="1.8.0" />
     <PackageVersion Include="Iesi.Collections" Version="4.0.5" />
     <PackageVersion Include="Ionic.Zlib.Core" Version="1.0.0" />
-    <PackageVersion Include="Marten" Version="5.11.0" />
+    <PackageVersion Include="Marten" Version="5.11.0" Condition="'$(TargetFramework)' != 'net6.0' AND '$(TargetFramework)' != 'net7.0'" />
+    <PackageVersion Include="Marten" Version="6.0.5" Condition="'$(TargetFramework)' == 'net6.0' OR '$(TargetFramework)' == 'net7.0'" />
     <PackageVersion Include="MathNet.Numerics" Version="5.0.0" />
     <PackageVersion Include="MediatR" Version="12.1.1" />
     <PackageVersion Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.21.0" />
