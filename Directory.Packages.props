@@ -65,6 +65,7 @@
     <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="7.0.0" Condition="'$(TargetFramework)' == 'net7.0'" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="6.0.0" Condition="'$(TargetFramework)' != 'net7.0'" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="7.0.0" Condition="'$(TargetFramework)' == 'net7.0'" />
+    <PackageVersion Include="Microsoft.Extensions.Logging" Version="7.0.0" Condition="'$(TargetFramework)' == 'net7.0'" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" Condition="'$(TargetFramework)' != 'net7.0'" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" Condition="'$(TargetFramework)' == 'net7.0'" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="6.0.0" Condition="'$(TargetFramework)' != 'net7.0'" />

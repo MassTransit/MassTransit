@@ -107,10 +107,15 @@ namespace MassTransit
         [Obsolete("AddMarten should be used to set up and configure Marten and use SetMartenSagaRepositoryProvider() with no arguments.")]
         public static void SetMartenSagaRepositoryProvider(this IRegistrationConfigurator configurator, string connectionString)
         {
-            configurator.AddMarten(options =>
-            {
-                options.Connection(connectionString);
-            });
+            var martenRegistrationPipeline = configurator.AddMarten(
+                options =>
+                {
+                    options.Connection(connectionString);
+                });
+
+#if NET6_0_OR_GREATER
+            martenRegistrationPipeline.ApplyAllDatabaseChangesOnStartup();
+#endif
 
             configurator.SetSagaRepositoryProvider(new MartenSagaRepositoryRegistrationProvider());
         }
@@ -125,12 +130,17 @@ namespace MassTransit
         public static void SetMartenSagaRepositoryProvider(this IRegistrationConfigurator configurator, string connectionString,
             Action<StoreOptions> configureOptions)
         {
-            configurator.AddMarten(options =>
-            {
-                options.Connection(connectionString);
+            var martenRegistrationPipeline = configurator.AddMarten(
+                options =>
+                {
+                    options.Connection(connectionString);
 
-                configureOptions?.Invoke(options);
-            });
+                    configureOptions?.Invoke(options);
+                });
+
+#if NET6_0_OR_GREATER
+            martenRegistrationPipeline.ApplyAllDatabaseChangesOnStartup();
+#endif
 
             configurator.SetSagaRepositoryProvider(new MartenSagaRepositoryRegistrationProvider());
         }
@@ -145,12 +155,17 @@ namespace MassTransit
         public static void SetMartenSagaRepositoryProvider(this IRegistrationConfigurator configurator, Func<NpgsqlConnection> connectionFactory,
             Action<StoreOptions> configureOptions)
         {
-            configurator.AddMarten(options =>
-            {
-                options.Connection(connectionFactory);
+            var martenRegistrationPipeline = configurator.AddMarten(
+                options =>
+                {
+                    options.Connection(connectionFactory);
 
-                configureOptions?.Invoke(options);
-            });
+                    configureOptions?.Invoke(options);
+                });
+
+#if NET6_0_OR_GREATER
+            martenRegistrationPipeline.ApplyAllDatabaseChangesOnStartup();
+#endif
 
             configurator.SetSagaRepositoryProvider(new MartenSagaRepositoryRegistrationProvider());
         }
