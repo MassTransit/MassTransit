@@ -3,14 +3,18 @@ namespace MassTransit.MartenIntegration.Tests
     namespace ContainerTests
     {
         using System;
+        using System.Linq;
+        using System.Threading;
         using System.Threading.Tasks;
         using Marten;
         using Microsoft.Extensions.DependencyInjection;
+        using Microsoft.Extensions.Hosting;
+        using Microsoft.Extensions.Logging;
+        using Microsoft.Extensions.Logging.Abstractions;
         using NUnit.Framework;
         using TestFramework;
         using TestFramework.Sagas;
         using Testing;
-
 
         public class Using_Marten_with_multiple_sagas :
             InMemoryTestFixture
@@ -27,6 +31,8 @@ namespace MassTransit.MartenIntegration.Tests
             [Test]
             public async Task Should_work_as_expected()
             {
+                await EnsureMartenHostedServiceIsStarted();
+
                 Task<ConsumeContext<TestStarted>> started = await ConnectPublishHandler<TestStarted>();
 
                 var correlationId = NewId.NextGuid();
@@ -49,6 +55,8 @@ namespace MassTransit.MartenIntegration.Tests
 
             protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
             {
+                configurator.AddLogging(loggingBuilder => loggingBuilder.AddProvider(NullLoggerProvider.Instance));
+
                 configurator.AddMarten(options =>
                 {
                     options.Connection("server=localhost;port=5432;database=MartenTest;user id=postgres;password=Password12!;");
@@ -60,7 +68,7 @@ namespace MassTransit.MartenIntegration.Tests
                             .WithEncoding("UTF-8")
                             .ConnectionLimit(-1);
                     });
-                });
+                }).ApplyAllDatabaseChangesOnStartup();
 
                 configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
                     .MartenRepository();
@@ -77,6 +85,12 @@ namespace MassTransit.MartenIntegration.Tests
                 configurator.ConfigureSaga<TestInstance>(busRegistrationContext);
                 configurator.ConfigureSaga<TestInstance2>(busRegistrationContext);
             }
+
+            private Task EnsureMartenHostedServiceIsStarted() =>
+                _provider
+                    .GetServices<IHostedService>()
+                    .Single(x => x.GetType().Name == "MartenActivator")
+                    .StartAsync(CancellationToken.None);
         }
 
 
