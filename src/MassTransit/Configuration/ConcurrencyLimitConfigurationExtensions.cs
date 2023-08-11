@@ -58,7 +58,7 @@
             managementEndpointConfigurator.Instance(observer.Limiter, x =>
             {
                 x.UseConcurrentMessageLimit(1);
-                x.Message<SetConcurrencyLimit>(m => m.UseRetry(r => r.None()));
+                x.Message<SetConcurrencyLimit>(m => m.UseMessageRetry(r => r.None()));
             });
         }
     }

@@ -235,6 +235,7 @@ namespace MassTransit.Configuration
 
         public IContainerRegistrar Registrar => _configurator.Registrar;
 
+        [Obsolete("Use 'Using[TransportName]' instead. Visit https://masstransit.io/obsolete for details.")]
         public void AddBus(Func<IBusRegistrationContext, IBusControl> busFactory)
         {
             _configurator.AddBus(busFactory);
