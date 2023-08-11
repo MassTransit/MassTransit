@@ -61,8 +61,7 @@ namespace MassTransit.RabbitMqTransport
 
             if (settings.UseClientCertificateAsAuthenticationIdentity)
             {
-                factory.AuthMechanisms.Clear();
-                factory.AuthMechanisms.Add(new ExternalMechanismFactory());
+                factory.AuthMechanisms = new List<IAuthMechanismFactory> { new ExternalMechanismFactory() };
                 factory.UserName = "";
                 factory.Password = "";
             }
