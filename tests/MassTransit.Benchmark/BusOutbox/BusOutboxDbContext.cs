@@ -23,8 +23,6 @@ public class BusOutboxDbContext :
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.AddInboxStateEntity();
-        modelBuilder.AddOutboxMessageEntity();
-        modelBuilder.AddOutboxStateEntity();
+        modelBuilder.AddTransactionalOutboxEntities();
     }
 }

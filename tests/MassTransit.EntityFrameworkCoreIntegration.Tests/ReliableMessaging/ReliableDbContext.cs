@@ -21,9 +21,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.AddInboxStateEntity();
-            modelBuilder.AddOutboxMessageEntity();
-            modelBuilder.AddOutboxStateEntity();
+            modelBuilder.AddTransactionalOutboxEntities();
         }
     }
 }

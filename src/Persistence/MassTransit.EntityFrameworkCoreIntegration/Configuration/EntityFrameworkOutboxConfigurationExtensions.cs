@@ -123,6 +123,25 @@ namespace MassTransit
             return configurator;
         }
 
+        /// <summary>
+        /// Adds all three entities (<see cref="InboxState"/>, <see cref="OutboxState"/>, and <see cref="OutboxMessage"/>)
+        /// to the DbContext. If this method is used, the <see cref="AddInboxStateEntity"/>, <see cref="AddOutboxStateEntity"/>, and
+        /// <see cref="AddOutboxMessageEntity"/> methods should not be used.
+        /// </summary>
+        /// <param name="modelBuilder"></param>
+        /// <param name="callback">Optional, to customize all three entity model builders</param>
+        public static void AddTransactionalOutboxEntities(this ModelBuilder modelBuilder, Action<EntityTypeBuilder>? callback = null)
+        {
+            modelBuilder.AddInboxStateEntity(callback);
+            modelBuilder.AddOutboxStateEntity(callback);
+            modelBuilder.AddOutboxMessageEntity(callback);
+        }
+
+        /// <summary>
+        /// Adds the <see cref="InboxState"/> entity to the DbContext. If used, the <see cref="AddTransactionalOutboxEntities"/> method should not be used.
+        /// </summary>
+        /// <param name="modelBuilder"></param>
+        /// <param name="callback">Optional, to customize the entity model builder</param>
         public static void AddInboxStateEntity(this ModelBuilder modelBuilder, Action<EntityTypeBuilder<InboxState>>? callback = null)
         {
             EntityTypeBuilder<InboxState> inbox = modelBuilder.Entity<InboxState>();
@@ -132,6 +151,10 @@ namespace MassTransit
             callback?.Invoke(inbox);
         }
 
+        /// <summary>
+        /// Configures the <see cref="InboxState"/> entity using an already created <see cref="ModelBuilder"/>.
+        /// </summary>
+        /// <param name="inbox">The model builder</param>
         public static void ConfigureInboxStateEntity(this EntityTypeBuilder<InboxState> inbox)
         {
             inbox.Property(p => p.Id);
@@ -161,6 +184,11 @@ namespace MassTransit
             inbox.Property(p => p.LastSequenceNumber);
         }
 
+        /// <summary>
+        /// Adds the <see cref="OutboxState"/> entity to the DbContext. If used, the <see cref="AddTransactionalOutboxEntities"/> method should not be used.
+        /// </summary>
+        /// <param name="modelBuilder"></param>
+        /// <param name="callback">Optional, to customize the entity model builder</param>
         public static void AddOutboxStateEntity(this ModelBuilder modelBuilder, Action<EntityTypeBuilder<OutboxState>>? callback = null)
         {
             EntityTypeBuilder<OutboxState> outbox = modelBuilder.Entity<OutboxState>();
@@ -170,6 +198,10 @@ namespace MassTransit
             callback?.Invoke(outbox);
         }
 
+        /// <summary>
+        /// Configures the <see cref="OutboxState"/> entity using an already created <see cref="ModelBuilder"/>.
+        /// </summary>
+        /// <param name="outbox">The model builder</param>
         public static void ConfigureOutboxStateEntity(this EntityTypeBuilder<OutboxState> outbox)
         {
             outbox.Property(p => p.OutboxId);
@@ -186,6 +218,11 @@ namespace MassTransit
             outbox.Property(p => p.LastSequenceNumber);
         }
 
+        /// <summary>
+        /// Adds the <see cref="OutboxMessage"/> entity to the DbContext. If used, the <see cref="AddTransactionalOutboxEntities"/> method should not be used.
+        /// </summary>
+        /// <param name="modelBuilder"></param>
+        /// <param name="callback">Optional, to customize the entity model builder</param>
         public static void AddOutboxMessageEntity(this ModelBuilder modelBuilder, Action<EntityTypeBuilder<OutboxMessage>>? callback = null)
         {
             EntityTypeBuilder<OutboxMessage> outbox = modelBuilder.Entity<OutboxMessage>();
@@ -195,6 +232,10 @@ namespace MassTransit
             callback?.Invoke(outbox);
         }
 
+        /// <summary>
+        /// Configures the <see cref="OutboxMessage"/> entity using an already created <see cref="ModelBuilder"/>.
+        /// </summary>
+        /// <param name="outbox">The model builder</param>
         public static void ConfigureOutboxMessageEntity(this EntityTypeBuilder<OutboxMessage> outbox)
         {
             outbox.Property(p => p.SequenceNumber);
