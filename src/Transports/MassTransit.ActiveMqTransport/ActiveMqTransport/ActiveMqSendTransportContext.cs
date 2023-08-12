@@ -91,19 +91,11 @@ namespace MassTransit.ActiveMqTransport
 
             transportMessage.Properties[MessageHeaders.ContentType] = context.ContentType.ToString();
 
-            transportMessage.NMSDeliveryMode = context.Durable ? MsgDeliveryMode.Persistent : MsgDeliveryMode.NonPersistent;
-
             if (context.MessageId.HasValue)
                 transportMessage.NMSMessageId = context.MessageId.ToString();
 
             if (context.CorrelationId.HasValue)
                 transportMessage.NMSCorrelationID = context.CorrelationId.ToString();
-
-            if (context.TimeToLive.HasValue)
-                transportMessage.NMSTimeToLive = context.TimeToLive > TimeSpan.Zero ? context.TimeToLive.Value : TimeSpan.FromSeconds(1);
-
-            if (context.Priority.HasValue)
-                transportMessage.NMSPriority = context.Priority.Value;
 
             if (transportMessage is Message message)
             {
@@ -123,7 +115,11 @@ namespace MassTransit.ActiveMqTransport
                     transportMessage.Properties["AMQ_SCHEDULED_DELAY"] = (long)delay.Value;
             }
 
-            var publishTask = Task.Run(() => producer.Send(transportMessage), context.CancellationToken);
+            var deliveryMode = context.Durable ? MsgDeliveryMode.Persistent : MsgDeliveryMode.NonPersistent;
+            var priority = context.Priority ?? NMSConstants.defaultPriority - 1;
+            var timeToLive = context.TimeToLive ?? NMSConstants.defaultTimeToLive;
+
+            var publishTask = Task.Run(() => producer.Send(transportMessage, deliveryMode, priority, timeToLive), context.CancellationToken);
 
             await publishTask.OrCanceled(context.CancellationToken).ConfigureAwait(false);
         }
