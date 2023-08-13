@@ -97,12 +97,13 @@
             return _executor.Run(() => _session.CreateConsumerAsync(destination, selector, noLocal), CancellationToken);
         }
 
-        public async Task SendAsync(IDestination destination, IMessage transportMessage, CancellationToken cancellationToken)
+        public async Task SendAsync(IDestination destination, IMessage message, CancellationToken cancellationToken)
         {
             var producer = await _messageProducerCache.GetMessageProducer(destination,
                 x => _executor.Run(() => _session.CreateProducerAsync(x), cancellationToken)).ConfigureAwait(false);
 
-            await _executor.Run(() => producer.SendAsync(transportMessage).OrCanceled(cancellationToken), cancellationToken).ConfigureAwait(false);
+            await _executor.Run(() => producer.SendAsync(message, message.NMSDeliveryMode, message.NMSPriority, message.NMSTimeToLive)
+                .OrCanceled(cancellationToken), cancellationToken).ConfigureAwait(false);
         }
 
         public IBytesMessage CreateBytesMessage(byte[] content)

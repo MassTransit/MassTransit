@@ -21,7 +21,7 @@
 
         Task<IMessageConsumer> CreateMessageConsumer(IDestination destination, string selector, bool noLocal);
 
-        Task SendAsync(IDestination destination, IMessage transportMessage, CancellationToken cancellationToken);
+        Task SendAsync(IDestination destination, IMessage message, CancellationToken cancellationToken);
 
         IBytesMessage CreateBytesMessage(byte[] content);
 
