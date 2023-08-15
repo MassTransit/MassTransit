@@ -24,6 +24,15 @@ namespace MassTransit
         /// Kebab case endpoint formatter, which uses dashes between words
         /// </summary>
         /// <param name="prefix">Prefix to start the name, should match the casing of the formatter (such as Dev or PreProd)</param>
+        public KebabCaseEndpointNameFormatter(string prefix)
+            : base(KebabCaseSeparator, prefix, false)
+        {
+        }
+
+        /// <summary>
+        /// Kebab case endpoint formatter, which uses dashes between words
+        /// </summary>
+        /// <param name="prefix">Prefix to start the name, should match the casing of the formatter (such as Dev or PreProd)</param>
         /// <param name="includeNamespace">If true, the namespace is included in the name</param>
         public KebabCaseEndpointNameFormatter(string prefix, bool includeNamespace)
             : base(KebabCaseSeparator, prefix, includeNamespace)

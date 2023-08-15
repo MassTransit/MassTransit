@@ -58,6 +58,16 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Default endpoint name formatter with prefix.
+        /// </summary>
+        /// <param name="prefix">Prefix to start the name, should match the casing of the formatter (such as Dev or PreProd)</param>
+        public DefaultEndpointNameFormatter(string prefix)
+        {
+            Prefix = prefix;
+            IncludeNamespace = false;
+        }
+
+        /// <summary>
         /// Default endpoint name formatter with join separator and prefix.
         /// </summary>
         /// <param name="joinSeparator">Define the join separator between the words</param>

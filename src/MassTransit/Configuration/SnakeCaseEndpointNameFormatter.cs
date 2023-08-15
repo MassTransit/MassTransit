@@ -46,6 +46,18 @@ namespace MassTransit
         /// <summary>
         /// Snake case endpoint formatter, which uses underscores between words
         /// </summary>
+        /// <param name="prefix">Prefix to start the name, should match the casing of the formatter (such as Dev or PreProd)</param>
+        public SnakeCaseEndpointNameFormatter(string prefix)
+            : base(prefix, false)
+        {
+            _separator = SnakeCaseSeparator;
+
+            Separator = _separator.ToString();
+        }
+
+        /// <summary>
+        /// Snake case endpoint formatter, which uses underscores between words
+        /// </summary>
         /// <param name="separator">Specify a separator other than _ to separate words</param>
         /// <param name="prefix">Prefix to start the name, should match the casing of the formatter (such as Dev or PreProd)</param>
         /// <param name="includeNamespace">If true, the namespace is included in the name</param>
