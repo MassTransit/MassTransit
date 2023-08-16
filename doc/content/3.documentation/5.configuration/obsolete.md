@@ -24,6 +24,20 @@ have a new overload that adds the `IRegistrationContext` parameter.
 The `IRegistrationContext` argument should be passed to methods that accept it, or that may have previously accepted `IServiceProvider`, to ensure the correct
 context is used for the bus and to ensure message scope is properly handled.
 
+For example, the outbox now requires `IRegistrationContext` as an argument.
+
+```csharp
+protected override void ConfigureSaga(IReceiveEndpointConfigurator configurator, 
+    ISagaConfigurator<JobAttemptSaga> sagaConfigurator,
+    IRegistrationContext context)
+{
+    configurator.UseMessageRetry(r => r.Intervals(100, 1000, 2000, 5000));
+
+    // use the new overload, not the obsolete one
+    configurator.UseInMemoryOutbox(context);
+}
+```
+
 ## AddMassTransitInMemoryTestHarness
 
 The original test harness has been deprecated, use `AddMassTransitTestHarness` instead. The current test harness is covered in the
