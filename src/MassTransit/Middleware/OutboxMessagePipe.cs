@@ -54,7 +54,7 @@ namespace MassTransit.Middleware
 
             LogContext.Debug?.Log("Outbox Completed: {MessageId} ({ReceiveCount})", context.MessageId, context.ReceiveCount);
 
-            if (!context.ReceiveContext.IsDelivered && !context.ReceiveContext.IsDelivered)
+            if (!context.ReceiveContext.IsDelivered)
                 await context.NotifyConsumed(context, timer.Elapsed, _options.ConsumerType).ConfigureAwait(false);
 
             context.ContinueProcessing = false;

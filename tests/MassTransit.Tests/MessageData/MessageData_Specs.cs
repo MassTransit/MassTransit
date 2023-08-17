@@ -135,14 +135,12 @@ namespace MassTransit.Tests.MessageData
             public SampleItemsCreatedContract(Guid messageId, IEnumerable<SampleItem> messages, bool boolExample)
             {
                 MessageId = messageId;
-                BatchId = BatchId;
                 Messages = messages;
                 BoolExample = boolExample;
             }
 
             public SampleItemsCreatedContract(IEnumerable<SampleItem> messages, bool boolExample)
             {
-                BatchId = BatchId;
                 Messages = messages;
                 BoolExample = boolExample;
             }

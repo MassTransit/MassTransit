@@ -65,7 +65,7 @@
         async Task Schedule<T>(BehaviorExceptionContext<TSaga, T> context, BehaviorExceptionContext<TSaga, TException> exceptionContext)
             where T : Exception
         {
-            Guid? previousTokenId = _schedule.GetTokenId(context.Saga);
+            Guid? previousTokenId = _schedule?.GetTokenId(context.Saga);
 
             var schedulerContext = context.GetPayload<MessageSchedulerContext>();
 
@@ -123,7 +123,7 @@
         {
             if (context is BehaviorExceptionContext<TSaga, TData, TException> exceptionContext)
             {
-                Guid? previousTokenId = _schedule.GetTokenId(context.Saga);
+                Guid? previousTokenId = _schedule?.GetTokenId(context.Saga);
 
                 var schedulerContext = context.GetPayload<MessageSchedulerContext>();
 

@@ -138,7 +138,7 @@
         {
             // This does the Right Thing. It only subtracts _position from the current segment length if it's non-null.
             // If _currentSegment is null, it returns 0.
-            var remainingSize = _currentSegment?.Length - _position ?? 0;
+            var remainingSize = _currentSegment != null ? _currentSegment.Length - _position : 0;
 
             // If the sizeHint is 0, any capacity will do
             // Otherwise, the buffer must have enough space for the entire size hint, or we need to add a segment.
