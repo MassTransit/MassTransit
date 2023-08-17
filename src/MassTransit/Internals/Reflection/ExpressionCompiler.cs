@@ -551,7 +551,7 @@ namespace MassTransit.Internals
         private static void ReturnClosureTypeToParamTypesToPool(Type[] closurePlusParamTypes)
         {
             var paramCount = closurePlusParamTypes.Length - 1;
-            if (paramCount != 0 && paramCount < 8)
+            if (paramCount > 0 && paramCount < 8)
                 Interlocked.Exchange(ref _closureTypePlusParamTypesPool[paramCount], closurePlusParamTypes);
         }
 

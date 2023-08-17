@@ -61,7 +61,7 @@
 
         async Task Execute(BehaviorContext<TSaga> context)
         {
-            Guid? previousTokenId = _schedule.GetTokenId(context.Saga);
+            Guid? previousTokenId = _schedule?.GetTokenId(context.Saga);
 
             var schedulerContext = context.GetPayload<MessageSchedulerContext>();
 
@@ -110,7 +110,7 @@
 
         public async Task Execute(BehaviorContext<TSaga, TMessage> context, IBehavior<TSaga, TMessage> next)
         {
-            Guid? previousTokenId = _schedule.GetTokenId(context.Saga);
+            Guid? previousTokenId = _schedule?.GetTokenId(context.Saga);
 
             var schedulerContext = context.GetPayload<MessageSchedulerContext>();
 
