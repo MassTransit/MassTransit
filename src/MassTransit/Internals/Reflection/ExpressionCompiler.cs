@@ -1974,7 +1974,7 @@ namespace MassTransit.Internals
                                             if ((parent & ParentFlags.InlinedLambdaInvoke) != 0)
                                             {
                                                 var index = closure.GetLabelOrInvokeIndex(gt.Target);
-                                                var invokeIndex = closure.Labels.Items[index].InlinedLambdaInvokeIndex;
+                                                var invokeIndex = index != -1 ? closure.Labels.Items[index].InlinedLambdaInvokeIndex : -1;
                                                 if (invokeIndex == -1)
                                                     return false;
                                                 ref var invokeInfo = ref closure.Labels.Items[invokeIndex];
