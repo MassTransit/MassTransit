@@ -16,5 +16,10 @@ namespace MassTransit
         {
             return context.TryGetPayload(out KafkaConsumeContext<TKey> consumeContext) ? consumeContext.Key : default;
         }
+
+        public static bool IsPartitionEof(this ConsumeContext context)
+        {
+            return context.TryGetPayload(out KafkaConsumeContext consumeContext) ? consumeContext.IsPartitionEof : default;
+        }
     }
 }

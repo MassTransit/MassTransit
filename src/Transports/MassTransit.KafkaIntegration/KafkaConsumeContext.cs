@@ -9,6 +9,7 @@ namespace MassTransit
         string Topic { get; }
         int Partition { get; }
         long Offset { get; }
+        bool IsPartitionEof { get; }
         DateTime CheckpointUtcDateTime { get; }
     }
 
