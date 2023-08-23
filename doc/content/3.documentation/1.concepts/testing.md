@@ -172,10 +172,10 @@ public async Task ASampleTest()
     await using var provider = new ServiceCollection()
         .AddMassTransitTestHarness(cfg =>
         {
-            cfg.Handler<SubmitOrderConsumer>(async cxt => 
+            cfg.Handler<SubmitOrder>(async cxt => 
             {
                 await cxt.RespondAsync(new OrderResponse("OK"));
-            }).Endpoint(ep => ep.Name = "ANamedEndpoint");
+            });
         })
         .BuildServiceProvider(true);
 
@@ -183,16 +183,10 @@ public async Task ASampleTest()
 
     await harness.Start();
 
-    // your actual test code may include a call like below some where
-    var clientFactory = provider.GetRequiredService<IScopedClientFactory>();
+    var client = harness.GetRequestClient<SubmitOrder>();
 
-    // A Short Address (link below)
-    var serviceAddress = new Uri("queue:ANamedEndpoint");
-    var client = clientFactory.CreateRequestClient<OrderSubmitted>(serviceAddress);
-
-    var response = await client.GetResponse<OrderSubmitted>(new
+    var response = await client.GetResponse<OrderResponse>(new SubmitOrder
     {
-        OrderId = InVar.Id,
         OrderNumber = "123"
     });
 
