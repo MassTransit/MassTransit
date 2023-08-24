@@ -5,6 +5,7 @@
     using MassTransit.MessageData;
     using NUnit.Framework;
 
+
     public class InMemory_Specs
     {
         [TestFixture]
@@ -18,11 +19,11 @@
 
                 Assert.That(property.Address, Is.Not.Null);
 
-                var dataFromRepository = await _repository.Get(property.Address);
+                using var dataFromRepository = await _repository.Get(property.Address);
 
                 using var reader = new StreamReader(dataFromRepository);
                 var stringFromRepository = await reader.ReadToEndAsync();
-                
+
                 Assert.That(stringFromRepository, Is.EqualTo(data));
             }
 

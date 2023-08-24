@@ -125,9 +125,9 @@
 
             using var ms = new MemoryStream();
 
-            var stream = await repository.Get(address, cancellationToken).ConfigureAwait(false);
+            using var stream = await repository.Get(address, cancellationToken).ConfigureAwait(false);
 
-            await stream.CopyToAsync(ms).ConfigureAwait(false);
+            await stream.CopyToAsync(ms, 4096, cancellationToken).ConfigureAwait(false);
 
             return new StoredMessageData<string>(address, Encoding.UTF8.GetString(ms.ToArray()));
         }
@@ -140,9 +140,9 @@
 
             using var ms = new MemoryStream();
 
-            var stream = await repository.Get(address, cancellationToken).ConfigureAwait(false);
+            using var stream = await repository.Get(address, cancellationToken).ConfigureAwait(false);
 
-            await stream.CopyToAsync(ms).ConfigureAwait(false);
+            await stream.CopyToAsync(ms, 4096, cancellationToken).ConfigureAwait(false);
 
             return new StoredMessageData<byte[]>(address, ms.ToArray());
         }
