@@ -114,14 +114,18 @@ namespace MassTransit
                 When(StatusCheckRequested.Received)
                     .SendCheckJobStatus()
                     .TransitionTo(CheckingStatus)
-                    .Catch<Exception>(eb => eb.TransitionTo(Suspect))
+                    .Catch<Exception>(eb => eb
+                        .Then(context => LogContext.Error?.Log(context.Exception, "Failed sending GetJobAttemptStatus"))
+                        .TransitionTo(Suspect))
                     .ScheduleJobStatusCheck(this));
 
             During(CheckingStatus,
                 When(StatusCheckRequested.Received)
                     .SendCheckJobStatus()
                     .TransitionTo(Suspect)
-                    .Catch<Exception>(eb => eb.TransitionTo(Suspect))
+                    .Catch<Exception>(eb => eb
+                        .Then(context => LogContext.Error?.Log(context.Exception, "Failed sending GetJobAttemptStatus"))
+                        .TransitionTo(Suspect))
                     .ScheduleJobStatusCheck(this));
 
             During(Running, CheckingStatus, Suspect,
@@ -216,12 +220,11 @@ namespace MassTransit
             JobStatusCheckRequested> binder)
         {
             return binder.SendAsync(context => context.Saga.InstanceAddress ?? context.Saga.ServiceAddress,
-                    context => context.Init<GetJobAttemptStatus>(new
-                    {
-                        context.Saga.JobId,
-                        AttemptId = context.Saga.CorrelationId
-                    }), (behaviorContext, context) => context.ResponseAddress = behaviorContext.GetJobAttemptSagaAddress())
-                .Catch<Exception>(ex => ex.Then(context => LogContext.Error?.Log(context.Exception, "Failed sending GetJobAttemptStatus")));
+                context => context.Init<GetJobAttemptStatus>(new
+                {
+                    context.Saga.JobId,
+                    AttemptId = context.Saga.CorrelationId
+                }), (behaviorContext, context) => context.ResponseAddress = behaviorContext.GetJobAttemptSagaAddress());
         }
 
         public static EventActivityBinder<JobAttemptSaga, T> ScheduleJobStatusCheck<T>(this EventActivityBinder<JobAttemptSaga, T> binder,
