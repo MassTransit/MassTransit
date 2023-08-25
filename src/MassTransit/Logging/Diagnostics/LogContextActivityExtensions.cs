@@ -7,6 +7,7 @@ namespace MassTransit.Logging
     using System.Collections.Generic;
     using System.Diagnostics;
     using Courier.Contracts;
+    using Metadata;
     using Middleware;
     using Transports;
 
@@ -266,7 +267,7 @@ namespace MassTransit.Logging
 
         static class Cached
         {
-            internal static readonly Lazy<ActivitySource> Source = new Lazy<ActivitySource>(() => new ActivitySource(DiagnosticHeaders.DefaultListenerName));
+            internal static readonly Lazy<ActivitySource> Source = new Lazy<ActivitySource>(() => new ActivitySource(DiagnosticHeaders.DefaultListenerName, HostMetadataCache.Host.MassTransitVersion));
             internal static readonly ConcurrentDictionary<string, string> OperationNames = new ConcurrentDictionary<string, string>(StringComparer.Ordinal);
         }
     }
