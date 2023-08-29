@@ -213,7 +213,7 @@ namespace MassTransit
             if (type.IsGenericType && type.Name.Contains('`'))
                 return SanitizeName(FormatName(type.GetGenericArguments().Last()));
 
-            var messageName = type.Name;
+            var messageName = FormatName(type);
 
             return SanitizeName(messageName);
         }

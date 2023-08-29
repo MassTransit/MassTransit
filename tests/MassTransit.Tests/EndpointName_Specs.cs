@@ -60,6 +60,34 @@ namespace MassTransit.Tests
         }
 
         [Test]
+        public void Should_include_the_namespace_and_prefix_with_generic_consumer()
+        {
+            var formatter = new KebabCaseEndpointNameFormatter("Dev", true);
+
+            var name = formatter.Consumer<SomeGenericConsumer<PingMessage>>();
+
+            Assert.That(name, Is.EqualTo("dev-mass-transit-test-framework-messages-ping-message"));
+        }
+
+        [Test]
+        public void Should_include_the_namespace_and_prefix_with_message_name()
+        {
+            var formatter = new KebabCaseEndpointNameFormatter("Dev", true);
+
+            var name = formatter.Message<PingMessage>();
+
+            Assert.That(name, Is.EqualTo("dev-mass-transit-test-framework-messages-ping-message"));
+        }
+
+        [Test]
+        public void Should_only_include_the_message_name()
+        {
+            var name = KebabCaseEndpointNameFormatter.Instance.Message<PingMessage>();
+
+            Assert.That(name, Is.EqualTo("ping-message"));
+        }
+
+        [Test]
         public void Should_include_the_prefix()
         {
             var formatter = new KebabCaseEndpointNameFormatter("Dev", false);
@@ -133,6 +161,15 @@ namespace MassTransit.Tests
             IConsumer<PingMessage>
         {
             public async Task Consume(ConsumeContext<PingMessage> context)
+            {
+            }
+        }
+
+        class SomeGenericConsumer<T> :
+            IConsumer<T>
+            where T : class
+        {
+            public async Task Consume(ConsumeContext<T> context)
             {
             }
         }
