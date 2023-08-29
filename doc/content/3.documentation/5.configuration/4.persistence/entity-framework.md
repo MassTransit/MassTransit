@@ -81,6 +81,32 @@ services.AddMassTransit(cfg =>
 });
 ```
 
+### Database Engines
+By default, MassTransit uses SQL Server locking statements to handle concurrency. It is important, however, if using PostgreSQL, MySQL or Sqlite that you specify this as part of the setup of the DbContextOptionsBuilder options.
+
+The following shows an example for PostgreSQL
+```csharp
+services.AddMassTransit(cfg =>
+{
+    cfg.AddSagaStateMachine<OrderStateMachine, OrderState>()
+        .EntityFrameworkRepository(r =>
+        {
+            r.ConcurrencyMode = ConcurrencyMode.Pessimistic; // or use Optimistic, which requires RowVersion
+
+            r.AddDbContext<DbContext, OrderStateDbContext>((provider,builder) =>
+            {
+                builder.UseNpgsql(connectionString, m =>
+                {
+                    m.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name);
+                    m.MigrationsHistoryTable($"__{nameof(OrderStateDbContext)}");
+                });
+            });
+
+            r.UsePostgres();
+        });
+});
+```
+
 ### Shared DbContext
 
 A single `DbContext` can be registered in the container which can then be used to configure sagas that are mapped by the `DbContext`. For example, [Job Consumers](/documentation/patterns/job-consumers) needs three saga repositories, and the Entity Framework Core package includes the `JobServiceSagaDbContext` which can be configured using the `AddSagaRepository` method as shown below.
