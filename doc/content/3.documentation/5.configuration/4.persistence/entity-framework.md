@@ -81,8 +81,8 @@ services.AddMassTransit(cfg =>
 });
 ```
 
-### Database Engines
-By default, MassTransit uses SQL Server locking statements to handle concurrency. It is important, however, if using PostgreSQL, MySQL or Sqlite that you specify this as part of the setup of the DbContextOptionsBuilder options.
+### Database Engines (PostgreSQL)
+By default, MassTransit uses Microsoft SQL Server locking statements to handle concurrency. It is important, however, if using PostgreSQL, MySQL or Sqlite that you specify this as part of the setup of the DbContextOptionsBuilder options.
 
 The following shows an example for PostgreSQL
 ```csharp
@@ -91,7 +91,7 @@ services.AddMassTransit(cfg =>
     cfg.AddSagaStateMachine<OrderStateMachine, OrderState>()
         .EntityFrameworkRepository(r =>
         {
-            r.ConcurrencyMode = ConcurrencyMode.Pessimistic; // or use Optimistic, which requires RowVersion
+            r.ConcurrencyMode = ConcurrencyMode.Optimistic; // or use Pessimistic, which does not require RowVersion
 
             r.AddDbContext<DbContext, OrderStateDbContext>((provider,builder) =>
             {
@@ -102,10 +102,51 @@ services.AddMassTransit(cfg =>
                 });
             });
 
+            //This line is added to enable PostgreSQL features
             r.UsePostgres();
         });
 });
 ```
+
+Further, in PostgreSQL, the RowVersion column [is a hidden system column](https://www.postgresql.org/docs/current/ddl-system-columns.html) which already exists on every table, called ```xmin``` with a type ```xid```. For this reason, we do not need to create a new RowVersion column when using "Optimistic" mode. Instead, we simply bind our RowVersion property to a ```uint``` type, and apply the correct mappings in our ```OrderStateMap``` class.
+
+The example below shows the original OrderState model, using a PostgreSQL RowVersion
+
+```csharp
+public class OrderState :
+    SagaStateMachineInstance
+{
+    public Guid CorrelationId { get; set; }
+    public string CurrentState { get; set; }
+
+    public DateTime? OrderDate { get; set; }
+
+    // If using Optimistic concurrency, this property is required
+    public uint RowVersion { get; set; }
+}
+```
+
+The state mapping must also be modified to use the ```xmin``` column of PostgreSQL
+```csharp
+public class OrderStateMap : 
+    SagaClassMap<OrderState>
+{
+    protected override void Configure(EntityTypeBuilder<OrderState> entity, ModelBuilder model)
+    {
+        entity.Property(x => x.CurrentState).HasMaxLength(64);
+        entity.Property(x => x.OrderDate);
+
+        // If using Optimistic concurrency, otherwise remove this property
+        entity.Property(x => x.RowVersion)
+            .HasColumnName("xmin")
+            .HasColumnType("xid")
+            .ValueGeneratedOnAddOrUpdate()
+            .IsConcurrencyToken();
+    }
+}
+```
+
+
 
 ### Shared DbContext
 
