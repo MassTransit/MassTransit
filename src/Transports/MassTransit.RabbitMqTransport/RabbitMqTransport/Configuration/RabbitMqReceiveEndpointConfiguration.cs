@@ -252,6 +252,11 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _settings.ConsumerTag = consumerTag;
         }
 
+        public void OverrideExchangeName(string exchangeName)
+        {
+            _settings.ExchangeName = exchangeName;
+        }
+
         RabbitMqReceiveEndpointContext CreateRabbitMqReceiveEndpointContext()
         {
             var builder = new RabbitMqReceiveEndpointBuilder(_hostConfiguration, this);

@@ -61,5 +61,11 @@
         /// </summary>
         /// <param name="consumerTag">The consumer tag to use for this receive endpoint.</param>
         void OverrideConsumerTag(string consumerTag);
+
+        /// <summary>
+        /// By default, the exchange and queue name would be same
+        /// </summary>
+        /// <param name="exchangeName">The new exchange name for this endpoint</param>
+        void OverrideExchangeName(string exchangeName);
     }
 }
