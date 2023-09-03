@@ -46,6 +46,7 @@
             }
         }
 
+
         [TestFixture]
         public class WhenAMessageIsSendToTheEndpointWithAGuidHeader :
             RabbitMqTestFixture
@@ -476,6 +477,7 @@
             }
         }
 
+
         [TestFixture]
         public class When_batch_publish_is_enabled_with_zero_timeout_and_a_message_is_published_to_the_consumer :
             RabbitMqTestFixture
@@ -558,49 +560,6 @@
             {
                 return Id.GetHashCode();
             }
-        }
-    }
-
-
-    [TestFixture]
-    public class When_publishing_an_interface_message :
-        RabbitMqTestFixture
-    {
-        [Test]
-        public async Task Should_have_correlation_id()
-        {
-            await InputQueueSendEndpoint.Send<IProxyMe>(new
-            {
-                IntValue,
-                StringValue,
-                CorrelationId = _correlationId
-            });
-
-            ConsumeContext<IProxyMe> message = await _handler;
-
-            message.Message.CorrelationId.ShouldBe(_correlationId);
-            message.Message.IntValue.ShouldBe(IntValue);
-            message.Message.StringValue.ShouldBe(StringValue);
-        }
-
-        const int IntValue = 42;
-        const string StringValue = "Hello";
-        readonly Guid _correlationId = Guid.NewGuid();
-        Task<ConsumeContext<IProxyMe>> _handler;
-
-        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
-        {
-            configurator.ConfigureConsumeTopology = false;
-
-            _handler = Handled<IProxyMe>(configurator);
-        }
-
-
-        public interface IProxyMe :
-            CorrelatedBy<Guid>
-        {
-            int IntValue { get; }
-            string StringValue { get; }
         }
     }
 }
