@@ -1,19 +1,19 @@
-namespace MassTransit.Tests
+namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Contracts.JobService;
     using JobConsumerTests;
-    using MassTransit.Testing;
+    using MassTransit.Contracts.JobService;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
+    using Testing;
 
 
     namespace JobConsumerTests
     {
         using System;
         using System.Threading.Tasks;
-        using Contracts.JobService;
+        using MassTransit.Contracts.JobService;
 
 
         public interface OddJob
@@ -39,69 +39,6 @@ namespace MassTransit.Tests
             public Task Consume(ConsumeContext<JobCompleted<OddJob>> context)
             {
                 return Task.CompletedTask;
-            }
-        }
-    }
-
-
-    [TestFixture]
-    public class Using_the_new_job_service_configuration
-    {
-        [Test]
-        public async Task Should_complete_the_job()
-        {
-            await using var provider = new ServiceCollection()
-                .AddMassTransitTestHarness(x =>
-                {
-                    x.SetTestTimeouts(testInactivityTimeout: TimeSpan.FromSeconds(10));
-
-                    x.SetKebabCaseEndpointNameFormatter();
-
-                    x.AddConsumer<OddJobConsumer>()
-                        .Endpoint(e => e.Name = "odd-job");
-
-                    x.AddConsumer<OddJobCompletedConsumer>()
-                        .Endpoint(e => e.ConcurrentMessageLimit = 1);
-
-                    x.SetInMemorySagaRepositoryProvider();
-
-                    x.AddJobSagaStateMachines();
-                    x.SetJobConsumerOptions(options => options.HeartbeatInterval = TimeSpan.FromSeconds(10))
-                        .Endpoint(e => e.PrefetchCount = 100);
-
-                    x.UsingInMemory((context, cfg) =>
-                    {
-                        cfg.UseDelayedMessageScheduler();
-
-                        cfg.ConfigureEndpoints(context);
-                    });
-                })
-                .BuildServiceProvider(true);
-
-            var harness = await provider.StartTestHarness();
-            try
-            {
-                var jobId = NewId.NextGuid();
-
-                IRequestClient<SubmitJob<OddJob>> client = harness.GetRequestClient<SubmitJob<OddJob>>();
-
-                Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new
-                {
-                    JobId = jobId,
-                    Job = new { Duration = TimeSpan.FromSeconds(1) }
-                });
-
-                Assert.That(response.Message.JobId, Is.EqualTo(jobId));
-
-                Assert.That(await harness.Published.Any<JobSubmitted>(), Is.True);
-                Assert.That(await harness.Published.Any<JobStarted>(), Is.True);
-
-                Assert.That(await harness.Published.Any<JobCompleted>(), Is.True);
-                Assert.That(await harness.Published.Any<JobCompleted<OddJob>>(), Is.True);
-            }
-            finally
-            {
-                await harness.Stop();
             }
         }
     }
@@ -346,8 +283,17 @@ namespace MassTransit.Tests
         static ServiceProvider SetupServiceCollection()
         {
             var provider = new ServiceCollection()
+                .ConfigureRabbitMqTestOptions(options =>
+                {
+                    options.CleanVirtualHost = true;
+                    options.CreateVirtualHostIfNotExists = true;
+                })
                 .AddMassTransitTestHarness(x =>
                 {
+                    x.AddOptions<RabbitMqTransportOptions>()
+                        .Configure(options => options.VHost = "test");
+
+                    x.SetTestTimeouts(testInactivityTimeout: TimeSpan.FromSeconds(10));
                     x.SetKebabCaseEndpointNameFormatter();
 
                     x.AddConsumer<OddJobConsumer>()
@@ -357,8 +303,10 @@ namespace MassTransit.Tests
                         .Endpoint(e => e.ConcurrentMessageLimit = 1);
 
                     x.AddJobSagaStateMachines();
+                    x.SetJobConsumerOptions(options => options.HeartbeatInterval = TimeSpan.FromSeconds(10))
+                        .Endpoint(e => e.PrefetchCount = 100);
 
-                    x.UsingInMemory((context, cfg) =>
+                    x.UsingRabbitMq((context, cfg) =>
                     {
                         cfg.UseDelayedMessageScheduler();
 

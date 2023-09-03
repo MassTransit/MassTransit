@@ -37,10 +37,14 @@ namespace MassTransit.ActiveMqTransport
 
             protected override void Send(SendContext<TMessage> context)
             {
+                if (!context.TryGetPayload(out ConsumeContext? consumeContext))
+                    return;
+
                 if (!context.TryGetPayload(out ActiveMqSendContext? sendContext))
                     throw new ArgumentException("The ActiveMqSendContext was not available");
 
-                sendContext!.ReplyDestination = _destination;
+                if (context.DestinationAddress == consumeContext.ResponseAddress)
+                    sendContext.ReplyDestination = _destination;
             }
 
             protected override void Send<T>(SendContext<T> context)
