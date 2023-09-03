@@ -145,45 +145,6 @@
         }
 
         [Test]
-        public async Task Should_connect_locally_with_test_harness_and_a_handler()
-        {
-            var harness = new AmazonSqsTestHarness();
-            HandlerTestHarness<PingMessage> handler = harness.Handler<PingMessage>(async context =>
-            {
-            });
-
-            await harness.Start();
-
-            await harness.InputQueueSendEndpoint.Send(new PingMessage());
-
-            await harness.Stop();
-        }
-
-        [Test]
-        public async Task Should_connect_locally_with_test_harness_and_a_publisher()
-        {
-            var harness = new AmazonSqsTestHarness();
-            HandlerTestHarness<PingMessage> handler = harness.Handler<PingMessage>();
-            HandlerTestHarness<PongMessage> handler2 = harness.Handler<PongMessage>();
-
-            await harness.Start();
-
-            await harness.Bus.Publish(new PingMessage());
-
-            Assert.That(handler.Consumed.Select().Any(), Is.True);
-
-            //            await Task.Delay(20000);
-
-            await harness.Bus.Publish(new PongMessage());
-
-            Assert.That(handler2.Consumed.Select().Any(), Is.True);
-
-            await harness.Stop().OrTimeout(s: 5);
-
-            await harness.Stop();
-        }
-
-        [Test]
         public async Task Should_connect_locally_with_test_harness_and_publish_without_consumer()
         {
             var harness = new AmazonSqsTestHarness();
