@@ -35,16 +35,14 @@ namespace MassTransit.KafkaIntegration.Configuration
             _kafkaSerializerFactory = kafkaSerializerFactory;
             _configure = configure;
             _oAuthBearerTokenRefreshHandler = oAuthBearerTokenRefreshHandler;
-            EndpointName = $"{KafkaTopicAddress.PathPrefix}/{_topicName}";
-            if (!string.IsNullOrWhiteSpace(_consumerConfig.GroupId))
-                EndpointName = $"{EndpointName}/{_consumerConfig.GroupId}";
+            EndpointName = new KafkaEndpointName(_topicName, _consumerConfig);
         }
 
-        public string EndpointName { get; }
+        public KafkaEndpointName EndpointName { get; }
 
         public ReceiveEndpoint CreateReceiveEndpoint(IBusInstance busInstance)
         {
-            var endpointConfiguration = busInstance.HostConfiguration.CreateReceiveEndpointConfiguration(EndpointName);
+            var endpointConfiguration = busInstance.HostConfiguration.CreateReceiveEndpointConfiguration(EndpointName.Name);
 
             var configurator = new KafkaTopicReceiveEndpointConfiguration<TKey, TValue>(_hostConfiguration, _consumerConfig, _topicName, busInstance,
                 endpointConfiguration, _oAuthBearerTokenRefreshHandler);

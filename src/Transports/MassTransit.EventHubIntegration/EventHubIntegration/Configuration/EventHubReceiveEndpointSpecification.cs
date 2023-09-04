@@ -28,14 +28,12 @@ namespace MassTransit.EventHubIntegration.Configuration
             _hostSettings = hostSettings;
             _storageSettings = storageSettings;
             _configure = configure;
-            EndpointName = $"{EventHubEndpointAddress.PathPrefix}/{_eventHubName}";
-            if (!string.IsNullOrWhiteSpace(_consumerGroup))
-                EndpointName = $"{EndpointName}/{_consumerGroup}";
+            EndpointName = new EventHubEndpointName(_eventHubName, _consumerGroup);
 
             _endpointObservers = new ReceiveEndpointObservable();
         }
 
-        public string EndpointName { get; }
+        public EventHubEndpointName EndpointName { get; }
 
         public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
         {
@@ -60,7 +58,7 @@ namespace MassTransit.EventHubIntegration.Configuration
 
         public ReceiveEndpoint CreateReceiveEndpoint(IBusInstance busInstance)
         {
-            var endpointConfiguration = busInstance.HostConfiguration.CreateReceiveEndpointConfiguration(EndpointName);
+            var endpointConfiguration = busInstance.HostConfiguration.CreateReceiveEndpointConfiguration(EndpointName.Name);
 
             var configurator = new EventHubReceiveEndpointConfigurator(_hostConfiguration, busInstance, endpointConfiguration, _hostSettings,
                 _storageSettings, _eventHubName, _consumerGroup);

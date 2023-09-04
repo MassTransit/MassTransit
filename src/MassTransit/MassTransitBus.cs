@@ -338,6 +338,16 @@ namespace MassTransit
             return _host.ConnectReceiveEndpoint(queueName, configureEndpoint);
         }
 
+        public async Task<bool> DisconnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter? endpointNameFormatter = null)
+        {
+            return await _host.DisconnectReceiveEndpoint(definition, endpointNameFormatter).ConfigureAwait(false);
+        }
+
+        public async Task<bool> DisconnectReceiveEndpoint(string queueName)
+        {
+            return await _host.DisconnectReceiveEndpoint(queueName).ConfigureAwait(false);
+        }
+
         void IProbeSite.Probe(ProbeContext context)
         {
             var scope = context.CreateScope("bus");

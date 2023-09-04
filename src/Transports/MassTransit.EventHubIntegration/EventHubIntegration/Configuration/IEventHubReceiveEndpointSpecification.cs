@@ -10,7 +10,7 @@ namespace MassTransit.EventHubIntegration.Configuration
         /// <summary>
         /// EventHub name
         /// </summary>
-        string EndpointName { get; }
+        EventHubEndpointName EndpointName { get; }
 
         ReceiveEndpoint CreateReceiveEndpoint(IBusInstance busInstance);
     }

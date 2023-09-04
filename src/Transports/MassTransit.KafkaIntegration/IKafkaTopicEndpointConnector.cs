@@ -1,6 +1,7 @@
 namespace MassTransit
 {
     using System;
+    using System.Threading.Tasks;
     using Confluent.Kafka;
 
 
@@ -13,5 +14,7 @@ namespace MassTransit
         HostReceiveEndpointHandle ConnectTopicEndpoint<TKey, TValue>(string topicName, ConsumerConfig consumerConfig,
             Action<IRiderRegistrationContext, IKafkaTopicReceiveEndpointConfigurator<TKey, TValue>> configure)
             where TValue : class;
+
+        Task<bool> DisconnectTopicEndpoint(string topicName, string groupId);
     }
 }

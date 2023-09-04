@@ -148,6 +148,23 @@
             _endpoints.TryRemove(endpointName, out _);
         }
 
+        public async Task<bool> Remove(string endpointName, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(endpointName))
+                throw new ArgumentException($"The {nameof(endpointName)} must not be null or empty", nameof(endpointName));
+
+            _ = _endpoints.TryGetValue(endpointName, out var endpoint);
+
+            if (endpoint == null)
+                throw new ConfigurationException($"A receive endpoint with the key was not found: {endpointName}");
+
+            var removed = _endpoints.TryRemove(endpointName, out _);
+
+            await endpoint.Stop(removed, cancellationToken).ConfigureAwait(false);
+
+            return removed;
+        }
+
 
         class Handle :
             HostReceiveEndpointHandle

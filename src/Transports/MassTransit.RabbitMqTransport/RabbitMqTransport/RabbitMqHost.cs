@@ -1,6 +1,7 @@
 namespace MassTransit.RabbitMqTransport
 {
     using System;
+    using System.Threading.Tasks;
     using Configuration;
     using Transports;
 
@@ -29,6 +30,18 @@ namespace MassTransit.RabbitMqTransport
         public override HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint = null)
         {
             return ConnectReceiveEndpoint(queueName, configureEndpoint);
+        }
+
+        public override async Task<bool> DisconnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter = null)
+        {
+            var queueName = definition.GetEndpointName(endpointNameFormatter ?? DefaultEndpointNameFormatter.Instance);
+
+            return await DisconnectReceiveEndpoint(queueName).ConfigureAwait(false);
+        }
+
+        public override async Task<bool> DisconnectReceiveEndpoint(string queueName)
+        {
+            return await ReceiveEndpoints.Remove(queueName).ConfigureAwait(false);
         }
 
         public HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter = null,

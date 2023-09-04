@@ -89,6 +89,74 @@ namespace MassTransit.KafkaIntegration.Tests
             Assert.That(headerType.Value, Is.EqualTo("World"));
         }
 
+        [Test]
+        public async Task Should_disconnect_connected_endpoint()
+        {
+            await using var provider = new ServiceCollection()
+                .ConfigureKafkaTestOptions(options =>
+                {
+                    options.CreateTopicsIfNotExists = true;
+                    options.TopicNames = new[] { Topic };
+                })
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.AddTaskCompletionSource<ConsumeContext<KafkaMessage>>();
+                    x.AddRider(rider =>
+                    {
+                        rider.AddProducer<KafkaMessage>(Topic);
+                        rider.AddConsumer<TestKafkaMessageConsumer<KafkaMessage>>();
+
+                        rider.UsingKafka((_, _) =>
+                        {
+                        });
+                    });
+                }).BuildServiceProvider();
+
+            var harness = provider.GetTestHarness();
+            await harness.Start();
+
+            var kafka = provider.GetRequiredService<IKafkaRider>();
+
+            var connected = kafka.ConnectTopicEndpoint<KafkaMessage>(Topic, nameof(TopicConnector_Specs), (context, configurator) =>
+            {
+                configurator.AutoOffsetReset = AutoOffsetReset.Earliest;
+                configurator.ConfigureConsumer<TestKafkaMessageConsumer<KafkaMessage>>(context);
+            });
+
+            await connected.Ready.OrCanceled(harness.CancellationToken);
+
+            var disconnected = await kafka.DisconnectTopicEndpoint(Topic, nameof(TopicConnector_Specs));
+
+            Assert.AreEqual(disconnected, true);
+        }
+
+        [Test]
+        public async Task Should_throw_ConfigurationException_when_endpoint_is_not_exist()
+        {
+            await using var provider = new ServiceCollection()
+                .ConfigureKafkaTestOptions(options =>
+                {
+                    options.CreateTopicsIfNotExists = true;
+                    options.TopicNames = new[] { Topic };
+                })
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.AddTaskCompletionSource<ConsumeContext<KafkaMessage>>();
+                    x.AddRider(rider =>
+                    {
+                        rider.UsingKafka((_, _) =>
+                        {
+                        });
+                    });
+                }).BuildServiceProvider();
+
+            var harness = provider.GetTestHarness();
+            await harness.Start();
+
+            var kafka = provider.GetRequiredService<IKafkaRider>();
+
+            Assert.ThrowsAsync<ConfigurationException>(() => kafka.DisconnectTopicEndpoint(Topic, nameof(TopicConnector_Specs)));
+        }
 
         public interface HeaderType
         {

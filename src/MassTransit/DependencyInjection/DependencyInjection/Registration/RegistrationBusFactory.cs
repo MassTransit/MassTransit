@@ -2,6 +2,7 @@ namespace MassTransit.DependencyInjection.Registration
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
     using Configuration;
     using Transports;
 
@@ -80,6 +81,16 @@ namespace MassTransit.DependencyInjection.Registration
 
                     configure?.Invoke(_busRegistrationContext, configurator);
                 });
+            }
+
+            public async Task<bool> DisconnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter = null)
+            {
+                return await BusControl.DisconnectReceiveEndpoint(definition, endpointNameFormatter).ConfigureAwait(false);
+            }
+
+            public async Task<bool> DisconnectReceiveEndpoint(string queueName)
+            {
+                return await BusControl.DisconnectReceiveEndpoint(queueName);
             }
         }
     }

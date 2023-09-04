@@ -80,8 +80,8 @@ namespace MassTransit.KafkaIntegration.Configuration
             where TValue : class
         {
             var specification = CreateSpecification(topicName, groupId, configure);
-            if (!_topics.TryAdd(specification.EndpointName, _ => specification))
-                throw new ConfigurationException($"A topic consumer with the same key was already added: {specification.EndpointName}");
+            if (!_topics.TryAdd(specification.EndpointName.Name, _ => specification))
+                throw new ConfigurationException($"A topic consumer with the same key was already added: {specification.EndpointName.Name}");
         }
 
         public void TopicEndpoint<TKey, TValue>(string topicName, ConsumerConfig consumerConfig,
@@ -89,8 +89,8 @@ namespace MassTransit.KafkaIntegration.Configuration
             where TValue : class
         {
             var specification = CreateSpecification(topicName, consumerConfig, configure);
-            if (!_topics.TryAdd(specification.EndpointName, _ => specification))
-                throw new ConfigurationException($"A topic consumer with the same key was already added: {specification.EndpointName}");
+            if (!_topics.TryAdd(specification.EndpointName.Name, _ => specification))
+                throw new ConfigurationException($"A topic consumer with the same key was already added: {specification.EndpointName.Name}");
         }
 
         void IKafkaFactoryConfigurator.TopicProducer<TKey, TValue>(string topicName, Action<IKafkaProducerConfigurator<TKey, TValue>> configure)
@@ -336,7 +336,7 @@ namespace MassTransit.KafkaIntegration.Configuration
 
             var endpoints = new ReceiveEndpointCollection();
             foreach (var specification in _topics.Values)
-                endpoints.Add(specification.EndpointName, specification.CreateReceiveEndpoint(busInstance));
+                endpoints.Add(specification.EndpointName.Name, specification.CreateReceiveEndpoint(busInstance));
 
             return new KafkaRider(this, busInstance, endpoints, context);
         }

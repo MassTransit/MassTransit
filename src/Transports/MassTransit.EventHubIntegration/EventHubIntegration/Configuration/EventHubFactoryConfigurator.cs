@@ -171,14 +171,14 @@ namespace MassTransit.EventHubIntegration.Configuration
 
             var endpoints = new ReceiveEndpointCollection();
             foreach (var endpoint in _endpoints)
-                endpoints.Add(endpoint.EndpointName, endpoint.CreateReceiveEndpoint(busInstance));
+                endpoints.Add(endpoint.EndpointName.Name, endpoint.CreateReceiveEndpoint(busInstance));
 
             return new EventHubRider(this, busInstance, endpoints, context);
         }
 
         public IEnumerable<ValidationResult> Validate()
         {
-            foreach (KeyValuePair<string, IEventHubReceiveEndpointSpecification[]> kv in _endpoints.GroupBy(x => x.EndpointName)
+            foreach (KeyValuePair<string, IEventHubReceiveEndpointSpecification[]> kv in _endpoints.GroupBy(x => x.EndpointName.Name)
                          .ToDictionary(x => x.Key, x => x.ToArray()))
             {
                 if (kv.Value.Length > 1)

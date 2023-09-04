@@ -1,6 +1,7 @@
 namespace MassTransit.Transports
 {
     using System;
+    using System.Threading.Tasks;
     using Configuration;
 
 
@@ -60,6 +61,16 @@ namespace MassTransit.Transports
             {
                 configure?.Invoke(RegistrationContext, configurator);
             });
+        }
+
+        public async Task<bool> DisconnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter = null)
+        {
+            return await _host.DisconnectReceiveEndpoint(definition, endpointNameFormatter).ConfigureAwait(false);
+        }
+
+        public async Task<bool> DisconnectReceiveEndpoint(string queueName)
+        {
+            return await _host.DisconnectReceiveEndpoint(queueName).ConfigureAwait(false);
         }
 
         public HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,

@@ -45,9 +45,15 @@ namespace MassTransit.EventHubIntegration
                 configure?.Invoke(_context, configurator);
             });
 
-            _endpoints.Add(specification.EndpointName, specification.CreateReceiveEndpoint(_busInstance));
+            _endpoints.Add(specification.EndpointName.Name, specification.CreateReceiveEndpoint(_busInstance));
 
-            return _endpoints.Start(specification.EndpointName);
+            return _endpoints.Start(specification.EndpointName.Name);
+        }
+
+        public async Task<bool> DisconnectEventHubEndpoint(string eventHubName, string consumerGroup)
+        {
+            var endpoint = new EventHubEndpointName(eventHubName, consumerGroup);
+            return await _endpoints.Remove(endpoint.Name).ConfigureAwait(false);
         }
 
         public RiderHandle Start(CancellationToken cancellationToken = default)

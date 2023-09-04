@@ -62,4 +62,35 @@
             }
         }
     }
+
+    [TestFixture]
+    public class Disconnecting_a_receive_endpoint_from_an_existing_bus :
+        RabbitMqTestFixture
+    {
+        [Test]
+        public async Task Should_be_allowed()
+        {
+            Task<ConsumeContext<PingMessage>> pingHandled = null;
+
+            var handle = Bus.ConnectReceiveEndpoint("second_queue");
+            await handle.Ready;
+
+            try
+            {
+                var disconnected = await Bus.DisconnectReceiveEndpoint("second_queue");
+
+                Assert.AreEqual(disconnected, true);
+            }
+            finally
+            {
+                await handle.StopAsync();
+            }
+        }
+
+        [Test]
+        public async Task Should_not_be_allowed_when_it_is_not_exist()
+        {
+            Assert.ThrowsAsync<ConfigurationException>(() => Bus.DisconnectReceiveEndpoint("second_queue"));
+        }
+    }
 }

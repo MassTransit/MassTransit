@@ -35,6 +35,10 @@ namespace MassTransit.Transports
 
         public abstract HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint = null);
 
+        public abstract Task<bool> DisconnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter = null);
+
+        public abstract Task<bool> DisconnectReceiveEndpoint(string queueName);
+
         ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
         {
             return ReceiveEndpoints.ConnectConsumeMessageObserver(observer);

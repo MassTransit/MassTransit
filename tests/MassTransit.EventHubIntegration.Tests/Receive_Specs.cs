@@ -2,6 +2,7 @@ namespace MassTransit.EventHubIntegration.Tests
 {
     using System.Threading.Tasks;
     using Azure.Messaging.EventHubs;
+    using Azure.Messaging.EventHubs.Consumer;
     using Azure.Messaging.EventHubs.Producer;
     using Context;
     using Contracts;
@@ -74,6 +75,106 @@ namespace MassTransit.EventHubIntegration.Tests
             }
         }
 
+        [Test]
+        public async Task Should_disconnect_connected_endpoint()
+        {
+            TaskCompletionSource<ConsumeContext<EventHubMessage>> taskCompletionSource = GetTask<ConsumeContext<EventHubMessage>>();
+            var services = new ServiceCollection();
+            services.AddSingleton(taskCompletionSource);
+
+            services.TryAddSingleton<ILoggerFactory>(LoggerFactory);
+            services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
+
+            services.AddMassTransit(x =>
+            {
+                x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
+                x.AddRider(rider =>
+                {
+                    rider.AddConsumer<EventHubMessageConsumer>();
+
+                    rider.UsingEventHub((context, k) =>
+                    {
+                        k.Host(Configuration.EventHubNamespace);
+                        k.Storage(Configuration.StorageAccount);
+
+                        k.ReceiveEndpoint(Configuration.EventHubName, c =>
+                        {
+                            c.ConfigureConsumer<EventHubMessageConsumer>(context);
+                        });
+                    });
+                });
+            });
+
+            var provider = services.BuildServiceProvider();
+
+            var busControl = provider.GetRequiredService<IBusControl>();
+
+            var eventHubRider = provider.GetRequiredService<IEventHubRider>();
+
+            await busControl.StartAsync(TestCancellationToken);
+
+            try
+            {
+                var disconnected = await eventHubRider.DisconnectEventHubEndpoint(
+                    Configuration.EventHubName,
+                    EventHubConsumerClient.DefaultConsumerGroupName);
+
+                Assert.AreEqual(disconnected, true);
+            }
+            finally
+            {
+                await busControl.StopAsync(TestCancellationToken);
+
+                await provider.DisposeAsync();
+            }
+        }
+
+        [Test]
+        public async Task Should_throw_ConfigurationException_when_endpoint_is_not_exist()
+        {
+            TaskCompletionSource<ConsumeContext<EventHubMessage>> taskCompletionSource = GetTask<ConsumeContext<EventHubMessage>>();
+            var services = new ServiceCollection();
+            services.AddSingleton(taskCompletionSource);
+
+            services.TryAddSingleton<ILoggerFactory>(LoggerFactory);
+            services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
+
+            services.AddMassTransit(x =>
+            {
+                x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
+                x.AddRider(rider =>
+                {
+                    rider.AddConsumer<EventHubMessageConsumer>();
+
+                    rider.UsingEventHub((context, k) =>
+                    {
+                        k.Host(Configuration.EventHubNamespace);
+                        k.Storage(Configuration.StorageAccount);
+                    });
+                });
+            });
+
+            var provider = services.BuildServiceProvider();
+
+            var busControl = provider.GetRequiredService<IBusControl>();
+
+            var eventHubRider = provider.GetRequiredService<IEventHubRider>();
+
+            await busControl.StartAsync(TestCancellationToken);
+
+            try
+            {
+                Assert.ThrowsAsync<ConfigurationException>(() => eventHubRider.DisconnectEventHubEndpoint(
+                    Configuration.EventHubName,
+                    EventHubConsumerClient.DefaultConsumerGroupName));
+            }
+            finally
+            {
+                await busControl.StopAsync(TestCancellationToken);
+
+                await provider.DisposeAsync();
+            }
+        }
 
         class EventHubMessageClass :
             EventHubMessage

@@ -153,6 +153,16 @@
             return _bus.ConnectReceiveEndpoint(queueName, configureEndpoint);
         }
 
+        public async Task<bool> DisconnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter = null)
+        {
+            return await _bus.DisconnectReceiveEndpoint(definition, endpointNameFormatter).ConfigureAwait(false);
+        }
+
+        public async Task<bool> DisconnectReceiveEndpoint(string queueName)
+        {
+            return await _bus.DisconnectReceiveEndpoint(queueName);
+        }
+
         public void Probe(ProbeContext context)
         {
             _bus.Probe(context);

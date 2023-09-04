@@ -1,6 +1,7 @@
 namespace MassTransit.Testing.Implementations
 {
     using System;
+    using System.Threading.Tasks;
     using Configuration;
     using Transports;
 
@@ -57,6 +58,16 @@ namespace MassTransit.Testing.Implementations
 
                 configure?.Invoke(_busRegistrationContext, configurator);
             });
+        }
+
+        public async Task<bool> DisconnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter = null)
+        {
+            return await BusControl.DisconnectReceiveEndpoint(definition, endpointNameFormatter).ConfigureAwait(false);
+        }
+
+        public async Task<bool> DisconnectReceiveEndpoint(string queueName)
+        {
+            return await BusControl.DisconnectReceiveEndpoint(queueName);
         }
     }
 }
