@@ -97,6 +97,7 @@ namespace MassTransit.DependencyInjection.Testing
         public ISentMessageList Sent => _sent.Value.Messages;
 
         public IServiceScope Scope => _scope.Value;
+        public IServiceProvider Provider => _provider;
 
         public IEndpointNameFormatter EndpointNameFormatter => _provider.GetService<IEndpointNameFormatter>() ?? DefaultEndpointNameFormatter.Instance;
 

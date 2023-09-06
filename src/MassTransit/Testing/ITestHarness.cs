@@ -12,6 +12,8 @@ namespace MassTransit.Testing
 
         IServiceScope Scope { get; }
 
+        IServiceProvider Provider { get; }
+
         IEndpointNameFormatter EndpointNameFormatter { get; }
 
         /// <summary>
