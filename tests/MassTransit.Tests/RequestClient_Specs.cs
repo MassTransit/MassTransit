@@ -86,7 +86,11 @@
                 unobservedTaskExceptions.Add(eventArgs.Exception);
             };
 
-            Assert.That(async () => await _response, Throws.TypeOf<RequestTimeoutException>());
+            IRequestClient<PingMessage> requestClient = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, TimeSpan.FromSeconds(1));
+
+            Task<Response<PongMessage>> response = requestClient.GetResponse<PongMessage>(new PingMessage());
+
+            Assert.That(async () => await response, Throws.TypeOf<RequestTimeoutException>());
 
             GC.Collect();
             await Task.Delay(1000);
@@ -96,16 +100,90 @@
             Assert.That(unhandledExceptions, Is.Empty);
             Assert.That(unobservedTaskExceptions, Is.Empty);
         }
+    }
 
-        Task<Response<PongMessage>> _response;
-        IRequestClient<PingMessage> _requestClient;
 
-        [OneTimeSetUp]
-        public void Setup()
+    [TestFixture]
+    [Explicit]
+    public class Sending_a_request_using_mediator_to_a_missing_service_that_times_out :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_timeout_without_exceptions()
         {
-            _requestClient = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, TimeSpan.FromSeconds(1));
+            var mediator = MassTransit.Bus.Factory.CreateMediator(x =>
+            {
+                x.Handler<PingMessage>(async context => {});
+            });
 
-            _response = _requestClient.GetResponse<PongMessage>(new PingMessage());
+            List<object> unhandledExceptions = new List<object>();
+            List<Exception> unobservedTaskExceptions = new List<Exception>();
+
+            AppDomain.CurrentDomain.UnhandledException += (sender, eventArgs) =>
+            {
+                unhandledExceptions.Add(eventArgs.ExceptionObject);
+            };
+
+            TaskScheduler.UnobservedTaskException += (sender, eventArgs) =>
+            {
+                unobservedTaskExceptions.Add(eventArgs.Exception);
+            };
+
+            IRequestClient<PingMessage> requestClient = mediator.CreateRequestClient<PingMessage>(InputQueueAddress, TimeSpan.FromSeconds(1));
+
+            Task<Response<PongMessage>> response = requestClient.GetResponse<PongMessage>(new PingMessage());
+
+            Assert.That(async () => await response, Throws.TypeOf<RequestTimeoutException>());
+
+            GC.Collect();
+            await Task.Delay(1000);
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+
+            Assert.That(unhandledExceptions, Is.Empty, "Unhandled");
+            Assert.That(unobservedTaskExceptions, Is.Empty, "Unobserved");
+        }
+    }
+
+    [TestFixture]
+    [Explicit]
+    public class Sending_a_request_using_mediator_that_faults :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_observe_all_exceptions()
+        {
+            var mediator = MassTransit.Bus.Factory.CreateMediator(x =>
+            {
+            });
+
+            List<object> unhandledExceptions = new List<object>();
+            List<Exception> unobservedTaskExceptions = new List<Exception>();
+
+            AppDomain.CurrentDomain.UnhandledException += (sender, eventArgs) =>
+            {
+                unhandledExceptions.Add(eventArgs.ExceptionObject);
+            };
+
+            TaskScheduler.UnobservedTaskException += (sender, eventArgs) =>
+            {
+                eventArgs.SetObserved();
+                unobservedTaskExceptions.Add(eventArgs.Exception);
+            };
+
+            IRequestClient<PingMessage> requestClient = mediator.CreateRequestClient<PingMessage>(InputQueueAddress, TimeSpan.FromSeconds(1));
+
+            Task<Response<PongMessage>> response = requestClient.GetResponse<PongMessage>(new PingMessage());
+
+            Assert.That(async () => await response, Throws.TypeOf<RequestException>());
+
+            GC.Collect();
+            await Task.Delay(1000);
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+
+            Assert.That(unhandledExceptions, Is.Empty, "Unhandled");
+            Assert.That(unobservedTaskExceptions, Is.Empty, "Unobserved");
         }
     }
 

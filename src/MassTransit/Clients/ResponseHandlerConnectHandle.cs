@@ -3,6 +3,7 @@
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Internals;
 
 
     /// <summary>
@@ -39,11 +40,13 @@
         public void TrySetException(Exception exception)
         {
             _completed.TrySetException(exception);
+            _completed.Task.IgnoreUnobservedExceptions();
         }
 
         public void TrySetCanceled(CancellationToken cancellationToken)
         {
             _completed.TrySetCanceled(cancellationToken);
+            _completed.Task.IgnoreUnobservedExceptions();
         }
 
         public Task<Response<TResponse>> Task { get; }

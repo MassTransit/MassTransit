@@ -5,6 +5,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Configuration;
+    using Internals;
     using Util;
 
 
@@ -237,6 +238,7 @@
                 var wasSet = _sendContext.TrySetException(exception);
 
                 _message.TrySetException(exception);
+                _message.Task.IgnoreUnobservedExceptions();
 
                 foreach (var handle in _responseHandlers.Values)
                 {
