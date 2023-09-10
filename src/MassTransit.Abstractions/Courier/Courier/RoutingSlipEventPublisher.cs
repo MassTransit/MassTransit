@@ -3,6 +3,7 @@ namespace MassTransit.Courier
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using Contracts;
     using Messages;
@@ -14,26 +15,30 @@ namespace MassTransit.Courier
         IRoutingSlipEventPublisher
     {
         static IDictionary<string, object>? _emptyObject;
+        readonly CancellationToken _cancellationToken;
         readonly CourierContext? _context;
         readonly HostInfo _host;
         readonly IPublishEndpoint _publishEndpoint;
         readonly RoutingSlip _routingSlip;
         readonly ISendEndpointProvider _sendEndpointProvider;
 
-        public RoutingSlipEventPublisher(CourierContext context, RoutingSlip routingSlip)
+        public RoutingSlipEventPublisher(CourierContext context, RoutingSlip routingSlip, CancellationToken cancellationToken)
         {
             _sendEndpointProvider = context;
             _publishEndpoint = context;
             _routingSlip = routingSlip;
+            _cancellationToken = cancellationToken;
             _host = context.Host;
             _context = context;
         }
 
-        public RoutingSlipEventPublisher(ISendEndpointProvider sendEndpointProvider, IPublishEndpoint publishEndpoint, RoutingSlip routingSlip)
+        public RoutingSlipEventPublisher(ISendEndpointProvider sendEndpointProvider, IPublishEndpoint publishEndpoint, RoutingSlip routingSlip,
+            CancellationToken cancellationToken)
         {
             _sendEndpointProvider = sendEndpointProvider;
             _publishEndpoint = publishEndpoint;
             _routingSlip = routingSlip;
+            _cancellationToken = cancellationToken;
             _host = HostMetadataCache.Host;
         }
 
@@ -206,7 +211,7 @@ namespace MassTransit.Courier
                 await PublishSubscriptionEvent(eventFlag, messageFactory, subscription).ConfigureAwait(false);
 
             if (_routingSlip.Subscriptions.All(sub => sub.Events.HasFlag(RoutingSlipEvents.Supplemental)))
-                await _publishEndpoint.Publish(messageFactory(RoutingSlipEventContents.All)).ConfigureAwait(false);
+                await _publishEndpoint.Publish(messageFactory(RoutingSlipEventContents.All), _cancellationToken).ConfigureAwait(false);
         }
 
         async Task PublishSubscriptionEvent<T>(RoutingSlipEvents eventFlag, Func<RoutingSlipEventContents, T> messageFactory, Subscription subscription)
@@ -226,10 +231,10 @@ namespace MassTransit.Courier
                     {
                         var adapter = new MessageEnvelopeContextAdapter<T>(_context.SerializerContext, subscription.Message);
 
-                        await endpoint.Send(message, adapter).ConfigureAwait(false);
+                        await endpoint.Send(message, adapter, _cancellationToken).ConfigureAwait(false);
                     }
                     else
-                        await endpoint.Send(message).ConfigureAwait(false);
+                        await endpoint.Send(message, _cancellationToken).ConfigureAwait(false);
                 }
             }
         }

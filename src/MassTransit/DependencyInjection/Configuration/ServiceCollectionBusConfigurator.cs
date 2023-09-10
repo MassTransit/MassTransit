@@ -4,6 +4,7 @@ namespace MassTransit.Configuration
     using System.Collections.Generic;
     using System.Linq;
     using Context;
+    using Courier;
     using DependencyInjection;
     using DependencyInjection.Registration;
     using Microsoft.Extensions.DependencyInjection;
@@ -53,6 +54,9 @@ namespace MassTransit.Configuration
             collection.TryAddScoped<IScopedBusContextProvider<IBus>, ScopedBusContextProvider<IBus>>();
             collection.TryAddScoped(provider => provider.GetRequiredService<IScopedBusContextProvider<IBus>>().Context.SendEndpointProvider);
             collection.TryAddScoped(provider => provider.GetRequiredService<IScopedBusContextProvider<IBus>>().Context.PublishEndpoint);
+            collection.TryAddScoped<IRoutingSlipExecutor>(provider => new RoutingSlipExecutor(
+                provider.GetRequiredService<IScopedBusContextProvider<IBus>>().Context.SendEndpointProvider,
+                provider.GetRequiredService<IScopedBusContextProvider<IBus>>().Context.PublishEndpoint));
         }
 
         protected ServiceCollectionBusConfigurator(IServiceCollection collection, IContainerRegistrar registrar)
@@ -162,6 +166,10 @@ namespace MassTransit.Configuration
             collection.TryAddScoped<IScopedBusContextProvider<TBus>, ScopedBusContextProvider<TBus>>();
             collection.TryAddScoped(provider => Bind<TBus>.Create(provider.GetRequiredService<IScopedBusContextProvider<TBus>>().Context.SendEndpointProvider));
             collection.TryAddScoped(provider => Bind<TBus>.Create(provider.GetRequiredService<IScopedBusContextProvider<TBus>>().Context.PublishEndpoint));
+
+            collection.TryAddScoped(provider => Bind<TBus>.Create<IRoutingSlipExecutor>(new RoutingSlipExecutor(
+                provider.GetRequiredService<IScopedBusContextProvider<IBus>>().Context.SendEndpointProvider,
+                provider.GetRequiredService<IScopedBusContextProvider<IBus>>().Context.PublishEndpoint)));
 
             collection.AddSingleton(provider => Bind<TBus>.Create(CreateRegistrationContext(provider)));
         }

@@ -26,10 +26,10 @@ namespace MassTransit.Context
             _executionId = newId.ToGuid();
             _timestamp = newId.Timestamp;
 
-            // TODO move this to the deserializer! One for JSON, one for SystemTextJson
             RoutingSlip = new SanitizedRoutingSlip(consumeContext);
 
-            Publisher = new RoutingSlipEventPublisher(this, RoutingSlip);
+            // ReSharper disable once VirtualMemberCallInConstructor
+            Publisher = new RoutingSlipEventPublisher(this, RoutingSlip, CancellationToken);
         }
 
         protected IRoutingSlipEventPublisher Publisher { get; }

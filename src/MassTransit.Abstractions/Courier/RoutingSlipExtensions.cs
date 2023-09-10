@@ -2,6 +2,7 @@
 {
     using System;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using Courier;
     using Courier.Contracts;
@@ -29,26 +30,16 @@
             return routingSlip.CompensateLogs.Select(x => x.Address).Last();
         }
 
-        public static async Task Execute<T>(this T source, RoutingSlip routingSlip)
+        public static Task Execute<T>(this T source, RoutingSlip routingSlip)
             where T : IPublishEndpoint, ISendEndpointProvider
         {
-            if (routingSlip.RanToCompletion())
-            {
-                var timestamp = DateTime.UtcNow;
-                var duration = timestamp - routingSlip.CreateTimestamp;
+            return new RoutingSlipExecutor(source, source).Execute(routingSlip, CancellationToken.None);
+        }
 
-                IRoutingSlipEventPublisher publisher = new RoutingSlipEventPublisher(source, source, routingSlip);
-
-                await publisher.PublishRoutingSlipCompleted(timestamp, duration, routingSlip.Variables).ConfigureAwait(false);
-            }
-            else
-            {
-                var address = routingSlip.GetNextExecuteAddress() ?? throw new RoutingSlipException("Activity execute address was not specified.");
-
-                var endpoint = await source.GetSendEndpoint(address).ConfigureAwait(false);
-
-                await endpoint.Send(routingSlip).ConfigureAwait(false);
-            }
+        public static Task Execute<T>(this T source, RoutingSlip routingSlip, CancellationToken cancellationToken)
+            where T : IPublishEndpoint, ISendEndpointProvider
+        {
+            return new RoutingSlipExecutor(source, source).Execute(routingSlip, cancellationToken);
         }
     }
 }

@@ -151,7 +151,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
             var builder = new RoutingSlipBuilder(_trackingNumber);
             await builder.AddSubscription(Bus.Address, RoutingSlipEvents.Completed, RoutingSlipEventContents.All, async (x) =>
             {
-                await x.Send<RegistrationCompleted>(new {Value = "Secret Value"});
+                await x.Send<RegistrationCompleted>(new { Value = "Secret Value" });
             });
 
             builder.AddActivity("TestActivity", _executeAddress, new { Value = "Hello" });
@@ -200,13 +200,18 @@ namespace MassTransit.Containers.Tests.Common_Tests
         [Test]
         public async Task Should_use_scope()
         {
+            var completed = SubscribeHandler<RoutingSlipCompleted>();
+
             var trackingNumber = NewId.NextGuid();
             var builder = new RoutingSlipBuilder(trackingNumber);
             builder.AddSubscription(Bus.Address, RoutingSlipEvents.All);
 
             builder.AddActivity("TestActivity", _executeAddress, new { Value = "Hello" });
 
-            await Bus.Execute(builder.Build());
+            await using var scope = ServiceProvider.CreateAsyncScope();
+            var executor = scope.ServiceProvider.GetRequiredService<IRoutingSlipExecutor>();
+
+            await executor.Execute(builder.Build(), InMemoryTestHarness.CancellationToken);
 
             var result = await _executeTaskCompletionSource.Task;
             Assert.IsNotNull(result);
@@ -215,6 +220,10 @@ namespace MassTransit.Containers.Tests.Common_Tests
             Assert.IsNotNull(activityResult);
 
             Assert.That(result, Is.EqualTo(activityResult.Item2));
+
+            ConsumeContext<RoutingSlipCompleted> completedContext = await completed;
+
+            Assert.That(completedContext.GetVariable("HeaderValue", ""), Is.EqualTo("Bingo!"));
         }
 
         readonly TaskCompletionSource<(TestActivity, MyId)> _activityTaskCompletionSource;
@@ -240,13 +249,11 @@ namespace MassTransit.Containers.Tests.Common_Tests
             configurator.AddActivity<TestActivity, TestArguments, TestLog>();
         }
 
-        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
-        {
-            configurator.AddActivity<TestActivity, TestArguments, TestLog>();
-        }
-
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
+            configurator.UseSendFilter(typeof(TestSendScopedFilter<>), BusRegistrationContext);
+            configurator.UseExecuteActivityFilter(typeof(TestActivityScopedFilter<>), BusRegistrationContext);
+
             configurator.ReceiveEndpoint("execute_testactivity", endpointConfigurator =>
             {
                 configurator.ReceiveEndpoint("compensate_testactivity", compensateConfigurator =>
@@ -256,8 +263,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
                 _executeAddress = endpointConfigurator.InputAddress;
             });
-
-            configurator.UseExecuteActivityFilter(typeof(TestActivityScopedFilter<>), BusRegistrationContext);
         }
 
 
@@ -283,7 +288,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
                 return context.CompletedWithVariables<TestLog>(new { OriginalValue = context.Arguments.Value }, new
                 {
                     Value = "Hello, World!",
-                    NullValue = (string)null
+                    NullValue = (string)null,
+                    HeaderValue = context.Headers.Get("ScopedHeader", "")
                 });
             }
 
@@ -313,6 +319,23 @@ namespace MassTransit.Containers.Tests.Common_Tests
         public Task Send(ExecuteContext<T> context, IPipe<ExecuteContext<T>> next)
         {
             _taskCompletionSource.TrySetResult(_myId);
+            return next.Send(context);
+        }
+
+        public void Probe(ProbeContext context)
+        {
+        }
+    }
+
+
+    public class TestSendScopedFilter<T> :
+        IFilter<SendContext<T>>
+        where T : class
+    {
+        public Task Send(SendContext<T> context, IPipe<SendContext<T>> next)
+        {
+            context.Headers.Set("ScopedHeader", "Bingo!");
+
             return next.Send(context);
         }
 
