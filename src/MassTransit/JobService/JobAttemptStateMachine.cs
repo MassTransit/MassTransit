@@ -120,7 +120,7 @@ namespace MassTransit
                     .ScheduleJobStatusCheck(this));
 
             During(CheckingStatus,
-                When(StatusCheckRequested.Received)
+                When(StatusCheckRequested.AnyReceived)
                     .SendCheckJobStatus()
                     .TransitionTo(Suspect)
                     .Catch<Exception>(eb => eb
@@ -139,7 +139,7 @@ namespace MassTransit
                     .TransitionTo(Faulted));
 
             During(Suspect,
-                When(StatusCheckRequested.Received)
+                When(StatusCheckRequested.AnyReceived)
                     .SendJobAttemptFaulted()
                     .TransitionTo(Faulted));
 
