@@ -219,6 +219,9 @@ namespace MassTransit
                 return false;
             }
 
+            if (type.Name == "JsonObject" && type.Namespace == "System.Text.Json.Nodes")
+                return true;
+
             var ns = type.Namespace;
             if (ns == "System")
             {
