@@ -199,29 +199,25 @@ namespace MassTransit.QuartzIntegration.Tests
                 Guid? existsId = await sagaHarness.Exists(id, machine => machine.PendingSecondMessage, TimeSpan.FromSeconds(10));
 
                 Assert.That(existsId.HasValue, "saga does not exists");
-
-                Assert.That((await sagaHarness.Exists(t => t.Timeouts == 0, machine => machine.PendingSecondMessage, TimeSpan.FromSeconds(2))).FirstOrDefault()
-                    != default);
+                
+                Assert.That(await sagaHarness.Exists(t => t.Timeouts == 0, machine => machine.PendingSecondMessage, TimeSpan.FromSeconds(2)) != default);
 
                 await adjustment.AdvanceTime(TimeSpan.FromMinutes(10));
                 Console.WriteLine("Advance 10 minutes");
 
-                Assert.That((await sagaHarness.Exists(t => t.Timeouts == 1, machine => machine.PendingSecondMessage, TimeSpan.FromSeconds(2))).FirstOrDefault()
-                    != default);
+                Assert.That(await sagaHarness.Exists(t => t.Timeouts == 1, machine => machine.PendingSecondMessage, TimeSpan.FromSeconds(2)) != default);
 
                 await adjustment.AdvanceTime(TimeSpan.FromMinutes(10));
 
                 Console.WriteLine("Advance 20 minutes in total");
 
-                Assert.That((await sagaHarness.Exists(t => t.Timeouts == 2, machine => machine.PendingSecondMessage, TimeSpan.FromSeconds(2))).FirstOrDefault()
-                    != default);
+                Assert.That(await sagaHarness.Exists(t => t.Timeouts == 2, machine => machine.PendingSecondMessage, TimeSpan.FromSeconds(2)) != default);
 
                 await adjustment.AdvanceTime(TimeSpan.FromMinutes(10));
 
                 Console.WriteLine("Advance 30 minutes in total");
 
-                Assert.That((await sagaHarness.Exists(t => t.Timeouts == 3, machine => machine.PendingSecondMessage, TimeSpan.FromSeconds(2))).FirstOrDefault()
-                    != default);
+                Assert.That(await sagaHarness.Exists(t => t.Timeouts == 3, machine => machine.PendingSecondMessage, TimeSpan.FromSeconds(2)) != default);
 
             }
             catch
@@ -243,21 +239,22 @@ namespace MassTransit.QuartzIntegration.Tests
 
                 Initially(
                     When(FirstMessage)
-                    .Schedule(SecondMessageTimeout, ctx => ctx.Init<SecondMessageTimeout>(new
-                        {
-                            ctx.Saga.CorrelationId
-                        }))
+                    .Schedule(SecondMessageTimeout, ctx =>
+                    {
+                        Console.WriteLine("Schedule SecondMessageTimeout " + ctx.Saga.Timeouts);
+                        return ctx.Init<SecondMessageTimeout>(new { ctx.Saga.CorrelationId });
+                    })
                     .TransitionTo(PendingSecondMessage));
 
                 During(PendingSecondMessage,
                         When(SecondMessageTimeoutEvent)
                             .Then(x => x.Saga.Timeouts += 1)
-                            .IfElse(x => x.Saga.Timeouts < 3,
+                            .IfElse(x => x.Saga.Timeouts < 4,
                                 retry => retry.Schedule(SecondMessageTimeout, ctx =>
-                                    ctx.Init<SecondMessageTimeout>(new
-                                    {
-                                        ctx.Saga.CorrelationId
-                                    })
+                                {
+                                    Console.WriteLine("Schedule SecondMessageTimeout" + ctx.Saga.Timeouts);
+                                    return ctx.Init<SecondMessageTimeout>(new { ctx.Saga.CorrelationId });
+                                }
                                 ),
                                 reject => reject.Finalize())
                 );
