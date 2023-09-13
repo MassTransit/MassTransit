@@ -35,7 +35,8 @@ namespace MassTransit.Configuration
             if (!Selector.TryGetValue<IConsumerRegistration>(_provider, typeof(T), out var consumer))
                 throw new ArgumentException($"The consumer type was not found: {TypeCache.GetShortName(typeof(T))}", nameof(T));
 
-            consumer.AddConfigureAction(configure);
+            if (configure != null)
+                consumer.AddConfigureAction<T>((_, cfg) => configure.Invoke(cfg));
             consumer.Configure(configurator, this);
         }
 
@@ -61,7 +62,8 @@ namespace MassTransit.Configuration
             if (!Selector.TryGetValue<ISagaRegistration>(_provider, typeof(T), out var saga))
                 throw new ArgumentException($"The saga type was not found: {TypeCache.GetShortName(typeof(T))}", nameof(T));
 
-            saga.AddConfigureAction(configure);
+            if (configure != null)
+                saga.AddConfigureAction<T>((_, cfg) => configure.Invoke(cfg));
             saga.Configure(configurator, this);
         }
 

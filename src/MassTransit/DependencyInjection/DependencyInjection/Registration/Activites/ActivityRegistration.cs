@@ -14,14 +14,14 @@ namespace MassTransit.DependencyInjection.Registration
         where TArguments : class
         where TLog : class
     {
-        readonly List<Action<ICompensateActivityConfigurator<TActivity, TLog>>> _compensateActions;
-        readonly List<Action<IExecuteActivityConfigurator<TActivity, TArguments>>> _executeActions;
+        readonly List<Action<IRegistrationContext, ICompensateActivityConfigurator<TActivity, TLog>>> _compensateActions;
+        readonly List<Action<IRegistrationContext, IExecuteActivityConfigurator<TActivity, TArguments>>> _executeActions;
         IActivityDefinition<TActivity, TArguments, TLog> _definition;
 
         public ActivityRegistration()
         {
-            _executeActions = new List<Action<IExecuteActivityConfigurator<TActivity, TArguments>>>();
-            _compensateActions = new List<Action<ICompensateActivityConfigurator<TActivity, TLog>>>();
+            _executeActions = new List<Action<IRegistrationContext, IExecuteActivityConfigurator<TActivity, TArguments>>>();
+            _compensateActions = new List<Action<IRegistrationContext, ICompensateActivityConfigurator<TActivity, TLog>>>();
             IncludeInConfigureEndpoints = !Type.HasAttribute<ExcludeFromConfigureEndpointsAttribute>();
         }
 
@@ -29,19 +29,19 @@ namespace MassTransit.DependencyInjection.Registration
 
         public bool IncludeInConfigureEndpoints { get; set; }
 
-        public void AddConfigureAction<T, TA>(Action<IExecuteActivityConfigurator<T, TA>> configure)
+        public void AddConfigureAction<T, TA>(Action<IRegistrationContext, IExecuteActivityConfigurator<T, TA>> configure)
             where T : class, IExecuteActivity<TA>
             where TA : class
         {
-            if (configure is Action<IExecuteActivityConfigurator<TActivity, TArguments>> action)
+            if (configure is Action<IRegistrationContext, IExecuteActivityConfigurator<TActivity, TArguments>> action)
                 _executeActions.Add(action);
         }
 
-        public void AddConfigureAction<T, TL>(Action<ICompensateActivityConfigurator<T, TL>> configure)
+        public void AddConfigureAction<T, TL>(Action<IRegistrationContext, ICompensateActivityConfigurator<T, TL>> configure)
             where T : class, ICompensateActivity<TL>
             where TL : class
         {
-            if (configure is Action<ICompensateActivityConfigurator<TActivity, TLog>> action)
+            if (configure is Action<IRegistrationContext, ICompensateActivityConfigurator<TActivity, TLog>> action)
                 _compensateActions.Add(action);
         }
 
@@ -71,8 +71,8 @@ namespace MassTransit.DependencyInjection.Registration
             GetActivityDefinition(context)
                 .Configure(configurator, specification, context);
 
-            foreach (Action<ICompensateActivityConfigurator<TActivity, TLog>> action in _compensateActions)
-                action(specification);
+            foreach (Action<IRegistrationContext, ICompensateActivityConfigurator<TActivity, TLog>> action in _compensateActions)
+                action(context, specification);
 
             LogContext.Info?.Log("Configured endpoint {Endpoint}, Compensate Activity: {ActivityType}", configurator.InputAddress.GetEndpointName(),
                 TypeCache<TActivity>.ShortName);
@@ -96,8 +96,8 @@ namespace MassTransit.DependencyInjection.Registration
             GetActivityDefinition(context)
                 .Configure(configurator, specification, context);
 
-            foreach (Action<IExecuteActivityConfigurator<TActivity, TArguments>> action in _executeActions)
-                action(specification);
+            foreach (Action<IRegistrationContext, IExecuteActivityConfigurator<TActivity, TArguments>> action in _executeActions)
+                action(context, specification);
 
             LogContext.Info?.Log("Configured endpoint {Endpoint}, Execute Activity: {ActivityType}", configurator.InputAddress.GetEndpointName(),
                 TypeCache<TActivity>.ShortName);

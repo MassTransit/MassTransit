@@ -19,12 +19,12 @@ namespace MassTransit.DependencyInjection.Registration
         where TStateMachine : class, SagaStateMachine<TInstance>
         where TInstance : class, SagaStateMachineInstance
     {
-        readonly List<Action<ISagaConfigurator<TInstance>>> _configureActions;
+        readonly List<Action<IRegistrationContext, ISagaConfigurator<TInstance>>> _configureActions;
         ISagaDefinition<TInstance> _definition;
 
         public SagaStateMachineRegistration()
         {
-            _configureActions = new List<Action<ISagaConfigurator<TInstance>>>();
+            _configureActions = new List<Action<IRegistrationContext, ISagaConfigurator<TInstance>>>();
             IncludeInConfigureEndpoints = !Type.HasAttribute<ExcludeFromConfigureEndpointsAttribute>();
         }
 
@@ -32,10 +32,10 @@ namespace MassTransit.DependencyInjection.Registration
 
         public bool IncludeInConfigureEndpoints { get; set; }
 
-        public void AddConfigureAction<T>(Action<ISagaConfigurator<T>> configure)
+        public void AddConfigureAction<T>(Action<IRegistrationContext, ISagaConfigurator<T>> configure)
             where T : class, ISaga
         {
-            if (configure is Action<ISagaConfigurator<TInstance>> action)
+            if (configure is Action<IRegistrationContext, ISagaConfigurator<TInstance>> action)
                 _configureActions.Add(action);
         }
 
@@ -53,8 +53,8 @@ namespace MassTransit.DependencyInjection.Registration
             GetSagaDefinition(context)
                 .Configure(configurator, stateMachineConfigurator, context);
 
-            foreach (Action<ISagaConfigurator<TInstance>> action in _configureActions)
-                action(stateMachineConfigurator);
+            foreach (Action<IRegistrationContext, ISagaConfigurator<TInstance>> action in _configureActions)
+                action(context, stateMachineConfigurator);
 
             IEnumerable<IEventObserver<TInstance>> eventObservers = context.GetServices<IEventObserver<TInstance>>();
             foreach (IEventObserver<TInstance> eventObserver in eventObservers)
