@@ -9,11 +9,11 @@ namespace MassTransit.Configuration
     public interface IActivityRegistration :
         IRegistration
     {
-        void AddConfigureAction<T, TArguments>(Action<IExecuteActivityConfigurator<T, TArguments>> configure)
+        void AddConfigureAction<T, TArguments>(Action<IRegistrationContext, IExecuteActivityConfigurator<T, TArguments>> configure)
             where T : class, IExecuteActivity<TArguments>
             where TArguments : class;
 
-        void AddConfigureAction<T, TLog>(Action<ICompensateActivityConfigurator<T, TLog>> configure)
+        void AddConfigureAction<T, TLog>(Action<IRegistrationContext, ICompensateActivityConfigurator<T, TLog>> configure)
             where T : class, ICompensateActivity<TLog>
             where TLog : class;
 

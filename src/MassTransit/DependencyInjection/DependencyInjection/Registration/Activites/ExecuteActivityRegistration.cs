@@ -13,12 +13,12 @@ namespace MassTransit.DependencyInjection.Registration
         where TActivity : class, IExecuteActivity<TArguments>
         where TArguments : class
     {
-        readonly List<Action<IExecuteActivityConfigurator<TActivity, TArguments>>> _configureActions;
+        readonly List<Action<IRegistrationContext, IExecuteActivityConfigurator<TActivity, TArguments>>> _configureActions;
         IExecuteActivityDefinition<TActivity, TArguments> _definition;
 
         public ExecuteActivityRegistration()
         {
-            _configureActions = new List<Action<IExecuteActivityConfigurator<TActivity, TArguments>>>();
+            _configureActions = new List<Action<IRegistrationContext, IExecuteActivityConfigurator<TActivity, TArguments>>>();
             IncludeInConfigureEndpoints = !Type.HasAttribute<ExcludeFromConfigureEndpointsAttribute>();
         }
 
@@ -26,9 +26,9 @@ namespace MassTransit.DependencyInjection.Registration
 
         public bool IncludeInConfigureEndpoints { get; set; }
 
-        void IExecuteActivityRegistration.AddConfigureAction<T, TArgs>(Action<IExecuteActivityConfigurator<T, TArgs>> configure)
+        void IExecuteActivityRegistration.AddConfigureAction<T, TArgs>(Action<IRegistrationContext, IExecuteActivityConfigurator<T, TArgs>> configure)
         {
-            if (configure is Action<IExecuteActivityConfigurator<TActivity, TArguments>> action)
+            if (configure is Action<IRegistrationContext, IExecuteActivityConfigurator<TActivity, TArguments>> action)
                 _configureActions.Add(action);
         }
 
@@ -45,8 +45,8 @@ namespace MassTransit.DependencyInjection.Registration
             GetActivityDefinition(context)
                 .Configure(configurator, specification, context);
 
-            foreach (Action<IExecuteActivityConfigurator<TActivity, TArguments>> action in _configureActions)
-                action(specification);
+            foreach (Action<IRegistrationContext, IExecuteActivityConfigurator<TActivity, TArguments>> action in _configureActions)
+                action(context, specification);
 
             LogContext.Info?.Log("Configured endpoint {Endpoint}, Execute Activity: {ActivityType}", configurator.InputAddress.GetEndpointName(),
                 TypeCache<TActivity>.ShortName);

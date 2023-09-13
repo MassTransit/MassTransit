@@ -7,6 +7,183 @@ namespace MassTransit
     public static class RegistrationConfiguratorExtensions
     {
         /// <summary>
+        /// Adds the consumer, allowing configuration when it is configured on an endpoint
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configure"></param>
+        /// <typeparam name="T">The consumer type</typeparam>
+        public static IConsumerRegistrationConfigurator<T> AddConsumer<T>(this IRegistrationConfigurator configurator,
+            Action<IConsumerConfigurator<T>> configure = null)
+            where T : class, IConsumer
+        {
+            return configure != null ? configurator.AddConsumer<T>((_, cfg) => configure.Invoke(cfg)) : configurator.AddConsumer<T>();
+        }
+
+        /// <summary>
+        /// Adds the consumer, allowing configuration when it is configured on an endpoint
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="consumerDefinitionType">The consumer definition type</param>
+        /// <param name="configure"></param>
+        /// <typeparam name="T">The consumer type</typeparam>
+        public static IConsumerRegistrationConfigurator<T> AddConsumer<T>(this IRegistrationConfigurator configurator,
+            Type consumerDefinitionType, Action<IConsumerConfigurator<T>> configure = null)
+            where T : class, IConsumer
+        {
+            return configure != null
+                ? configurator.AddConsumer<T>(consumerDefinitionType, (_, cfg) => configure.Invoke(cfg))
+                : configurator.AddConsumer<T>(consumerDefinitionType);
+        }
+
+        /// <summary>
+        /// Adds the saga, allowing configuration when it is configured on the endpoint. This should not
+        /// be used for state machine (Automatonymous) sagas.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configure"></param>
+        /// <typeparam name="T">The saga type</typeparam>
+        public static ISagaRegistrationConfigurator<T> AddSaga<T>(this IRegistrationConfigurator configurator,
+            Action<ISagaConfigurator<T>> configure = null)
+            where T : class, ISaga
+        {
+            return configure != null ? configurator.AddSaga<T>((_, cfg) => configure.Invoke(cfg)) : configurator.AddSaga<T>();
+        }
+
+        /// <summary>
+        /// Adds the saga, allowing configuration when it is configured on the endpoint. This should not
+        /// be used for state machine (Automatonymous) sagas.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="sagaDefinitionType">The saga definition type</param>
+        /// <param name="configure"></param>
+        /// <typeparam name="T">The saga type</typeparam>
+        public static ISagaRegistrationConfigurator<T> AddSaga<T>(this IRegistrationConfigurator configurator, Type sagaDefinitionType,
+            Action<ISagaConfigurator<T>> configure = null)
+            where T : class, ISaga
+        {
+            return configure != null
+                ? configurator.AddSaga<T>(sagaDefinitionType, (_, cfg) => configure.Invoke(cfg))
+                : configurator.AddSaga<T>(sagaDefinitionType);
+        }
+
+        /// <summary>
+        /// Adds a SagaStateMachine to the registry, using the factory method, and updates the registrar prior to registering so that the default
+        /// saga registrar isn't notified.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configure"></param>
+        /// <typeparam name="TStateMachine"></typeparam>
+        /// <typeparam name="T"></typeparam>
+        public static ISagaRegistrationConfigurator<T> AddSagaStateMachine<TStateMachine, T>(this IRegistrationConfigurator configurator,
+            Action<ISagaConfigurator<T>> configure = null)
+            where TStateMachine : class, SagaStateMachine<T>
+            where T : class, SagaStateMachineInstance
+        {
+            return configure != null
+                ? configurator.AddSagaStateMachine<TStateMachine, T>((_, cfg) => configure.Invoke(cfg))
+                : configurator.AddSagaStateMachine<TStateMachine, T>();
+        }
+
+        /// <summary>
+        /// Adds a SagaStateMachine to the registry, using the factory method, and updates the registrar prior to registering so that the default
+        /// saga registrar isn't notified.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="sagaDefinitionType"></param>
+        /// <param name="configure"></param>
+        /// <typeparam name="TStateMachine"></typeparam>
+        /// <typeparam name="T"></typeparam>
+        public static ISagaRegistrationConfigurator<T> AddSagaStateMachine<TStateMachine, T>(this IRegistrationConfigurator configurator,
+            Type sagaDefinitionType, Action<ISagaConfigurator<T>> configure = null)
+            where TStateMachine : class, SagaStateMachine<T>
+            where T : class, SagaStateMachineInstance
+        {
+            return configure != null
+                ? configurator.AddSagaStateMachine<TStateMachine, T>(sagaDefinitionType, (_, cfg) => configure.Invoke(cfg))
+                : configurator.AddSagaStateMachine<TStateMachine, T>(sagaDefinitionType);
+        }
+
+        /// <summary>
+        /// Adds an execute activity (Courier), allowing configuration when it is configured on the endpoint.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configure"></param>
+        /// <typeparam name="TActivity">The activity type</typeparam>
+        /// <typeparam name="TArguments">The argument type</typeparam>
+        public static IExecuteActivityRegistrationConfigurator<TActivity, TArguments> AddExecuteActivity<TActivity, TArguments>(
+            this IRegistrationConfigurator configurator,
+            Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
+            where TActivity : class, IExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            return configure != null
+                ? configurator.AddExecuteActivity<TActivity, TArguments>((_, cfg) => configure.Invoke(cfg))
+                : configurator.AddExecuteActivity<TActivity, TArguments>();
+        }
+
+        /// <summary>
+        /// Adds an execute activity (Courier), allowing configuration when it is configured on the endpoint.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="executeActivityDefinitionType"></param>
+        /// <param name="configure"></param>
+        /// <typeparam name="TActivity">The activity type</typeparam>
+        /// <typeparam name="TArguments">The argument type</typeparam>
+        public static IExecuteActivityRegistrationConfigurator<TActivity, TArguments> AddExecuteActivity<TActivity, TArguments>(
+            this IRegistrationConfigurator configurator, Type executeActivityDefinitionType,
+            Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
+            where TActivity : class, IExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            return configure != null
+                ? configurator.AddExecuteActivity<TActivity, TArguments>(executeActivityDefinitionType, (_, cfg) => configure.Invoke(cfg))
+                : configurator.AddExecuteActivity<TActivity, TArguments>(executeActivityDefinitionType);
+        }
+
+        /// <summary>
+        /// Adds an activity (Courier), allowing configuration when it is configured on the endpoint.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configureExecute">The execute configuration callback</param>
+        /// <param name="configureCompensate">The compensate configuration callback</param>
+        /// <typeparam name="TActivity">The activity type</typeparam>
+        /// <typeparam name="TArguments">The argument type</typeparam>
+        /// <typeparam name="TLog">The log type</typeparam>
+        public static IActivityRegistrationConfigurator<TActivity, TArguments, TLog> AddActivity<TActivity, TArguments, TLog>(
+            this IRegistrationConfigurator configurator,
+            Action<IExecuteActivityConfigurator<TActivity, TArguments>> configureExecute = null,
+            Action<ICompensateActivityConfigurator<TActivity, TLog>> configureCompensate = null)
+            where TActivity : class, IActivity<TArguments, TLog>
+            where TLog : class
+            where TArguments : class
+        {
+            return configurator.AddActivity<TActivity, TArguments, TLog>((_, cfg) => configureExecute?.Invoke(cfg),
+                (_, cfg) => configureCompensate?.Invoke(cfg));
+        }
+
+        /// <summary>
+        /// Adds an activity (Courier), allowing configuration when it is configured on the endpoint.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="activityDefinitionType"></param>
+        /// <param name="configureExecute">The execute configuration callback</param>
+        /// <param name="configureCompensate">The compensate configuration callback</param>
+        /// <typeparam name="TActivity">The activity type</typeparam>
+        /// <typeparam name="TArguments">The argument type</typeparam>
+        /// <typeparam name="TLog">The log type</typeparam>
+        public static IActivityRegistrationConfigurator<TActivity, TArguments, TLog> AddActivity<TActivity, TArguments, TLog>(
+            this IRegistrationConfigurator configurator, Type activityDefinitionType,
+            Action<IExecuteActivityConfigurator<TActivity, TArguments>> configureExecute = null,
+            Action<ICompensateActivityConfigurator<TActivity, TLog>> configureCompensate = null)
+            where TActivity : class, IActivity<TArguments, TLog>
+            where TLog : class
+            where TArguments : class
+        {
+            return configurator.AddActivity<TActivity, TArguments, TLog>(activityDefinitionType, (_, cfg) => configureExecute?.Invoke(cfg),
+                (_, cfg) => configureCompensate?.Invoke(cfg));
+        }
+
+        /// <summary>
         /// Adds the consumer, along with an optional consumer definition
         /// </summary>
         /// <param name="configurator"></param>

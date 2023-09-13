@@ -18,12 +18,12 @@ namespace MassTransit.DependencyInjection.Registration
         IConsumerRegistration
         where TConsumer : class, IConsumer
     {
-        readonly List<Action<IConsumerConfigurator<TConsumer>>> _configureActions;
+        readonly List<Action<IRegistrationContext, IConsumerConfigurator<TConsumer>>> _configureActions;
         IConsumerDefinition<TConsumer> _definition;
 
         public ConsumerRegistration()
         {
-            _configureActions = new List<Action<IConsumerConfigurator<TConsumer>>>();
+            _configureActions = new List<Action<IRegistrationContext, IConsumerConfigurator<TConsumer>>>();
             IncludeInConfigureEndpoints = !Type.HasAttribute<ExcludeFromConfigureEndpointsAttribute>();
         }
 
@@ -31,9 +31,9 @@ namespace MassTransit.DependencyInjection.Registration
 
         public bool IncludeInConfigureEndpoints { get; set; }
 
-        void IConsumerRegistration.AddConfigureAction<T>(Action<IConsumerConfigurator<T>> configure)
+        void IConsumerRegistration.AddConfigureAction<T>(Action<IRegistrationContext, IConsumerConfigurator<T>> configure)
         {
-            if (configure is Action<IConsumerConfigurator<TConsumer>> action)
+            if (configure is Action<IRegistrationContext, IConsumerConfigurator<TConsumer>> action)
                 _configureActions.Add(action);
         }
 
@@ -51,8 +51,8 @@ namespace MassTransit.DependencyInjection.Registration
             GetConsumerDefinition(context)
                 .Configure(configurator, consumerConfigurator, context);
 
-            foreach (Action<IConsumerConfigurator<TConsumer>> action in _configureActions)
-                action(consumerConfigurator);
+            foreach (Action<IRegistrationContext, IConsumerConfigurator<TConsumer>> action in _configureActions)
+                action(context, consumerConfigurator);
 
             var endpointName = configurator.InputAddress.GetEndpointName();
 

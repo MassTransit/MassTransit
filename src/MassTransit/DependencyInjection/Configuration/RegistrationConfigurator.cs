@@ -32,13 +32,14 @@ namespace MassTransit.Configuration
 
         public IContainerRegistrar Registrar { get; }
 
-        public IConsumerRegistrationConfigurator<T> AddConsumer<T>(Action<IConsumerConfigurator<T>> configure)
+        public IConsumerRegistrationConfigurator<T> AddConsumer<T>(Action<IRegistrationContext, IConsumerConfigurator<T>> configure = null)
             where T : class, IConsumer
         {
             return AddConsumer(null, configure);
         }
 
-        public IConsumerRegistrationConfigurator<T> AddConsumer<T>(Type consumerDefinitionType, Action<IConsumerConfigurator<T>> configure = null)
+        public IConsumerRegistrationConfigurator<T> AddConsumer<T>(Type consumerDefinitionType,
+            Action<IRegistrationContext, IConsumerConfigurator<T>> configure = null)
             where T : class, IConsumer
         {
             var registration = _collection.RegisterConsumer<T>(Registrar, consumerDefinitionType);
@@ -48,13 +49,13 @@ namespace MassTransit.Configuration
             return new ConsumerRegistrationConfigurator<T>(this, registration);
         }
 
-        public ISagaRegistrationConfigurator<T> AddSaga<T>(Action<ISagaConfigurator<T>> configure)
+        public ISagaRegistrationConfigurator<T> AddSaga<T>(Action<IRegistrationContext, ISagaConfigurator<T>> configure)
             where T : class, ISaga
         {
             return AddSaga(null, configure);
         }
 
-        public ISagaRegistrationConfigurator<T> AddSaga<T>(Type sagaDefinitionType, Action<ISagaConfigurator<T>> configure = null)
+        public ISagaRegistrationConfigurator<T> AddSaga<T>(Type sagaDefinitionType, Action<IRegistrationContext, ISagaConfigurator<T>> configure = null)
             where T : class, ISaga
         {
             if (typeof(T).HasInterface<SagaStateMachineInstance>())
@@ -67,14 +68,15 @@ namespace MassTransit.Configuration
             return new SagaRegistrationConfigurator<T>(this, registration);
         }
 
-        public ISagaRegistrationConfigurator<T> AddSagaStateMachine<TStateMachine, T>(Action<ISagaConfigurator<T>> configure = null)
+        public ISagaRegistrationConfigurator<T> AddSagaStateMachine<TStateMachine, T>(Action<IRegistrationContext, ISagaConfigurator<T>> configure = null)
             where TStateMachine : class, SagaStateMachine<T>
             where T : class, SagaStateMachineInstance
         {
             return AddSagaStateMachine<TStateMachine, T>(null, configure);
         }
 
-        public ISagaRegistrationConfigurator<T> AddSagaStateMachine<TStateMachine, T>(Type sagaDefinitionType, Action<ISagaConfigurator<T>> configure = null)
+        public ISagaRegistrationConfigurator<T> AddSagaStateMachine<TStateMachine, T>(Type sagaDefinitionType,
+            Action<IRegistrationContext, ISagaConfigurator<T>> configure = null)
             where TStateMachine : class, SagaStateMachine<T>
             where T : class, SagaStateMachineInstance
         {
@@ -86,7 +88,7 @@ namespace MassTransit.Configuration
         }
 
         public IExecuteActivityRegistrationConfigurator<TActivity, TArguments> AddExecuteActivity<TActivity, TArguments>(
-            Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure)
+            Action<IRegistrationContext, IExecuteActivityConfigurator<TActivity, TArguments>> configure)
             where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
@@ -94,7 +96,7 @@ namespace MassTransit.Configuration
         }
 
         public IExecuteActivityRegistrationConfigurator<TActivity, TArguments> AddExecuteActivity<TActivity, TArguments>(Type executeActivityDefinitionType,
-            Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
+            Action<IRegistrationContext, IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
             where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
@@ -106,8 +108,8 @@ namespace MassTransit.Configuration
         }
 
         public IActivityRegistrationConfigurator<TActivity, TArguments, TLog> AddActivity<TActivity, TArguments, TLog>(
-            Action<IExecuteActivityConfigurator<TActivity, TArguments>> configureExecute,
-            Action<ICompensateActivityConfigurator<TActivity, TLog>> configureCompensate)
+            Action<IRegistrationContext, IExecuteActivityConfigurator<TActivity, TArguments>> configureExecute,
+            Action<IRegistrationContext, ICompensateActivityConfigurator<TActivity, TLog>> configureCompensate)
             where TActivity : class, IActivity<TArguments, TLog>
             where TArguments : class
             where TLog : class
@@ -116,8 +118,8 @@ namespace MassTransit.Configuration
         }
 
         public IActivityRegistrationConfigurator<TActivity, TArguments, TLog> AddActivity<TActivity, TArguments, TLog>(Type activityDefinitionType,
-            Action<IExecuteActivityConfigurator<TActivity, TArguments>> configureExecute = null,
-            Action<ICompensateActivityConfigurator<TActivity, TLog>> configureCompensate = null)
+            Action<IRegistrationContext, IExecuteActivityConfigurator<TActivity, TArguments>> configureExecute = null,
+            Action<IRegistrationContext, ICompensateActivityConfigurator<TActivity, TLog>> configureCompensate = null)
             where TActivity : class, IActivity<TArguments, TLog>
             where TArguments : class
             where TLog : class

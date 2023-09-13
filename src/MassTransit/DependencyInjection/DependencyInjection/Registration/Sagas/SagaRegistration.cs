@@ -17,12 +17,12 @@ namespace MassTransit.DependencyInjection.Registration
         ISagaRegistration
         where TSaga : class, ISaga
     {
-        readonly List<Action<ISagaConfigurator<TSaga>>> _configureActions;
+        readonly List<Action<IRegistrationContext, ISagaConfigurator<TSaga>>> _configureActions;
         ISagaDefinition<TSaga> _definition;
 
         public SagaRegistration()
         {
-            _configureActions = new List<Action<ISagaConfigurator<TSaga>>>();
+            _configureActions = new List<Action<IRegistrationContext, ISagaConfigurator<TSaga>>>();
             IncludeInConfigureEndpoints = !Type.HasAttribute<ExcludeFromConfigureEndpointsAttribute>();
         }
 
@@ -30,9 +30,9 @@ namespace MassTransit.DependencyInjection.Registration
 
         public bool IncludeInConfigureEndpoints { get; set; }
 
-        void ISagaRegistration.AddConfigureAction<T>(Action<ISagaConfigurator<T>> configure)
+        void ISagaRegistration.AddConfigureAction<T>(Action<IRegistrationContext, ISagaConfigurator<T>> configure)
         {
-            if (configure is Action<ISagaConfigurator<TSaga>> action)
+            if (configure is Action<IRegistrationContext, ISagaConfigurator<TSaga>> action)
                 _configureActions.Add(action);
         }
 
@@ -49,8 +49,8 @@ namespace MassTransit.DependencyInjection.Registration
             GetSagaDefinition(context)
                 .Configure(configurator, sagaConfigurator, context);
 
-            foreach (Action<ISagaConfigurator<TSaga>> action in _configureActions)
-                action(sagaConfigurator);
+            foreach (Action<IRegistrationContext, ISagaConfigurator<TSaga>> action in _configureActions)
+                action(context, sagaConfigurator);
 
             LogContext.Info?.Log("Configured endpoint {Endpoint}, Saga: {SagaType}", configurator.InputAddress.GetEndpointName(),
                 TypeCache<TSaga>.ShortName);
