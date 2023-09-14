@@ -98,6 +98,15 @@ namespace MassTransit
 
         static string? GetMessageNameFromAttribute(Type type)
         {
+            if (type is { IsArray: true, HasElementType: true })
+            {
+                var elementType = type.GetElementType();
+                var elementName = GetMessageNameFromAttribute(elementType);
+
+                if (!string.IsNullOrWhiteSpace(elementName))
+                    return elementName + "[]";
+            }
+
             return type.GetCustomAttribute<MessageUrnAttribute>()?.Urn.ToString();
         }
 
@@ -114,7 +123,7 @@ namespace MassTransit
                 sb.Append(':');
             }
 
-            if (type.IsNested && type.DeclaringType != null)
+            if (type is { IsNested: true, DeclaringType: { } })
             {
                 GetMessageNameFromType(sb, type.DeclaringType, false);
                 sb.Append('+');
