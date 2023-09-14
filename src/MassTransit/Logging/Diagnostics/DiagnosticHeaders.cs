@@ -41,7 +41,7 @@ namespace MassTransit.Logging
 
         public static class Messaging
         {
-            public const string BodyLength = "messaging.message_payload_size_bytes";
+            public const string BodyLength = "messaging.message.payload_size_bytes";
             public const string ConversationId = "messaging.message.conversation_id";
             public const string DestinationName = "messaging.destination.name";
             public const string TransportMessageId = "messaging.message.id";
