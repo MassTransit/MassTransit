@@ -9,6 +9,6 @@ namespace MassTransit.Transports
     /// </summary>
     public interface IMessageNameFormatter
     {
-        MessageName GetMessageName(Type type);
+        string GetMessageName(Type type);
     }
 }

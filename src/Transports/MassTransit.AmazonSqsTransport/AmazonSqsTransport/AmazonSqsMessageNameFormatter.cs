@@ -2,7 +2,6 @@ namespace MassTransit.AmazonSqsTransport
 {
     using System;
     using System.Collections.Concurrent;
-    using System.Reflection;
     using System.Text;
     using Transports;
 
@@ -27,9 +26,9 @@ namespace MassTransit.AmazonSqsTransport
             _cache = new ConcurrentDictionary<Type, string>();
         }
 
-        public MessageName GetMessageName(Type type)
+        public string GetMessageName(Type type)
         {
-            return new MessageName(_cache.GetOrAdd(type, CreateMessageName));
+            return _cache.GetOrAdd(type, CreateMessageName);
         }
 
         string CreateMessageName(Type type)

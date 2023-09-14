@@ -4,11 +4,12 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
     using System.Threading;
     using System.Threading.Tasks;
     using Internals;
-    using MassTransit.Testing;
+    using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
     using Serialization;
     using TestFramework;
     using TestFramework.Messages;
+    using Testing;
 
 
     [TestFixture]
@@ -174,12 +175,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
     public class Publishing_a_message_to_an_remove_subscriptions_endpoint :
         AsyncTestFixture
     {
-        public Publishing_a_message_to_an_remove_subscriptions_endpoint()
-            : base(new InMemoryTestHarness())
-        {
-            TestTimeout = TimeSpan.FromMinutes(3);
-        }
-
         [Test]
         public async Task Should_create_receive_endpoint_and_start()
         {
@@ -223,6 +218,45 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
             finally
             {
                 await busHandle.StopAsync(new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
+            }
+        }
+
+        public Publishing_a_message_to_an_remove_subscriptions_endpoint()
+            : base(new InMemoryTestHarness())
+        {
+            TestTimeout = TimeSpan.FromMinutes(3);
+        }
+    }
+
+
+    [TestFixture]
+    public class MessageType_Specs
+    {
+        [Test]
+        public async Task Should_not_allow_array_message_types_but_does()
+        {
+            await using var provider = new ServiceCollection()
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.AddConsumer<ArrayConsumer>();
+                    x.UsingTestAzureServiceBus();
+                })
+                .BuildServiceProvider(true);
+
+            var harness = await provider.StartTestHarness();
+
+            await harness.Bus.Publish(new[] { new PingMessage(), new PingMessage(), new PingMessage() });
+
+            Assert.That(await harness.Consumed.Any<PingMessage[]>());
+        }
+
+
+        class ArrayConsumer :
+            IConsumer<PingMessage[]>
+        {
+            public Task Consume(ConsumeContext<PingMessage[]> context)
+            {
+                return Task.CompletedTask;
             }
         }
     }

@@ -16,9 +16,9 @@ namespace MassTransit.AzureServiceBusTransport
                 : new DefaultMessageNameFormatter("---", "--", namespaceSeparator, "-");
         }
 
-        public MessageName GetMessageName(Type type)
+        public string GetMessageName(Type type)
         {
-            return _formatter.GetMessageName(type);
+            return _formatter.GetMessageName(type).Replace("[]", "__");
         }
     }
 }
