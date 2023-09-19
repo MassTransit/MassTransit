@@ -114,19 +114,14 @@ namespace MassTransit
                 When(StatusCheckRequested.Received)
                     .SendCheckJobStatus()
                     .TransitionTo(CheckingStatus)
-                    .Catch<Exception>(eb => eb
-                        .Then(context => LogContext.Error?.Log(context.Exception, "Failed sending GetJobAttemptStatus"))
-                        .TransitionTo(Suspect))
                     .ScheduleJobStatusCheck(this));
 
             During(CheckingStatus,
-                When(StatusCheckRequested.AnyReceived)
+                When(StatusCheckRequested.Received)
                     .SendCheckJobStatus()
                     .TransitionTo(Suspect)
-                    .Catch<Exception>(eb => eb
-                        .Then(context => LogContext.Error?.Log(context.Exception, "Failed sending GetJobAttemptStatus"))
-                        .TransitionTo(Suspect))
-                    .ScheduleJobStatusCheck(this));
+                    .ScheduleJobStatusCheck(this)
+            );
 
             During(Running, CheckingStatus, Suspect,
                 When(AttemptStatus, context => context.Message.Status == JobStatus.Running)
@@ -139,7 +134,7 @@ namespace MassTransit
                     .TransitionTo(Faulted));
 
             During(Suspect,
-                When(StatusCheckRequested.AnyReceived)
+                When(StatusCheckRequested.Received)
                     .SendJobAttemptFaulted()
                     .TransitionTo(Faulted));
 
