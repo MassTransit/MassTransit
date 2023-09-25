@@ -9,6 +9,8 @@ namespace MassTransit
     public readonly struct ActiveMqHostAddress
     {
         public const string ActiveMqScheme = "activemq";
+        public const string AmqpScheme = "amqp";
+        public const string AmqpsScheme = "amqps";
 
         public readonly string Scheme;
         public readonly string Host;
@@ -26,6 +28,8 @@ namespace MassTransit
             switch (scheme)
             {
                 case ActiveMqScheme:
+                case AmqpScheme:
+                case AmqpsScheme:
                     ParseLeft(address, out Scheme, out Host, out Port, out VirtualHost);
                     break;
 
