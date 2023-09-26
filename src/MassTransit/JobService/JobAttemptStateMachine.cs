@@ -55,8 +55,8 @@ namespace MassTransit
                         context.Saga.InstanceAddress ??= context.Message.InstanceAddress;
                         context.Saga.ServiceAddress ??= context.Message.ServiceAddress;
                     })
-                    .SendStartJob()
                     .ScheduleJobStatusCheck(this)
+                    .SendStartJob()
                     .TransitionTo(Starting));
 
             During(Starting,
@@ -112,15 +112,16 @@ namespace MassTransit
 
             During(Running,
                 When(StatusCheckRequested.Received)
+                    .ScheduleJobStatusCheck(this)
                     .SendCheckJobStatus()
                     .TransitionTo(CheckingStatus)
-                    .ScheduleJobStatusCheck(this));
+            );
 
             During(CheckingStatus,
                 When(StatusCheckRequested.Received)
+                    .ScheduleJobStatusCheck(this)
                     .SendCheckJobStatus()
                     .TransitionTo(Suspect)
-                    .ScheduleJobStatusCheck(this)
             );
 
             During(Running, CheckingStatus, Suspect,
