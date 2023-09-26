@@ -140,8 +140,7 @@ public class OrderStateMap :
         entity.Property(x => x.RowVersion)
             .HasColumnName("xmin")
             .HasColumnType("xid")
-            .ValueGeneratedOnAddOrUpdate()
-            .IsConcurrencyToken();
+            .IsRowVersion()
     }
 }
 ```
