@@ -184,7 +184,7 @@
                 _configurator = configurator;
                 _options = options;
                 JobTypeId = jobTypeId;
-                JobTypeName = jobTypeName;
+                JobTypeName = string.IsNullOrWhiteSpace(options.JobTypeName) ? jobTypeName : options.JobTypeName;
             }
 
             public Task PublishConcurrentJobLimit(IPublishEndpoint publishEndpoint, Uri instanceAddress)
