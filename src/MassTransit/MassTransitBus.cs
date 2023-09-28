@@ -195,13 +195,15 @@ namespace MassTransit
                 }
                 catch (OperationCanceledException exception) when (exception.CancellationToken == cancellationToken)
                 {
+                    LogContext.Warning?.Log(exception, "Bus start canceled: {HostAddress}", _host.Address);
+
                     try
                     {
                         await busHandle.StopAsync(TimeSpan.FromSeconds(30)).ConfigureAwait(false);
                     }
-                    catch (Exception ex)
+                    catch (Exception stopException)
                     {
-                        LogContext.Warning?.Log(ex, "Bus start faulted, and failed to stop host");
+                        LogContext.Warning?.Log(stopException, "Bus start canceled, bus stop faulted: {HostAddress}", _host.Address);
                     }
 
                     await busHandle.Ready.ConfigureAwait(false);
@@ -224,7 +226,7 @@ namespace MassTransit
                 {
                     if (busHandle != null)
                     {
-                        LogContext.Debug?.Log(ex, "Bus start faulted, stopping host");
+                        LogContext.Warning?.Log(ex, "Bus start faulted: {HostAddress}", _host.Address);
 
                         await busHandle.StopAsync(cancellationToken).ConfigureAwait(false);
                     }
@@ -234,7 +236,7 @@ namespace MassTransit
                 }
                 catch (Exception stopException)
                 {
-                    LogContext.Warning?.Log(stopException, "Bus start faulted, and failed to stop host");
+                    LogContext.Warning?.Log(stopException, "Bus start faulted, bus stop faulted: {HostAddress}", _host.Address);
                 }
 
                 _busState = BusState.Faulted;
