@@ -32,7 +32,16 @@ namespace MassTransit.Middleware
                 context.TimeToLive = _context.ExpirationTime.Value.ToUniversalTime() - DateTime.UtcNow;
 
             foreach (KeyValuePair<string, object> header in _context.Headers.GetAll())
-                context.Headers.Set(header.Key, header.Value);
+            {
+                switch (header.Key)
+                {
+                    case MessageHeaders.RedeliveryCount:
+                    case MessageHeaders.SchedulingTokenId:
+                        continue;
+                }
+
+                context.Headers.Set(header.Key, header.Value, false);
+            }
 
             _callback?.Invoke(_context, context);
 
