@@ -173,6 +173,11 @@ namespace MassTransit
         public static class Request
         {
             public const string Accept = "MT-Request-AcceptType";
+
+            /// <summary>
+            /// Tracks routing slip retries when using the RoutingSlipRequestProxy
+            /// </summary>
+            public const string RoutingSlipRetryCount = "MT-RoutingSlip-RetryCount";
         }
 
 

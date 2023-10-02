@@ -24,7 +24,7 @@ namespace MassTransit.Futures
 
             var routingSlip = builder.Build();
 
-            await context.Execute(routingSlip).ConfigureAwait(false);
+            await context.Execute(routingSlip, context.CancellationToken).ConfigureAwait(false);
 
             if (TrackRoutingSlip)
                 context.Saga.Pending.Add(trackingNumber);

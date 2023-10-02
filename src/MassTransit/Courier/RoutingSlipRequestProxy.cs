@@ -1,5 +1,6 @@
 namespace MassTransit.Courier
 {
+    using System;
     using System.Threading.Tasks;
     using Contracts;
 
@@ -12,20 +13,36 @@ namespace MassTransit.Courier
         {
             var builder = new RoutingSlipBuilder(NewId.NextGuid());
 
-            builder.AddSubscription(context.ReceiveContext.InputAddress, RoutingSlipEvents.Completed | RoutingSlipEvents.Faulted);
+            builder.AddSubscription(GetResponseEndpointAddress(context), RoutingSlipEvents.Completed | RoutingSlipEvents.Faulted);
 
-            builder.AddVariable("RequestId", context.RequestId);
-            builder.AddVariable("ResponseAddress", context.ResponseAddress);
-            builder.AddVariable("FaultAddress", context.FaultAddress);
-            builder.AddVariable("Request", context.Message);
+            builder.AddVariable(RoutingSlipRequestVariableNames.RequestId, context.RequestId);
+            builder.AddVariable(RoutingSlipRequestVariableNames.ResponseAddress, context.ResponseAddress);
+            builder.AddVariable(RoutingSlipRequestVariableNames.FaultAddress, context.FaultAddress);
+            builder.AddVariable(RoutingSlipRequestVariableNames.Request, context.Message);
+            builder.AddVariable(RoutingSlipRequestVariableNames.RequestAddress, context.ReceiveContext.InputAddress);
+
+            var retryAttempt = context.Headers.Get<int>(MessageHeaders.Request.RoutingSlipRetryCount);
+            if (retryAttempt > 0)
+                builder.AddVariable(RoutingSlipRequestVariableNames.RetryAttempt, retryAttempt);
 
             await BuildRoutingSlip(builder, context);
 
             var routingSlip = builder.Build();
 
-            await context.Execute(routingSlip).ConfigureAwait(false);
+            await context.Execute(routingSlip, context.CancellationToken).ConfigureAwait(false);
         }
 
         protected abstract Task BuildRoutingSlip(RoutingSlipBuilder builder, ConsumeContext<TRequest> request);
+
+        /// <summary>
+        /// By default, returns the input address of the request consumer which assumes the response consumer is on the same receive endpoint.
+        /// Override to specify the endpoint address of the response consumer if it is configured on a separate receive endpoint.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        protected virtual Uri GetResponseEndpointAddress(ConsumeContext<TRequest> context)
+        {
+            return context.ReceiveContext.InputAddress;
+        }
     }
 }
