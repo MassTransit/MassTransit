@@ -1,6 +1,8 @@
 ﻿namespace MassTransit
 {
+    using System;
     using System.Collections.Generic;
+    using ActiveMqTransport.Configuration;
 
 
     public interface IActiveMqHostConfigurator
@@ -17,7 +19,7 @@
         /// <param name="password"></param>
         void Password(string password);
 
-        void UseSsl();
+        void UseSsl(Action<IActiveMqSslConfigurator> configureSsl);
 
         /// <summary>
         /// Sets a list of hosts to enable the failover transport

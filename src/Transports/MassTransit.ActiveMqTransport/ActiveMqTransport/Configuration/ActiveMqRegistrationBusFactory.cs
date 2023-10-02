@@ -42,7 +42,7 @@ namespace MassTransit.ActiveMqTransport.Configuration
                     h.Password(options.Pass);
 
                 if (options.UseSsl)
-                    h.UseSsl();
+                    h.UseSsl(s => { });
             });
 
             return CreateBus(configurator, context, _configure, specifications);

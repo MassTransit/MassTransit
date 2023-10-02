@@ -3,6 +3,7 @@ namespace MassTransit.ActiveMqTransport.Configuration
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net.Security;
     using Apache.NMS;
 
 
@@ -108,5 +109,7 @@ namespace MassTransit.ActiveMqTransport.Configuration
                 Port = Port
             }.Uri.ToString();
         }
+
+        public RemoteCertificateValidationCallback CertificateValidationCallback { get; set; }
     }
 }
