@@ -3,10 +3,13 @@ namespace MassTransit.InMemoryTransport
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading;
 
 
     public class InMemoryTransportMessage
     {
+        static long _nextSequenceNumber;
+
         public InMemoryTransportMessage(Guid messageId, byte[] body, string contentType)
         {
             Headers = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
@@ -15,7 +18,11 @@ namespace MassTransit.InMemoryTransport
 
             Headers[MessageHeaders.MessageId] = messageId.ToString();
             Headers[MessageHeaders.ContentType] = contentType;
+
+            SequenceNumber = Interlocked.Increment(ref _nextSequenceNumber);
         }
+
+        public long SequenceNumber { get; }
 
         public Guid MessageId { get; }
 

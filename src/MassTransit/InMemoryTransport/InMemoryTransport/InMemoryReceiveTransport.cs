@@ -78,7 +78,7 @@ namespace MassTransit.InMemoryTransport
 
 
         class ReceiveTransportAgent :
-            ConsumerAgent<Guid>,
+            ConsumerAgent<long>,
             ReceiveTransportHandle,
             IMessageReceiver<InMemoryTransportMessage>
         {
@@ -111,7 +111,7 @@ namespace MassTransit.InMemoryTransport
 
                     try
                     {
-                        await Dispatch(message.MessageId, context, NoLockReceiveContext.Instance).ConfigureAwait(false);
+                        await Dispatch(message.SequenceNumber, context, NoLockReceiveContext.Instance).ConfigureAwait(false);
                     }
                     catch (Exception exception)
                     {

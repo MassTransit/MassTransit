@@ -29,7 +29,7 @@ namespace MassTransit.Containers.Tests
 
                     x.AddConfigureEndpointsCallback((context, name, cfg) =>
                     {
-                        cfg.UseDelayedRedelivery(r => r.Intervals(TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2)));
+                        cfg.UseDelayedRedelivery(r => r.Immediate(3));
                         cfg.UseMessageRetry(r =>
                         {
                             r.Immediate(5);
