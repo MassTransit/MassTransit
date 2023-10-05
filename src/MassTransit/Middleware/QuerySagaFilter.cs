@@ -54,7 +54,8 @@ namespace MassTransit.Middleware
 
                 await next.Send(context).ConfigureAwait(false);
             }
-            catch (Exception exception) when (exception.GetBaseException() is OperationCanceledException && !context.CancellationToken.IsCancellationRequested)
+            catch (Exception exception) when ((exception is OperationCanceledException || exception.GetBaseException() is OperationCanceledException)
+                                              && !context.CancellationToken.IsCancellationRequested)
             {
                 await context.NotifyFaulted(timer.Elapsed, TypeCache<TSaga>.ShortName, exception).ConfigureAwait(false);
 

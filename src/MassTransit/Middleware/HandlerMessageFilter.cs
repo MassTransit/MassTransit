@@ -49,15 +49,14 @@ namespace MassTransit.Middleware
 
                 await next.Send(context).ConfigureAwait(false);
             }
-            catch (OperationCanceledException exception)
+            catch (Exception exception) when ((exception is OperationCanceledException || exception.GetBaseException() is OperationCanceledException)
+                                              && !context.CancellationToken.IsCancellationRequested)
             {
                 await context.NotifyFaulted(timer.Elapsed, TypeCache<MessageHandler<TMessage>>.ShortName, exception).ConfigureAwait(false);
 
                 activity?.AddExceptionEvent(exception);
-                instrument?.AddException(exception);
 
-                if (exception.CancellationToken == context.CancellationToken)
-                    throw;
+                instrument?.AddException(exception);
 
                 throw new ConsumerCanceledException($"The operation was canceled by the consumer: {TypeCache<MessageHandler<TMessage>>.ShortName}");
             }
