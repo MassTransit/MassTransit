@@ -65,9 +65,17 @@ namespace MassTransit.AmazonSqsTransport
                 Attributes = subscriptionAttributes
             };
 
-            var response = await _snsClient.SubscribeAsync(subscribeRequest, CancellationToken).ConfigureAwait(false);
+            SubscribeResponse response;
+            try
+            {
+                response = await _snsClient.SubscribeAsync(subscribeRequest, CancellationToken).ConfigureAwait(false);
 
-            response.EnsureSuccessfulResponse();
+                response.EnsureSuccessfulResponse();
+            }
+            catch (InvalidParameterException exception) when (exception.Message.Contains("exists"))
+            {
+                return;
+            }
 
             queueInfo.SubscriptionArns.Add(response.SubscriptionArn);
 
@@ -134,13 +142,6 @@ namespace MassTransit.AmazonSqsTransport
             await ConnectionContext.RemoveQueueByName(queue.EntityName).ConfigureAwait(false);
         }
 
-        public async Task<PublishRequest> CreatePublishRequest(string topicName, string body)
-        {
-            var topicInfo = await ConnectionContext.GetTopicByName(topicName).ConfigureAwait(false);
-
-            return new PublishRequest(topicInfo.Arn, body);
-        }
-
         public async Task Publish(string topicName, PublishBatchRequestEntry request, CancellationToken cancellationToken)
         {
             var topicInfo = await ConnectionContext.GetTopicByName(topicName).ConfigureAwait(false);
@@ -205,6 +206,13 @@ namespace MassTransit.AmazonSqsTransport
             }, CancellationToken).ConfigureAwait(false);
 
             response.EnsureSuccessfulResponse();
+        }
+
+        public async Task<PublishRequest> CreatePublishRequest(string topicName, string body)
+        {
+            var topicInfo = await ConnectionContext.GetTopicByName(topicName).ConfigureAwait(false);
+
+            return new PublishRequest(topicInfo.Arn, body);
         }
 
         async Task DeleteQueueSubscription(string subscriptionArn)
