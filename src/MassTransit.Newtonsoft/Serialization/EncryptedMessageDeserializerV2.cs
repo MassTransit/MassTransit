@@ -40,7 +40,11 @@ namespace MassTransit.Serialization
         {
             try
             {
-                using var stream = body.GetStream();
+                var messageBody = body is StringMessageBody smb
+                    ? new Base64MessageBody(smb.GetString())
+                    : body;
+
+                using var stream = messageBody.GetStream();
                 using var disposingCryptoStream = _cryptoStreamProvider.GetDecryptStream(stream, headers);
                 using var jsonReader = new BsonDataReader(disposingCryptoStream);
 
