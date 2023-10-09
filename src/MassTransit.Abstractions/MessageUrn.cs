@@ -96,7 +96,7 @@ namespace MassTransit
                 : messageName!;
         }
 
-        static string? GetMessageNameFromAttribute(Type type)
+        static string? GetMessageNameFromAttribute(Type? type)
         {
             if (type is { IsArray: true, HasElementType: true })
             {
@@ -107,7 +107,7 @@ namespace MassTransit
                     return elementName + "[]";
             }
 
-            return type.GetCustomAttribute<MessageUrnAttribute>()?.Urn.ToString();
+            return type?.GetCustomAttribute<MessageUrnAttribute>()?.Urn.ToString();
         }
 
         static string GetMessageNameFromType(StringBuilder sb, Type type, bool includeScope)
