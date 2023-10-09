@@ -3,7 +3,7 @@
 The MassTransit framework has fully adopted the [`Microsoft.Extensions.Logging`](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/logging/?view=aspnetcore-5.0) framework.
 So, it will use whatever logging configuration is already in your container.
 
-## Basic Configuration
+## Configuration
 
 By integrating with `Microsoft.Extensions.Logging` the basic configuration is no configuration. :tada:
 When you run a project using the HostBuilder features of .Net you will get a basic logging experience right
@@ -41,3 +41,19 @@ public static IHostBuilder CreateHostBuilder(string[] args)
         });
 }
 ```
+
+## Other Loggers
+
+For applications that are not using MassTransit's container-based configuration (`AddMassTransit`) or for those with non-standard log configurations, it's possible to explicitly configure MassTransit so that it uses a provided `ILoggerFactory`.
+
+
+```csharp
+ILoggerFactory loggerFactory = <get this somehow>;
+
+var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
+{
+    LogContext.ConfigureCurrentLogContext(loggerFactory);
+});
+```
+
+This _must_ be specified within the bus configuration so that the provided `ILoggerFactory` is used.
