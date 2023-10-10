@@ -229,8 +229,6 @@ namespace MassTransit.AmazonSqsTransport
 
         static bool QueueHasTopicPermission(Policy policy, string topicArn, string sqsQueueArn)
         {
-            var topicArnPattern = topicArn.Substring(0, topicArn.LastIndexOf(':') + 1) + "*";
-
             IEnumerable<Condition> conditions = policy.Statements
                 .Where(s => s.Resources.Any(r => r.Id.Equals(sqsQueueArn)))
                 .SelectMany(s => s.Conditions);
@@ -238,7 +236,7 @@ namespace MassTransit.AmazonSqsTransport
             return conditions.Any(c =>
                 string.Equals(c.Type, ConditionFactory.ArnComparisonType.ArnLike.ToString(), StringComparison.OrdinalIgnoreCase) &&
                 string.Equals(c.ConditionKey, ConditionFactory.SOURCE_ARN_CONDITION_KEY, StringComparison.OrdinalIgnoreCase) &&
-                c.Values.Any(v => v == topicArnPattern || v == topicArn));
+                c.Values.Contains(topicArn));
         }
     }
 }
