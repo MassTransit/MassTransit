@@ -23,8 +23,12 @@ namespace MassTransit.AmazonSqsTransport
         readonly IAmazonSimpleNotificationService _snsClient;
         readonly IAmazonSQS _sqsClient;
 
-        public AmazonSqsClientContext(ConnectionContext connectionContext, IAmazonSQS sqsClient, IAmazonSimpleNotificationService snsClient,
-            CancellationToken cancellationToken)
+        public AmazonSqsClientContext(
+            ConnectionContext connectionContext,
+            IAmazonSQS sqsClient,
+            IAmazonSimpleNotificationService snsClient,
+            CancellationToken cancellationToken
+        )
             : base(connectionContext)
         {
             ConnectionContext = connectionContext;
@@ -87,7 +91,7 @@ namespace MassTransit.AmazonSqsTransport
                 ? new Policy()
                 : Policy.FromJson(policyValue);
 
-            if (!QueueHasTopicPermission(policy, topicArnPattern, sqsQueueArn))
+            if (!QueueHasTopicPermission(policy, topicArnPattern, topicInfo.Arn, sqsQueueArn))
             {
                 var statement = new Statement(Statement.StatementEffect.Allow);
             #pragma warning disable 618
@@ -95,7 +99,7 @@ namespace MassTransit.AmazonSqsTransport
             #pragma warning restore 618
                 statement.Resources.Add(new Resource(sqsQueueArn));
                 statement.Conditions.Add(ConditionFactory.NewSourceArnCondition(topicArnPattern));
-                statement.Principals.Add(new Principal("*"));
+                statement.Principals.Add(new Principal("Service","sns.amazonaws.com"));
                 policy.Statements.Add(statement);
 
                 var jsonPolicy = policy.ToJson();
@@ -224,7 +228,7 @@ namespace MassTransit.AmazonSqsTransport
             response.EnsureSuccessfulResponse();
         }
 
-        static bool QueueHasTopicPermission(Policy policy, string topicArnPattern, string sqsQueueArn)
+        static bool QueueHasTopicPermission(Policy policy, string topicArnPattern, string topicArn, string sqsQueueArn)
         {
             IEnumerable<Condition> conditions = policy.Statements
                 .Where(s => s.Resources.Any(r => r.Id.Equals(sqsQueueArn)))
@@ -233,7 +237,7 @@ namespace MassTransit.AmazonSqsTransport
             return conditions.Any(c =>
                 string.Equals(c.Type, ConditionFactory.ArnComparisonType.ArnLike.ToString(), StringComparison.OrdinalIgnoreCase) &&
                 string.Equals(c.ConditionKey, ConditionFactory.SOURCE_ARN_CONDITION_KEY, StringComparison.OrdinalIgnoreCase) &&
-                c.Values.Contains(topicArnPattern));
+                c.Values.Any(v => v == topicArnPattern || v == topicArn));
         }
     }
 }
