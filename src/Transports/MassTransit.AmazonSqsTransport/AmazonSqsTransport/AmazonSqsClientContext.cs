@@ -84,21 +84,20 @@ namespace MassTransit.AmazonSqsTransport
             queueInfo.SubscriptionArns.Add(response.SubscriptionArn);
 
             var sqsQueueArn = queueInfo.Arn;
-            var topicArnPattern = topicInfo.Arn.Substring(0, topicInfo.Arn.LastIndexOf(':') + 1) + "*";
 
             queueInfo.Attributes.TryGetValue(QueueAttributeName.Policy, out var policyValue);
             var policy = string.IsNullOrEmpty(policyValue)
                 ? new Policy()
                 : Policy.FromJson(policyValue);
 
-            if (!QueueHasTopicPermission(policy, topicArnPattern, topicInfo.Arn, sqsQueueArn))
+            if (!QueueHasTopicPermission(policy, topicInfo.Arn, sqsQueueArn))
             {
                 var statement = new Statement(Statement.StatementEffect.Allow);
             #pragma warning disable 618
                 statement.Actions.Add(SQSActionIdentifiers.SendMessage);
             #pragma warning restore 618
                 statement.Resources.Add(new Resource(sqsQueueArn));
-                statement.Conditions.Add(ConditionFactory.NewSourceArnCondition(topicArnPattern));
+                statement.Conditions.Add(ConditionFactory.NewSourceArnCondition(topicInfo.Arn));
                 statement.Principals.Add(new Principal("Service","sns.amazonaws.com"));
                 policy.Statements.Add(statement);
 
@@ -228,8 +227,10 @@ namespace MassTransit.AmazonSqsTransport
             response.EnsureSuccessfulResponse();
         }
 
-        static bool QueueHasTopicPermission(Policy policy, string topicArnPattern, string topicArn, string sqsQueueArn)
+        static bool QueueHasTopicPermission(Policy policy, string topicArn, string sqsQueueArn)
         {
+            var topicArnPattern = topicArn.Substring(0, topicArn.LastIndexOf(':') + 1) + "*";
+
             IEnumerable<Condition> conditions = policy.Statements
                 .Where(s => s.Resources.Any(r => r.Id.Equals(sqsQueueArn)))
                 .SelectMany(s => s.Conditions);
