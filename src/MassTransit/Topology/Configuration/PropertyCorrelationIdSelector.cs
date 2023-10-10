@@ -1,6 +1,7 @@
 namespace MassTransit.Configuration
 {
     using System;
+    using Internals;
     using Topology;
 
 
@@ -17,16 +18,15 @@ namespace MassTransit.Configuration
 
         public bool TryGetSetCorrelationId(out IMessageCorrelationId<T> messageCorrelationId)
         {
-            var propertyInfo = typeof(T).GetProperty(_propertyName);
-            if (propertyInfo != null && propertyInfo.PropertyType == typeof(Guid))
+            if (ReadPropertyCache<T>.TryGetProperty(_propertyName, out IReadProperty<T, Guid> property))
             {
-                messageCorrelationId = new PropertyMessageCorrelationId<T>(propertyInfo);
+                messageCorrelationId = new PropertyMessageCorrelationId<T>(property);
                 return true;
             }
 
-            if (propertyInfo != null && propertyInfo.PropertyType == typeof(Guid?))
+            if (ReadPropertyCache<T>.TryGetProperty(_propertyName, out IReadProperty<T, Guid?> nullableProperty))
             {
-                messageCorrelationId = new NullablePropertyMessageCorrelationId<T>(propertyInfo);
+                messageCorrelationId = new NullablePropertyMessageCorrelationId<T>(nullableProperty);
                 return true;
             }
 

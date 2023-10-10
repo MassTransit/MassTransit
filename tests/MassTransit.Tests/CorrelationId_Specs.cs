@@ -65,7 +65,7 @@
         [Test]
         public async Task Should_include_a_correlation_id()
         {
-            var message = new A {CorrelationId = NewId.NextGuid()};
+            var message = new A { CorrelationId = NewId.NextGuid() };
 
             await InputQueueSendEndpoint.Send(message);
 
@@ -97,7 +97,7 @@
         [Test]
         public async Task Should_include_a_correlation_id()
         {
-            var message = new A {CommandId = NewId.NextGuid()};
+            var message = new A { CommandId = NewId.NextGuid() };
 
             await InputQueueSendEndpoint.Send(message);
 
@@ -129,7 +129,7 @@
         [Test]
         public async Task Should_include_a_correlation_id()
         {
-            var message = new A {EventId = NewId.NextGuid()};
+            var message = new A { EventId = NewId.NextGuid() };
 
             await InputQueueSendEndpoint.Send(message);
 
@@ -162,7 +162,7 @@
         [Test]
         public async Task Should_include_a_correlation_id()
         {
-            var message = new A {CorrelationId = NewId.NextGuid()};
+            var message = new A { CorrelationId = NewId.NextGuid() };
 
             await InputQueueSendEndpoint.Send(message);
 
@@ -181,6 +181,45 @@
 
 
         class A
+        {
+            public Guid? CorrelationId { get; set; }
+        }
+    }
+
+
+    [TestFixture]
+    public class Sending_a_nullable_correlation_id_base_class_message :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_include_a_correlation_id()
+        {
+            var message = new A { CorrelationId = NewId.NextGuid() };
+
+            await InputQueueSendEndpoint.Send(message);
+
+            ConsumeContext<A> context = await _handled;
+
+            Assert.That(context.CorrelationId.HasValue, Is.True);
+            Assert.That(context.CorrelationId.Value, Is.EqualTo(message.CorrelationId.Value));
+        }
+
+        Task<ConsumeContext<A>> _handled;
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            _handled = Handled<A>(configurator);
+        }
+
+
+        public interface IA
+        {
+            Guid? CorrelationId { get; }
+        }
+
+
+        class A :
+            IA
         {
             public Guid? CorrelationId { get; set; }
         }

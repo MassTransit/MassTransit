@@ -1,7 +1,6 @@
 namespace MassTransit.Topology
 {
     using System;
-    using System.Reflection;
     using Internals;
 
 
@@ -11,9 +10,9 @@ namespace MassTransit.Topology
     {
         readonly IReadProperty<T, Guid?> _property;
 
-        public NullablePropertyMessageCorrelationId(PropertyInfo propertyInfo)
+        public NullablePropertyMessageCorrelationId(IReadProperty<T, Guid?> property)
         {
-            _property = ReadPropertyCache<T>.GetProperty<Guid?>(propertyInfo);
+            _property = property;
         }
 
         public bool TryGetCorrelationId(T message, out Guid correlationId)
