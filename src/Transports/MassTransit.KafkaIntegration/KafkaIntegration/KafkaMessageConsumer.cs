@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.KafkaIntegration
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
     using Confluent.Kafka;
@@ -12,6 +13,7 @@
 
     public class KafkaMessageConsumer<TKey, TValue> :
         ConsumerAgent<TopicPartitionOffset>,
+        KafkaConsumerBuilderContext,
         IKafkaMessageConsumer<TKey, TValue>
         where TValue : class
     {
@@ -20,7 +22,7 @@
         readonly IConsumer<byte[], byte[]> _consumer;
         readonly KafkaReceiveEndpointContext<TKey, TValue> _context;
         readonly IChannelExecutorPool<ConsumeResult<byte[], byte[]>> _executorPool;
-        readonly IConsumerLockContext _lockContext;
+        readonly ConsumerLockContext _lockContext;
         readonly ReceiveSettings _receiveSettings;
 
         public KafkaMessageConsumer(ReceiveSettings receiveSettings, KafkaReceiveEndpointContext<TKey, TValue> context, ConsumerContext consumerContext)
@@ -31,21 +33,34 @@
 
             _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(Stopping);
             _checkpointTokenSource = CancellationTokenSource.CreateLinkedTokenSource(Stopped);
-            var lockContext = new ConsumerLockContext(consumerContext, receiveSettings, _checkpointTokenSource.Token);
+            _lockContext = new ConsumerLockContext(consumerContext, receiveSettings, _checkpointTokenSource.Token);
 
-            _consumer = consumerContext.CreateConsumer(lockContext, HandleKafkaError);
+            _consumer = consumerContext.CreateConsumer(this, HandleKafkaError);
 
-            _executorPool = new CombinedChannelExecutorPool(lockContext, receiveSettings);
-            _lockContext = lockContext;
+            _executorPool = new CombinedChannelExecutorPool(_lockContext, receiveSettings);
 
             TrySetConsumeTask(Task.Run(() => Consume()));
+        }
+
+        public IEnumerable<TopicPartitionOffset> OnAssigned(IConsumer<byte[], byte[]> consumer, IEnumerable<TopicPartition> partitions)
+        {
+            SetReady();
+            return _lockContext.OnAssigned(consumer, partitions);
+        }
+
+        public IEnumerable<TopicPartitionOffset> OnUnAssigned(IConsumer<byte[], byte[]> consumer, IEnumerable<TopicPartitionOffset> partitions)
+        {
+            return _lockContext.OnUnAssigned(consumer, partitions);
+        }
+
+        public IEnumerable<TopicPartitionOffset> OnPartitionLost(IConsumer<byte[], byte[]> consumer, IEnumerable<TopicPartitionOffset> partitions)
+        {
+            return _lockContext.OnPartitionLost(consumer, partitions);
         }
 
         async Task Consume()
         {
             _consumer.Subscribe(_receiveSettings.Topic);
-
-            SetReady();
 
             try
             {
@@ -95,11 +110,11 @@
 
         void HandleKafkaError(IConsumer<byte[], byte[]> consumer, Error error)
         {
-            EnabledLogger? logger = error.IsFatal ? LogContext.Error : LogContext.Warning;
-            logger?.Log("Consumer [{MemberId}] error ({Code}): {Reason} on {Topic}", consumer.MemberId, error.Code, error.Reason, _receiveSettings.Topic);
-
             if (_cancellationTokenSource.IsCancellationRequested)
                 return;
+
+            EnabledLogger? logger = error.IsFatal ? LogContext.Error : LogContext.Warning;
+            logger?.Log("Consumer [{MemberId}] error ({Code}): {Reason} on {Topic}", consumer.MemberId, error.Code, error.Reason, _receiveSettings.Topic);
 
             if (error.IsLocalError)
                 _cancellationTokenSource.Cancel();
