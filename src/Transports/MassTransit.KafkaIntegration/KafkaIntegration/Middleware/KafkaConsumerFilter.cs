@@ -21,11 +21,14 @@ namespace MassTransit.KafkaIntegration.Middleware
         public async Task Send(ConsumerContext context, IPipe<ConsumerContext> next)
         {
             var receiveSettings = _context.GetPayload<ReceiveSettings>();
-            var consumers = new IKafkaMessageConsumer<TKey, TValue>[receiveSettings.ConcurrentConsumerLimit];
-            for (var i = 0; i < consumers.Length; i++)
-                consumers[i] = new KafkaMessageConsumer<TKey, TValue>(receiveSettings, _context, context);
+            var consumers = new Task<IKafkaMessageConsumer<TKey, TValue>>[receiveSettings.ConcurrentConsumerLimit];
 
-            var supervisor = CreateConsumerSupervisor(consumers);
+            for (var i = 0; i < consumers.Length; i++)
+                consumers[i] = CreateConsumer(context, receiveSettings);
+
+            IKafkaMessageConsumer<TKey, TValue>[] actualConsumers = await Task.WhenAll(consumers).ConfigureAwait(false);
+
+            var supervisor = CreateConsumerSupervisor(actualConsumers);
 
             await _context.TransportObservers.NotifyReady(_context.InputAddress).ConfigureAwait(false);
 
@@ -35,7 +38,7 @@ namespace MassTransit.KafkaIntegration.Middleware
             }
             finally
             {
-                DeliveryMetrics metrics = new CombinedDeliveryMetrics(consumers);
+                DeliveryMetrics metrics = new CombinedDeliveryMetrics(actualConsumers);
 
                 await _context.TransportObservers.NotifyCompleted(_context.InputAddress, metrics).ConfigureAwait(false);
 
@@ -47,6 +50,13 @@ namespace MassTransit.KafkaIntegration.Middleware
 
         public void Probe(ProbeContext context)
         {
+        }
+
+        async Task<IKafkaMessageConsumer<TKey, TValue>> CreateConsumer(ConsumerContext context, ReceiveSettings receiveSettings)
+        {
+            var consumer = new KafkaMessageConsumer<TKey, TValue>(receiveSettings, _context, context);
+            await consumer.Ready.ConfigureAwait(false);
+            return consumer;
         }
 
         Supervisor CreateConsumerSupervisor(IKafkaMessageConsumer<TKey, TValue>[] actualConsumers)
