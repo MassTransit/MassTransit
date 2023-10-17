@@ -1,5 +1,5 @@
 name: Bug Report
-description: Create a bug report for an issue found in MassTransit
+description: Create a bug report for an issue found in MassTransit. Should not be used for questions on the use of MassTransit.
 body:
   - type: markdown
     attributes:

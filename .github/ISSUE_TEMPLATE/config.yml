@@ -1,14 +1,14 @@
 blank_issues_enabled: false
 contact_links:
   - name: Commercial Support
-    url: https://masstransit-project.com/learn/support.html
-    about: For commerial support services, including architectural guidance, code review, and troubleshooting
+    url: https://masstransit.io/support
+    about: Commercial support, the official support services for MassTransit customers
   - name: GitHub Discussions
     url: https://github.com/MassTransit/MassTransit/discussions
-    about: Submit questions, ideas, or general conversation topics
-  - name: Live Chat (on Discord)
+    about: Questions on the use of MassTransit, use search to find existing discussions
+  - name: Discord
     url: https://discord.gg/rNpQgYn
-    about: Live chat room for questions and conversation
+    about: Active chat room for MassTransit-related conversations. Should not be used for posting code snippets (use GitHub Discusssions)
   - name: Stack Overflow
     url: https://stackoverflow.com/questions/tagged/masstransit
-    about: Questions and answers, search to see if your question has already been answered
+    about: Search for existing questions and answers, should not be used for asking support-related questions.
