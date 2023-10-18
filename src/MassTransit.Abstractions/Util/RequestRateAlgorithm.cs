@@ -287,7 +287,7 @@ namespace MassTransit.Util
         async Task RunResultSet<TKey, T>(IGrouping<TKey, T> results, ResultCallback<T> resultCallback, OrderCallback<T> orderCallback,
             CancellationToken cancellationToken = default)
         {
-            var tasks = new List<Task>(ResultLimit);
+            int count = 0;
 
             try
             {
@@ -307,16 +307,15 @@ namespace MassTransit.Util
                         }
                     }
 
-                    tasks.Add(RunResultCallback());
+                    Add(RunResultCallback());
+                    count++;
                 }
             }
             catch (Exception)
             {
-                if (tasks.Count == 0)
+                if (count == 0)
                     throw;
             }
-
-            await Task.WhenAll(tasks).ConfigureAwait(false);
         }
 
         public async Task<ActiveRequest> BeginRequest(CancellationToken cancellationToken = default)
