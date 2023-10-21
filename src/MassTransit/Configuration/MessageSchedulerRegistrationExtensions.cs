@@ -27,7 +27,7 @@ namespace MassTransit
                 return sendEndpointProvider.CreateMessageScheduler(bus.Topology, schedulerEndpointAddress);
             });
 
-            configurator.TryAddScoped(provider =>
+            configurator.TryAddScoped<IRecurringMessageScheduler>(provider =>
             {
                 var bus = provider.GetRequiredService<IBus>();
                 var sendEndpointProvider = provider.GetRequiredService<ISendEndpointProvider>();
@@ -58,7 +58,8 @@ namespace MassTransit
             {
                 var bus = provider.GetRequiredService<TBus>();
                 var sendEndpointProvider = provider.GetRequiredService<Bind<TBus, ISendEndpointProvider>>().Value;
-                return Bind<TBus>.Create(new EndpointRecurringMessageScheduler(sendEndpointProvider, schedulerEndpointAddress, bus.Topology));
+                return Bind<TBus>.Create<IRecurringMessageScheduler>(
+                    new EndpointRecurringMessageScheduler(sendEndpointProvider, schedulerEndpointAddress, bus.Topology));
             });
         }
 
@@ -76,7 +77,7 @@ namespace MassTransit
                 return publishEndpoint.CreateMessageScheduler(bus.Topology);
             });
 
-            configurator.TryAddScoped(provider =>
+            configurator.TryAddScoped<IRecurringMessageScheduler>(provider =>
             {
                 var bus = provider.GetRequiredService<IBus>();
                 var publishEndpoint = provider.GetRequiredService<IPublishEndpoint>();
@@ -103,7 +104,7 @@ namespace MassTransit
             {
                 var bus = provider.GetRequiredService<TBus>();
                 var publishEndpoint = provider.GetRequiredService<Bind<TBus, IPublishEndpoint>>().Value;
-                return Bind<TBus>.Create(new PublishRecurringMessageScheduler(publishEndpoint, bus.Topology));
+                return Bind<TBus>.Create<IRecurringMessageScheduler>(new PublishRecurringMessageScheduler(publishEndpoint, bus.Topology));
             });
         }
     }
