@@ -129,8 +129,24 @@
             // It is time to cancel pending tasks as we already drained current pool
             _checkpointTokenSource.Cancel();
 
-            _consumer.Close();
-            _consumer.Dispose();
+            try
+            {
+                _consumer.Close();
+            }
+            catch (Exception e)
+            {
+                LogContext.Error?.Log(e, "Consumer [{MemberId}] close faulted on {Topic}", _consumer.MemberId, _receiveSettings.Topic);
+            }
+
+            try
+            {
+                _consumer.Dispose();
+            }
+            catch (Exception)
+            {
+                //ignored
+            }
+
             _cancellationTokenSource.Dispose();
 
             await _lockContext.DisposeAsync().ConfigureAwait(false);
