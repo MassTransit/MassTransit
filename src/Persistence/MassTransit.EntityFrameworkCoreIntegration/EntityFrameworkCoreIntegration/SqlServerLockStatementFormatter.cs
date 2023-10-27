@@ -6,9 +6,19 @@ namespace MassTransit.EntityFrameworkCoreIntegration
     public class SqlServerLockStatementFormatter :
         ILockStatementFormatter
     {
+        readonly bool _serializable;
+
+        public SqlServerLockStatementFormatter(bool serializable)
+        {
+            _serializable = serializable;
+        }
+
         public void Create(StringBuilder sb, string schema, string table)
         {
-            sb.AppendFormat("SELECT * FROM {0} WITH (UPDLOCK, ROWLOCK, SERIALIZABLE) WHERE ", FormatTableName(schema, table));
+            sb.AppendFormat("SELECT * FROM {0} WITH (UPDLOCK, ROWLOCK", FormatTableName(schema, table));
+            if (_serializable)
+                sb.Append(", SERIALIZABLE");
+            sb.Append(") WHERE ");
         }
 
         public void AppendColumn(StringBuilder sb, int index, string columnName)
