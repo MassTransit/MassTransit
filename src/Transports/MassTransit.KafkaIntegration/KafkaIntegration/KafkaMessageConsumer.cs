@@ -118,7 +118,10 @@
                 _receiveSettings.Topic, error.IsFatal);
 
             if (error.IsLocalError || error.IsFatal)
+            {
                 _cancellationTokenSource.Cancel();
+                SetNotReady(new KafkaException(error));
+            }
         }
 
         protected override async Task ActiveAndActualAgentsCompleted(StopContext context)
