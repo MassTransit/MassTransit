@@ -47,7 +47,11 @@ namespace MassTransit.ActiveMqTransport.Middleware
 
             var supervisor = CreateConsumerSupervisor(context, actualConsumers);
 
+            await supervisor.Ready.ConfigureAwait(false);
+
             LogContext.Debug?.Log("Consumers Ready: {InputAddress}", _context.InputAddress);
+
+            _context.AddConsumeAgent(supervisor);
 
             await _context.TransportObservers.NotifyReady(_context.InputAddress).ConfigureAwait(false);
 
@@ -74,8 +78,6 @@ namespace MassTransit.ActiveMqTransport.Middleware
         {
             var supervisor = new ConsumerSupervisor(actualConsumers);
 
-            _context.AddConsumeAgent(supervisor);
-
             void HandleException(Exception exception)
             {
                 supervisor.Stop(exception.Message);
@@ -100,8 +102,6 @@ namespace MassTransit.ActiveMqTransport.Middleware
             LogContext.Debug?.Log("Created consumer for {InputAddress}: {Queue}", _context.InputAddress, entity.EntityName);
 
             var consumer = new ActiveMqConsumer(context, (MessageConsumer)messageConsumer, _context, executor);
-
-            await consumer.Ready.ConfigureAwait(false);
 
             return consumer;
         }
