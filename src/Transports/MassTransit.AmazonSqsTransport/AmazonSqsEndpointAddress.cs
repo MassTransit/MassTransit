@@ -74,8 +74,6 @@ namespace MassTransit
                     throw new ArgumentException($"The address scheme is not supported: {address.Scheme}", nameof(address));
             }
 
-            AmazonSqsEntityNameValidator.Validator.ThrowIfInvalidEntityName(Name);
-
             foreach (var (key, value) in address.SplitQueryString())
             {
                 switch (key)
@@ -98,6 +96,11 @@ namespace MassTransit
                         break;
                 }
             }
+
+            if (Type == AddressType.Queue)
+                AmazonSqsEntityNameValidator.Validator.ThrowIfInvalidEntityName(Name);
+            else
+                AmazonSnsTopicNameValidator.Validator.ThrowIfInvalidEntityName(Name);
         }
 
         public AmazonSqsEndpointAddress(Uri hostAddress, string name, bool durable = true, bool autoDelete = false, AddressType type = AddressType.Queue)

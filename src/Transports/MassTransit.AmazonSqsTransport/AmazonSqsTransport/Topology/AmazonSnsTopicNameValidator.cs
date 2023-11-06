@@ -3,7 +3,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
     using System.Text.RegularExpressions;
 
 
-    public class AmazonSqsEntityNameValidator :
+    public class AmazonSnsTopicNameValidator :
         IEntityNameValidator
     {
         static readonly Regex _regex = new Regex(@"^[A-Za-z0-9\-_\.:]+$", RegexOptions.Compiled);
@@ -22,8 +22,8 @@ namespace MassTransit.AmazonSqsTransport.Topology
                     "The entity name must be a sequence of these characters: letters, digits, hyphen, underscore, period, or colon.");
             }
 
-            if (name.Length > 80)
-                throw new AmazonSqsTransportConfigurationException("The entity name length must be <= 80");
+            if (name.Length > 256)
+                throw new AmazonSqsTransportConfigurationException("The topic name length must be <= 256");
         }
 
         public bool IsValidEntityName(string name)
@@ -34,7 +34,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
 
         static class Cached
         {
-            internal static readonly IEntityNameValidator EntityNameValidator = new AmazonSqsEntityNameValidator();
+            internal static readonly IEntityNameValidator EntityNameValidator = new AmazonSnsTopicNameValidator();
         }
     }
 }
