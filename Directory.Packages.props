@@ -13,6 +13,7 @@
     <PackageVersion Include="Azure.Messaging.ServiceBus" Version="7.16.2" />
     <PackageVersion Include="Azure.Storage.Blobs" Version="12.18.0" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.13.9" />
+    <PackageVersion Include="CassandraCSharpDriver" Version="3.19.3" />
     <PackageVersion Include="Confluent.Kafka" Version="2.2.0" />
     <PackageVersion Include="Confluent.SchemaRegistry.Serdes.Avro" Version="2.2.0" />
     <PackageVersion Include="coverlet.collector" Version="3.1.2" />

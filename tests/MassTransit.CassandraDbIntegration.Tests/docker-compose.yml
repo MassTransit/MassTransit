@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  cassandra:
+    image: cassandra
+    ports:
+      - '9042:9042'
+    environment:
+      - CASSANDRA_SEEDS=cassandra
+      - CASSANDRA_PASSWORD_SEEDER=yes
+      - CASSANDRA_PASSWORD=cassandra
+      - CASSANDRA_USER=cassandra
