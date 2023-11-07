@@ -81,7 +81,8 @@ namespace MassTransit.RabbitMqTransport.Topology
 
         public void BindToExchange(string exchangeName, Action<IRabbitMqExchangeBindingConfigurator> configure = null)
         {
-            var specification = new ExchangeBindingPublishTopologySpecification(exchangeName, RabbitMQ.Client.ExchangeType.Fanout, Durable, AutoDelete);
+            string exchangeType = ExchangeArguments.TryGetValue("x-delayed-type", out var argument) ? (string)argument : RabbitMQ.Client.ExchangeType.Fanout;
+            var specification = new ExchangeBindingPublishTopologySpecification(exchangeName, exchangeType, Durable, AutoDelete);
 
             configure?.Invoke(specification);
 
