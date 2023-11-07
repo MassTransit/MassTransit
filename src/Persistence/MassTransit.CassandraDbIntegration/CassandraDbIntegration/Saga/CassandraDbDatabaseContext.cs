@@ -35,23 +35,15 @@ namespace MassTransit.CassandraDbIntegration.Saga
 
         public async Task<TSaga> Load(Guid correlationId)
         {
-            try
-            {
-                var value = await _database
-                    .GetTable<CassandraDbSaga>()
-                    .FirstOrDefault(x => x.CorrelationId == _options.FormatSagaKey(correlationId))
-                    .ExecuteAsync()
-                    .ConfigureAwait(false);
+            var value = await _database
+                .GetTable<CassandraDbSaga>()
+                .FirstOrDefault(x => x.CorrelationId == _options.FormatSagaKey(correlationId))
+                .ExecuteAsync()
+                .ConfigureAwait(false);
 
-                return value == null
-                    ? null
-                    : JsonSerializer.Deserialize<TSaga>(value.Properties, SystemTextJsonMessageSerializer.Options);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
+            return value == null
+                ? null
+                : JsonSerializer.Deserialize<TSaga>(value.Properties, SystemTextJsonMessageSerializer.Options);
         }
 
         public async Task Update(SagaConsumeContext<TSaga> context)
