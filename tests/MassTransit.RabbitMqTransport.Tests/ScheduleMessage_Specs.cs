@@ -194,35 +194,53 @@
     public class Should_schedule_in_direct_exchange_type :
         Should_schedule_in_any_exchange_type
     {
-        protected override string Type => ExchangeType.Direct; 
+        public Should_schedule_in_direct_exchange_type()
+            : base(ExchangeType.Direct)
+        {
+        }
     }
 
     public class Should_schedule_in_fanout_exchange_type :
         Should_schedule_in_any_exchange_type
     {
-        protected override string Type => ExchangeType.Fanout;
+        public Should_schedule_in_fanout_exchange_type()
+            : base(ExchangeType.Fanout)
+        {
+        }
     }
 
     public class Should_schedule_in_headers_exchange_type :
         Should_schedule_in_any_exchange_type
     {
-        protected override string Type => ExchangeType.Headers;
+        public Should_schedule_in_headers_exchange_type()
+            : base(ExchangeType.Headers)
+        {
+        }
     }
 
     public class Should_schedule_in_topic_exchange_type :
         Should_schedule_in_any_exchange_type
     {
-        protected override string Type => ExchangeType.Topic;
+        public Should_schedule_in_topic_exchange_type()
+            : base(ExchangeType.Topic)
+        {
+        }
     }
 
     public abstract class Should_schedule_in_any_exchange_type :
         RabbitMqTestFixture
     {
+        private readonly string _exchangeType;
+
+        protected Should_schedule_in_any_exchange_type(string exchangeType)
+            : base(inputQueueName: $"input_queue_{exchangeType}")
+        {
+            _exchangeType = exchangeType;
+        }
+
         Task<ConsumeContext<FirstMessage>> _first;
 
         Task<ConsumeContext<SecondMessage>> _second;
-
-        protected abstract string Type { get; }
 
         [Test]
         public async Task Should_get_both_messages()
@@ -244,10 +262,9 @@
         {
             configurator.UseDelayedMessageScheduler();
         }
-
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
-            configurator.ExchangeType = Type;
+            configurator.ExchangeType = _exchangeType;
 
             _first = Handler<FirstMessage>(configurator, async context =>
             {
