@@ -5,13 +5,12 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
     using Microsoft.EntityFrameworkCore.Design;
     using TestFramework;
 
-
     public class FutureSagaDbContextFactory :
         IDesignTimeDbContextFactory<FutureSagaDbContext>
     {
         public FutureSagaDbContext CreateDbContext(string[] args)
         {
-            var builder = new DbContextOptionsBuilder();
+            var builder = new DbContextOptionsBuilder<FutureSagaDbContext>();
 
             Apply(builder);
 
@@ -27,7 +26,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
             });
         }
 
-        public FutureSagaDbContext CreateDbContext(DbContextOptionsBuilder optionsBuilder)
+        public FutureSagaDbContext CreateDbContext(DbContextOptionsBuilder<FutureSagaDbContext> optionsBuilder)
         {
             return new FutureSagaDbContext(optionsBuilder.Options);
         }

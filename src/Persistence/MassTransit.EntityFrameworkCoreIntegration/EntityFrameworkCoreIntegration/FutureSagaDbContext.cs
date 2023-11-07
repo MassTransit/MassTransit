@@ -7,7 +7,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
     public class FutureSagaDbContext :
         SagaDbContext
     {
-        public FutureSagaDbContext(DbContextOptions options)
+        public FutureSagaDbContext(DbContextOptions<FutureSagaDbContext> options)
             : base(options)
         {
         }
