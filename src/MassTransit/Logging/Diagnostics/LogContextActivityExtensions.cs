@@ -228,10 +228,19 @@ namespace MassTransit.Logging
 
         static ActivityContext GetParentActivityContext(Headers headers)
         {
-            return headers.TryGetHeader(DiagnosticHeaders.ActivityId, out var headerValue) && headerValue is string activityId
-                && ActivityContext.TryParse(activityId, null, out var activityContext)
-                    ? activityContext
-                    : default;
+            if (!headers.TryGetHeader(DiagnosticHeaders.ActivityId, out var headerValue) ||
+                !(headerValue is string activityId) ||
+                !ActivityContext.TryParse(activityId, null, out var activityContext))
+                return default;
+
+            // Set IsRemote to true
+            if (System.Diagnostics.Activity.Current == null)
+            {
+                activityContext = new ActivityContext(activityContext.TraceId, activityContext.SpanId, activityContext.TraceFlags,
+                    activityContext.TraceState, true);
+            }
+
+            return activityContext;
         }
 
         static StartedActivity? StartActivity(Action<System.Diagnostics.Activity> started)
