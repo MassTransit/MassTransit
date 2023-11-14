@@ -8,10 +8,10 @@
     <PackageVersion Include="AWSSDK.SimpleNotificationService" Version="3.7.300.1" />
     <PackageVersion Include="AWSSDK.S3" Version="3.7.300.1" />
     <PackageVersion Include="AWSSDK.SQS" Version="3.7.300.1" />
-    <PackageVersion Include="Azure.Identity" Version="1.10.3" />
-    <PackageVersion Include="Azure.Messaging.EventHubs.Processor" Version="5.9.3" />
+    <PackageVersion Include="Azure.Identity" Version="1.10.4" />
+    <PackageVersion Include="Azure.Messaging.EventHubs.Processor" Version="5.10.0" />
     <PackageVersion Include="Azure.Messaging.ServiceBus" Version="7.16.2" />
-    <PackageVersion Include="Azure.Storage.Blobs" Version="12.19.0" />
+    <PackageVersion Include="Azure.Storage.Blobs" Version="12.19.1" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.13.10" />
     <PackageVersion Include="Confluent.Kafka" Version="2.3.0" />
     <PackageVersion Include="Confluent.SchemaRegistry.Serdes.Avro" Version="2.3.0" />
@@ -40,7 +40,7 @@
     <PackageVersion Include="Microsoft.Azure.Cosmos" Version="3.36.0" />
     <PackageVersion Include="Microsoft.Azure.Cosmos.Table" Version="1.0.8" />
     <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions.EventHubs" Version="5.5.0" />
-    <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="5.13.3" />
+    <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="5.13.4" />
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.1.0" />
@@ -70,7 +70,7 @@
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" Condition="'$(TargetFramework)' == 'net7.0'" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="6.0.0" Condition="'$(TargetFramework)' != 'net7.0'" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="7.0.1" Condition="'$(TargetFramework)' == 'net7.0'" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.7.2" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="1.1.1" />
     <PackageVersion Include="MongoDB.Driver" Version="2.22.0" />
     <PackageVersion Include="MongoDB.Driver.GridFS" Version="2.22.0" />
