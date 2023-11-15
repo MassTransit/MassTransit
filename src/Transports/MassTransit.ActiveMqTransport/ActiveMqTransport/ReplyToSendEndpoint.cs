@@ -43,7 +43,7 @@ namespace MassTransit.ActiveMqTransport
                 if (!context.TryGetPayload(out ActiveMqSendContext? sendContext))
                     throw new ArgumentException("The ActiveMqSendContext was not available");
 
-                if (context.DestinationAddress == consumeContext.ResponseAddress)
+                if (string.Equals(context.DestinationAddress?.AbsolutePath, consumeContext.ResponseAddress?.AbsolutePath))
                     sendContext.ReplyDestination = _destination;
             }
 
