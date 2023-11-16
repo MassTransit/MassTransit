@@ -1,6 +1,8 @@
 ﻿namespace MassTransit.AmazonSqsTransport
 {
     using System;
+    using System.Net;
+    using Amazon.SQS;
     using Configuration;
     using Topology;
     using Transports;
@@ -42,6 +44,11 @@
 
         public override Exception ConvertException(Exception exception, string message)
         {
+            if (exception is AmazonSQSException { StatusCode: HttpStatusCode.BadRequest })
+            {
+                return new AmazonSqsValidationException(message + _hostConfiguration.Settings, exception);
+            }
+
             return new AmazonSqsConnectionException(message + _hostConfiguration.Settings, exception);
         }
 
