@@ -19,16 +19,13 @@ namespace MassTransit.AmazonSqsTransport.Topology
             if (!success)
             {
                 throw new AmazonSqsTransportConfigurationException(
-                    "The entity name must be a sequence of these characters: letters, digits, hyphen, underscore, period, or colon.");
+                    "The entity name length must be <= 80 and a sequence of these characters: letters, digits, hyphen, underscore, period, or colon.");
             }
-
-            if (name.Length > 80)
-                throw new AmazonSqsTransportConfigurationException("The entity name length must be <= 80");
         }
 
         public bool IsValidEntityName(string name)
         {
-            return _regex.Match(name).Success;
+            return _regex.Match(name).Success && name.Length <= 80;
         }
 
 
