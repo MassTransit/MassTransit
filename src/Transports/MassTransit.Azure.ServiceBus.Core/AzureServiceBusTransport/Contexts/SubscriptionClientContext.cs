@@ -4,6 +4,7 @@ namespace MassTransit.AzureServiceBusTransport
     using System.Threading;
     using System.Threading.Tasks;
     using Azure.Messaging.ServiceBus;
+    using Internals;
     using MassTransit.Middleware;
 
 
@@ -106,7 +107,10 @@ namespace MassTransit.AzureServiceBusTransport
 
         public Task NotifyFaulted(Exception exception, string entityPath)
         {
-            return _agent.Stop($"Unrecoverable exception on {entityPath}");
+            Task.Run(() => _agent.Stop($"Unrecoverable exception on {entityPath}"))
+                .IgnoreUnobservedExceptions();
+
+            return Task.CompletedTask;
         }
 
         public async ValueTask DisposeAsync()
