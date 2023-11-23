@@ -22,6 +22,7 @@
         readonly IConsumer<byte[], byte[]> _consumer;
         readonly KafkaReceiveEndpointContext<TKey, TValue> _context;
         readonly IChannelExecutorPool<ConsumeResult<byte[], byte[]>> _executorPool;
+        readonly SemaphoreSlim _limit;
         readonly ConsumerLockContext _lockContext;
         readonly ReceiveSettings _receiveSettings;
 
@@ -30,6 +31,7 @@
         {
             _receiveSettings = receiveSettings;
             _context = context;
+            _limit = new SemaphoreSlim(receiveSettings.ConcurrentMessageLimit);
 
             _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(Stopping);
             _checkpointTokenSource = CancellationTokenSource.CreateLinkedTokenSource(Stopped);
@@ -37,7 +39,10 @@
 
             _consumer = consumerContext.CreateConsumer(this, HandleKafkaError);
 
-            _executorPool = new CombinedChannelExecutorPool(_lockContext, receiveSettings);
+            IHashGenerator hashGenerator = new Murmur3UnsafeHashGenerator();
+            _executorPool = new PartitionChannelExecutorPool<ConsumeResult<byte[], byte[]>>(x => x.Message.Key, hashGenerator,
+                receiveSettings.ConcurrentMessageLimit,
+                receiveSettings.ConcurrentDeliveryLimit);
 
             TrySetConsumeTask(Task.Run(() => Consume()));
         }
@@ -67,6 +72,7 @@
                 while (!_cancellationTokenSource.IsCancellationRequested)
                 {
                     ConsumeResult<byte[], byte[]> consumeResult = _consumer.Consume(_cancellationTokenSource.Token);
+                    await _limit.WaitAsync(_cancellationTokenSource.Token).ConfigureAwait(false);
                     await _lockContext.Pending(consumeResult).ConfigureAwait(false);
                     await _executorPool.Push(consumeResult, () => Handle(consumeResult), Stopping).ConfigureAwait(false);
                 }
@@ -105,6 +111,7 @@
             {
                 registration?.Dispose();
                 context.Dispose();
+                _limit.Release();
             }
         }
 
@@ -155,38 +162,7 @@
 
             await _lockContext.DisposeAsync().ConfigureAwait(false);
             _checkpointTokenSource.Dispose();
-        }
-
-
-        class CombinedChannelExecutorPool :
-            IChannelExecutorPool<ConsumeResult<byte[], byte[]>>
-        {
-            readonly IChannelExecutorPool<ConsumeResult<byte[], byte[]>> _keyExecutorPool;
-            readonly IChannelExecutorPool<ConsumeResult<byte[], byte[]>> _partitionExecutorPool;
-
-            public CombinedChannelExecutorPool(IChannelExecutorPool<ConsumeResult<byte[], byte[]>> partitionExecutorPool, ReceiveSettings receiveSettings)
-            {
-                _partitionExecutorPool = partitionExecutorPool;
-                IHashGenerator hashGenerator = new Murmur3UnsafeHashGenerator();
-                _keyExecutorPool = new PartitionChannelExecutorPool<ConsumeResult<byte[], byte[]>>(x => x.Message.Key, hashGenerator,
-                    receiveSettings.ConcurrentMessageLimit,
-                    receiveSettings.ConcurrentDeliveryLimit);
-            }
-
-            public Task Push(ConsumeResult<byte[], byte[]> result, Func<Task> handle, CancellationToken cancellationToken)
-            {
-                return _partitionExecutorPool.Push(result, () => _keyExecutorPool.Run(result, handle, cancellationToken), cancellationToken);
-            }
-
-            public Task Run(ConsumeResult<byte[], byte[]> result, Func<Task> method, CancellationToken cancellationToken = default)
-            {
-                return _partitionExecutorPool.Run(result, () => _keyExecutorPool.Run(result, method, cancellationToken), cancellationToken);
-            }
-
-            public ValueTask DisposeAsync()
-            {
-                return _keyExecutorPool.DisposeAsync();
-            }
+            _limit.Dispose();
         }
     }
 }

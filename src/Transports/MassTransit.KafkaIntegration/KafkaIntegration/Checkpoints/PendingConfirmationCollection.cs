@@ -19,7 +19,7 @@ namespace MassTransit.KafkaIntegration.Checkpoints
             _confirmations = new ConcurrentDictionary<TopicPartitionOffset, IPendingConfirmation>();
 
             if (cancellationToken.CanBeCanceled)
-                _registration = cancellationToken.Register(Cancel);
+                _registration = cancellationToken.Register(() => Cancel());
         }
 
         public void Dispose()

@@ -10,8 +10,7 @@ namespace MassTransit.EventHubIntegration
 
     public class ProcessorLockContext :
         IProcessorLockContext,
-        ProcessorClientBuilderContext,
-        IChannelExecutorPool<ProcessEventArgs>
+        ProcessorClientBuilderContext
     {
         readonly ProcessorContext _context;
         readonly SingleThreadedDictionary<string, PartitionCheckpointData> _data;
@@ -24,16 +23,6 @@ namespace MassTransit.EventHubIntegration
             _receiveSettings = receiveSettings;
             _pending = new PendingConfirmationCollection(cancellationToken);
             _data = new SingleThreadedDictionary<string, PartitionCheckpointData>(StringComparer.Ordinal);
-        }
-
-        public Task Push(ProcessEventArgs partition, Func<Task> method, CancellationToken cancellationToken = default)
-        {
-            return _data.TryGetValue(partition.Partition.PartitionId, out var data) ? data.Push(method) : Task.CompletedTask;
-        }
-
-        public Task Run(ProcessEventArgs partition, Func<Task> method, CancellationToken cancellationToken = default)
-        {
-            return _data.TryGetValue(partition.Partition.PartitionId, out var data) ? data.Run(method) : Task.CompletedTask;
         }
 
         public ValueTask DisposeAsync()
@@ -89,53 +78,6 @@ namespace MassTransit.EventHubIntegration
             LogContext.SetCurrentIfNull(_context.LogContext);
 
             return _data.TryRemove(eventArgs.PartitionId, out var data) ? data.Close(eventArgs) : Task.CompletedTask;
-        }
-
-
-        sealed class PartitionCheckpointData
-        {
-            readonly CancellationTokenSource _cancellationTokenSource;
-            readonly ICheckpointer _checkpointer;
-            readonly ChannelExecutor _executor;
-            readonly PendingConfirmationCollection _pending;
-
-            public PartitionCheckpointData(ReceiveSettings settings, PendingConfirmationCollection pending)
-            {
-                _cancellationTokenSource = new CancellationTokenSource();
-                _executor = new ChannelExecutor(settings.PrefetchCount, settings.ConcurrentMessageLimit);
-                _checkpointer = new BatchCheckpointer(settings, _cancellationTokenSource.Token);
-                _pending = pending;
-            }
-
-            public Task Pending(ProcessEventArgs eventArgs)
-            {
-                var pendingConfirmation = _pending.Add(eventArgs);
-                return _checkpointer.Pending(pendingConfirmation);
-            }
-
-            public async Task Close(PartitionClosingEventArgs args)
-            {
-                if (args.Reason != ProcessingStoppedReason.Shutdown)
-                    _cancellationTokenSource.Cancel();
-
-                await _executor.DisposeAsync().ConfigureAwait(false);
-                await _checkpointer.DisposeAsync().ConfigureAwait(false);
-
-                LogContext.Info?.Log("Partition: {PartitionId} was closed, reason: {Reason}", args.PartitionId, args.Reason);
-
-                _cancellationTokenSource.Cancel();
-                _cancellationTokenSource.Dispose();
-            }
-
-            public Task Push(Func<Task> method)
-            {
-                return _executor.Push(method, _cancellationTokenSource.Token);
-            }
-
-            public Task Run(Func<Task> method)
-            {
-                return _executor.Run(method, _cancellationTokenSource.Token);
-            }
         }
     }
 }
