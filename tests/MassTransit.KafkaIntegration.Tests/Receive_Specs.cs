@@ -111,12 +111,13 @@ namespace MassTransit.KafkaIntegration.Tests
         }
     }
 
+
     public class ConcurrentKeysReceive_Specs :
         InMemoryTestFixture
     {
         const string Topic = "test-concurrent-keys";
-        const int NumMessages = 10;
-        const int NumKeys = 2;
+        const int NumMessages = 50;
+        const int NumKeys = 5;
 
         [Test]
         public async Task Should_receive_concurrently_by_keys()
@@ -135,15 +136,8 @@ namespace MassTransit.KafkaIntegration.Tests
                         rider.AddConsumer<KafkaMessageConsumer>();
                         rider.AddProducer<int, KafkaMessage>(Topic);
 
-                        rider.UsingKafka((context, k) =>
+                        rider.UsingKafka((_, _) =>
                         {
-                            k.TopicEndpoint<int, KafkaMessage>(Topic, nameof(ConcurrentKeysReceive_Specs), c =>
-                            {
-                                c.AutoOffsetReset = AutoOffsetReset.Earliest;
-                                c.ConcurrentMessageLimit = NumMessages;
-
-                                c.ConfigureConsumer<KafkaMessageConsumer>(context);
-                            });
                         });
                     });
                 }).BuildServiceProvider();
@@ -154,6 +148,18 @@ namespace MassTransit.KafkaIntegration.Tests
             ITopicProducer<int, KafkaMessage> producer = harness.GetProducer<int, KafkaMessage>();
             for (var i = 0; i < NumMessages; i++)
                 await producer.Produce(i % NumKeys, new { Index = i + 1 }, harness.CancellationToken);
+
+            var kafka = provider.GetRequiredService<IKafkaRider>();
+
+            var connected = kafka.ConnectTopicEndpoint<int, KafkaMessage>(Topic, nameof(ConcurrentKeysReceive_Specs), (context, configurator) =>
+            {
+                configurator.AutoOffsetReset = AutoOffsetReset.Earliest;
+                configurator.ConcurrentMessageLimit = NumMessages;
+
+                configurator.ConfigureConsumer<KafkaMessageConsumer>(context);
+            });
+
+            await connected.Ready.OrCanceled(harness.CancellationToken);
 
             await provider.GetTask<ConsumeContext<KafkaMessage>>();
 
@@ -186,7 +192,7 @@ namespace MassTransit.KafkaIntegration.Tests
             {
                 if (Interlocked.Decrement(ref _index) <= 0)
                     _taskCompletionSource.TrySetResult(context);
-                return Task.CompletedTask;
+                return Task.Delay(10);
             }
         }
 
@@ -336,6 +342,7 @@ namespace MassTransit.KafkaIntegration.Tests
             int Index { get; }
         }
     }
+
 
     public class MultiGroupReceive_Specs :
         InMemoryTestFixture

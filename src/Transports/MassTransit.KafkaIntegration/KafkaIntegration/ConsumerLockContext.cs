@@ -12,8 +12,7 @@ namespace MassTransit.KafkaIntegration
 
     public class ConsumerLockContext :
         IConsumerLockContext,
-        KafkaConsumerBuilderContext,
-        IChannelExecutorPool<ConsumeResult<byte[], byte[]>>
+        KafkaConsumerBuilderContext
     {
         readonly ConsumerContext _context;
         readonly SingleThreadedDictionary<TopicPartition, PartitionCheckpointData> _data;
@@ -26,16 +25,6 @@ namespace MassTransit.KafkaIntegration
             _receiveSettings = receiveSettings;
             _pending = new PendingConfirmationCollection(cancellationToken);
             _data = new SingleThreadedDictionary<TopicPartition, PartitionCheckpointData>();
-        }
-
-        public Task Push(ConsumeResult<byte[], byte[]> partition, Func<Task> method, CancellationToken cancellationToken = default)
-        {
-            return _data.TryGetValue(partition.TopicPartition, out var data) ? data.Push(method) : Task.CompletedTask;
-        }
-
-        public Task Run(ConsumeResult<byte[], byte[]> partition, Func<Task> method, CancellationToken cancellationToken = default)
-        {
-            return _data.TryGetValue(partition.TopicPartition, out var data) ? data.Run(method) : Task.CompletedTask;
         }
 
         public ValueTask DisposeAsync()
@@ -124,55 +113,6 @@ namespace MassTransit.KafkaIntegration
 
             TaskUtil.Await(Task.WhenAll(partitions.Select(partition => CloseAndDelete(partition))));
             return Array.Empty<TopicPartitionOffset>();
-        }
-
-
-        sealed class PartitionCheckpointData
-        {
-            readonly CancellationTokenSource _cancellationTokenSource;
-            readonly ICheckpointer _checkpointer;
-            readonly ChannelExecutor _executor;
-            readonly PendingConfirmationCollection _pending;
-
-            public PartitionCheckpointData(IConsumer<byte[], byte[]> consumer, ReceiveSettings settings, PendingConfirmationCollection pending)
-            {
-                _pending = pending;
-                _cancellationTokenSource = new CancellationTokenSource();
-
-                _executor = new ChannelExecutor(settings.PrefetchCount, settings.ConcurrentMessageLimit);
-                _checkpointer = new BatchCheckpointer(consumer, settings, _cancellationTokenSource.Token);
-            }
-
-            public Task Pending(ConsumeResult<byte[], byte[]> result)
-            {
-                var pendingConfirmation = _pending.Add(result.TopicPartitionOffset);
-                return _checkpointer.Pending(pendingConfirmation);
-            }
-
-            public Task Lost()
-            {
-                _cancellationTokenSource.Cancel();
-                return Close();
-            }
-
-            public async Task Close()
-            {
-                await _executor.DisposeAsync().ConfigureAwait(false);
-                await _checkpointer.DisposeAsync().ConfigureAwait(false);
-
-                _cancellationTokenSource.Cancel();
-                _cancellationTokenSource.Dispose();
-            }
-
-            public Task Push(Func<Task> method)
-            {
-                return _executor.Push(method, _cancellationTokenSource.Token);
-            }
-
-            public Task Run(Func<Task> method)
-            {
-                return _executor.Run(method, _cancellationTokenSource.Token);
-            }
         }
     }
 }

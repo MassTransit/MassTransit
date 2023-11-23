@@ -20,6 +20,7 @@
         readonly EventProcessorClient _client;
         readonly ReceiveEndpointContext _context;
         readonly IChannelExecutorPool<ProcessEventArgs> _executorPool;
+        readonly SemaphoreSlim _limit;
         readonly IProcessorLockContext _lockContext;
 
         public EventHubDataReceiver(ReceiveSettings receiveSettings, ReceiveEndpointContext context, ProcessorContext processorContext)
@@ -27,15 +28,20 @@
         {
             _context = context;
             _checkpointTokenSource = CancellationTokenSource.CreateLinkedTokenSource(Stopped);
+            _limit = new SemaphoreSlim(receiveSettings.PrefetchCount);
 
             var lockContext = new ProcessorLockContext(processorContext, receiveSettings, _checkpointTokenSource.Token);
-            _executorPool = new CombinedChannelExecutorPool(lockContext, receiveSettings);
+
+            IHashGenerator hashGenerator = new Murmur3UnsafeHashGenerator();
+            _executorPool = new PartitionChannelExecutorPool<ProcessEventArgs>(GetBytes, hashGenerator,
+                receiveSettings.ConcurrentMessageLimit,
+                receiveSettings.ConcurrentDeliveryLimit);
 
             _client = processorContext.GetClient(lockContext);
+            _lockContext = lockContext;
 
             _client.ProcessErrorAsync += HandleError;
             _client.ProcessEventAsync += HandleMessage;
-            _lockContext = lockContext;
 
             TrySetManualConsumeTask();
 
@@ -54,11 +60,18 @@
             }
         }
 
+        static byte[] GetBytes(ProcessEventArgs eventArgs)
+        {
+            var partitionKey = eventArgs.Data.PartitionKey;
+            return !string.IsNullOrEmpty(partitionKey) ? Encoding.UTF8.GetBytes(partitionKey) : Array.Empty<byte>();
+        }
+
         async Task HandleMessage(ProcessEventArgs eventArgs)
         {
             if (IsStopping || !eventArgs.HasEvent)
                 return;
 
+            await _limit.WaitAsync(Stopping).ConfigureAwait(false);
             await _lockContext.Pending(eventArgs).ConfigureAwait(false);
             await _executorPool.Push(eventArgs, () => Handle(eventArgs), Stopping).ConfigureAwait(false);
         }
@@ -86,6 +99,7 @@
             {
                 registration?.Dispose();
                 context.Dispose();
+                _limit.Release();
             }
         }
 
@@ -106,44 +120,7 @@
 
             await _lockContext.DisposeAsync().ConfigureAwait(false);
             _checkpointTokenSource.Dispose();
-        }
-
-
-        class CombinedChannelExecutorPool :
-            IChannelExecutorPool<ProcessEventArgs>
-        {
-            readonly IChannelExecutorPool<ProcessEventArgs> _keyExecutorPool;
-            readonly IChannelExecutorPool<ProcessEventArgs> _partitionExecutorPool;
-
-            public CombinedChannelExecutorPool(IChannelExecutorPool<ProcessEventArgs> partitionExecutorPool, ReceiveSettings receiveSettings)
-            {
-                _partitionExecutorPool = partitionExecutorPool;
-                IHashGenerator hashGenerator = new Murmur3UnsafeHashGenerator();
-                _keyExecutorPool = new PartitionChannelExecutorPool<ProcessEventArgs>(GetBytes, hashGenerator,
-                    receiveSettings.ConcurrentMessageLimit,
-                    receiveSettings.ConcurrentDeliveryLimit);
-            }
-
-            public Task Push(ProcessEventArgs args, Func<Task> handle, CancellationToken cancellationToken)
-            {
-                return _partitionExecutorPool.Push(args, () => _keyExecutorPool.Run(args, handle, cancellationToken), cancellationToken);
-            }
-
-            public Task Run(ProcessEventArgs args, Func<Task> method, CancellationToken cancellationToken = default)
-            {
-                return _partitionExecutorPool.Run(args, () => _keyExecutorPool.Run(args, method, cancellationToken), cancellationToken);
-            }
-
-            public ValueTask DisposeAsync()
-            {
-                return _keyExecutorPool.DisposeAsync();
-            }
-
-            static byte[] GetBytes(ProcessEventArgs args)
-            {
-                var partitionKey = args.Data.PartitionKey;
-                return !string.IsNullOrEmpty(partitionKey) ? Encoding.UTF8.GetBytes(partitionKey) : Array.Empty<byte>();
-            }
+            _limit.Dispose();
         }
     }
 }
