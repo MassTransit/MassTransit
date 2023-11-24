@@ -31,7 +31,7 @@
         {
             _receiveSettings = receiveSettings;
             _context = context;
-            _limit = new SemaphoreSlim(receiveSettings.ConcurrentMessageLimit);
+            _limit = new SemaphoreSlim(receiveSettings.PrefetchCount);
 
             _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(Stopping);
             _checkpointTokenSource = CancellationTokenSource.CreateLinkedTokenSource(Stopped);
@@ -80,10 +80,12 @@
             catch (OperationCanceledException exception) when (exception.CancellationToken == Stopping
                                                                || exception.CancellationToken == _cancellationTokenSource.Token)
             {
+                SetNotReady(exception);
             }
             catch (Exception exception)
             {
                 LogContext.Warning?.Log(exception, "Consume Loop faulted");
+                SetNotReady(exception);
             }
         }
 
