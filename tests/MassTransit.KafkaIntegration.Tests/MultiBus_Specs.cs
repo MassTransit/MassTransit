@@ -308,7 +308,7 @@ namespace MassTransit.KafkaIntegration.Tests
     public class MultiBus_ConcurrentConsumers_ReBalance_Specs :
         InMemoryTestFixture
     {
-        const string Topic = "concurrent-rebalance-receive-test-multi";
+        const string Topic = "concurrent-rebalance-multi";
 
         public MultiBus_ConcurrentConsumers_ReBalance_Specs()
         {
@@ -371,6 +371,10 @@ namespace MassTransit.KafkaIntegration.Tests
                         });
                     });
                 }).BuildServiceProvider();
+
+
+            IEnumerable<KafkaTestHarnessHostedService> kafkaHostedServices = provider.GetServices<IHostedService>().OfType<KafkaTestHarnessHostedService>();
+            await Task.WhenAll(kafkaHostedServices.Select(x => x.StartAsync(TestCancellationToken)));
 
             var busControl = provider.GetRequiredService<IBusControl>();
             var secondBus = provider.GetRequiredService<IBusInstance<ISecondBus>>();

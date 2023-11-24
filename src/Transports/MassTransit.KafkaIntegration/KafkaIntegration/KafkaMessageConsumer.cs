@@ -65,10 +65,10 @@
 
         async Task Consume()
         {
-            _consumer.Subscribe(_receiveSettings.Topic);
-
             try
             {
+                _consumer.Subscribe(_receiveSettings.Topic);
+
                 while (!_cancellationTokenSource.IsCancellationRequested)
                 {
                     ConsumeResult<byte[], byte[]> consumeResult = _consumer.Consume(_cancellationTokenSource.Token);
