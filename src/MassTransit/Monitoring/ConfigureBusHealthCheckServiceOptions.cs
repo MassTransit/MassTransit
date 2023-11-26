@@ -32,7 +32,7 @@ namespace MassTransit.Monitoring
                 var optionsType = typeof(IOptions<>).MakeGenericType(type);
 
                 var name = busInstance.Name;
-                HealthStatus? failureStatus = HealthStatus.Unhealthy;
+                HealthStatus? minimalFailureStatus = HealthStatus.Unhealthy;
                 var tags = new HashSet<string>(_tags, StringComparer.OrdinalIgnoreCase);
 
                 var busOptions = _provider.GetService(optionsType);
@@ -44,14 +44,14 @@ namespace MassTransit.Monitoring
                     if (!string.IsNullOrWhiteSpace(healthCheckOptions.Name))
                         name = healthCheckOptions.Name;
 
-                    if (healthCheckOptions.FailureStatus.HasValue)
-                        failureStatus = healthCheckOptions.FailureStatus.Value;
+                    if (healthCheckOptions.MinimalFailureStatus.HasValue)
+                        minimalFailureStatus = healthCheckOptions.MinimalFailureStatus.Value;
 
                     if (healthCheckOptions.Tags.Any())
                         tags = healthCheckOptions.Tags;
                 }
 
-                options.Registrations.Add(new HealthCheckRegistration(name, new BusHealthCheck(busInstance), failureStatus, tags));
+                options.Registrations.Add(new HealthCheckRegistration(name, new BusHealthCheck(busInstance), minimalFailureStatus, tags));
             }
         }
     }
