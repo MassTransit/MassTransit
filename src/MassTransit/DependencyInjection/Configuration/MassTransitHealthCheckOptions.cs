@@ -32,7 +32,7 @@ namespace MassTransit.Configuration
         /// The minimal <see cref="HealthStatus" /> that should be reported when the health check fails.
         /// If null then all statuses from <see cref="HealthStatus.Unhealthy"/> to <see cref="HealthStatus.Healthy"/> will be reported depending on app health.
         /// </summary>
-        public HealthStatus? MinimalFailureStatus { get; }
+        public HealthStatus? MinimalFailureStatus { get; set; }
 
 
         /// <summary>
