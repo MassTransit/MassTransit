@@ -18,7 +18,7 @@ namespace MassTransit.Configuration
         /// If null then the default status of <see cref="HealthStatus.Unhealthy" /> will be reported.
         /// </summary>
         [Obsolete("Use MinimalFailureStatus instead.", true)]
-        public HealthStatus? FailureStatus { set; }
+        public HealthStatus? FailureStatus { get; }
 
         /// <summary>
         /// The minimal <see cref="HealthStatus" /> that should be reported when the health check fails.
