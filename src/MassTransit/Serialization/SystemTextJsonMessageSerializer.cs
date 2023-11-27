@@ -38,6 +38,10 @@ namespace MassTransit.Serialization
                 Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
             };
 
+#if NET8_0_OR_GREATER
+            Options.TypeInfoResolverChain.Insert(0, SystemTextJsonSerializationContext.Default);
+#endif
+
             Options.Converters.Add(new StringDecimalJsonConverter());
             Options.Converters.Add(new SystemTextJsonMessageDataConverter());
             Options.Converters.Add(new SystemTextJsonConverterFactory());
