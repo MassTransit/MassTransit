@@ -30,8 +30,8 @@
     <PackageVersion Include="Hangfire.MemoryStorage" Version="1.8.0" />
     <PackageVersion Include="Iesi.Collections" Version="4.0.5" />
     <PackageVersion Include="Ionic.Zlib.Core" Version="1.0.0" />
-    <PackageVersion Include="Marten" Version="5.11.0" Condition="'$(TargetFramework)' != 'net6.0' AND '$(TargetFramework)' != 'net7.0'" />
-    <PackageVersion Include="Marten" Version="6.3.0" Condition="'$(TargetFramework)' == 'net6.0' OR '$(TargetFramework)' == 'net7.0'" />
+    <PackageVersion Include="Marten" Version="5.11.0" Condition="'$(TargetFramework)' != 'net6.0' AND '$(TargetFramework)' != 'net7.0' AND '$(TargetFramework)' != 'net8.0'" />
+    <PackageVersion Include="Marten" Version="6.3.0" Condition="'$(TargetFramework)' == 'net6.0' OR '$(TargetFramework)' == 'net7.0' OR '$(TargetFramework)' == 'net8.0'" />
     <PackageVersion Include="MathNet.Numerics" Version="5.0.0" />
     <PackageVersion Include="MediatR" Version="12.1.1" />
     <PackageVersion Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.21.0" />
@@ -52,24 +52,34 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.18" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.1" Condition="'$(TargetFramework)' == 'net6.0'" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="7.0.11" Condition="'$(TargetFramework)' == 'net7.0'" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.11" />
-    <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="6.0.1" Condition="'$(TargetFramework)' != 'net7.0'" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="6.0.1" Condition="'$(TargetFramework)' != 'net7.0' AND '$(TargetFramework)' != 'net8.0'" />
     <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="7.0.0" Condition="'$(TargetFramework)' == 'net7.0'" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="6.0.1" Condition="'$(TargetFramework)' != 'net7.0'" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="6.0.1" Condition="'$(TargetFramework)' != 'net7.0' AND '$(TargetFramework)' != 'net8.0'" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" Condition="'$(TargetFramework)' == 'net7.0'" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" Condition="'$(TargetFramework)' != 'net7.0'" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" Condition="'$(TargetFramework)' != 'net7.0' AND '$(TargetFramework)' != 'net8.0'" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" Condition="'$(TargetFramework)' == 'net7.0'" />
-    <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="6.0.1" Condition="'$(TargetFramework)' != 'net7.0'" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'" />
+    <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="6.0.1" Condition="'$(TargetFramework)' != 'net7.0' AND '$(TargetFramework)' != 'net8.0'" />
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="7.0.1" Condition="'$(TargetFramework)' == 'net7.0'" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0" Condition="'$(TargetFramework)' != 'net7.0'" />
+    <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0" Condition="'$(TargetFramework)' != 'net7.0' AND '$(TargetFramework)' != 'net8.0'" />
     <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="7.0.0" Condition="'$(TargetFramework)' == 'net7.0'" />
-    <PackageVersion Include="Microsoft.Extensions.Http" Version="6.0.0" Condition="'$(TargetFramework)' != 'net7.0'" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="6.0.0" Condition="'$(TargetFramework)' != 'net7.0' AND '$(TargetFramework)' != 'net8.0'" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="7.0.0" Condition="'$(TargetFramework)' == 'net7.0'" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'" />
     <PackageVersion Include="Microsoft.Extensions.Logging" Version="7.0.0" Condition="'$(TargetFramework)' == 'net7.0'" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" Condition="'$(TargetFramework)' != 'net7.0'" />
+    <PackageVersion Include="Microsoft.Extensions.Logging" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" Condition="'$(TargetFramework)' != 'net7.0' AND '$(TargetFramework)' != 'net8.0'" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" Condition="'$(TargetFramework)' == 'net7.0'" />
-    <PackageVersion Include="Microsoft.Extensions.Options" Version="6.0.0" Condition="'$(TargetFramework)' != 'net7.0'" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="6.0.0" Condition="'$(TargetFramework)' != 'net7.0' AND '$(TargetFramework)' != 'net8.0'" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="7.0.1" Condition="'$(TargetFramework)' == 'net7.0'" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="1.1.1" />
     <PackageVersion Include="MongoDB.Driver" Version="2.22.0" />
@@ -96,15 +106,18 @@
     <PackageVersion Include="StackExchange.Redis" Version="2.7.4" />
     <PackageVersion Include="System.Data.SqlClient" Version="4.8.5" />
     <PackageVersion Include="System.Data.SQLite" Version="1.0.118" />
-    <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="6.0.1" Condition="'$(TargetFramework)' != 'net7.0'" />
+    <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="6.0.1" Condition="'$(TargetFramework)' != 'net7.0' AND '$(TargetFramework)' != 'net8.0'" />
     <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="7.0.1" Condition="'$(TargetFramework)' == 'net7.0'" />
+    <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'" />
     <PackageVersion Include="System.Net.Http" Version="4.3.4" Condition="'$(TargetFramework)' == 'net462'" />
     <PackageVersion Include="System.Reflection.Emit" Version="4.7.0" />
     <PackageVersion Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
-    <PackageVersion Include="System.Text.Json" Version="6.0.8" Condition="'$(TargetFramework)' != 'net7.0'" />
+    <PackageVersion Include="System.Text.Json" Version="6.0.8" Condition="'$(TargetFramework)' != 'net7.0' AND '$(TargetFramework)' != 'net8.0'" />
     <PackageVersion Include="System.Text.Json" Version="7.0.3" Condition="'$(TargetFramework)' == 'net7.0'" />
-    <PackageVersion Include="System.Threading.Channels" Version="6.0.0" Condition="'$(TargetFramework)' != 'net7.0'" />
+    <PackageVersion Include="System.Text.Json" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'" />
+    <PackageVersion Include="System.Threading.Channels" Version="6.0.0" Condition="'$(TargetFramework)' != 'net7.0' AND '$(TargetFramework)' != 'net8.0'" />
     <PackageVersion Include="System.Threading.Channels" Version="7.0.0" Condition="'$(TargetFramework)' == 'net7.0'" />
+    <PackageVersion Include="System.Threading.Channels" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'" />
     <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
     <PackageVersion Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
