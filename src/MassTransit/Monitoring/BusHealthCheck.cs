@@ -30,7 +30,16 @@ namespace MassTransit.Monitoring
                 ))
             };
 
-            return Task.FromResult(result.Status switch
+            var minimalHealthcheckLevel = context.Registration.FailureStatus switch
+            {
+                HealthStatus.Healthy => BusHealthStatus.Healthy,
+                HealthStatus.Degraded => BusHealthStatus.Degraded,
+                _ => BusHealthStatus.Unhealthy
+            };
+
+            var usedHealthcheckResult = result.Status < minimalHealthcheckLevel ? minimalHealthcheckLevel : result.Status;
+
+            return Task.FromResult(usedHealthcheckResult switch
             {
                 BusHealthStatus.Healthy => HealthCheckResult.Healthy(result.Description, data),
                 BusHealthStatus.Degraded => HealthCheckResult.Degraded(result.Description, result.Exception, data),
