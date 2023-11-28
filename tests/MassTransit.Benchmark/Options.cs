@@ -477,6 +477,9 @@ namespace NDesk.Options
             option = optionName;
         }
 
+#if NET8_0_OR_GREATER
+        [Obsolete("Formatter-based serialization is obsolete and should not be used.")]
+#endif
         protected OptionException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -485,6 +488,9 @@ namespace NDesk.Options
 
         public string OptionName => option;
 
+#if NET8_0_OR_GREATER
+        [Obsolete("Formatter-based serialization is obsolete and should not be used.")]
+#endif
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);

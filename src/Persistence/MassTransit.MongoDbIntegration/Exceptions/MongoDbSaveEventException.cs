@@ -24,6 +24,9 @@
             TrackingNumber = trackingNumber;
         }
 
+#if NET8_0_OR_GREATER
+        [Obsolete("Formatter-based serialization is obsolete and should not be used.")]
+#endif
         protected MongoDbSaveEventException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -32,6 +35,9 @@
 
         public Guid TrackingNumber { get; private set; }
 
+#if NET8_0_OR_GREATER
+        [Obsolete("Formatter-based serialization is obsolete and should not be used.")]
+#endif
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
