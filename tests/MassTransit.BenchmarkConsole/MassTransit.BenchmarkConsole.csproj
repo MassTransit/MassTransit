@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net7.0;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>net6.0;net7.0;net8.0;netcoreapp3.1</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PackageId>MassTransit.BenchmarkConsole</PackageId>
     <OutputType>Exe</OutputType>
