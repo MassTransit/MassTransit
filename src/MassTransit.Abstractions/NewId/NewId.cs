@@ -13,6 +13,10 @@ namespace MassTransit
 #endif
 
 
+// We need to target netstandard2.0, so keep using ref parameter.
+// CS9191: The 'ref' modifier for argument 2 corresponding to 'in' parameter is equivalent to 'in'. Consider using 'in' instead.
+#pragma warning disable CS9191
+
     /// <summary>
     /// A NewId is a type that fits into the same space as a Guid/Uuid/unique identifier,
     /// but is guaranteed to be both unique and ordered, assuming it is generated using
