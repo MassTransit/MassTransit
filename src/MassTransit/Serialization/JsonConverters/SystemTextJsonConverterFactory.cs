@@ -65,10 +65,10 @@
                     || typeToConvert.ClosesType(typeof(Dictionary<,>), out elementTypes)
                     || (typeToConvert.ClosesType(typeof(IEnumerable<>), out Type[] enumerableType)
                         && enumerableType[0].ClosesType(typeof(KeyValuePair<,>), out elementTypes)
-                        && elementTypes[1] == typeof(object)))
+                        && elementTypes[1] == typeof(object)
+                        && !typeToConvert.ClosesType(typeof(IReadOnlyList<>))))
                 {
                     var keyType = elementTypes[0];
-                    var valueType = elementTypes[1];
 
                     if (keyType != typeof(string) && keyType != typeof(Uri))
                         return false;

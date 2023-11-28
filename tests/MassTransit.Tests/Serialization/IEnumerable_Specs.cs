@@ -5,6 +5,7 @@
     using System.Linq;
     using MassTransit.Serialization;
     using NUnit.Framework;
+    using RequestClientMessages;
 
 
     [TestFixture(typeof(NewtonsoftJsonMessageSerializer))]
@@ -19,7 +20,8 @@
         [Test]
         public void Should_deserialize_the_enumerable_type()
         {
-            EnumerableMessageType message = new EnumerableMessageTypeImpl {Items = new[] {new MessageItem {Value = "Frank"}, new MessageItem {Value = "Mary"}}};
+            EnumerableMessageType message =
+                new EnumerableMessageTypeImpl { Items = new[] { new MessageItem { Value = "Frank" }, new MessageItem { Value = "Mary" } } };
 
             var result = SerializeAndReturn(message);
 
@@ -27,6 +29,37 @@
         }
 
         public Deserializing_an_enumerable_property(Type serializerType)
+            : base(serializerType)
+        {
+        }
+    }
+
+
+    [TestFixture(typeof(NewtonsoftJsonMessageSerializer))]
+    [TestFixture(typeof(SystemTextJsonMessageSerializer))]
+    [TestFixture(typeof(BsonMessageSerializer))]
+    [TestFixture(typeof(NewtonsoftXmlMessageSerializer))]
+    [TestFixture(typeof(EncryptedMessageSerializer))]
+    [TestFixture(typeof(EncryptedMessageSerializerV2))]
+    public class Deserializing_a_list_of_key_value_pairs_with_duplicate_keys :
+        SerializationTest
+    {
+        [Test]
+        public void Should_not_convert_to_a_dictionary()
+        {
+            var message = new ListStringObjectMessage { Properties = new[]
+            {
+                new KeyValuePair<string, object>("Frank", "Mary"),
+                new KeyValuePair<string, object>("Peter", "Mary"),
+                new KeyValuePair<string, object>("Frank", "Peter")
+            }.ToList() };
+
+            var result = SerializeAndReturn(message);
+
+            Assert.That(result.Properties.Count(), Is.EqualTo(message.Properties.Count()));
+        }
+
+        public Deserializing_a_list_of_key_value_pairs_with_duplicate_keys(Type serializerType)
             : base(serializerType)
         {
         }
@@ -43,7 +76,7 @@
         [Test]
         public void Should_deserialize_multi_dimensional_arrays()
         {
-            var message = new DoubleTheMessage {Values = new[,] {{1, 2}, {3, 4}, {5, 6}}};
+            var message = new DoubleTheMessage { Values = new[,] { { 1, 2 }, { 3, 4 }, { 5, 6 } } };
 
             var result = SerializeAndReturn(message);
 
@@ -56,6 +89,12 @@
             : base(serializerType)
         {
         }
+    }
+
+
+    public class ListStringObjectMessage
+    {
+        public List<KeyValuePair<string, object>> Properties { get; set; }
     }
 
 
