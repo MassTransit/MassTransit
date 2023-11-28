@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <LangVersion>8</LangVersion>
+    <LangVersion>12</LangVersion>
     <WarningLevel>4</WarningLevel>
     <NoWarn>CS1587,CS1591,CS1998,NU5105,NETSDK1188</NoWarn>
   </PropertyGroup>

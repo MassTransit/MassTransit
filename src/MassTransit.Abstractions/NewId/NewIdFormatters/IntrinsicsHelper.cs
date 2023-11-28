@@ -9,6 +9,10 @@ namespace MassTransit.NewIdFormatters
     using System.Runtime.Intrinsics.X86;
 
 
+// We need to target netstandard2.0, so keep using ref parameter.
+// CS9191: The 'ref' modifier for argument 2 corresponding to 'in' parameter is equivalent to 'in'. Consider using 'in' instead.
+#pragma warning disable CS9191
+
     internal static class IntrinsicsHelper
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
