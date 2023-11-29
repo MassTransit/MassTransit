@@ -234,7 +234,11 @@ namespace MassTransit
             var sagaName = FormatName(type);
 
             if (sagaName.EndsWith(saga, StringComparison.InvariantCultureIgnoreCase))
+            {
                 sagaName = sagaName.Substring(0, sagaName.Length - saga.Length);
+                if (sagaName is "")
+                    throw new ConfigurationException($"You cannot have a saga named \"{type.Name}\" - please add a meaningful prefix. MassTransit will automatically remove the \"{saga}\" suffix from your type names when you do not specify a dedicated name.");
+            }
 
             return SanitizeName(sagaName);
         }

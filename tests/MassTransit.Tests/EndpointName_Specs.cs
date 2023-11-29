@@ -1,5 +1,6 @@
 namespace MassTransit.Tests
 {
+    using System;
     using System.Threading.Tasks;
     using MassTransit.Configuration;
     using NUnit.Framework;
@@ -150,6 +151,18 @@ namespace MassTransit.Tests
             );
         }
 
+        [Test]
+        public void Should_throw_exception_when_class_is_called_saga()
+        {
+            var formatter = DefaultEndpointNameFormatter.Instance;
+
+            var exception = Assert.Throws<ConfigurationException>(() => formatter.Saga<Saga>());
+            Assert.AreEqual(
+                "You cannot have a saga named \"Saga\" - please add a meaningful prefix. MassTransit will automatically remove the \"Saga\" suffix from your type names when you do not specify a dedicated name.",
+                exception.Message
+            );
+        }
+
         class SomeReallyCoolConsumer :
             IConsumer<PingMessage>
         {
@@ -191,6 +204,12 @@ namespace MassTransit.Tests
             public async Task Consume(ConsumeContext<PingMessage> context)
             {
             }
+        }
+
+
+        class Saga : ISaga
+        {
+            public Guid CorrelationId { get; set; }
         }
     }
 }
