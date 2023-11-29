@@ -163,6 +163,30 @@ namespace MassTransit.Tests
             );
         }
 
+        [Test]
+        public void Should_throw_exception_when_class_is_called_activity_for_execute()
+        {
+            var formatter = DefaultEndpointNameFormatter.Instance;
+
+            var exception = Assert.Throws<ConfigurationException>(() => formatter.ExecuteActivity<Activity, PingMessage>());
+            Assert.AreEqual(
+                "You cannot have an activity named \"Activity\" - please add a meaningful prefix. MassTransit will automatically remove the \"Activity\" suffix from your type names when you do not specify a dedicated name.",
+                exception.Message
+            );
+        }
+
+        [Test]
+        public void Should_throw_exception_when_class_is_called_activity_for_compensate()
+        {
+            var formatter = DefaultEndpointNameFormatter.Instance;
+
+            var exception = Assert.Throws<ConfigurationException>(() => formatter.CompensateActivity<Activity, PingMessage>());
+            Assert.AreEqual(
+                "You cannot have an activity named \"Activity\" - please add a meaningful prefix. MassTransit will automatically remove the \"Activity\" suffix from your type names when you do not specify a dedicated name.",
+                exception.Message
+            );
+        }
+
         class SomeReallyCoolConsumer :
             IConsumer<PingMessage>
         {
@@ -210,6 +234,19 @@ namespace MassTransit.Tests
         class Saga : ISaga
         {
             public Guid CorrelationId { get; set; }
+        }
+
+        class Activity : IExecuteActivity<PingMessage>, ICompensateActivity<PingMessage>
+        {
+            public Task<ExecutionResult> Execute(ExecuteContext<PingMessage> context)
+            {
+                return Task.FromResult(context.Completed());
+            }
+
+            public Task<CompensationResult> Compensate(CompensateContext<PingMessage> context)
+            {
+                return Task.FromResult(context.Compensated());
+            }
         }
     }
 }

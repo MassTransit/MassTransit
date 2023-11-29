@@ -261,7 +261,11 @@ namespace MassTransit
             var activityName = FormatName(activityType);
 
             if (activityName.EndsWith(activity, StringComparison.InvariantCultureIgnoreCase))
+            {
                 activityName = activityName.Substring(0, activityName.Length - activity.Length);
+                if (activityName is "")
+                    throw new ConfigurationException($"You cannot have an activity named \"{activityType.Name}\" - please add a meaningful prefix. MassTransit will automatically remove the \"{activity}\" suffix from your type names when you do not specify a dedicated name.");
+            }
 
             return SanitizeName(activityName);
         }
