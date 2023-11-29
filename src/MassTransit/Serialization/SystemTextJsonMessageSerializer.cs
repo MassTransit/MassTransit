@@ -7,6 +7,7 @@ namespace MassTransit.Serialization
     using System.Runtime.Serialization;
     using System.Text.Encodings.Web;
     using System.Text.Json;
+    using System.Text.Json.Serialization.Metadata;
     using Initializers;
     using Initializers.TypeConverters;
     using JsonConverters;
@@ -36,6 +37,14 @@ namespace MassTransit.Serialization
                 ReadCommentHandling = JsonCommentHandling.Skip,
                 WriteIndented = true,
                 Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+
+#if NET8_0_OR_GREATER
+                // Set the TypeInfoResolver property based on whether reflection-based is enabled.
+                // If reflection is enabled, combine the default resolver (reflection-based) context with the custom serializer context
+                // Otherwise, use only the custom serializer context.
+                // User can overwrite it directly or by modifying the TypeInfoResolverChain.
+                TypeInfoResolver = JsonSerializer.IsReflectionEnabledByDefault ? JsonTypeInfoResolver.Combine(SystemTextJsonSerializationContext.Default, new DefaultJsonTypeInfoResolver()) : SystemTextJsonSerializationContext.Default
+#endif
             };
 
             Options.Converters.Add(new StringDecimalJsonConverter());
