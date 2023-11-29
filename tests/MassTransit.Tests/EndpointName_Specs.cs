@@ -138,6 +138,17 @@ namespace MassTransit.Tests
             Assert.That(name, Is.EqualTo("some-really-cool-top-shelf"));
         }
 
+        [Test]
+        public void Should_throw_exception_when_class_is_called_consumer()
+        {
+            var formatter = DefaultEndpointNameFormatter.Instance;
+
+            var exception = Assert.Throws<ConfigurationException>(() => formatter.Consumer<Consumer>());
+            Assert.AreEqual(
+                "You cannot have a consumer named \"Consumer\" - please add a meaningful prefix. MassTransit will automatically remove the \"Consumer\" suffix from your type names when you do not specify a dedicated name.",
+                exception.Message
+            );
+        }
 
         class SomeReallyCoolConsumer :
             IConsumer<PingMessage>
@@ -170,6 +181,14 @@ namespace MassTransit.Tests
             where T : class
         {
             public async Task Consume(ConsumeContext<T> context)
+            {
+            }
+        }
+
+
+        class Consumer : IConsumer<PingMessage>
+        {
+            public async Task Consume(ConsumeContext<PingMessage> context)
             {
             }
         }

@@ -198,7 +198,11 @@ namespace MassTransit
             var consumerName = FormatName(type);
 
             if (consumerName.EndsWith(consumer, StringComparison.InvariantCultureIgnoreCase))
+            {
                 consumerName = consumerName.Substring(0, consumerName.Length - consumer.Length);
+                if (consumerName is "")
+                    throw new ConfigurationException($"You cannot have a consumer named \"{type.Name}\" - please add a meaningful prefix. MassTransit will automatically remove the \"{consumer}\" suffix from your type names when you do not specify a dedicated name.");
+            }
 
             return SanitizeName(consumerName);
         }
