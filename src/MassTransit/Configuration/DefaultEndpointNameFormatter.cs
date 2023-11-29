@@ -23,21 +23,6 @@ namespace MassTransit
         static readonly Regex _nonAlpha = new Regex("[^a-zA-Z0-9]", RegexOptions.Compiled | RegexOptions.Singleline);
 
         /// <summary>
-        /// Gets a value indicating whether the namespace is included in the name.
-        /// </summary>
-        protected bool IncludeNamespace { get; }
-
-        /// <summary>
-        /// Gets the Prefix to start the name.
-        /// </summary>
-        protected string Prefix { get; }
-
-        /// <summary>
-        /// Gets the join separator between the words
-        /// </summary>
-        protected string JoinSeparator { get; }
-
-        /// <summary>
         /// Default endpoint name formatter.
         /// </summary>
         /// <param name="includeNamespace">If true, the namespace is included in the name</param>
@@ -84,6 +69,21 @@ namespace MassTransit
         {
             IncludeNamespace = false;
         }
+
+        /// <summary>
+        /// Gets a value indicating whether the namespace is included in the name.
+        /// </summary>
+        protected bool IncludeNamespace { get; }
+
+        /// <summary>
+        /// Gets the Prefix to start the name.
+        /// </summary>
+        protected string Prefix { get; }
+
+        /// <summary>
+        /// Gets the join separator between the words
+        /// </summary>
+        protected string JoinSeparator { get; }
 
         public static IEndpointNameFormatter Instance { get; } = new DefaultEndpointNameFormatter();
 
@@ -186,8 +186,8 @@ namespace MassTransit
         /// <summary>
         /// Gets the endpoint name for a consumer of the given type.
         /// </summary>
-        /// <param name="type">The type of the consumer implementing <see cref="IConsumer"/></param>
-        /// <returns>The fully formatted name as it will be provided via <see cref="Consumer{T}"/></returns>
+        /// <param name="type">The type of the consumer implementing <see cref="IConsumer" /></param>
+        /// <returns>The fully formatted name as it will be provided via <see cref="Consumer{T}" /></returns>
         protected virtual string GetConsumerName(Type type)
         {
             if (type.IsGenericType && type.Name.Contains('`'))
@@ -198,7 +198,12 @@ namespace MassTransit
             var consumerName = FormatName(type);
 
             if (consumerName.EndsWith(consumer, StringComparison.InvariantCultureIgnoreCase))
+            {
                 consumerName = consumerName.Substring(0, consumerName.Length - consumer.Length);
+
+                if (string.IsNullOrWhiteSpace(consumerName))
+                    throw new ConfigurationException($"A consumer may not be named \"{consumer}\". Add a meaningful prefix when using ConfigureEndpoints.");
+            }
 
             return SanitizeName(consumerName);
         }
@@ -207,7 +212,7 @@ namespace MassTransit
         /// Gets the endpoint name for a message of the given type.
         /// </summary>
         /// <param name="type">The type of the message</param>
-        /// <returns>The fully formatted name as it will be provided via <see cref="Message{T}"/></returns>
+        /// <returns>The fully formatted name as it will be provided via <see cref="Message{T}" /></returns>
         protected virtual string GetMessageName(Type type)
         {
             if (type.IsGenericType && type.Name.Contains('`'))
@@ -221,8 +226,8 @@ namespace MassTransit
         /// <summary>
         /// Gets the endpoint name for a saga of the given type.
         /// </summary>
-        /// <param name="type">The type of the saga implementing <see cref="ISaga"/></param>
-        /// <returns>The fully formatted name as it will be provided via <see cref="Saga{T}"/></returns>
+        /// <param name="type">The type of the saga implementing <see cref="ISaga" /></param>
+        /// <returns>The fully formatted name as it will be provided via <see cref="Saga{T}" /></returns>
         protected virtual string GetSagaName(Type type)
         {
             const string saga = "Saga";
@@ -230,7 +235,11 @@ namespace MassTransit
             var sagaName = FormatName(type);
 
             if (sagaName.EndsWith(saga, StringComparison.InvariantCultureIgnoreCase))
+            {
                 sagaName = sagaName.Substring(0, sagaName.Length - saga.Length);
+                if (string.IsNullOrWhiteSpace(sagaName))
+                    throw new ConfigurationException($"A saga may not be named \"{saga}\". Add a meaningful prefix when using ConfigureEndpoints.");
+            }
 
             return SanitizeName(sagaName);
         }
@@ -241,11 +250,11 @@ namespace MassTransit
         /// <remarks>
         /// The activity name is used both for execution and compensation endpoint names.
         /// </remarks>
-        /// <param name="activityType">The type of the activity implementing <see cref="IActivity"/></param>
+        /// <param name="activityType">The type of the activity implementing <see cref="IActivity" /></param>
         /// <param name="argumentType">
         /// For execution endpoints this is the activity arguments, for compensation this is the log type.
         /// </param>
-        /// <returns>The formatted activity name further used in <see cref="ExecuteActivity{T,TArguments}"/> and <see cref="CompensateActivity{T,TLog}"/>.</returns>
+        /// <returns>The formatted activity name further used in <see cref="ExecuteActivity{T,TArguments}" /> and <see cref="CompensateActivity{T,TLog}" />.</returns>
         protected virtual string GetActivityName(Type activityType, Type argumentType)
         {
             const string activity = "Activity";
@@ -253,16 +262,20 @@ namespace MassTransit
             var activityName = FormatName(activityType);
 
             if (activityName.EndsWith(activity, StringComparison.InvariantCultureIgnoreCase))
+            {
                 activityName = activityName.Substring(0, activityName.Length - activity.Length);
+                if (string.IsNullOrWhiteSpace(activityName))
+                    throw new ConfigurationException($"An activity may not be named \"{activity}\". Add a meaningful prefix when using ConfigureEndpoints.");
+            }
 
             return SanitizeName(activityName);
         }
 
         /// <summary>
-        /// Does a basic formatting of the type respecting settings like <see cref="IncludeNamespace"/>.
+        /// Does a basic formatting of the type respecting settings like <see cref="IncludeNamespace" />.
         /// </summary>
         /// <param name="type">The type to format.</param>
-        /// <returns>A formatted type name, not yet sanitized via <see cref="SanitizeName"/>.</returns>
+        /// <returns>A formatted type name, not yet sanitized via <see cref="SanitizeName" />.</returns>
         protected virtual string FormatName(Type type)
         {
             var name = IncludeNamespace
