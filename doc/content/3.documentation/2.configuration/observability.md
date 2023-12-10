@@ -106,50 +106,67 @@ The OpenTelemetry metrics captured by MassTransit:
 
 | Name                                         | Description                                 |
 |:---------------------------------------------|:--------------------------------------------|
-| messaging_masstransit_receive                | Number of messages received                 |
-| messaging_masstransit_receive_errors         | Number of messages receive faults           |
-| messaging_masstransit_consume                | Number of messages consumed                 |
-| messaging_masstransit_consume_errors         | Number of message consume faults            |
-| messaging_masstransit_saga                   | Number of messages processed by saga        |
-| messaging_masstransit_saga_errors            | Number of message faults by saga            |
-| messaging_masstransit_consume_retries        | Number of message consume retries           |
-| messaging_masstransit_handler                | Number of messages handled                  |
-| messaging_masstransit_handler_errors         | Number of message handler faults            |
-| messaging_masstransit_outbox_delivery        | Number of messages delivered by outbox      |
-| messaging_masstransit_outbox_delivery_errors | Number of message delivery faults by outbox |
-| messaging_masstransit_send                   | Number of messages sent                     |
-| messaging_masstransit_send_errors            | Number of message send faults               |
-| messaging_masstransit_outbox_send            | Number of messages sent to outbox           |
-| messaging_masstransit_outbox_send_errors     | Number of message send faults to outbox     |
-| messaging_masstransit_execute                | Number of activities executed               |
-| messaging_masstransit_execute_errors         | Number of activity execution faults         |
-| messaging_masstransit_compensate             | Number of activities compensated            |
-| messaging_masstransit_compensate_errors      | Number of activity compensation failures    |
+| messaging.masstransit.receive                | Number of messages received                 |
+| messaging.masstransit.receive.errors         | Number of messages receive faults           |
+| messaging.masstransit.consume                | Number of messages consumed                 |
+| messaging.masstransit.consume.errors         | Number of message consume faults            |
+| messaging.masstransit.saga                   | Number of messages processed by saga        |
+| messaging.masstransit.saga.errors            | Number of message faults by saga            |
+| messaging.masstransit.consume.retries        | Number of message consume retries           |
+| messaging.masstransit.handler                | Number of messages handled                  |
+| messaging.masstransit.handler.errors         | Number of message handler faults            |
+| messaging.masstransit.outbox.delivery        | Number of messages delivered by outbox      |
+| messaging.masstransit.outbox.delivery.errors | Number of message delivery faults by outbox |
+| messaging.masstransit.send                   | Number of messages sent                     |
+| messaging.masstransit.send.errors            | Number of message send faults               |
+| messaging.masstransit.outbox.send            | Number of messages sent to outbox           |
+| messaging.masstransit.outbox.send.errors     | Number of message send faults to outbox     |
+| messaging.masstransit.execute                | Number of activities executed               |
+| messaging.masstransit.execute.errors         | Number of activity execution faults         |
+| messaging.masstransit.compensate             | Number of activities compensated            |
+| messaging.masstransit.compensate.errors      | Number of activity compensation failures    |
 
 `Gauges`
 
 | Name                                    | Description                                             |
 |:----------------------------------------|:--------------------------------------------------------|
-| messaging_masstransit_receive_active    | Number of messages being received                       |
-| messaging_masstransit_consume_active    | Number of consumers in progress                         |
-| messaging_masstransit_execute_active    | Number of activity executions in progress               |
-| messaging_masstransit_compensate_active | Number of activity compensations in progress            |
-| messaging_masstransit_handler_active    | Number of handlers in progress                          |
-| messaging_masstransit_saga_active       | Number of sagas in progress                             |
+| messaging.masstransit.receive.active    | Number of messages being received                       |
+| messaging.masstransit.consume.active    | Number of consumers in progress                         |
+| messaging.masstransit.execute.active    | Number of activity executions in progress               |
+| messaging.masstransit.compensate.active | Number of activity compensations in progress            |
+| messaging.masstransit.handler.active    | Number of handlers in progress                          |
+| messaging.masstransit.saga.active       | Number of sagas in progress                             |
 
 `Histograms`
 
 | Name                                      | Description                                                                        |
 |:------------------------------------------|:-----------------------------------------------------------------------------------|
-| messaging_masstransit_receive_duration    | Elapsed time spent receiving a message, in millis                                  |
-| messaging_masstransit_consume_duration    | Elapsed time spent consuming a message, in millis                                  |
-| messaging_masstransit_saga_duration       | Elapsed time spent saga processing a message, in millis                            |
-| messaging_masstransit_handler_duration    | Elapsed time spent handler processing a message, in millis                         |
-| messaging_masstransit_delivery_durations  | Elapsed time between when the message was sent and when it was consumed, in millis |
-| messaging_masstransit_execute_duration    | Elapsed time spent executing an activity, in millis                                |
-| messaging_masstransit_compensate_duration | Elapsed time spent compensating an activity, in millis                             |
+| messaging.masstransit.receive.duration    | Elapsed time spent receiving a message, in millis                                  |
+| messaging.masstransit.consume.duration    | Elapsed time spent consuming a message, in millis                                  |
+| messaging.masstransit.saga.duration       | Elapsed time spent saga processing a message, in millis                            |
+| messaging.masstransit.handler.duration    | Elapsed time spent handler processing a message, in millis                         |
+| messaging.masstransit.delivery.durations  | Elapsed time between when the message was sent and when it was consumed, in millis |
+| messaging.masstransit.execute.duration    | Elapsed time spent executing an activity, in millis                                |
+| messaging.masstransit.compensate.duration | Elapsed time spent compensating an activity, in millis                             |
+
+
+`Labels`
+
+| Name                                 | Description                                         |
+|:-------------------------------------|:----------------------------------------------------|
+| messaging.masstransit.service        | The service name specified at bus configuration     |
+| messaging.masstransit.destination    | The endpoint address                                |
+| messaging.masstransit.message_type   | The message type for the metric                     |
+| messaging.masstransit.consumer_type  | The consumer, saga, or activity type for the metric |
+| messaging.masstransit.activity_type  | The activity name                                   |
+| messaging.masstransit.argument_type  | The activity execute argument type                  |
+| messaging.masstransit.log_type       | The activity compensate log type                    |
+| messaging.masstransit.exception_type | The exception type for a fault metric               |
+| messaging.masstransit.bus            | The bus instance                                    |
+| messaging.masstransit.endpoint       | The receive endpoint                                |
 
 Metric names and labels can be configured with `Options`:
+
 ```csharp
 services.Configure<InstrumentationOptions>(options =>
 {
