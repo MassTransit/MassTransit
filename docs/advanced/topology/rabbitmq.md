@@ -1,6 +1,6 @@
 # RabbitMQ
 
-The send and publish topologies are extended to support RabbitMQ features, and make it possible to configure how exchanged are created.
+The send and publish topologies are extended to support RabbitMQ features, and make it possible to configure how exchanges are created.
 
 ## Exchanges
 
