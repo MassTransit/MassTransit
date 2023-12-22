@@ -99,8 +99,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
             await _inUse.WaitAsync(context.CancellationToken).ConfigureAwait(false);
             try
             {
-                _dbContext.Set<TSaga>().Update(context.Saga);
-
                 await _dbContext.SaveChangesAsync(CancellationToken).ConfigureAwait(false);
             }
             finally
