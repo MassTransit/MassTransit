@@ -26,7 +26,7 @@
 
                 supervisor.SetReady();
 
-                Assert.That(async () => await supervisor.Ready.OrTimeout(s: 5), Throws.TypeOf<AggregateException>());
+                Assert.That(async () => await supervisor.Ready.OrTimeout(s: 5), Throws.TypeOf<IntentionalTestException>());
 
                 await supervisor.Stop().OrTimeout(s: 5);
 

@@ -210,6 +210,51 @@ namespace MassTransit.Internals
             }, TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
         }
 
+        public static void TrySetFromTask<T>(this TaskCompletionSource<T> source, Task task, T value)
+        {
+            switch (task)
+            {
+                case { IsCanceled: true }:
+                    source.TrySetCanceled();
+                    break;
+                case { IsFaulted: true, Exception.InnerExceptions: not null }:
+                    source.TrySetException(task.Exception.InnerExceptions);
+                    break;
+                case { IsFaulted: true, Exception: not null }:
+                    source.TrySetException(task.Exception);
+                    break;
+                case { IsFaulted: true, Exception: null }:
+                    source.TrySetException(new InvalidOperationException("The context faulted but no exception was present."));
+                    break;
+                default:
+                    source.TrySetResult(value);
+                    break;
+            }
+        }
+
+        public static void TrySetFromTask<T>(this TaskCompletionSource<T> source, Task<T> task)
+        {
+            switch (task)
+            {
+                case { IsCanceled: true }:
+                    source.TrySetCanceled();
+                    break;
+                case { IsFaulted: true, Exception.InnerExceptions: not null }:
+                    source.TrySetException(task.Exception.InnerExceptions);
+                    break;
+                case { IsFaulted: true, Exception: not null }:
+                    source.TrySetException(task.Exception);
+                    break;
+                case { IsFaulted: true, Exception: null }:
+                    source.TrySetException(new InvalidOperationException("The context faulted but no exception was present."));
+                    break;
+                default:
+                    source.TrySetResult(task.Result);
+                    break;
+            }
+        }
+
+
         /// <summary>
         /// Register a callback on the <paramref name="cancellationToken" /> which completes the resulting task.
         /// </summary>

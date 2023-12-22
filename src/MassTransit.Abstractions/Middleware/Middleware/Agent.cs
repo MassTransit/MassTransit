@@ -3,6 +3,7 @@
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Internals;
 
 
     /// <summary>
@@ -132,7 +133,14 @@
                 {
                     // if a previous readyTask is already completed, no sense in trying
                     if (_setReady.Task.IsCompleted)
+                    {
+                        if (_setReady.Task.IsFaulted)
+                        {
+                            var _ = _setReady.Task.Exception;
+                        }
+
                         return;
+                    }
 
                     _setReadyCancel?.Cancel();
 
@@ -141,7 +149,14 @@
                 }
 
                 if (_ready.Task.IsCompleted)
+                {
+                    if (_ready.Task.IsFaulted)
+                    {
+                        var _ = _ready.Task.Exception;
+                    }
+
                     return;
+                }
 
                 var setReadyCancel = _setReadyCancel = new CancellationTokenSource();
 
@@ -150,13 +165,7 @@
                     if (setReadyCancel.IsCancellationRequested)
                         return;
 
-                    if (task.IsCanceled)
-                        _ready.TrySetCanceled();
-                    else if (task.IsFaulted)
-
-                        _ready.TrySetException(task.Exception!);
-                    else
-                        _ready.TrySetResult(task.Result);
+                    _ready.TrySetFromTask(task);
                 }
 
                 TaskCompletionSource<bool> setReady = _setReady = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -167,14 +176,7 @@
                     if (setReadyCancel.IsCancellationRequested)
                         return;
 
-                    if (task.IsCanceled)
-                        setReady.TrySetCanceled();
-                    else if (task.IsFaulted)
-
-                        // ReSharper disable once AssignNullToNotNullAttribute
-                        setReady.TrySetException(task.Exception!);
-                    else
-                        setReady.TrySetResult(true);
+                    setReady.TrySetFromTask(task, true);
                 }
 
                 readyTask.ContinueWith(OnCompleted, TaskScheduler.Default);
@@ -211,12 +213,7 @@
                     if (setCompletedCancel.IsCancellationRequested)
                         return;
 
-                    if (task.IsCanceled)
-                        _completed.TrySetCanceled();
-                    else if (task.IsFaulted && task.Exception is { } aggregateException)
-                        _completed.TrySetException(aggregateException);
-                    else
-                        _completed.TrySetResult(task.Result);
+                    _completed.TrySetFromTask(task);
                 }
 
                 TaskCompletionSource<bool> setCompleted = _setCompleted = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -227,12 +224,7 @@
                     if (setCompletedCancel.IsCancellationRequested)
                         return;
 
-                    if (task.IsCanceled)
-                        setCompleted.TrySetCanceled();
-                    else if (task.IsFaulted && task.Exception is { } aggregateException)
-                        setCompleted.TrySetException(aggregateException);
-                    else
-                        setCompleted.TrySetResult(true);
+                    setCompleted.TrySetFromTask(task, true);
                 }
 
                 completedTask.ContinueWith(OnCompleted, TaskScheduler.Default);
@@ -245,12 +237,21 @@
         /// <param name="task"></param>
         protected void SetFaulted(Task task)
         {
-            if (task.IsCanceled)
-                _ready.TrySetCanceled();
-            else if (task.IsFaulted && task.Exception != null)
-                _ready.TrySetException(task.Exception.InnerExceptions);
-            else
-                _ready.TrySetException(new InvalidOperationException("The context faulted but no exception was present."));
+            switch (task)
+            {
+                case { IsCanceled: true }:
+                    _ready.TrySetCanceled();
+                    break;
+                case { IsFaulted: true, Exception.InnerExceptions: not null }:
+                    _ready.TrySetException(task.Exception.InnerExceptions);
+                    break;
+                case { IsFaulted: true, Exception: not null }:
+                    _ready.TrySetException(task.Exception);
+                    break;
+                default:
+                    _ready.TrySetException(new InvalidOperationException("The context faulted but no exception was present."));
+                    break;
+            }
 
             _completed.TrySetResult(true);
         }
