@@ -4,11 +4,6 @@ navigation.title: SQL/DB
 
 # SQL Database Transport
 
-::alert{type="success"}
-The SQL Database Transport is under active development and available for limited preview only at this time. Customers interested in obtaining early-access 
-to the preview should [contact support](mailto:support@masstransit.io) for details. This documentation is also preliminary and subject to change!
-::
-
 
 In the realm of distributed systems and message-oriented architectures, a reliable and efficient message transport is a crucial aspect.
 
@@ -48,7 +43,6 @@ The database transport supports:
 - Message priority, at the message level
 - All consumer types, including consumers, sagas, state machines, and routing slips
 - Transactional Outbox using Entity Framework Core
-
 
 
 ## Subscription Types
@@ -113,10 +107,8 @@ The database transport message scheduler can be configured as shown below:
 ```csharp
 services.AddMassTransit(x =>
 {
-    x.UsingDb((context, cfg) =>
+    x.UsingPostgres((context, cfg) =>
     {
-        cfg.UsePgSql(context);
-    
         cfg.UseDbMessageScheduler();
     
         cfg.ConfigureEndpoints(context);
@@ -129,7 +121,7 @@ services.AddMassTransit(x =>
 To configure the database options, the standard .NET options pattern can be used.
 
 ```csharp
-services.AddOptions<DbTransportOptions>().Configure(options =>
+services.AddOptions<SqlTransportOptions>().Configure(options =>
 {
     options.Host = "localhost";
     options.Database = "sample";
@@ -145,7 +137,7 @@ services.AddOptions<DbTransportOptions>().Configure(options =>
 To automatically create the tables, roles, functions, and other related database elements, a hosted service is available. 
 
 ```csharp
-services.AddPgSqlMigrationHostedService(create: true, delete: false);
+services.AddPostgresMigrationHostedService(create: true, delete: false);
 ```
 
 ::alert{type="danger"}
