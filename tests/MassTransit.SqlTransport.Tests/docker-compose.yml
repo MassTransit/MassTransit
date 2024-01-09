@@ -1,0 +1,23 @@
+﻿version: '2.3'
+services:
+  mssql:
+    image: "mcr.microsoft.com/azure-sql-edge"
+    networks:
+      - dbtransport-network
+    environment:
+      - "ACCEPT_EULA=Y"
+      - "SA_PASSWORD=Password12!"
+    ports:
+      - "1433:1433"
+  postgres:
+    image: "postgres"
+    networks:
+      - dbtransport-network
+    environment:
+      - "POSTGRES_PASSWORD=Password12!"
+    ports:
+      - "5432:5432"
+
+networks:
+  dbtransport-network:
+    driver: bridge

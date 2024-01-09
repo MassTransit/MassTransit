@@ -5,10 +5,10 @@
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(IsWindows)' == 'true' ">
-    <TargetFrameworks>$(TargetFrameworks);net462</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworks);net472</TargetFrameworks>
   </PropertyGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net462'">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net472'">
     <Reference Include="System.Transactions" />
   </ItemGroup>
 

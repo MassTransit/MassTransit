@@ -111,6 +111,41 @@ jobs:
         run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.ActiveMqTransport.Tests
 
+  test-sql-transport:
+    name: "Transport: SQL"
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    services:
+      mssql:
+        image: mcr.microsoft.com/azure-sql-edge
+        env:
+          ACCEPT_EULA: Y
+          SA_PASSWORD: "Password12!"
+        ports:
+          - 1433:1433
+      postgres:
+        image: postgres:14.7
+        env:
+          POSTGRES_PASSWORD: "Password12!"
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: false
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Test Database Transport
+        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter "Category!=Flaky&Category!=Integration"
+        working-directory: tests/MassTransit.SqlTransport.Tests
+
+
   test-azure-service-bus:
     name: "Transports: Azure Service Bus"
     if: false # too flaky at this point
@@ -159,12 +194,11 @@ jobs:
     runs-on: ubuntu-latest
     services:
       localstack:
-        image: localstack/localstack:latest
+        image: localstack/localstack:3.0.2
         ports:
           - "4566:4566"
           - "4571:4571"
-          - "8080:8080"
-        options: --health-cmd "curl --fail http://localhost:4566/health || exit 1" --health-interval 10s --health-timeout 5s --health-retries 5
+        options: --health-cmd "curl --fail http://localhost:4566/health || exit 1" --health-interval 10s --health-timeout 5s --health-retries 5 --health-start-period 15s
     steps:
       - name: Check out code
         uses: actions/checkout@v3
@@ -504,6 +538,7 @@ jobs:
       # - test-azure-service-bus
       - test-rabbitmq
       - test-sqs
+      - test-sql-transport
       - test-azure-table
       - test-cosmosdb
       - test-dapper
@@ -724,6 +759,20 @@ jobs:
         uses: drusellers/publish-nuget@master
         with:
           project-file-path: src/Transports/MassTransit.Azure.ServiceBus.Core/MassTransit.Azure.ServiceBus.Core.csproj
+          version: ${{ needs.calc-version.outputs.version }}
+          tag-commit: false
+          nuget-key: ${{secrets.NUGET_API_KEY}}
+      - name: Build and Publish MassTransit.SqlTransport.PostreSql
+        uses: drusellers/publish-nuget@master
+        with:
+          project-file-path: src/Transports/MassTransit.SqlTransport.PostgreSql/MassTransit.SqlTransport.PostgreSql.csproj
+          version: ${{ needs.calc-version.outputs.version }}
+          tag-commit: false
+          nuget-key: ${{secrets.NUGET_API_KEY}}
+      - name: Build and Publish MassTransit.SqlTransport.SqlServer
+        uses: drusellers/publish-nuget@master
+        with:
+          project-file-path: src/Transports/MassTransit.SqlTransport.SqlServer/MassTransit.SqlTransport.SqlServer.csproj
           version: ${{ needs.calc-version.outputs.version }}
           tag-commit: false
           nuget-key: ${{secrets.NUGET_API_KEY}}

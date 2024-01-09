@@ -8,7 +8,8 @@ namespace MassTransit
     /// The context of a Message from AzureServiceBus - gives access to the transport
     /// message when requested.
     /// </summary>
-    public interface ServiceBusMessageContext
+    public interface ServiceBusMessageContext :
+        PartitionKeyConsumeContext
     {
         int DeliveryCount { get; }
         string Label { get; }
@@ -20,7 +21,6 @@ namespace MassTransit
         long Size { get; }
         string To { get; }
         string ReplyToSessionId { get; }
-        string PartitionKey { get; }
         string ReplyTo { get; }
         DateTime EnqueuedTime { get; }
         DateTime ScheduledEnqueueTime { get; }

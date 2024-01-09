@@ -16,6 +16,7 @@
     <PackageVersion Include="Confluent.Kafka" Version="2.3.0" />
     <PackageVersion Include="Confluent.SchemaRegistry.Serdes.Avro" Version="2.3.0" />
     <PackageVersion Include="coverlet.collector" Version="3.1.2" />
+    <PackageVersion Include="Dapper" Version="2.1.28" />
     <PackageVersion Include="dapper.contrib" Version="2.0.78" />
     <PackageVersion Include="EntityFramework" Version="6.4.4" />
     <PackageVersion Include="Google.Protobuf" Version="3.25.1" />
@@ -87,6 +88,7 @@
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="Newtonsoft.Json.Bson" Version="1.0.2" />
     <PackageVersion Include="NHibernate" Version="5.4.7" />
+    <PackageVersion Include="Npgsql" Version="8.0.0"/>
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.0" />
     <PackageVersion Include="NUnit" Version="3.14.0" />
     <PackageVersion Include="NUnit.Analyzers" Version="3.3.0" />
@@ -109,7 +111,7 @@
     <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="6.0.1" Condition="'$(TargetFramework)' != 'net7.0' AND '$(TargetFramework)' != 'net8.0'" />
     <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="7.0.1" Condition="'$(TargetFramework)' == 'net7.0'" />
     <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'" />
-    <PackageVersion Include="System.Net.Http" Version="4.3.4" Condition="'$(TargetFramework)' == 'net462'" />
+    <PackageVersion Include="System.Net.Http" Version="4.3.4" Condition="'$(TargetFramework)' == 'net472'" />
     <PackageVersion Include="System.Reflection.Emit" Version="4.7.0" />
     <PackageVersion Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
     <PackageVersion Include="System.Text.Json" Version="6.0.8" Condition="'$(TargetFramework)' != 'net7.0' AND '$(TargetFramework)' != 'net8.0'" />

@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(IsWindows)' == 'true' ">
-    <TargetFrameworks>$(TargetFrameworks);net462</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworks);net472</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
+    <PackageReference Include="Dapper" />
     <PackageReference Include="dapper.contrib" />
     <PackageReference Include="Microsoft.Data.SqlClient" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
