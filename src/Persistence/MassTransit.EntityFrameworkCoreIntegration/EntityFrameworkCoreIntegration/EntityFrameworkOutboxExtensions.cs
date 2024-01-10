@@ -10,7 +10,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
     public static class EntityFrameworkOutboxExtensions
     {
-        public static async Task AddSend<T>(this DbSet<OutboxMessage> collection, SendContext<T> context, IObjectDeserializer deserializer,
+        public static Task AddSend<T>(this DbSet<OutboxMessage> collection, SendContext<T> context, IObjectDeserializer deserializer,
             Guid? inboxMessageId = null, Guid? inboxConsumerId = null, Guid? outboxId = null)
             where T : class
         {
@@ -57,7 +57,10 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                 outboxMessage.Properties = deserializer.SerializeDictionary(properties);
             }
 
-            await collection.AddAsync(outboxMessage, context.CancellationToken).ConfigureAwait(false);
+            lock (collection)
+                collection.Add(outboxMessage);
+
+            return Task.CompletedTask;
         }
     }
 }

@@ -19,6 +19,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
     {
         readonly TDbContext _dbContext;
         readonly InboxState _inboxState;
+        readonly DbSet<OutboxMessage> _outboxMessageSet;
         readonly IDbContextTransaction _transaction;
 
         public DbContextOutboxConsumeContext(ConsumeContext<TMessage> context, OutboxConsumeOptions options, IServiceProvider provider, TDbContext dbContext,
@@ -28,6 +29,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             _dbContext = dbContext;
             _transaction = transaction;
             _inboxState = inboxState;
+
+            _outboxMessageSet = dbContext.Set<OutboxMessage>();
         }
 
         public override Guid? MessageId => _inboxState.MessageId;
@@ -46,7 +49,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             _inboxState.Consumed = DateTime.UtcNow;
             _dbContext.Update(_inboxState);
 
-            await _dbContext.SaveChangesAsync(CancellationToken);
+            await _dbContext.SaveChangesAsync(CancellationToken).ConfigureAwait(false);
 
             LogContext.Debug?.Log("Outbox Consumed: {MessageId} {Consumed}", MessageId, _inboxState.Consumed);
         }
@@ -56,7 +59,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             _inboxState.Delivered = DateTime.UtcNow;
             _dbContext.Update(_inboxState);
 
-            await _dbContext.SaveChangesAsync(CancellationToken);
+            await _dbContext.SaveChangesAsync(CancellationToken).ConfigureAwait(false);
 
             LogContext.Debug?.Log("Outbox Delivered: {MessageId} {Delivered}", MessageId, _inboxState.Delivered);
         }
@@ -70,7 +73,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                 .OrderBy(x => x.SequenceNumber)
                 .Take(Options.MessageDeliveryLimit + 1)
                 .AsNoTracking()
-                .ToListAsync(CancellationToken);
+                .ToListAsync(CancellationToken).ConfigureAwait(false);
 
             for (var i = 0; i < messages.Count; i++)
                 messages[i].Deserialize(SerializerContext);
@@ -90,11 +93,11 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         {
             List<OutboxMessage> messages = await _dbContext.Set<OutboxMessage>()
                 .Where(x => x.InboxMessageId == MessageId && x.InboxConsumerId == ConsumerId)
-                .ToListAsync(CancellationToken);
+                .ToListAsync(CancellationToken).ConfigureAwait(false);
 
             _dbContext.RemoveRange(messages);
 
-            await _dbContext.SaveChangesAsync(CancellationToken);
+            await _dbContext.SaveChangesAsync(CancellationToken).ConfigureAwait(false);
 
             if (messages.Count > 0)
                 LogContext.Debug?.Log("Outbox removed {Count} messages: {MessageId}", messages.Count, MessageId);
@@ -103,7 +106,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         public override Task AddSend<T>(SendContext<T> context)
             where T : class
         {
-            return _dbContext.Set<OutboxMessage>().AddSend(context, SerializerContext, MessageId, ConsumerId);
+            return _outboxMessageSet.AddSend(context, SerializerContext, MessageId, ConsumerId);
         }
     }
 }

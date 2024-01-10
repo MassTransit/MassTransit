@@ -15,9 +15,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         where TDbContext : DbContext
     {
         readonly TDbContext _dbContext;
-        readonly IServiceProvider _provider;
         readonly IsolationLevel _isolationLevel;
         readonly ILockStatementProvider _lockStatementProvider;
+        readonly IServiceProvider _provider;
         string _lockStatement;
 
         public EntityFrameworkOutboxContextFactory(TDbContext dbContext, IServiceProvider provider, IOptions<EntityFrameworkOutboxOptions> options)
@@ -88,19 +88,17 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
                     return continueProcessing;
                 }
-                catch (DbUpdateConcurrencyException)
-                {
-                    await RollbackTransaction(transaction).ConfigureAwait(false);
-                    throw;
-                }
-                catch (DbUpdateException)
-                {
-                    await RollbackTransaction(transaction).ConfigureAwait(false);
-                    throw;
-                }
                 catch (Exception)
                 {
-                    await RollbackTransaction(transaction).ConfigureAwait(false);
+                    try
+                    {
+                        await transaction.RollbackAsync(CancellationToken.None).ConfigureAwait(false);
+                    }
+                    catch (Exception innerException)
+                    {
+                        LogContext.Warning?.Log(innerException, "Transaction rollback failed");
+                    }
+
                     throw;
                 }
             }
@@ -120,18 +118,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         {
             var scope = context.CreateFilterScope("outboxContextFactory");
             scope.Add("provider", "entityFrameworkCore");
-        }
-
-        static async Task RollbackTransaction(IDbContextTransaction transaction)
-        {
-            try
-            {
-                await transaction.RollbackAsync(CancellationToken.None).ConfigureAwait(false);
-            }
-            catch (Exception innerException)
-            {
-                LogContext.Warning?.Log(innerException, "Transaction rollback failed");
-            }
         }
     }
 }

@@ -23,8 +23,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         readonly TBus _bus;
         readonly IClientFactory _clientFactory;
         readonly TDbContext _dbContext;
-        readonly object _lock = new object();
         readonly IBusOutboxNotification _notification;
+        readonly DbSet<OutboxMessage> _outboxMessageSet;
+        readonly DbSet<OutboxState> _outboxStateSet;
         readonly IServiceProvider _provider;
         Guid _outboxId;
         EntityEntry<OutboxState>? _outboxState;
@@ -42,25 +43,25 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             _provider = provider;
 
             _outboxId = NewId.NextGuid();
+
+            _outboxMessageSet = dbContext.Set<OutboxMessage>();
+            _outboxStateSet = dbContext.Set<OutboxState>();
         }
 
         public void Dispose()
         {
-            lock (_lock)
-            {
-                if (WasCommitted())
-                    _notification.Delivered();
+            if (WasCommitted())
+                _notification.Delivered();
 
-                _outboxState = null;
-            }
+            _outboxState = null;
         }
 
         public Task AddSend<T>(SendContext<T> context)
             where T : class
         {
-            if (_outboxState == null || WasCommitted())
+            lock (_outboxStateSet)
             {
-                lock (_lock)
+                if (_outboxState == null || WasCommitted())
                 {
                     if (WasCommitted())
                     {
@@ -77,7 +78,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                 }
             }
 
-            return _dbContext.Set<OutboxMessage>().AddSend(context, SystemTextJsonMessageSerializer.Instance, outboxId: _outboxId);
+            return _outboxMessageSet.AddSend(context, SystemTextJsonMessageSerializer.Instance, outboxId: _outboxId);
         }
 
         public object? GetService(Type serviceType)
