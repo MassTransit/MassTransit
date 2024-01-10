@@ -40,7 +40,7 @@
 
             var brokerTopology = settings.GetBrokerTopology();
 
-            IPipe<ModelContext> configureTopology = new ConfigureRabbitMqTopologyFilter<SendSettings>(settings, brokerTopology).ToPipe();
+            ConfigureRabbitMqTopologyFilter<SendSettings> configureTopology = new ConfigureRabbitMqTopologyFilter<SendSettings>(settings, brokerTopology);
 
             return CreateSendTransport(receiveEndpointContext, modelContextSupervisor, configureTopology, settings.ExchangeName, endpointAddress);
         }
@@ -57,7 +57,7 @@
 
             var brokerTopology = publishTopology.GetBrokerTopology();
 
-            IPipe<ModelContext> configureTopology = new ConfigureRabbitMqTopologyFilter<SendSettings>(settings, brokerTopology).ToPipe();
+            ConfigureRabbitMqTopologyFilter<SendSettings> configureTopology = new ConfigureRabbitMqTopologyFilter<SendSettings>(settings, brokerTopology);
 
             var endpointAddress = settings.GetSendAddress(_hostConfiguration.HostAddress);
 
@@ -66,7 +66,7 @@
         }
 
         Task<ISendTransport> CreateSendTransport(ReceiveEndpointContext receiveEndpointContext, IModelContextSupervisor modelContextSupervisor,
-            IPipe<ModelContext> pipe, string exchangeName, RabbitMqEndpointAddress endpointAddress)
+            ConfigureRabbitMqTopologyFilter<SendSettings> filter, string exchangeName, RabbitMqEndpointAddress endpointAddress)
         {
             var supervisor = new ModelContextSupervisor(modelContextSupervisor);
 
@@ -78,7 +78,7 @@
 
             IPipe<ModelContext> delayPipe = new ConfigureRabbitMqTopologyFilter<DelaySettings>(delaySettings, delaySettings.GetBrokerTopology()).ToPipe();
 
-            var sendTransportContext = new RabbitMqSendTransportContext(_hostConfiguration, receiveEndpointContext, supervisor, pipe, exchangeName,
+            var sendTransportContext = new RabbitMqSendTransportContext(_hostConfiguration, receiveEndpointContext, supervisor, filter, exchangeName,
                 delayPipe, delaySettings.ExchangeName);
 
             var transport = new SendTransport<ModelContext>(sendTransportContext);

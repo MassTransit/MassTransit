@@ -1,5 +1,6 @@
 namespace MassTransit.EventHubIntegration.Middleware
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Azure;
@@ -18,10 +19,19 @@ namespace MassTransit.EventHubIntegration.Middleware
 
         public async Task Send(ProcessorContext context, IPipe<ProcessorContext> next)
         {
-            await context.OneTimeSetup<ConfigureTopologyContext>(_ => CreateBlobIfNotExistsAsync(context.CancellationToken), () => new Context())
+            OneTimeContext<EventHubBlobContainerFactoryFilter> oneTimeContext = await context
+                .OneTimeSetup<EventHubBlobContainerFactoryFilter>(() => CreateBlobIfNotExistsAsync(context.CancellationToken))
                 .ConfigureAwait(false);
 
-            await next.Send(context).ConfigureAwait(false);
+            try
+            {
+                await next.Send(context).ConfigureAwait(false);
+            }
+            catch (Exception)
+            {
+                oneTimeContext.Evict();
+                throw;
+            }
         }
 
         public void Probe(ProbeContext context)
@@ -47,12 +57,6 @@ namespace MassTransit.EventHubIntegration.Middleware
                 LogContext.Warning?.Log(exception, "Azure Blob Container does not exist: {Address}", _blockClient.Uri);
                 return false;
             }
-        }
-
-
-        class Context :
-            ConfigureTopologyContext
-        {
         }
     }
 }

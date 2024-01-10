@@ -59,6 +59,8 @@ namespace MassTransit.Middleware
                 {
                     if (_retryPolicy.IsHandled(exception))
                     {
+                        context.GetOrAddPayload(() => payloadRetryContext);
+
                         var retryFaultedTask = policyContext.RetryFaulted(exception);
                         if (retryFaultedTask.Status != TaskStatus.RanToCompletion)
                             await retryFaultedTask.ConfigureAwait(false);
@@ -71,8 +73,6 @@ namespace MassTransit.Middleware
                         }
                     }
 
-                    context.GetOrAddPayload(() => payloadRetryContext);
-
                     throw;
                 }
 
@@ -80,6 +80,8 @@ namespace MassTransit.Middleware
                 {
                     if (_retryPolicy.IsHandled(exception))
                     {
+                        context.GetOrAddPayload(() => genericRetryContext);
+
                         var retryFaultedTask = policyContext.RetryFaulted(exception);
                         if (retryFaultedTask.Status != TaskStatus.RanToCompletion)
                             await retryFaultedTask.ConfigureAwait(false);
@@ -92,8 +94,6 @@ namespace MassTransit.Middleware
                         }
                     }
 
-                    context.GetOrAddPayload(() => genericRetryContext);
-
                     throw;
                 }
 
@@ -101,6 +101,8 @@ namespace MassTransit.Middleware
                 {
                     if (_retryPolicy.IsHandled(exception))
                     {
+                        context.GetOrAddPayload(() => retryContext);
+
                         var retryFaultedTask = retryContext.RetryFaulted(exception);
                         if (retryFaultedTask.Status != TaskStatus.RanToCompletion)
                             await retryFaultedTask.ConfigureAwait(false);
@@ -111,8 +113,6 @@ namespace MassTransit.Middleware
                             if (retryFaultTask.Status != TaskStatus.RanToCompletion)
                                 await retryFaultTask.ConfigureAwait(false);
                         }
-
-                        context.GetOrAddPayload(() => retryContext);
                     }
 
                     throw;
@@ -179,6 +179,8 @@ namespace MassTransit.Middleware
                     {
                         if (_retryPolicy.IsHandled(exception))
                         {
+                            context.GetOrAddPayload(() => payloadRetryContext);
+
                             var retryFaultedTask = retryContext.RetryFaulted(exception);
                             if (retryFaultedTask.Status != TaskStatus.RanToCompletion)
                                 await retryFaultedTask.ConfigureAwait(false);
@@ -191,8 +193,6 @@ namespace MassTransit.Middleware
                             }
                         }
 
-                        context.GetOrAddPayload(() => payloadRetryContext);
-
                         throw;
                     }
 
@@ -200,6 +200,8 @@ namespace MassTransit.Middleware
                     {
                         if (_retryPolicy.IsHandled(exception))
                         {
+                            context.GetOrAddPayload(() => genericRetryContext);
+
                             var retryFaultedTask = retryContext.RetryFaulted(exception);
                             if (retryFaultedTask.Status != TaskStatus.RanToCompletion)
                                 await retryFaultedTask.ConfigureAwait(false);
@@ -212,8 +214,6 @@ namespace MassTransit.Middleware
                             }
                         }
 
-                        context.GetOrAddPayload(() => genericRetryContext);
-
                         throw;
                     }
 
@@ -221,6 +221,8 @@ namespace MassTransit.Middleware
                     {
                         if (_retryPolicy.IsHandled(exception))
                         {
+                            context.GetOrAddPayload(() => nextRetryContext);
+
                             var retryFaultedTask = nextRetryContext.RetryFaulted(exception);
                             if (retryFaultedTask.Status != TaskStatus.RanToCompletion)
                                 await retryFaultedTask.ConfigureAwait(false);
@@ -231,8 +233,6 @@ namespace MassTransit.Middleware
                                 if (retryFaultTask.Status != TaskStatus.RanToCompletion)
                                     await retryFaultTask.ConfigureAwait(false);
                             }
-
-                            context.GetOrAddPayload(() => nextRetryContext);
                         }
 
                         throw;

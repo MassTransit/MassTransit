@@ -66,10 +66,10 @@
 
         IErrorTransport CreateErrorTransport(TransportSetHeaderAdapter<MessageAttributeValue> headerAdapter)
         {
-            var errorSettings = _configuration.Topology.Send.GetErrorSettings(_configuration.Settings);
-            var filter = new ConfigureAmazonSqsTopologyFilter<ErrorSettings>(errorSettings, errorSettings.GetBrokerTopology());
+            var settings = _configuration.Topology.Send.GetErrorSettings(_configuration.Settings);
+            var filter = new ConfigureAmazonSqsTopologyFilter<ErrorSettings>(settings, settings.GetBrokerTopology());
 
-            return new SqsErrorTransport(errorSettings.EntityName, headerAdapter, filter);
+            return new SqsErrorTransport(settings.EntityName, headerAdapter, filter);
         }
 
         IDeadLetterTransport CreateDeadLetterTransport(TransportSetHeaderAdapter<MessageAttributeValue> headerAdapter)

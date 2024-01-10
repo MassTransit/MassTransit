@@ -3,16 +3,18 @@
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Amazon.SQS.Model;
+    using Middleware;
     using Transports;
 
 
     public class SqsDeadLetterTransport :
-        SqsMoveTransport,
+        SqsMoveTransport<DeadLetterSettings>,
         IDeadLetterTransport
     {
         readonly TransportSetHeaderAdapter<MessageAttributeValue> _headerAdapter;
 
-        public SqsDeadLetterTransport(string destination, TransportSetHeaderAdapter<MessageAttributeValue> headerAdapter, IFilter<ClientContext> topologyFilter)
+        public SqsDeadLetterTransport(string destination, TransportSetHeaderAdapter<MessageAttributeValue> headerAdapter,
+            ConfigureAmazonSqsTopologyFilter<DeadLetterSettings> topologyFilter)
             : base(destination, topologyFilter)
         {
             _headerAdapter = headerAdapter;

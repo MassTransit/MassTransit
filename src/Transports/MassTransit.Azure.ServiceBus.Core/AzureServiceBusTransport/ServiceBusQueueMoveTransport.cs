@@ -51,12 +51,6 @@
                 preSend(message, message.ApplicationProperties);
 
                 await clientContext.Send(message).ConfigureAwait(false);
-
-                var reason = message.ApplicationProperties.TryGetValue(MessageHeaders.Reason, out var reasonProperty) ? reasonProperty.ToString() : "";
-                if (reason == "fault")
-                    reason = message.ApplicationProperties.TryGetValue(MessageHeaders.FaultMessage, out var fault) ? $"Fault: {fault}" : "Fault";
-
-                context.LogMoved(clientContext.EntityPath, reason);
             });
 
             return _sendEndpointContext.Supervisor.Send(clientPipe, context.CancellationToken);

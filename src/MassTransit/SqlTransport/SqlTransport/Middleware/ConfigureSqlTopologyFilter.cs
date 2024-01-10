@@ -1,6 +1,7 @@
 #nullable enable
 namespace MassTransit.SqlTransport.Middleware;
 
+using System;
 using System.Threading.Tasks;
 using Configuration;
 using Topology;
@@ -28,14 +29,23 @@ public class ConfigureSqlTopologyFilter<TSettings> :
 
     public async Task Send(ClientContext context, IPipe<ClientContext> next)
     {
-        await context.OneTimeSetup<ConfigureTopologyContext<TSettings>>(async _ =>
+        OneTimeContext<ConfigureTopologyContext<TSettings>> oneTimeContext = await context.OneTimeSetup<ConfigureTopologyContext<TSettings>>(() =>
         {
-            await ConfigureTopology(context).ConfigureAwait(false);
-
             context.GetOrAddPayload(() => _settings);
-        }, () => new Context()).ConfigureAwait(false);
 
-        await next.Send(context).ConfigureAwait(false);
+            return ConfigureTopology(context);
+        }).ConfigureAwait(false);
+
+        try
+        {
+            await next.Send(context).ConfigureAwait(false);
+        }
+        catch (Exception)
+        {
+            oneTimeContext.Evict();
+
+            throw;
+        }
     }
 
     public void Probe(ProbeContext context)
@@ -90,11 +100,5 @@ public class ConfigureSqlTopologyFilter<TSettings> :
         SqlLogMessages.CreateQueue(queue);
 
         return context.CreateQueue(queue);
-    }
-
-
-    class Context :
-        ConfigureTopologyContext<TSettings>
-    {
     }
 }

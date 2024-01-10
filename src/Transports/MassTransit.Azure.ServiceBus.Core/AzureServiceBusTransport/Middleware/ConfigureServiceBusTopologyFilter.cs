@@ -1,5 +1,6 @@
 ﻿namespace MassTransit.AzureServiceBusTransport.Middleware
 {
+    using System;
     using System.Linq;
     using System.Threading.Tasks;
     using Logging;
@@ -27,9 +28,18 @@
 
         public async Task Send(ClientContext context, IPipe<ClientContext> next)
         {
-            await ConfigureTopology(context).ConfigureAwait(false);
+            OneTimeContext<ConfigureTopologyContext<TSettings>> oneTimeContext = await ConfigureTopology(context).ConfigureAwait(false);
 
-            await next.Send(context).ConfigureAwait(false);
+            try
+            {
+                await next.Send(context).ConfigureAwait(false);
+            }
+            catch (Exception)
+            {
+                oneTimeContext.Evict();
+
+                throw;
+            }
         }
 
         public void Probe(ProbeContext context)
@@ -41,22 +51,33 @@
 
         public async Task Send(SendEndpointContext context, IPipe<SendEndpointContext> next)
         {
-            await ConfigureTopology(context).ConfigureAwait(false);
+            OneTimeContext<ConfigureTopologyContext<TSettings>> oneTimeContext = await ConfigureTopology(context).ConfigureAwait(false);
 
-            await next.Send(context).ConfigureAwait(false);
+            try
+            {
+                await next.Send(context).ConfigureAwait(false);
+            }
+            catch (Exception)
+            {
+                oneTimeContext.Evict();
+
+                throw;
+            }
         }
 
-        async Task ConfigureTopology(NamespaceContext context)
+        async Task<OneTimeContext<ConfigureTopologyContext<TSettings>>> ConfigureTopology(NamespaceContext context)
         {
-            await context.OneTimeSetup<ConfigureTopologyContext<TSettings>>(async payload =>
+            OneTimeContext<ConfigureTopologyContext<TSettings>> oneTimeContext = await context.OneTimeSetup<ConfigureTopologyContext<TSettings>>(() =>
             {
-                await ConfigureTopology(context.ConnectionContext).ConfigureAwait(false);
-
                 context.GetOrAddPayload(() => _settings);
 
                 if (_context != null && _removeSubscriptions)
                     _context.AddSendAgent(new RemoveServiceBusTopologyAgent(context.ConnectionContext, _brokerTopology));
-            }, () => new Context()).ConfigureAwait(false);
+
+                return ConfigureTopology(context.ConnectionContext);
+            }).ConfigureAwait(false);
+
+            return oneTimeContext;
         }
 
         async Task ConfigureTopology(ConnectionContext context)

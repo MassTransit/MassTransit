@@ -34,9 +34,9 @@ namespace MassTransit.Middleware
             if (context.IsDelivered || context.IsFaulted)
                 return;
 
-            context.LogSkipped();
-
             await _deadLetterPipe.Send(context).ConfigureAwait(false);
+
+            context.LogSkipped();
         }
     }
 }

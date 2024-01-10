@@ -3,7 +3,6 @@ namespace MassTransit.SqlTransport
 {
     using System;
     using System.Threading.Tasks;
-    using Transports;
 
 
     public class SqlQueueMoveTransport
@@ -35,12 +34,6 @@ namespace MassTransit.SqlTransport
             preSend(message, transportHeaders);
 
             await clientContext.MoveMessage(messageContext.LockId.Value, messageContext.DeliveryMessageId, _queueName, _queueType, transportHeaders);
-
-            var reason = transportHeaders.TryGetHeader(MessageHeaders.Reason, out var reasonProperty) ? reasonProperty.ToString() : "";
-            if (reason == "fault")
-                reason = transportHeaders.TryGetHeader(MessageHeaders.FaultMessage, out var fault) ? $"Fault: {fault}" : "Fault";
-
-            context.LogMoved(_queueName, reason);
         }
     }
 }

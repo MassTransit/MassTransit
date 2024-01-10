@@ -49,19 +49,18 @@
 
         IErrorTransport CreateErrorTransport()
         {
-            var errorSettings = _configuration.Topology.Send.GetErrorSettings(_configuration.Settings);
-            var filter = new ConfigureActiveMqTopologyFilter<ErrorSettings>(errorSettings, errorSettings.GetBrokerTopology());
+            var settings = _configuration.Topology.Send.GetErrorSettings(_configuration.Settings);
+            var filter = new ConfigureActiveMqTopologyFilter<ErrorSettings>(settings, settings.GetBrokerTopology());
 
-            return new ActiveMqErrorTransport(new QueueEntity(0, errorSettings.EntityName, errorSettings.Durable, errorSettings.AutoDelete), filter);
+            return new ActiveMqErrorTransport(new QueueEntity(0, settings.EntityName, settings.Durable, settings.AutoDelete), filter);
         }
 
         IDeadLetterTransport CreateDeadLetterTransport()
         {
-            var deadLetterSettings = _configuration.Topology.Send.GetDeadLetterSettings(_configuration.Settings);
-            var filter = new ConfigureActiveMqTopologyFilter<DeadLetterSettings>(deadLetterSettings, deadLetterSettings.GetBrokerTopology());
+            var settings = _configuration.Topology.Send.GetDeadLetterSettings(_configuration.Settings);
+            var filter = new ConfigureActiveMqTopologyFilter<DeadLetterSettings>(settings, settings.GetBrokerTopology());
 
-            return new ActiveMqDeadLetterTransport(new QueueEntity(0, deadLetterSettings.EntityName, deadLetterSettings.Durable, deadLetterSettings.AutoDelete),
-                filter);
+            return new ActiveMqDeadLetterTransport(new QueueEntity(0, settings.EntityName, settings.Durable, settings.AutoDelete), filter);
         }
 
         BrokerTopology BuildTopology(ReceiveSettings settings)

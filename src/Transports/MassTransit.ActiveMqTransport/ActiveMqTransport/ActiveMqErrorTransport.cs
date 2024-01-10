@@ -2,15 +2,16 @@
 {
     using System.Threading.Tasks;
     using Apache.NMS;
+    using Middleware;
     using Topology;
     using Transports;
 
 
     public class ActiveMqErrorTransport :
-        ActiveMqMoveTransport,
+        ActiveMqMoveTransport<ErrorSettings>,
         IErrorTransport
     {
-        public ActiveMqErrorTransport(Queue destination, IFilter<SessionContext> topologyFilter)
+        public ActiveMqErrorTransport(Queue destination, ConfigureActiveMqTopologyFilter<ErrorSettings> topologyFilter)
             : base(destination, topologyFilter)
         {
         }

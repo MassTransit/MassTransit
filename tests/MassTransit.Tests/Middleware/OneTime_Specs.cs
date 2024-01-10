@@ -19,10 +19,10 @@ namespace MassTransit.Tests.Middleware
             {
                 cfg.UseExecuteAsync(async x =>
                 {
-                    await x.OneTimeSetup<Secret<IInputContext>>(async key =>
+                    await x.OneTimeSetup<Secret<IInputContext>>(async () =>
                     {
                         Interlocked.Increment(ref callCount);
-                    }, () => new MySecret<IInputContext>());
+                    });
 
                     Interlocked.Increment(ref totalCount);
                 });

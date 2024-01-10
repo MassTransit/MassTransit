@@ -3,15 +3,17 @@
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using Middleware;
     using RabbitMQ.Client;
 
 
-    public class RabbitMqMoveTransport
+    public class RabbitMqMoveTransport<TSettings>
+        where TSettings : class
     {
         readonly string _exchange;
-        readonly IFilter<ModelContext> _topologyFilter;
+        readonly ConfigureRabbitMqTopologyFilter<TSettings> _topologyFilter;
 
-        protected RabbitMqMoveTransport(string exchange, IFilter<ModelContext> topologyFilter)
+        protected RabbitMqMoveTransport(string exchange, ConfigureRabbitMqTopologyFilter<TSettings> topologyFilter)
         {
             _topologyFilter = topologyFilter;
             _exchange = exchange;
@@ -22,7 +24,7 @@
             if (!context.TryGetPayload(out ModelContext modelContext))
                 throw new ArgumentException("The ReceiveContext must contain a ModelContext", nameof(context));
 
-            await _topologyFilter.Send(modelContext, Pipe.Empty<ModelContext>()).ConfigureAwait(false);
+            OneTimeContext<ConfigureTopologyContext<TSettings>> oneTimeContext = await _topologyFilter.Configure(modelContext).ConfigureAwait(false);
 
             IBasicProperties properties;
             var routingKey = "";
@@ -48,8 +50,15 @@
 
             preSend(properties, headers);
 
-            var task = modelContext.BasicPublishAsync(_exchange, routingKey, true, properties, body, true);
-            context.AddReceiveTask(task);
+            try
+            {
+                await modelContext.BasicPublishAsync(_exchange, routingKey, true, properties, body, true).ConfigureAwait(false);
+            }
+            catch (Exception)
+            {
+                oneTimeContext.Evict();
+                throw;
+            }
         }
     }
 }

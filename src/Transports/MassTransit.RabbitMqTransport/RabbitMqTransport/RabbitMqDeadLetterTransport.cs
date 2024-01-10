@@ -1,15 +1,16 @@
 ﻿namespace MassTransit.RabbitMqTransport
 {
     using System.Threading.Tasks;
+    using Middleware;
     using RabbitMQ.Client;
     using Transports;
 
 
     public class RabbitMqDeadLetterTransport :
-        RabbitMqMoveTransport,
+        RabbitMqMoveTransport<DeadLetterSettings>,
         IDeadLetterTransport
     {
-        public RabbitMqDeadLetterTransport(string exchange, IFilter<ModelContext> topologyFilter)
+        public RabbitMqDeadLetterTransport(string exchange, ConfigureRabbitMqTopologyFilter<DeadLetterSettings> topologyFilter)
             : base(exchange, topologyFilter)
         {
         }

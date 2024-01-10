@@ -11,6 +11,7 @@ namespace MassTransit.RabbitMqTransport
     using Initializers.TypeConverters;
     using Internals;
     using Logging;
+    using Middleware;
     using RabbitMQ.Client;
     using Transports;
 
@@ -21,7 +22,7 @@ namespace MassTransit.RabbitMqTransport
     {
         static readonly DateTimeOffsetTypeConverter _dateTimeOffsetConverter = new DateTimeOffsetTypeConverter();
         static readonly DateTimeTypeConverter _dateTimeConverter = new DateTimeTypeConverter();
-        readonly IPipe<ModelContext> _configureTopologyPipe;
+        readonly ConfigureRabbitMqTopologyFilter<SendSettings> _configureTopologyFilter;
         readonly IPipe<ModelContext> _delayConfigureTopologyPipe;
         readonly string _delayExchange;
         readonly string _exchange;
@@ -31,14 +32,14 @@ namespace MassTransit.RabbitMqTransport
 
         public RabbitMqSendTransportContext(IRabbitMqHostConfiguration hostConfiguration, ReceiveEndpointContext receiveEndpointContext,
             IModelContextSupervisor supervisor,
-            IPipe<ModelContext> configureTopologyPipe, string exchange,
+            ConfigureRabbitMqTopologyFilter<SendSettings> configureTopologyFilter, string exchange,
             IPipe<ModelContext> delayConfigureTopologyPipe, string delayExchange)
             : base(hostConfiguration, receiveEndpointContext.Serialization)
         {
             _hostConfiguration = hostConfiguration;
             _supervisor = supervisor;
 
-            _configureTopologyPipe = configureTopologyPipe;
+            _configureTopologyFilter = configureTopologyFilter;
             _exchange = exchange;
 
             _delayConfigureTopologyPipe = delayConfigureTopologyPipe;
@@ -103,7 +104,8 @@ namespace MassTransit.RabbitMqTransport
 
             sendContext.CancellationToken.ThrowIfCancellationRequested();
 
-            await _configureTopologyPipe.Send(transportContext).ConfigureAwait(false);
+            OneTimeContext<ConfigureTopologyContext<SendSettings>> oneTimeContext =
+                await _configureTopologyFilter.Configure(transportContext).ConfigureAwait(false);
 
             sendContext.CancellationToken.ThrowIfCancellationRequested();
 
@@ -161,7 +163,19 @@ namespace MassTransit.RabbitMqTransport
             var publishTask = transportContext.BasicPublishAsync(exchange, routingKey, context.Mandatory, context.BasicProperties, body,
                 context.AwaitAck);
 
-            await publishTask.OrCanceled(context.CancellationToken).ConfigureAwait(false);
+            try
+            {
+                await publishTask.OrCanceled(context.CancellationToken).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                oneTimeContext.Evict();
+                throw;
+            }
         }
 
         static void SetHeaders(IDictionary<string, object> dictionary, SendHeaders headers)
