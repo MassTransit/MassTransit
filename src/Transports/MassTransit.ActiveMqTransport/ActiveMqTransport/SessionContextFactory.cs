@@ -17,7 +17,7 @@
             _connectionContextSupervisor = connectionContextSupervisor;
         }
 
-        IPipeContextAgent<SessionContext> IPipeContextFactory<SessionContext>.CreateContext(ISupervisor supervisor)
+        public IPipeContextAgent<SessionContext> CreateContext(ISupervisor supervisor)
         {
             IAsyncPipeContextAgent<SessionContext> asyncContext = supervisor.AddAsyncContext<SessionContext>();
 
@@ -26,7 +26,7 @@
             return asyncContext;
         }
 
-        IActivePipeContextAgent<SessionContext> IPipeContextFactory<SessionContext>.CreateActiveContext(ISupervisor supervisor,
+        public IActivePipeContextAgent<SessionContext> CreateActiveContext(ISupervisor supervisor,
             PipeContextHandle<SessionContext> context, CancellationToken cancellationToken)
         {
             return supervisor.AddActiveContext(context, CreateSharedSession(context.Context, cancellationToken));
@@ -53,18 +53,18 @@
 
                 connectionContext.Connection.ExceptionListener += HandleConnectionException;
 
-            #pragma warning disable 4014
+                #pragma warning disable 4014
                 // ReSharper disable once MethodSupportsCancellation
                 asyncContext.Completed.ContinueWith(_ => connectionContext.Connection.ExceptionListener -= HandleConnectionException,
                     TaskContinuationOptions.ExecuteSynchronously);
-            #pragma warning restore 4014
+                #pragma warning restore 4014
 
                 return new ActiveMqSessionContext(connectionContext, session, createCancellationToken);
             }
 
-        #pragma warning disable CS4014
+            #pragma warning disable CS4014
             _connectionContextSupervisor.CreateAgent(asyncContext, CreateSessionContext, cancellationToken);
-        #pragma warning restore CS4014
+            #pragma warning restore CS4014
         }
     }
 }

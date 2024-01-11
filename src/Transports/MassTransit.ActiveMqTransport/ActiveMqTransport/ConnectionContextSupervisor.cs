@@ -37,7 +37,8 @@
 
             var settings = _topologyConfiguration.Send.GetSendSettings(endpointAddress);
 
-            IPipe<SessionContext> configureTopology = new ConfigureActiveMqTopologyFilter<SendSettings>(settings, settings.GetBrokerTopology()).ToPipe();
+            IPipe<SessionContext> configureTopology = new ConfigureActiveMqTopologyFilter<SendSettings>(settings, settings.GetBrokerTopology(), context)
+                .ToPipe();
 
             return CreateSendTransport(context, sessionContextSupervisor, configureTopology, settings.EntityName,
                 endpointAddress.Type == ActiveMqEndpointAddress.AddressType.Queue ? DestinationType.Queue : DestinationType.Topic);
@@ -52,7 +53,8 @@
 
             var settings = publishTopology.GetSendSettings(_hostConfiguration.HostAddress);
 
-            IPipe<SessionContext> configureTopology = new ConfigureActiveMqTopologyFilter<SendSettings>(settings, publishTopology.GetBrokerTopology()).ToPipe();
+            IPipe<SessionContext> configureTopology = new ConfigureActiveMqTopologyFilter<SendSettings>(settings, publishTopology.GetBrokerTopology(), context)
+                .ToPipe();
 
             return CreateSendTransport(context, sessionContextSupervisor, configureTopology, settings.EntityName, DestinationType.Topic);
         }

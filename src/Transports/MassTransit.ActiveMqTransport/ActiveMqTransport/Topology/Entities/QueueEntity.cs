@@ -8,19 +8,17 @@ namespace MassTransit.ActiveMqTransport.Topology
         Queue,
         QueueHandle
     {
-        public QueueEntity(long id, string name, bool durable, bool autoDelete, bool lazy = false)
+        public QueueEntity(long id, string name, bool durable, bool autoDelete)
         {
             Id = id;
             EntityName = name;
             AutoDelete = autoDelete;
             Durable = durable;
-            Lazy = lazy;
         }
 
         public static IEqualityComparer<QueueEntity> NameComparer { get; } = new NameEqualityComparer();
 
         public static IEqualityComparer<QueueEntity> QueueComparer { get; } = new QueueEntityEqualityComparer();
-        public bool Lazy { get; }
 
         public string EntityName { get; }
         public bool AutoDelete { get; }

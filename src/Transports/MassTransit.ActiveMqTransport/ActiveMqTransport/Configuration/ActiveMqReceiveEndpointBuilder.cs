@@ -35,10 +35,11 @@
         {
             var brokerTopology = BuildTopology(_configuration.Settings);
 
-            var deadLetterTransport = CreateDeadLetterTransport();
-            var errorTransport = CreateErrorTransport();
-
             var context = new ActiveMqConsumerReceiveEndpointContext(_hostConfiguration, _configuration, brokerTopology);
+
+            var deadLetterTransport = CreateDeadLetterTransport(context);
+            var errorTransport = CreateErrorTransport(context);
+
 
             context.GetOrAddPayload(() => deadLetterTransport);
             context.GetOrAddPayload(() => errorTransport);
@@ -47,18 +48,18 @@
             return context;
         }
 
-        IErrorTransport CreateErrorTransport()
+        IErrorTransport CreateErrorTransport(ActiveMqReceiveEndpointContext context)
         {
             var settings = _configuration.Topology.Send.GetErrorSettings(_configuration.Settings);
-            var filter = new ConfigureActiveMqTopologyFilter<ErrorSettings>(settings, settings.GetBrokerTopology());
+            var filter = new ConfigureActiveMqTopologyFilter<ErrorSettings>(settings, settings.GetBrokerTopology(), context);
 
             return new ActiveMqErrorTransport(new QueueEntity(0, settings.EntityName, settings.Durable, settings.AutoDelete), filter);
         }
 
-        IDeadLetterTransport CreateDeadLetterTransport()
+        IDeadLetterTransport CreateDeadLetterTransport(ActiveMqReceiveEndpointContext context)
         {
             var settings = _configuration.Topology.Send.GetDeadLetterSettings(_configuration.Settings);
-            var filter = new ConfigureActiveMqTopologyFilter<DeadLetterSettings>(settings, settings.GetBrokerTopology());
+            var filter = new ConfigureActiveMqTopologyFilter<DeadLetterSettings>(settings, settings.GetBrokerTopology(), context);
 
             return new ActiveMqDeadLetterTransport(new QueueEntity(0, settings.EntityName, settings.Durable, settings.AutoDelete), filter);
         }

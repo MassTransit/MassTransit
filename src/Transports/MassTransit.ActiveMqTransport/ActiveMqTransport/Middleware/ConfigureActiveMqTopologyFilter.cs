@@ -3,7 +3,6 @@ namespace MassTransit.ActiveMqTransport.Middleware;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Apache.NMS.ActiveMQ;
 using Topology;
 
 
@@ -16,12 +15,14 @@ public class ConfigureActiveMqTopologyFilter<TSettings> :
     where TSettings : class
 {
     readonly BrokerTopology _brokerTopology;
+    readonly ActiveMqReceiveEndpointContext _context;
     readonly TSettings _settings;
 
-    public ConfigureActiveMqTopologyFilter(TSettings settings, BrokerTopology brokerTopology)
+    public ConfigureActiveMqTopologyFilter(TSettings settings, BrokerTopology brokerTopology, ActiveMqReceiveEndpointContext context)
     {
         _settings = settings;
         _brokerTopology = brokerTopology;
+        _context = context;
     }
 
     public async Task Send(SessionContext context, IPipe<SessionContext> next)
@@ -31,6 +32,9 @@ public class ConfigureActiveMqTopologyFilter<TSettings> :
         try
         {
             await next.Send(context).ConfigureAwait(false);
+
+            if (_settings is ReceiveSettings)
+                _context.AddSendAgent(new RemoveAutoDeleteAgent(context, _brokerTopology));
         }
         catch (Exception)
         {
@@ -38,9 +42,6 @@ public class ConfigureActiveMqTopologyFilter<TSettings> :
 
             throw;
         }
-
-        if (_settings is ReceiveSettings)
-            await DeleteAutoDelete(context).ConfigureAwait(false);
     }
 
     public void Probe(ProbeContext context)
@@ -67,27 +68,6 @@ public class ConfigureActiveMqTopologyFilter<TSettings> :
         await Task.WhenAll(_brokerTopology.Queues.Select(queue => Declare(context, queue))).ConfigureAwait(false);
     }
 
-    async Task DeleteAutoDelete(SessionContext context)
-    {
-        try
-        {
-            await Task.WhenAll(_brokerTopology.Consumers.Where(x => x.Destination.AutoDelete).Select(consumer => Delete(context, consumer.Destination)))
-                .ConfigureAwait(false);
-
-            await Task.WhenAll(_brokerTopology.Topics.Where(x => x.AutoDelete).Select(topic => Delete(context, topic))).ConfigureAwait(false);
-
-            await Task.WhenAll(_brokerTopology.Queues.Where(x => x.AutoDelete).Select(queue => Delete(context, queue))).ConfigureAwait(false);
-        }
-        catch (ConnectionClosedException exception)
-        {
-            LogContext.Debug?.Log(exception, "Connection was closed, auto-delete queues/topics/consumers could not be deleted");
-        }
-        catch (Exception exception)
-        {
-            LogContext.Error?.Log(exception, "Failure removing auto-delete queues/topics");
-        }
-    }
-
     Task Declare(SessionContext context, Topic topic)
     {
         LogContext.Debug?.Log("Get topic {Topic}", topic);
@@ -100,15 +80,5 @@ public class ConfigureActiveMqTopologyFilter<TSettings> :
         LogContext.Debug?.Log("Get queue {Queue}", queue);
 
         return context.GetQueue(queue);
-    }
-
-    Task Delete(SessionContext context, Topic topic)
-    {
-        return context.DeleteTopic(topic.EntityName);
-    }
-
-    Task Delete(SessionContext context, Queue queue)
-    {
-        return context.DeleteQueue(queue.EntityName);
     }
 }

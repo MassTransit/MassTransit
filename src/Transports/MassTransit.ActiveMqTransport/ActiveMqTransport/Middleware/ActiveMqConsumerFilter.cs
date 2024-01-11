@@ -28,6 +28,13 @@ namespace MassTransit.ActiveMqTransport.Middleware
         {
         }
 
+        string GetReceiveEntityName(ReceiveSettings settings, string entityName = null)
+        {
+            return settings.AutoDelete
+                ? entityName ?? settings.EntityName
+                : $"{entityName ?? settings.EntityName}?consumer.prefetchSize={settings.PrefetchCount}";
+        }
+
         async Task IFilter<SessionContext>.Send(SessionContext context, IPipe<SessionContext> next)
         {
             var receiveSettings = context.GetPayload<ReceiveSettings>();
@@ -36,12 +43,13 @@ namespace MassTransit.ActiveMqTransport.Middleware
 
             var consumers = new List<Task<ActiveMqConsumer>>
             {
-                CreateConsumer(context, new QueueEntity(0, receiveSettings.EntityName, receiveSettings.Durable, receiveSettings.AutoDelete),
-                    receiveSettings.Selector, executor)
+                CreateConsumer(context, new QueueEntity(0, GetReceiveEntityName(receiveSettings), receiveSettings.Durable,
+                    receiveSettings.AutoDelete), receiveSettings.Selector, executor)
             };
 
             consumers.AddRange(_context.BrokerTopology.Consumers.Select(x =>
-                CreateConsumer(context, x.Destination, x.Selector, executor)));
+                CreateConsumer(context, new QueueEntity(0, GetReceiveEntityName(receiveSettings, x.Destination.EntityName), x.Destination.Durable,
+                    x.Destination.AutoDelete), x.Selector, executor)));
 
             ActiveMqConsumer[] actualConsumers = await Task.WhenAll(consumers).ConfigureAwait(false);
 
@@ -93,7 +101,8 @@ namespace MassTransit.ActiveMqTransport.Middleware
             return supervisor;
         }
 
-        async Task<ActiveMqConsumer> CreateConsumer(SessionContext context, Queue entity, string selector, ChannelExecutor executor)
+        async Task<ActiveMqConsumer> CreateConsumer(SessionContext context, Queue entity, string selector,
+            ChannelExecutor executor)
         {
             var queue = await context.GetQueue(entity).ConfigureAwait(false);
 
