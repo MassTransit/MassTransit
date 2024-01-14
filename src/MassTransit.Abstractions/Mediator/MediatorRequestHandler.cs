@@ -5,7 +5,7 @@ namespace MassTransit.Mediator
 
 
     /// <summary>
-    /// A Mediator request handler base class, that provides a simplified overridable method with
+    /// A Mediator request handler base class that provides a simplified overridable method with
     /// a Task (void) return type
     /// </summary>
     /// <typeparam name="TRequest"></typeparam>
@@ -23,8 +23,8 @@ namespace MassTransit.Mediator
 
 
     /// <summary>
-    /// A Mediator request handler base class, that provides a simplified overridable method with
-    /// a Task&lt;typeparamref name="TResponse"/>&gt; return type
+    /// A Mediator request handler base class that provides a simplified overridable method with
+    /// a Task&lt;<typeparamref name="TResponse"/>&gt; return type
     /// </summary>
     /// <typeparam name="TRequest"></typeparam>
     /// <typeparam name="TResponse"></typeparam>
