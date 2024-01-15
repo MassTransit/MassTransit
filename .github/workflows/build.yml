@@ -1,6 +1,6 @@
 name: MassTransit
 env:
-  MASSTRANSIT_VERSION: 8.1.4
+  MASSTRANSIT_VERSION: 8.2.0
 on:
   push:
     paths:
@@ -70,23 +70,6 @@ jobs:
       - name: Test Abstractions
         run: dotnet test -c Release -f net8.0 --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.Abstractions.Tests
-
-  test-containers:
-    name: Container Tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v3
-
-      - name: Install .NET Core SDK 6.0
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '8.0.x'
-
-      - name: Test Containers
-        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
-        working-directory: tests/MassTransit.Containers.Tests
 
   test-activemq:
     name: "Transports: ActiveMQ"
@@ -211,9 +194,6 @@ jobs:
       - name: Test SQS
         run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
         working-directory: tests/MassTransit.AmazonSqsTransport.Tests
-      - name: Test S3
-        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
-        working-directory: tests/MassTransit.AmazonS3.Tests
   test-azure-table:
     name: "Storage: Azure Table"
     if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/v8') && github.repository == 'MassTransit/MassTransit'
@@ -533,7 +513,6 @@ jobs:
     needs:
       - compile
       - test-ubuntu
-      - test-containers
       - test-activemq
       # - test-azure-service-bus
       - test-rabbitmq
@@ -619,13 +598,6 @@ jobs:
         uses: drusellers/publish-nuget@master
         with:
           project-file-path: src/MassTransit.Interop.NServiceBus/MassTransit.Interop.NServiceBus.csproj
-          version: ${{ needs.calc-version.outputs.version }}
-          tag-commit: false
-          nuget-key: ${{secrets.NUGET_API_KEY}}
-      - name: Build and Publish MassTransit.PrometheusIntegration
-        uses: drusellers/publish-nuget@master
-        with:
-          project-file-path: src/MassTransit.PrometheusIntegration/MassTransit.PrometheusIntegration.csproj
           version: ${{ needs.calc-version.outputs.version }}
           tag-commit: false
           nuget-key: ${{secrets.NUGET_API_KEY}}
@@ -780,13 +752,6 @@ jobs:
         uses: drusellers/publish-nuget@master
         with:
           project-file-path: src/Transports/MassTransit.EventHubIntegration/MassTransit.EventHubIntegration.csproj
-          version: ${{ needs.calc-version.outputs.version }}
-          tag-commit: false
-          nuget-key: ${{secrets.NUGET_API_KEY}}
-      - name: Build and Publish MassTransit.Grpc
-        uses: drusellers/publish-nuget@master
-        with:
-          project-file-path: src/Transports/MassTransit.GrpcTransport/MassTransit.GrpcTransport.csproj
           version: ${{ needs.calc-version.outputs.version }}
           tag-commit: false
           nuget-key: ${{secrets.NUGET_API_KEY}}

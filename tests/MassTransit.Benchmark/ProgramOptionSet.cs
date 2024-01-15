@@ -25,7 +25,6 @@ namespace MassTransitBenchmark
             InMemory,
             AmazonSqs,
             ActiveMq,
-            Grpc,
             Kafka
         }
 
@@ -38,7 +37,7 @@ namespace MassTransitBenchmark
             Add<string>("traces", "Enable traces capturing to OTel exporter", x => EnableTraces = x != null);
             Add<string>("metrics", "Enable metrics capturing to OTel exporter", x => EnableMetrics = x != null);
 
-            Add<TransportOptions>("t|transport:", "Transport (RabbitMQ, AzureServiceBus, Mediator, AmazonSqs, InMemory, Grpc)",
+            Add<TransportOptions>("t|transport:", "Transport (RabbitMQ, AzureServiceBus, Mediator, AmazonSqs, InMemory)",
                 value => Transport = value);
             Add("rabbitmq", "Use RabbitMQ", x => Transport = TransportOptions.RabbitMq);
             Add("kafka", "Use Kafka", x => Transport = TransportOptions.Kafka);
@@ -47,7 +46,6 @@ namespace MassTransitBenchmark
             Add("sqs", "Use Amazon SQS", x => Transport = TransportOptions.AmazonSqs);
             Add("servicebus", "Use Azure Service Bus", x => Transport = TransportOptions.AzureServiceBus);
             Add("activemq", "Use ActiveMQ", x => Transport = TransportOptions.ActiveMq);
-            Add("grpc", "Use gRPC", x => Transport = TransportOptions.Grpc);
 
             Add<BenchmarkOptions>("run:", "Run benchmark (All, Latency, RPC)", value => Benchmark = value);
             Add("rpc", "Run the RPC benchmark", x => Benchmark = BenchmarkOptions.Rpc);
