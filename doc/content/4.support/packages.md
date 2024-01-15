@@ -23,6 +23,8 @@ The following NuGet packages are the currently supported.
   * [MassTransit.WebJobs.ServiceBus](https://nuget.org/packages/MassTransit.WebJobs.ServiceBus/)
   * [MassTransit.WebJobs.EventHubs](https://nuget.org/packages/MassTransit.WebJobs.EventHubs/)
 * [MassTransit.RabbitMQ](https://nuget.org/packages/MassTransit.RabbitMQ/)
+* [MassTransit.SqlTransport.PostgreSQL](https://nuget.org/packages/MassTransit.SqlTransport.PostgreSQL/)
+* [MassTransit.SqlTransport.SqlServer](https://nuget.org/packages/MassTransit.SqlTransport.SqlServer/)
 * **Riders**
   * [MassTransit.EventHub](https://nuget.org/packages/MassTransit.EventHub/)
   * [MassTransit.Kafka](https://nuget.org/packages/MassTransit.Kafka/)
@@ -58,7 +60,6 @@ The following NuGet packages are the currently supported.
 
 * [MassTransit.Analyzers](https://nuget.org/packages/MassTransit.Analyzers/)
 * [MassTransit.SignalR](https://nuget.org/packages/MassTransit.SignalR/)
-* [MassTransit.Prometheus](https://nuget.org/packages/MassTransit.Prometheus/)
 * [MassTransit.StateMachineVisualizer](https://nuget.org/packages/MassTransit.StateMachineVisualizer/)
 * [MassTransit.TestFramework](https://nuget.org/packages/MassTransit.TestFramework/)
 
@@ -92,6 +93,7 @@ The following packages from earlier versions of MassTransit are no longer suppor
 * MassTransit.Ninject
 * MassTransit.NLog
 * MassTransit.Platform.Abstractions
+* MassTransit.Prometheus
 * MassTransit.Reactive
 * MassTransit.SerilogIntegration
 * MassTransit.SimpleInjector

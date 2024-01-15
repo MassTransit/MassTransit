@@ -57,6 +57,8 @@ MassTransit NuGet Packages
 | [MassTransit.AmazonSQS][AmazonSQS.nuget]                        | 6.0, 7.0, 8.0 |      2.0      |     4.7.2      |
 | [MassTransit.Azure.ServiceBus.Core][AzureSbCore.nuget]          | 6.0, 7.0, 8.0 |   2.0, 2.1    |     4.7.2      |
 | [MassTransit.RabbitMQ][RabbitMQ.nuget]                          | 6.0, 7.0, 8.0 |   2.0, 2.1    |     4.7.2      |
+| [MassTransit.SqlTransport.PostgreSQL][PostgreSQL.nuget]         | 6.0, 7.0, 8.0 |   2.0, 2.1    |     4.7.2      |
+| [MassTransit.SqlTransport.SqlServer][SqlServer.nuget]           | 6.0, 7.0, 8.0 |   2.0, 2.1    |     4.7.2      |
 | [MassTransit.WebJobs.EventHubs][EventHubs.nuget]                | 6.0, 7.0, 8.0 |   2.0, 2.1    |     4.7.2      |
 | [MassTransit.WebJobs.ServiceBus][AzureFunc.nuget]               | 6.0, 7.0, 8.0 |   2.0, 2.1    |     4.7.2      |
 | **Riders**                                                      |               |               |                |
@@ -136,6 +138,8 @@ Logo Design by _The Agile Badger_
 [AzureSbCore.nuget]: https://www.nuget.org/packages/MassTransit.Azure.ServiceBus.Core
 [Grpc.nuget]: https://www.nuget.org/packages/MassTransit.Grpc
 [RabbitMQ.nuget]: https://www.nuget.org/packages/MassTransit.RabbitMQ
+[PostgreSQL.nuget]: https://nuget.org/packages/MassTransit.SqlTransport.PostgreSQL/
+[SqlServer.nuget]: https://nuget.org/packages/MassTransit.SqlTransport.SqlServer/
 [EventHubs.nuget]: https://www.nuget.org/packages/MassTransit.WebJobs.EventHubs
 [AzureFunc.nuget]: https://www.nuget.org/packages/MassTransit.WebJobs.ServiceBus
 
