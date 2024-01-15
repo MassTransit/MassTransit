@@ -31,11 +31,7 @@ namespace MassTransit.ActiveMqTransport.Configuration
                     Password = parts[1];
             }
 
-            TransportOptions = new Dictionary<string, string>
-            {
-                { "wireFormat.tightEncodingEnabled", "true" },
-                { "nms.AsyncSend", "true" }
-            };
+            TransportOptions = new Dictionary<string, string> { { "wireFormat.tightEncodingEnabled", "true" } };
 
             _hostAddress = new Lazy<Uri>(FormatHostAddress);
             _brokerAddress = new Lazy<Uri>(FormatBrokerAddress);

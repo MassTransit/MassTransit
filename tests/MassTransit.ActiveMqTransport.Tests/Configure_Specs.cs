@@ -115,7 +115,7 @@ namespace MassTransit.ActiveMqTransport.Tests
             };
 
             Assert.That(settings.BrokerAddress, Is.EqualTo(new Uri(
-                "activemq:failover:(tcp://failover1:61616/,tcp://failover2:61616/)?wireFormat.tightEncodingEnabled=true&nms.AsyncSend=true")));
+                "activemq:failover:(tcp://failover1:61616/,tcp://failover2:61616/)?wireFormat.tightEncodingEnabled=true")));
         }
 
         [Test]
