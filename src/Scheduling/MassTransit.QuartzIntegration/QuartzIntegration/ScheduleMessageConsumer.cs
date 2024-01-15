@@ -94,7 +94,7 @@ namespace MassTransit.QuartzIntegration
                 triggerBuilder.EndAt(schedule.EndTime);
 
             var trigger = PopulateTrigger(context, triggerBuilder, messageBody, context.Message.Destination, context.Message.PayloadType,
-                messageId: context.MessageId, tokenId: context.Message.CorrelationId);
+                messageId: default, tokenId: context.Message.CorrelationId);
 
             var scheduler = await _schedulerFactory.GetScheduler(context.CancellationToken).ConfigureAwait(false);
 

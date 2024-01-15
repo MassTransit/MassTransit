@@ -38,7 +38,7 @@ namespace MassTransit.QuartzIntegration
             _jobDataMap = executionContext.MergedJobDataMap;
             _objectDeserializer = objectDeserializer;
 
-            Guid? messageId = ConvertIdToGuid(_jobDataMap.GetString(nameof(MessageId)));
+            Guid? messageId = _jobDataMap.TryGetString(nameof(MessageId), out var text) ? ConvertIdToGuid(text) : default;
 
             if (messageId.HasValue)
                 _messageId = messageId;
