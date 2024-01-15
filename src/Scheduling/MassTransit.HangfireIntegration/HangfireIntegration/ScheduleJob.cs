@@ -99,7 +99,9 @@ namespace MassTransit.HangfireIntegration
 
                 var serializerContext = deserializer.Deserialize(body, _messageContext, _destinationAddress);
 
-                context.MessageId = _messageContext.MessageId;
+                if (_messageContext.MessageId.HasValue)
+                    context.MessageId = _messageContext.MessageId;
+
                 context.RequestId = _messageContext.RequestId;
                 context.ConversationId = _messageContext.ConversationId;
                 context.CorrelationId = _messageContext.CorrelationId;

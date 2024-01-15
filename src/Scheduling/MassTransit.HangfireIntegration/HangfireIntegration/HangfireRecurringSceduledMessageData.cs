@@ -26,6 +26,8 @@ namespace MassTransit.HangfireIntegration
 
             SetBaseProperties(data, context, context.Message.Destination, messageBody, context.Message.PayloadType);
 
+            data.MessageId = null;
+
             return data;
         }
     }
