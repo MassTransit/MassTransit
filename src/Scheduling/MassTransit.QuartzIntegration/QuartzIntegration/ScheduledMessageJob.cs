@@ -28,12 +28,15 @@ namespace MassTransit.QuartzIntegration
 
             var contentType = new ContentType(jobData.GetString("ContentType")!);
             var destinationAddress = new Uri(jobData.GetString("Destination")!);
-            var body = jobData.GetString("Body") ?? string.Empty;
-            var supportedMessageTypes = jobData.GetString("MessageType")?.Split(';').ToArray() ?? Array.Empty<string>();
+            if(!jobData.TryGetString("Body", out var body))
+                body = string.Empty;
+            var supportedMessageTypes = Array.Empty<string>();
+            if(jobData.TryGetString("MessageType", out var messageType))
+                supportedMessageTypes = messageType?.Split(';').ToArray() ?? Array.Empty<string>();
 
             try
             {
-                var pipe = new ForwardScheduledMessagePipe(contentType, messageContext, body, destinationAddress, supportedMessageTypes);
+                var pipe = new ForwardScheduledMessagePipe(contentType, messageContext, body!, destinationAddress, supportedMessageTypes);
 
                 var endpoint = await _bus.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
