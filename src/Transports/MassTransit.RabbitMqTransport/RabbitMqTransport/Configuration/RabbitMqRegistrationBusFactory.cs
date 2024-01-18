@@ -35,7 +35,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             var options = context.GetRequiredService<IOptionsMonitor<RabbitMqTransportOptions>>().Get(busName);
 
-            configurator.Host(options.Host, options.Port, options.VHost, h =>
+            configurator.Host(options.Host, options.Port, options.VHost, options.ConnectionName, h =>
             {
                 if (!string.IsNullOrWhiteSpace(options.User))
                     h.Username(options.User);

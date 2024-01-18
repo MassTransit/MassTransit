@@ -90,5 +90,10 @@
         /// Configure the Max message size for RabbitMQ.Client
         /// </summary>
         void MaxMessageSize(uint maxMessageSize);
+
+        /// <summary>
+        /// Sets the connection name for the connection to RabbitMQ
+        /// </summary>
+        void ConnectionName(string connectionName);
     }
 }
