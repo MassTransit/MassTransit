@@ -151,5 +151,10 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             throw new FormatException("The host path must be empty or contain a single virtual host name");
         }
+
+        public void ConnectionName(string connectionName)
+        {
+            _settings.ClientProvidedName = connectionName;
+        }
     }
 }
