@@ -1,5 +1,6 @@
 namespace MassTransit.Mediator
 {
+    using Internals;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -37,7 +38,14 @@ namespace MassTransit.Mediator
         {
             var response = await Handle(context.Message, context.CancellationToken).ConfigureAwait(false);
 
-            await context.RespondAsync(response).ConfigureAwait(false);
+            if (response is not null)
+            {
+                await context.RespondAsync(response).ConfigureAwait(false);
+            }
+            else
+            {
+                await context.RespondAsync(Null<TResponse>.Value).ConfigureAwait(false);
+            }
         }
 
         protected abstract Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken);

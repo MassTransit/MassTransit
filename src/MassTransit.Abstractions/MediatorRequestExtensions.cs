@@ -1,9 +1,10 @@
 namespace MassTransit
 {
+    using Mediator;
+    using Mediator.Internals;
     using System.Runtime.ExceptionServices;
     using System.Threading;
     using System.Threading.Tasks;
-    using Mediator;
 
 
     public static class MediatorRequestExtensions
@@ -15,27 +16,27 @@ namespace MassTransit
         /// <param name="request">The request message</param>
         /// <param name="cancellationToken"></param>
         /// <typeparam name="T">The response type</typeparam>
-        /// <returns>The response object</returns>
+        /// <returns>The response object, which may be <see langword="null"/></returns>
         public static async Task<T> SendRequest<T>(this IMediator mediator, Request<T> request, CancellationToken cancellationToken = default)
             where T : class
         {
             try
             {
-                Response<T> response = await mediator.CreateRequest(request, cancellationToken).GetResponse<T>().ConfigureAwait(false);
+                var requestClient = mediator.CreateRequestClient<Request<T>>();
+                var response = await requestClient.GetResponse<T, Null<T>>(request, cancellationToken).ConfigureAwait(false);
 
-                return response.Message;
+                if (response.Is<T>(out var defaultResponse))
+                {
+                    return defaultResponse.Message;
+                }
             }
             catch (RequestException exception)
+                when (exception.InnerException is { } innerException)
             {
-                if (exception.InnerException != null)
-                {
-                    var dispatchInfo = ExceptionDispatchInfo.Capture(exception.InnerException);
-
-                    dispatchInfo.Throw();
-                }
-
-                throw;
+                ExceptionDispatchInfo.Capture(innerException).Throw();
             }
+
+            return default!;
         }
     }
 }
