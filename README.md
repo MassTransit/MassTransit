@@ -84,7 +84,7 @@ enhancements and calls for help from people who forget to check back if they get
 
 ## Building from Source
 
- 1. Install the latest [.NET 6 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
+ 1. Install the latest [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
  2. Clone the source down to your machine<br/>
     ```bash
     git clone https://github.com/MassTransit/MassTransit.git
@@ -101,7 +101,7 @@ enhancements and calls for help from people who forget to check back if they get
  3. Make a pull request
  
 # REQUIREMENTS
-* .NET 6 SDK
+* .NET 8 SDK
 
 # CREDITS
 Logo Design by _The Agile Badger_
