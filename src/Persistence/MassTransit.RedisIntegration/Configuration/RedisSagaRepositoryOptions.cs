@@ -7,7 +7,7 @@ namespace MassTransit
         where TSaga : class, ISaga
     {
         public RedisSagaRepositoryOptions(ConcurrencyMode concurrencyMode, TimeSpan? lockTimeout, string lockSuffix, string keyPrefix,
-            SelectDatabase databaseSelector, TimeSpan? expiry)
+            SelectDatabase databaseSelector, TimeSpan? expiry, IRetryPolicy retryPolicy)
         {
             ConcurrencyMode = concurrencyMode;
 
@@ -17,7 +17,7 @@ namespace MassTransit
 
             KeyPrefix = string.IsNullOrWhiteSpace(keyPrefix) ? null : keyPrefix.EndsWith(":") ? keyPrefix : $"{keyPrefix}:";
 
-            RetryPolicy = Retry.Exponential(10, TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(10), TimeSpan.FromMilliseconds(918));
+            RetryPolicy = (retryPolicy == null) ? Retry.Exponential(10, TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(10), TimeSpan.FromMilliseconds(918)) : retryPolicy;
 
             DatabaseSelector = databaseSelector;
 
