@@ -11,7 +11,7 @@ namespace MassTransit.SqlTransport.PostgreSql
     {
         const string DbExistsSql = @"SELECT COUNT(*) FROM pg_database WHERE datname = '{0}'";
         const string DbCreateSql = @"CREATE DATABASE ""{0}""";
-        const string SchemaCreateSql = @"CREATE SCHEMA IF NOT EXISTS {0}";
+        const string SchemaCreateSql = @"CREATE SCHEMA IF NOT EXISTS ""{0}""";
         const string GrantConnectSql = @"GRANT CONNECT ON DATABASE ""{0}"" to ""{1}"";";
         const string DropSql = @"DROP DATABASE ""{0}"" WITH (force)";
         const string RoleExistsSql = @"SELECT COUNT(*) FROM pg_catalog.pg_roles WHERE rolname = '{0}'";
