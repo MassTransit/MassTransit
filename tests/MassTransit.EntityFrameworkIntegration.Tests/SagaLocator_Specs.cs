@@ -2,6 +2,7 @@
 {
     using System;
     using System.Threading.Tasks;
+    using MassTransit.Tests;
     using MassTransit.Tests.Saga;
     using MassTransit.Tests.Saga.Messages;
     using NUnit.Framework;

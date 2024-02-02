@@ -6,6 +6,7 @@ namespace MassTransit.DapperIntegration.Tests
         using System.Threading.Tasks;
         using Dapper;
         using Dapper.Contrib.Extensions;
+        using MassTransit.Tests;
         using Microsoft.Data.SqlClient;
         using Microsoft.Extensions.DependencyInjection;
         using NUnit.Framework;

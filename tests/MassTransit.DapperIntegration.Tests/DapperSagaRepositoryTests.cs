@@ -3,6 +3,7 @@
     using System;
     using System.Threading.Tasks;
     using Dapper;
+    using MassTransit.Tests;
     using MassTransit.Tests.Saga.Messages;
     using Microsoft.Data.SqlClient;
     using NUnit.Framework;

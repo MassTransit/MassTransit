@@ -207,6 +207,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
         using System.Collections.Generic;
         using System.Reflection;
         using DependencyInjection;
+        using MassTransit.Tests;
         using Microsoft.EntityFrameworkCore;
         using Microsoft.EntityFrameworkCore.Design;
         using Microsoft.EntityFrameworkCore.Metadata.Builders;
