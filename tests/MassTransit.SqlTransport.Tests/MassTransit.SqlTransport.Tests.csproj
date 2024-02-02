@@ -25,5 +25,6 @@
         <ProjectReference Include="..\..\src\Persistence\MassTransit.EntityFrameworkCoreIntegration\MassTransit.EntityFrameworkCoreIntegration.csproj" />
         <ProjectReference Include="..\..\src\Transports\MassTransit.SqlTransport.PostgreSql\MassTransit.SqlTransport.PostgreSql.csproj" />
         <ProjectReference Include="..\..\src\Transports\MassTransit.SqlTransport.SqlServer\MassTransit.SqlTransport.SqlServer.csproj" />
+        <ProjectReference Include="..\MassTransit.Tests\MassTransit.Tests.csproj" />
     </ItemGroup>
 </Project>

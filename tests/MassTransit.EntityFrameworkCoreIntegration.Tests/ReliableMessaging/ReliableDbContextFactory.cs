@@ -1,6 +1,7 @@
 namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
 {
     using System.Reflection;
+    using MassTransit.Tests;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Design;
     using TestFramework;

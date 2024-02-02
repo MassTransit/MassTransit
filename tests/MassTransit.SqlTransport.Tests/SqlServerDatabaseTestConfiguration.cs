@@ -3,10 +3,10 @@ namespace MassTransit.DbTransport.Tests;
 using System;
 using System.Reflection;
 using EntityFrameworkCoreIntegration;
+using MassTransit.Tests;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using SqlServer;
-using TestFramework;
 
 
 public class SqlServerDatabaseTestConfiguration :

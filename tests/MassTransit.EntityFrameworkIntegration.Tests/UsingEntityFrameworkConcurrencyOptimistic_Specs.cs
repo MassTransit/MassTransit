@@ -5,6 +5,7 @@
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
     using System.Threading.Tasks;
+    using MassTransit.Tests;
     using NUnit.Framework;
     using Saga;
     using TestFramework;

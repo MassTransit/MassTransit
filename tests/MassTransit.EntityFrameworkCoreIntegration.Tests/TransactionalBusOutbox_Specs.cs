@@ -4,6 +4,7 @@
     using System.Threading.Tasks;
     using System.Transactions;
     using Internals;
+    using MassTransit.Tests;
     using MassTransit.Tests.Saga.Messages;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.ChangeTracking;

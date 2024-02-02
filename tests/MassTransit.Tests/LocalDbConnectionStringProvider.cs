@@ -1,4 +1,4 @@
-namespace MassTransit.TestFramework
+namespace MassTransit.Tests
 {
     using System;
     using System.Collections.Generic;

@@ -4,6 +4,7 @@
     using System.Linq;
     using System.Threading.Tasks;
     using Audit;
+    using MassTransit.Tests;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;

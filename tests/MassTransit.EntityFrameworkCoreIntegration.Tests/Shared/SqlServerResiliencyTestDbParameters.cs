@@ -2,6 +2,7 @@
 {
     using System;
     using System.Reflection;
+    using MassTransit.Tests;
     using Microsoft.EntityFrameworkCore;
     using TestFramework;
 
