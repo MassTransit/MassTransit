@@ -16,6 +16,8 @@ namespace MassTransit
 
         TimeSpan? Expiry { set; }
 
+        IRetryPolicy RetryPolicy { set; }
+        
         /// <summary>
         /// Set the database factory using configuration, which caches a <see cref="ConnectionMultiplexer" /> under the hood.
         /// </summary>
