@@ -78,10 +78,10 @@ namespace MassTransit.Logging
             {
                 activity.SetTag(DiagnosticHeaders.InputAddress, inputAddress);
 
-                if ((context.TransportHeaders.TryGetHeader(MessageHeaders.MessageId, out var messageIdHeader)
-                        || context.TransportHeaders.TryGetHeader(MessageHeaders.TransportMessageId, out messageIdHeader))
+                if ((context.TransportHeaders.TryGetHeader(MessageHeaders.TransportMessageId, out var messageIdHeader)
+                        || context.TransportHeaders.TryGetHeader(MessageHeaders.MessageId, out messageIdHeader))
                     && messageIdHeader is string text)
-                    activity.SetTag(DiagnosticHeaders.Messaging.MessageId, text);
+                    activity.SetTag(DiagnosticHeaders.Messaging.TransportMessageId, text);
             }
 
             activity.Start();
@@ -181,7 +181,7 @@ namespace MassTransit.Logging
             if (activity.IsAllDataRequested)
             {
                 if (context.MessageId.HasValue)
-                    activity.SetTag(DiagnosticHeaders.Messaging.MessageId, context.MessageId.Value.ToString("D"));
+                    activity.SetTag(DiagnosticHeaders.MessageId, context.MessageId.Value.ToString("D"));
                 if (conversationId != null)
                     activity.SetTag(DiagnosticHeaders.Messaging.ConversationId, conversationId);
                 if (context.CorrelationId.HasValue)
