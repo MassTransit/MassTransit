@@ -92,7 +92,7 @@ namespace MassTransit.Logging
         public static StartedActivity? StartConsumerActivity<TConsumer, T>(this ILogContext logContext, ConsumeContext<T> context)
             where T : class
         {
-            return StartActivity(activity =>
+            return StartActivity(context, activity =>
             {
                 activity.SetTag(DiagnosticHeaders.ConsumerType, TypeCache<TConsumer>.ShortName);
                 activity.SetTag(DiagnosticHeaders.PeerAddress, MessageTypeCache<T>.DiagnosticAddress);
@@ -102,7 +102,7 @@ namespace MassTransit.Logging
         public static StartedActivity? StartHandlerActivity<T>(this ILogContext logContext, ConsumeContext<T> context)
             where T : class
         {
-            return StartActivity(activity =>
+            return StartActivity(context, activity =>
             {
                 activity.SetTag(DiagnosticHeaders.ConsumerType, "Handler");
                 activity.SetTag(DiagnosticHeaders.PeerAddress, MessageTypeCache<T>.DiagnosticAddress);
@@ -113,7 +113,7 @@ namespace MassTransit.Logging
             where TSaga : class, ISaga
             where T : class
         {
-            return StartActivity(activity =>
+            return StartActivity(context, activity =>
             {
                 activity.SetTag(DiagnosticHeaders.SagaId, context.Saga.CorrelationId.ToString("D"));
                 activity.SetTag(DiagnosticHeaders.ConsumerType, TypeCache<TSaga>.ShortName);
@@ -125,7 +125,7 @@ namespace MassTransit.Logging
             where TSaga : class, SagaStateMachineInstance
             where T : class
         {
-            return StartActivity(activity =>
+            return StartActivity(context, activity =>
             {
                 activity.SetTag(DiagnosticHeaders.SagaId, context.Saga.CorrelationId.ToString("D"));
                 activity.SetTag(DiagnosticHeaders.ConsumerType, context.StateMachine.Name);
@@ -137,7 +137,7 @@ namespace MassTransit.Logging
             where TActivity : IExecuteActivity<TArguments>
             where TArguments : class
         {
-            return StartActivity(activity =>
+            return StartActivity(context, activity =>
             {
                 activity.SetTag(DiagnosticHeaders.TrackingNumber, context.Message.TrackingNumber.ToString("D"));
                 activity.SetTag(DiagnosticHeaders.ConsumerType, TypeCache<TActivity>.ShortName);
@@ -149,7 +149,7 @@ namespace MassTransit.Logging
             where TActivity : ICompensateActivity<TLog>
             where TLog : class
         {
-            return StartActivity(activity =>
+            return StartActivity(context, activity =>
             {
                 activity.SetTag(DiagnosticHeaders.TrackingNumber, context.Message.TrackingNumber.ToString("D"));
                 activity.SetTag(DiagnosticHeaders.ConsumerType, TypeCache<TActivity>.ShortName);
@@ -243,7 +243,7 @@ namespace MassTransit.Logging
             return default;
         }
 
-        static StartedActivity? StartActivity(Action<System.Diagnostics.Activity> started)
+        static StartedActivity? StartActivity(ConsumeContext context, Action<System.Diagnostics.Activity> started)
         {
             var currentActivity = System.Diagnostics.Activity.Current;
             if (currentActivity == null)
@@ -266,7 +266,26 @@ namespace MassTransit.Logging
             activity.SetTag(DiagnosticHeaders.Messaging.Operation, "process");
 
             if (activity.IsAllDataRequested)
+            {
+                if (context.MessageId.HasValue)
+                    activity.SetTag(DiagnosticHeaders.MessageId, context.MessageId.Value.ToString("D"));
+                if (context.ConversationId.HasValue)
+                    activity.SetTag(DiagnosticHeaders.Messaging.ConversationId, context.ConversationId.Value.ToString("D"));
+                if (context.CorrelationId.HasValue)
+                    activity.SetTag(DiagnosticHeaders.CorrelationId, context.CorrelationId.Value.ToString("D"));
+                if (context.RequestId.HasValue)
+                    activity.SetTag(DiagnosticHeaders.RequestId, context.RequestId.Value.ToString("D"));
+                if (context.InitiatorId.HasValue)
+                    activity.SetTag(DiagnosticHeaders.InitiatorId, context.InitiatorId.Value.ToString("D"));
+                if (context.SourceAddress != null)
+                    activity.SetTag(DiagnosticHeaders.SourceAddress, context.SourceAddress.ToString());
+                if (context.DestinationAddress != null)
+                    activity.SetTag(DiagnosticHeaders.DestinationAddress, context.DestinationAddress.ToString());
+
+                activity.SetTag(DiagnosticHeaders.MessageTypes, string.Join(",", context.SupportedMessageTypes));
+
                 started(activity);
+            }
 
             activity.Start();
 

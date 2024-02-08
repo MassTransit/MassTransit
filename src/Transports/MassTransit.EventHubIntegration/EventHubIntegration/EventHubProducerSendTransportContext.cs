@@ -175,7 +175,7 @@ namespace MassTransit.EventHubIntegration
         }
 
         public override string EntityName => _endpointAddress.EventHubName;
-        public override string ActivitySystem => EventHubEndpointAddress.PathPrefix;
+        public override string ActivitySystem => "eventhubs";
 
         public override Task<SendContext<T>> CreateSendContext<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
         {
