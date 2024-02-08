@@ -31,7 +31,7 @@ namespace MassTransit.AzureServiceBusTransport
         }
 
         public override string EntityName { get; }
-        public override string ActivitySystem => "service-bus";
+        public override string ActivitySystem => "azure_servicebus";
 
         public Task Send(IPipe<SendEndpointContext> pipe, CancellationToken cancellationToken = default)
         {

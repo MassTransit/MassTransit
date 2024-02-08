@@ -26,7 +26,7 @@ namespace MassTransit.Logging
         {
             if (activity.IsAllDataRequested)
             {
-                SetTag(activity, DiagnosticHeaders.MessageId, context.MessageId);
+                SetTag(activity, DiagnosticHeaders.Messaging.MessageId, context.MessageId);
                 SetTag(activity, DiagnosticHeaders.Messaging.ConversationId, context.ConversationId);
 
                 SetTag(activity, DiagnosticHeaders.CorrelationId, context.CorrelationId);

@@ -33,7 +33,7 @@ namespace MassTransit.AmazonSqsTransport
         }
 
         public override string EntityName { get; }
-        public override string ActivitySystem => "sqs";
+        public override string ActivitySystem => "aws_sqs";
 
         public Task Send(IPipe<ClientContext> pipe, CancellationToken cancellationToken = default)
         {
