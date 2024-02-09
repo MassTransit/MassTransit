@@ -209,7 +209,7 @@
         async Task RunRpc(Action callback, CancellationToken cancellationToken)
         {
             if (_model.IsClosed)
-                throw new InvalidOperationException($"The channel was closed: {_model.CloseReason} {_model.ChannelNumber}");
+                throw new OperationInterruptedException(new ShutdownEventArgs(ShutdownInitiator.Application, 491, "Channel is already closed"));
 
             try
             {
@@ -230,7 +230,7 @@
         async Task<T> RunRpc<T>(Func<T> callback, CancellationToken cancellationToken)
         {
             if (_model.IsClosed)
-                throw new InvalidOperationException($"The channel was closed: {_model.CloseReason} {_model.ChannelNumber}");
+                throw new OperationInterruptedException(new ShutdownEventArgs(ShutdownInitiator.Application, 491, "Channel is already closed"));
 
             try
             {
