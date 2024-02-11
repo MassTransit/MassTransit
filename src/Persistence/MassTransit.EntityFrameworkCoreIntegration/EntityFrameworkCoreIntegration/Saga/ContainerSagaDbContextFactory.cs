@@ -5,14 +5,13 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
     using Microsoft.EntityFrameworkCore;
 
 
-    public class ContainerSagaDbContextFactory<TContext, TSaga> :
+    public class ContainerSagaDbContextFactory<TSaga> :
         ISagaDbContextFactory<TSaga>
-        where TContext : DbContext
         where TSaga : class, ISaga
     {
-        readonly TContext _dbContext;
+        readonly DbContext _dbContext;
 
-        public ContainerSagaDbContextFactory(TContext dbContext)
+        public ContainerSagaDbContextFactory(DbContext dbContext)
         {
             _dbContext = dbContext;
         }

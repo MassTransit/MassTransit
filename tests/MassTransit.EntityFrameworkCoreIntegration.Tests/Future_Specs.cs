@@ -20,7 +20,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
                     r.ConcurrencyMode = ConcurrencyMode.Pessimistic;
                     r.LockStatementProvider = new SqlServerLockStatementProvider();
 
-                    r.ExistingDbContext<FutureSagaDbContext>();
+                    r.ExistingDbContext(typeof(FutureSagaDbContext));
                 });
         }
 

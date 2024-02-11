@@ -42,8 +42,14 @@ namespace MassTransit
         /// <typeparam name="TContext"></typeparam>
         void ExistingDbContext<TContext>()
             where TContext : DbContext;
-    }
 
+        /// <summary>
+        /// Use an existing (already configured in the container) DbContext that will be resolved
+        /// within the container scope
+        /// </summary>
+        /// <param name="dbContextImpl">DbContext implementation type</param>
+        void ExistingDbContext(Type dbContextImpl);
+    }
 
     public interface IEntityFrameworkSagaRepositoryConfigurator<TSaga> :
         IEntityFrameworkSagaRepositoryConfigurator

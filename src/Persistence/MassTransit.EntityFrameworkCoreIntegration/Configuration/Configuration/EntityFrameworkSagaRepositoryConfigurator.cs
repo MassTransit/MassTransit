@@ -86,7 +86,34 @@ namespace MassTransit.Configuration
         {
             _configureDbContext = configurator =>
             {
-                configurator.TryAddScoped<ISagaDbContextFactory<TSaga>, ContainerSagaDbContextFactory<TContext, TSaga>>();
+                configurator.TryAddScoped<ISagaDbContextFactory<TSaga>>(sp =>
+                {
+                    var dbCtx = (DbContext)sp.GetRequiredService<TContext>();
+                    return new ContainerSagaDbContextFactory<TSaga>(dbCtx);
+                });
+            };
+        }
+
+        public void ExistingDbContext(Type dbContextImpl)
+        {
+            if (!typeof(DbContext).IsAssignableFrom(dbContextImpl))
+            {
+                new[]
+                {
+                    this.Failure(
+                        "DbContext",
+                        "Provided type must implement DbContext base class"
+                    )
+                }.ThrowIfContainsFailure();
+            }
+
+            _configureDbContext = configurator =>
+            {
+                configurator.TryAddScoped<ISagaDbContextFactory<TSaga>>(sp =>
+                {
+                    var dbCtx = (DbContext)sp.GetRequiredService(dbContextImpl);
+                    return new ContainerSagaDbContextFactory<TSaga>(dbCtx);
+                });
             };
         }
 
@@ -124,7 +151,7 @@ namespace MassTransit.Configuration
 
             collection.TryAddScoped<TContext, TImplementation>();
 
-            collection.TryAddScoped<ISagaDbContextFactory<TSaga>, ContainerSagaDbContextFactory<TContext, TSaga>>();
+            collection.TryAddScoped<ISagaDbContextFactory<TSaga>, ContainerSagaDbContextFactory<TSaga>>();
         }
 
         static DbContextOptions<TContext> DbContextOptionsFactory<TContext>(IServiceProvider provider,
