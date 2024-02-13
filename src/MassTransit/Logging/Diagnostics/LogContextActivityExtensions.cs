@@ -267,6 +267,11 @@ namespace MassTransit.Logging
 
             if (activity.IsAllDataRequested)
             {
+                if ((context.ReceiveContext.TransportHeaders.TryGetHeader(MessageHeaders.TransportMessageId, out var messageIdHeader)
+                        || context.ReceiveContext.TransportHeaders.TryGetHeader(MessageHeaders.MessageId, out messageIdHeader))
+                    && messageIdHeader is string text)
+                    activity.SetTag(DiagnosticHeaders.Messaging.TransportMessageId, text);
+
                 if (context.MessageId.HasValue)
                     activity.SetTag(DiagnosticHeaders.MessageId, context.MessageId.Value.ToString("D"));
                 if (context.ConversationId.HasValue)
