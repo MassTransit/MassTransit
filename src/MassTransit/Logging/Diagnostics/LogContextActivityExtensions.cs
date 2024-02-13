@@ -279,6 +279,8 @@ namespace MassTransit.Logging
                     activity.SetTag(DiagnosticHeaders.InitiatorId, context.InitiatorId.Value.ToString("D"));
                 if (context.SourceAddress != null)
                     activity.SetTag(DiagnosticHeaders.SourceAddress, context.SourceAddress.ToString());
+                if (context.DestinationAddress != null)
+                    activity.SetTag(DiagnosticHeaders.DestinationAddress, context.DestinationAddress.ToString());
 
                 activity.SetTag(DiagnosticHeaders.MessageTypes, string.Join(",", context.SupportedMessageTypes));
 
