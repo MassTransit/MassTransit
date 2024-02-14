@@ -231,8 +231,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
                     x.SetTestTimeouts(testInactivityTimeout: TimeSpan.FromSeconds(5));
                     x.AddEntityFrameworkOutbox<ReliableDbContext>(o =>
                     {
-                        o.QueryDelay = TimeSpan.FromMinutes(10);
-
                         o.UseBusOutbox(bo =>
                         {
                             bo.MessageDeliveryLimit = 10;
