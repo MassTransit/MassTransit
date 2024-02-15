@@ -108,6 +108,90 @@ namespace MassTransit.Tests
 
 
     [TestFixture]
+    public class Using_outbound_scoped_filters_with_the_job_service
+    {
+        [Test]
+        public async Task Should_complete_the_job()
+        {
+            await using var provider = new ServiceCollection()
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.SetTestTimeouts(testInactivityTimeout: TimeSpan.FromSeconds(10));
+
+                    x.SetKebabCaseEndpointNameFormatter();
+
+                    x.AddConsumer<OddJobConsumer>()
+                        .Endpoint(e => e.Name = "odd-job");
+
+                    x.AddConsumer<OddJobCompletedConsumer>()
+                        .Endpoint(e => e.ConcurrentMessageLimit = 1);
+
+                    x.SetInMemorySagaRepositoryProvider();
+
+                    x.AddJobSagaStateMachines();
+                    x.SetJobConsumerOptions(options => options.HeartbeatInterval = TimeSpan.FromSeconds(10))
+                        .Endpoint(e => e.PrefetchCount = 100);
+
+                    x.AddConfigureEndpointsCallback((context, name, cfg) =>
+                    {
+                        cfg.UseMessageScope(context);
+                        cfg.UsePublishFilter(typeof(JobTestPublishFilter<>), context);
+                    });
+
+                    x.UsingInMemory((context, cfg) =>
+                    {
+                        cfg.UseDelayedMessageScheduler();
+
+                        cfg.ConfigureEndpoints(context);
+                    });
+                })
+                .BuildServiceProvider(true);
+
+            var harness = await provider.StartTestHarness();
+            try
+            {
+                var jobId = NewId.NextGuid();
+
+                IRequestClient<SubmitJob<OddJob>> client = harness.GetRequestClient<SubmitJob<OddJob>>();
+
+                Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new
+                {
+                    JobId = jobId,
+                    Job = new { Duration = TimeSpan.FromSeconds(1) }
+                });
+
+                Assert.That(response.Message.JobId, Is.EqualTo(jobId));
+
+                Assert.That(await harness.Published.Any<JobSubmitted>(), Is.True);
+                Assert.That(await harness.Published.Any<JobStarted>(), Is.True);
+
+                Assert.That(await harness.Published.Any<JobCompleted>(), Is.True);
+                Assert.That(await harness.Published.Any<JobCompleted<OddJob>>(), Is.True);
+            }
+            finally
+            {
+                await harness.Stop();
+            }
+        }
+
+
+        public class JobTestPublishFilter<T> :
+            IFilter<PublishContext<T>>
+            where T : class
+        {
+            public Task Send(PublishContext<T> context, IPipe<PublishContext<T>> next)
+            {
+                return next.Send(context);
+            }
+
+            public void Probe(ProbeContext context)
+            {
+            }
+        }
+    }
+
+
+    [TestFixture]
     public class JobConsumer_Specs
     {
         [Test]
