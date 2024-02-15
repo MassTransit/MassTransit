@@ -39,7 +39,7 @@
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.1.0" />
-    <PackageVersion Include="Microsoft.Data.SqlClient" Version="2.1.5" />
+    <PackageVersion Include="Microsoft.Data.SqlClient" Version="2.1.7" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -82,7 +82,7 @@
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="Newtonsoft.Json.Bson" Version="1.0.2" />
     <PackageVersion Include="NHibernate" Version="5.4.7" />
-    <PackageVersion Include="Npgsql" Version="8.0.0"/>
+    <PackageVersion Include="Npgsql" Version="8.0.0" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.0" />
     <PackageVersion Include="NUnit" Version="3.14.0" />
     <PackageVersion Include="NUnit.Analyzers" Version="3.3.0" />
@@ -100,7 +100,7 @@
     <PackageVersion Include="SharpZipLib" Version="1.4.2" />
     <PackageVersion Include="Shouldly" Version="4.1.0" />
     <PackageVersion Include="StackExchange.Redis" Version="2.7.10" />
-    <PackageVersion Include="System.Data.SqlClient" Version="4.8.5" />
+    <PackageVersion Include="System.Data.SqlClient" Version="4.8.6" />
     <PackageVersion Include="System.Data.SQLite" Version="1.0.118" />
     <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="6.0.1" Condition="'$(TargetFramework)' != 'net7.0' AND '$(TargetFramework)' != 'net8.0'" />
     <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="7.0.1" Condition="'$(TargetFramework)' == 'net7.0'" />
