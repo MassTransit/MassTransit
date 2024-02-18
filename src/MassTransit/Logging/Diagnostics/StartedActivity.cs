@@ -41,7 +41,7 @@ namespace MassTransit.Logging
                 { DiagnosticHeaders.Exceptions.Escaped, escaped },
                 { DiagnosticHeaders.Exceptions.Message, exceptionMessage },
                 { DiagnosticHeaders.Exceptions.Type, TypeCache.GetShortName(exception.GetType()) },
-                { DiagnosticHeaders.Exceptions.Stacktrace, ExceptionUtil.GetStackTrace(exception) }
+                { DiagnosticHeaders.Exceptions.Stacktrace, exception.ToString() }
             };
 
             var activityEvent = new ActivityEvent(DiagnosticHeaders.Exceptions.EventName, DateTimeOffset.UtcNow, tags);
