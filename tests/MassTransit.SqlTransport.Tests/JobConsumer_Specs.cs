@@ -73,7 +73,9 @@ namespace MassTransit.DbTransport.Tests
             Assert.That(response.Message.JobId, Is.EqualTo(jobId));
 
             Assert.That(await harness.Published.Any<JobSubmitted>(), Is.True);
+
             Assert.That(await harness.Published.Any<JobStarted>(), Is.True);
+            Assert.That(await harness.Published.Any<JobStarted<OddJob>>(), Is.True);
 
             await harness.Bus.Publish<CancelJob>(new { JobId = jobId });
 
@@ -105,7 +107,9 @@ namespace MassTransit.DbTransport.Tests
             Assert.That(response.Message.JobId, Is.EqualTo(jobId));
 
             Assert.That(await harness.Published.Any<JobSubmitted>(), Is.True);
+
             Assert.That(await harness.Published.Any<JobStarted>(), Is.True);
+            Assert.That(await harness.Published.Any<JobStarted<OddJob>>(), Is.True);
 
             IRequestClient<GetJobState> stateClient = harness.GetRequestClient<GetJobState>();
 
@@ -148,7 +152,9 @@ namespace MassTransit.DbTransport.Tests
             Assert.That(response.Message.JobId, Is.EqualTo(jobId));
 
             Assert.That(await harness.Published.Any<JobSubmitted>(), Is.True);
+
             Assert.That(await harness.Published.Any<JobStarted>(), Is.True);
+            Assert.That(await harness.Published.Any<JobStarted<OddJob>>(), Is.True);
 
             await harness.Bus.Publish<CancelJob>(new { JobId = jobId });
 
@@ -233,7 +239,9 @@ namespace MassTransit.DbTransport.Tests
             Assert.That(response.Message.JobId, Is.EqualTo(jobId));
 
             Assert.That(await harness.Published.Any<JobSubmitted>(), Is.True);
+
             Assert.That(await harness.Published.Any<JobStarted>(), Is.True);
+            Assert.That(await harness.Published.Any<JobStarted<OddJob>>(), Is.True);
 
             Assert.That(await harness.Published.Any<JobCompleted>(), Is.True);
             Assert.That(await harness.Published.Any<JobCompleted<OddJob>>(), Is.True);
@@ -254,7 +262,9 @@ namespace MassTransit.DbTransport.Tests
             await harness.Bus.Publish<OddJob>(new { Duration = TimeSpan.FromSeconds(1) });
 
             Assert.That(await harness.Published.Any<JobSubmitted>(), Is.True);
+
             Assert.That(await harness.Published.Any<JobStarted>(), Is.True);
+            Assert.That(await harness.Published.Any<JobStarted<OddJob>>(), Is.True);
 
             Assert.That(await harness.Published.Any<JobCompleted>(), Is.True);
             Assert.That(await harness.Published.Any<JobCompleted<OddJob>>(), Is.True);

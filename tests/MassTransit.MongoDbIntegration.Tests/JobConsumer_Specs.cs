@@ -98,7 +98,9 @@ namespace MassTransit.MongoDbIntegration.Tests
                 Assert.That(response.Message.JobId, Is.EqualTo(jobId));
 
                 Assert.That(await harness.Published.Any<JobSubmitted>(), Is.True);
+
                 Assert.That(await harness.Published.Any<JobStarted>(), Is.True);
+                Assert.That(await harness.Published.Any<JobStarted<OddJob>>(), Is.True);
 
                 Assert.That(await harness.Published.Any<JobCompleted>(), Is.True);
                 Assert.That(await harness.Published.Any<JobCompleted<OddJob>>(), Is.True);
