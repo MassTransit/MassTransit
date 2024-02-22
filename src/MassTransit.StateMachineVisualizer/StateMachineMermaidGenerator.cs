@@ -59,7 +59,7 @@
                 string vertexLabel = GetVertexLabel(vertex, true);
 
                 if (vertex.IsComposite)
-                    return $"{index}[\\\"{vertexLabel}\"/])";
+                    return $"{index}[\\\"{vertexLabel}\"/]";
 
                 return $"{index}[\"{vertexLabel}\"]";
             }
