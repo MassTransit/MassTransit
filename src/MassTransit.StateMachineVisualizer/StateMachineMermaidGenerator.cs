@@ -29,7 +29,7 @@
             {
                 string source = FormatVertex(edge.Source, vertices);
                 string target = FormatVertex(edge.Target, vertices);
-                string line = $"{Environment.NewLine}    {source} --> {target}";
+                string line = $"{Environment.NewLine}    {source} --> {target};";
 
                 output.Append(line);
             }

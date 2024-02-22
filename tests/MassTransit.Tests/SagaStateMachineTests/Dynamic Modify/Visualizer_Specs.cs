@@ -104,18 +104,18 @@
 }";
 
         const string ExpectedMermaidFile = @"flowchart TB;
-    0([""Initial""]) --> 5[""Initialized""]
-    1([""Running""]) --> 7[""Finished""]
-    1([""Running""]) --> 8[""Suspend""]
-    2([""Failed""]) --> 10[""Restart«RestartData»""]
-    4([""Suspended""]) --> 9[""Resume""]
-    5[""Initialized""] --> 1([""Running""])
-    5[""Initialized""] --> 6[""Exception""]
-    6[""Exception""] --> 2([""Failed""])
-    7[""Finished""] --> 3([""Final""])
-    8[""Suspend""] --> 4([""Suspended""])
-    9[""Resume""] --> 1([""Running""])
-    10[""Restart«RestartData»""] --> 1([""Running""])";
+    0([""Initial""]) --> 5[""Initialized""];
+    1([""Running""]) --> 7[""Finished""];
+    1([""Running""]) --> 8[""Suspend""];
+    2([""Failed""]) --> 10[""Restart«RestartData»""];
+    4([""Suspended""]) --> 9[""Resume""];
+    5[""Initialized""] --> 1([""Running""]);
+    5[""Initialized""] --> 6[""Exception""];
+    6[""Exception""] --> 2([""Failed""]);
+    7[""Finished""] --> 3([""Final""]);
+    8[""Suspend""] --> 4([""Suspended""]);
+    9[""Resume""] --> 1([""Running""]);
+    10[""Restart«RestartData»""] --> 1([""Running""]);";
 
 
         class Instance :

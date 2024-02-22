@@ -14,7 +14,7 @@
             Graph = CreateAdjacencyGraph(data);
         }
 
-        private static AdjacencyGraph<Vertex, Edge<Vertex>> CreateAdjacencyGraph(StateMachineGraph data)
+        static AdjacencyGraph<Vertex, Edge<Vertex>> CreateAdjacencyGraph(StateMachineGraph data)
         {
             var graph = new AdjacencyGraph<Vertex, Edge<Vertex>>();
 
