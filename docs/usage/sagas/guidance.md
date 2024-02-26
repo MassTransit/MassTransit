@@ -37,7 +37,7 @@ services.AddMassTransit(x =>
 
             e.ConfigureSaga<OrderState>(context, s =>
             {
-                var partition = endpointConfigurator.CreatePartitioner(ConcurrencyLimit);
+                var partition = s.CreatePartitioner(ConcurrencyLimit);
 
                 s.Message<SubmitOrder>(x => x.UsePartitioner(partition, m => m.Message.OrderId));
                 s.Message<OrderAccepted>(x => x.UsePartitioner(partition, m => m.Message.OrderId));
