@@ -92,14 +92,26 @@ namespace MassTransit.AmazonSqsTransport
 
             if (!QueueHasTopicPermission(policy, topicInfo.Arn, sqsQueueArn))
             {
-                var statement = new Statement(Statement.StatementEffect.Allow);
-            #pragma warning disable 618
-                statement.Actions.Add(SQSActionIdentifiers.SendMessage);
-            #pragma warning restore 618
-                statement.Resources.Add(new Resource(sqsQueueArn));
-                statement.Conditions.Add(ConditionFactory.NewSourceArnCondition(topicInfo.Arn));
-                statement.Principals.Add(new Principal("Service","sns.amazonaws.com"));
-                policy.Statements.Add(statement);
+                var statement = policy.Statements.FirstOrDefault();
+
+                if (statement is null)
+                {
+                    statement = new Statement(Statement.StatementEffect.Allow);
+#pragma warning disable 618
+                    statement.Actions.Add(SQSActionIdentifiers.SendMessage);
+#pragma warning restore 618
+                    statement.Resources.Add(new Resource(sqsQueueArn));
+                    statement.Conditions.Add(ConditionFactory.NewSourceArnCondition(topicInfo.Arn));
+                    statement.Principals.Add(new Principal("Service", "sns.amazonaws.com"));
+                    policy.Statements.Add(statement);
+                }
+
+                var condition = statement.Conditions.First();
+
+                condition.Values = condition
+                    .Values
+                    .Append(topicInfo.Arn)
+                    .ToArray();
 
                 var jsonPolicy = policy.ToJson();
 
