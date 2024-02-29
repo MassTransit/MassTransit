@@ -17,11 +17,11 @@ namespace MassTransit.KafkaIntegration.Configuration
     {
         readonly ClientConfig _clientConfig;
         readonly Recycle<IClientContextSupervisor> _clientSupervisor;
+        readonly List<Action<ISendPipeConfigurator>> _configureSend;
         readonly ReceiveEndpointObservable _endpointObservers;
         readonly SingleThreadedDictionary<string, IKafkaProducerSpecification> _producers;
         readonly SendObservable _sendObservers;
         readonly SingleThreadedDictionary<string, IKafkaConsumerSpecification> _topics;
-        Action<ISendPipeConfigurator> _configureSend;
         IHeadersDeserializer _headersDeserializer;
         IHeadersSerializer _headersSerializer;
         bool _isHostConfigured;
@@ -36,6 +36,7 @@ namespace MassTransit.KafkaIntegration.Configuration
             _endpointObservers = new ReceiveEndpointObservable();
             _sendObservers = new SendObservable();
             _serializerFactory = new DefaultKafkaSerializerFactory();
+            _configureSend = new List<Action<ISendPipeConfigurator>>();
 
             SetHeadersDeserializer(DictionaryHeadersSerialize.Deserializer);
             SetHeadersSerializer(DictionaryHeadersSerialize.Serializer);
@@ -261,7 +262,7 @@ namespace MassTransit.KafkaIntegration.Configuration
 
         public void ConfigureSend(Action<ISendPipeConfigurator> callback)
         {
-            _configureSend = callback ?? throw new ArgumentNullException(nameof(callback));
+            _configureSend.Add(callback ?? throw new ArgumentNullException(nameof(callback)));
         }
 
         public KafkaSendTransportContext<TKey, TValue> CreateSendTransportContext<TKey, TValue>(IBusInstance busInstance, string topic)
@@ -287,15 +288,13 @@ namespace MassTransit.KafkaIntegration.Configuration
             Action<IKafkaProducerConfigurator<TKey, TValue>> configure = null)
             where TValue : class
         {
-            var configurator = new KafkaProducerSpecification<TKey, TValue>(this, producerConfig, topicName, _oAuthBearerTokenRefreshHandler);
+            var configurator = new KafkaProducerSpecification<TKey, TValue>(this, producerConfig, topicName, _oAuthBearerTokenRefreshHandler, _configureSend);
             configurator.SetHeadersSerializer(_headersSerializer);
             configurator.SetKeySerializer(_serializerFactory.GetSerializer<TKey>());
             configurator.SetValueSerializer(_serializerFactory.GetSerializer<TValue>());
             configure?.Invoke(configurator);
 
             configurator.ConnectSendObserver(_sendObservers);
-            if (_configureSend != null)
-                configurator.ConfigureSend(_configureSend);
             return configurator;
         }
 
