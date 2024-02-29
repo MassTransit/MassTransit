@@ -17,7 +17,7 @@ namespace MassTransit.AmazonSqsTransport
 
         Task<QueueInfo> CreateQueue(Queue queue);
 
-        Task CreateQueueSubscription(Topology.Topic topic, Queue queue);
+        Task<bool> CreateQueueSubscription(Topology.Topic topic, Queue queue);
 
         Task DeleteTopic(Topology.Topic topic);
 

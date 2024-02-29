@@ -153,7 +153,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
 
         protected override void ConfigureAmazonSqsReceiveEndpoint(IAmazonSqsReceiveEndpointConfigurator configurator)
         {
-            configurator.UseRawJsonDeserializer();
+            configurator.UseRawJsonDeserializer(RawSerializerOptions.AnyMessageType | RawSerializerOptions.AddTransportHeaders);
 
             TaskCompletionSource<ConsumeContext<Command>> handler = GetTask<ConsumeContext<Command>>();
             _handler = handler.Task;
