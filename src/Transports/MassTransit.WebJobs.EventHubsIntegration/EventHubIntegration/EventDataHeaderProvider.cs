@@ -57,6 +57,12 @@ namespace MassTransit.EventHubIntegration
                 return !string.IsNullOrWhiteSpace(_eventData.CorrelationId);
             }
 
+            if (MessageHeaders.TransportSentTime.Equals(key, StringComparison.OrdinalIgnoreCase))
+            {
+                value = _eventData.EnqueuedTime.UtcDateTime;
+                return true;
+            }
+
             if (MessageHeaders.ContentType.Equals(key, StringComparison.OrdinalIgnoreCase))
             {
                 value = _eventData.ContentType;

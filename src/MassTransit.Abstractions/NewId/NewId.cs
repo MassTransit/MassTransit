@@ -94,6 +94,11 @@ namespace MassTransit
             {
                 var ticks = (long)(((ulong)_a << 32) | (uint)_b);
 
+                if (ticks > DateTime.MaxValue.Ticks)
+                    return DateTime.MaxValue;
+                if (ticks < DateTime.MinValue.Ticks)
+                    return DateTime.MinValue;
+
                 return new DateTime(ticks, DateTimeKind.Utc);
             }
         }
