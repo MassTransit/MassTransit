@@ -52,10 +52,9 @@ namespace MassTransit.Middleware
 
                 await jobContext.NotifyCompleted().ConfigureAwait(false);
             }
-            catch (OperationCanceledException exception)
+            catch (OperationCanceledException exception) when (jobContext.CancellationToken == exception.CancellationToken)
             {
-                if (jobContext.CancellationToken == exception.CancellationToken)
-                    await jobContext.NotifyCanceled("Operation canceled").ConfigureAwait(false);
+                await jobContext.NotifyCanceled("Operation canceled").ConfigureAwait(false);
             }
             catch (Exception exception)
             {
