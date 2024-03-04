@@ -68,6 +68,32 @@ namespace MassTransit.Configuration
             return register.Register(collection, registrar);
         }
 
+        public static IConsumerRegistration RegisterConsumer(this IServiceCollection collection, IContainerRegistrar registrar, Type consumerType,
+            Type consumerDefinitionType = null)
+        {
+            if (MessageTypeCache.HasSagaInterfaces(consumerType))
+                throw new ArgumentException($"{TypeCache.GetShortName(consumerType)} is a saga, and cannot be registered as a consumer", nameof(consumerType));
+
+            if (consumerDefinitionType != null)
+            {
+                if (!consumerDefinitionType.ClosesType(typeof(IConsumerDefinition<>), out Type[] types) || types[0] != consumerType)
+                {
+                    throw new ArgumentException(
+                        $"{TypeCache.GetShortName(consumerDefinitionType)} is not a consumer definition of {TypeCache.GetShortName(consumerType)}",
+                        nameof(consumerDefinitionType));
+                }
+
+                var consumerRegistrar = (IConsumerRegistrar)Activator.CreateInstance(
+                    typeof(ConsumerDefinitionRegistrar<,>).MakeGenericType(consumerType, consumerDefinitionType));
+
+                return consumerRegistrar.Register(collection, registrar);
+            }
+
+            var register = (IConsumerRegistrar)Activator.CreateInstance(typeof(ConsumerRegistrar<>).MakeGenericType(consumerType));
+
+            return register.Register(collection, registrar);
+        }
+
 
         interface IConsumerRegistrar
         {

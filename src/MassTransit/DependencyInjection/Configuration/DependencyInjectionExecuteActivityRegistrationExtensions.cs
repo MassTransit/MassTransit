@@ -1,7 +1,6 @@
 namespace MassTransit.Configuration
 {
     using System;
-    using DependencyInjection;
     using DependencyInjection.Registration;
     using Internals;
     using Microsoft.Extensions.DependencyInjection;
@@ -67,6 +66,39 @@ namespace MassTransit.Configuration
 
             var register = (IExecuteActivityRegistrar)Activator.CreateInstance(typeof(ExecuteActivityDefinitionRegistrar<,,>)
                 .MakeGenericType(typeof(TActivity), typeof(TArguments), activityDefinitionType));
+
+            return register.Register(collection, registrar);
+        }
+
+        public static IExecuteActivityRegistration RegisterExecuteActivity(this IServiceCollection collection, IContainerRegistrar registrar, Type activityType,
+            Type activityDefinitionType = null)
+        {
+            if (activityType.ClosesType(typeof(IActivity<,>), out Type[] _))
+                throw new ArgumentException($"Activities must be registered using RegisterActivity: {TypeCache.GetShortName(activityType)}",
+                    nameof(activityType));
+
+            if (!activityType.ClosesType(typeof(IExecuteActivity<>), out Type[] argumentTypes))
+                throw new ArgumentException($"Execute activities must implement IExecuteActivity<TArguments>: {TypeCache.GetShortName(activityType)}",
+                    nameof(activityType));
+
+            if (activityDefinitionType != null)
+            {
+                if (!activityDefinitionType.ClosesType(typeof(IExecuteActivityDefinition<,>), out Type[] types) || types[0] != activityType)
+                {
+                    throw new ArgumentException(
+                        $"{TypeCache.GetShortName(activityDefinitionType)} is not an activity definition of {TypeCache.GetShortName(activityType)}",
+                        nameof(activityDefinitionType));
+                }
+
+                var activityRegistrar = (IExecuteActivityRegistrar)Activator.CreateInstance(typeof(ExecuteActivityDefinitionRegistrar<,,>)
+                    .MakeGenericType(activityType, argumentTypes[0], activityDefinitionType));
+
+                return activityRegistrar.Register(collection, registrar);
+            }
+
+
+            var register = (IExecuteActivityRegistrar)Activator.CreateInstance(typeof(ExecuteActivityRegistrar<,>)
+                .MakeGenericType(activityType, argumentTypes[0]));
 
             return register.Register(collection, registrar);
         }
