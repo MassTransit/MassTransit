@@ -42,7 +42,7 @@
             _executor = new ChannelExecutor(1);
 
             _publisher = connectionContext.BatchSettings.Enabled
-                ? (IPublisher)new BatchPublisher(_executor, model, connectionContext.BatchSettings, _confirmations)
+                ? new BatchPublisher(_executor, model, connectionContext.BatchSettings, _confirmations)
                 : new ImmediatePublisher(_executor, model, _confirmations);
 
             _model.ModelShutdown += OnModelShutdown;
@@ -133,7 +133,10 @@
         public Task BasicAck(ulong deliveryTag, bool multiple)
         {
             if (_model.IsClosed)
-                return TaskUtil.Faulted<bool>(new InvalidOperationException($"The channel was closed: {_model.CloseReason} {_model.ChannelNumber}"));
+            {
+                return TaskUtil.Faulted<bool>(new OperationInterruptedException(new ShutdownEventArgs(ShutdownInitiator.Peer, 491,
+                    $"Channel is already closed: {_model.CloseReason}")));
+            }
 
             _model.BasicAck(deliveryTag, multiple);
 
@@ -209,7 +212,7 @@
         async Task RunRpc(Action callback, CancellationToken cancellationToken)
         {
             if (_model.IsClosed)
-                throw new OperationInterruptedException(new ShutdownEventArgs(ShutdownInitiator.Application, 491, "Channel is already closed"));
+                throw new OperationInterruptedException(new ShutdownEventArgs(ShutdownInitiator.Peer, 491, $"Channel is already closed: {_model.CloseReason}"));
 
             try
             {
@@ -230,7 +233,7 @@
         async Task<T> RunRpc<T>(Func<T> callback, CancellationToken cancellationToken)
         {
             if (_model.IsClosed)
-                throw new OperationInterruptedException(new ShutdownEventArgs(ShutdownInitiator.Application, 491, "Channel is already closed"));
+                throw new OperationInterruptedException(new ShutdownEventArgs(ShutdownInitiator.Peer, 491, $"Channel is already closed: {_model.CloseReason}"));
 
             try
             {
