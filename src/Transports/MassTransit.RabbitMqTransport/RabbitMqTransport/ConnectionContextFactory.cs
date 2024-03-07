@@ -33,8 +33,7 @@
 
             void HandleShutdown(object sender, ShutdownEventArgs args)
             {
-                if (args.Initiator != ShutdownInitiator.Application)
-                    contextHandle.Stop(args.ReplyText);
+                contextHandle.Stop(args.ReplyText);
             }
 
             context.ContinueWith(task =>
