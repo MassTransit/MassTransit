@@ -501,7 +501,8 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    DECLARE @vTopicId int;
+    DECLARE @vTopicId bigint;
+    DECLARE @vRowCount bigint;
     DECLARE @vEnqueueTime datetimeoffset;
     DECLARE @vRow table (
         queueId bigint,
@@ -575,7 +576,14 @@ BEGIN
             OR (qs.SubType = 2 AND @routingKey = qs.RoutingKey)
             OR (qs.SubType = 3 AND @routingKey LIKE qs.RoutingKey));
 
-    SELECT * FROM @vRow;
+    SELECT @vRowCount = COUNT(*) FROM @vRow;
+
+    IF @vRowCount = 0
+    BEGIN
+        DELETE FROM {0}.Message WHERE TransportMessageId = @transportMessageId;
+    END;
+
+    RETURN @vRowCount;
 END;
 ";
 
@@ -611,13 +619,6 @@ BEGIN
 
     DECLARE @vQueueId int;
     DECLARE @vEnqueueTime datetimeoffset;
-    DECLARE @vRow table (
-        queueId bigint,
-        transportMessageId uniqueidentifier,
-        priority int,
-        enqueueTime datetimeoffset,
-        routingKey varchar(100)
-    );
 
     IF @entityName IS NULL OR LEN(@entityName) < 1
     BEGIN
@@ -651,10 +652,9 @@ BEGIN
     );
 
     INSERT INTO {0}.MessageDelivery (QueueId, TransportMessageId, Priority, EnqueueTime, DeliveryCount, MaxDeliveryCount, PartitionKey, RoutingKey)
-    OUTPUT inserted.QueueId, inserted.TransportMessageId, inserted.Priority, inserted.EnqueueTime, inserted.RoutingKey INTO @vRow
     VALUES (@vQueueId, @transportMessageId, @priority, @vEnqueueTime, 0, @maxDeliveryCount, @partitionKey, @routingKey)
 
-    SELECT * FROM @vRow;
+    RETURN 1;
 END;
 ";
 
