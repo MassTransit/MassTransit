@@ -36,6 +36,8 @@ namespace MassTransit.Middleware
             {
                 await _next.Send(context).ConfigureAwait(false);
 
+                await context.ConsumeCompleted.ConfigureAwait(false);
+
                 await context.SetConsumed().ConfigureAwait(false);
 
                 return;
