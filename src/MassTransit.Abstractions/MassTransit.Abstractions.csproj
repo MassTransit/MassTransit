@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="../../signing.props" />
 
   <PropertyGroup>
@@ -25,6 +25,11 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="MassTransit" />
+    <InternalsVisibleTo Include="MassTransit.Tests" />
   </ItemGroup>
 
   <ItemGroup>

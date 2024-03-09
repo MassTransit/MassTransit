@@ -169,7 +169,7 @@
         /// <param name="context"></param>
         /// <param name="duration"></param>
         /// <param name="consumerType">The consumer type</param>
-        Task NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
+        internal Task NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
             where T : class;
 
         /// <summary>
@@ -179,7 +179,7 @@
         /// <param name="duration"></param>
         /// <param name="consumerType">The message consumer type</param>
         /// <param name="exception">The exception that occurred</param>
-        Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
+        internal Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
             where T : class;
     }
 
@@ -195,7 +195,7 @@
         /// </summary>
         /// <param name="duration"></param>
         /// <param name="consumerType">The consumer type</param>
-        Task NotifyConsumed(TimeSpan duration, string consumerType);
+        internal Task NotifyConsumed(TimeSpan duration, string consumerType);
 
         /// <summary>
         /// Notify that a fault occurred during message consumption -- note that this is internal, and should not be called by a consumer
@@ -203,6 +203,6 @@
         /// <param name="duration"></param>
         /// <param name="consumerType"></param>
         /// <param name="exception"></param>
-        Task NotifyFaulted(TimeSpan duration, string consumerType, Exception exception);
+        internal Task NotifyFaulted(TimeSpan duration, string consumerType, Exception exception);
     }
 }
