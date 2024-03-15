@@ -4,7 +4,8 @@ namespace MassTransit.Components
 
 
     public class RequestState :
-        SagaStateMachineInstance
+        SagaStateMachineInstance,
+        ISagaVersion
     {
         public int CurrentState { get; set; }
 
@@ -22,6 +23,8 @@ namespace MassTransit.Components
         /// The saga address where the request should be redelivered
         /// </summary>
         public Uri SagaAddress { get; set; }
+
+        public int Version { get; set; }
 
         /// <summary>
         /// Same as RequestId from the original request
