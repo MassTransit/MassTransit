@@ -880,7 +880,7 @@ BEGIN
                           mdx.LockId,
                           mdx.Priority,
                           row_number() over (partition by mdx.PartitionKey order by mdx.Priority, mdx.EnqueueTime, mdx.MessageDeliveryId) as row_number
-                   FROM transport.MessageDelivery mdx
+                   FROM transport.MessageDelivery mdx WITH (ROWLOCK, READPAST, UPDLOCK)
                    WHERE mdx.QueueId = @queueId
                      AND mdx.DeliveryCount < mdx.MaxDeliveryCount),
          so_ready as (SELECT ready.MessageDeliveryId

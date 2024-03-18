@@ -491,7 +491,7 @@ namespace MassTransit.SqlTransport.PostgreSql
                                                                WHERE row_number = 1 AND ready.lock_id IS NULL
                                                                AND ready.enqueue_time < v_now
                                                                ORDER BY ready.priority, ready.enqueue_time, ready.message_delivery_id
-                                                           LIMIT fetch_count)
+                                                           LIMIT fetch_count FOR UPDATE SKIP LOCKED)
                                                        FOR UPDATE OF md SKIP LOCKED)
                                                        UPDATE "{0}".message_delivery dm
                                                        SET delivery_count = dm.delivery_count + 1,
