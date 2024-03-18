@@ -31,6 +31,7 @@ namespace MassTransit.JobService
             var job = context.GetJob<TJob>() ?? throw new SerializationException($"The job could not be deserialized: {TypeCache<TJob>.ShortName}");
 
             await _jobService.StartJob(context, job, _jobPipe, _options.JobTimeout);
+            await context.Publish<JobStarted<TJob>>(context.Message);
         }
     }
 }

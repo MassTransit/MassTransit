@@ -9,7 +9,7 @@ namespace MassTransit.Util
 
     public class PendingTaskCollection
     {
-        readonly IDictionary<long, Task> _tasks;
+        readonly Dictionary<long, Task> _tasks;
         long _nextId;
 
         public PendingTaskCollection(int capacity)

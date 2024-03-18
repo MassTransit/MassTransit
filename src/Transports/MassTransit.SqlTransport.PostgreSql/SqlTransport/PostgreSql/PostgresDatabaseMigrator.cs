@@ -35,13 +35,14 @@ namespace MassTransit.SqlTransport.PostgreSql
         const string CreateInfrastructureSql = """
                                                SET ROLE "{1}";
 
-                                               CREATE OR REPLACE FUNCTION create_constraint_if_not_exists (t_name text, c_name text, constraint_sql text)
+                                               CREATE OR REPLACE FUNCTION "{0}".create_constraint_if_not_exists (t_name text, c_name text, constraint_sql text)
                                                RETURNS void AS
                                                $$
                                                BEGIN
                                                    IF NOT EXISTS (SELECT constraint_name
                                                                   FROM information_schema.constraint_column_usage
-                                                                  WHERE table_name = t_name AND constraint_name = c_name) THEN
+                                                                  WHERE table_name = t_name AND table_schema = '{0}'
+                                                                  AND constraint_name = c_name AND constraint_schema = '{0}') THEN
                                                        EXECUTE constraint_sql;
                                                    END IF;
                                                END;
@@ -51,7 +52,7 @@ namespace MassTransit.SqlTransport.PostgreSql
 
                                                CREATE TABLE IF NOT EXISTS "{0}".queue
                                                (
-                                                   id          bigint          not null primary key default nextval('topology_seq'),
+                                                   id          bigint          not null primary key default nextval('{0}.topology_seq'),
                                                    updated     timestamptz     not null default (now() at time zone 'utc'),
 
                                                    name        text            not null,
@@ -59,25 +60,25 @@ namespace MassTransit.SqlTransport.PostgreSql
                                                    auto_delete integer
                                                );
 
-                                               SELECT create_constraint_if_not_exists('queue', 'unique_queue',
+                                               SELECT "{0}".create_constraint_if_not_exists('queue', 'unique_queue',
                                                        'CREATE UNIQUE INDEX IF NOT EXISTS queue_uqx ON "{0}".queue (type, name) INCLUDE (id);ALTER TABLE "{0}".queue ADD CONSTRAINT unique_queue UNIQUE USING INDEX queue_uqx;');
 
                                                CREATE INDEX IF NOT EXISTS queue_auto_delete_ndx ON "{0}".queue (auto_delete) INCLUDE (id);
 
                                                CREATE TABLE IF NOT EXISTS "{0}".topic
                                                (
-                                                   id          bigint      not null primary key default nextval('topology_seq'),
+                                                   id          bigint      not null primary key default nextval('{0}.topology_seq'),
                                                    updated     timestamptz not null default (now() at time zone 'utc'),
 
                                                    name        text        not null
                                                );
 
-                                               SELECT create_constraint_if_not_exists('topic', 'unique_topic',
+                                               SELECT "{0}".create_constraint_if_not_exists('topic', 'unique_topic',
                                                        'CREATE UNIQUE INDEX IF NOT EXISTS topic_uqx ON "{0}".topic (name) INCLUDE (id);ALTER TABLE "{0}".topic ADD CONSTRAINT unique_topic UNIQUE USING INDEX topic_uqx;');
 
                                                CREATE TABLE IF NOT EXISTS "{0}".topic_subscription
                                                (
-                                                   id              bigint       not null primary key default nextval('topology_seq'),
+                                                   id              bigint       not null primary key default nextval('{0}.topology_seq'),
                                                    updated         timestamptz  not null default (now() at time zone 'utc'),
 
                                                    source_id       bigint       not null references "{0}".topic (id) ON DELETE CASCADE,
@@ -88,7 +89,7 @@ namespace MassTransit.SqlTransport.PostgreSql
                                                    filter          jsonb        not null
                                                );
 
-                                               SELECT create_constraint_if_not_exists('topic_subscription', 'unique_topic_subscription',
+                                               SELECT "{0}".create_constraint_if_not_exists('topic_subscription', 'unique_topic_subscription',
                                                        'CREATE UNIQUE INDEX IF NOT EXISTS topic_subscription_uqx ON "{0}".topic_subscription (source_id, destination_id, sub_type, routing_key, filter) INCLUDE (id);ALTER TABLE "{0}".topic_subscription ADD CONSTRAINT unique_topic_subscription UNIQUE USING INDEX topic_subscription_uqx;');
 
                                                CREATE INDEX IF NOT EXISTS topic_subscription_source_id_ndx ON "{0}".topic_subscription (source_id) INCLUDE (id, destination_id);
@@ -97,7 +98,7 @@ namespace MassTransit.SqlTransport.PostgreSql
 
                                                CREATE TABLE IF NOT EXISTS "{0}".queue_subscription
                                                (
-                                                   id              bigint       not null primary key default nextval('topology_seq'),
+                                                   id              bigint       not null primary key default nextval('{0}.topology_seq'),
                                                    updated         timestamptz  not null default (now() at time zone 'utc'),
 
                                                    source_id       bigint       not null references "{0}".topic (id) ON DELETE CASCADE,
@@ -108,7 +109,7 @@ namespace MassTransit.SqlTransport.PostgreSql
                                                    filter          jsonb        not null
                                                );
 
-                                               SELECT create_constraint_if_not_exists('queue_subscription', 'unique_queue_subscription',
+                                               SELECT "{0}".create_constraint_if_not_exists('queue_subscription', 'unique_queue_subscription',
                                                        'CREATE UNIQUE INDEX IF NOT EXISTS queue_subscription_uqx ON "{0}".queue_subscription (source_id, destination_id, sub_type, routing_key, filter);ALTER TABLE "{0}".queue_subscription ADD CONSTRAINT unique_queue_subscription UNIQUE USING INDEX queue_subscription_uqx;');
 
                                                CREATE INDEX IF NOT EXISTS queue_subscription_source_id_ndx ON "{0}".queue_subscription (source_id) INCLUDE (id, destination_id);
@@ -696,12 +697,11 @@ namespace MassTransit.SqlTransport.PostgreSql
                                                , scheduling_token_id uuid DEFAULT NULL
                                                , max_delivery_count int DEFAULT 10
                                                )
-                                                   RETURNS "{0}".message_delivery AS
+                                                   RETURNS bigint AS
                                                $$
                                                DECLARE
                                                    v_queue_id     bigint;
                                                    v_enqueue_time timestamptz;
-                                                   v_row          "{0}".message_delivery;
                                                BEGIN
                                                    if entity_name is null or length(entity_name) < 1 then
                                                        raise exception 'Queue names must not be null or empty';
@@ -722,10 +722,9 @@ namespace MassTransit.SqlTransport.PostgreSql
                                                    VALUES (transport_message_id, body, binary_body, content_type, message_type, message_id, correlation_id, conversation_id, request_id, initiator_id,
                                                        source_address, destination_address, response_address, fault_address, sent_time, headers, host, scheduling_token_id);
                                                    INSERT INTO "{0}".message_delivery (queue_id, transport_message_id, priority, enqueue_time, delivery_count, max_delivery_count, partition_key, routing_key)
-                                                   VALUES (v_queue_id, send_message.transport_message_id, send_message.priority, v_enqueue_time, 0, send_message.max_delivery_count, send_message.partition_key, send_message.routing_key)
-                                                   RETURNING * INTO v_row;
+                                                   VALUES (v_queue_id, send_message.transport_message_id, send_message.priority, v_enqueue_time, 0, send_message.max_delivery_count, send_message.partition_key, send_message.routing_key);
 
-                                                   RETURN v_row;
+                                                   RETURN 1;
 
                                                END;
                                                $$ LANGUAGE plpgsql;
@@ -756,12 +755,12 @@ namespace MassTransit.SqlTransport.PostgreSql
                                                , scheduling_token_id uuid DEFAULT NULL
                                                , max_delivery_count int DEFAULT 10
                                                )
-                                                   RETURNS SETOF "{0}".message_delivery AS
+                                                   RETURNS bigint AS
                                                $$
                                                DECLARE
                                                    v_topic_id      bigint;
                                                    v_enqueue_time  timestamptz;
-                                                   v_row           "{0}".message_delivery;
+                                                   v_publish_count bigint;
                                                BEGIN
                                                    IF entity_name IS NULL OR LENGTH(entity_name) < 1 THEN
                                                        RAISE EXCEPTION 'Topic names must not be null or empty';
@@ -781,7 +780,9 @@ namespace MassTransit.SqlTransport.PostgreSql
                                                        source_address, destination_address, response_address, fault_address, sent_time, headers, host, scheduling_token_id)
                                                    VALUES (transport_message_id, body, binary_body, content_type, message_type, message_id, correlation_id, conversation_id, request_id, initiator_id,
                                                        source_address, destination_address, response_address, fault_address, sent_time, headers, host, scheduling_token_id);
-                                                   RETURN QUERY INSERT INTO "{0}".message_delivery (queue_id, transport_message_id, priority, enqueue_time, delivery_count, max_delivery_count, partition_key, routing_key)
+
+                                                   WITH delivered AS (
+                                                   INSERT INTO "{0}".message_delivery (queue_id, transport_message_id, priority, enqueue_time, delivery_count, max_delivery_count, partition_key, routing_key)
                                                    WITH RECURSIVE fabric AS (
                                                        SELECT source_id, destination_id
                                                            FROM "{0}".topic t
@@ -812,7 +813,14 @@ namespace MassTransit.SqlTransport.PostgreSql
                                                            WHEN qs.sub_type = 3 THEN publish_message.routing_key ~ qs.routing_key
                                                            ELSE false END
                                                        AND (qs.source_id = fabric.destination_id OR qs.source_id = v_topic_id)
-                                                   RETURNING *;
+                                                   RETURNING message_delivery_id)
+                                                   SELECT COUNT(d.message_delivery_id) FROM delivered d INTO v_publish_count;
+
+                                                   IF v_publish_count = 0 THEN
+                                                       DELETE FROM "{0}".message WHERE message.transport_message_id = publish_message.transport_message_id;
+                                                   END IF;
+
+                                                   RETURN v_publish_count;
 
                                                END;
                                                $$ LANGUAGE plpgsql;

@@ -26,11 +26,12 @@ namespace MassTransit.KafkaIntegration
 
         public KafkaTopicSendTransportContext(IHostConfiguration hostConfiguration, string topicName,
             IProducerContextSupervisor supervisor, IHeadersSerializer headersSerializer, IAsyncSerializer<TKey> keySerializer,
-            IAsyncSerializer<TValue> valueSerializer, Action<ISendPipeConfigurator> configureSend, ISerialization serialization)
+            IAsyncSerializer<TValue> valueSerializer, IReadOnlyList<Action<ISendPipeConfigurator>> configureSend, ISerialization serialization)
             : base(hostConfiguration, serialization)
         {
             var sendConfiguration = new SendPipeConfiguration(hostConfiguration.Topology.SendTopology);
-            configureSend?.Invoke(sendConfiguration.Configurator);
+            for (var i = 0; i < configureSend.Count; i++)
+                configureSend[i](sendConfiguration.Configurator);
 
             _hostConfiguration = hostConfiguration;
             _supervisor = supervisor;

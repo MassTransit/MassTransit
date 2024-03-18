@@ -21,7 +21,9 @@ namespace MassTransit
         {
             try
             {
-                Response<T> response = await mediator.CreateRequest(request, cancellationToken).GetResponse<T>().ConfigureAwait(false);
+                using RequestHandle<Request<T>> handle = mediator.CreateRequest(request, cancellationToken);
+
+                Response<T> response = await handle.GetResponse<T>().ConfigureAwait(false);
 
                 return response.Message;
             }

@@ -34,13 +34,13 @@ namespace MassTransit
         /// Use a simple factory method to create the connection
         /// </summary>
         /// <param name="connectionFactory"></param>
-        void ConnectionFactory(Func<ConnectionMultiplexer> connectionFactory);
+        void ConnectionFactory(Func<IConnectionMultiplexer> connectionFactory);
 
         /// <summary>
         /// Use the configuration service provider to resolve the connection
         /// </summary>
         /// <param name="connectionFactory"></param>
-        void ConnectionFactory(Func<IServiceProvider, ConnectionMultiplexer> connectionFactory);
+        void ConnectionFactory(Func<IServiceProvider, IConnectionMultiplexer> connectionFactory);
 
         /// <summary>
         /// Select a database other than the default to be used (optional)

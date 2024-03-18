@@ -8,11 +8,13 @@
     public static class RedisSagaRepository<TSaga>
         where TSaga : class, ISagaVersion
     {
-        public static ISagaRepository<TSaga> Create(Func<IDatabase> redisDbFactory, bool optimistic = true, TimeSpan? lockTimeout = null, TimeSpan?
-            lockRetryTimeout = null, string keyPrefix = "", TimeSpan? expiry = null, IRetryPolicy retryPolicy = null)
+        public static ISagaRepository<TSaga> Create(RedisConnectionFactory connectionFactory, Func<IDatabase> redisDbFactory, bool optimistic = true,
+            TimeSpan? lockTimeout
+                = null, TimeSpan?
+                lockRetryTimeout = null, string keyPrefix = "", TimeSpan? expiry = null, IRetryPolicy retryPolicy = null)
         {
             var options = new RedisSagaRepositoryOptions<TSaga>(optimistic ? ConcurrencyMode.Optimistic : ConcurrencyMode.Pessimistic, lockTimeout, null,
-                keyPrefix, SelectDefaultDatabase, expiry, retryPolicy);
+                keyPrefix, connectionFactory, SelectDefaultDatabase, expiry, retryPolicy);
 
             var consumeContextFactory = new SagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga>();
 

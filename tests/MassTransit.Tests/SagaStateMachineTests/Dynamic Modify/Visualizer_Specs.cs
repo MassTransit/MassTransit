@@ -16,17 +16,31 @@
         }
 
         [Test]
-        public void Should_show_the_goods()
+        public void Should_show_graphviz_output()
         {
             var generator = new StateMachineGraphvizGenerator(_graph);
 
-            string dots = generator.CreateDotFile();
+            string output = generator.CreateDotFile();
 
-            Console.WriteLine(dots);
+            Console.WriteLine(output);
 
-            var expected = Expected.Replace("\r", "").Replace("\n", Environment.NewLine);
+            var expected = ExpectedGraphvizFile.Replace("\r", "").Replace("\n", Environment.NewLine);
 
-            Assert.AreEqual(expected, dots);
+            Assert.AreEqual(expected, output);
+        }
+
+        [Test]
+        public void Should_show_mermaid_output()
+        {
+            var generator = new StateMachineMermaidGenerator(_graph);
+
+            string output = generator.CreateMermaidFile();
+
+            Console.WriteLine(output);
+
+            var expected = ExpectedMermaidFile.Replace("\r", "").Replace("\n", Environment.NewLine);
+
+            Assert.AreEqual(expected, output);
         }
 
         StateMachine<Instance> _machine;
@@ -63,7 +77,7 @@
             _graph = _machine.GetGraph();
         }
 
-        const string Expected = @"digraph G {
+        const string ExpectedGraphvizFile = @"digraph G {
 0 [shape=ellipse, label=""Initial""];
 1 [shape=ellipse, label=""Running""];
 2 [shape=ellipse, label=""Failed""];
@@ -88,6 +102,20 @@
 9 -> 1;
 10 -> 1;
 }";
+
+        const string ExpectedMermaidFile = @"flowchart TB;
+    0([""Initial""]) --> 5[""Initialized""];
+    1([""Running""]) --> 7[""Finished""];
+    1([""Running""]) --> 8[""Suspend""];
+    2([""Failed""]) --> 10[""Restart«RestartData»""];
+    4([""Suspended""]) --> 9[""Resume""];
+    5[""Initialized""] --> 1([""Running""]);
+    5[""Initialized""] --> 6[""Exception""];
+    6[""Exception""] --> 2([""Failed""]);
+    7[""Finished""] --> 3([""Final""]);
+    8[""Suspend""] --> 4([""Suspended""]);
+    9[""Resume""] --> 1([""Running""]);
+    10[""Restart«RestartData»""] --> 1([""Running""]);";
 
 
         class Instance :

@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Amazon.SQS;
     using Amazon.SQS.Model;
     using Transports;
 
@@ -29,6 +30,18 @@
             {
                 value = _message.MessageId;
                 return true;
+            }
+
+            if (MessageHeaders.TransportSentTime.Equals(key, StringComparison.OrdinalIgnoreCase))
+            {
+                if (_message.Attributes.TryGetValue(MessageSystemAttributeName.SentTimestamp, out var sentTimestamp))
+                {
+                    if (DateTime.TryParse(sentTimestamp, out var timestamp))
+                    {
+                        value = timestamp;
+                        return true;
+                    }
+                }
             }
 
             value = null;

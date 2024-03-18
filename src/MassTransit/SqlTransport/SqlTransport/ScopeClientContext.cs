@@ -56,7 +56,7 @@ namespace MassTransit.SqlTransport
             return _context.Send(queueName, context);
         }
 
-        public Task<IEnumerable<MessageDelivery>> Publish<T>(string topicName, SqlMessageSendContext<T> context)
+        public Task Publish<T>(string topicName, SqlMessageSendContext<T> context)
             where T : class
         {
             return _context.Publish(topicName, context);

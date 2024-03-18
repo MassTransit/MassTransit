@@ -10,6 +10,7 @@ using NUnit.Framework;
 using Testing;
 using UnitTests;
 
+
 [TestFixture(typeof(PostgresDatabaseTestConfiguration))]
 [TestFixture(typeof(SqlServerDatabaseTestConfiguration))]
 public class Using_publish<T>
@@ -70,6 +71,47 @@ public class Using_publish<T>
     readonly T _configuration;
 
     public Using_publish()
+    {
+        _configuration = new T();
+    }
+}
+
+
+[TestFixture(typeof(PostgresDatabaseTestConfiguration))]
+[TestFixture(typeof(SqlServerDatabaseTestConfiguration))]
+public class Publishing_a_unsubscribed_message_type<T>
+    where T : IDatabaseTestConfiguration, new()
+{
+    [Test]
+    public async Task Should_not_leave_orphaned_messages()
+    {
+        await using var provider = _configuration.Create()
+            .AddMassTransitTestHarness(x =>
+            {
+                x.SetTestTimeouts(testInactivityTimeout: TimeSpan.FromSeconds(2));
+
+                _configuration.Configure(x, (context, cfg) =>
+                {
+                    cfg.ReceiveEndpoint("publish-input-queue", e =>
+                    {
+                        e.PrefetchCount = 30;
+                    });
+                });
+            })
+            .BuildServiceProvider(true);
+
+        var harness = provider.GetTestHarness();
+
+        await harness.Start();
+
+        await harness.Bus.Publish(new TestMessage($"Hello, World!"), harness.CancellationToken);
+
+        await harness.Stop();
+    }
+
+    readonly T _configuration;
+
+    public Publishing_a_unsubscribed_message_type()
     {
         _configuration = new T();
     }

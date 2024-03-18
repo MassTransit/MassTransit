@@ -60,7 +60,7 @@
             var redis = ConnectionMultiplexer.Connect("127.0.0.1");
             redis.PreserveAsyncOrder = false;
 
-            _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => RedisSagaRepository<SimpleSaga>.Create(() => redis.GetDatabase()));
+            _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => RedisSagaRepository<SimpleSaga>.Create(_ => redis, () => redis.GetDatabase()));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -120,7 +120,7 @@
             var redis = ConnectionMultiplexer.Connect("127.0.0.1");
             redis.PreserveAsyncOrder = false;
 
-            _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => RedisSagaRepository<SimpleSaga>.Create(() => redis.GetDatabase(), false));
+            _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => RedisSagaRepository<SimpleSaga>.Create(_ => redis, () => redis.GetDatabase(), false));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -180,7 +180,8 @@
             var redis = ConnectionMultiplexer.Connect("127.0.0.1");
             redis.PreserveAsyncOrder = false;
 
-            _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => RedisSagaRepository<SimpleSaga>.Create(() => redis.GetDatabase(), keyPrefix: "test"));
+            _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() =>
+                RedisSagaRepository<SimpleSaga>.Create(_ => redis, () => redis.GetDatabase(), keyPrefix: "test"));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

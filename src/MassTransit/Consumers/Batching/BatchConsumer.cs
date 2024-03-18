@@ -20,7 +20,7 @@
         readonly ChannelExecutor _dispatcher;
         readonly ChannelExecutor _executor;
         readonly DateTime _firstMessage;
-        readonly SortedDictionary<Guid, ConsumeContext<TMessage>> _messages;
+        readonly Dictionary<Guid, BatchEntry> _messages;
         readonly BatchOptions _options;
         readonly Timer _timer;
         Activity _currentActivity;
@@ -32,7 +32,7 @@
             _executor = executor;
             _consumerPipe = consumerPipe;
             _dispatcher = dispatcher;
-            _messages = new SortedDictionary<Guid, ConsumeContext<TMessage>>();
+            _messages = new Dictionary<Guid, BatchEntry>();
             _completed = TaskUtil.GetTask<DateTime>();
             _firstMessage = DateTime.UtcNow;
             _options = options;
@@ -83,7 +83,11 @@
                 _currentActivity = currentActivity;
 
             var messageId = context.MessageId ?? NewId.NextGuid();
-            _messages.Add(messageId, context);
+
+            var batchEntry = new BatchEntry(context, context.SentTime ?? context.ReceiveContext.GetSentTime() ?? DateTime.UtcNow);
+
+            if (!_messages.ContainsKey(messageId))
+                _messages.Add(messageId, batchEntry);
 
             if (_options.TimeLimitStart == BatchTimeLimitStart.FromLast)
                 _timer.Change(_options.TimeLimit, TimeSpan.FromMilliseconds(-1));
@@ -156,9 +160,20 @@
 
         List<ConsumeContext<TMessage>> GetMessageBatchInOrder()
         {
-            return _messages.Values
-                .OrderBy(x => x.SentTime ?? x.MessageId?.ToNewId().Timestamp ?? default)
-                .ToList();
+            return _messages.Values.OrderBy(x => x.Timestamp).Select(x => x.Context).ToList();
+        }
+
+
+        readonly struct BatchEntry
+        {
+            public readonly ConsumeContext<TMessage> Context;
+            public readonly DateTime Timestamp;
+
+            public BatchEntry(ConsumeContext<TMessage> context, DateTime timestamp)
+            {
+                Context = context;
+                Timestamp = timestamp;
+            }
         }
     }
 }

@@ -2,6 +2,7 @@ namespace MassTransit.Configuration
 {
     using System;
     using System.Collections.Generic;
+    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using RedisIntegration.Saga;
     using Saga;
@@ -13,8 +14,7 @@ namespace MassTransit.Configuration
         ISpecification
         where TSaga : class, ISagaVersion
     {
-        ConfigurationOptions _configurationOptions;
-        Func<IServiceProvider, ConnectionMultiplexer> _connectionFactory;
+        RedisConnectionFactory _connectionFactory;
         SelectDatabase _databaseSelector;
 
         public RedisSagaRepositoryConfigurator()
@@ -41,19 +41,24 @@ namespace MassTransit.Configuration
 
         public void DatabaseConfiguration(ConfigurationOptions configurationOptions)
         {
-            _configurationOptions = configurationOptions;
+            var configurationString = configurationOptions.ToString(true);
 
-            _connectionFactory = provider => ConnectionMultiplexer.Connect(_configurationOptions);
+            IConnectionMultiplexer Factory(IServiceProvider provider)
+            {
+                return provider.GetRequiredService<IConnectionMultiplexerFactory>().GetConnectionMultiplexer(configurationString);
+            }
+
+            _connectionFactory = Factory;
         }
 
-        public void ConnectionFactory(Func<ConnectionMultiplexer> connectionFactory)
+        public void ConnectionFactory(Func<IConnectionMultiplexer> connectionFactory)
         {
-            _connectionFactory = provider => connectionFactory();
+            _connectionFactory = _ => connectionFactory();
         }
 
-        public void ConnectionFactory(Func<IServiceProvider, ConnectionMultiplexer> connectionFactory)
+        public void ConnectionFactory(Func<IServiceProvider, IConnectionMultiplexer> connectionFactory)
         {
-            _connectionFactory = connectionFactory;
+            _connectionFactory = x => connectionFactory(x);
         }
 
         public void SelectDatabase(SelectDatabase databaseSelector)
@@ -72,8 +77,9 @@ namespace MassTransit.Configuration
         public void Register<T>(ISagaRepositoryRegistrationConfigurator<T> configurator)
             where T : class, ISagaVersion
         {
-            configurator.TryAddSingleton(_connectionFactory);
-            configurator.TryAddSingleton(new RedisSagaRepositoryOptions<T>(ConcurrencyMode, LockTimeout, LockSuffix, KeyPrefix, _databaseSelector, Expiry, RetryPolicy));
+            configurator.TryAddSingleton<IConnectionMultiplexerFactory, ConnectionMultiplexerFactory>();
+            configurator.TryAddSingleton(new RedisSagaRepositoryOptions<T>(ConcurrencyMode, LockTimeout, LockSuffix, KeyPrefix, _connectionFactory,
+                _databaseSelector, Expiry, RetryPolicy));
             configurator.RegisterLoadSagaRepository<T, RedisSagaRepositoryContextFactory<T>>();
             configurator
                 .RegisterSagaRepository<T, DatabaseContext<T>, SagaConsumeContextFactory<DatabaseContext<T>, T>, RedisSagaRepositoryContextFactory<T>>();

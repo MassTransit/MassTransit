@@ -78,6 +78,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                 catch (OperationCanceledException)
                 {
                 }
+                catch (DbUpdateConcurrencyException)
+                {
+                }
                 catch (Exception exception)
                 {
                     _logger.LogError(exception, "ProcessMessageBatch faulted");

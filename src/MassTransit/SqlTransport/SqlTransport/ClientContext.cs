@@ -51,7 +51,7 @@ namespace MassTransit.SqlTransport
         Task Send<T>(string queueName, SqlMessageSendContext<T> context)
             where T : class;
 
-        Task<IEnumerable<MessageDelivery>> Publish<T>(string topicName, SqlMessageSendContext<T> context)
+        Task Publish<T>(string topicName, SqlMessageSendContext<T> context)
             where T : class;
 
         Task<IEnumerable<SqlTransportMessage>> ReceiveMessages(string queueName, SqlReceiveMode mode, int messageLimit, TimeSpan lockDuration);

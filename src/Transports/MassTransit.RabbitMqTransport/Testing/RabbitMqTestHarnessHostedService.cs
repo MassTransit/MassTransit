@@ -39,6 +39,9 @@ namespace MassTransit.Testing
 
             if (_testOptions.CleanVirtualHost)
                 await CleanVirtualHost();
+
+            if (_testOptions.ConfigureVirtualHostCallback != null)
+                await ConfigureVirtualHost();
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
@@ -115,6 +118,38 @@ namespace MassTransit.Testing
 
                 if (exchangeCount > 0 || queueCount > 0)
                     _logger.LogInformation("Removed {QueueCount} queue(s), {ExchangeCount} exchange(s)", queueCount, exchangeCount);
+
+                connection.Close(200, "Completed (Ok)");
+            }
+            catch (Exception ex)
+            {
+                if (connection.IsOpen)
+                    connection.Close(500, $"Completed (not OK): {ex.Message}");
+            }
+        }
+
+        async Task ConfigureVirtualHost()
+        {
+            var virtualHost = _transportOptions.VHost;
+
+            var factory = new ConnectionFactory
+            {
+                HostName = _transportOptions.Host,
+                Port = _transportOptions.Port,
+                VirtualHost = virtualHost ?? "/",
+                UserName = _transportOptions.User,
+                Password = _transportOptions.Pass
+            };
+
+            var connection = factory.CreateConnection();
+            try
+            {
+                using var model = connection.CreateModel();
+                model.ConfirmSelect();
+
+                _testOptions.ConfigureVirtualHostCallback(model);
+
+                model.Close();
 
                 connection.Close(200, "Completed (Ok)");
             }

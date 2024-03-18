@@ -25,8 +25,7 @@
 
             void HandleShutdown(object sender, ShutdownEventArgs args)
             {
-                if (args.Initiator != ShutdownInitiator.Application)
-                    asyncContext.Stop(args.ReplyText);
+                asyncContext.Stop(args.ReplyText);
             }
 
             context.ContinueWith(task =>

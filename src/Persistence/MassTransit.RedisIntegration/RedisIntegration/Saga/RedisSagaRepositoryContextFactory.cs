@@ -16,12 +16,12 @@ namespace MassTransit.RedisIntegration.Saga
         readonly ISagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga> _factory;
         readonly RedisSagaRepositoryOptions<TSaga> _options;
 
-        public RedisSagaRepositoryContextFactory(ConnectionMultiplexer multiplexer, ISagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga> factory,
+        public RedisSagaRepositoryContextFactory(IServiceProvider provider, ISagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga> factory,
             RedisSagaRepositoryOptions<TSaga> options)
         {
             IDatabase DatabaseFactory()
             {
-                return options.DatabaseSelector(multiplexer);
+                return options.DatabaseSelector(options.ConnectionFactory(provider));
             }
 
             _databaseFactory = DatabaseFactory;

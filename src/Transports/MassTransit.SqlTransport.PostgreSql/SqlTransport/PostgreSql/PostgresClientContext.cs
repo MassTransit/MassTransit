@@ -122,7 +122,7 @@ namespace MassTransit.SqlTransport.PostgreSql
 
             context.Headers.TryGetHeader(MessageHeaders.SchedulingTokenId, out var schedulingTokenId);
 
-            return _context.Query((x, t) => x.QuerySingleAsync<MessageDelivery>(_sendSql, new
+            return _context.Query((x, t) => x.ExecuteScalarAsync<long?>(_sendSql, new
             {
                 entity_name = queueName,
                 priority = (int)(context.Priority ?? 100),
@@ -150,14 +150,14 @@ namespace MassTransit.SqlTransport.PostgreSql
             }), CancellationToken);
         }
 
-        public override Task<IEnumerable<MessageDelivery>> Publish<T>(string topicName, SqlMessageSendContext<T> context)
+        public override Task Publish<T>(string topicName, SqlMessageSendContext<T> context)
         {
             IEnumerable<KeyValuePair<string, object>> headers = context.Headers.GetAll().ToList();
             var headersAsJson = headers.Any() ? JsonSerializer.Serialize(headers, SystemTextJsonMessageSerializer.Options) : null;
 
             context.Headers.TryGetHeader(MessageHeaders.SchedulingTokenId, out var schedulingTokenId);
 
-            return _context.Query((x, t) => x.QueryAsync<MessageDelivery>(_publishSql, new
+            return _context.Query((x, t) => x.ExecuteScalarAsync<long?>(_publishSql, new
             {
                 entity_name = topicName,
                 priority = (int)(context.Priority ?? 100),

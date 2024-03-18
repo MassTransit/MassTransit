@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using Apache.NMS;
+    using Internals;
     using Transports;
 
 
@@ -41,6 +42,15 @@
             {
                 value = _message.NMSCorrelationID;
                 return true;
+            }
+
+            if (MessageHeaders.TransportSentTime.Equals(key, StringComparison.OrdinalIgnoreCase))
+            {
+                if (_message.NMSTimestamp > DateTimeConstants.Epoch)
+                {
+                    value = _message.NMSTimestamp;
+                    return true;
+                }
             }
 
             var found = _message.Properties.Contains(key);

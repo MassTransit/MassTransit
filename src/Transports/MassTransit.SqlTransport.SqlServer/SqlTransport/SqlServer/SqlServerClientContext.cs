@@ -132,7 +132,7 @@ namespace MassTransit.SqlTransport.SqlServer
 
             context.Headers.TryGetHeader(MessageHeaders.SchedulingTokenId, out var schedulingTokenId);
 
-            return QuerySingle<MessageDelivery>(_sendSql, new
+            return Execute<long>(_sendSql, new
             {
                 entityName = queueName,
                 priority = (int)(context.Priority ?? 100),
@@ -160,14 +160,14 @@ namespace MassTransit.SqlTransport.SqlServer
             });
         }
 
-        public override Task<IEnumerable<MessageDelivery>> Publish<T>(string topicName, SqlMessageSendContext<T> context)
+        public override Task Publish<T>(string topicName, SqlMessageSendContext<T> context)
         {
             IEnumerable<KeyValuePair<string, object>> headers = context.Headers.GetAll().ToList();
             var headersAsJson = headers.Any() ? JsonSerializer.Serialize(headers, SystemTextJsonMessageSerializer.Options) : null;
 
             context.Headers.TryGetHeader(MessageHeaders.SchedulingTokenId, out var schedulingTokenId);
 
-            return Query<MessageDelivery>(_publishSql, new
+            return Execute<long>(_publishSql, new
             {
                 entityName = topicName,
                 priority = (int)(context.Priority ?? 100),

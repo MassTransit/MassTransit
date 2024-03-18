@@ -2,6 +2,7 @@ namespace MassTransit
 {
     using System;
     using System.Threading.Tasks;
+    using Configuration;
     using DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -45,6 +46,22 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="handler">An asynchronous method to handle the message</param>
+        public static IConsumerRegistrationConfigurator AddHandler<T>(this IRegistrationConfigurator configurator, Func<T, Task> handler)
+            where T : class
+        {
+            if (!MessageTypeCache<T>.IsValidMessageType)
+                throw new ArgumentException(MessageTypeCache<T>.InvalidMessageTypeReason, nameof(T));
+
+            configurator.TryAddSingleton(new MessageHandlerMethod<T>(handler));
+
+            return configurator.AddConsumer<MessageHandlerConsumer<T>, MessageHandlerConsumerDefinition<MessageHandlerConsumer<T>, T>>();
+        }
+
+        /// <summary>
+        /// Adds a method handler, using the first parameter to determine the message type
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="handler">An asynchronous method to handle the message</param>
         public static IConsumerRegistrationConfigurator AddHandler<T, TResponse>(this IRegistrationConfigurator configurator,
             Func<ConsumeContext<T>, Task<TResponse>> handler)
             where T : class
@@ -56,22 +73,6 @@ namespace MassTransit
             configurator.TryAddSingleton(new RequestHandlerMethod<T, TResponse>(handler));
 
             return configurator.AddConsumer<RequestHandlerConsumer<T, TResponse>, MessageHandlerConsumerDefinition<RequestHandlerConsumer<T, TResponse>, T>>();
-        }
-
-        /// <summary>
-        /// Adds a method handler, using the first parameter to determine the message type
-        /// </summary>
-        /// <param name="configurator"></param>
-        /// <param name="handler">An asynchronous method to handle the message</param>
-        public static IConsumerRegistrationConfigurator AddHandler<T>(this IRegistrationConfigurator configurator, Func<T, Task> handler)
-            where T : class
-        {
-            if (!MessageTypeCache<T>.IsValidMessageType)
-                throw new ArgumentException(MessageTypeCache<T>.InvalidMessageTypeReason, nameof(T));
-
-            configurator.TryAddSingleton(new MessageHandlerMethod<T>(handler));
-
-            return configurator.AddConsumer<MessageHandlerConsumer<T>, MessageHandlerConsumerDefinition<MessageHandlerConsumer<T>, T>>();
         }
 
         /// <summary>

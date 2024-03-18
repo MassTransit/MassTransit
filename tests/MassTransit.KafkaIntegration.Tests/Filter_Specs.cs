@@ -105,8 +105,6 @@ namespace MassTransit.KafkaIntegration.Tests
     [TestFixture]
     public class Using_a_scoped_send_filter
     {
-        const string Topic = "scoped-filter-producer";
-
         [Test]
         public async Task Should_properly_configure_the_scoped_filter()
         {
@@ -159,6 +157,8 @@ namespace MassTransit.KafkaIntegration.Tests
             Assert.That(result.Headers.Get<string>("Scoped-Value"), Is.EqualTo("Hello, World"));
         }
 
+        const string Topic = "scoped-filter-producer";
+
 
         public class ScopedContext
         {
@@ -188,6 +188,133 @@ namespace MassTransit.KafkaIntegration.Tests
                 _logger.LogInformation("Send Scoped Filter: {Value}", _scopedContext.Value);
 
                 context.Headers.Set("Scoped-Value", _scopedContext.Value);
+
+                return next.Send(context);
+            }
+        }
+
+
+        public record KafkaMessage
+        {
+        }
+    }
+
+
+    [TestFixture]
+    public class Using_a_multiple_scoped_send_filters
+    {
+        [Test]
+        public async Task Should_properly_configure_the_scoped_filter()
+        {
+            await using var provider = new ServiceCollection()
+                .AddScoped<ScopedContext>()
+                .ConfigureKafkaTestOptions(options =>
+                {
+                    options.CreateTopicsIfNotExists = true;
+                    options.TopicNames = new[] { Topic };
+                })
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.AddTaskCompletionSource<ConsumeContext<KafkaMessage>>();
+
+                    x.AddRider(r =>
+                    {
+                        r.AddConsumer<TestKafkaMessageConsumer<KafkaMessage>>();
+
+                        r.AddProducer<KafkaMessage>(Topic);
+
+                        r.UsingKafka((context, k) =>
+                        {
+                            k.UseSendFilter(typeof(ScopedContextSendFilter<>), context);
+
+                            k.UseSendFilter(typeof(SecondScopedContextSendFilter<>), context);
+
+                            k.TopicEndpoint<KafkaMessage>(Topic, nameof(Using_a_scoped_send_filter), c =>
+                            {
+                                c.AutoOffsetReset = AutoOffsetReset.Earliest;
+
+                                c.ConfigureConsumer<TestKafkaMessageConsumer<KafkaMessage>>(context);
+                            });
+                        });
+                    });
+                })
+                .BuildServiceProvider(true);
+
+            var harness = provider.GetTestHarness();
+
+            await harness.Start();
+
+            var scopedContext = harness.Scope.ServiceProvider.GetRequiredService<ScopedContext>();
+
+            ITopicProducer<KafkaMessage> producer = harness.GetProducer<KafkaMessage>();
+
+            await producer.Produce(new { }, harness.CancellationToken);
+
+            await provider.GetTask<ConsumeContext<KafkaMessage>>();
+
+            await scopedContext.SecondTask.Task;
+
+            await scopedContext.FirstTask.Task;
+        }
+
+        const string Topic = "scoped-filters-producer";
+
+
+        public class ScopedContext
+        {
+            public ScopedContext(ITestHarness harness)
+            {
+                FirstTask = harness.GetTask<SendContext>();
+                SecondTask = harness.GetTask<SendContext>();
+            }
+
+            public TaskCompletionSource<SendContext> FirstTask { get; set; }
+            public TaskCompletionSource<SendContext> SecondTask { get; set; }
+        }
+
+
+        public class ScopedContextSendFilter<T> :
+            IFilter<SendContext<T>>
+            where T : class
+        {
+            readonly ScopedContext _scopedContext;
+
+            public ScopedContextSendFilter(ScopedContext scopedContext)
+            {
+                _scopedContext = scopedContext;
+            }
+
+            public void Probe(ProbeContext context)
+            {
+            }
+
+            public Task Send(SendContext<T> context, IPipe<SendContext<T>> next)
+            {
+                _scopedContext.FirstTask.TrySetResult(context);
+
+                return next.Send(context);
+            }
+        }
+
+
+        public class SecondScopedContextSendFilter<T> :
+            IFilter<SendContext<T>>
+            where T : class
+        {
+            readonly ScopedContext _scopedContext;
+
+            public SecondScopedContextSendFilter(ScopedContext scopedContext)
+            {
+                _scopedContext = scopedContext;
+            }
+
+            public void Probe(ProbeContext context)
+            {
+            }
+
+            public Task Send(SendContext<T> context, IPipe<SendContext<T>> next)
+            {
+                _scopedContext.SecondTask.TrySetResult(context);
 
                 return next.Send(context);
             }

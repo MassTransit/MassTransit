@@ -57,6 +57,12 @@
                 return !string.IsNullOrWhiteSpace(_message.CorrelationId);
             }
 
+            if (MessageHeaders.TransportSentTime.Equals(key, StringComparison.OrdinalIgnoreCase))
+            {
+                value = _message.EnqueuedTime.UtcDateTime;
+                return true;
+            }
+
             if (MessageHeaders.ContentType.Equals(key, StringComparison.OrdinalIgnoreCase))
             {
                 value = _message.ContentType;

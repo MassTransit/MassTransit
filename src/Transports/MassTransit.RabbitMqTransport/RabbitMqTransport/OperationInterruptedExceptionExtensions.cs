@@ -13,6 +13,7 @@ namespace MassTransit.RabbitMqTransport
                 404 => true, // not found
                 405 => true, // locked
                 406 => true, // precondition failed
+                491 => true, // the channel was already closed (MT-internal)
                 _ => false
             };
         }

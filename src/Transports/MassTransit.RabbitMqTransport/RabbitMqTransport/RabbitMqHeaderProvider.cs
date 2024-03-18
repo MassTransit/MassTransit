@@ -3,12 +3,15 @@ namespace MassTransit.RabbitMqTransport
     using System;
     using System.Collections.Generic;
     using System.Text;
+    using Initializers.TypeConverters;
     using Transports;
 
 
     public class RabbitMqHeaderProvider :
         IHeaderProvider
     {
+        static readonly DateTimeTypeConverter _dateTimeConverter = new DateTimeTypeConverter();
+
         readonly RabbitMqBasicConsumeContext _context;
 
         public RabbitMqHeaderProvider(RabbitMqBasicConsumeContext context)
@@ -67,6 +70,15 @@ namespace MassTransit.RabbitMqTransport
                     return !string.IsNullOrWhiteSpace(s);
 
                 return value != default;
+            }
+
+            if (MessageHeaders.TransportSentTime.Equals(key, StringComparison.OrdinalIgnoreCase) && _context.Properties.IsTimestampPresent())
+            {
+                if (_dateTimeConverter.TryConvert(_context.Properties.Timestamp.UnixTime, out var result))
+                {
+                    value = result;
+                    return true;
+                }
             }
 
             if (RabbitMqHeaders.Exchange.Equals(key, StringComparison.OrdinalIgnoreCase))
