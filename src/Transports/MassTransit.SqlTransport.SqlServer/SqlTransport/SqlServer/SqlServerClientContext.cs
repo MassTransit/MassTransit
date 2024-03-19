@@ -8,6 +8,7 @@ namespace MassTransit.SqlTransport.SqlServer
     using System.Threading;
     using System.Threading.Tasks;
     using Dapper;
+    using Microsoft.Data.SqlClient;
     using Serialization;
     using Topology;
 
@@ -107,22 +108,30 @@ namespace MassTransit.SqlTransport.SqlServer
             return result ?? throw new SqlTopologyException("Purge queue failed");
         }
 
-        public override Task<IEnumerable<SqlTransportMessage>> ReceiveMessages(string queueName, SqlReceiveMode mode, int messageLimit, TimeSpan lockDuration)
+        public override async Task<IEnumerable<SqlTransportMessage>> ReceiveMessages(string queueName, SqlReceiveMode mode, int messageLimit,
+            TimeSpan lockDuration)
         {
-            var sql = mode switch
+            try
             {
-                SqlReceiveMode.Normal => _receiveSql,
-                _ => _receivePartitionedSql
-            };
+                var sql = mode switch
+                {
+                    SqlReceiveMode.Normal => _receiveSql,
+                    _ => _receivePartitionedSql
+                };
 
-            return Query<SqlTransportMessage>(sql, new
+                return await Query<SqlTransportMessage>(sql, new
+                {
+                    queueName,
+                    consumerId = _consumerId,
+                    lockId = NewId.NextGuid(),
+                    lockDuration = (int)lockDuration.TotalSeconds,
+                    fetchCount = messageLimit
+                }).ConfigureAwait(false);
+            }
+            catch (SqlException exception) when (exception.Number == 1205)
             {
-                queueName,
-                consumerId = _consumerId,
-                lockId = NewId.NextGuid(),
-                lockDuration = (int)lockDuration.TotalSeconds,
-                fetchCount = messageLimit
-            });
+                return Array.Empty<SqlTransportMessage>();
+            }
         }
 
         public override Task Send<T>(string queueName, SqlMessageSendContext<T> context)

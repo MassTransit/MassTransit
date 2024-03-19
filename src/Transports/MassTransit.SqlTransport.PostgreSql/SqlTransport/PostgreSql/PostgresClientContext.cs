@@ -7,6 +7,7 @@ namespace MassTransit.SqlTransport.PostgreSql
     using System.Threading;
     using System.Threading.Tasks;
     using Dapper;
+    using Npgsql;
     using Serialization;
     using Topology;
 
@@ -98,21 +99,29 @@ namespace MassTransit.SqlTransport.PostgreSql
             return _context.Query((x, t) => x.ExecuteScalarAsync<long>(_purgeQueueSql, new { queue_name = queueName }), CancellationToken);
         }
 
-        public override Task<IEnumerable<SqlTransportMessage>> ReceiveMessages(string queueName, SqlReceiveMode mode, int messageLimit, TimeSpan lockDuration)
+        public override async Task<IEnumerable<SqlTransportMessage>> ReceiveMessages(string queueName, SqlReceiveMode mode, int messageLimit,
+            TimeSpan lockDuration)
         {
-            var sql = mode switch
+            try
             {
-                SqlReceiveMode.Normal => _receiveSql,
-                _ => _receivePartitionedSql
-            };
-            return _context.Query((x, t) => x.QueryAsync<SqlTransportMessage>(sql, new
+                var sql = mode switch
+                {
+                    SqlReceiveMode.Normal => _receiveSql,
+                    _ => _receivePartitionedSql
+                };
+                return await _context.Query((x, t) => x.QueryAsync<SqlTransportMessage>(sql, new
+                {
+                    queue_name = queueName,
+                    fetch_consumer_id = _consumerId,
+                    fetch_lock_id = NewId.NextGuid(),
+                    lock_duration = lockDuration,
+                    fetch_count = messageLimit
+                }), CancellationToken).ConfigureAwait(false);
+            }
+            catch (PostgresException exception) when (exception.ErrorCode == 40001)
             {
-                queue_name = queueName,
-                fetch_consumer_id = _consumerId,
-                fetch_lock_id = NewId.NextGuid(),
-                lock_duration = lockDuration,
-                fetch_count = messageLimit
-            }), CancellationToken);
+                return Array.Empty<SqlTransportMessage>();
+            }
         }
 
         public override Task Send<T>(string queueName, SqlMessageSendContext<T> context)
