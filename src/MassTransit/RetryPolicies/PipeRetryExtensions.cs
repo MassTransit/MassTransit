@@ -9,7 +9,12 @@ namespace MassTransit.RetryPolicies
 
     public static class PipeRetryExtensions
     {
-        public static async Task Retry(this IRetryPolicy retryPolicy, Func<Task> retryMethod, CancellationToken cancellationToken = default)
+        public static Task Retry(this IRetryPolicy retryPolicy, Func<Task> retryMethod, CancellationToken cancellationToken = default)
+        {
+            return Retry(retryPolicy, retryMethod, true, cancellationToken);
+        }
+
+        public static async Task Retry(this IRetryPolicy retryPolicy, Func<Task> retryMethod, bool log, CancellationToken cancellationToken = default)
         {
             var inlinePipeContext = new InlinePipeContext(cancellationToken);
 
@@ -29,7 +34,7 @@ namespace MassTransit.RetryPolicies
 
                 try
                 {
-                    await Attempt(inlinePipeContext, retryContext, retryMethod).ConfigureAwait(false);
+                    await Attempt(inlinePipeContext, retryContext, retryMethod, log).ConfigureAwait(false);
 
                     return;
                 }
@@ -45,7 +50,13 @@ namespace MassTransit.RetryPolicies
             }
         }
 
-        public static async Task<T> Retry<T>(this IRetryPolicy retryPolicy, Func<Task<T>> retryMethod, CancellationToken cancellationToken = default)
+        public static Task<T> Retry<T>(this IRetryPolicy retryPolicy, Func<Task<T>> retryMethod, CancellationToken cancellationToken = default)
+        {
+            return Retry(retryPolicy, retryMethod, true, cancellationToken);
+        }
+
+        public static async Task<T> Retry<T>(this IRetryPolicy retryPolicy, Func<Task<T>> retryMethod, bool log,
+            CancellationToken cancellationToken = default)
         {
             var inlinePipeContext = new InlinePipeContext(cancellationToken);
 
@@ -65,7 +76,7 @@ namespace MassTransit.RetryPolicies
 
                 try
                 {
-                    return await Attempt(inlinePipeContext, retryContext, retryMethod).ConfigureAwait(false);
+                    return await Attempt(inlinePipeContext, retryContext, retryMethod, log).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException ex) when (ex.CancellationToken == cancellationToken)
                 {
@@ -79,12 +90,13 @@ namespace MassTransit.RetryPolicies
             }
         }
 
-        static async Task Attempt<T>(T context, RetryContext<T> retryContext, Func<Task> retryMethod)
+        static async Task Attempt<T>(T context, RetryContext<T> retryContext, Func<Task> retryMethod, bool log)
             where T : class, PipeContext
         {
             while (context.CancellationToken.IsCancellationRequested == false)
             {
-                LogContext.Warning?.Log(retryContext.Exception, "Retrying {Delay}: {Message}", retryContext.Delay, retryContext.Exception.Message);
+                if (log)
+                    LogContext.Warning?.Log(retryContext.Exception, "Retrying {Delay}: {Message}", retryContext.Delay, retryContext.Exception.Message);
 
                 try
                 {
@@ -115,12 +127,13 @@ namespace MassTransit.RetryPolicies
             throw new OperationCanceledException(context.CancellationToken);
         }
 
-        static async Task<TResult> Attempt<T, TResult>(T context, RetryContext<T> retryContext, Func<Task<TResult>> retryMethod)
+        static async Task<TResult> Attempt<T, TResult>(T context, RetryContext<T> retryContext, Func<Task<TResult>> retryMethod, bool log)
             where T : class, PipeContext
         {
             while (context.CancellationToken.IsCancellationRequested == false)
             {
-                LogContext.Warning?.Log(retryContext.Exception, "Retrying {Delay}: {Message}", retryContext.Delay, retryContext.Exception.Message);
+                if (log)
+                    LogContext.Warning?.Log(retryContext.Exception, "Retrying {Delay}: {Message}", retryContext.Delay, retryContext.Exception.Message);
 
                 try
                 {

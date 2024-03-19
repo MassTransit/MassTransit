@@ -83,7 +83,7 @@ namespace MassTransit.SqlTransport.SqlServer
             #endif
 
                 return result;
-            }, cancellationToken).ConfigureAwait(false);
+            }, false, cancellationToken).ConfigureAwait(false);
         }
 
         public Task DelayUntilMessageReady(long queueId, TimeSpan timeout, CancellationToken cancellationToken)

@@ -85,7 +85,7 @@ namespace MassTransit.SqlTransport.PostgreSql
                 await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
 
                 return result;
-            }, cancellationToken).ConfigureAwait(false);
+            }, false, cancellationToken).ConfigureAwait(false);
         }
 
         public Task DelayUntilMessageReady(long queueId, TimeSpan timeout, CancellationToken cancellationToken)
