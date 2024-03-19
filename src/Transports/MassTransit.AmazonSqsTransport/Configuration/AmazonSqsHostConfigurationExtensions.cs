@@ -48,9 +48,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Declare a ReceiveEndpoint using a unique generated queue name. This queue defaults to auto-delete
-        /// and non-durable. By default all services bus instances include a default receiveEndpoint that is
-        /// of this type (created automatically upon the first receiver binding).
+        /// Declare a receive endpoint using the endpoint <paramref name="definition"/>.
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="definition"></param>
