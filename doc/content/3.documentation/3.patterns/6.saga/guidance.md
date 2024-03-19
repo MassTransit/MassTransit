@@ -21,7 +21,7 @@ To configure the receive endpoint directly:
 ```csharp
 services.AddMassTransit(x =>
 {
-    x.AddStateMachineSaga<OrderStateMachine, OrderState>()
+    x.AddSagaStateMachine<OrderStateMachine, OrderState>()
         .MongoDbRepository(r =>
         {
             r.Connection = "mongodb://127.0.0.1";
