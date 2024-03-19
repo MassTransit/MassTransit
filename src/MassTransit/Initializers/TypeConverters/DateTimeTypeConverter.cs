@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.Initializers.TypeConverters
 {
     using System;
+    using System.Globalization;
     using Internals;
 
 
@@ -55,7 +56,7 @@
 
         public bool TryConvert(string input, out DateTime result)
         {
-            if (DateTimeOffset.TryParse(input, out var value))
+            if (DateTimeOffset.TryParse(input, null, DateTimeStyles.AssumeUniversal, out var value))
             {
                 result = value.Offset == TimeSpan.Zero ? value.UtcDateTime : value.LocalDateTime;
                 return true;
