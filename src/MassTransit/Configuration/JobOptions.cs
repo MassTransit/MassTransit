@@ -20,6 +20,7 @@ namespace MassTransit
         {
             ConcurrentJobLimit = 1;
             JobTimeout = TimeSpan.FromMinutes(5);
+            JobCancellationTimeout = TimeSpan.FromSeconds(30);
 
             RetryPolicy = Retry.None;
         }
@@ -28,6 +29,11 @@ namespace MassTransit
         /// Set the allowed time for a job to complete (per attempt). If the job timeout expires and the job has not yet completed, it will be canceled.
         /// </summary>
         public TimeSpan JobTimeout { get; set; }
+
+        /// <summary>
+        /// Set the allowed time for a job to stop execution after the cancellation. If the job cancellation timeout expires and the job has not yet completed, it will be fully canceled.
+        /// </summary>
+        public TimeSpan JobCancellationTimeout { get; set; }
 
         /// <summary>
         /// Set the concurrent job limit. The limit is applied to each instance if the job consumer is scaled out.
@@ -48,6 +54,8 @@ namespace MassTransit
                 yield return this.Failure("JobOptions", "ConcurrentJobLimit", "Must be > 0");
             if (JobTimeout <= TimeSpan.Zero)
                 yield return this.Failure("JobOptions", "JobTimeout", "Must be > TimeSpan.Zero");
+            if (JobCancellationTimeout <= TimeSpan.Zero)
+                yield return this.Failure("JobOptions", "JobCancellationTimeout", "Must be > TimeSpan.Zero");
         }
 
         /// <summary>
@@ -58,6 +66,18 @@ namespace MassTransit
         public JobOptions<TJob> SetJobTimeout(TimeSpan timeout)
         {
             JobTimeout = timeout;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Set the allowed time for a job to stop execution after the cancellation. If the job cancellation timeout expires and the job has not yet completed, it will be fully canceled.
+        /// </summary>
+        /// <param name="timeout"></param>
+        /// <returns></returns>
+        public JobOptions<TJob> SetJobCancellationTimeout(TimeSpan timeout)
+        {
+            JobCancellationTimeout = timeout;
 
             return this;
         }

@@ -48,7 +48,7 @@
             return false;
         }
 
-        public async Task<JobHandle> StartJob<T>(ConsumeContext<StartJob> context, T job, IPipe<ConsumeContext<T>> jobPipe, TimeSpan timeout)
+        public async Task<JobHandle> StartJob<T>(ConsumeContext<StartJob> context, T job, IPipe<ConsumeContext<T>> jobPipe, TimeSpan timeout, TimeSpan cancellationTimeout)
             where T : class
         {
             var startJob = context.Message;
@@ -63,7 +63,7 @@
 
             var jobTask = jobPipe.Send(jobContext);
 
-            var jobHandle = new ConsumerJobHandle<T>(jobContext, jobTask);
+            var jobHandle = new ConsumerJobHandle<T>(jobContext, jobTask, cancellationTimeout);
 
             Add(jobHandle);
 

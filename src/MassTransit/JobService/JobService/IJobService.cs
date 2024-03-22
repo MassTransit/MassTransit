@@ -19,8 +19,9 @@
         /// <param name="job">The job command</param>
         /// <param name="jobPipe">The pipe which executes the job</param>
         /// <param name="timeout">The job timeout, after which the job is cancelled</param>
+        /// <param name="cancellationTimeout">The job cancellation timeout, after which the job is fully cancelled</param>
         /// <returns>The newly created job's handle</returns>
-        Task<JobHandle> StartJob<T>(ConsumeContext<StartJob> context, T job, IPipe<ConsumeContext<T>> jobPipe, TimeSpan timeout)
+        Task<JobHandle> StartJob<T>(ConsumeContext<StartJob> context, T job, IPipe<ConsumeContext<T>> jobPipe, TimeSpan timeout, TimeSpan cancellationTimeout)
             where T : class;
 
         /// <summary>

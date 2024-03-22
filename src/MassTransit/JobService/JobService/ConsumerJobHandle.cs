@@ -10,10 +10,12 @@
         where T : class
     {
         readonly ConsumeJobContext<T> _context;
+        readonly TimeSpan _jobCancellationTimeout;
 
-        public ConsumerJobHandle(ConsumeJobContext<T> context, Task task)
+        public ConsumerJobHandle(ConsumeJobContext<T> context, Task task, TimeSpan jobCancellationTimeout)
         {
             _context = context;
+            _jobCancellationTimeout = jobCancellationTimeout;
             JobTask = task;
         }
 
@@ -29,7 +31,7 @@
 
             try
             {
-                await JobTask.OrTimeout(TimeSpan.FromSeconds(30)).ConfigureAwait(false);
+                await JobTask.OrTimeout(_jobCancellationTimeout).ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {
