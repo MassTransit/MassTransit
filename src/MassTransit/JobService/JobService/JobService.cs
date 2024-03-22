@@ -48,7 +48,7 @@
             return false;
         }
 
-        public async Task<JobHandle> StartJob<T>(ConsumeContext<StartJob> context, T job, IPipe<ConsumeContext<T>> jobPipe, TimeSpan timeout)
+        public async Task<JobHandle> StartJob<T>(ConsumeContext<StartJob> context, T job, IPipe<ConsumeContext<T>> jobPipe, JobOptions<T> jobOptions)
             where T : class
         {
             var startJob = context.Message;
@@ -56,14 +56,14 @@
             if (_jobs.ContainsKey(startJob.JobId))
                 throw new JobAlreadyExistsException(startJob.JobId);
 
-            var jobContext = new ConsumeJobContext<T>(context, InstanceAddress, startJob.JobId, startJob.AttemptId, startJob.RetryAttempt, job, timeout);
+            var jobContext = new ConsumeJobContext<T>(context, InstanceAddress, startJob.JobId, startJob.AttemptId, startJob.RetryAttempt, job, jobOptions.JobTimeout);
 
             LogContext.Debug?.Log("Executing job: {JobType} {JobId} ({RetryAttempt})", TypeCache<T>.ShortName, startJob.JobId,
                 startJob.RetryAttempt);
 
             var jobTask = jobPipe.Send(jobContext);
 
-            var jobHandle = new ConsumerJobHandle<T>(jobContext, jobTask);
+            var jobHandle = new ConsumerJobHandle<T>(jobContext, jobTask, jobOptions.JobCancellationTimeout);
 
             Add(jobHandle);
 
