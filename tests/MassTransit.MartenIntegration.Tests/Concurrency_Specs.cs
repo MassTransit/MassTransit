@@ -3,6 +3,7 @@ namespace MassTransit.MartenIntegration.Tests
     using System;
     using System.Threading.Tasks;
     using ConcurrentSagaTypes;
+    using Marten;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
     using Testing;
@@ -33,11 +34,14 @@ namespace MassTransit.MartenIntegration.Tests
                             context.Publish(new CompletingB(context.Message.CorrelationId)));
                     });
 
+                    x.AddMarten().ApplyAllDatabaseChangesOnStartup();
+
                     x.AddSagaStateMachine<TransactionStateMachine, TransactionState>()
                         .MartenRepository("server=localhost;port=5432;database=MartenTest;user id=postgres;password=Password12!;", r =>
                         {
                             r.CreateDatabasesForTenants(c =>
                             {
+                                c.MaintenanceDatabase("server=localhost;port=5432;database=postgres;user id=postgres;password=Password12!;");
                                 c.ForTenant()
                                     .CheckAgainstPgDatabase()
                                     .WithOwner("postgres")

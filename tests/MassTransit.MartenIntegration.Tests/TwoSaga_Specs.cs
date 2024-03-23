@@ -62,6 +62,7 @@ namespace MassTransit.MartenIntegration.Tests
                     options.Connection("server=localhost;port=5432;database=MartenTest;user id=postgres;password=Password12!;");
                     options.CreateDatabasesForTenants(c =>
                     {
+                        c.MaintenanceDatabase("server=localhost;port=5432;database=postgres;user id=postgres;password=Password12!;");
                         c.ForTenant()
                             .CheckAgainstPgDatabase()
                             .WithOwner("postgres")
