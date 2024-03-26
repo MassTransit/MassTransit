@@ -12,7 +12,7 @@ namespace MassTransit
     /// <param name="context"></param>
     /// <returns></returns>
     public delegate TMessage EventExceptionMessageFactory<TSaga, in TException, out TMessage>(BehaviorExceptionContext<TSaga, TException> context)
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TException : Exception;
 
 
@@ -26,7 +26,7 @@ namespace MassTransit
     /// <param name="context"></param>
     /// <returns></returns>
     public delegate T EventExceptionMessageFactory<TSaga, in TMessage, in TException, out T>(BehaviorExceptionContext<TSaga, TMessage, TException> context)
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TMessage : class
         where TException : Exception;
 }

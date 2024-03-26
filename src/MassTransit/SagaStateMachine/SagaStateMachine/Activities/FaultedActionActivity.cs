@@ -7,7 +7,7 @@
     public class FaultedActionActivity<TSaga, TException> :
         IStateMachineActivity<TSaga>
         where TException : Exception
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
     {
         readonly Action<BehaviorExceptionContext<TSaga, TException>> _action;
 
@@ -60,7 +60,7 @@
 
     public class FaultedActionActivity<TSaga, TMessage, TException> :
         IStateMachineActivity<TSaga, TMessage>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TException : Exception
         where TMessage : class
     {

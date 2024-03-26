@@ -1,72 +1,75 @@
-namespace MassTransit.SagaStateMachine
+namespace MassTransit
 {
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
-
-    public class NonTransitionEventObserver<TSaga> :
-        IEventObserver<TSaga>
-        where TSaga : class, ISaga
+    public partial class MassTransitStateMachine<TInstance>
+        where TInstance : class, SagaStateMachineInstance
     {
-        readonly IReadOnlyDictionary<string, StateMachineEvent<TSaga>> _eventCache;
-        readonly IEventObserver<TSaga> _observer;
-
-        public NonTransitionEventObserver(IReadOnlyDictionary<string, StateMachineEvent<TSaga>> eventCache, IEventObserver<TSaga> observer)
+        class NonTransitionEventObserver<TSaga> :
+            IEventObserver<TSaga>
+            where TSaga : class, SagaStateMachineInstance
         {
-            _eventCache = eventCache;
-            _observer = observer;
-        }
+            readonly IReadOnlyDictionary<string, StateMachineEvent> _eventCache;
+            readonly IEventObserver<TSaga> _observer;
 
-        public Task PreExecute(BehaviorContext<TSaga> context)
-        {
-            if (_eventCache.TryGetValue(context.Event.Name, out StateMachineEvent<TSaga> stateMachineEvent) && !stateMachineEvent.IsTransitionEvent)
-                return _observer.PreExecute(context);
+            public NonTransitionEventObserver(IReadOnlyDictionary<string, StateMachineEvent> eventCache, IEventObserver<TSaga> observer)
+            {
+                _eventCache = eventCache;
+                _observer = observer;
+            }
 
-            return Task.CompletedTask;
-        }
+            public Task PreExecute(BehaviorContext<TSaga> context)
+            {
+                if (_eventCache.TryGetValue(context.Event.Name, out StateMachineEvent stateMachineEvent) && !stateMachineEvent.IsTransitionEvent)
+                    return _observer.PreExecute(context);
 
-        public Task PreExecute<T>(BehaviorContext<TSaga, T> context)
-            where T : class
-        {
-            if (_eventCache.TryGetValue(context.Event.Name, out StateMachineEvent<TSaga> stateMachineEvent) && !stateMachineEvent.IsTransitionEvent)
-                return _observer.PreExecute(context);
+                return Task.CompletedTask;
+            }
 
-            return Task.CompletedTask;
-        }
+            public Task PreExecute<T>(BehaviorContext<TSaga, T> context)
+                where T : class
+            {
+                if (_eventCache.TryGetValue(context.Event.Name, out StateMachineEvent stateMachineEvent) && !stateMachineEvent.IsTransitionEvent)
+                    return _observer.PreExecute(context);
 
-        public Task PostExecute(BehaviorContext<TSaga> context)
-        {
-            if (_eventCache.TryGetValue(context.Event.Name, out StateMachineEvent<TSaga> stateMachineEvent) && !stateMachineEvent.IsTransitionEvent)
-                return _observer.PostExecute(context);
+                return Task.CompletedTask;
+            }
 
-            return Task.CompletedTask;
-        }
+            public Task PostExecute(BehaviorContext<TSaga> context)
+            {
+                if (_eventCache.TryGetValue(context.Event.Name, out StateMachineEvent stateMachineEvent) && !stateMachineEvent.IsTransitionEvent)
+                    return _observer.PostExecute(context);
 
-        public Task PostExecute<T>(BehaviorContext<TSaga, T> context)
-            where T : class
-        {
-            if (_eventCache.TryGetValue(context.Event.Name, out StateMachineEvent<TSaga> stateMachineEvent) && !stateMachineEvent.IsTransitionEvent)
-                return _observer.PostExecute(context);
+                return Task.CompletedTask;
+            }
 
-            return Task.CompletedTask;
-        }
+            public Task PostExecute<T>(BehaviorContext<TSaga, T> context)
+                where T : class
+            {
+                if (_eventCache.TryGetValue(context.Event.Name, out StateMachineEvent stateMachineEvent) && !stateMachineEvent.IsTransitionEvent)
+                    return _observer.PostExecute(context);
 
-        public Task ExecuteFault(BehaviorContext<TSaga> context, Exception exception)
-        {
-            if (_eventCache.TryGetValue(context.Event.Name, out StateMachineEvent<TSaga> stateMachineEvent) && !stateMachineEvent.IsTransitionEvent)
-                return _observer.ExecuteFault(context, exception);
+                return Task.CompletedTask;
+            }
 
-            return Task.CompletedTask;
-        }
+            public Task ExecuteFault(BehaviorContext<TSaga> context, Exception exception)
+            {
+                if (_eventCache.TryGetValue(context.Event.Name, out StateMachineEvent stateMachineEvent) && !stateMachineEvent.IsTransitionEvent)
+                    return _observer.ExecuteFault(context, exception);
 
-        public Task ExecuteFault<T>(BehaviorContext<TSaga, T> context, Exception exception)
-            where T : class
-        {
-            if (_eventCache.TryGetValue(context.Event.Name, out StateMachineEvent<TSaga> stateMachineEvent) && !stateMachineEvent.IsTransitionEvent)
-                return _observer.ExecuteFault(context, exception);
+                return Task.CompletedTask;
+            }
 
-            return Task.CompletedTask;
+            public Task ExecuteFault<T>(BehaviorContext<TSaga, T> context, Exception exception)
+                where T : class
+            {
+                if (_eventCache.TryGetValue(context.Event.Name, out StateMachineEvent stateMachineEvent) && !stateMachineEvent.IsTransitionEvent)
+                    return _observer.ExecuteFault(context, exception);
+
+                return Task.CompletedTask;
+            }
         }
     }
 }

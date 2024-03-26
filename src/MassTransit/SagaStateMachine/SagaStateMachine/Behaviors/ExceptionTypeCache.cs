@@ -13,7 +13,7 @@ namespace MassTransit.SagaStateMachine
         }
 
         public static Task Faulted<TSaga>(IBehavior<TSaga> behavior, BehaviorContext<TSaga> context, Exception exception)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
         {
             if (exception == null)
                 throw new ArgumentNullException(nameof(exception));
@@ -22,7 +22,7 @@ namespace MassTransit.SagaStateMachine
         }
 
         public static Task Faulted<TSaga, TMessage>(IBehavior<TSaga, TMessage> behavior, BehaviorContext<TSaga, TMessage> context, Exception exception)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TMessage : class
         {
             if (exception == null)
@@ -41,10 +41,10 @@ namespace MassTransit.SagaStateMachine
         interface CachedConfigurator
         {
             Task Faulted<TSaga>(IBehavior<TSaga> behavior, BehaviorContext<TSaga> context, Exception exception)
-                where TSaga : class, ISaga;
+                where TSaga : class, SagaStateMachineInstance;
 
             Task Faulted<TSaga, TMessage>(IBehavior<TSaga, TMessage> behavior, BehaviorContext<TSaga, TMessage> context, Exception exception)
-                where TSaga : class, ISaga
+                where TSaga : class, SagaStateMachineInstance
                 where TMessage : class;
         }
 
@@ -57,7 +57,7 @@ namespace MassTransit.SagaStateMachine
             {
                 if (exception is TException typedException)
                 {
-                    var exceptionContext = new BehaviorExceptionContextProxy<TInstance, TException>(context, typedException);
+                    var exceptionContext = new MassTransitStateMachine<TInstance>.BehaviorExceptionContextProxy<TException>(context, typedException);
 
                     return behavior.Faulted(exceptionContext);
                 }
@@ -70,7 +70,7 @@ namespace MassTransit.SagaStateMachine
             {
                 if (exception is TException typedException)
                 {
-                    var exceptionContext = new BehaviorExceptionContextProxy<TInstance, TData, TException>(context, typedException);
+                    var exceptionContext = new MassTransitStateMachine<TInstance>.BehaviorExceptionContextProxy<TData, TException>(context, typedException);
 
                     return behavior.Faulted(exceptionContext);
                 }

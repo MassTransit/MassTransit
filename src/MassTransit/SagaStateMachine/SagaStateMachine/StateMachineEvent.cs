@@ -1,14 +1,18 @@
-namespace MassTransit.SagaStateMachine
+namespace MassTransit
 {
-    public class StateMachineEvent<TInstance>
+    public partial class MassTransitStateMachine<TInstance>
+        where TInstance : class, SagaStateMachineInstance
     {
-        public StateMachineEvent(Event @event, bool isTransitionEvent)
+        class StateMachineEvent
         {
-            Event = @event;
-            IsTransitionEvent = isTransitionEvent;
-        }
+            public StateMachineEvent(Event @event, bool isTransitionEvent)
+            {
+                Event = @event;
+                IsTransitionEvent = isTransitionEvent;
+            }
 
-        public bool IsTransitionEvent { get; }
-        public Event Event { get; }
+            public bool IsTransitionEvent { get; }
+            public Event Event { get; }
+        }
     }
 }

@@ -10,15 +10,15 @@ namespace MassTransit
         IMessageConsumeTopologyConfigurator<TMessage>
         where TMessage : class
     {
-        readonly IList<IMessageConsumeTopologyConvention<TMessage>> _conventions;
-        readonly IList<IMessageConsumeTopology<TMessage>> _delegateTopologies;
-        readonly IList<IMessageConsumeTopology<TMessage>> _topologies;
+        readonly List<IMessageConsumeTopologyConvention<TMessage>> _conventions;
+        readonly List<IMessageConsumeTopology<TMessage>> _delegateTopologies;
+        readonly List<IMessageConsumeTopology<TMessage>> _topologies;
 
         public MessageConsumeTopology()
         {
-            _conventions = new List<IMessageConsumeTopologyConvention<TMessage>>();
-            _topologies = new List<IMessageConsumeTopology<TMessage>>();
-            _delegateTopologies = new List<IMessageConsumeTopology<TMessage>>();
+            _conventions = new List<IMessageConsumeTopologyConvention<TMessage>>(8);
+            _topologies = new List<IMessageConsumeTopology<TMessage>>(8);
+            _delegateTopologies = new List<IMessageConsumeTopology<TMessage>>(8);
         }
 
         protected bool IsBindableMessageType => GlobalTopology.IsConsumableMessageType(typeof(TMessage));
@@ -57,8 +57,13 @@ namespace MassTransit
 
         public bool TryAddConvention(IMessageConsumeTopologyConvention<TMessage> convention)
         {
-            if (_conventions.Any(x => x.GetType() == convention.GetType()))
-                return false;
+            var conventionType = convention.GetType();
+
+            for (var i = 0; i < _conventions.Count; i++)
+            {
+                if (_conventions[i].GetType() == conventionType)
+                    return false;
+            }
 
             _conventions.Add(convention);
             return true;
@@ -71,8 +76,7 @@ namespace MassTransit
             {
                 if (_conventions[i] is TConvention convention)
                 {
-                    var updatedConvention = update(convention);
-                    _conventions[i] = updatedConvention;
+                    _conventions[i] = update(convention);
                     return;
                 }
             }
@@ -85,8 +89,7 @@ namespace MassTransit
             {
                 if (_conventions[i] is TConvention convention)
                 {
-                    var updatedConvention = update(convention);
-                    _conventions[i] = updatedConvention;
+                    _conventions[i] = update(convention);
                     return;
                 }
             }

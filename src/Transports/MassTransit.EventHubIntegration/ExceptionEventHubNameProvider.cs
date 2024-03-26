@@ -14,7 +14,7 @@ namespace MassTransit
     public delegate string ExceptionEventHubNameProvider<TInstance, in TData, in TException>(BehaviorExceptionContext<TInstance, TData, TException> context)
         where TException : Exception
         where TData : class
-        where TInstance : class, ISaga;
+        where TInstance : class, SagaStateMachineInstance;
 
 
     /// <summary>
@@ -26,5 +26,5 @@ namespace MassTransit
     /// <returns></returns>
     public delegate string ExceptionEventHubNameProvider<TInstance, in TException>(BehaviorExceptionContext<TInstance, TException> context)
         where TException : Exception
-        where TInstance : class, ISaga;
+        where TInstance : class, SagaStateMachineInstance;
 }

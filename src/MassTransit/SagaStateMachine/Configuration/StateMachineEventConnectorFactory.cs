@@ -3,28 +3,29 @@
     using System;
     using Middleware;
 
-
-    public class StateMachineEventConnectorFactory<TInstance, TMessage> :
-        ISagaConnectorFactory
-        where TInstance : class, ISaga, SagaStateMachineInstance
-        where TMessage : class
+    public partial class StateMachineInterfaceType<TInstance, TData>
     {
-        readonly ISagaMessageConnector<TInstance> _connector;
-
-        public StateMachineEventConnectorFactory(SagaStateMachine<TInstance> stateMachine, EventCorrelation<TInstance, TMessage> correlation)
+        public class StateMachineEventConnectorFactory :
+            ISagaConnectorFactory
         {
-            var consumeFilter = new StateMachineSagaMessageFilter<TInstance, TMessage>(stateMachine, correlation.Event);
+            readonly ISagaMessageConnector<TInstance> _connector;
 
-            _connector = new StateMachineSagaMessageConnector<TInstance, TMessage>(consumeFilter, correlation.Policy, correlation.FilterFactory,
-                correlation.MessageFilter, correlation.ConfigureConsumeTopology);
-        }
+            public StateMachineEventConnectorFactory(SagaStateMachine<TInstance> stateMachine, EventCorrelation<TInstance, TData> correlation)
+            {
+                var consumeFilter = new StateMachineSagaMessageFilter<TInstance, TData>(stateMachine, correlation.Event);
 
-        ISagaMessageConnector<T> ISagaConnectorFactory.CreateMessageConnector<T>()
-        {
-            if (_connector is ISagaMessageConnector<T> connector)
-                return connector;
+                _connector = new StateMachineSagaMessageConnector(consumeFilter, correlation.Policy,
+                    correlation.FilterFactory,
+                    correlation.MessageFilter, correlation.ConfigureConsumeTopology);
+            }
 
-            throw new ArgumentException("The saga type did not match the connector type");
+            ISagaMessageConnector<T> ISagaConnectorFactory.CreateMessageConnector<T>()
+            {
+                if (_connector is ISagaMessageConnector<T> connector)
+                    return connector;
+
+                throw new ArgumentException("The saga type did not match the connector type");
+            }
         }
     }
 }

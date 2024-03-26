@@ -7,7 +7,7 @@ namespace MassTransit
     public static class StateMachineIntrospectionExtensions
     {
         public static async Task<IEnumerable<Event>> NextEvents<TInstance>(this BehaviorContext<TInstance> context)
-            where TInstance : class, ISaga
+            where TInstance : class, SagaStateMachineInstance
         {
             return context.StateMachine.NextEvents(await context.StateMachine.Accessor.Get(context));
         }

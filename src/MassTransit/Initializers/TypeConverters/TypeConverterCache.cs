@@ -10,7 +10,7 @@ namespace MassTransit.Initializers.TypeConverters
     public class TypeConverterCache :
         ITypeConverterCache
     {
-        readonly IList<object> _converters;
+        readonly List<object> _converters;
         readonly ConcurrentDictionary<Type, object> _typeConverters;
 
         TypeConverterCache()

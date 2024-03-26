@@ -8,11 +8,11 @@ namespace MassTransit.Configuration
         where TData : class, CorrelatedBy<Guid>
         where TInstance : class, SagaStateMachineInstance
     {
-        readonly MassTransitEventCorrelationConfigurator<TInstance, TData> _configurator;
+        readonly StateMachineInterfaceType<TInstance, TData>.MassTransitEventCorrelationConfigurator _configurator;
 
         public CorrelatedByEventCorrelationBuilder(SagaStateMachine<TInstance> machine, Event<TData> @event)
         {
-            var configurator = new MassTransitEventCorrelationConfigurator<TInstance, TData>(machine, @event, null);
+            var configurator = new StateMachineInterfaceType<TInstance, TData>.MassTransitEventCorrelationConfigurator(machine, @event, null);
             configurator.CorrelateById(x => x.Message.CorrelationId);
 
             _configurator = configurator;

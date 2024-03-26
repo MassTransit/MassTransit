@@ -14,7 +14,7 @@ namespace MassTransit
         /// <param name="context"></param>
         /// <param name="state">The target state</param>
         public static Task TransitionToState<TSaga>(this BehaviorContext<TSaga> context, State state)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
         {
             IStateAccessor<TSaga> accessor = context.StateMachine.Accessor;
             State<TSaga> toState = context.StateMachine.GetState(state.Name);

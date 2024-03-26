@@ -6,7 +6,7 @@ namespace MassTransit.SagaStateMachine
 
     public class AsyncFactoryActivity<TSaga> :
         IStateMachineActivity<TSaga>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
     {
         readonly Func<BehaviorContext<TSaga>, Task<IStateMachineActivity<TSaga>>> _activityFactory;
 
@@ -58,7 +58,7 @@ namespace MassTransit.SagaStateMachine
 
     public class AsyncFactoryActivity<TSaga, TMessage> :
         IStateMachineActivity<TSaga, TMessage>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TMessage : class
     {
         readonly Func<BehaviorContext<TSaga, TMessage>, Task<IStateMachineActivity<TSaga, TMessage>>> _activityFactory;

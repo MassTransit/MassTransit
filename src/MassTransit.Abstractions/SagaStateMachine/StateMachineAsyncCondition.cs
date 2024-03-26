@@ -11,7 +11,7 @@ namespace MassTransit
     /// <param name="context"></param>
     /// <returns></returns>
     public delegate Task<bool> StateMachineAsyncCondition<TSaga, in TMessage>(BehaviorContext<TSaga, TMessage> context)
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TMessage : class;
 
 
@@ -22,5 +22,5 @@ namespace MassTransit
     /// <param name="context"></param>
     /// <returns></returns>
     public delegate Task<bool> StateMachineAsyncCondition<TSaga>(BehaviorContext<TSaga> context)
-        where TSaga : class, ISaga;
+        where TSaga : class, SagaStateMachineInstance;
 }

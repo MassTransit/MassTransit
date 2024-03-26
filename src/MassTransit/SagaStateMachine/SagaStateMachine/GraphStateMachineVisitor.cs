@@ -8,7 +8,7 @@
 
     public class GraphStateMachineVisitor<TSaga> :
         StateMachineVisitor
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
     {
         readonly HashSet<Edge> _edges;
         readonly Dictionary<Event, Vertex> _events;
@@ -87,7 +87,7 @@
         }
 
         public void Visit<T>(IBehavior<T> behavior)
-            where T : class, ISaga
+            where T : class, SagaStateMachineInstance
         {
             Visit(behavior, x =>
             {
@@ -95,13 +95,13 @@
         }
 
         public void Visit<T>(IBehavior<T> behavior, Action<IBehavior<T>> next)
-            where T : class, ISaga
+            where T : class, SagaStateMachineInstance
         {
             next(behavior);
         }
 
         public void Visit<T, TData>(IBehavior<T, TData> behavior)
-            where T : class, ISaga
+            where T : class, SagaStateMachineInstance
             where TData : class
         {
             Visit(behavior, x =>
@@ -110,7 +110,7 @@
         }
 
         public void Visit<T, TData>(IBehavior<T, TData> behavior, Action<IBehavior<T, TData>> next)
-            where T : class, ISaga
+            where T : class, SagaStateMachineInstance
             where TData : class
         {
             next(behavior);
@@ -133,7 +133,7 @@
             }
 
             var activityType = activity.GetType();
-            var compensateType = activityType.GetTypeInfo().IsGenericType
+            var compensateType = activityType.IsGenericType
                 && activityType.GetGenericTypeDefinition() == typeof(CatchFaultActivity<,>)
                     ? activityType.GetGenericArguments().Skip(1).First()
                     : null;
@@ -209,7 +209,7 @@
             var targetType = @event
                 .GetType()
                 .GetInterfaces()
-                .Where(x => x.GetTypeInfo().IsGenericType)
+                .Where(x => x.IsGenericType)
                 .Where(x => x.GetGenericTypeDefinition() == typeof(Event<>))
                 .Select(x => x.GetGenericArguments()[0])
                 .DefaultIfEmpty(typeof(Event))

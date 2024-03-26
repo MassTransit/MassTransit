@@ -39,7 +39,7 @@ namespace MassTransit
     /// <typeparam name="TSaga">The instance type to which the state applies</typeparam>
     public interface State<TSaga> :
         State
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
     {
         IEnumerable<Event> Events { get; }
 

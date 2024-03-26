@@ -77,7 +77,7 @@
     /// <typeparam name="TSaga"></typeparam>
     public interface StateMachine<TSaga> :
         StateMachine
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
     {
         /// <summary>
         /// Exposes the current state on the given instance

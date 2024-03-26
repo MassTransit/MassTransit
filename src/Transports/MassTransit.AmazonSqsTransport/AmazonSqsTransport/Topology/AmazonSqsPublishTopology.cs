@@ -53,7 +53,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
             return GetMessageTopology<T>() as IAmazonSqsMessagePublishTopologyConfigurator<T>;
         }
 
-        protected override IMessagePublishTopologyConfigurator CreateMessageTopology<T>(Type type)
+        protected override IMessagePublishTopologyConfigurator CreateMessageTopology<T>()
         {
             var messageTopology = new AmazonSqsMessagePublishTopology<T>(this, _messageTopology.GetMessageTopology<T>());
 

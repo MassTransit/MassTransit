@@ -55,5 +55,17 @@ namespace MassTransit.Middleware
             var scope = context.CreateFilterScope("outbox");
             scope.Add("type", "in-memory");
         }
+
+        public void Method1()
+        {
+        }
+
+        public void Method2()
+        {
+        }
+
+        public void Method3()
+        {
+        }
     }
 }

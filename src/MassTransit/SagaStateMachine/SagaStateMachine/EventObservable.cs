@@ -1,46 +1,60 @@
-namespace MassTransit.SagaStateMachine
+namespace MassTransit
 {
     using System;
     using System.Threading.Tasks;
     using Util;
 
-
-    public class EventObservable<TSaga> :
-        Connectable<IEventObserver<TSaga>>,
-        IEventObserver<TSaga>
-        where TSaga : class, ISaga
+    public partial class MassTransitStateMachine<TInstance>
+        where TInstance : class, SagaStateMachineInstance
     {
-        public Task PreExecute(BehaviorContext<TSaga> context)
+        public class EventObservable :
+            Connectable<IEventObserver<TInstance>>,
+            IEventObserver<TInstance>
         {
-            return ForEachAsync(x => x.PreExecute(context));
-        }
+            public Task PreExecute(BehaviorContext<TInstance> context)
+            {
+                return ForEachAsync(x => x.PreExecute(context));
+            }
 
-        public Task PreExecute<T>(BehaviorContext<TSaga, T> context)
-            where T : class
-        {
-            return ForEachAsync(x => x.PreExecute(context));
-        }
+            public Task PreExecute<T>(BehaviorContext<TInstance, T> context)
+                where T : class
+            {
+                return ForEachAsync(x => x.PreExecute(context));
+            }
 
-        public Task PostExecute(BehaviorContext<TSaga> context)
-        {
-            return ForEachAsync(x => x.PostExecute(context));
-        }
+            public Task PostExecute(BehaviorContext<TInstance> context)
+            {
+                return ForEachAsync(x => x.PostExecute(context));
+            }
 
-        public Task PostExecute<T>(BehaviorContext<TSaga, T> context)
-            where T : class
-        {
-            return ForEachAsync(x => x.PostExecute(context));
-        }
+            public Task PostExecute<T>(BehaviorContext<TInstance, T> context)
+                where T : class
+            {
+                return ForEachAsync(x => x.PostExecute(context));
+            }
 
-        public Task ExecuteFault(BehaviorContext<TSaga> context, Exception exception)
-        {
-            return ForEachAsync(x => x.ExecuteFault(context, exception));
-        }
+            public Task ExecuteFault(BehaviorContext<TInstance> context, Exception exception)
+            {
+                return ForEachAsync(x => x.ExecuteFault(context, exception));
+            }
 
-        public Task ExecuteFault<T>(BehaviorContext<TSaga, T> context, Exception exception)
-            where T : class
-        {
-            return ForEachAsync(x => x.ExecuteFault(context, exception));
+            public Task ExecuteFault<T>(BehaviorContext<TInstance, T> context, Exception exception)
+                where T : class
+            {
+                return ForEachAsync(x => x.ExecuteFault(context, exception));
+            }
+
+            public void Method4()
+            {
+            }
+
+            public void Method5()
+            {
+            }
+
+            public void Method6()
+            {
+            }
         }
     }
 }

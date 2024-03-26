@@ -5,7 +5,7 @@ namespace MassTransit
 
 
     public interface EventActivities<TInstance>
-        where TInstance : class, ISaga
+        where TInstance : class, SagaStateMachineInstance
     {
         IEnumerable<IActivityBinder<TInstance>> GetStateActivityBinders();
     }

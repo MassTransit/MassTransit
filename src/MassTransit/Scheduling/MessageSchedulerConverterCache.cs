@@ -154,7 +154,7 @@ namespace MassTransit.Scheduling
         static class Cached
         {
             internal static readonly Lazy<MessageSchedulerConverterCache> Converters =
-                new Lazy<MessageSchedulerConverterCache>(() => new MessageSchedulerConverterCache(), LazyThreadSafetyMode.PublicationOnly);
+                new Lazy<MessageSchedulerConverterCache>(() => new MessageSchedulerConverterCache());
         }
     }
 }

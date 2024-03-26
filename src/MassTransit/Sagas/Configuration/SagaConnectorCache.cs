@@ -1,9 +1,7 @@
-﻿namespace MassTransit.Configuration
+﻿using System;
+
+namespace MassTransit.Configuration
 {
-    using System;
-    using System.Threading;
-
-
     /// <summary>
     /// Caches the saga connectors for the saga
     /// </summary>
@@ -16,7 +14,7 @@
 
         SagaConnectorCache()
         {
-            _connector = new Lazy<SagaConnector<TSaga>>(() => new SagaConnector<TSaga>(), LazyThreadSafetyMode.PublicationOnly);
+            _connector = new Lazy<SagaConnector<TSaga>>(() => new SagaConnector<TSaga>());
         }
 
         public static ISagaConnector Connector => Cached.Instance.Value.Connector;
@@ -26,8 +24,7 @@
 
         static class Cached
         {
-            internal static readonly Lazy<ISagaConnectorCache> Instance = new Lazy<ISagaConnectorCache>(
-                () => new SagaConnectorCache<TSaga>(), LazyThreadSafetyMode.PublicationOnly);
+            internal static readonly Lazy<ISagaConnectorCache> Instance = new Lazy<ISagaConnectorCache>(() => new SagaConnectorCache<TSaga>());
         }
     }
 }

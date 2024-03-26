@@ -1,56 +1,58 @@
-namespace MassTransit.SagaStateMachine
+namespace MassTransit
 {
     using System;
     using System.Linq;
 
-
-    public class StateAccessorIndex<TSaga>
-        where TSaga : class, ISaga
+    public partial class MassTransitStateMachine<TInstance>
+        where TInstance : class, SagaStateMachineInstance
     {
-        readonly State<TSaga>[] _assignedStates;
-        readonly StateMachine<TSaga> _stateMachine;
-        readonly Lazy<State<TSaga>[]> _states;
-
-        public StateAccessorIndex(StateMachine<TSaga> stateMachine, State<TSaga> initial, State<TSaga> final, State[] states)
+        class StateAccessorIndex
         {
-            _stateMachine = stateMachine;
+            readonly State<TInstance>[] _assignedStates;
+            readonly StateMachine<TInstance> _stateMachine;
+            readonly Lazy<State<TInstance>[]> _states;
 
-            _assignedStates = new[] { null, initial, final }.Concat(states.Cast<State<TSaga>>()).ToArray();
-
-            _states = new Lazy<State<TSaga>[]>(CreateStateArray);
-        }
-
-        public int this[string name]
-        {
-            get
+            public StateAccessorIndex(StateMachine<TInstance> stateMachine, State<TInstance> initial, State<TInstance> final, State[] states)
             {
-                if (string.IsNullOrWhiteSpace(name))
-                    throw new ArgumentNullException(nameof(name));
+                _stateMachine = stateMachine;
 
-                for (var i = 1; i < _states.Value.Length; i++)
+                _assignedStates = new[] { null, initial, final }.Concat(states.Cast<State<TInstance>>()).ToArray();
+
+                _states = new Lazy<State<TInstance>[]>(CreateStateArray);
+            }
+
+            public int this[string name]
+            {
+                get
                 {
-                    if (_states.Value[i].Name.Equals(name))
-                        return i;
+                    if (string.IsNullOrWhiteSpace(name))
+                        throw new ArgumentNullException(nameof(name));
+
+                    for (var i = 1; i < _states.Value.Length; i++)
+                    {
+                        if (_states.Value[i].Name.Equals(name))
+                            return i;
+                    }
+
+                    throw new ArgumentException("Unknown state specified: " + name);
                 }
-
-                throw new ArgumentException("Unknown state specified: " + name);
             }
-        }
 
-        public State<TSaga> this[int index]
-        {
-            get
+            public State<TInstance> this[int index]
             {
-                if (index < 0 || index >= _states.Value.Length)
-                    throw new ArgumentOutOfRangeException(nameof(index));
+                get
+                {
+                    if (index < 0 || index >= _states.Value.Length)
+                        throw new ArgumentOutOfRangeException(nameof(index));
 
-                return _states.Value[index];
+                    return _states.Value[index];
+                }
             }
-        }
 
-        State<TSaga>[] CreateStateArray()
-        {
-            return _assignedStates.Concat(_stateMachine.States.Cast<State<TSaga>>()).Distinct().ToArray();
+            State<TInstance>[] CreateStateArray()
+            {
+                return _assignedStates.Concat(_stateMachine.States.Cast<State<TInstance>>()).Distinct().ToArray();
+            }
         }
     }
 }

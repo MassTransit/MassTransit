@@ -9,7 +9,7 @@ namespace MassTransit
     /// <typeparam name="TSaga"></typeparam>
     public interface UnhandledEventContext<TSaga> :
         BehaviorContext<TSaga>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
     {
         /// <summary>
         /// The current state of the state machine

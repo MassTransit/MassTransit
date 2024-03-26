@@ -14,7 +14,7 @@ namespace MassTransit.SqlTransport.Topology
         where TMessage : class
     {
         readonly ISqlMessagePublishTopology<TMessage> _publishTopology;
-        readonly IList<ISqlConsumeTopologySpecification> _specifications;
+        readonly List<ISqlConsumeTopologySpecification> _specifications;
 
         public SqlMessageConsumeTopology(ISqlMessagePublishTopology<TMessage> publishTopology)
         {

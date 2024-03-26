@@ -1,4 +1,4 @@
-namespace MassTransit.SagaStateMachine
+namespace MassTransit
 {
     using System;
     using System.Linq;
@@ -7,73 +7,76 @@ namespace MassTransit.SagaStateMachine
     using System.Threading.Tasks;
     using Internals;
 
-
-    public class RawStateAccessor<TSaga> :
-        IStateAccessor<TSaga>
-        where TSaga : class, ISaga
+    public partial class MassTransitStateMachine<TInstance>
+        where TInstance : class, SagaStateMachineInstance
     {
-        readonly StateMachine<TSaga> _machine;
-        readonly IStateObserver<TSaga> _observer;
-        readonly PropertyInfo _propertyInfo;
-        readonly IReadProperty<TSaga, State> _read;
-        readonly IWriteProperty<TSaga, State> _write;
-
-        public RawStateAccessor(StateMachine<TSaga> machine, Expression<Func<TSaga, State>> currentStateExpression, IStateObserver<TSaga> observer)
+        class RawStateAccessor :
+            IStateAccessor<TInstance>
         {
-            _machine = machine;
-            _observer = observer;
+            readonly StateMachine<TInstance> _machine;
+            readonly IStateObserver<TInstance> _observer;
+            readonly PropertyInfo _propertyInfo;
+            readonly IReadProperty<TInstance, State> _read;
+            readonly IWriteProperty<TInstance, State> _write;
 
-            _propertyInfo = currentStateExpression.GetPropertyInfo();
+            public RawStateAccessor(StateMachine<TInstance> machine, Expression<Func<TInstance, State>> currentStateExpression,
+                IStateObserver<TInstance> observer)
+            {
+                _machine = machine;
+                _observer = observer;
 
-            _read = ReadPropertyCache<TSaga>.GetProperty<State>(_propertyInfo);
-            _write = WritePropertyCache<TSaga>.GetProperty<State>(_propertyInfo);
-        }
+                _propertyInfo = currentStateExpression.GetPropertyInfo();
 
-        Task<State<TSaga>> IStateAccessor<TSaga>.Get(BehaviorContext<TSaga> context)
-        {
-            var state = _read.Get(context.Saga);
-            if (state == null)
-                return Task.FromResult<State<TSaga>>(null);
+                _read = ReadPropertyCache<TInstance>.GetProperty<State>(_propertyInfo);
+                _write = WritePropertyCache<TInstance>.GetProperty<State>(_propertyInfo);
+            }
 
-            return Task.FromResult(_machine.GetState(state.Name));
-        }
+            Task<State<TInstance>> IStateAccessor<TInstance>.Get(BehaviorContext<TInstance> context)
+            {
+                var state = _read.Get(context.Saga);
+                if (state == null)
+                    return Task.FromResult<State<TInstance>>(null);
 
-        Task IStateAccessor<TSaga>.Set(BehaviorContext<TSaga> context, State<TSaga> state)
-        {
-            if (state == null)
-                throw new ArgumentNullException(nameof(state));
+                return Task.FromResult(_machine.GetState(state.Name));
+            }
 
-            var previous = _read.Get(context.Saga);
-            if (state.Equals(previous))
-                return Task.CompletedTask;
+            Task IStateAccessor<TInstance>.Set(BehaviorContext<TInstance> context, State<TInstance> state)
+            {
+                if (state == null)
+                    throw new ArgumentNullException(nameof(state));
 
-            _write.Set(context.Saga, state);
+                var previous = _read.Get(context.Saga);
+                if (state.Equals(previous))
+                    return Task.CompletedTask;
 
-            State<TSaga> previousState = null;
-            if (previous != null)
-                previousState = _machine.GetState(previous.Name);
+                _write.Set(context.Saga, state);
 
-            return _observer.StateChanged(context, state, previousState);
-        }
+                State<TInstance> previousState = null;
+                if (previous != null)
+                    previousState = _machine.GetState(previous.Name);
 
-        public Expression<Func<TSaga, bool>> GetStateExpression(params State[] states)
-        {
-            if (states == null || states.Length == 0)
-                throw new ArgumentOutOfRangeException(nameof(states), "One or more states must be specified");
+                return _observer.StateChanged(context, state, previousState);
+            }
 
-            var parameterExpression = Expression.Parameter(typeof(TSaga), "instance");
+            public Expression<Func<TInstance, bool>> GetStateExpression(params State[] states)
+            {
+                if (states == null || states.Length == 0)
+                    throw new ArgumentOutOfRangeException(nameof(states), "One or more states must be specified");
 
-            var statePropertyExpression = Expression.Property(parameterExpression, _propertyInfo.GetMethod);
+                var parameterExpression = Expression.Parameter(typeof(TInstance), "instance");
 
-            var stateExpression = states.Select(state => Expression.Equal(statePropertyExpression,
-                Expression.Constant(state, typeof(State)))).Aggregate((left, right) => Expression.Or(left, right));
+                var statePropertyExpression = Expression.Property(parameterExpression, _propertyInfo.GetMethod);
 
-            return Expression.Lambda<Func<TSaga, bool>>(stateExpression, parameterExpression);
-        }
+                var stateExpression = states.Select(state => Expression.Equal(statePropertyExpression,
+                    Expression.Constant(state, typeof(State)))).Aggregate((left, right) => Expression.Or(left, right));
 
-        public void Probe(ProbeContext context)
-        {
-            context.Add("currentStateProperty", _propertyInfo.Name);
+                return Expression.Lambda<Func<TInstance, bool>>(stateExpression, parameterExpression);
+            }
+
+            public void Probe(ProbeContext context)
+            {
+                context.Add("currentStateProperty", _propertyInfo.Name);
+            }
         }
     }
 }

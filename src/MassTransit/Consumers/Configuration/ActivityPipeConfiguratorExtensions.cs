@@ -14,8 +14,8 @@ namespace MassTransit.Configuration
                 throw new ArgumentNullException(nameof(specification));
 
             IPipeSpecification<ExecuteActivityContext<TActivity, TArguments>> filterSpecification =
-                new SplitFilterPipeSpecification<ExecuteActivityContext<TActivity, TArguments>, ExecuteActivityContext<TArguments>>(specification,
-                    (input, context) => input, context => context);
+                new PipeConfigurator<ExecuteActivityContext<TActivity, TArguments>>.SplitFilterPipeSpecification<ExecuteActivityContext<TArguments>>(
+                    specification, (input, context) => input, context => context);
 
             configurator.AddPipeSpecification(filterSpecification);
         }
@@ -29,7 +29,7 @@ namespace MassTransit.Configuration
                 throw new ArgumentNullException(nameof(specification));
 
             IPipeSpecification<CompensateActivityContext<TActivity, TLog>> filterSpecification =
-                new SplitFilterPipeSpecification<CompensateActivityContext<TActivity, TLog>, CompensateActivityContext<TLog>>(specification,
+                new PipeConfigurator<CompensateActivityContext<TActivity, TLog>>.SplitFilterPipeSpecification<CompensateActivityContext<TLog>>(specification,
                     (input, context) => input, context => context);
 
             configurator.AddPipeSpecification(filterSpecification);

@@ -14,7 +14,7 @@ namespace MassTransit.InMemoryTransport
     {
         readonly IMessageTopology _messageTopology;
         readonly IInMemoryPublishTopologyConfigurator _publishTopology;
-        readonly IList<IInMemoryConsumeTopologySpecification> _specifications;
+        readonly List<IInMemoryConsumeTopologySpecification> _specifications;
 
         public InMemoryConsumeTopology(IMessageTopology messageTopology, IInMemoryPublishTopologyConfigurator publishTopology)
         {

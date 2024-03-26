@@ -1,9 +1,7 @@
+using System;
+
 namespace MassTransit.Scheduling
 {
-    using System;
-    using System.Threading;
-
-
     /// <summary>
     /// A cache of convention-based CorrelationId mappers, used unless overridden by some mystical force
     /// </summary>
@@ -29,7 +27,7 @@ namespace MassTransit.Scheduling
 
         public bool TryGetTokenId(T message, out Guid tokenId)
         {
-            Guid? result = _selector(message);
+            var result = _selector(message);
             if (result.HasValue)
             {
                 tokenId = result.Value;
@@ -59,8 +57,7 @@ namespace MassTransit.Scheduling
 
         static class Cached
         {
-            internal static Lazy<IScheduleTokenIdCache<T>> Metadata = new Lazy<IScheduleTokenIdCache<T>>(
-                () => new ScheduleTokenIdCache<T>(), LazyThreadSafetyMode.PublicationOnly);
+            internal static Lazy<IScheduleTokenIdCache<T>> Metadata = new Lazy<IScheduleTokenIdCache<T>>(() => new ScheduleTokenIdCache<T>());
         }
     }
 }

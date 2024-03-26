@@ -6,7 +6,7 @@ namespace MassTransit.SagaStateMachine
 
     public class CompositeEventActivity<TSaga> :
         IStateMachineActivity<TSaga>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
     {
         readonly ICompositeEventStatusAccessor<TSaga> _accessor;
         readonly CompositeEventStatus _complete;

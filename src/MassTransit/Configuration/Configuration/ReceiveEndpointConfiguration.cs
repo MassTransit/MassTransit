@@ -15,8 +15,8 @@
         readonly Lazy<IConsumePipe> _consumePipe;
         readonly HashSet<IReceiveEndpointDependency> _dependencies;
         readonly HashSet<IReceiveEndpointDependent> _dependents;
-        readonly IList<string> _lateConfigurationKeys;
-        readonly IList<IReceiveEndpointSpecification> _specifications;
+        readonly List<string> _lateConfigurationKeys;
+        readonly List<IReceiveEndpointSpecification> _specifications;
         IReceiveEndpoint _receiveEndpoint;
 
         protected ReceiveEndpointConfiguration(IHostConfiguration hostConfiguration, IEndpointConfiguration endpointConfiguration)

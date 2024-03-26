@@ -11,7 +11,7 @@ namespace MassTransit.SagaStateMachine
     /// <typeparam name="TSaga"></typeparam>
     public class LastBehavior<TSaga> :
         IBehavior<TSaga>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
     {
         readonly IStateMachineActivity<TSaga> _activity;
 

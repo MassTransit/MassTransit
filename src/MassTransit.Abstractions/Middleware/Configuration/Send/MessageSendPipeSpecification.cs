@@ -10,10 +10,10 @@ namespace MassTransit.Configuration
         IMessageSendPipeSpecification
         where TMessage : class
     {
-        readonly IList<IPipeSpecification<SendContext>> _baseSpecifications;
-        readonly IList<ISpecificationPipeSpecification<SendContext<TMessage>>> _implementedMessageTypeSpecifications;
-        readonly IList<ISpecificationPipeSpecification<SendContext<TMessage>>> _parentMessageSpecifications;
-        readonly IList<IPipeSpecification<SendContext<TMessage>>> _specifications;
+        readonly List<IPipeSpecification<SendContext>> _baseSpecifications;
+        readonly List<ISpecificationPipeSpecification<SendContext<TMessage>>> _implementedMessageTypeSpecifications;
+        readonly List<ISpecificationPipeSpecification<SendContext<TMessage>>> _parentMessageSpecifications;
+        readonly List<IPipeSpecification<SendContext<TMessage>>> _specifications;
 
         public MessageSendPipeSpecification()
         {
@@ -72,7 +72,8 @@ namespace MassTransit.Configuration
             {
                 for (var index = 0; index < _baseSpecifications.Count; index++)
                 {
-                    var split = new SplitFilterPipeSpecification<SendContext<TMessage>, SendContext>(_baseSpecifications[index], MergeContext, FilterContext);
+                    var split = new PipeConfigurator<SendContext<TMessage>>.SplitFilterPipeSpecification<SendContext>(_baseSpecifications[index], MergeContext,
+                        FilterContext);
 
                     split.Apply(builder);
                 }
@@ -81,7 +82,7 @@ namespace MassTransit.Configuration
 
         public IPipe<SendContext<TMessage>> BuildMessagePipe()
         {
-            var pipeBuilder = new SpecificationPipeBuilder<SendContext<TMessage>>();
+            var pipeBuilder = new PipeConfigurator<SendContext<TMessage>>.SpecificationPipeBuilder();
 
             Apply(pipeBuilder);
 

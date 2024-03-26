@@ -2,7 +2,7 @@ namespace MassTransit
 {
     using System;
     using System.Threading.Tasks;
-    using Middleware;
+    using Configuration;
 
 
     public static class PipeExtensions
@@ -19,7 +19,7 @@ namespace MassTransit
             return pipe switch
             {
                 null => false,
-                EmptyPipe<T> _ => false,
+                PipeConfigurator<T>.EmptyPipe _ => false,
                 _ => true
             };
         }
@@ -36,7 +36,7 @@ namespace MassTransit
             return pipe switch
             {
                 null => true,
-                EmptyPipe<T> _ => true,
+                PipeConfigurator<T>.EmptyPipe _ => false,
                 _ => false
             };
         }

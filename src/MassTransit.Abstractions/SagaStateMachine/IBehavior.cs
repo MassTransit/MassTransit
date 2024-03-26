@@ -10,7 +10,7 @@ namespace MassTransit
     /// <typeparam name="TInstance">The state type</typeparam>
     public interface IBehavior<TInstance> :
         IVisitable
-        where TInstance : class, ISaga
+        where TInstance : class, SagaStateMachineInstance
     {
         /// <summary>
         /// Execute the activity with the given behavior context
@@ -56,7 +56,7 @@ namespace MassTransit
     /// <typeparam name="TMessage">The data type of the behavior</typeparam>
     public interface IBehavior<TSaga, in TMessage> :
         IVisitable
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TMessage : class
     {
         /// <summary>

@@ -5,7 +5,7 @@ namespace MassTransit
 
     public interface ExceptionActivityBinder<TSaga, TException> :
         EventActivities<TSaga>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TException : Exception
     {
         StateMachine<TSaga> StateMachine { get; }
@@ -67,7 +67,7 @@ namespace MassTransit
 
     public interface ExceptionActivityBinder<TSaga, TMessage, TException> :
         EventActivities<TSaga>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TException : Exception
         where TMessage : class
     {

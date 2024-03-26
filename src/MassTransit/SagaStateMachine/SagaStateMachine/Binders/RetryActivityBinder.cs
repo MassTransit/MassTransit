@@ -2,7 +2,7 @@ namespace MassTransit.SagaStateMachine
 {
     public class RetryActivityBinder<TInstance> :
         IActivityBinder<TInstance>
-        where TInstance : class, ISaga
+        where TInstance : class, SagaStateMachineInstance
     {
         readonly IStateMachineActivity<TInstance> _activity;
 
@@ -42,7 +42,7 @@ namespace MassTransit.SagaStateMachine
 
     public class RetryActivityBinder<TInstance, TMessage> :
         IActivityBinder<TInstance>
-        where TInstance : class, ISaga
+        where TInstance : class, SagaStateMachineInstance
         where TMessage : class
     {
         readonly IStateMachineActivity<TInstance> _activity;

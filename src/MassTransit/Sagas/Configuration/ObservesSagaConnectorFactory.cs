@@ -21,7 +21,7 @@
 
             var consumeFilter = new ObservesSagaMessageFilter<TSaga, TMessage>();
 
-            _connector = new QuerySagaMessageConnector<TSaga, TMessage>(consumeFilter, policy, queryFactory);
+            _connector = new SagaConnector<TSaga, TMessage>.QuerySagaMessageConnector(consumeFilter, policy, queryFactory);
         }
 
         ISagaMessageConnector<T> ISagaConnectorFactory.CreateMessageConnector<T>()

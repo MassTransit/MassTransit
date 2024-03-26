@@ -59,8 +59,7 @@
 
             public void AddPipeSpecification(IPipeSpecification<TContext> specification)
             {
-                _configurator.AddPipeSpecification(new SplitFilterPipeSpecification<TRescue, TContext>(specification,
-                    InputContext, Context));
+                _configurator.AddPipeSpecification(new PipeConfigurator<TRescue>.SplitFilterPipeSpecification<TContext>(specification, InputContext, Context));
             }
 
             static TRescue Context(TRescue context)

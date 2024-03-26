@@ -15,7 +15,7 @@ namespace MassTransit.Testing.Implementations
         where TElement : class, IAsyncListElement
     {
         readonly Connectable<Channel<TElement>> _channels;
-        readonly IList<TElement> _messages;
+        readonly List<TElement> _messages;
         readonly IDictionary<Guid, TElement> _messageLookup;
         readonly TimeSpan _timeout;
         readonly CancellationToken _testCompleted;

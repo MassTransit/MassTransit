@@ -15,20 +15,20 @@ namespace MassTransit
         IConsumeTopologyConfigurator,
         IConsumeTopologyConfigurationObserver
     {
-        readonly IList<IMessageConsumeTopologyConvention> _conventions;
+        readonly List<IMessageConsumeTopologyConvention> _conventions;
         readonly object _lock = new object();
         readonly int _maxQueueNameLength;
-        readonly ConcurrentDictionary<Type, IMessageConsumeTopologyConfigurator> _messageTypes;
+        readonly ConcurrentDictionary<Type, Lazy<IMessageConsumeTopologyConfigurator>> _messageTypes;
         readonly ConsumeTopologyConfigurationObservable _observers;
 
         protected ConsumeTopology(int maxQueueNameLength = 1024)
         {
             _maxQueueNameLength = maxQueueNameLength;
-            _messageTypes = new ConcurrentDictionary<Type, IMessageConsumeTopologyConfigurator>();
+            _messageTypes = new ConcurrentDictionary<Type, Lazy<IMessageConsumeTopologyConfigurator>>();
 
             _observers = new ConsumeTopologyConfigurationObservable();
 
-            _conventions = new List<IMessageConsumeTopologyConvention>();
+            _conventions = new List<IMessageConsumeTopologyConvention>(8);
             _observers.Connect(this);
         }
 
@@ -86,13 +86,18 @@ namespace MassTransit
         {
             lock (_lock)
             {
-                if (_conventions.Any(x => x.GetType() == convention.GetType()))
-                    return false;
+                var conventionType = convention.GetType();
+
+                for (var i = 0; i < _conventions.Count; i++)
+                {
+                    if (_conventions[i].GetType() == conventionType)
+                        return false;
+                }
 
                 _conventions.Add(convention);
 
                 foreach (var messageConsumeTopologyConfigurator in _messageTypes.Values)
-                    messageConsumeTopologyConfigurator.TryAddConvention(convention);
+                    messageConsumeTopologyConfigurator.Value.TryAddConvention(convention);
 
                 return true;
             }
@@ -100,7 +105,7 @@ namespace MassTransit
 
         public virtual IEnumerable<ValidationResult> Validate()
         {
-            return _messageTypes.Values.SelectMany(x => x.Validate());
+            return _messageTypes.Values.SelectMany(x => x.Value.Validate());
         }
 
         void IConsumeTopologyConfigurator.AddMessageConsumeTopology<T>(IMessageConsumeTopology<T> topology)
@@ -137,16 +142,16 @@ namespace MassTransit
             if (MessageTypeCache<T>.IsValidMessageType == false)
                 throw new ArgumentException(MessageTypeCache<T>.InvalidMessageTypeReason, nameof(T));
 
-            var specification = _messageTypes.GetOrAdd(typeof(T), CreateMessageTopology<T>);
+            var specification = _messageTypes.GetOrAdd(typeof(T), type => new Lazy<IMessageConsumeTopologyConfigurator>(() => CreateMessageTopology<T>(type)));
 
-            return specification as IMessageConsumeTopologyConfigurator<T>;
+            return specification.Value as IMessageConsumeTopologyConfigurator<T>;
         }
 
         protected bool All(Func<IMessageConsumeTopologyConfigurator, bool> callback)
         {
             IMessageConsumeTopologyConfigurator[] configurators;
             lock (_lock)
-                configurators = _messageTypes.Values.ToArray();
+                configurators = _messageTypes.Values.Select(x => x.Value).ToArray();
 
             if (configurators.Length == 0)
                 return true;
@@ -162,7 +167,7 @@ namespace MassTransit
         {
             IMessageConsumeTopologyConfigurator[] configurators;
             lock (_lock)
-                configurators = _messageTypes.Values.ToArray();
+                configurators = _messageTypes.Values.Select(x => x.Value).ToArray();
 
             if (configurators.Length == 0)
                 return Enumerable.Empty<TResult>();
@@ -178,7 +183,7 @@ namespace MassTransit
         {
             IMessageConsumeTopologyConfigurator[] configurators;
             lock (_lock)
-                configurators = _messageTypes.Values.ToArray();
+                configurators = _messageTypes.Values.Select(x => x.Value).ToArray();
 
             switch (configurators.Length)
             {

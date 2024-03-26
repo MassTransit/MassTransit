@@ -7,7 +7,7 @@ namespace MassTransit.SagaStateMachine
     public class FaultedContainerFactoryActivity<TSaga, TException, TActivity> :
         IStateMachineActivity<TSaga>
         where TActivity : class, IStateMachineActivity<TSaga>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TException : Exception
     {
         public void Accept(StateMachineVisitor visitor)
@@ -65,7 +65,7 @@ namespace MassTransit.SagaStateMachine
     public class FaultedContainerFactoryActivity<TSaga, TMessage, TException, TActivity> :
         IStateMachineActivity<TSaga, TMessage>
         where TActivity : class, IStateMachineActivity<TSaga, TMessage>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TException : Exception
         where TMessage : class
     {

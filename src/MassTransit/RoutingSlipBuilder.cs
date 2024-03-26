@@ -21,13 +21,13 @@
     {
         public static readonly IDictionary<string, object> NoArguments = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
-        readonly IList<ActivityException> _activityExceptions;
-        readonly IList<ActivityLog> _activityLogs;
-        readonly IList<CompensateLog> _compensateLogs;
+        readonly List<ActivityException> _activityExceptions;
+        readonly List<ActivityLog> _activityLogs;
+        readonly List<CompensateLog> _compensateLogs;
         readonly DateTime _createTimestamp;
-        readonly IList<Activity> _itinerary;
+        readonly List<Activity> _itinerary;
         readonly List<Activity> _sourceItinerary;
-        readonly IList<Subscription> _subscriptions;
+        readonly List<Subscription> _subscriptions;
         readonly IDictionary<string, object> _variables;
 
         public RoutingSlipBuilder(Guid trackingNumber)

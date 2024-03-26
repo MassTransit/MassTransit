@@ -1,11 +1,9 @@
-﻿namespace MassTransit.Configuration
+﻿using System;
+using System.Collections.Concurrent;
+using MassTransit.Consumer;
+
+namespace MassTransit.Configuration
 {
-    using System;
-    using System.Collections.Concurrent;
-    using System.Threading;
-    using Consumer;
-
-
     public class ConsumerConnectorCache<TConsumer> :
         IConsumerConnectorCache
         where TConsumer : class
@@ -14,8 +12,7 @@
 
         ConsumerConnectorCache()
         {
-            _connector = new Lazy<ConsumerConnector<TConsumer>>(() => new ConsumerConnector<TConsumer>(),
-                LazyThreadSafetyMode.PublicationOnly);
+            _connector = new Lazy<ConsumerConnector<TConsumer>>(() => new ConsumerConnector<TConsumer>());
         }
 
         public static IConsumerConnector Connector => Cached.Instance.Value.Connector;
@@ -25,8 +22,7 @@
 
         static class Cached
         {
-            internal static readonly Lazy<IConsumerConnectorCache> Instance = new Lazy<IConsumerConnectorCache>(
-                () => new ConsumerConnectorCache<TConsumer>(), LazyThreadSafetyMode.PublicationOnly);
+            internal static readonly Lazy<IConsumerConnectorCache> Instance = new Lazy<IConsumerConnectorCache>(() => new ConsumerConnectorCache<TConsumer>());
         }
     }
 
@@ -73,7 +69,7 @@
             {
                 var consumerFactory = new ObjectConsumerFactory<T>(objectFactory);
 
-                IConsumerSpecification<T> specification = _connector.Value.CreateConsumerSpecification<T>();
+                var specification = _connector.Value.CreateConsumerSpecification<T>();
 
                 return _connector.Value.ConnectConsumer(consumePipe, consumerFactory, specification);
             }

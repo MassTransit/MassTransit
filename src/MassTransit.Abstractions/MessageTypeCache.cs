@@ -1,20 +1,20 @@
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Threading;
+using MassTransit.Internals;
+using MassTransit.Metadata;
+
+
 namespace MassTransit
 {
-    using System;
-    using System.Collections.Concurrent;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Reflection;
-    using System.Threading;
-    using Internals;
-
-
     public static class MessageTypeCache
     {
         static CachedType GetOrAdd(Type type)
         {
-            return Cached.Instance.GetOrAdd(type, _ => Activator.CreateInstance(typeof(CachedType<>).MakeGenericType(type)) as CachedType
-                ?? throw new InvalidOperationException("Failed to create cached message type"));
+            return Cached.Instance.GetOrAdd(type, _ => Activation.Activate(type, new Factory()));
         }
 
         public static IEnumerable<PropertyInfo> GetProperties(Type type)
@@ -37,16 +37,6 @@ namespace MassTransit
             return GetOrAdd(type).IsTemporaryMessageType;
         }
 
-        public static bool HasConsumerInterfaces(Type type)
-        {
-            return GetOrAdd(type).HasConsumerInterfaces;
-        }
-
-        public static bool HasSagaInterfaces(Type type)
-        {
-            return GetOrAdd(type).HasSagaInterfaces;
-        }
-
         public static Type[] GetMessageTypes(Type type)
         {
             return GetOrAdd(type).MessageTypes;
@@ -58,6 +48,17 @@ namespace MassTransit
         }
 
 
+        readonly struct Factory :
+            IActivationType<CachedType>
+        {
+            public CachedType ActivateType<T>()
+                where T : class
+            {
+                return new CachedType<T>();
+            }
+        }
+
+
         static class Cached
         {
             internal static readonly ConcurrentDictionary<Type, CachedType> Instance = new ConcurrentDictionary<Type, CachedType>();
@@ -66,8 +67,6 @@ namespace MassTransit
 
         interface CachedType
         {
-            bool HasConsumerInterfaces { get; }
-            bool HasSagaInterfaces { get; }
             bool IsTemporaryMessageType { get; }
             bool IsValidMessageType { get; }
             string? InvalidMessageTypeReason { get; }
@@ -80,8 +79,6 @@ namespace MassTransit
         class CachedType<T> :
             CachedType
         {
-            bool CachedType.HasConsumerInterfaces => MessageTypeCache<T>.HasConsumerInterfaces;
-            bool CachedType.HasSagaInterfaces => MessageTypeCache<T>.HasSagaInterfaces;
             bool CachedType.IsTemporaryMessageType => MessageTypeCache<T>.IsTemporaryMessageType;
             bool CachedType.IsValidMessageType => MessageTypeCache<T>.IsValidMessageType;
             string? CachedType.InvalidMessageTypeReason => MessageTypeCache<T>.InvalidMessageTypeReason;
@@ -89,6 +86,14 @@ namespace MassTransit
             public string[] MessageTypeNames => MessageTypeCache<T>.MessageTypeNames;
 
             public IEnumerable<PropertyInfo> Properties => MessageTypeCache<T>.Properties;
+
+            public void Method1()
+            {
+            }
+
+            public void Method2()
+            {
+            }
         }
     }
 
@@ -97,40 +102,22 @@ namespace MassTransit
         IMessageTypeCache
     {
         readonly Lazy<string> _diagnosticAddress;
-        readonly Lazy<bool> _hasConsumerInterfaces;
-        readonly Lazy<bool> _hasSagaInterfaces;
         readonly Lazy<bool> _isTemporaryMessageType;
         readonly Lazy<bool> _isValidMessageType;
         readonly Lazy<string[]> _messageTypeNames;
-        readonly Lazy<Type[]> _messageTypes;
-        readonly Lazy<List<PropertyInfo>> _properties;
+        Type[]? _messageTypes;
+        List<PropertyInfo>? _properties;
         string? _invalidMessageTypeReason;
 
         MessageTypeCache()
         {
-            _hasSagaInterfaces = new Lazy<bool>(ScanForSagaInterfaces, LazyThreadSafetyMode.PublicationOnly);
-            _hasConsumerInterfaces = new Lazy<bool>(() => !_hasSagaInterfaces.Value && ScanForConsumerInterfaces(), LazyThreadSafetyMode.PublicationOnly);
-
-            static List<PropertyInfo> PropertyListFactory()
-            {
-                return typeof(T).GetAllProperties()
-                    .GroupBy(x => x.Name)
-                    .Select(x => x.Last())
-                    .ToList();
-            }
-
-            _properties = new Lazy<List<PropertyInfo>>(PropertyListFactory);
-
             _isValidMessageType = new Lazy<bool>(CheckIfValidMessageType);
             _isTemporaryMessageType = new Lazy<bool>(() => CheckIfTemporaryMessageType(typeof(T)));
-            _messageTypes = new Lazy<Type[]>(() => GetMessageTypes().ToArray());
             _messageTypeNames = new Lazy<string[]>(() => GetMessageTypeNames().ToArray());
             _diagnosticAddress = new Lazy<string>(GetDiagnosticAddress);
         }
 
         public static string DiagnosticAddress => Cached.Metadata.Value.DiagnosticAddress;
-        public static bool HasSagaInterfaces => Cached.Metadata.Value.HasSagaInterfaces;
-        public static bool HasConsumerInterfaces => Cached.Metadata.Value.HasConsumerInterfaces;
         public static IEnumerable<PropertyInfo> Properties => Cached.Metadata.Value.Properties;
         public static bool IsValidMessageType => Cached.Metadata.Value.IsValidMessageType;
         public static string? InvalidMessageTypeReason => Cached.Metadata.Value.InvalidMessageTypeReason;
@@ -139,19 +126,27 @@ namespace MassTransit
         public static string[] MessageTypeNames => Cached.Metadata.Value.MessageTypeNames;
 
         bool IMessageTypeCache.IsTemporaryMessageType => _isTemporaryMessageType.Value;
+
         string[] IMessageTypeCache.MessageTypeNames => _messageTypeNames.Value;
         string IMessageTypeCache.DiagnosticAddress => _diagnosticAddress.Value;
-        IEnumerable<PropertyInfo> IMessageTypeCache.Properties => _properties.Value;
+        IEnumerable<PropertyInfo> IMessageTypeCache.Properties => _properties ??= PropertyListFactory();
         bool IMessageTypeCache.IsValidMessageType => _isValidMessageType.Value;
         string? IMessageTypeCache.InvalidMessageTypeReason => _invalidMessageTypeReason;
-        Type[] IMessageTypeCache.MessageTypes => _messageTypes.Value;
-        bool IMessageTypeCache.HasConsumerInterfaces => _hasConsumerInterfaces.Value;
-        bool IMessageTypeCache.HasSagaInterfaces => _hasSagaInterfaces.Value;
+
+        static List<PropertyInfo> PropertyListFactory()
+        {
+            return typeof(T).GetAllProperties()
+                .GroupBy(x => x.Name)
+                .Select(x => x.Last())
+                .ToList();
+        }
+
+        Type[] IMessageTypeCache.MessageTypes => _messageTypes ??= GetMessageTypes().ToArray();
 
         static bool CheckIfTemporaryMessageType(Type messageTypeInfo)
         {
             return (!messageTypeInfo.IsVisible && messageTypeInfo.IsClass)
-                || (messageTypeInfo.IsGenericType && messageTypeInfo.GetGenericArguments().Any(x => CheckIfTemporaryMessageType(x)));
+                   || (messageTypeInfo.IsGenericType && messageTypeInfo.GetGenericArguments().Any(x => CheckIfTemporaryMessageType(x)));
         }
 
         /// <summary>
@@ -166,14 +161,12 @@ namespace MassTransit
                 yield return typeof(T);
 
             if (typeof(T).ClosesType(typeof(Fault<>), out Type[] arguments))
-            {
                 foreach (var faultMessageType in MessageTypeCache.GetMessageTypes(arguments[0]))
                 {
                     var faultInterfaceType = typeof(Fault<>).MakeGenericType(faultMessageType);
                     if (faultInterfaceType != typeof(T))
                         yield return faultInterfaceType;
                 }
-            }
 
             var baseType = typeof(T).BaseType;
             while (baseType != null && MessageTypeCache.IsValidMessageType(baseType))
@@ -183,7 +176,7 @@ namespace MassTransit
                 baseType = baseType.BaseType;
             }
 
-            IEnumerable<Type> interfaces = typeof(T)
+            var interfaces = typeof(T)
                 .GetInterfaces()
                 .Where(MessageTypeCache.IsValidMessageType);
 
@@ -201,15 +194,19 @@ namespace MassTransit
         {
             var type = typeof(T);
 
-            if (type.IsAnonymousType())
+            var ns = type.Namespace;
+            if (ns == null)
             {
-                _invalidMessageTypeReason = $"Message types must not be anonymous types: {TypeCache<T>.ShortName}";
+                _invalidMessageTypeReason = $"Messages types must have a valid namespace: {TypeCache<T>.ShortName}";
                 return false;
             }
 
-            if (type.Namespace == null)
+            if (type is { Name: "JsonObject", Namespace: "System.Text.Json.Nodes" })
+                return true;
+
+            if (ns == "System" || ns.StartsWith("System."))
             {
-                _invalidMessageTypeReason = $"Messages types must have a valid namespace: {TypeCache<T>.ShortName}";
+                _invalidMessageTypeReason = $"Messages types must not be in the System namespace: {TypeCache<T>.ShortName}";
                 return false;
             }
 
@@ -219,19 +216,9 @@ namespace MassTransit
                 return false;
             }
 
-            if (type.Name == "JsonObject" && type.Namespace == "System.Text.Json.Nodes")
-                return true;
-
-            var ns = type.Namespace;
-            if (ns == "System")
+            if (type.IsAnonymousType())
             {
-                _invalidMessageTypeReason = $"Messages types must not be in the System namespace: {TypeCache<T>.ShortName}";
-                return false;
-            }
-
-            if (ns != null && ns.StartsWith("System."))
-            {
-                _invalidMessageTypeReason = $"Messages types must not be in the System namespace: {TypeCache<T>.ShortName}";
+                _invalidMessageTypeReason = $"Message types must not be anonymous types: {TypeCache<T>.ShortName}";
                 return false;
             }
 
@@ -280,7 +267,7 @@ namespace MassTransit
 
                 if (typeDefinition == typeof(Observes<,>))
                 {
-                    Type[] closingArguments = type.GetClosingArguments(typeof(Observes<,>)).ToArray();
+                    var closingArguments = type.GetClosingArguments(typeof(Observes<,>)).ToArray();
                     _invalidMessageTypeReason = $"Observes<{closingArguments[0].Name},{closingArguments[1].Name}> is not a valid message type";
                     return false;
                 }
@@ -317,32 +304,10 @@ namespace MassTransit
             return $"{type}/{ns}";
         }
 
-        static bool ScanForConsumerInterfaces()
-        {
-            Type[] interfaces = typeof(T).GetInterfaces();
-
-            return interfaces.Any(t => t.HasInterface(typeof(IConsumer<>))
-                || t.HasInterface(typeof(IJobConsumer<>)));
-        }
-
-        static bool ScanForSagaInterfaces()
-        {
-            Type[] interfaces = typeof(T).GetInterfaces();
-
-            if (interfaces.Contains(typeof(ISaga)))
-                return true;
-
-            return interfaces.Any(t => t.HasInterface(typeof(InitiatedBy<>))
-                || t.HasInterface(typeof(Orchestrates<>))
-                || t.HasInterface(typeof(InitiatedByOrOrchestrates<>))
-                || t.HasInterface(typeof(Observes<,>)));
-        }
-
 
         static class Cached
         {
-            internal static readonly Lazy<IMessageTypeCache> Metadata =
-                new Lazy<IMessageTypeCache>(() => new MessageTypeCache<T>(), LazyThreadSafetyMode.PublicationOnly);
+            internal static readonly Lazy<IMessageTypeCache> Metadata = new Lazy<IMessageTypeCache>(() => new MessageTypeCache<T>());
         }
     }
 }

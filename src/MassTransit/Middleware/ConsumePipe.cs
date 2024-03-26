@@ -4,7 +4,6 @@ namespace MassTransit.Middleware
     using System.Collections.Concurrent;
     using System.Threading.Tasks;
     using Configuration;
-    using Observables;
     using Transports;
 
 
@@ -12,16 +11,15 @@ namespace MassTransit.Middleware
         IConsumePipe
     {
         readonly TaskCompletionSource<bool> _connected;
-        readonly IDynamicFilter<ConsumeContext, Guid> _dynamicFilter;
+        readonly IConsumeContextMessageTypeFilter _filter;
         readonly ConcurrentDictionary<Type, IMessagePipe> _outputPipes;
         readonly IPipe<ConsumeContext> _pipe;
         readonly IConsumePipeSpecification _specification;
 
-        public ConsumePipe(IConsumePipeSpecification specification, IDynamicFilter<ConsumeContext, Guid> dynamicFilter, IPipe<ConsumeContext> pipe,
-            bool autoStart)
+        public ConsumePipe(IConsumePipeSpecification specification, IConsumeContextMessageTypeFilter filter, IPipe<ConsumeContext> pipe, bool autoStart)
         {
             _specification = specification;
-            _dynamicFilter = dynamicFilter ?? throw new ArgumentNullException(nameof(dynamicFilter));
+            _filter = filter ?? throw new ArgumentNullException(nameof(filter));
             _pipe = pipe ?? throw new ArgumentNullException(nameof(pipe));
 
             _outputPipes = new ConcurrentDictionary<Type, IMessagePipe>();
@@ -33,27 +31,28 @@ namespace MassTransit.Middleware
 
         public Task Connected => _connected.Task;
 
-        void IProbeSite.Probe(ProbeContext context)
+        public void Probe(ProbeContext context)
         {
             var scope = context.CreateScope("consumePipe");
 
             _pipe.Probe(scope);
         }
 
-        Task IPipe<ConsumeContext>.Send(ConsumeContext context)
+        public Task Send(ConsumeContext context)
         {
             return _pipe.Send(context);
         }
 
-        ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<TMessage>(IConsumeMessageObserver<TMessage> observer)
+        public ConnectHandle ConnectConsumeMessageObserver<TMessage>(IConsumeMessageObserver<TMessage> observer)
+            where TMessage : class
         {
-            return _dynamicFilter.ConnectObserver(new ConsumeObserverAdapter<TMessage>(observer));
+            return _filter.ConnectConsumeMessageObserver(observer);
         }
 
         public ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
             where T : class
         {
-            var handle = _dynamicFilter.ConnectPipe(BuildMessagePipe(pipe));
+            var handle = _filter.ConnectMessagePipe(BuildMessagePipe(pipe));
 
             if (_connected.Task.Status == TaskStatus.WaitingForActivation)
                 _connected.TrySetResult(true);
@@ -67,9 +66,10 @@ namespace MassTransit.Middleware
             return ConnectConsumePipe(pipe);
         }
 
-        ConnectHandle IRequestPipeConnector.ConnectRequestPipe<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)
+        public ConnectHandle ConnectRequestPipe<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)
+            where T : class
         {
-            var handle = _dynamicFilter.ConnectPipe(requestId, BuildMessagePipe(pipe));
+            var handle = _filter.ConnectMessagePipe(requestId, BuildMessagePipe(pipe));
 
             if (_connected.Task.Status == TaskStatus.WaitingForActivation)
                 _connected.TrySetResult(true);
@@ -77,9 +77,9 @@ namespace MassTransit.Middleware
             return handle;
         }
 
-        ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)
+        public ConnectHandle ConnectConsumeObserver(IConsumeObserver observer)
         {
-            return _dynamicFilter.ConnectObserver(new ConsumeObserverAdapter(observer));
+            return _filter.ConnectConsumeObserver(observer);
         }
 
         IPipe<ConsumeContext<T>> BuildMessagePipe<T>(IPipe<ConsumeContext<T>> pipe)

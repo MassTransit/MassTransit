@@ -6,7 +6,7 @@ namespace MassTransit.SagaStateMachine
 
     public class EmptyBehavior<TSaga> :
         IBehavior<TSaga>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
     {
         public void Accept(StateMachineVisitor visitor)
         {
@@ -45,7 +45,7 @@ namespace MassTransit.SagaStateMachine
 
     public class EmptyBehavior<TSaga, TMessage> :
         IBehavior<TSaga, TMessage>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TMessage : class
     {
         public void Accept(StateMachineVisitor visitor)

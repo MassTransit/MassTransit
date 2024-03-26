@@ -15,9 +15,9 @@ namespace MassTransit.RabbitMqTransport.Topology
         where TMessage : class
     {
         readonly RabbitMqExchangeConfigurator _exchange;
-        readonly IList<IRabbitMqMessagePublishTopology> _implementedMessageTypes;
+        readonly List<IRabbitMqMessagePublishTopology> _implementedMessageTypes;
         readonly IRabbitMqPublishTopology _publishTopology;
-        readonly IList<IRabbitMqPublishTopologySpecification> _specifications;
+        readonly List<IRabbitMqPublishTopologySpecification> _specifications;
 
         public RabbitMqMessagePublishTopology(IRabbitMqPublishTopology publishTopology, IMessageTopology<TMessage> messageTopology,
             IMessageExchangeTypeSelector<TMessage> exchangeTypeSelector)

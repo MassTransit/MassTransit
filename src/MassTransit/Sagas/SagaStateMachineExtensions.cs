@@ -18,7 +18,7 @@ namespace MassTransit
         /// <returns></returns>
         public static ISagaQuery<TInstance> CreateSagaQuery<TInstance>(this StateMachine<TInstance> machine, Expression<Func<TInstance, bool>> expression,
             params State[] states)
-            where TInstance : class, ISaga
+            where TInstance : class, SagaStateMachineInstance
         {
             Expression<Func<TInstance, bool>> stateExpression = machine.Accessor.GetStateExpression(states);
 
@@ -35,7 +35,7 @@ namespace MassTransit
         /// <returns></returns>
         public static Func<TInstance, bool> CreateSagaFilter<TInstance>(this StateMachine<TInstance> machine, Expression<Func<TInstance, bool>> expression,
             params State[] states)
-            where TInstance : class, ISaga
+            where TInstance : class, SagaStateMachineInstance
         {
             Expression<Func<TInstance, bool>> stateExpression = machine.Accessor.GetStateExpression(states);
 

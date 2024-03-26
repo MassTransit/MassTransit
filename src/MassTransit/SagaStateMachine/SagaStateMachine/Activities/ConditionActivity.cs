@@ -6,7 +6,7 @@
 
     public class ConditionActivity<TSaga> :
         IStateMachineActivity<TSaga>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
     {
         readonly StateMachineAsyncCondition<TSaga> _condition;
         readonly IBehavior<TSaga> _elseBehavior;
@@ -71,7 +71,7 @@
 
     public class ConditionActivity<TSaga, TMessage> :
         IStateMachineActivity<TSaga>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TMessage : class
     {
         readonly StateMachineAsyncCondition<TSaga, TMessage> _condition;

@@ -1,48 +1,50 @@
-namespace MassTransit.SagaStateMachine
+namespace MassTransit
 {
     using System;
     using System.Linq.Expressions;
     using Internals;
 
-
-    public class StateMachineSchedule<TSaga, TMessage> :
-        Schedule<TSaga, TMessage>
-        where TSaga : class, SagaStateMachineInstance
-        where TMessage : class
+    public partial class MassTransitStateMachine<TInstance>
+        where TInstance : class, SagaStateMachineInstance
     {
-        readonly string _name;
-        readonly IReadProperty<TSaga, Guid?> _read;
-        readonly ScheduleSettings<TSaga, TMessage> _settings;
-        readonly IWriteProperty<TSaga, Guid?> _write;
-
-        public StateMachineSchedule(string name, Expression<Func<TSaga, Guid?>> tokenIdExpression, ScheduleSettings<TSaga, TMessage> settings)
+        public class StateMachineSchedule<TMessage> :
+            Schedule<TInstance, TMessage>
+            where TMessage : class
         {
-            _name = name;
-            _settings = settings;
+            readonly string _name;
+            readonly IReadProperty<TInstance, Guid?> _read;
+            readonly ScheduleSettings<TInstance, TMessage> _settings;
+            readonly IWriteProperty<TInstance, Guid?> _write;
 
-            var propertyInfo = tokenIdExpression.GetPropertyInfo();
+            public StateMachineSchedule(string name, Expression<Func<TInstance, Guid?>> tokenIdExpression, ScheduleSettings<TInstance, TMessage> settings)
+            {
+                _name = name;
+                _settings = settings;
 
-            _read = ReadPropertyCache<TSaga>.GetProperty<Guid?>(propertyInfo);
-            _write = WritePropertyCache<TSaga>.GetProperty<Guid?>(propertyInfo);
-        }
+                var propertyInfo = tokenIdExpression.GetPropertyInfo();
 
-        string Schedule<TSaga>.Name => _name;
-        public Event<TMessage> Received { get; set; }
-        public Event<TMessage> AnyReceived { get; set; }
+                _read = ReadPropertyCache<TInstance>.GetProperty<Guid?>(propertyInfo);
+                _write = WritePropertyCache<TInstance>.GetProperty<Guid?>(propertyInfo);
+            }
 
-        public TimeSpan GetDelay(BehaviorContext<TSaga> context)
-        {
-            return _settings.DelayProvider(context);
-        }
+            string Schedule<TInstance>.Name => _name;
+            public Event<TMessage> Received { get; set; }
+            public Event<TMessage> AnyReceived { get; set; }
 
-        public Guid? GetTokenId(TSaga instance)
-        {
-            return _read.Get(instance);
-        }
+            public TimeSpan GetDelay(BehaviorContext<TInstance> context)
+            {
+                return _settings.DelayProvider(context);
+            }
 
-        public void SetTokenId(TSaga instance, Guid? tokenId)
-        {
-            _write.Set(instance, tokenId);
+            public Guid? GetTokenId(TInstance instance)
+            {
+                return _read.Get(instance);
+            }
+
+            public void SetTokenId(TInstance instance, Guid? tokenId)
+            {
+                _write.Set(instance, tokenId);
+            }
         }
     }
 }

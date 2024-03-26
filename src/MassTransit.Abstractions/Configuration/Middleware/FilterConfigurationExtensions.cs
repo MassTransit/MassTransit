@@ -138,7 +138,9 @@ namespace MassTransit
 
             var filterSpecification = new FilterPipeSpecification<TFilter>(filter);
 
-            var pipeBuilderConfigurator = new SplitFilterPipeSpecification<TContext, TFilter>(filterSpecification, contextProvider, inputContextProvider);
+            var pipeBuilderConfigurator = new PipeConfigurator<TContext>.SplitFilterPipeSpecification<TFilter>(filterSpecification,
+                contextProvider,
+                inputContextProvider);
 
             configurator.AddPipeSpecification(pipeBuilderConfigurator);
         }

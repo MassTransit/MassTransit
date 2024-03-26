@@ -11,9 +11,9 @@
         IMessageConsumePipeSpecification
         where TMessage : class
     {
-        readonly IList<IPipeSpecification<ConsumeContext>> _baseSpecifications;
-        readonly IList<ISpecificationPipeSpecification<ConsumeContext<TMessage>>> _parentMessageSpecifications;
-        readonly IList<IPipeSpecification<ConsumeContext<TMessage>>> _specifications;
+        readonly List<IPipeSpecification<ConsumeContext>> _baseSpecifications;
+        readonly List<ISpecificationPipeSpecification<ConsumeContext<TMessage>>> _parentMessageSpecifications;
+        readonly List<IPipeSpecification<ConsumeContext<TMessage>>> _specifications;
 
         public MessageConsumePipeSpecification()
         {
@@ -63,8 +63,9 @@
             {
                 for (var index = 0; index < _baseSpecifications.Count; index++)
                 {
-                    var split = new SplitFilterPipeSpecification<ConsumeContext<TMessage>, ConsumeContext>(_baseSpecifications[index], MergeContext,
-                        FilterContext);
+                    var split = new PipeConfigurator<ConsumeContext<TMessage>>.SplitFilterPipeSpecification<ConsumeContext>(_baseSpecifications[index],
+                        MergeContext, FilterContext);
+
                     split.Apply(builder);
                 }
             }
@@ -72,7 +73,7 @@
 
         public IPipe<ConsumeContext<TMessage>> BuildMessagePipe(IPipe<ConsumeContext<TMessage>> pipe)
         {
-            var pipeBuilder = new SpecificationPipeBuilder<ConsumeContext<TMessage>>();
+            var pipeBuilder = new PipeConfigurator<ConsumeContext<TMessage>>.SpecificationPipeBuilder();
 
             Apply(pipeBuilder);
 

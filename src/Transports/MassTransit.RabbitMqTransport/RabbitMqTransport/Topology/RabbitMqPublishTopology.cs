@@ -50,7 +50,7 @@
             return GetMessageTopology<T>() as IRabbitMqMessagePublishTopologyConfigurator<T>;
         }
 
-        protected override IMessagePublishTopologyConfigurator CreateMessageTopology<T>(Type type)
+        protected override IMessagePublishTopologyConfigurator CreateMessageTopology<T>()
         {
             var exchangeTypeSelector = new MessageExchangeTypeSelector<T>(ExchangeTypeSelector);
 

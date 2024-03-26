@@ -11,7 +11,7 @@
     public interface BehaviorExceptionContext<TSaga, out TException> :
         BehaviorContext<TSaga>
         where TException : Exception
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
     {
         TException Exception { get; }
 
@@ -37,7 +37,7 @@
         BehaviorContext<TSaga, TMessage>,
         BehaviorExceptionContext<TSaga, TException>
         where TException : Exception
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TMessage : class
     {
         /// <summary>

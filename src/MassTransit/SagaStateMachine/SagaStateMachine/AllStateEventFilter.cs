@@ -2,7 +2,7 @@ namespace MassTransit.SagaStateMachine
 {
     public class AllStateEventFilter<TSaga> :
         IStateEventFilter<TSaga>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
     {
         public bool Filter(BehaviorContext<TSaga> context)
         {

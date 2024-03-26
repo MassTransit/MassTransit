@@ -4,12 +4,12 @@
 
 
     public delegate TimeSpan ScheduleDelayExceptionProvider<TSaga, in TException>(BehaviorExceptionContext<TSaga, TException> context)
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TException : Exception;
 
 
     public delegate TimeSpan ScheduleDelayExceptionProvider<TSaga, in TMessage, in TException>(BehaviorExceptionContext<TSaga, TMessage, TException> context)
         where TMessage : class
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TException : Exception;
 }

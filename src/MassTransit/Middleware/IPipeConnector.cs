@@ -44,4 +44,23 @@
         ConnectHandle ConnectPipe<T>(TKey key, IPipe<T> pipe)
             where T : class, PipeContext;
     }
+
+
+    /// <summary>
+    /// Supports connecting a pipe using a key, which is a method of dispatching to different pipes
+    /// based on context.
+    /// </summary>
+    /// <typeparam name="TKey"></typeparam>
+    /// <typeparam name="TMessage"></typeparam>
+    public interface IKeyPipeConnector<out TMessage, in TKey>
+        where TMessage : class
+    {
+        /// <summary>
+        /// Connect a pipe to the filter using the specified key
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="pipe"></param>
+        /// <returns></returns>
+        ConnectHandle ConnectPipe(TKey key, IPipe<ConsumeContext<TMessage>> pipe);
+    }
 }

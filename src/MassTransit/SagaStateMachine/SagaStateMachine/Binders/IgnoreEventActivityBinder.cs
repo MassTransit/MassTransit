@@ -2,7 +2,7 @@ namespace MassTransit.SagaStateMachine
 {
     public class IgnoreEventActivityBinder<TInstance> :
         IActivityBinder<TInstance>
-        where TInstance : class, ISaga
+        where TInstance : class, SagaStateMachineInstance
     {
         public Event Event { get; }
 
@@ -30,7 +30,7 @@ namespace MassTransit.SagaStateMachine
 
     public class IgnoreEventActivityBinder<TInstance, TData> :
         IActivityBinder<TInstance>
-        where TInstance : class, ISaga
+        where TInstance : class, SagaStateMachineInstance
         where TData : class
     {
         readonly Event<TData> _event;

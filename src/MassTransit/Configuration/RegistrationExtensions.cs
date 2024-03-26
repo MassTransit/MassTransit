@@ -102,7 +102,7 @@ namespace MassTransit
         {
             filter ??= t => true;
 
-            IEnumerable<Type> consumerTypes = types.Where(MessageTypeCache.HasConsumerInterfaces);
+            IEnumerable<Type> consumerTypes = types.Where(RegistrationMetadata.IsConsumer);
             IEnumerable<Type> consumerDefinitionTypes = types.Where(x => x.HasInterface(typeof(IConsumerDefinition<>)));
 
             var consumers = from c in consumerTypes

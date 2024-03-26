@@ -4,7 +4,7 @@ namespace MassTransit
 
 
     public interface IStateObserver<TSaga>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
     {
         /// <summary>
         /// Invoked prior to changing the state of the state machine

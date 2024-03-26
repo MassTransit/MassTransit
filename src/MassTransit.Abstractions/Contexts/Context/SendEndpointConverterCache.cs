@@ -128,8 +128,7 @@ namespace MassTransit.Context
 
         static class Cached
         {
-            internal static readonly Lazy<SendEndpointConverterCache> Converters =
-                new Lazy<SendEndpointConverterCache>(() => new SendEndpointConverterCache(), LazyThreadSafetyMode.PublicationOnly);
+            internal static readonly Lazy<SendEndpointConverterCache> Converters = new Lazy<SendEndpointConverterCache>(() => new SendEndpointConverterCache());
         }
     }
 }

@@ -7,7 +7,7 @@ namespace MassTransit.Tests.SagaStateMachineTests.Automatonymous
 
     class EventRaisedObserver<TInstance> :
         IEventObserver<TInstance>
-        where TInstance : class, ISaga
+        where TInstance : class, SagaStateMachineInstance
     {
         public EventRaisedObserver()
         {

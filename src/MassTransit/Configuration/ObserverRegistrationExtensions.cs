@@ -178,7 +178,7 @@ namespace MassTransit
         /// <returns></returns>
         public static IServiceCollection AddEventObserver<TInstance, T>(this IServiceCollection services)
             where T : class, IEventObserver<TInstance>
-            where TInstance : class, ISaga
+            where TInstance : class, SagaStateMachineInstance
         {
             services.TryAddEnumerable(ServiceDescriptor.Singleton<IEventObserver<TInstance>, T>());
             return services;
@@ -194,7 +194,7 @@ namespace MassTransit
         /// <returns></returns>
         public static IServiceCollection AddEventObserver<TInstance, T>(this IServiceCollection services, Func<IServiceProvider, T> factory)
             where T : class, IEventObserver<TInstance>
-            where TInstance : class, ISaga
+            where TInstance : class, SagaStateMachineInstance
         {
             services.TryAddEnumerable(ServiceDescriptor.Singleton<IEventObserver<TInstance>, T>(factory));
             return services;
@@ -209,7 +209,7 @@ namespace MassTransit
         /// <returns></returns>
         public static IServiceCollection AddStateObserver<TInstance, T>(this IServiceCollection services)
             where T : class, IStateObserver<TInstance>
-            where TInstance : class, ISaga
+            where TInstance : class, SagaStateMachineInstance
         {
             services.TryAddEnumerable(ServiceDescriptor.Singleton<IStateObserver<TInstance>, T>());
             return services;
@@ -225,7 +225,7 @@ namespace MassTransit
         /// <returns></returns>
         public static IServiceCollection AddStateObserver<TInstance, T>(this IServiceCollection services, Func<IServiceProvider, T> factory)
             where T : class, IStateObserver<TInstance>
-            where TInstance : class, ISaga
+            where TInstance : class, SagaStateMachineInstance
         {
             services.TryAddEnumerable(ServiceDescriptor.Singleton<IStateObserver<TInstance>, T>(factory));
             return services;

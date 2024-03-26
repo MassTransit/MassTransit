@@ -74,31 +74,29 @@
         IMessageTopologyConfigurator<TMessage>
         where TMessage : class
     {
-        readonly Lazy<string> _entityName;
+        string? _entityName;
 
         public MessageTopology(IMessageEntityNameFormatter<TMessage> entityNameFormatter)
         {
             EntityNameFormatter = entityNameFormatter;
-
-            _entityName = new Lazy<string>(() => EntityNameFormatter.FormatEntityName());
         }
 
         public IMessageEntityNameFormatter<TMessage> EntityNameFormatter { get; private set; }
 
-        public string EntityName => _entityName.Value;
+        public string EntityName => _entityName ??= EntityNameFormatter.FormatEntityName();
 
         public void SetEntityNameFormatter(IMessageEntityNameFormatter<TMessage> entityNameFormatter)
         {
             if (entityNameFormatter == null)
                 throw new ArgumentNullException(nameof(entityNameFormatter));
 
-            if (_entityName.IsValueCreated)
+            if (_entityName != null)
             {
-                if (_entityName.Value == entityNameFormatter.FormatEntityName())
+                if (_entityName == entityNameFormatter.FormatEntityName())
                     return;
 
                 throw new ConfigurationException(
-                    $"The message type {TypeCache<TMessage>.ShortName} entity name was already evaluated: {_entityName.Value}");
+                    $"The message type {TypeCache<TMessage>.ShortName} entity name was already evaluated: {_entityName}");
             }
 
             EntityNameFormatter = entityNameFormatter;

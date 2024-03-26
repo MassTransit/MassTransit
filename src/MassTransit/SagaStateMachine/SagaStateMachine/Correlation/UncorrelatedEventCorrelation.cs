@@ -1,34 +1,36 @@
-namespace MassTransit.SagaStateMachine
+namespace MassTransit
 {
     using System;
     using System.Collections.Generic;
 
-
-    public class UncorrelatedEventCorrelation<TSaga, TMessage> :
-        EventCorrelation<TSaga, TMessage>
-        where TSaga : class, SagaStateMachineInstance
-        where TMessage : class
+    public partial class MassTransitStateMachine<TInstance>
+        where TInstance : class, SagaStateMachineInstance
     {
-        public UncorrelatedEventCorrelation(Event<TMessage> @event)
+        public class UncorrelatedEventCorrelation<TData> :
+            EventCorrelation<TInstance, TData>
+            where TData : class
         {
-            Event = @event;
-        }
+            public UncorrelatedEventCorrelation(Event<TData> @event)
+            {
+                Event = @event;
+            }
 
-        public SagaFilterFactory<TSaga, TMessage> FilterFactory => null;
+            public SagaFilterFactory<TInstance, TData> FilterFactory => null;
 
-        public Event<TMessage> Event { get; }
+            public Event<TData> Event { get; }
 
-        Type EventCorrelation.DataType => typeof(TMessage);
+            Type EventCorrelation.DataType => typeof(TData);
 
-        public bool ConfigureConsumeTopology => false;
+            public bool ConfigureConsumeTopology => false;
 
-        public IFilter<ConsumeContext<TMessage>> MessageFilter => null;
+            public IFilter<ConsumeContext<TData>> MessageFilter => null;
 
-        public ISagaPolicy<TSaga, TMessage> Policy => null;
+            public ISagaPolicy<TInstance, TData> Policy => null;
 
-        public IEnumerable<ValidationResult> Validate()
-        {
-            yield return this.Failure(Event.Name, "Correlation", "was not specified");
+            public IEnumerable<ValidationResult> Validate()
+            {
+                yield return this.Failure(Event.Name, "Correlation", "was not specified");
+            }
         }
     }
 }

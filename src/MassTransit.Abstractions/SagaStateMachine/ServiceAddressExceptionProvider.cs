@@ -11,7 +11,7 @@ namespace MassTransit
     /// <param name="context"></param>
     /// <returns></returns>
     public delegate Uri ServiceAddressExceptionProvider<TSaga, in TException>(BehaviorExceptionContext<TSaga, TException> context)
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TException : Exception;
 
 
@@ -24,7 +24,7 @@ namespace MassTransit
     /// <param name="context"></param>
     /// <returns></returns>
     public delegate Uri ServiceAddressExceptionProvider<TSaga, in TMessage, in TException>(BehaviorExceptionContext<TSaga, TMessage, TException> context)
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TMessage : class
         where TException : Exception;
 }

@@ -53,7 +53,7 @@ namespace MassTransit.Configuration
 
         static class Cached
         {
-            internal static readonly IList<IConsumerConvention> Registered = new List<IConsumerConvention>();
+            internal static readonly List<IConsumerConvention> Registered = new List<IConsumerConvention>();
         }
     }
 }

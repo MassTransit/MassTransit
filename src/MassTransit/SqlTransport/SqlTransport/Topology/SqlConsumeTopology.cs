@@ -12,7 +12,7 @@ namespace MassTransit.SqlTransport.Topology
         ISqlConsumeTopologyConfigurator
     {
         readonly ISqlPublishTopology _publishTopology;
-        readonly IList<ISqlConsumeTopologySpecification> _specifications;
+        readonly List<ISqlConsumeTopologySpecification> _specifications;
 
         public SqlConsumeTopology(ISqlPublishTopology publishTopology)
             : base(255)

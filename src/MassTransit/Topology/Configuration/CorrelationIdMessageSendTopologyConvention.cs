@@ -8,7 +8,7 @@
         ICorrelationIdMessageSendTopologyConvention<TMessage>
         where TMessage : class
     {
-        readonly IList<ICorrelationIdSelector<TMessage>> _selectors;
+        readonly List<ICorrelationIdSelector<TMessage>> _selectors;
 
         public CorrelationIdMessageSendTopologyConvention()
         {

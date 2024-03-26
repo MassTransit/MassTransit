@@ -48,7 +48,7 @@ namespace MassTransit.DependencyInjection.Registration
             if (decoratorRegistration != null)
                 repository = decoratorRegistration.DecorateSagaRepository(repository);
 
-            var stateMachineConfigurator = new StateMachineSagaConfigurator<TInstance>(stateMachine, repository, configurator);
+            var stateMachineConfigurator = new MassTransitStateMachine<TInstance>.StateMachineSagaConfigurator(stateMachine, repository, configurator);
 
             GetSagaDefinition(context)
                 .Configure(configurator, stateMachineConfigurator, context);

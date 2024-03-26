@@ -21,7 +21,9 @@ namespace MassTransit.Configuration
 
             var consumeFilter = new OrchestratesSagaMessageFilter<TSaga, TMessage>();
 
-            _connector = new CorrelatedSagaMessageConnector<TSaga, TMessage>(consumeFilter, policy, x => x.Message.CorrelationId);
+            _connector = new SagaConnector<TSaga, TMessage>.CorrelatedSagaMessageConnector(consumeFilter, policy, x
+                => x.Message
+                .CorrelationId);
         }
 
         ISagaMessageConnector<T> ISagaConnectorFactory.CreateMessageConnector<T>()

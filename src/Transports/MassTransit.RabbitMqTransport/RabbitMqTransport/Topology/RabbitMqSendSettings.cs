@@ -11,7 +11,7 @@ namespace MassTransit.RabbitMqTransport.Topology
         RabbitMqExchangeConfigurator,
         SendSettings
     {
-        readonly IList<ExchangeBindingPublishTopologySpecification> _exchangeBindings;
+        readonly List<ExchangeBindingPublishTopologySpecification> _exchangeBindings;
         bool _bindToQueue;
         string _queueName;
 

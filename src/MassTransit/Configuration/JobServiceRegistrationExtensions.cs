@@ -4,7 +4,6 @@ namespace MassTransit
     using System;
     using Configuration;
     using DependencyInjection.Registration;
-    using Microsoft.Extensions.DependencyInjection;
 
 
     public static class JobServiceRegistrationExtensions

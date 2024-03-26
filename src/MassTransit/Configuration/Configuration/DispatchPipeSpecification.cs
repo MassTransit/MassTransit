@@ -12,7 +12,7 @@
         where TInput : class, PipeContext
     {
         readonly IPipeContextConverterFactory<TInput> _pipeContextConverterFactory;
-        readonly IList<IPipeConnectorSpecification> _specifications;
+        readonly List<IPipeConnectorSpecification> _specifications;
 
         public DispatchPipeSpecification(IPipeContextConverterFactory<TInput> pipeContextConverterFactory)
         {

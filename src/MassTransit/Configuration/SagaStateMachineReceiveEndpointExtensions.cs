@@ -24,7 +24,7 @@ namespace MassTransit
                 throw new ArgumentNullException(nameof(stateMachine));
             if (repository == null)
                 throw new ArgumentNullException(nameof(repository));
-            var stateMachineConfigurator = new StateMachineSagaConfigurator<TInstance>(stateMachine, repository, configurator);
+            var stateMachineConfigurator = new MassTransitStateMachine<TInstance>.StateMachineSagaConfigurator(stateMachine, repository, configurator);
 
             configure?.Invoke(stateMachineConfigurator);
 
@@ -35,7 +35,7 @@ namespace MassTransit
             ISagaRepository<TInstance> repository, Action<ISagaConfigurator<TInstance>>? configure = null)
             where TInstance : class, SagaStateMachineInstance
         {
-            var connector = new StateMachineConnector<TInstance>(stateMachine);
+            var connector = new MassTransitStateMachine<TInstance>.StateMachineConnector(stateMachine);
 
             ISagaSpecification<TInstance> specification = connector.CreateSagaSpecification<TInstance>();
 

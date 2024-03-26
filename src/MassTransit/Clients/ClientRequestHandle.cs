@@ -17,7 +17,7 @@
         public delegate Task<TRequest> SendRequestCallback(Guid requestId, IPipe<SendContext<TRequest>> pipe, CancellationToken cancellationToken);
 
 
-        readonly IList<string> _accept;
+        readonly List<string> _accept;
         readonly CancellationToken _cancellationToken;
         readonly CancellationTokenSource _cancellationTokenSource;
         readonly ClientFactoryContext _context;
@@ -202,8 +202,7 @@
                 return FaultHandler(context);
             }
 
-            var connectHandle = _context.ConnectRequestHandler(RequestId, MessageHandler,
-                new PipeConfigurator<ConsumeContext<Fault<TRequest>>>());
+            var connectHandle = _context.ConnectRequestHandler(RequestId, MessageHandler, new PipeConfigurator<ConsumeContext<Fault<TRequest>>>());
 
             var handle = new FaultHandlerConnectHandle(connectHandle);
 

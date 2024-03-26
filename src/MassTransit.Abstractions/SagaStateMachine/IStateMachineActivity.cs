@@ -16,7 +16,7 @@ namespace MassTransit
     /// <typeparam name="TSaga"></typeparam>
     public interface IStateMachineActivity<TSaga> :
         IStateMachineActivity
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
     {
         /// <summary>
         /// Execute the activity with the given behavior context
@@ -66,7 +66,7 @@ namespace MassTransit
     /// <typeparam name="TMessage"></typeparam>
     public interface IStateMachineActivity<TSaga, TMessage> :
         IStateMachineActivity
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TMessage : class
     {
         /// <summary>

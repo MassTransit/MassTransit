@@ -1,31 +1,20 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using MassTransit.Saga;
+
 namespace MassTransit.Configuration
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Reflection;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using Saga;
-
-
     public class SagaMetadataCache<TSaga> :
         ISagaMetadataCache<TSaga>
         where TSaga : class, ISaga
     {
-        readonly SagaInterfaceType[] _initiatedByOrOrchestratesTypes;
-        readonly SagaInterfaceType[] _initiatedByTypes;
-        readonly SagaInterfaceType[] _observesTypes;
-        readonly SagaInterfaceType[] _orchestratesTypes;
         SagaInstanceFactoryMethod<TSaga> _factoryMethod;
 
         SagaMetadataCache()
         {
-            _initiatedByTypes = GetInitiatingTypes().ToArray();
-            _orchestratesTypes = GetOrchestratingTypes().ToArray();
-            _observesTypes = GetObservingTypes().ToArray();
-            _initiatedByOrOrchestratesTypes = GetInitiatingOrOrchestratingTypes().ToArray();
-
             GetActivatorSagaInstanceFactoryMethod();
         }
 
@@ -34,11 +23,12 @@ namespace MassTransit.Configuration
         public static SagaInterfaceType[] ObservesTypes => Cached.Instance.Value.ObservesTypes;
         public static SagaInterfaceType[] InitiatedByOrOrchestratesTypes => Cached.Instance.Value.InitiatedByOrOrchestratesTypes;
         public static SagaInstanceFactoryMethod<TSaga> FactoryMethod => Cached.Instance.Value.FactoryMethod;
+
         SagaInstanceFactoryMethod<TSaga> ISagaMetadataCache<TSaga>.FactoryMethod => _factoryMethod;
-        SagaInterfaceType[] ISagaMetadataCache<TSaga>.InitiatedByTypes => _initiatedByTypes;
-        SagaInterfaceType[] ISagaMetadataCache<TSaga>.OrchestratesTypes => _orchestratesTypes;
-        SagaInterfaceType[] ISagaMetadataCache<TSaga>.ObservesTypes => _observesTypes;
-        SagaInterfaceType[] ISagaMetadataCache<TSaga>.InitiatedByOrOrchestratesTypes => _initiatedByOrOrchestratesTypes;
+        SagaInterfaceType[] ISagaMetadataCache<TSaga>.InitiatedByTypes => GetInitiatingTypes().ToArray();
+        SagaInterfaceType[] ISagaMetadataCache<TSaga>.OrchestratesTypes => GetOrchestratingTypes().ToArray();
+        SagaInterfaceType[] ISagaMetadataCache<TSaga>.ObservesTypes => GetObservingTypes().ToArray();
+        SagaInterfaceType[] ISagaMetadataCache<TSaga>.InitiatedByOrOrchestratesTypes => GetInitiatingOrOrchestratingTypes().ToArray();
 
         void GetActivatorSagaInstanceFactoryMethod()
         {
@@ -155,8 +145,7 @@ namespace MassTransit.Configuration
 
         static class Cached
         {
-            internal static readonly Lazy<ISagaMetadataCache<TSaga>> Instance = new Lazy<ISagaMetadataCache<TSaga>>(
-                () => new SagaMetadataCache<TSaga>(), LazyThreadSafetyMode.PublicationOnly);
+            internal static readonly Lazy<ISagaMetadataCache<TSaga>> Instance = new Lazy<ISagaMetadataCache<TSaga>>(() => new SagaMetadataCache<TSaga>());
         }
     }
 }

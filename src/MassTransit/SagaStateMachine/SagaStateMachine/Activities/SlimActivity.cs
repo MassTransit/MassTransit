@@ -10,7 +10,7 @@ namespace MassTransit.SagaStateMachine
     /// <typeparam name="TMessage"></typeparam>
     public class SlimActivity<TSaga, TMessage> :
         IStateMachineActivity<TSaga, TMessage>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TMessage : class
     {
         readonly IStateMachineActivity<TSaga> _activity;

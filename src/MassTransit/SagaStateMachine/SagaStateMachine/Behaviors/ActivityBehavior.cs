@@ -6,7 +6,7 @@ namespace MassTransit.SagaStateMachine
 
     public class ActivityBehavior<TSaga> :
         IBehavior<TSaga>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
     {
         readonly IStateMachineActivity<TSaga> _activity;
         readonly IBehavior<TSaga> _next;

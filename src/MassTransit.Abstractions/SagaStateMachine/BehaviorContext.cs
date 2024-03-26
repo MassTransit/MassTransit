@@ -10,7 +10,7 @@
     /// <typeparam name="TSaga">The state instance type</typeparam>
     public interface BehaviorContext<TSaga> :
         SagaConsumeContext<TSaga>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
     {
         StateMachine<TSaga> StateMachine { get; }
 
@@ -65,7 +65,7 @@
     public interface BehaviorContext<TSaga, out TMessage> :
         SagaConsumeContext<TSaga, TMessage>,
         BehaviorContext<TSaga>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TMessage : class
     {
         new Event<TMessage> Event { get; }

@@ -12,7 +12,7 @@ namespace MassTransit
     /// <returns></returns>
     public delegate bool StateMachineExceptionCondition<TSaga, in TException>(BehaviorExceptionContext<TSaga, TException> context)
         where TException : Exception
-        where TSaga : class, ISaga;
+        where TSaga : class, SagaStateMachineInstance;
 
 
     /// <summary>
@@ -25,6 +25,6 @@ namespace MassTransit
     /// <returns></returns>
     public delegate bool StateMachineExceptionCondition<TSaga, in TMessage, in TException>(BehaviorExceptionContext<TSaga, TMessage, TException> context)
         where TException : Exception
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TMessage : class;
 }

@@ -11,7 +11,7 @@
     /// <typeparam name="TException"></typeparam>
     public class CatchFaultActivity<TSaga, TException> :
         IStateMachineActivity<TSaga>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TException : Exception
     {
         readonly IBehavior<TSaga> _behavior;

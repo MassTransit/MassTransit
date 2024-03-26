@@ -45,7 +45,7 @@
             return (ISqlMessagePublishTopologyConfigurator<T>)GetMessageTopology<T>();
         }
 
-        protected override IMessagePublishTopologyConfigurator CreateMessageTopology<T>(Type type)
+        protected override IMessagePublishTopologyConfigurator CreateMessageTopology<T>()
         {
             var messageTopology = new SqlMessagePublishTopology<T>(this, _messageTopology.GetMessageTopology<T>());
 

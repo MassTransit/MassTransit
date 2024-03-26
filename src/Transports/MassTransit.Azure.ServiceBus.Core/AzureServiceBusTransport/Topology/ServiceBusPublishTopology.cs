@@ -77,7 +77,7 @@
             return GetMessageTopology<T>() as IServiceBusMessagePublishTopologyConfigurator<T>;
         }
 
-        protected override IMessagePublishTopologyConfigurator CreateMessageTopology<T>(Type type)
+        protected override IMessagePublishTopologyConfigurator CreateMessageTopology<T>()
         {
             var messageTopology = new ServiceBusMessagePublishTopology<T>(this, _messageTopology.GetMessageTopology<T>());
 

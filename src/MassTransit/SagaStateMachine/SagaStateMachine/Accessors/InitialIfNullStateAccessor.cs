@@ -1,51 +1,54 @@
-﻿namespace MassTransit.SagaStateMachine
+﻿namespace MassTransit
 {
     using System;
     using System.Linq.Expressions;
     using System.Threading.Tasks;
+    using SagaStateMachine;
 
-
-    public class InitialIfNullStateAccessor<TSaga> :
-        IStateAccessor<TSaga>
-        where TSaga : class, ISaga
+    public partial class MassTransitStateMachine<TInstance>
+        where TInstance : class, SagaStateMachineInstance
     {
-        readonly IBehavior<TSaga> _initialBehavior;
-        readonly IStateAccessor<TSaga> _stateAccessor;
-
-        public InitialIfNullStateAccessor(State<TSaga> initialState, IStateAccessor<TSaga> stateAccessor)
+        class InitialIfNullStateAccessor :
+            IStateAccessor<TInstance>
         {
-            _stateAccessor = stateAccessor;
+            readonly IBehavior<TInstance> _initialBehavior;
+            readonly IStateAccessor<TInstance> _stateAccessor;
 
-            IStateMachineActivity<TSaga> initialActivity = new TransitionActivity<TSaga>(initialState, _stateAccessor);
-            _initialBehavior = new LastBehavior<TSaga>(initialActivity);
-        }
-
-        async Task<State<TSaga>> IStateAccessor<TSaga>.Get(BehaviorContext<TSaga> context)
-        {
-            State<TSaga> state = await _stateAccessor.Get(context).ConfigureAwait(false);
-            if (state == null)
+            public InitialIfNullStateAccessor(State<TInstance> initialState, IStateAccessor<TInstance> stateAccessor)
             {
-                await _initialBehavior.Execute(context).ConfigureAwait(false);
+                _stateAccessor = stateAccessor;
 
-                state = await _stateAccessor.Get(context).ConfigureAwait(false);
+                IStateMachineActivity<TInstance> initialActivity = new TransitionActivity<TInstance>(initialState, _stateAccessor);
+                _initialBehavior = new LastBehavior<TInstance>(initialActivity);
             }
 
-            return state;
-        }
+            async Task<State<TInstance>> IStateAccessor<TInstance>.Get(BehaviorContext<TInstance> context)
+            {
+                State<TInstance> state = await _stateAccessor.Get(context).ConfigureAwait(false);
+                if (state == null)
+                {
+                    await _initialBehavior.Execute(context).ConfigureAwait(false);
 
-        Task IStateAccessor<TSaga>.Set(BehaviorContext<TSaga> context, State<TSaga> state)
-        {
-            return _stateAccessor.Set(context, state);
-        }
+                    state = await _stateAccessor.Get(context).ConfigureAwait(false);
+                }
 
-        public Expression<Func<TSaga, bool>> GetStateExpression(params State[] states)
-        {
-            return _stateAccessor.GetStateExpression(states);
-        }
+                return state;
+            }
 
-        public void Probe(ProbeContext context)
-        {
-            _stateAccessor.Probe(context);
+            Task IStateAccessor<TInstance>.Set(BehaviorContext<TInstance> context, State<TInstance> state)
+            {
+                return _stateAccessor.Set(context, state);
+            }
+
+            public Expression<Func<TInstance, bool>> GetStateExpression(params State[] states)
+            {
+                return _stateAccessor.GetStateExpression(states);
+            }
+
+            public void Probe(ProbeContext context)
+            {
+                _stateAccessor.Probe(context);
+            }
         }
     }
 }

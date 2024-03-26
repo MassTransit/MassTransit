@@ -65,9 +65,8 @@
                     return context as BindContext<TLeft, TRight> ?? new BindContextProxy<TLeft, TRight>(context, input.Right);
                 }
 
-                _configurator.AddPipeSpecification(new SplitFilterPipeSpecification<BindContext<TLeft, TRight>, TLeft>(specification,
-                    ContextProvider,
-                    context => context.Left));
+                _configurator.AddPipeSpecification(new PipeConfigurator<BindContext<TLeft, TRight>>.SplitFilterPipeSpecification<TLeft>(specification,
+                    ContextProvider, context => context.Left));
             }
         }
     }

@@ -12,7 +12,7 @@ namespace Automatonymous
     [Obsolete("Deprecated, use IEventObserver instead")]
     public interface EventObserver<TSaga> :
         IEventObserver<TSaga>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
     {
     }
 }

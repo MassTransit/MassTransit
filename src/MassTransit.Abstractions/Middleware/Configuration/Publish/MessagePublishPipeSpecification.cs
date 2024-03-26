@@ -4,16 +4,15 @@ namespace MassTransit.Configuration
     using System.Collections.Generic;
     using System.Linq;
 
-
     public class MessagePublishPipeSpecification<TMessage> :
         IMessagePublishPipeSpecification<TMessage>,
         IMessagePublishPipeSpecification
         where TMessage : class
     {
-        readonly IList<IPipeSpecification<PublishContext>> _baseSpecifications;
-        readonly IList<ISpecificationPipeSpecification<PublishContext<TMessage>>> _implementedMessageTypeSpecifications;
-        readonly IList<ISpecificationPipeSpecification<PublishContext<TMessage>>> _parentMessageSpecifications;
-        readonly IList<IPipeSpecification<PublishContext<TMessage>>> _specifications;
+        readonly List<IPipeSpecification<PublishContext>> _baseSpecifications;
+        readonly List<ISpecificationPipeSpecification<PublishContext<TMessage>>> _implementedMessageTypeSpecifications;
+        readonly List<ISpecificationPipeSpecification<PublishContext<TMessage>>> _parentMessageSpecifications;
+        readonly List<IPipeSpecification<PublishContext<TMessage>>> _specifications;
 
         public MessagePublishPipeSpecification()
         {
@@ -72,8 +71,8 @@ namespace MassTransit.Configuration
             {
                 for (var index = 0; index < _baseSpecifications.Count; index++)
                 {
-                    var split = new SplitFilterPipeSpecification<PublishContext<TMessage>, PublishContext>(_baseSpecifications[index], MergeContext,
-                        FilterContext);
+                    var split = new PipeConfigurator<PublishContext<TMessage>>.SplitFilterPipeSpecification<PublishContext>(_baseSpecifications[index],
+                        MergeContext, FilterContext);
 
                     split.Apply(builder);
                 }
@@ -82,7 +81,7 @@ namespace MassTransit.Configuration
 
         public IPipe<PublishContext<TMessage>> BuildMessagePipe()
         {
-            var pipeBuilder = new SpecificationPipeBuilder<PublishContext<TMessage>>();
+            var pipeBuilder = new PipeConfigurator<PublishContext<TMessage>>.SpecificationPipeBuilder();
 
             Apply(pipeBuilder);
 

@@ -83,6 +83,8 @@ namespace MassTransit.Azure.Cosmos.Tests
                         .Endpoint(e => e.PrefetchCount = 100);
 
                     x.AddJobSagaStateMachines()
+                        .JobEndpoint(e => e.Name = "da-job")
+                        .JobAttemptEndpoint(e => e.Name = "da_job-attempt")
                         .CosmosRepository(r =>
                         {
                             r.AccountEndpoint = Configuration.AccountEndpoint;

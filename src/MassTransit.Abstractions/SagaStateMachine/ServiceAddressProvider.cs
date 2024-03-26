@@ -10,7 +10,7 @@ namespace MassTransit
     /// <param name="context"></param>
     /// <returns></returns>
     public delegate Uri ServiceAddressProvider<TSaga>(BehaviorContext<TSaga> context)
-        where TSaga : class, ISaga;
+        where TSaga : class, SagaStateMachineInstance;
 
 
     /// <summary>
@@ -21,6 +21,6 @@ namespace MassTransit
     /// <param name="context"></param>
     /// <returns></returns>
     public delegate Uri ServiceAddressProvider<TSaga, in TMessage>(BehaviorContext<TSaga, TMessage> context)
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TMessage : class;
 }

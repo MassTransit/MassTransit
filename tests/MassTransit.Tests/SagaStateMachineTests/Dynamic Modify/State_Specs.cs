@@ -29,7 +29,7 @@
         [Test]
         public void Should_be_an_instance_of_the_proper_type()
         {
-            Assert.IsInstanceOf<StateMachineState<Instance>>(_machine.Initial);
+            Assert.IsInstanceOf<MassTransitStateMachine<Instance>.StateMachineState>(_machine.Initial);
         }
 
 

@@ -122,7 +122,7 @@ namespace MassTransit.Logging
         }
 
         public static StartedActivity? StartSagaStateMachineActivity<TSaga, T>(this ILogContext logContext, BehaviorContext<TSaga, T> context)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where T : class
         {
             return StartActivity(activity =>

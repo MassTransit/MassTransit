@@ -8,7 +8,7 @@ namespace MassTransit.Context
 
     public class PendingFaultCollection
     {
-        readonly IList<IPendingFault> _pendingFaults;
+        readonly List<IPendingFault> _pendingFaults;
 
         public PendingFaultCollection()
         {

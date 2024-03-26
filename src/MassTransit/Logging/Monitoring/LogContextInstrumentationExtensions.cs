@@ -144,7 +144,7 @@ namespace MassTransit.Logging
 
         public static StartedInstrument? StartSagaStateMachineInstrument<TSaga, T>(this ILogContext logContext, BehaviorContext<TSaga, T> context)
             where T : class
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
         {
             if (!_isConfigured || !_sagaTotal.Enabled)
                 return null;
@@ -480,7 +480,7 @@ namespace MassTransit.Logging
             if (type.IsGenericParameter)
                 return "";
 
-            if (type.GetTypeInfo().IsGenericType)
+            if (type.IsGenericType)
             {
                 var name = type.GetGenericTypeDefinition().Name;
 
@@ -491,7 +491,7 @@ namespace MassTransit.Logging
 
                 sb.Append(name);
                 sb.Append('_');
-                Type[] arguments = type.GetTypeInfo().GenericTypeArguments;
+                Type[] arguments = type.GenericTypeArguments;
                 for (var i = 0; i < arguments.Length; i++)
                 {
                     if (i > 0)

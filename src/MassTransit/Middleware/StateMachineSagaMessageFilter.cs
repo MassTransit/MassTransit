@@ -11,18 +11,18 @@ namespace MassTransit.Middleware
     /// <summary>
     /// Dispatches the ConsumeContext to the consumer method for the specified message type
     /// </summary>
-    /// <typeparam name="TSaga">The consumer type</typeparam>
+    /// <typeparam name="TInstance">The consumer type</typeparam>
     /// <typeparam name="TMessage">The message type</typeparam>
-    public class StateMachineSagaMessageFilter<TSaga, TMessage> :
-        ISagaMessageFilter<TSaga, TMessage>
-        where TSaga : class, ISaga, SagaStateMachineInstance
+    public class StateMachineSagaMessageFilter<TInstance, TMessage> :
+        ISagaMessageFilter<TInstance, TMessage>
+        where TInstance : class, ISaga, SagaStateMachineInstance
         where TMessage : class
     {
         readonly string _activityName;
         readonly Event<TMessage> _event;
-        readonly SagaStateMachine<TSaga> _machine;
+        readonly SagaStateMachine<TInstance> _machine;
 
-        public StateMachineSagaMessageFilter(SagaStateMachine<TSaga> machine, Event<TMessage> @event)
+        public StateMachineSagaMessageFilter(SagaStateMachine<TInstance> machine, Event<TMessage> @event)
         {
             _machine = machine;
             _event = @event;
@@ -37,19 +37,20 @@ namespace MassTransit.Middleware
             {
                 Event = _event.Name,
                 DataType = TypeCache<TMessage>.ShortName,
-                InstanceType = TypeCache<TSaga>.ShortName
+                InstanceType = TypeCache<TInstance>.ShortName
             });
 
-            List<State<TSaga>> states = _machine.States.Cast<State<TSaga>>().Where(x => x.Events.Contains(_event)).ToList();
+            List<State<TInstance>> states = _machine.States.Cast<State<TInstance>>().Where(x => x.Events.Contains(_event)).ToList();
             if (states.Any())
                 scope.Add("states", states.Select(x => x.Name).ToArray());
 
             _machine.Probe(context);
         }
 
-        public async Task Send(SagaConsumeContext<TSaga, TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next)
+        public async Task Send(SagaConsumeContext<TInstance, TMessage> context, IPipe<SagaConsumeContext<TInstance, TMessage>> next)
         {
-            BehaviorContext<TSaga, TMessage> behaviorContext = new BehaviorContextProxy<TSaga, TMessage>(_machine, context, context, _event);
+            BehaviorContext<TInstance, TMessage> behaviorContext =
+                new MassTransitStateMachine<TInstance>.BehaviorContextProxy<TMessage>(_machine, context, context, _event);
 
             StartedActivity? activity = LogContext.Current?.StartSagaStateMachineActivity(behaviorContext);
             StartedInstrument? instrument = LogContext.Current?.StartSagaStateMachineInstrument(behaviorContext);
@@ -58,7 +59,7 @@ namespace MassTransit.Middleware
             {
                 if (activity is { Activity: { IsAllDataRequested: true } })
                 {
-                    State<TSaga> beginState = await behaviorContext.StateMachine.Accessor.Get(behaviorContext).ConfigureAwait(false);
+                    State<TInstance> beginState = await behaviorContext.StateMachine.Accessor.Get(behaviorContext).ConfigureAwait(false);
                     if (beginState != null)
                         activity?.SetTag(DiagnosticHeaders.BeginState, beginState.Name);
                 }
@@ -70,9 +71,9 @@ namespace MassTransit.Middleware
             }
             catch (UnhandledEventException ex)
             {
-                State<TSaga> currentState = await _machine.Accessor.Get(behaviorContext).ConfigureAwait(false);
+                State<TInstance> currentState = await _machine.Accessor.Get(behaviorContext).ConfigureAwait(false);
 
-                var stateMachineException = new NotAcceptedStateMachineException(typeof(TSaga), typeof(TMessage),
+                var stateMachineException = new NotAcceptedStateMachineException(typeof(TInstance), typeof(TMessage),
                     context.CorrelationId ?? Guid.Empty, currentState.Name, ex);
 
                 activity?.AddExceptionEvent(stateMachineException);
@@ -93,7 +94,7 @@ namespace MassTransit.Middleware
                 {
                     if (activity.Value.Activity.IsAllDataRequested)
                     {
-                        State<TSaga> endState = await behaviorContext.StateMachine.Accessor.Get(behaviorContext).ConfigureAwait(false);
+                        State<TInstance> endState = await behaviorContext.StateMachine.Accessor.Get(behaviorContext).ConfigureAwait(false);
                         if (endState != null)
                             activity?.SetTag(DiagnosticHeaders.EndState, endState.Name);
                     }

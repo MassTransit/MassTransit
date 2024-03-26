@@ -82,5 +82,18 @@
 
             return redeliverySpecification;
         }
+
+        public void Method4()
+        {
+        }
+
+        public void Method5()
+        {
+        }
+
+        public void Method6()
+        {
+        }
+
     }
 }

@@ -154,7 +154,7 @@ namespace MassTransit
         static class Cached
         {
             internal static Lazy<IEndpointConventionCache<TMessage>> Metadata = new Lazy<IEndpointConventionCache<TMessage>>(
-                () => new EndpointConventionCache<TMessage>(), LazyThreadSafetyMode.PublicationOnly);
+                () => new EndpointConventionCache<TMessage>());
         }
     }
 }

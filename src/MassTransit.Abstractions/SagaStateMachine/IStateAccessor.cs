@@ -7,7 +7,7 @@
 
     public interface IStateAccessor<TSaga> :
         IProbeSite
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
     {
         Task<State<TSaga>> Get(BehaviorContext<TSaga> context);
 

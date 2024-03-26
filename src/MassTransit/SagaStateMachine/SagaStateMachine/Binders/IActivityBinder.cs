@@ -1,7 +1,7 @@
 namespace MassTransit.SagaStateMachine
 {
     public interface IActivityBinder<TSaga>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
     {
         Event Event { get; }
 

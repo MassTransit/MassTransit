@@ -6,7 +6,7 @@ namespace MassTransit.SagaStateMachine
 
     public class DataConverterActivity<TSaga, TMessage> :
         IStateMachineActivity<TSaga>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TMessage : class
     {
         readonly IStateMachineActivity<TSaga, TMessage> _activity;

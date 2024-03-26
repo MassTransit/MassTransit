@@ -19,19 +19,19 @@
     /// as retry and policy configuration.
     /// </summary>
     /// <typeparam name="TInstance">The state instance type</typeparam>
-    public class MassTransitStateMachine<TInstance> :
+    public partial class MassTransitStateMachine<TInstance> :
         SagaStateMachine<TInstance>
         where TInstance : class, SagaStateMachineInstance
     {
         readonly HashSet<string> _compositeEvents;
-        readonly Dictionary<string, StateMachineEvent<TInstance>> _eventCache;
+        readonly Dictionary<string, StateMachineEvent> _eventCache;
         readonly Dictionary<Event, EventCorrelation> _eventCorrelations;
-        readonly EventObservable<TInstance> _eventObservers;
+        readonly EventObservable _eventObservers;
         readonly State<TInstance> _final;
         readonly State<TInstance> _initial;
         readonly Lazy<StateMachineRegistration[]> _registrations;
         readonly Dictionary<string, State<TInstance>> _stateCache;
-        readonly StateObservable<TInstance> _stateObservers;
+        readonly StateObservable _stateObservers;
         IStateAccessor<TInstance> _accessor;
 
         List<FieldInfo> _backingFields;
@@ -43,19 +43,19 @@
         protected MassTransitStateMachine()
         {
             _registrations = new Lazy<StateMachineRegistration[]>(() => GetRegistrations());
-            _stateCache = new Dictionary<string, State<TInstance>>();
-            _eventCache = new Dictionary<string, StateMachineEvent<TInstance>>();
+            _stateCache = new Dictionary<string, State<TInstance>>(16);
+            _eventCache = new Dictionary<string, StateMachineEvent>(16);
             _compositeEvents = new HashSet<string>();
 
-            _eventObservers = new EventObservable<TInstance>();
-            _stateObservers = new StateObservable<TInstance>();
+            _eventObservers = new EventObservable();
+            _stateObservers = new StateObservable();
 
-            _initial = new StateMachineState<TInstance>((context, state) => UnhandledEvent(context, state), "Initial", _eventObservers);
+            _initial = new StateMachineState((context, state) => UnhandledEvent(context, state), "Initial", _eventObservers);
             _stateCache[_initial.Name] = _initial;
-            _final = new StateMachineState<TInstance>((context, state) => UnhandledEvent(context, state), "Final", _eventObservers);
+            _final = new StateMachineState((context, state) => UnhandledEvent(context, state), "Final", _eventObservers);
             _stateCache[_final.Name] = _final;
 
-            _accessor = new DefaultInstanceStateAccessor<TInstance>(this, _stateCache[Initial.Name], _stateObservers);
+            _accessor = new DefaultInstanceStateAccessor(this, _stateCache[Initial.Name], _stateObservers);
 
             _unhandledEventCallback = DefaultUnhandledEventCallback;
 
@@ -147,7 +147,7 @@
 
         Event StateMachine.GetEvent(string name)
         {
-            if (_eventCache.TryGetValue(name, out StateMachineEvent<TInstance> result))
+            if (_eventCache.TryGetValue(name, out StateMachineEvent result))
                 return result.Event;
 
             throw new UnknownEventException(_name, name);
@@ -202,7 +202,7 @@
 
         public IDisposable ConnectEventObserver(Event @event, IEventObserver<TInstance> observer)
         {
-            var eventObserver = new SelectedEventObserver<TInstance>(@event, observer);
+            var eventObserver = new SelectedEventObserver(@event, observer);
 
             return _eventObservers.Connect(eventObserver);
         }
@@ -233,9 +233,9 @@
         /// </remarks>
         protected internal void InstanceState(Expression<Func<TInstance, State>> instanceStateProperty)
         {
-            var stateAccessor = new RawStateAccessor<TInstance>(this, instanceStateProperty, _stateObservers);
+            var stateAccessor = new RawStateAccessor(this, instanceStateProperty, _stateObservers);
 
-            _accessor = new InitialIfNullStateAccessor<TInstance>(_stateCache[Initial.Name], stateAccessor);
+            _accessor = new InitialIfNullStateAccessor(_stateCache[Initial.Name], stateAccessor);
         }
 
         /// <summary>
@@ -244,9 +244,9 @@
         /// <param name="instanceStateProperty"></param>
         protected internal void InstanceState(Expression<Func<TInstance, string>> instanceStateProperty)
         {
-            var stateAccessor = new StringStateAccessor<TInstance>(this, instanceStateProperty, _stateObservers);
+            var stateAccessor = new StringStateAccessor(this, instanceStateProperty, _stateObservers);
 
-            _accessor = new InitialIfNullStateAccessor<TInstance>(_stateCache[Initial.Name], stateAccessor);
+            _accessor = new InitialIfNullStateAccessor(_stateCache[Initial.Name], stateAccessor);
         }
 
         /// <summary>
@@ -256,11 +256,11 @@
         /// <param name="states">Specifies the states, in order, to which the int values should be assigned</param>
         protected internal void InstanceState(Expression<Func<TInstance, int>> instanceStateProperty, params State[] states)
         {
-            var stateIndex = new StateAccessorIndex<TInstance>(this, _initial, _final, states);
+            var stateIndex = new StateAccessorIndex(this, _initial, _final, states);
 
-            var stateAccessor = new IntStateAccessor<TInstance>(instanceStateProperty, stateIndex, _stateObservers);
+            var stateAccessor = new IntStateAccessor(instanceStateProperty, stateIndex, _stateObservers);
 
-            _accessor = new InitialIfNullStateAccessor<TInstance>(_stateCache[Initial.Name], stateAccessor);
+            _accessor = new InitialIfNullStateAccessor(_stateCache[Initial.Name], stateAccessor);
         }
 
         /// <summary>
@@ -345,7 +345,7 @@
             where TEvent : Event
         {
             var @event = ctor(name);
-            _eventCache[name] = new StateMachineEvent<TInstance>(@event, false);
+            _eventCache[name] = new StateMachineEvent(@event, false);
             return @event;
         }
 
@@ -367,7 +367,7 @@
 
             _eventCorrelations.TryGetValue(@event, out var existingCorrelation);
 
-            var configurator = new MassTransitEventCorrelationConfigurator<TInstance, T>(this, @event, existingCorrelation);
+            var configurator = new StateMachineInterfaceType<TInstance, T>.MassTransitEventCorrelationConfigurator(this, @event, existingCorrelation);
 
             configureEventCorrelation(configurator);
 
@@ -399,7 +399,7 @@
 
             _eventCorrelations.TryGetValue(@event, out var existingCorrelation);
 
-            var configurator = new MassTransitEventCorrelationConfigurator<TInstance, T>(this, @event, existingCorrelation);
+            var configurator = new StateMachineInterfaceType<TInstance, T>.MassTransitEventCorrelationConfigurator(this, @event, existingCorrelation);
 
             configureEventCorrelation(configurator);
 
@@ -429,7 +429,7 @@
 
             InitializeEventProperty<TProperty, T>(eventProperty, propertyValue, @event);
 
-            _eventCache[name] = new StateMachineEvent<TInstance>(@event, false);
+            _eventCache[name] = new StateMachineEvent(@event, false);
         }
 
         /// <summary>
@@ -485,7 +485,7 @@
 
             _eventCorrelations.TryGetValue(@event, out var existingCorrelation);
 
-            var configurator = new MassTransitEventCorrelationConfigurator<TInstance, T>(this, @event, existingCorrelation);
+            var configurator = new StateMachineInterfaceType<TInstance, T>.MassTransitEventCorrelationConfigurator(this, @event, existingCorrelation);
 
             configure?.Invoke(configurator);
 
@@ -626,7 +626,7 @@
 
                 InitializeEvent(this, eventProperty, @event);
 
-                _eventCache[eventProperty.Name] = new StateMachineEvent<TInstance>(@event, false);
+                _eventCache[eventProperty.Name] = new StateMachineEvent(@event, false);
 
                 return @event;
             }
@@ -640,7 +640,7 @@
             {
                 var @event = new TriggerEvent(name);
 
-                _eventCache[name] = new StateMachineEvent<TInstance>(@event, false);
+                _eventCache[name] = new StateMachineEvent(@event, false);
 
                 return @event;
             }
@@ -709,7 +709,7 @@
             if (TryGetState(name, out State<TInstance> foundState))
                 return foundState;
 
-            var state = new StateMachineState<TInstance>((c, s) => UnhandledEvent(c, s), name, _eventObservers);
+            var state = new StateMachineState((c, s) => UnhandledEvent(c, s), name, _eventObservers);
             SetState(name, state);
 
             return state;
@@ -722,11 +722,11 @@
             var propertyValue = property.GetValue(this);
 
             // If the state was already defined, don't define it again
-            var existingState = propertyValue as StateMachineState<TInstance>;
+            var existingState = propertyValue as StateMachineState;
             if (name.Equals(existingState?.Name))
                 return;
 
-            var state = new StateMachineState<TInstance>((c, s) => UnhandledEvent(c, s), name, _eventObservers);
+            var state = new StateMachineState((c, s) => UnhandledEvent(c, s), name, _eventObservers);
 
             InitializeState(this, property, state);
 
@@ -751,28 +751,28 @@
 
             var name = $"{property.Name}.{stateProperty.Name}";
 
-            StateMachineState<TInstance> existingState = GetStateProperty(stateProperty, propertyValue);
+            StateMachineState existingState = GetStateProperty(stateProperty, propertyValue);
             if (name.Equals(existingState?.Name))
                 return;
 
-            var state = new StateMachineState<TInstance>((c, s) => UnhandledEvent(c, s), name, _eventObservers);
+            var state = new StateMachineState((c, s) => UnhandledEvent(c, s), name, _eventObservers);
 
             InitializeStateProperty(stateProperty, propertyValue, state);
 
             SetState(name, state);
         }
 
-        static StateMachineState<TInstance> GetStateProperty<TProperty>(PropertyInfo stateProperty, TProperty propertyValue)
+        static StateMachineState GetStateProperty<TProperty>(PropertyInfo stateProperty, TProperty propertyValue)
             where TProperty : class
         {
             if (stateProperty.CanRead)
-                return stateProperty.GetValue(propertyValue) as StateMachineState<TInstance>;
+                return stateProperty.GetValue(propertyValue) as StateMachineState;
 
             var objectProperty = propertyValue.GetType().GetProperty(stateProperty.Name, typeof(State));
             if (objectProperty == null || !objectProperty.CanRead)
                 throw new ArgumentException($"The state property is not readable: {stateProperty.Name}");
 
-            return objectProperty.GetValue(propertyValue) as StateMachineState<TInstance>;
+            return objectProperty.GetValue(propertyValue) as StateMachineState;
         }
 
         /// <summary>
@@ -795,11 +795,11 @@
             var propertyValue = property.GetValue(this);
 
             // If the state was already defined, don't define it again
-            var existingState = propertyValue as StateMachineState<TInstance>;
+            var existingState = propertyValue as StateMachineState;
             if (name.Equals(existingState?.Name) && superState.Name.Equals(existingState?.SuperState?.Name))
                 return;
 
-            var state = new StateMachineState<TInstance>((c, s) => UnhandledEvent(c, s), name, _eventObservers, superStateInstance);
+            var state = new StateMachineState((c, s) => UnhandledEvent(c, s), name, _eventObservers, superStateInstance);
 
             InitializeState(this, property, state);
 
@@ -819,7 +819,7 @@
                 superState.Name.Equals(existingState?.SuperState?.Name))
                 return existingState;
 
-            var state = new StateMachineState<TInstance>((c, s) => UnhandledEvent(c, s), name, _eventObservers, superStateInstance);
+            var state = new StateMachineState((c, s) => UnhandledEvent(c, s), name, _eventObservers, superStateInstance);
 
             SetState(name, state);
             return state;
@@ -849,11 +849,11 @@
 
             var name = $"{property.Name}.{stateProperty.Name}";
 
-            StateMachineState<TInstance> existingState = GetStateProperty(stateProperty, propertyValue);
+            StateMachineState existingState = GetStateProperty(stateProperty, propertyValue);
             if (name.Equals(existingState?.Name) && superState.Name.Equals(existingState?.SuperState?.Name))
                 return;
 
-            var state = new StateMachineState<TInstance>((c, s) => UnhandledEvent(c, s), name, _eventObservers, superStateInstance);
+            var state = new StateMachineState((c, s) => UnhandledEvent(c, s), name, _eventObservers, superStateInstance);
 
             InitializeStateProperty(stateProperty, propertyValue, state);
 
@@ -865,14 +865,14 @@
         /// </summary>
         /// <param name="name"></param>
         /// <param name="state"></param>
-        void SetState(string name, StateMachineState<TInstance> state)
+        void SetState(string name, StateMachineState state)
         {
             _stateCache[name] = state;
 
-            _eventCache[state.BeforeEnter.Name] = new StateMachineEvent<TInstance>(state.BeforeEnter, true);
-            _eventCache[state.Enter.Name] = new StateMachineEvent<TInstance>(state.Enter, true);
-            _eventCache[state.Leave.Name] = new StateMachineEvent<TInstance>(state.Leave, true);
-            _eventCache[state.AfterLeave.Name] = new StateMachineEvent<TInstance>(state.AfterLeave, true);
+            _eventCache[state.BeforeEnter.Name] = new StateMachineEvent(state.BeforeEnter, true);
+            _eventCache[state.Enter.Name] = new StateMachineEvent(state.Enter, true);
+            _eventCache[state.Leave.Name] = new StateMachineEvent(state.Leave, true);
+            _eventCache[state.AfterLeave.Name] = new StateMachineEvent(state.AfterLeave, true);
         }
 
         /// <summary>
@@ -1261,7 +1261,7 @@
 
         Task UnhandledEvent(BehaviorContext<TInstance> context, State state)
         {
-            var unhandledEventContext = new UnhandledEventBehaviorContext<TInstance>(this, context, state);
+            var unhandledEventContext = new UnhandledEventBehaviorContext(this, context, state);
 
             return _unhandledEventCallback(unhandledEventContext);
         }
@@ -1328,7 +1328,7 @@
         {
             var property = propertyExpression.GetPropertyInfo();
 
-            var request = new StateMachineRequest<TInstance, TRequest, TResponse>(property.Name, settings, requestIdExpression);
+            var request = new StateMachineRequest<TRequest, TResponse>(property.Name, settings, requestIdExpression);
 
             InitializeRequest(this, property, request);
 
@@ -1375,7 +1375,7 @@
         {
             var property = propertyExpression.GetPropertyInfo();
 
-            var request = new StateMachineRequest<TInstance, TRequest, TResponse>(property.Name, settings);
+            var request = new StateMachineRequest<TRequest, TResponse>(property.Name, settings);
 
             InitializeRequest(this, property, request);
 
@@ -1473,7 +1473,7 @@
         {
             var property = propertyExpression.GetPropertyInfo();
 
-            var request = new StateMachineRequest<TInstance, TRequest, TResponse, TResponse2>(property.Name, settings, requestIdExpression);
+            var request = new StateMachineRequest<TRequest, TResponse, TResponse2>(property.Name, settings, requestIdExpression);
 
             InitializeRequest(this, property, request);
 
@@ -1531,7 +1531,7 @@
         {
             var property = propertyExpression.GetPropertyInfo();
 
-            var request = new StateMachineRequest<TInstance, TRequest, TResponse, TResponse2>(property.Name, settings);
+            var request = new StateMachineRequest<TRequest, TResponse, TResponse2>(property.Name, settings);
 
             InitializeRequest(this, property, request);
 
@@ -1644,7 +1644,7 @@
         {
             var property = propertyExpression.GetPropertyInfo();
 
-            var request = new StateMachineRequest<TInstance, TRequest, TResponse, TResponse2, TResponse3>(property.Name, settings, requestIdExpression);
+            var request = new StateMachineRequest<TRequest, TResponse, TResponse2, TResponse3>(property.Name, settings, requestIdExpression);
 
             InitializeRequest(this, property, request);
 
@@ -1712,7 +1712,7 @@
         {
             var property = propertyExpression.GetPropertyInfo();
 
-            var request = new StateMachineRequest<TInstance, TRequest, TResponse, TResponse2, TResponse3>(property.Name, settings);
+            var request = new StateMachineRequest<TRequest, TResponse, TResponse2, TResponse3>(property.Name, settings);
 
             InitializeRequest(this, property, request);
 
@@ -1790,7 +1790,7 @@
 
             var name = property.Name;
 
-            var schedule = new StateMachineSchedule<TInstance, TMessage>(name, tokenIdExpression, settings);
+            var schedule = new StateMachineSchedule<TMessage>(name, tokenIdExpression, settings);
 
             InitializeSchedule(this, property, schedule);
 
@@ -1800,10 +1800,7 @@
                 Event(propertyExpression, x => x.AnyReceived);
             else
             {
-                Event(propertyExpression, x => x.AnyReceived, x =>
-                {
-                    settings.Received(x);
-                });
+                Event(propertyExpression, x => x.AnyReceived, x => { settings.Received(x); });
             }
 
             DuringAny(
@@ -1892,7 +1889,23 @@
                     : typeof(UncorrelatedEventRegistration<>).MakeGenericType(typeof(TInstance), messageType);
             }
 
-            return (EventRegistration)Activator.CreateInstance(registrationType, @event);
+            // return (EventRegistration)Activator.CreateInstance(registrationType, @event);
+            return CreateRegistration(registrationType, @event, messageType);
+        }
+
+        static EventRegistration CreateRegistration(Type registrationType, Event @event, Type messageType)
+        {
+            var constructorInfo = registrationType.GetConstructors().FirstOrDefault(x => x.GetParameters().Length == 1);
+            if (constructorInfo == null)
+                throw new ArgumentException("The event correlation could not be created: " + TypeCache.GetShortName(registrationType));
+
+            var eventParameter = Expression.Parameter(typeof(Event), "event");
+            var convertExpression = Expression.Convert(eventParameter, typeof(Event<>).MakeGenericType(messageType));
+            var @new = Expression.New(constructorInfo, convertExpression);
+
+            var factoryMethod = Expression.Lambda<Func<Event, EventRegistration>>(@new, eventParameter).CompileFast();
+
+            return factoryMethod(@event);
         }
 
         StateMachine<TInstance> Modify(Action<IStateMachineModifier<TInstance>> modifier)
@@ -1920,13 +1933,13 @@
         {
             var events = new List<StateMachineRegistration>();
 
-            var machineType = GetType().GetTypeInfo();
+            var machineType = GetType();
 
             IEnumerable<PropertyInfo> properties = GetStateMachineProperties();
 
             foreach (var propertyInfo in properties)
             {
-                if (propertyInfo.PropertyType.GetTypeInfo().IsGenericType)
+                if (propertyInfo.PropertyType.IsGenericType)
                 {
                     if (propertyInfo.PropertyType.GetGenericTypeDefinition() == typeof(Event<>))
                     {
@@ -1958,13 +1971,13 @@
 
         IEnumerable<PropertyInfo> GetStateMachineProperties()
         {
-            return _stateMachineProperties ??= GetType().GetTypeInfo().GetProperties(BindingFlags.Instance | BindingFlags.Public)
+            return _stateMachineProperties ??= GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public)
                 .Where(x => x.CanRead && (x.CanWrite || TryGetBackingField(x, out _))).ToList();
         }
 
         bool TryGetBackingField(PropertyInfo property, out FieldInfo backingField)
         {
-            _backingFields ??= GetType().GetTypeInfo()
+            _backingFields ??= GetType()
                 .GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
                 .Where(field =>
                     field.Attributes.HasFlag(FieldAttributes.Private) &&
@@ -1983,7 +1996,7 @@
             return backingField != null;
         }
 
-        void InitializeState(MassTransitStateMachine<TInstance> stateMachine, PropertyInfo property, StateMachineState<TInstance> state)
+        void InitializeState(MassTransitStateMachine<TInstance> stateMachine, PropertyInfo property, StateMachineState state)
         {
             if (property.CanWrite)
                 property.SetValue(stateMachine, state);
@@ -1993,7 +2006,7 @@
                 throw new ArgumentException($"The state property is not writable: {property.Name}");
         }
 
-        void InitializeStateProperty<TProperty>(PropertyInfo stateProperty, TProperty propertyValue, StateMachineState<TInstance> state)
+        void InitializeStateProperty<TProperty>(PropertyInfo stateProperty, TProperty propertyValue, StateMachineState state)
             where TProperty : class
         {
             if (stateProperty.CanWrite)
@@ -2170,12 +2183,13 @@
                 if (GlobalTopology.Send.GetMessageTopology<TData>().TryGetConvention(out ICorrelationIdMessageSendTopologyConvention<TData> convention)
                     && convention.TryGetMessageCorrelationId(out IMessageCorrelationId<TData> messageCorrelationId))
                 {
-                    var builder = new MessageCorrelationIdEventCorrelationBuilder<TInstance, TData>(machine, _event, messageCorrelationId);
+                    var builder = new StateMachineInterfaceType<TInstance, TData>.MessageCorrelationIdEventCorrelationBuilder(machine, _event,
+                        messageCorrelationId);
 
                     machine._eventCorrelations[_event] = builder.Build();
                 }
                 else
-                    machine._eventCorrelations[_event] = new UncorrelatedEventCorrelation<TInstance, TData>(_event);
+                    machine._eventCorrelations[_event] = new UncorrelatedEventCorrelation<TData>(_event);
             }
         }
 
@@ -2196,12 +2210,13 @@
                 if (GlobalTopology.Send.GetMessageTopology<TData>().TryGetConvention(out ICorrelationIdMessageSendTopologyConvention<TData> convention)
                     && convention.TryGetMessageCorrelationId(out IMessageCorrelationId<TData> messageCorrelationId))
                 {
-                    var builder = new MessageCorrelationIdFaultEventCorrelationBuilder<TInstance, TData>(machine, _event, messageCorrelationId);
+                    var builder = new StateMachineInterfaceType<TInstance, TData>.MessageCorrelationIdFaultEventCorrelationBuilder(machine, _event,
+                        messageCorrelationId);
 
                     machine._eventCorrelations[_event] = builder.Build();
                 }
                 else
-                    machine._eventCorrelations[_event] = new UncorrelatedEventCorrelation<TInstance, Fault<TData>>(_event);
+                    machine._eventCorrelations[_event] = new UncorrelatedEventCorrelation<Fault<TData>>(_event);
             }
         }
 

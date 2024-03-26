@@ -45,7 +45,9 @@ namespace MassTransit.Internals
             if (typeInfo.IsInterface)
             {
                 IEnumerable<PropertyInfo> sourceProperties = properties
-                    .Concat(typeInfo.ImplementedInterfaces.SelectMany(x => x.GetTypeInfo().DeclaredProperties));
+                    .Concat(typeInfo.ImplementedInterfaces.SelectMany(x => x.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Instance |
+                                                                                           BindingFlags.Static | BindingFlags.Public |
+                                                                                           BindingFlags.NonPublic)));
 
                 foreach (var prop in sourceProperties)
                     yield return prop;
@@ -102,7 +104,7 @@ namespace MassTransit.Internals
         /// <returns>True if the type can be constructed, otherwise false.</returns>
         public static bool IsConcrete(this Type type)
         {
-            return type is {IsAbstract: false, IsInterface: false};
+            return type is { IsAbstract: false, IsInterface: false };
         }
 
         public static bool IsInterfaceOrConcreteClass(this Type type)
@@ -110,7 +112,7 @@ namespace MassTransit.Internals
             if (type.IsInterface)
                 return true;
 
-            return type is {IsClass: true, IsAbstract: false};
+            return type is { IsClass: true, IsAbstract: false };
         }
 
         /// <summary>
@@ -173,8 +175,8 @@ namespace MassTransit.Internals
         public static bool CanBeNull(this Type type)
         {
             return !type.IsValueType
-                || type == typeof(string)
-                || type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
+                   || type == typeof(string)
+                   || type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
         }
 
         /// <summary>

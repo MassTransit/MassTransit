@@ -6,7 +6,7 @@ namespace MassTransit.SagaStateMachine
 
     public class CatchExceptionActivityBinder<TInstance, TException> :
         ExceptionActivityBinder<TInstance, TException>
-        where TInstance : class, ISaga
+        where TInstance : class, SagaStateMachineInstance
         where TException : Exception
     {
         readonly IActivityBinder<TInstance>[] _activities;
@@ -107,7 +107,7 @@ namespace MassTransit.SagaStateMachine
 
     public class CatchExceptionActivityBinder<TInstance, TData, TException> :
         ExceptionActivityBinder<TInstance, TData, TException>
-        where TInstance : class, ISaga
+        where TInstance : class, SagaStateMachineInstance
         where TException : Exception
         where TData : class
     {

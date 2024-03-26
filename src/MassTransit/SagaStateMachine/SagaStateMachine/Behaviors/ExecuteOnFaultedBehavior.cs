@@ -7,7 +7,7 @@ namespace MassTransit.SagaStateMachine
     public class ExecuteOnFaultedBehavior<TSaga, TException> :
         IBehavior<TSaga>
         where TException : Exception
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
     {
         readonly BehaviorExceptionContext<TSaga, TException> _context;
         readonly IBehavior<TSaga> _next;
@@ -53,7 +53,7 @@ namespace MassTransit.SagaStateMachine
     public class ExecuteOnFaultedBehavior<TSaga, TMessage, TException> :
         IBehavior<TSaga>
         where TException : Exception
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TMessage : class
     {
         readonly BehaviorExceptionContext<TSaga, TMessage, TException> _context;

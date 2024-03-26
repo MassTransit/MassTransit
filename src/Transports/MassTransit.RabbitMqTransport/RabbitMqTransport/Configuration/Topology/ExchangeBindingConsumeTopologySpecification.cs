@@ -13,7 +13,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         IRabbitMqExchangeToExchangeBindingConfigurator,
         IRabbitMqConsumeTopologySpecification
     {
-        readonly IList<IRabbitMqConsumeTopologySpecification> _specifications;
+        readonly List<IRabbitMqConsumeTopologySpecification> _specifications;
 
         public ExchangeBindingConsumeTopologySpecification(string exchangeName, string exchangeType, bool durable = true, bool autoDelete = false)
             : base(exchangeName, exchangeType, durable, autoDelete)

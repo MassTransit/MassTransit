@@ -19,5 +19,17 @@ namespace MassTransit.Configuration
 
             return redeliverySpecification;
         }
+
+        public void Method7()
+        {
+        }
+
+        public void Method8()
+        {
+        }
+
+        public void Method9()
+        {
+        }
     }
 }

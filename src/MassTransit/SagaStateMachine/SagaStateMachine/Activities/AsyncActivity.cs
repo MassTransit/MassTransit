@@ -6,7 +6,7 @@
 
     public class AsyncActivity<TSaga> :
         IStateMachineActivity<TSaga>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
     {
         readonly Func<BehaviorContext<TSaga>, Task> _asyncAction;
 
@@ -57,7 +57,7 @@
 
     public class AsyncActivity<TInstance, TData> :
         IStateMachineActivity<TInstance, TData>
-        where TInstance : class, ISaga
+        where TInstance : class, SagaStateMachineInstance
         where TData : class
     {
         readonly Func<BehaviorContext<TInstance, TData>, Task> _asyncAction;

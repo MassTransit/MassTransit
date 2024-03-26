@@ -13,7 +13,7 @@ namespace MassTransit.SqlTransport.Topology
         ISqlMessagePublishTopologyConfigurator<TMessage>
         where TMessage : class
     {
-        readonly IList<ISqlMessagePublishTopology> _implementedMessageTypes;
+        readonly List<ISqlMessagePublishTopology> _implementedMessageTypes;
         readonly SqlTopicConfigurator _topic;
 
         public SqlMessagePublishTopology(ISqlPublishTopology publishTopology, IMessageTopology<TMessage> messageTopology)

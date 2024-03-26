@@ -15,7 +15,7 @@ namespace MassTransit.Configuration
         readonly object _lock = new object();
         readonly ConcurrentDictionary<Type, IMessageSendPipeSpecification> _messageSpecifications;
         readonly SendPipeSpecificationObservable _observers;
-        readonly IList<IPipeSpecification<SendContext>> _specifications;
+        readonly List<IPipeSpecification<SendContext>> _specifications;
 
         public SendPipeSpecification()
         {

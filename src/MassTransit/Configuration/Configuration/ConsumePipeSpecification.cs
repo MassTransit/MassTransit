@@ -183,7 +183,7 @@ namespace MassTransit.Configuration
 
         public IConsumePipe BuildConsumePipe()
         {
-            var filter = new DynamicFilter<ConsumeContext, Guid>(new ConsumeContextConverterFactory(), GetRequestId);
+            var filter = new ConsumeContextMessageTypeFilter();
 
             IBuildPipeConfigurator<ConsumeContext> configurator = new PipeConfigurator<ConsumeContext>();
 
@@ -206,11 +206,6 @@ namespace MassTransit.Configuration
                 _consumePipeConfigurators.Add(specification);
 
             return specification;
-        }
-
-        static Guid GetRequestId(ConsumeContext context)
-        {
-            return context.RequestId ?? Guid.Empty;
         }
 
         IMessageConsumePipeSpecification CreateMessageSpecification<T>(Type type)

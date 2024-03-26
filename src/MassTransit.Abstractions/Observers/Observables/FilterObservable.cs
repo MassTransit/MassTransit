@@ -26,6 +26,19 @@
         {
             return ForEachAsync(x => x.SendFault(context, exception));
         }
+
+        public void Method4()
+        {
+        }
+
+        public void Method5()
+        {
+        }
+
+        public void Method6()
+        {
+        }
+
     }
 
 
@@ -48,5 +61,18 @@
         {
             return ForEachAsync(x => x.SendFault(context, exception));
         }
+
+        public void Method4()
+        {
+        }
+
+        public void Method5()
+        {
+        }
+
+        public void Method6()
+        {
+        }
+
     }
 }

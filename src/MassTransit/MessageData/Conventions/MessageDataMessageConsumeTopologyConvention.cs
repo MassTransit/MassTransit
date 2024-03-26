@@ -1,5 +1,7 @@
+#nullable enable
 namespace MassTransit.MessageData.Conventions
 {
+    using System.Diagnostics.CodeAnalysis;
     using Configuration;
     using MassTransit.Configuration;
 
@@ -15,14 +17,15 @@ namespace MassTransit.MessageData.Conventions
             _repository = repository;
         }
 
-        bool IMessageConsumeTopologyConvention.TryGetMessageConsumeTopologyConvention<T>(out IMessageConsumeTopologyConvention<T> convention)
+        bool IMessageConsumeTopologyConvention.TryGetMessageConsumeTopologyConvention<T>(
+            [NotNullWhen(true)] out IMessageConsumeTopologyConvention<T>? convention)
         {
             convention = this as IMessageConsumeTopologyConvention<T>;
 
             return convention != null;
         }
 
-        bool IMessageConsumeTopologyConvention<TMessage>.TryGetMessageConsumeTopology(out IMessageConsumeTopology<TMessage> messageConsumeTopology)
+        public bool TryGetMessageConsumeTopology([NotNullWhen(true)] out IMessageConsumeTopology<TMessage>? messageConsumeTopology)
         {
             var specification = new GetMessageDataTransformSpecification<TMessage>(_repository);
             if (specification.TryGetConsumeTopology(out messageConsumeTopology))

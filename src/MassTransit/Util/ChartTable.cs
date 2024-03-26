@@ -9,7 +9,7 @@ namespace MassTransit.Util
     public class ChartTable
     {
         readonly int _chartWidth;
-        readonly IList<Line> _lines;
+        readonly List<Line> _lines;
 
         public ChartTable(int chartWidth = 60)
         {

@@ -1,20 +1,20 @@
-﻿namespace MassTransit.Configuration
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using MassTransit.Metadata;
+using MassTransit.Util;
+
+namespace MassTransit.Configuration
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using Util;
-
-
     public class InstanceConnector<TConsumer> :
         IInstanceConnector
         where TConsumer : class
     {
-        readonly IList<IInstanceMessageConnector<TConsumer>> _connectors;
+        readonly List<IInstanceMessageConnector<TConsumer>> _connectors;
 
         public InstanceConnector()
         {
-            if (MessageTypeCache<TConsumer>.HasSagaInterfaces)
+            if (RegistrationMetadata.IsSaga(typeof(TConsumer)))
                 throw new ConfigurationException("A saga cannot be registered as a consumer");
 
             _connectors = Consumes()
@@ -27,7 +27,7 @@
             var handles = new List<ConnectHandle>(_connectors.Count);
             try
             {
-                foreach (IInstanceMessageConnector<T> connector in _connectors.Cast<IInstanceMessageConnector<T>>())
+                foreach (var connector in _connectors.Cast<IInstanceMessageConnector<T>>())
                 {
                     var handle = connector.ConnectInstance(pipeConnector, instance, specification);
 
@@ -48,7 +48,7 @@
         {
             if (instance is TConsumer consumer)
             {
-                IConsumerSpecification<TConsumer> specification = CreateConsumerSpecification<TConsumer>();
+                var specification = CreateConsumerSpecification<TConsumer>();
 
                 return ConnectInstance(pipeConnector, consumer, specification);
             }
@@ -60,7 +60,7 @@
         public IConsumerSpecification<T> CreateConsumerSpecification<T>()
             where T : class
         {
-            List<IConsumerMessageSpecification<T>> messageSpecifications =
+            var messageSpecifications =
                 _connectors.Select(x => x.CreateConsumerMessageSpecification())
                     .Cast<IConsumerMessageSpecification<T>>()
                     .ToList();

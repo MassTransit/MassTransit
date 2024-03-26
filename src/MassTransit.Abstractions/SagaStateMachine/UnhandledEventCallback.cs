@@ -10,5 +10,5 @@ namespace MassTransit
     /// <param name="context">The event context</param>
     /// <returns></returns>
     public delegate Task UnhandledEventCallback<TSaga>(UnhandledEventContext<TSaga> context)
-        where TSaga : class, ISaga;
+        where TSaga : class, SagaStateMachineInstance;
 }

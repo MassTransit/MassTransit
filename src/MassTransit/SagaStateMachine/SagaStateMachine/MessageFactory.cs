@@ -80,7 +80,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorContext<TSaga, TMessage>, T> Create<TSaga, TMessage>(T message,
             SendContextCallback<TSaga, TMessage, T> callback)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TMessage : class
         {
             return callback == null
@@ -90,7 +90,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorContext<TSaga, TMessage>, T> Create<TSaga, TMessage>(Task<T> factory,
             SendContextCallback<TSaga, TMessage, T> callback)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TMessage : class
         {
             return callback == null
@@ -100,7 +100,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorContext<TSaga, TMessage>, T> Create<TSaga, TMessage>(
             Func<BehaviorContext<TSaga, TMessage>, Task<SendTuple<T>>> factory)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TMessage : class
         {
             return new ContextMessageFactory<BehaviorContext<TSaga, TMessage>, T>(factory);
@@ -108,7 +108,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorContext<TSaga, TMessage>, T> Create<TSaga, TMessage>(
             Func<BehaviorContext<TSaga, TMessage>, Task<SendTuple<T>>> factory, Action<SendContext<T>> callback)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TMessage : class
         {
             if (callback == null)
@@ -131,7 +131,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorContext<TSaga, TMessage>, T> Create<TSaga, TMessage>(
             Func<BehaviorContext<TSaga, TMessage>, Task<SendTuple<T>>> factory, SendContextCallback<TSaga, TMessage, T> callback)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TMessage : class
         {
             if (callback == null)
@@ -153,7 +153,7 @@ namespace MassTransit.SagaStateMachine
         }
 
         public static ContextMessageFactory<BehaviorContext<TSaga, TMessage>, T> Create<TSaga, TMessage>(AsyncEventMessageFactory<TSaga, TMessage, T> factory)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TMessage : class
         {
             Task<SendTuple<T>> Factory(BehaviorContext<TSaga, TMessage> context)
@@ -175,7 +175,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorContext<TSaga, TMessage>, T> Create<TSaga, TMessage>(AsyncEventMessageFactory<TSaga, TMessage, T> factory,
             IPipe<SendContext<T>> pipe)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TMessage : class
         {
             if (!pipe.IsNotEmpty())
@@ -200,7 +200,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorContext<TSaga, TMessage>, T> Create<TSaga, TMessage>(AsyncEventMessageFactory<TSaga, TMessage, T> factory,
             Action<SendContext<T>> callback)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TMessage : class
         {
             return callback == null ? Create(factory) : Create(factory, Pipe.Execute(callback));
@@ -208,7 +208,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorContext<TSaga, TMessage>, T> Create<TSaga, TMessage>(AsyncEventMessageFactory<TSaga, TMessage, T> factory,
             SendContextCallback<TSaga, TMessage, T> callback)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TMessage : class
         {
             if (callback == null)
@@ -234,7 +234,7 @@ namespace MassTransit.SagaStateMachine
         }
 
         public static ContextMessageFactory<BehaviorContext<TSaga, TMessage>, T> Create<TSaga, TMessage>(EventMessageFactory<TSaga, TMessage, T> factory)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TMessage : class
         {
             Task<SendTuple<T>> Factory(BehaviorContext<TSaga, TMessage> context)
@@ -248,7 +248,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorContext<TSaga, TMessage>, T> Create<TSaga, TMessage>(EventMessageFactory<TSaga, TMessage, T> factory,
             IPipe<SendContext<T>> pipe)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TMessage : class
         {
             if (!pipe.IsNotEmpty())
@@ -265,7 +265,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorContext<TSaga, TMessage>, T> Create<TSaga, TMessage>(EventMessageFactory<TSaga, TMessage, T> factory,
             Action<SendContext<T>> callback)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TMessage : class
         {
             return callback == null ? Create(factory) : Create(factory, Pipe.Execute(callback));
@@ -273,7 +273,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorContext<TSaga, TMessage>, T> Create<TSaga, TMessage>(EventMessageFactory<TSaga, TMessage, T> factory,
             SendContextCallback<TSaga, TMessage, T> callback)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TMessage : class
         {
             if (callback == null)
@@ -292,7 +292,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorExceptionContext<TSaga, TMessage, TException>, T> Create<TSaga, TMessage, TException>(T message,
             SendExceptionContextCallback<TSaga, TMessage, TException, T> callback)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TMessage : class
             where TException : Exception
         {
@@ -303,7 +303,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorExceptionContext<TSaga, TMessage, TException>, T> Create<TSaga, TMessage, TException>(Task<T> factory,
             SendExceptionContextCallback<TSaga, TMessage, TException, T> callback)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TMessage : class
             where TException : Exception
         {
@@ -314,7 +314,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorExceptionContext<TSaga, TMessage, TException>, T> Create<TSaga, TMessage, TException>(
             Func<BehaviorExceptionContext<TSaga, TMessage, TException>, Task<SendTuple<T>>> factory)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TMessage : class
             where TException : Exception
         {
@@ -323,7 +323,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorExceptionContext<TSaga, TMessage, TException>, T> Create<TSaga, TMessage, TException>(
             Func<BehaviorExceptionContext<TSaga, TMessage, TException>, Task<SendTuple<T>>> factory, Action<SendContext<T>> callback)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TMessage : class
             where TException : Exception
         {
@@ -348,7 +348,7 @@ namespace MassTransit.SagaStateMachine
         public static ContextMessageFactory<BehaviorExceptionContext<TSaga, TMessage, TException>, T> Create<TSaga, TMessage, TException>(
             Func<BehaviorExceptionContext<TSaga, TMessage, TException>, Task<SendTuple<T>>> factory,
             SendExceptionContextCallback<TSaga, TMessage, TException, T> callback)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TMessage : class
             where TException : Exception
         {
@@ -372,7 +372,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorExceptionContext<TSaga, TMessage, TException>, T> Create<TSaga, TMessage, TException>(
             AsyncEventExceptionMessageFactory<TSaga, TMessage, TException, T> factory)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TMessage : class
             where TException : Exception
         {
@@ -395,7 +395,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorExceptionContext<TSaga, TMessage, TException>, T> Create<TSaga, TMessage, TException>(
             AsyncEventExceptionMessageFactory<TSaga, TMessage, TException, T> factory, IPipe<SendContext<T>> pipe)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TMessage : class
             where TException : Exception
         {
@@ -421,7 +421,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorExceptionContext<TSaga, TMessage, TException>, T> Create<TSaga, TMessage, TException>(
             AsyncEventExceptionMessageFactory<TSaga, TMessage, TException, T> factory, Action<SendContext<T>> callback)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TMessage : class
             where TException : Exception
         {
@@ -430,7 +430,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorExceptionContext<TSaga, TMessage, TException>, T> Create<TSaga, TMessage, TException>(
             AsyncEventExceptionMessageFactory<TSaga, TMessage, TException, T> factory, SendExceptionContextCallback<TSaga, TMessage, TException, T> callback)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TMessage : class
             where TException : Exception
         {
@@ -458,7 +458,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorExceptionContext<TSaga, TMessage, TException>, T> Create<TSaga, TMessage, TException>(
             EventExceptionMessageFactory<TSaga, TMessage, TException, T> factory)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TMessage : class
             where TException : Exception
         {
@@ -473,7 +473,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorExceptionContext<TSaga, TMessage, TException>, T> Create<TSaga, TMessage, TException>(
             EventExceptionMessageFactory<TSaga, TMessage, TException, T> factory, IPipe<SendContext<T>> pipe)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TMessage : class
             where TException : Exception
         {
@@ -491,7 +491,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorExceptionContext<TSaga, TMessage, TException>, T> Create<TSaga, TMessage, TException>(
             EventExceptionMessageFactory<TSaga, TMessage, TException, T> factory, Action<SendContext<T>> callback)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TMessage : class
             where TException : Exception
         {
@@ -500,7 +500,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorExceptionContext<TSaga, TMessage, TException>, T> Create<TSaga, TMessage, TException>(
             EventExceptionMessageFactory<TSaga, TMessage, TException, T> factory, SendExceptionContextCallback<TSaga, TMessage, TException, T> callback)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TMessage : class
             where TException : Exception
         {
@@ -521,7 +521,7 @@ namespace MassTransit.SagaStateMachine
         // Saga Only
 
         public static ContextMessageFactory<BehaviorContext<TSaga>, T> Create<TSaga>(T message, SendContextCallback<TSaga, T> callback)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
         {
             return callback == null
                 ? Create(message)
@@ -529,7 +529,7 @@ namespace MassTransit.SagaStateMachine
         }
 
         public static ContextMessageFactory<BehaviorContext<TSaga>, T> Create<TSaga>(Task<T> factory, SendContextCallback<TSaga, T> callback)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
         {
             return callback == null
                 ? Create(factory)
@@ -538,7 +538,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorExceptionContext<TSaga, TException>, T> Create<TSaga, TException>(T message,
             SendExceptionContextCallback<TSaga, TException, T> callback)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TException : Exception
         {
             return callback == null
@@ -548,7 +548,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorExceptionContext<TSaga, TException>, T> Create<TSaga, TException>(Task<T> factory,
             SendExceptionContextCallback<TSaga, TException, T> callback)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TException : Exception
         {
             return callback == null
@@ -557,14 +557,14 @@ namespace MassTransit.SagaStateMachine
         }
 
         public static ContextMessageFactory<BehaviorContext<TSaga>, T> Create<TSaga>(Func<BehaviorContext<TSaga>, Task<SendTuple<T>>> factory)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
         {
             return new ContextMessageFactory<BehaviorContext<TSaga>, T>(factory);
         }
 
         public static ContextMessageFactory<BehaviorContext<TSaga>, T> Create<TSaga>(Func<BehaviorContext<TSaga>, Task<SendTuple<T>>> factory,
             Action<SendContext<T>> callback)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
         {
             if (callback == null)
                 return Create(factory);
@@ -586,7 +586,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorContext<TSaga>, T> Create<TSaga>(Func<BehaviorContext<TSaga>, Task<SendTuple<T>>> factory,
             SendContextCallback<TSaga, T> callback)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
         {
             if (callback == null)
                 return Create(factory);
@@ -607,7 +607,7 @@ namespace MassTransit.SagaStateMachine
         }
 
         public static ContextMessageFactory<BehaviorContext<TSaga>, T> Create<TSaga>(AsyncEventMessageFactory<TSaga, T> factory)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
         {
             Task<SendTuple<T>> Factory(BehaviorContext<TSaga> context)
             {
@@ -628,7 +628,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorContext<TSaga>, T> Create<TSaga>(AsyncEventMessageFactory<TSaga, T> factory,
             IPipe<SendContext<T>> pipe)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
         {
             if (!pipe.IsNotEmpty())
                 return Create(factory);
@@ -652,14 +652,14 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorContext<TSaga>, T> Create<TSaga>(AsyncEventMessageFactory<TSaga, T> factory,
             Action<SendContext<T>> callback)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
         {
             return callback == null ? Create(factory) : Create(factory, Pipe.Execute(callback));
         }
 
         public static ContextMessageFactory<BehaviorContext<TSaga>, T> Create<TSaga>(AsyncEventMessageFactory<TSaga, T> factory,
             SendContextCallback<TSaga, T> callback)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
         {
             if (callback == null)
                 return Create(factory);
@@ -684,7 +684,7 @@ namespace MassTransit.SagaStateMachine
         }
 
         public static ContextMessageFactory<BehaviorContext<TSaga>, T> Create<TSaga>(EventMessageFactory<TSaga, T> factory)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
         {
             Task<SendTuple<T>> Factory(BehaviorContext<TSaga> context)
             {
@@ -697,7 +697,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorContext<TSaga>, T> Create<TSaga>(EventMessageFactory<TSaga, T> factory,
             IPipe<SendContext<T>> pipe)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
         {
             if (!pipe.IsNotEmpty())
                 return Create(factory);
@@ -713,14 +713,14 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorContext<TSaga>, T> Create<TSaga>(EventMessageFactory<TSaga, T> factory,
             Action<SendContext<T>> callback)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
         {
             return callback == null ? Create(factory) : Create(factory, Pipe.Execute(callback));
         }
 
         public static ContextMessageFactory<BehaviorContext<TSaga>, T> Create<TSaga>(EventMessageFactory<TSaga, T> factory,
             SendContextCallback<TSaga, T> callback)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
         {
             if (callback == null)
                 return Create(factory);
@@ -738,7 +738,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorExceptionContext<TSaga, TException>, T> Create<TSaga, TException>(
             Func<BehaviorExceptionContext<TSaga, TException>, Task<SendTuple<T>>> factory)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TException : Exception
         {
             return new ContextMessageFactory<BehaviorExceptionContext<TSaga, TException>, T>(factory);
@@ -746,7 +746,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorExceptionContext<TSaga, TException>, T> Create<TSaga, TException>(
             Func<BehaviorExceptionContext<TSaga, TException>, Task<SendTuple<T>>> factory, Action<SendContext<T>> callback)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TException : Exception
         {
             if (callback == null)
@@ -769,7 +769,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorExceptionContext<TSaga, TException>, T> Create<TSaga, TException>(
             Func<BehaviorExceptionContext<TSaga, TException>, Task<SendTuple<T>>> factory, SendExceptionContextCallback<TSaga, TException, T> callback)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TException : Exception
         {
             if (callback == null)
@@ -792,7 +792,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorExceptionContext<TSaga, TException>, T> Create<TSaga, TException>(
             AsyncEventExceptionMessageFactory<TSaga, TException, T> factory)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TException : Exception
         {
             Task<SendTuple<T>> Factory(BehaviorExceptionContext<TSaga, TException> context)
@@ -814,7 +814,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorExceptionContext<TSaga, TException>, T> Create<TSaga, TException>(
             AsyncEventExceptionMessageFactory<TSaga, TException, T> factory, IPipe<SendContext<T>> pipe)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TException : Exception
         {
             if (!pipe.IsNotEmpty())
@@ -839,7 +839,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorExceptionContext<TSaga, TException>, T> Create<TSaga, TException>(
             AsyncEventExceptionMessageFactory<TSaga, TException, T> factory, Action<SendContext<T>> callback)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TException : Exception
         {
             return callback == null ? Create(factory) : Create(factory, Pipe.Execute(callback));
@@ -847,7 +847,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorExceptionContext<TSaga, TException>, T> Create<TSaga, TException>(
             AsyncEventExceptionMessageFactory<TSaga, TException, T> factory, SendExceptionContextCallback<TSaga, TException, T> callback)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TException : Exception
         {
             if (callback == null)
@@ -874,7 +874,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorExceptionContext<TSaga, TException>, T> Create<TSaga, TException>(
             EventExceptionMessageFactory<TSaga, TException, T> factory)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TException : Exception
         {
             Task<SendTuple<T>> Factory(BehaviorExceptionContext<TSaga, TException> context)
@@ -888,7 +888,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorExceptionContext<TSaga, TException>, T> Create<TSaga, TException>(
             EventExceptionMessageFactory<TSaga, TException, T> factory, IPipe<SendContext<T>> pipe)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TException : Exception
         {
             if (!pipe.IsNotEmpty())
@@ -905,7 +905,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorExceptionContext<TSaga, TException>, T> Create<TSaga, TException>(
             EventExceptionMessageFactory<TSaga, TException, T> factory, Action<SendContext<T>> callback)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TException : Exception
         {
             return callback == null ? Create(factory) : Create(factory, Pipe.Execute(callback));
@@ -913,7 +913,7 @@ namespace MassTransit.SagaStateMachine
 
         public static ContextMessageFactory<BehaviorExceptionContext<TSaga, TException>, T> Create<TSaga, TException>(
             EventExceptionMessageFactory<TSaga, TException, T> factory, SendExceptionContextCallback<TSaga, TException, T> callback)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TException : Exception
         {
             if (callback == null)

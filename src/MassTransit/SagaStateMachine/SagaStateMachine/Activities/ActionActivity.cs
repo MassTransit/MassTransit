@@ -6,7 +6,7 @@ namespace MassTransit.SagaStateMachine
 
     public class ActionActivity<TSaga> :
         IStateMachineActivity<TSaga>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
     {
         readonly Action<BehaviorContext<TSaga>> _action;
 
@@ -58,7 +58,7 @@ namespace MassTransit.SagaStateMachine
 
     public class ActionActivity<TSaga, TMessage> :
         IStateMachineActivity<TSaga, TMessage>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TMessage : class
     {
         readonly Action<BehaviorContext<TSaga, TMessage>> _action;

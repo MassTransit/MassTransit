@@ -7,7 +7,7 @@
     public class AsyncFaultedActionActivity<TSaga, TException> :
         IStateMachineActivity<TSaga>
         where TException : Exception
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
     {
         readonly Func<BehaviorExceptionContext<TSaga, TException>, Task> _asyncAction;
 
@@ -62,7 +62,7 @@
 
     public class AsyncFaultedActionActivity<TSaga, TMessage, TException> :
         IStateMachineActivity<TSaga, TMessage>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TException : Exception
         where TMessage : class
     {

@@ -17,7 +17,7 @@
 
         WritePropertyCache()
         {
-            if (MessageTypeCache<T>.IsValidMessageType && typeof(T).GetTypeInfo().IsInterface)
+            if (MessageTypeCache<T>.IsValidMessageType && typeof(T).IsInterface)
             {
                 _implementationType = TypeMetadataCache<T>.ImplementationType;
                 _propertyIndex = _implementationType.GetAllProperties()

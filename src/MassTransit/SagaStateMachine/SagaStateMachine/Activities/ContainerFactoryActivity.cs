@@ -7,7 +7,7 @@
     public class ContainerFactoryActivity<TSaga, TActivity> :
         IStateMachineActivity<TSaga>
         where TActivity : class, IStateMachineActivity<TSaga>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
     {
         public void Accept(StateMachineVisitor visitor)
         {
@@ -54,7 +54,7 @@
     public class ContainerFactoryActivity<TSaga, TMessage, TActivity> :
         IStateMachineActivity<TSaga, TMessage>
         where TActivity : class, IStateMachineActivity<TSaga, TMessage>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TMessage : class
     {
         void IProbeSite.Probe(ProbeContext context)

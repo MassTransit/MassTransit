@@ -4,10 +4,10 @@ namespace MassTransit
 
 
     public delegate DateTime ScheduleTimeProvider<TSaga>(BehaviorContext<TSaga> context)
-        where TSaga : class, ISaga;
+        where TSaga : class, SagaStateMachineInstance;
 
 
     public delegate DateTime ScheduleTimeProvider<TSaga, in TMessage>(BehaviorContext<TSaga, TMessage> context)
         where TMessage : class
-        where TSaga : class, ISaga;
+        where TSaga : class, SagaStateMachineInstance;
 }

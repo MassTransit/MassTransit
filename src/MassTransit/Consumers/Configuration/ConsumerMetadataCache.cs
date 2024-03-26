@@ -1,10 +1,8 @@
+using System;
+using System.Linq;
+
 namespace MassTransit.Configuration
 {
-    using System;
-    using System.Linq;
-    using System.Threading;
-
-
     public class ConsumerMetadataCache<T> :
         IConsumerMetadataCache<T>
         where T : class
@@ -27,8 +25,7 @@ namespace MassTransit.Configuration
 
         static class Cached
         {
-            internal static readonly Lazy<IConsumerMetadataCache<T>> Metadata = new Lazy<IConsumerMetadataCache<T>>(
-                () => new ConsumerMetadataCache<T>(), LazyThreadSafetyMode.PublicationOnly);
+            internal static readonly Lazy<IConsumerMetadataCache<T>> Metadata = new Lazy<IConsumerMetadataCache<T>>(() => new ConsumerMetadataCache<T>());
         }
     }
 }

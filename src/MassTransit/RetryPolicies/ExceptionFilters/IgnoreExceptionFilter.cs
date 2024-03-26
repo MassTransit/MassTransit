@@ -28,7 +28,7 @@ namespace MassTransit.RetryPolicies.ExceptionFilters
         {
             for (var i = 0; i < _exceptionTypes.Length; i++)
             {
-                if (_exceptionTypes[i].GetTypeInfo().IsInstanceOfType(exception))
+                if (_exceptionTypes[i].IsInstanceOfType(exception))
                     return false;
             }
 

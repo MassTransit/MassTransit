@@ -9,7 +9,7 @@
 
     public class MultiTestConsumer
     {
-        readonly IList<IConsumerConfigurator> _configures;
+        readonly List<IConsumerConfigurator> _configures;
         readonly ReceivedMessageList _received;
         readonly CancellationToken _testCompleted;
 

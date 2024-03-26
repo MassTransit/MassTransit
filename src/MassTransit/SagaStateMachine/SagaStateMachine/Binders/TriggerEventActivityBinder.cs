@@ -8,7 +8,7 @@ namespace MassTransit.SagaStateMachine
 
     public class TriggerEventActivityBinder<TInstance> :
         EventActivityBinder<TInstance>
-        where TInstance : class, ISaga
+        where TInstance : class, SagaStateMachineInstance
     {
         readonly IActivityBinder<TInstance>[] _activities;
         readonly StateMachineCondition<TInstance> _filter;

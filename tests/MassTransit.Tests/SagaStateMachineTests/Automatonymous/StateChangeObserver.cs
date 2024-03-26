@@ -6,7 +6,7 @@
 
     class StateChangeObserver<T> :
         IStateObserver<T>
-        where T : class, ISaga
+        where T : class, SagaStateMachineInstance
     {
         public StateChangeObserver()
         {

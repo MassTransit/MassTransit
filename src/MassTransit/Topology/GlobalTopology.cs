@@ -109,8 +109,7 @@ namespace MassTransit
 
         static class Cached
         {
-            internal static readonly Lazy<IGlobalTopology> Metadata =
-                new Lazy<IGlobalTopology>(() => new GlobalTopology(), LazyThreadSafetyMode.PublicationOnly);
+            internal static readonly Lazy<IGlobalTopology> Metadata = new Lazy<IGlobalTopology>(() => new GlobalTopology());
         }
     }
 }

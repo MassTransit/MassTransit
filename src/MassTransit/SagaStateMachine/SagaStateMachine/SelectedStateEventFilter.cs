@@ -2,7 +2,7 @@ namespace MassTransit.SagaStateMachine
 {
     public class SelectedStateEventFilter<TSaga, TMessage> :
         IStateEventFilter<TSaga>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TMessage : class
     {
         readonly StateMachineCondition<TSaga, TMessage> _filter;

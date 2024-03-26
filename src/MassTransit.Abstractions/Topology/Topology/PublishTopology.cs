@@ -1,31 +1,30 @@
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using MassTransit.Configuration;
+using MassTransit.Metadata;
+
 namespace MassTransit.Topology
 {
-    using System;
-    using System.Collections.Concurrent;
-    using System.Collections.Generic;
-    using System.Linq;
-    using Configuration;
-    using Metadata;
-
-
     public class PublishTopology :
         IPublishTopologyConfigurator,
         IPublishTopologyConfigurationObserver
     {
-        readonly IList<IMessagePublishTopologyConvention> _conventions;
+        readonly List<IMessagePublishTopologyConvention> _conventions;
         readonly object _lock = new object();
         readonly ConcurrentDictionary<Type, IMessageTypeFactory> _messageTypeFactoryCache;
-        readonly ConcurrentDictionary<Type, IMessagePublishTopologyConfigurator> _messageTypes;
+        readonly ConcurrentDictionary<Type, Lazy<IMessagePublishTopologyConfigurator>> _messageTypes;
         readonly PublishTopologyConfigurationObservable _observers;
 
         public PublishTopology()
         {
-            _messageTypes = new ConcurrentDictionary<Type, IMessagePublishTopologyConfigurator>();
+            _messageTypes = new ConcurrentDictionary<Type, Lazy<IMessagePublishTopologyConfigurator>>();
 
             _observers = new PublishTopologyConfigurationObservable();
             _messageTypeFactoryCache = new ConcurrentDictionary<Type, IMessageTypeFactory>();
 
-            _conventions = new List<IMessagePublishTopologyConvention>();
+            _conventions = new List<IMessagePublishTopologyConvention>(8);
 
             _observers.Connect(this);
         }
@@ -47,8 +46,8 @@ namespace MassTransit.Topology
 
         public bool TryGetPublishAddress(Type messageType, Uri baseAddress, out Uri? publishAddress)
         {
-            return _messageTypes.GetOrAdd(messageType, CreateMessageType)
-                .TryGetPublishAddress(baseAddress, out publishAddress);
+            return _messageTypes.GetOrAdd(messageType, type => new Lazy<IMessagePublishTopologyConfigurator>(() => CreateMessageType(type)))
+                .Value.TryGetPublishAddress(baseAddress, out publishAddress);
         }
 
         public ConnectHandle ConnectPublishTopologyConfigurationObserver(IPublishTopologyConfigurationObserver observer)
@@ -60,8 +59,14 @@ namespace MassTransit.Topology
         {
             lock (_lock)
             {
-                if (_conventions.Any(x => x.GetType() == convention.GetType()))
-                    return false;
+                var conventionType = convention.GetType();
+
+                for (var i = 0; i < _conventions.Count; i++)
+                {
+                    if (_conventions[i].GetType() == conventionType)
+                        return false;
+                }
+
                 _conventions.Add(convention);
                 return true;
             }
@@ -69,14 +74,14 @@ namespace MassTransit.Topology
 
         void IPublishTopologyConfigurator.AddMessagePublishTopology<T>(IMessagePublishTopology<T> topology)
         {
-            IMessagePublishTopologyConfigurator<T> messageConfiguration = GetMessageTopology<T>();
+            var messageConfiguration = GetMessageTopology<T>();
 
             messageConfiguration.Add(topology);
         }
 
         public virtual IEnumerable<ValidationResult> Validate()
         {
-            return _messageTypes.Values.SelectMany(x => x.Validate());
+            return _messageTypes.Values.SelectMany(x => x.Value.Validate());
         }
 
         IMessagePublishTopology IPublishTopology.GetMessageTopology(Type messageType)
@@ -89,12 +94,10 @@ namespace MassTransit.Topology
             if (MessageTypeCache.IsValidMessageType(messageType) == false)
                 throw new ArgumentException(MessageTypeCache.InvalidMessageTypeReason(messageType), nameof(messageType));
 
-            var topology = _messageTypes.GetOrAdd(messageType, CreateMessageType);
-
-            return topology;
+            return GetOrAddByMessageType(messageType).CreateMessageType();
         }
 
-        protected virtual IMessagePublishTopologyConfigurator CreateMessageTopology<T>(Type type)
+        protected virtual IMessagePublishTopologyConfigurator CreateMessageTopology<T>()
             where T : class
         {
             var messageTopology = new MessagePublishTopology<T>(this);
@@ -114,9 +117,9 @@ namespace MassTransit.Topology
             if (MessageTypeCache<T>.IsValidMessageType == false)
                 throw new ArgumentException(MessageTypeCache<T>.InvalidMessageTypeReason, nameof(T));
 
-            var topology = _messageTypes.GetOrAdd(typeof(T), CreateMessageTopology<T>);
+            var topology = _messageTypes.GetOrAdd(typeof(T), type => new Lazy<IMessagePublishTopologyConfigurator>(() => CreateMessageTopology<T>()));
 
-            return (IMessagePublishTopologyConfigurator<T>)topology;
+            return (IMessagePublishTopologyConfigurator<T>)topology.Value;
         }
 
         protected void OnMessageTopologyCreated<T>(IMessagePublishTopologyConfigurator<T> messageTopology)
@@ -127,8 +130,8 @@ namespace MassTransit.Topology
 
         protected void ForEachMessageType<T>(Action<T> callback)
         {
-            foreach (T configurator in _messageTypes.Values)
-                callback(configurator);
+            foreach (Lazy<IMessagePublishTopologyConfigurator> configurator in _messageTypes.Values)
+                callback((T)configurator.Value);
         }
 
         void ApplyConventionsToMessageTopology<T>(IMessagePublishTopologyConfigurator<T> messageTopology)
@@ -136,13 +139,13 @@ namespace MassTransit.Topology
         {
             IMessagePublishTopologyConvention[] conventions;
             lock (_lock)
+            {
                 conventions = _conventions.ToArray();
+            }
 
             foreach (var convention in conventions)
-            {
                 if (convention.TryGetMessagePublishTopologyConvention(out IMessagePublishTopologyConvention<T> messagePublishTopologyConvention))
                     messageTopology.TryAddConvention(messagePublishTopologyConvention);
-            }
         }
 
         IMessagePublishTopologyConfigurator CreateMessageType(Type messageType)
@@ -152,8 +155,17 @@ namespace MassTransit.Topology
 
         IMessageTypeFactory GetOrAddByMessageType(Type type)
         {
-            return _messageTypeFactoryCache.GetOrAdd(type,
-                _ => (IMessageTypeFactory)Activator.CreateInstance(typeof(MessageTypeFactory<>).MakeGenericType(type), this)!);
+            return _messageTypeFactoryCache.GetOrAdd(type, _ => Activation.Activate(type, new Factory(), this));
+        }
+
+
+        readonly struct Factory :
+            IActivationType<IMessageTypeFactory, IPublishTopologyConfigurator>
+        {
+            public IMessageTypeFactory ActivateType<T>(IPublishTopologyConfigurator configurator) where T : class
+            {
+                return new MessageTypeFactory<T>(configurator);
+            }
         }
 
 

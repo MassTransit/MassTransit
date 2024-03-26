@@ -3,43 +3,45 @@ namespace MassTransit.Configuration
     using System.Collections.Generic;
     using Middleware;
 
-
-    public class SagaSplitFilterSpecification<TSaga, TMessage> :
-        IPipeSpecification<SagaConsumeContext<TSaga, TMessage>>
-        where TMessage : class
+    public partial class SagaConnector<TSaga, TMessage>
         where TSaga : class, ISaga
+        where TMessage : class
     {
-        readonly IPipeSpecification<SagaConsumeContext<TSaga>> _specification;
-
-        public SagaSplitFilterSpecification(IPipeSpecification<SagaConsumeContext<TSaga>> specification)
+        public class SagaSplitFilterSpecification :
+            IPipeSpecification<SagaConsumeContext<TSaga, TMessage>>
         {
-            _specification = specification;
-        }
+            readonly IPipeSpecification<SagaConsumeContext<TSaga>> _specification;
 
-        public void Apply(IPipeBuilder<SagaConsumeContext<TSaga, TMessage>> builder)
-        {
-            _specification.Apply(new BuilderProxy(builder));
-        }
-
-        public IEnumerable<ValidationResult> Validate()
-        {
-            return _specification.Validate();
-        }
-
-
-        class BuilderProxy :
-            IPipeBuilder<SagaConsumeContext<TSaga>>
-        {
-            readonly IPipeBuilder<SagaConsumeContext<TSaga, TMessage>> _builder;
-
-            public BuilderProxy(IPipeBuilder<SagaConsumeContext<TSaga, TMessage>> builder)
+            public SagaSplitFilterSpecification(IPipeSpecification<SagaConsumeContext<TSaga>> specification)
             {
-                _builder = builder;
+                _specification = specification;
             }
 
-            public void AddFilter(IFilter<SagaConsumeContext<TSaga>> filter)
+            public void Apply(IPipeBuilder<SagaConsumeContext<TSaga, TMessage>> builder)
             {
-                _builder.AddFilter(new SagaSplitFilter<TSaga, TMessage>(filter));
+                _specification.Apply(new BuilderProxy(builder));
+            }
+
+            public IEnumerable<ValidationResult> Validate()
+            {
+                return _specification.Validate();
+            }
+
+
+            class BuilderProxy :
+                IPipeBuilder<SagaConsumeContext<TSaga>>
+            {
+                readonly IPipeBuilder<SagaConsumeContext<TSaga, TMessage>> _builder;
+
+                public BuilderProxy(IPipeBuilder<SagaConsumeContext<TSaga, TMessage>> builder)
+                {
+                    _builder = builder;
+                }
+
+                public void AddFilter(IFilter<SagaConsumeContext<TSaga>> filter)
+                {
+                    _builder.AddFilter(new SagaSplitFilter<TSaga, TMessage>(filter));
+                }
             }
         }
     }

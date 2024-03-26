@@ -1,55 +1,56 @@
-﻿namespace MassTransit.SagaStateMachine
+﻿namespace MassTransit
 {
     using System;
 
-
-    public class BehaviorExceptionContextProxy<TSaga, TException> :
-        BehaviorContextProxy<TSaga>,
-        BehaviorExceptionContext<TSaga, TException>
-        where TSaga : class, ISaga
-        where TException : Exception
+    public partial class MassTransitStateMachine<TInstance>
+        where TInstance : class, SagaStateMachineInstance
     {
-        readonly BehaviorContext<TSaga> _context;
-
-        public BehaviorExceptionContextProxy(BehaviorContext<TSaga> context, TException exception)
-            : base(context.StateMachine, context, context.Event)
+        public class BehaviorExceptionContextProxy<TException> :
+            BehaviorContextProxy,
+            BehaviorExceptionContext<TInstance, TException>
+            where TException : Exception
         {
-            _context = context;
-            Exception = exception;
+            readonly BehaviorContext<TInstance> _context;
+
+            public BehaviorExceptionContextProxy(BehaviorContext<TInstance> context, TException exception)
+                : base(context.StateMachine, context, context.Event)
+            {
+                _context = context;
+                Exception = exception;
+            }
+
+            public TException Exception { get; }
+
+            public new BehaviorExceptionContext<TInstance, T, TException> CreateProxy<T>(Event<T> @event, T data)
+                where T : class
+            {
+                return new BehaviorExceptionContextProxy<T, TException>(_context.CreateProxy(@event, data), Exception);
+            }
         }
 
-        public TException Exception { get; }
 
-        public new BehaviorExceptionContext<TSaga, T, TException> CreateProxy<T>(Event<T> @event, T data)
-            where T : class
+        public class BehaviorExceptionContextProxy<TData, TException> :
+            BehaviorContextProxy<TData>,
+            BehaviorExceptionContext<TInstance, TData, TException>
+            where TData : class
+            where TException : Exception
         {
-            return new BehaviorExceptionContextProxy<TSaga, T, TException>(_context.CreateProxy(@event, data), Exception);
-        }
-    }
+            readonly BehaviorContext<TInstance, TData> _context;
 
+            public BehaviorExceptionContextProxy(BehaviorContext<TInstance, TData> context, TException exception)
+                : base(context.StateMachine, context, context, context.Event)
+            {
+                _context = context;
+                Exception = exception;
+            }
 
-    public class BehaviorExceptionContextProxy<TSaga, TData, TException> :
-        BehaviorContextProxy<TSaga, TData>,
-        BehaviorExceptionContext<TSaga, TData, TException>
-        where TSaga : class, ISaga
-        where TData : class
-        where TException : Exception
-    {
-        readonly BehaviorContext<TSaga, TData> _context;
+            public TException Exception { get; }
 
-        public BehaviorExceptionContextProxy(BehaviorContext<TSaga, TData> context, TException exception)
-            : base(context.StateMachine, context, context, context.Event)
-        {
-            _context = context;
-            Exception = exception;
-        }
-
-        public TException Exception { get; }
-
-        public new BehaviorExceptionContext<TSaga, T, TException> CreateProxy<T>(Event<T> @event, T data)
-            where T : class
-        {
-            return new BehaviorExceptionContextProxy<TSaga, T, TException>(_context.CreateProxy(@event, data), Exception);
+            public new BehaviorExceptionContext<TInstance, T, TException> CreateProxy<T>(Event<T> @event, T data)
+                where T : class
+            {
+                return new BehaviorExceptionContextProxy<T, TException>(_context.CreateProxy(@event, data), Exception);
+            }
         }
     }
 }

@@ -10,7 +10,7 @@ namespace MassTransit.SagaStateMachine
     /// <typeparam name="TMessage">The event data type</typeparam>
     public class DataBehavior<TSaga, TMessage> :
         IBehavior<TSaga, TMessage>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TMessage : class
     {
         readonly IBehavior<TSaga> _behavior;

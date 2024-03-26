@@ -1,13 +1,12 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using MassTransit.Internals;
+
+
 namespace MassTransit.Metadata
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Reflection;
-    using System.Threading;
-    using Internals;
-
-
     public class ImplementedMessageTypeCache<TMessage> :
         IImplementedMessageTypeCache<TMessage>
         where TMessage : class
@@ -17,85 +16,105 @@ namespace MassTransit.Metadata
         ImplementedMessageTypeCache()
         {
             _implementedTypes = GetMessageTypes()
-                .Where(x => x.Type != typeof(TMessage))
-                .Select(x => Activator.CreateInstance(typeof(TypeAdapter<>).MakeGenericType(typeof(TMessage), x.Type), (object)x.Direct))
-                .Cast<CachedType>()
+                .Select(x => Activation.Activate(x.Type, new Factory(), x.Direct))
                 .ToArray();
         }
 
-        void IImplementedMessageTypeCache<TMessage>.EnumerateImplementedTypes(IImplementedMessageType implementedMessageType, bool includeActualType)
+        void IImplementedMessageTypeCache<TMessage>.EnumerateImplementedTypes(IImplementedMessageType implementedMessageType)
         {
             for (var i = 0; i < _implementedTypes.Length; i++)
             {
-                if (_implementedTypes[i].MessageType == typeof(TMessage) && !includeActualType)
+                if (_implementedTypes[i].MessageType == typeof(TMessage))
                     continue;
 
                 _implementedTypes[i].ImplementsType(implementedMessageType);
             }
         }
 
+        public void Method1()
+        {
+        }
+
+        public void Method2()
+        {
+        }
+
+        public void Method3()
+        {
+        }
+
+
         /// <summary>
         /// Enumerate the implemented message types
         /// </summary>
         /// <param name="implementedMessageType">The interface reference to invoke for each type</param>
-        /// <param name="includeActualType">Include the actual message type first, before any implemented types</param>
-        public static void EnumerateImplementedTypes(IImplementedMessageType implementedMessageType, bool includeActualType = false)
+        public static void EnumerateImplementedTypes(IImplementedMessageType implementedMessageType)
         {
-            Cached.Instance.Value.EnumerateImplementedTypes(implementedMessageType, includeActualType);
+            Cached.Instance.Value.EnumerateImplementedTypes(implementedMessageType);
         }
 
         static IEnumerable<ImplementedType> GetMessageTypes()
         {
-            if (MessageTypeCache<TMessage>.IsValidMessageType)
-                yield return new ImplementedType(typeof(TMessage), true);
+            return GetMessageTypes(new HashSet<Type>(), typeof(TMessage), true);
+        }
 
-            if (typeof(TMessage).ClosesType(typeof(Fault<>), out Type[] arguments))
+        static IEnumerable<ImplementedType> GetMessageTypes(HashSet<Type> used, Type messageType, bool direct)
+        {
+            if (messageType.ClosesType(typeof(Fault<>), out Type[] arguments))
             {
-                foreach (var faultMessageType in MessageTypeCache.GetMessageTypes(arguments[0]))
+                bool directFault = direct;
+                foreach (var faultMessageType in GetMessageTypes(used, arguments[0], false))
                 {
-                    var faultInterfaceType = typeof(Fault<>).MakeGenericType(faultMessageType);
-                    if (faultInterfaceType != typeof(TMessage))
-                        yield return new ImplementedType(faultInterfaceType, true);
+                    var faultInterfaceType = typeof(Fault<>).MakeGenericType(faultMessageType.Type);
+                    if (faultInterfaceType != typeof(TMessage) && used.Add(faultInterfaceType))
+                        yield return new ImplementedType(faultInterfaceType, directFault);
+
+                    directFault = false;
                 }
             }
 
-            Type[] implementedInterfaces = GetImplementedInterfaces(typeof(TMessage)).ToArray();
-
-            foreach (var baseInterface in implementedInterfaces.Except(implementedInterfaces.SelectMany(x => x.GetInterfaces()))
-                .Where(MessageTypeCache.IsValidMessageType))
-                yield return new ImplementedType(baseInterface, true);
-
-            foreach (var baseInterface in implementedInterfaces.SelectMany(x => x.GetInterfaces()).Distinct().Where(MessageTypeCache.IsValidMessageType))
-                yield return new ImplementedType(baseInterface, false);
-
-            var baseType = typeof(TMessage).BaseType;
-            while (baseType != null && MessageTypeCache.IsValidMessageType(baseType))
+            var baseType = messageType.BaseType;
+            if (baseType != null && MessageTypeCache.IsValidMessageType(baseType))
             {
-                yield return new ImplementedType(baseType, typeof(TMessage).BaseType == baseType);
+                foreach (var baseMessageType in GetMessageTypes(used, baseType, false))
+                {
+                    if (used.Add(baseMessageType.Type))
+                        yield return new ImplementedType(baseMessageType.Type, direct);
+                }
 
-                foreach (var baseInterface in GetImplementedInterfaces(baseType).Where(MessageTypeCache.IsValidMessageType))
-                    yield return new ImplementedType(baseInterface, false);
+                if (used.Add(baseType))
+                    yield return new ImplementedType(baseType, direct);
+            }
 
-                baseType = baseType.BaseType;
+            var interfaces = messageType.GetInterfaces();
+
+            for (var index = 0; index < interfaces.Length; index++)
+            {
+                var interfaceType = interfaces[index];
+
+                if (MessageTypeCache.IsValidMessageType(interfaceType))
+                {
+                    foreach (var baseInterfaceType in GetMessageTypes(used, interfaceType, false))
+                    {
+                        if (used.Add(baseInterfaceType.Type))
+                            yield return new ImplementedType(baseInterfaceType.Type, direct);
+                    }
+
+                    if (used.Add(interfaceType))
+                        yield return new ImplementedType(interfaceType, direct);
+                }
             }
         }
 
-        static IEnumerable<Type> GetImplementedInterfaces(Type baseType)
+
+        readonly struct Factory :
+            IActivationType<CachedType, bool>
         {
-            IEnumerable<Type> baseInterfaces = baseType
-                .GetInterfaces()
-                .Where(MessageTypeCache.IsValidMessageType)
-                .ToArray();
-
-            if (baseType.BaseType != null && baseType.BaseType != typeof(object))
+            public CachedType ActivateType<T>(bool direct)
+                where T : class
             {
-                baseInterfaces = baseInterfaces
-                    .Except(baseType.BaseType.GetInterfaces())
-                    .Except(baseInterfaces.SelectMany(x => x.GetInterfaces()))
-                    .ToArray();
+                return new TypeAdapter<T>(direct);
             }
-
-            return baseInterfaces;
         }
 
 
@@ -129,8 +148,7 @@ namespace MassTransit.Metadata
 
         static class Cached
         {
-            internal static readonly Lazy<IImplementedMessageTypeCache<TMessage>> Instance = new Lazy<IImplementedMessageTypeCache<TMessage>>(
-                () => new ImplementedMessageTypeCache<TMessage>(), LazyThreadSafetyMode.PublicationOnly);
+            internal static readonly Lazy<IImplementedMessageTypeCache<TMessage>> Instance = new(() => new ImplementedMessageTypeCache<TMessage>());
         }
 
 
@@ -144,11 +162,23 @@ namespace MassTransit.Metadata
             }
 
             public bool Direct { get; }
-            Type CachedType.MessageType => typeof(TAdapter);
+            public Type MessageType => typeof(TAdapter);
 
-            void CachedType.ImplementsType(IImplementedMessageType implementedMessageType)
+            public void ImplementsType(IImplementedMessageType implementedMessageType)
             {
                 implementedMessageType.ImplementsMessageType<TAdapter>(Direct);
+            }
+
+            public void Method1()
+            {
+            }
+
+            public void Method2()
+            {
+            }
+
+            public void Method3()
+            {
             }
         }
     }

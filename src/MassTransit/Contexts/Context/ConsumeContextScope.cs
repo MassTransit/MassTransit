@@ -128,5 +128,17 @@
         {
             return NotifyFaulted(this, duration, consumerType, exception);
         }
+
+        public void Method1()
+        {
+        }
+
+        public void Method2()
+        {
+        }
+
+        public void Method3()
+        {
+        }
     }
 }

@@ -11,7 +11,7 @@ namespace MassTransit.Configuration
         IReceiveEndpointConfigurator
     {
         readonly IReceiveEndpointConfiguration _configuration;
-        protected readonly IList<IReceiveEndpointSpecification> Specifications;
+        protected readonly List<IReceiveEndpointSpecification> Specifications;
 
         protected ReceiverConfiguration(IReceiveEndpointConfiguration endpointConfiguration)
             : base(endpointConfiguration)

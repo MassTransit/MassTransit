@@ -1,36 +1,38 @@
-namespace MassTransit.SagaStateMachine
+namespace MassTransit
 {
     using System.Threading.Tasks;
 
-
-    public class UnhandledEventBehaviorContext<TSaga> :
-        BehaviorContextProxy<TSaga>,
-        UnhandledEventContext<TSaga>
-        where TSaga : class, ISaga
+    public partial class MassTransitStateMachine<TInstance>
+        where TInstance : class, SagaStateMachineInstance
     {
-        readonly BehaviorContext<TSaga> _context;
-        readonly StateMachine<TSaga> _machine;
-
-        public UnhandledEventBehaviorContext(StateMachine<TSaga> machine, BehaviorContext<TSaga> context, State state)
-            : base(machine, context, context.Event)
+        class UnhandledEventBehaviorContext :
+            BehaviorContextProxy,
+            UnhandledEventContext<TInstance>
         {
-            _context = context;
-            CurrentState = state;
-            _machine = machine;
-        }
+            readonly BehaviorContext<TInstance> _context;
+            readonly StateMachine<TInstance> _machine;
 
-        public State CurrentState { get; }
+            public UnhandledEventBehaviorContext(StateMachine<TInstance> machine, BehaviorContext<TInstance> context, State state)
+                : base(machine, context, context.Event)
+            {
+                _context = context;
+                CurrentState = state;
+                _machine = machine;
+            }
 
-        public Event Event => _context.Event;
+            public State CurrentState { get; }
 
-        public Task Ignore()
-        {
-            return Task.CompletedTask;
-        }
+            public Event Event => _context.Event;
 
-        public Task Throw()
-        {
-            throw new UnhandledEventException(_machine.Name, _context.Event.Name, CurrentState.Name);
+            public Task Ignore()
+            {
+                return Task.CompletedTask;
+            }
+
+            public Task Throw()
+            {
+                throw new UnhandledEventException(_machine.Name, _context.Event.Name, CurrentState.Name);
+            }
         }
     }
 }

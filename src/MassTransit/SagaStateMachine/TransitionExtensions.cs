@@ -10,7 +10,7 @@ namespace MassTransit
         /// Transition the state machine to the specified state
         /// </summary>
         public static EventActivityBinder<TSaga> TransitionTo<TSaga>(this EventActivityBinder<TSaga> source, State toState)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
         {
             State<TSaga> state = source.StateMachine.GetState(toState.Name);
 
@@ -29,7 +29,7 @@ namespace MassTransit
         /// <returns></returns>
         public static ExceptionActivityBinder<TSaga, TException> TransitionTo<TSaga, TException>(this ExceptionActivityBinder<TSaga, TException> source,
             State toState)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TException : Exception
         {
             State<TSaga> state = source.StateMachine.GetState(toState.Name);
@@ -45,7 +45,7 @@ namespace MassTransit
         /// Transition the state machine to the specified state
         /// </summary>
         public static EventActivityBinder<TSaga, TMessage> TransitionTo<TSaga, TMessage>(this EventActivityBinder<TSaga, TMessage> source, State toState)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TMessage : class
         {
             State<TSaga> state = source.StateMachine.GetState(toState.Name);
@@ -66,7 +66,7 @@ namespace MassTransit
         /// <returns></returns>
         public static ExceptionActivityBinder<TSaga, TMessage, TException> TransitionTo<TSaga, TMessage, TException>(
             this ExceptionActivityBinder<TSaga, TMessage, TException> source, State toState)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TException : Exception
             where TMessage : class
         {
@@ -83,7 +83,7 @@ namespace MassTransit
         /// Transition the state machine to the Final state
         /// </summary>
         public static EventActivityBinder<TSaga, TMessage> Finalize<TSaga, TMessage>(this EventActivityBinder<TSaga, TMessage> source)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TMessage : class
         {
             State<TSaga> state = source.StateMachine.GetState(source.StateMachine.Final.Name);
@@ -97,7 +97,7 @@ namespace MassTransit
         /// Transition the state machine to the Final state
         /// </summary>
         public static EventActivityBinder<TSaga> Finalize<TSaga>(this EventActivityBinder<TSaga> source)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
         {
             State<TSaga> state = source.StateMachine.GetState(source.StateMachine.Final.Name);
 
@@ -111,7 +111,7 @@ namespace MassTransit
         /// </summary>
         public static ExceptionActivityBinder<TSaga, TMessage, TException> Finalize<TSaga, TMessage, TException>(
             this ExceptionActivityBinder<TSaga, TMessage, TException> source)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TException : Exception
             where TMessage : class
         {
@@ -128,7 +128,7 @@ namespace MassTransit
         /// Transition the state machine to the Final state
         /// </summary>
         public static ExceptionActivityBinder<TSaga, TException> Finalize<TSaga, TException>(this ExceptionActivityBinder<TSaga, TException> source)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TException : Exception
         {
             State<TSaga> state = source.StateMachine.GetState(source.StateMachine.Final.Name);

@@ -1,25 +1,30 @@
-namespace MassTransit.Configuration
+using MassTransit.Configuration;
+
+namespace MassTransit
 {
     using System.Collections.Generic;
 
-
-    public class StateMachineSagaSpecification<TInstance> :
-        SagaSpecification<TInstance>
-        where TInstance : class, ISaga, SagaStateMachineInstance
+    public partial class MassTransitStateMachine<TInstance>
+        where TInstance : class, SagaStateMachineInstance
     {
-        readonly SagaStateMachine<TInstance> _stateMachine;
-
-        public StateMachineSagaSpecification(SagaStateMachine<TInstance> stateMachine, IEnumerable<ISagaMessageSpecification<TInstance>> messageSpecifications)
-            : base(messageSpecifications)
+        class StateMachineSagaSpecification :
+            SagaSpecification<TInstance>
         {
-            _stateMachine = stateMachine;
-        }
+            readonly SagaStateMachine<TInstance> _stateMachine;
 
-        public override IEnumerable<ValidationResult> Validate()
-        {
-            Observers.ForEach(observer => observer.StateMachineSagaConfigured(this, _stateMachine));
+            public StateMachineSagaSpecification(SagaStateMachine<TInstance> stateMachine,
+                IEnumerable<ISagaMessageSpecification<TInstance>> messageSpecifications)
+                : base(messageSpecifications)
+            {
+                _stateMachine = stateMachine;
+            }
 
-            return base.Validate();
+            public override IEnumerable<ValidationResult> Validate()
+            {
+                Observers.ForEach(observer => observer.StateMachineSagaConfigured(this, _stateMachine));
+
+                return base.Validate();
+            }
         }
     }
 }

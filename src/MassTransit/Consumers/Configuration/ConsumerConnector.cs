@@ -1,20 +1,20 @@
-﻿namespace MassTransit.Configuration
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using MassTransit.Metadata;
+using MassTransit.Util;
+
+namespace MassTransit.Configuration
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using Util;
-
-
     public class ConsumerConnector<T> :
         IConsumerConnector
         where T : class
     {
-        readonly IList<IConsumerMessageConnector<T>> _connectors;
+        readonly List<IConsumerMessageConnector<T>> _connectors;
 
         public ConsumerConnector()
         {
-            if (MessageTypeCache<T>.HasSagaInterfaces)
+            if (RegistrationMetadata.IsSaga(typeof(T)))
                 throw new ConfigurationException("A saga cannot be registered as a consumer");
 
             _connectors = Consumes().ToList();
@@ -28,7 +28,7 @@
             var handles = new List<ConnectHandle>(_connectors.Count);
             try
             {
-                foreach (IConsumerMessageConnector<TConsumer> connector in _connectors.Cast<IConsumerMessageConnector<TConsumer>>())
+                foreach (var connector in _connectors.Cast<IConsumerMessageConnector<TConsumer>>())
                 {
                     var handle = connector.ConnectConsumer(consumePipe, consumerFactory, specification);
 
@@ -47,7 +47,7 @@
 
         IConsumerSpecification<TConsumer> IConsumerConnector.CreateConsumerSpecification<TConsumer>()
         {
-            List<IConsumerMessageSpecification<TConsumer>> messageSpecifications =
+            var messageSpecifications =
                 _connectors.Select(x => x.CreateConsumerMessageSpecification())
                     .Cast<IConsumerMessageSpecification<TConsumer>>()
                     .ToList();

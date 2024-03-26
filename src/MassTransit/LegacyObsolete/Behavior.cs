@@ -16,7 +16,7 @@ namespace Automatonymous
     [Obsolete("Deprecated, use IBehavior instead")]
     public interface Behavior<TSaga> :
         IBehavior<TSaga>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
     {
     }
 
@@ -29,7 +29,7 @@ namespace Automatonymous
     [Obsolete("Deprecated, use IBehavior instead")]
     public interface Behavior<TSaga, in TMessage> :
         IBehavior<TSaga, TMessage>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TMessage : class
     {
     }

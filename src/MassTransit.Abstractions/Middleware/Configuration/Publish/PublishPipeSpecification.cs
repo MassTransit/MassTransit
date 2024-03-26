@@ -15,7 +15,7 @@ namespace MassTransit.Configuration
         readonly object _lock = new object();
         readonly ConcurrentDictionary<Type, IMessagePublishPipeSpecification> _messageSpecifications;
         readonly PublishPipeSpecificationObservable _observers;
-        readonly IList<IPipeSpecification<PublishContext>> _specifications;
+        readonly List<IPipeSpecification<PublishContext>> _specifications;
 
         public PublishPipeSpecification()
         {
@@ -45,14 +45,15 @@ namespace MassTransit.Configuration
 
         void IPublishPipeConfigurator.AddPipeSpecification(IPipeSpecification<SendContext> specification)
         {
-            var splitSpecification = new SplitFilterPipeSpecification<PublishContext, SendContext>(specification, MergeContext, FilterContext);
+            var splitSpecification = new PipeConfigurator<PublishContext>.SplitFilterPipeSpecification<SendContext>(specification, MergeContext, FilterContext);
 
             AddPipeSpecification(splitSpecification);
         }
 
         void IPublishPipeConfigurator.AddPipeSpecification<T>(IPipeSpecification<SendContext<T>> specification)
         {
-            var splitSpecification = new SplitFilterPipeSpecification<PublishContext<T>, SendContext<T>>(specification, MergeContext, FilterContext);
+            var splitSpecification =
+                new PipeConfigurator<PublishContext<T>>.SplitFilterPipeSpecification<SendContext<T>>(specification, MergeContext, FilterContext);
 
             AddPipeSpecification(splitSpecification);
         }

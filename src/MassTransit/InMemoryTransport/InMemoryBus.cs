@@ -1,12 +1,10 @@
+using System;
+using MassTransit.Configuration;
+using MassTransit.InMemoryTransport.Configuration;
+using MassTransit.Topology;
+
 namespace MassTransit
 {
-    using System;
-    using System.Threading;
-    using Configuration;
-    using InMemoryTransport.Configuration;
-    using Topology;
-
-
     public static class InMemoryBus
     {
         public static IMessageTopologyConfigurator MessageTopology => Cached.MessageTopologyValue.Value;
@@ -43,7 +41,7 @@ namespace MassTransit
         static class Cached
         {
             internal static readonly Lazy<IMessageTopologyConfigurator> MessageTopologyValue =
-                new Lazy<IMessageTopologyConfigurator>(() => new MessageTopology(_entityNameFormatter), LazyThreadSafetyMode.PublicationOnly);
+                new Lazy<IMessageTopologyConfigurator>(() => new MessageTopology(_entityNameFormatter));
 
             static readonly IEntityNameFormatter _entityNameFormatter;
 

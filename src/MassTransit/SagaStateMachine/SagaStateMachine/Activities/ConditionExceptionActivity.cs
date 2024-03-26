@@ -6,7 +6,7 @@
 
     public class ConditionExceptionActivity<TSaga, TConditionException> :
         IStateMachineActivity<TSaga>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TConditionException : Exception
     {
         readonly StateMachineAsyncExceptionCondition<TSaga, TConditionException> _condition;
@@ -81,7 +81,7 @@
 
     public class ConditionExceptionActivity<TSaga, TMessage, TConditionException> :
         IStateMachineActivity<TSaga>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TMessage : class
         where TConditionException : Exception
     {

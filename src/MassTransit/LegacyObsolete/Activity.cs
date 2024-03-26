@@ -24,7 +24,7 @@ namespace Automatonymous
     public interface Activity<TSaga> :
         IStateMachineActivity<TSaga>,
         Activity
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
     {
     }
 
@@ -33,7 +33,7 @@ namespace Automatonymous
     public interface Activity<TSaga, TMessage> :
         IStateMachineActivity<TSaga, TMessage>,
         Activity
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TMessage : class
     {
     }

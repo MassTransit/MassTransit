@@ -14,7 +14,7 @@ namespace MassTransit
         /// <param name="binder">The event binder</param>
         /// <param name="action">The synchronous delegate</param>
         public static EventActivityBinder<TSaga> Then<TSaga>(this EventActivityBinder<TSaga> binder, Action<BehaviorContext<TSaga>> action)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
         {
             return binder.Add(new ActionActivity<TSaga>(action));
         }
@@ -28,7 +28,7 @@ namespace MassTransit
         /// <param name="action">The synchronous delegate</param>
         public static ExceptionActivityBinder<TSaga, TException> Then<TSaga, TException>(this ExceptionActivityBinder<TSaga, TException> binder,
             Action<BehaviorExceptionContext<TSaga, TException>> action)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TException : Exception
         {
             return binder.Add(new FaultedActionActivity<TSaga, TException>(action));
@@ -43,7 +43,7 @@ namespace MassTransit
         /// <param name="asyncAction">The asynchronous delegate</param>
         public static ExceptionActivityBinder<TSaga, TException> ThenAsync<TSaga, TException>(this ExceptionActivityBinder<TSaga, TException> binder,
             Func<BehaviorExceptionContext<TSaga, TException>, Task> asyncAction)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TException : Exception
         {
             return binder.Add(new AsyncFaultedActionActivity<TSaga, TException>(asyncAction));
@@ -56,7 +56,7 @@ namespace MassTransit
         /// <param name="binder">The event binder</param>
         /// <param name="action">The asynchronous delegate</param>
         public static EventActivityBinder<TSaga> ThenAsync<TSaga>(this EventActivityBinder<TSaga> binder, Func<BehaviorContext<TSaga>, Task> action)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
         {
             return binder.Add(new AsyncActivity<TSaga>(action));
         }
@@ -70,7 +70,7 @@ namespace MassTransit
         /// <param name="action">The synchronous delegate</param>
         public static EventActivityBinder<TSaga, TData> Then<TSaga, TData>(this EventActivityBinder<TSaga, TData> binder,
             Action<BehaviorContext<TSaga, TData>> action)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TData : class
         {
             return binder.Add(new ActionActivity<TSaga, TData>(action));
@@ -87,7 +87,7 @@ namespace MassTransit
         public static ExceptionActivityBinder<TSaga, TData, TException> Then<TSaga, TData, TException>(
             this ExceptionActivityBinder<TSaga, TData, TException> binder,
             Action<BehaviorExceptionContext<TSaga, TData, TException>> action)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TException : Exception
             where TData : class
         {
@@ -105,7 +105,7 @@ namespace MassTransit
         public static ExceptionActivityBinder<TSaga, TData, TException> ThenAsync<TSaga, TData, TException>(
             this ExceptionActivityBinder<TSaga, TData, TException> binder,
             Func<BehaviorExceptionContext<TSaga, TData, TException>, Task> asyncAction)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TException : Exception
             where TData : class
         {
@@ -121,7 +121,7 @@ namespace MassTransit
         /// <param name="action">The asynchronous delegate</param>
         public static EventActivityBinder<TSaga, TData> ThenAsync<TSaga, TData>(this EventActivityBinder<TSaga, TData> binder,
             Func<BehaviorContext<TSaga, TData>, Task> action)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TData : class
         {
             return binder.Add(new AsyncActivity<TSaga, TData>(action));
@@ -135,7 +135,7 @@ namespace MassTransit
         /// <param name="activityFactory">The factory method which returns the activity to execute</param>
         public static EventActivityBinder<TSaga> Execute<TSaga>(this EventActivityBinder<TSaga> binder,
             Func<BehaviorContext<TSaga>, IStateMachineActivity<TSaga>> activityFactory)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
         {
             var activity = new FactoryActivity<TSaga>(activityFactory);
             return binder.Add(activity);
@@ -148,7 +148,7 @@ namespace MassTransit
         /// <param name="binder">The event binder</param>
         /// <param name="activity">An existing activity</param>
         public static EventActivityBinder<TSaga> Execute<TSaga>(this EventActivityBinder<TSaga> binder, IStateMachineActivity<TSaga> activity)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
         {
             return binder.Add(activity);
         }
@@ -161,7 +161,7 @@ namespace MassTransit
         /// <param name="activityFactory">The factory method which returns the activity to execute</param>
         public static EventActivityBinder<TSaga> ExecuteAsync<TSaga>(this EventActivityBinder<TSaga> binder,
             Func<BehaviorContext<TSaga>, Task<IStateMachineActivity<TSaga>>> activityFactory)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
         {
             var activity = new AsyncFactoryActivity<TSaga>(activityFactory);
             return binder.Add(activity);
@@ -176,7 +176,7 @@ namespace MassTransit
         /// <param name="activityFactory">The factory method which returns the activity to execute</param>
         public static EventActivityBinder<TSaga, TData> Execute<TSaga, TData>(this EventActivityBinder<TSaga, TData> binder,
             Func<BehaviorContext<TSaga, TData>, IStateMachineActivity<TSaga, TData>> activityFactory)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TData : class
         {
             var activity = new FactoryActivity<TSaga, TData>(activityFactory);
@@ -192,7 +192,7 @@ namespace MassTransit
         /// <param name="activityFactory">The factory method which returns the activity to execute</param>
         public static EventActivityBinder<TSaga, TData> ExecuteAsync<TSaga, TData>(this EventActivityBinder<TSaga, TData> binder,
             Func<BehaviorContext<TSaga, TData>, Task<IStateMachineActivity<TSaga, TData>>> activityFactory)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TData : class
         {
             var activity = new AsyncFactoryActivity<TSaga, TData>(activityFactory);
@@ -208,7 +208,7 @@ namespace MassTransit
         /// <param name="activityFactory">The factory method which returns the activity to execute</param>
         public static EventActivityBinder<TSaga, TData> Execute<TSaga, TData>(this EventActivityBinder<TSaga, TData> binder,
             Func<BehaviorContext<TSaga, TData>, IStateMachineActivity<TSaga>> activityFactory)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TData : class
         {
             var activity = new FactoryActivity<TSaga, TData>(context =>
@@ -230,7 +230,7 @@ namespace MassTransit
         /// <param name="activityFactory">The factory method which returns the activity to execute</param>
         public static EventActivityBinder<TSaga, TData> ExecuteAsync<TSaga, TData>(this EventActivityBinder<TSaga, TData> binder,
             Func<BehaviorContext<TSaga, TData>, Task<IStateMachineActivity<TSaga>>> activityFactory)
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TData : class
         {
             var activity = new AsyncFactoryActivity<TSaga, TData>(async context =>

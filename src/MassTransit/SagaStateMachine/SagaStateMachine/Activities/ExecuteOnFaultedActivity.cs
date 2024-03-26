@@ -6,7 +6,7 @@
 
     public class ExecuteOnFaultedActivity<TSaga> :
         IStateMachineActivity<TSaga>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
     {
         readonly IStateMachineActivity<TSaga> _activity;
 

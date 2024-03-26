@@ -7,7 +7,7 @@ namespace MassTransit.SagaStateMachine
 
     public class RetryActivity<TInstance> :
         IStateMachineActivity<TInstance>
-        where TInstance : class, ISaga
+        where TInstance : class, SagaStateMachineInstance
     {
         readonly IBehavior<TInstance> _retryBehavior;
         readonly IRetryPolicy _retryPolicy;
@@ -62,7 +62,7 @@ namespace MassTransit.SagaStateMachine
 
     public class RetryActivity<TInstance, TMessage> :
         IStateMachineActivity<TInstance>
-        where TInstance : class, ISaga
+        where TInstance : class, SagaStateMachineInstance
         where TMessage : class
     {
         readonly IBehavior<TInstance> _retryBehavior;

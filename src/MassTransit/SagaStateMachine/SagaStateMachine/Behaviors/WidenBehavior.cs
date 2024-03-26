@@ -5,7 +5,7 @@ namespace MassTransit.SagaStateMachine
 
     public class WidenBehavior<TSaga, TMessage> :
         IBehavior<TSaga>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TMessage : class
     {
         readonly Event<TMessage> _event;

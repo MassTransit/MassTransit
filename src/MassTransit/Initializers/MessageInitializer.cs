@@ -12,7 +12,7 @@ namespace MassTransit.Initializers
 
     public static class MessageInitializer
     {
-        static readonly IList<IInitializerConvention> _conventions;
+        static readonly List<IInitializerConvention> _conventions;
         static IInitializerConvention[]? _conventionsArray;
 
         static MessageInitializer()

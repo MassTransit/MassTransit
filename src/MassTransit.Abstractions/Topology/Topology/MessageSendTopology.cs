@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace MassTransit.Topology
 {
     using System;
@@ -10,15 +12,15 @@ namespace MassTransit.Topology
         IMessageSendTopologyConfigurator<TMessage>
         where TMessage : class
     {
-        readonly IList<IMessageSendTopologyConvention<TMessage>> _conventions;
-        readonly IList<IMessageSendTopology<TMessage>> _delegateTopologies;
-        readonly IList<IMessageSendTopology<TMessage>> _topologies;
+        readonly List<IMessageSendTopologyConvention<TMessage>> _conventions;
+        readonly List<IMessageSendTopology<TMessage>> _delegateTopologies;
+        readonly List<IMessageSendTopology<TMessage>> _topologies;
 
         public MessageSendTopology()
         {
-            _conventions = new List<IMessageSendTopologyConvention<TMessage>>();
-            _topologies = new List<IMessageSendTopology<TMessage>>();
-            _delegateTopologies = new List<IMessageSendTopology<TMessage>>();
+            _conventions = new List<IMessageSendTopologyConvention<TMessage>>(8);
+            _topologies = new List<IMessageSendTopology<TMessage>>(8);
+            _delegateTopologies = new List<IMessageSendTopology<TMessage>>(8);
         }
 
         public void Add(IMessageSendTopology<TMessage> sendTopology)
@@ -35,20 +37,24 @@ namespace MassTransit.Topology
         {
             ITopologyPipeBuilder<SendContext<TMessage>> delegatedBuilder = builder.CreateDelegatedBuilder();
 
-            foreach (IMessageSendTopology<TMessage> topology in _delegateTopologies)
-                topology.Apply(delegatedBuilder);
-
-            foreach (IMessageSendTopologyConvention<TMessage> convention in _conventions)
+            for (var i = 0; i < _delegateTopologies.Count; i++)
             {
-                if (convention.TryGetMessageSendTopology(out IMessageSendTopology<TMessage> topology))
+                _delegateTopologies[i].Apply(delegatedBuilder);
+            }
+
+            for (var i = 0; i < _conventions.Count; i++)
+            {
+                if (_conventions[i].TryGetMessageSendTopology(out IMessageSendTopology<TMessage> topology))
                     topology.Apply(builder);
             }
 
-            foreach (IMessageSendTopology<TMessage> topology in _topologies)
-                topology.Apply(builder);
+            for (var i = 0; i < _topologies.Count; i++)
+            {
+                _topologies[i].Apply(builder);
+            }
         }
 
-        public bool TryGetConvention<TConvention>(out TConvention? convention)
+        public bool TryGetConvention<TConvention>([NotNullWhen(true)] out TConvention? convention)
             where TConvention : class, IMessageSendTopologyConvention<TMessage>
         {
             for (var i = 0; i < _conventions.Count; i++)
@@ -66,8 +72,13 @@ namespace MassTransit.Topology
 
         public bool TryAddConvention(IMessageSendTopologyConvention<TMessage> convention)
         {
-            if (_conventions.Any(x => x.GetType() == convention.GetType()))
-                return false;
+            var conventionType = convention.GetType();
+
+            for (var i = 0; i < _conventions.Count; i++)
+            {
+                if (_conventions[i].GetType() == conventionType)
+                    return false;
+            }
 
             _conventions.Add(convention);
             return true;
@@ -78,11 +89,9 @@ namespace MassTransit.Topology
         {
             for (var i = 0; i < _conventions.Count; i++)
             {
-                var convention = _conventions[i] as TConvention;
-                if (convention != null)
+                if (_conventions[i] is TConvention convention)
                 {
-                    var updatedConvention = update(convention);
-                    _conventions[i] = updatedConvention;
+                    _conventions[i] = update(convention);
                     return;
                 }
             }
@@ -93,11 +102,9 @@ namespace MassTransit.Topology
         {
             for (var i = 0; i < _conventions.Count; i++)
             {
-                var convention = _conventions[i] as TConvention;
-                if (convention != null)
+                if (_conventions[i] is TConvention convention)
                 {
-                    var updatedConvention = update(convention);
-                    _conventions[i] = updatedConvention;
+                    _conventions[i] = update(convention);
                     return;
                 }
             }

@@ -20,7 +20,7 @@ namespace MassTransit.Configuration
 
             var policy = new NewSagaPolicy<TSaga, TMessage>(sagaFactory, false);
 
-            _connector = new CorrelatedSagaMessageConnector<TSaga, TMessage>(consumeFilter, policy, x => x.Message.CorrelationId);
+            _connector = new SagaConnector<TSaga, TMessage>.CorrelatedSagaMessageConnector(consumeFilter, policy, x => x.Message.CorrelationId);
         }
 
         ISagaMessageConnector<T> ISagaConnectorFactory.CreateMessageConnector<T>()

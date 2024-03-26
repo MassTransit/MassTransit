@@ -2,16 +2,15 @@ namespace MassTransit
 {
     using System;
     using System.Collections.Concurrent;
-    using System.Threading;
     using Internals;
+    using Metadata;
 
 
     public static class TypeCache
     {
         static CachedType GetOrAdd(Type type)
         {
-            return Cached.Instance.GetOrAdd(type, _ => Activator.CreateInstance(typeof(CachedType<>).MakeGenericType(type)) as CachedType
-                ?? throw new InvalidOperationException("Failed to create cached type"));
+            return Cached.Instance.GetOrAdd(type, _ => Activation.Activate(type, new Factory()));
         }
 
         internal static void GetOrAdd<T>(Type type, ITypeCache<T> typeCache)
@@ -22,6 +21,17 @@ namespace MassTransit
         public static string GetShortName(Type type)
         {
             return GetOrAdd(type).ShortName;
+        }
+
+
+        readonly struct Factory :
+            IActivationType<CachedType>
+        {
+            public CachedType ActivateType<T>()
+                where T : class
+            {
+                return new CachedType<T>();
+            }
         }
 
 
@@ -53,6 +63,14 @@ namespace MassTransit
             }
 
             public string ShortName => _shortName ??= TypeCache<T>.ShortName;
+
+            public void Method1()
+            {
+            }
+
+            public void Method2()
+            {
+            }
         }
     }
 
@@ -82,10 +100,18 @@ namespace MassTransit
         IReadWritePropertyCache<T> ITypeCache<T>.ReadWritePropertyCache => _writePropertyCache.Value;
         string ITypeCache<T>.ShortName => _shortName;
 
+        public void Method1()
+        {
+        }
+
+        public void Method2()
+        {
+        }
+
 
         static class Cached
         {
-            internal static readonly Lazy<ITypeCache<T>> Metadata = new Lazy<ITypeCache<T>>(() => new TypeCache<T>(), LazyThreadSafetyMode.PublicationOnly);
+            internal static readonly Lazy<ITypeCache<T>> Metadata = new Lazy<ITypeCache<T>>(() => new TypeCache<T>());
         }
     }
 }

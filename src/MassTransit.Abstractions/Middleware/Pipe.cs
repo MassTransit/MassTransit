@@ -102,7 +102,7 @@ namespace MassTransit
         public static IPipe<T> Empty<T>()
             where T : class, PipeContext
         {
-            return Cache<T>.EmptyPipe;
+            return PipeConfigurator<T>.Cache.EmptyPipe;
         }
 
         /// <summary>
@@ -118,7 +118,7 @@ namespace MassTransit
             if (filter == null)
                 throw new ArgumentNullException(nameof(filter));
 
-            return new LastPipe<T>(filter);
+            return new PipeConfigurator<T>.LastPipe(filter);
         }
 
 
@@ -194,13 +194,6 @@ namespace MassTransit
             {
                 context.CreateFilterScope("executeAsync");
             }
-        }
-
-
-        static class Cache<TContext>
-            where TContext : class, PipeContext
-        {
-            internal static readonly IPipe<TContext> EmptyPipe = new EmptyPipe<TContext>();
         }
     }
 }

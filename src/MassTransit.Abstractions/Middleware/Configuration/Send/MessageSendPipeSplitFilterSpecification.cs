@@ -51,12 +51,12 @@ namespace MassTransit.Configuration
 
             public ISpecificationPipeBuilder<SendContext<T>> CreateDelegatedBuilder()
             {
-                return new ChildSpecificationPipeBuilder<SendContext<T>>(this, IsImplemented, true);
+                return new PipeConfigurator<SendContext<T>>.ChildSpecificationPipeBuilder(this, IsImplemented, true);
             }
 
             public ISpecificationPipeBuilder<SendContext<T>> CreateImplementedBuilder()
             {
-                return new ChildSpecificationPipeBuilder<SendContext<T>>(this, true, IsDelegated);
+                return new PipeConfigurator<SendContext<T>>.ChildSpecificationPipeBuilder(this, true, IsDelegated);
             }
 
             SendContext<TMessage> ContextProvider(SendContext<TMessage> context, SendContext<T> splitContext)

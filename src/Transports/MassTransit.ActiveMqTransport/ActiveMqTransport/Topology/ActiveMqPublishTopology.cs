@@ -52,7 +52,7 @@ namespace MassTransit.ActiveMqTransport.Topology
             return GetMessageTopology<T>() as IActiveMqMessagePublishTopologyConfigurator<T>;
         }
 
-        protected override IMessagePublishTopologyConfigurator CreateMessageTopology<T>(Type type)
+        protected override IMessagePublishTopologyConfigurator CreateMessageTopology<T>()
         {
             var messageTopology = new ActiveMqMessagePublishTopology<T>(this, _messageTopology.GetMessageTopology<T>());
 

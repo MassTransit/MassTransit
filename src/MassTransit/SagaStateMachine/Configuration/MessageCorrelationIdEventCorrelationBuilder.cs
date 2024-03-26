@@ -2,29 +2,29 @@ namespace MassTransit.Configuration
 {
     using System;
 
-
-    public class MessageCorrelationIdEventCorrelationBuilder<TInstance, TData> :
-        IEventCorrelationBuilder
-        where TData : class
-        where TInstance : class, SagaStateMachineInstance
+    public partial class StateMachineInterfaceType<TInstance, TData>
     {
-        readonly MassTransitEventCorrelationConfigurator<TInstance, TData> _configurator;
-
-        public MessageCorrelationIdEventCorrelationBuilder(SagaStateMachine<TInstance> machine, Event<TData> @event,
-            IMessageCorrelationId<TData> messageCorrelationId)
+        public class MessageCorrelationIdEventCorrelationBuilder :
+            IEventCorrelationBuilder
         {
-            var configurator = new MassTransitEventCorrelationConfigurator<TInstance, TData>(machine, @event, null);
+            readonly MassTransitEventCorrelationConfigurator _configurator;
 
-            configurator.CorrelateById(x => messageCorrelationId.TryGetCorrelationId(x.Message, out var correlationId)
-                ? correlationId
-                : throw new ArgumentException($"The message {TypeCache<TData>.ShortName} did not have a correlationId"));
+            public MessageCorrelationIdEventCorrelationBuilder(SagaStateMachine<TInstance> machine, Event<TData> @event,
+                IMessageCorrelationId<TData> messageCorrelationId)
+            {
+                var configurator = new MassTransitEventCorrelationConfigurator(machine, @event, null);
 
-            _configurator = configurator;
-        }
+                configurator.CorrelateById(x => messageCorrelationId.TryGetCorrelationId(x.Message, out var correlationId)
+                    ? correlationId
+                    : throw new ArgumentException($"The message {TypeCache<TData>.ShortName} did not have a correlationId"));
 
-        public EventCorrelation Build()
-        {
-            return _configurator.Build();
+                _configurator = configurator;
+            }
+
+            public EventCorrelation Build()
+            {
+                return _configurator.Build();
+            }
         }
     }
 }

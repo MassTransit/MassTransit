@@ -23,7 +23,7 @@
 
         public int Count => _connections.Count;
 
-        void IProbeSite.Probe(ProbeContext context)
+        public void Probe(ProbeContext context)
         {
             _connections.ForEach(pipe => pipe.Probe(context));
         }

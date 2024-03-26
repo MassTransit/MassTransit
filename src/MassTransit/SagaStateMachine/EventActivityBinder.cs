@@ -5,7 +5,7 @@ namespace MassTransit
 
     public interface EventActivityBinder<TSaga> :
         EventActivities<TSaga>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
     {
         StateMachine<TSaga> StateMachine { get; }
 
@@ -75,7 +75,7 @@ namespace MassTransit
 
     public interface EventActivityBinder<TSaga, TMessage> :
         EventActivities<TSaga>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
         where TMessage : class
     {
         StateMachine<TSaga> StateMachine { get; }

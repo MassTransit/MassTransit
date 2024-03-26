@@ -7,7 +7,6 @@ namespace MassTransit.Metadata
         /// Invokes the interface for each implemented type of the message
         /// </summary>
         /// <param name="implementedMessageType"></param>
-        /// <param name="includeActualType"></param>
-        void EnumerateImplementedTypes(IImplementedMessageType implementedMessageType, bool includeActualType);
+        void EnumerateImplementedTypes(IImplementedMessageType implementedMessageType);
     }
 }

@@ -6,7 +6,7 @@ namespace MassTransit.SagaStateMachine
 
     public class TransitionActivity<TSaga> :
         IStateMachineActivity<TSaga>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
     {
         readonly IStateAccessor<TSaga> _currentStateAccessor;
         readonly State<TSaga> _toState;

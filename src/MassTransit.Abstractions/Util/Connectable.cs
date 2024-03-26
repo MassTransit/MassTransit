@@ -2,7 +2,6 @@ namespace MassTransit.Util
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -15,19 +14,43 @@ namespace MassTransit.Util
         where T : class
     {
         readonly Dictionary<long, T> _connections;
-        T[] _connected;
+        T[]? _connected;
         long _nextId;
 
         public Connectable()
         {
             _connections = new Dictionary<long, T>();
-            _connected = Array.Empty<T>();
+            _connected = null;
+        }
+
+        public T[] Connected
+        {
+            get
+            {
+                T[]? read = Volatile.Read(ref _connected);
+                if (read != null)
+                    return read;
+
+                lock (_connections)
+                {
+                    Volatile.Read(ref _connected);
+                    if (read != null)
+                        return read;
+
+                    var connected = new T[_connections.Count];
+                    _connections.Values.CopyTo(connected, 0);
+
+                    Volatile.Write(ref _connected, connected);
+                }
+
+                return _connected;
+            }
         }
 
         /// <summary>
         /// The number of connections
         /// </summary>
-        public int Count => _connected.Length;
+        public int Count => Connected.Length;
 
         /// <summary>
         /// Connect a connectable type
@@ -44,7 +67,7 @@ namespace MassTransit.Util
             lock (_connections)
             {
                 _connections.Add(id, connection);
-                _connected = _connections.Values.ToArray();
+                _connected = null;
             }
 
             return new Handle(id, this);
@@ -60,9 +83,7 @@ namespace MassTransit.Util
             if (callback == null)
                 throw new ArgumentNullException(nameof(callback));
 
-            T[] connected;
-            lock (_connections)
-                connected = _connected;
+            var connected = Connected;
 
             if (connected.Length == 0)
                 return Task.CompletedTask;
@@ -89,9 +110,7 @@ namespace MassTransit.Util
 
         public void ForEach(Action<T> callback)
         {
-            T[] connected;
-            lock (_connections)
-                connected = _connected;
+            var connected = Connected;
 
             switch (connected.Length)
             {
@@ -111,9 +130,7 @@ namespace MassTransit.Util
 
         public bool All(Func<T, bool> callback)
         {
-            T[] connected;
-            lock (_connections)
-                connected = _connected;
+            var connected = Connected;
 
             if (connected.Length == 0)
                 return true;
@@ -135,8 +152,20 @@ namespace MassTransit.Util
             lock (_connections)
             {
                 _connections.Remove(id);
-                _connected = _connections.Values.ToArray();
+                _connected = null;
             }
+        }
+
+        public void Method1()
+        {
+        }
+
+        public void Method2()
+        {
+        }
+
+        public void Method3()
+        {
         }
 
 
@@ -160,6 +189,14 @@ namespace MassTransit.Util
             public void Dispose()
             {
                 Disconnect();
+            }
+
+            public void Method1()
+            {
+            }
+
+            public void Method2()
+            {
             }
         }
     }

@@ -1,36 +1,39 @@
 ﻿namespace MassTransit.Configuration
 {
-    public class ChildSpecificationPipeBuilder<T> :
-        ISpecificationPipeBuilder<T>
-        where T : class, PipeContext
+    public partial class PipeConfigurator<TContext>
+        where TContext : class, PipeContext
     {
-        readonly ISpecificationPipeBuilder<T> _builder;
-
-        public ChildSpecificationPipeBuilder(ISpecificationPipeBuilder<T> builder, bool isImplemented, bool isDelegated)
+        public class ChildSpecificationPipeBuilder :
+            ISpecificationPipeBuilder<TContext>
         {
-            _builder = builder;
+            readonly ISpecificationPipeBuilder<TContext> _builder;
 
-            IsDelegated = isDelegated;
-            IsImplemented = isImplemented;
-        }
+            public ChildSpecificationPipeBuilder(ISpecificationPipeBuilder<TContext> builder, bool isImplemented, bool isDelegated)
+            {
+                _builder = builder;
 
-        public void AddFilter(IFilter<T> filter)
-        {
-            _builder.AddFilter(filter);
-        }
+                IsDelegated = isDelegated;
+                IsImplemented = isImplemented;
+            }
 
-        public bool IsDelegated { get; }
+            public void AddFilter(IFilter<TContext> filter)
+            {
+                _builder.AddFilter(filter);
+            }
 
-        public bool IsImplemented { get; }
+            public bool IsDelegated { get; }
 
-        public ISpecificationPipeBuilder<T> CreateDelegatedBuilder()
-        {
-            return new ChildSpecificationPipeBuilder<T>(this, IsImplemented, true);
-        }
+            public bool IsImplemented { get; }
 
-        public ISpecificationPipeBuilder<T> CreateImplementedBuilder()
-        {
-            return new ChildSpecificationPipeBuilder<T>(this, true, IsDelegated);
+            public ISpecificationPipeBuilder<TContext> CreateDelegatedBuilder()
+            {
+                return new ChildSpecificationPipeBuilder(this, IsImplemented, true);
+            }
+
+            public ISpecificationPipeBuilder<TContext> CreateImplementedBuilder()
+            {
+                return new ChildSpecificationPipeBuilder(this, true, IsDelegated);
+            }
         }
     }
 }

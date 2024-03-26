@@ -4,37 +4,40 @@ namespace MassTransit.Configuration
     using System.Collections.Generic;
 
 
-    public class SagaPipeSpecificationProxy<TSaga, TMessage> :
-        IPipeSpecification<SagaConsumeContext<TSaga, TMessage>>
+    public partial class SagaConnector<TSaga, TMessage>
         where TSaga : class, ISaga
         where TMessage : class
     {
-        readonly IPipeSpecification<SagaConsumeContext<TSaga, TMessage>> _specification;
-
-        public SagaPipeSpecificationProxy(IPipeSpecification<SagaConsumeContext<TSaga>> specification)
+        public class SagaPipeSpecificationProxy :
+            IPipeSpecification<SagaConsumeContext<TSaga, TMessage>>
         {
-            if (specification == null)
-                throw new ArgumentNullException(nameof(specification));
+            readonly IPipeSpecification<SagaConsumeContext<TSaga, TMessage>> _specification;
 
-            _specification = new SagaSplitFilterSpecification<TSaga, TMessage>(specification);
-        }
+            public SagaPipeSpecificationProxy(IPipeSpecification<SagaConsumeContext<TSaga>> specification)
+            {
+                if (specification == null)
+                    throw new ArgumentNullException(nameof(specification));
 
-        public SagaPipeSpecificationProxy(IPipeSpecification<ConsumeContext<TMessage>> specification)
-        {
-            if (specification == null)
-                throw new ArgumentNullException(nameof(specification));
+                _specification = new SagaSplitFilterSpecification(specification);
+            }
 
-            _specification = new SagaMessageSplitFilterSpecification<TSaga, TMessage>(specification);
-        }
+            public SagaPipeSpecificationProxy(IPipeSpecification<ConsumeContext<TMessage>> specification)
+            {
+                if (specification == null)
+                    throw new ArgumentNullException(nameof(specification));
 
-        public void Apply(IPipeBuilder<SagaConsumeContext<TSaga, TMessage>> builder)
-        {
-            _specification.Apply(builder);
-        }
+                _specification = new SagaMessageSplitFilterSpecification(specification);
+            }
 
-        public IEnumerable<ValidationResult> Validate()
-        {
-            return _specification.Validate();
+            public void Apply(IPipeBuilder<SagaConsumeContext<TSaga, TMessage>> builder)
+            {
+                _specification.Apply(builder);
+            }
+
+            public IEnumerable<ValidationResult> Validate()
+            {
+                return _specification.Validate();
+            }
         }
     }
 }

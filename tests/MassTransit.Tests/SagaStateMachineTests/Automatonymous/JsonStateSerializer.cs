@@ -8,7 +8,7 @@
 
     public class JsonStateSerializer<TStateMachine, TInstance>
         where TStateMachine : StateMachine<TInstance>
-        where TInstance : class, ISaga
+        where TInstance : class, SagaStateMachineInstance
     {
         readonly TStateMachine _machine;
 

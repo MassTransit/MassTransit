@@ -5,7 +5,7 @@ namespace MassTransit
 
 
     public interface IEventObserver<TSaga>
-        where TSaga : class, ISaga
+        where TSaga : class, SagaStateMachineInstance
     {
         /// <summary>
         /// Called before the event context is delivered to the activities

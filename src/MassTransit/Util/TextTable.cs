@@ -29,8 +29,8 @@ namespace MassTransit.Util
             typeof(float)
         };
 
-        readonly IList<object> _columns;
-        readonly IList<object[]> _rows;
+        readonly List<object> _columns;
+        readonly List<object[]> _rows;
         Type[] _columnTypes;
 
         public TextTable(params string[] columns)

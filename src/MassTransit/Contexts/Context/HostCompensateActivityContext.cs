@@ -15,5 +15,18 @@
         }
 
         TActivity CompensateActivityContext<TActivity, TLog>.Activity => _activity;
+
+        public void Method7()
+        {
+        }
+
+        public void Method8()
+        {
+        }
+
+        public void Method9()
+        {
+        }
+
     }
 }

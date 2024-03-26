@@ -26,7 +26,7 @@
             _pipes = new ConcurrentDictionary<TKey, IPipe<TContext>>();
         }
 
-        void IProbeSite.Probe(ProbeContext context)
+        public void Probe(ProbeContext context)
         {
             var scope = context.CreateScope("key");
 

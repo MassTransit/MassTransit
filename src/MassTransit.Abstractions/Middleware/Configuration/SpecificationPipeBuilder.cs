@@ -1,62 +1,63 @@
 namespace MassTransit.Configuration
 {
     using System.Collections.Generic;
-    using Middleware;
 
-
-    public class SpecificationPipeBuilder<TContext> :
-        ISpecificationPipeBuilder<TContext>
+    public partial class PipeConfigurator<TContext>
         where TContext : class, PipeContext
     {
-        readonly List<IFilter<TContext>> _filters;
-
-        public SpecificationPipeBuilder()
+        public class SpecificationPipeBuilder :
+            ISpecificationPipeBuilder<TContext>
         {
-            _filters = new List<IFilter<TContext>>();
-        }
+            readonly List<IFilter<TContext>> _filters;
 
-        public void AddFilter(IFilter<TContext> filter)
-        {
-            _filters.Add(filter);
-        }
+            public SpecificationPipeBuilder()
+            {
+                _filters = new List<IFilter<TContext>>(16);
+            }
 
-        public IPipe<TContext> Build()
-        {
-            if (_filters.Count == 0)
-                return Pipe.Empty<TContext>();
+            public void AddFilter(IFilter<TContext> filter)
+            {
+                _filters.Add(filter);
+            }
 
-            IPipe<TContext> current = new LastPipe<TContext>(_filters[_filters.Count - 1]);
+            public IPipe<TContext> Build()
+            {
+                if (_filters.Count == 0)
+                    return Cache.EmptyPipe;
 
-            for (var i = _filters.Count - 2; i >= 0; i--)
-                current = new FilterPipe<TContext>(_filters[i], current);
+                IPipe<TContext> current = new LastPipe(_filters[_filters.Count - 1]);
 
-            return current;
-        }
+                for (var i = _filters.Count - 2; i >= 0; i--)
+                    current = new FilterPipe(_filters[i], current);
 
-        public IPipe<TContext> Build(IPipe<TContext> lastPipe)
-        {
-            if (_filters.Count == 0)
-                return lastPipe;
+                return current;
+            }
 
-            IPipe<TContext> current = lastPipe;
+            public IPipe<TContext> Build(IPipe<TContext> lastPipe)
+            {
+                if (_filters.Count == 0)
+                    return lastPipe;
 
-            for (var i = _filters.Count - 1; i >= 0; i--)
-                current = new FilterPipe<TContext>(_filters[i], current);
+                IPipe<TContext> current = lastPipe;
 
-            return current;
-        }
+                for (var i = _filters.Count - 1; i >= 0; i--)
+                    current = new FilterPipe(_filters[i], current);
 
-        public bool IsDelegated => false;
-        public bool IsImplemented => false;
+                return current;
+            }
 
-        public ISpecificationPipeBuilder<TContext> CreateDelegatedBuilder()
-        {
-            return new ChildSpecificationPipeBuilder<TContext>(this, IsImplemented, true);
-        }
+            public bool IsDelegated => false;
+            public bool IsImplemented => false;
 
-        public ISpecificationPipeBuilder<TContext> CreateImplementedBuilder()
-        {
-            return new ChildSpecificationPipeBuilder<TContext>(this, true, IsDelegated);
+            public ISpecificationPipeBuilder<TContext> CreateDelegatedBuilder()
+            {
+                return new ChildSpecificationPipeBuilder(this, IsImplemented, true);
+            }
+
+            public ISpecificationPipeBuilder<TContext> CreateImplementedBuilder()
+            {
+                return new ChildSpecificationPipeBuilder(this, true, IsDelegated);
+            }
         }
     }
 }

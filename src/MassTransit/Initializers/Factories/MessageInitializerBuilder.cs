@@ -10,7 +10,7 @@
         where TMessage : class
         where TInput : class
     {
-        readonly IList<IHeaderInitializer<TMessage, TInput>> _headerInitializers;
+        readonly List<IHeaderInitializer<TMessage, TInput>> _headerInitializers;
         readonly IDictionary<string, IPropertyInitializer<TMessage, TInput>> _initializers;
         readonly HashSet<string> _inputPropertyUsed;
         readonly IMessageFactory<TMessage> _messageFactory;

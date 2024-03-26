@@ -6,7 +6,7 @@ namespace MassTransit.SagaStateMachine
 
     public class ConditionalExceptionActivityBinder<TInstance, TException> :
         IActivityBinder<TInstance>
-        where TInstance : class, ISaga
+        where TInstance : class, SagaStateMachineInstance
         where TException : Exception
     {
         readonly StateMachineAsyncExceptionCondition<TInstance, TException> _condition;
@@ -69,7 +69,7 @@ namespace MassTransit.SagaStateMachine
 
     public class ConditionalExceptionActivityBinder<TInstance, TData, TException> :
         IActivityBinder<TInstance>
-        where TInstance : class, ISaga
+        where TInstance : class, SagaStateMachineInstance
         where TException : Exception
         where TData : class
     {

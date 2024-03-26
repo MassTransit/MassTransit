@@ -12,26 +12,26 @@ namespace MassTransit.SagaStateMachine
         /// <typeparam name="TSaga">The context type</typeparam>
         /// <returns></returns>
         public static IBehavior<TSaga> Empty<TSaga>()
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
         {
             return Cached<TSaga>.EmptyBehavior;
         }
 
         public static IBehavior<TSaga, TMessage> Empty<TSaga, TMessage>()
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TMessage : class
         {
             return Cached<TSaga, TMessage>.EmptyBehavior;
         }
 
         public static IBehavior<TSaga> Faulted<TSaga>()
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
         {
             return Cached<TSaga>.FaultedBehavior;
         }
 
         public static IBehavior<TSaga, TMessage> Faulted<TSaga, TMessage>()
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TMessage : class
         {
             return Cached<TSaga, TMessage>.FaultedBehavior;
@@ -39,7 +39,7 @@ namespace MassTransit.SagaStateMachine
 
 
         static class Cached<TSaga>
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
         {
             internal static readonly IBehavior<TSaga> EmptyBehavior = new EmptyBehavior<TSaga>();
             internal static readonly IBehavior<TSaga> FaultedBehavior = new FaultedBehavior<TSaga>();
@@ -47,7 +47,7 @@ namespace MassTransit.SagaStateMachine
 
 
         static class Cached<TSaga, TMessage>
-            where TSaga : class, ISaga
+            where TSaga : class, SagaStateMachineInstance
             where TMessage : class
         {
             internal static readonly IBehavior<TSaga, TMessage> EmptyBehavior = new EmptyBehavior<TSaga, TMessage>();

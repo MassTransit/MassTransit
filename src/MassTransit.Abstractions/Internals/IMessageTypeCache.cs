@@ -13,16 +13,6 @@ namespace MassTransit.Internals
         string DiagnosticAddress { get; }
 
         /// <summary>
-        /// True if the type implements any known saga interfaces
-        /// </summary>
-        bool HasConsumerInterfaces { get; }
-
-        /// <summary>
-        /// True if the type implements any known saga interfaces
-        /// </summary>
-        bool HasSagaInterfaces { get; }
-
-        /// <summary>
         /// True if the message type is a valid message type
         /// </summary>
         bool IsValidMessageType { get; }
