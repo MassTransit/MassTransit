@@ -14,7 +14,7 @@ namespace MassTransit.Middleware
             if (endpoint is OutboxSendEndpoint outboxSendEndpoint)
                 endpoint = outboxSendEndpoint.Endpoint;
 
-            if (endpoint is Middleware.Outbox.OutboxSendEndpoint outboxEndpoint)
+            if (endpoint is Outbox.OutboxSendEndpoint outboxEndpoint)
                 return outboxEndpoint.Endpoint;
 
             return endpoint;

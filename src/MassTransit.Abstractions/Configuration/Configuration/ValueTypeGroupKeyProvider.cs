@@ -17,7 +17,7 @@ namespace MassTransit.Configuration
 
         public bool TryGetKey(ConsumeContext<TMessage> context, out TKey key)
         {
-            var property = _provider(context);
+            TKey? property = _provider(context);
 
             if (property.HasValue)
             {

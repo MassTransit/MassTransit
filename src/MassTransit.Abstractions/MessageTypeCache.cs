@@ -1,15 +1,14 @@
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Threading;
-using MassTransit.Internals;
-using MassTransit.Metadata;
-
-
 namespace MassTransit
 {
+    using System;
+    using System.Collections.Concurrent;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Reflection;
+    using Internals;
+    using Metadata;
+
+
     public static class MessageTypeCache
     {
         static CachedType GetOrAdd(Type type)
@@ -105,9 +104,9 @@ namespace MassTransit
         readonly Lazy<bool> _isTemporaryMessageType;
         readonly Lazy<bool> _isValidMessageType;
         readonly Lazy<string[]> _messageTypeNames;
+        string? _invalidMessageTypeReason;
         Type[]? _messageTypes;
         List<PropertyInfo>? _properties;
-        string? _invalidMessageTypeReason;
 
         MessageTypeCache()
         {
@@ -133,6 +132,8 @@ namespace MassTransit
         bool IMessageTypeCache.IsValidMessageType => _isValidMessageType.Value;
         string? IMessageTypeCache.InvalidMessageTypeReason => _invalidMessageTypeReason;
 
+        Type[] IMessageTypeCache.MessageTypes => _messageTypes ??= GetMessageTypes().ToArray();
+
         static List<PropertyInfo> PropertyListFactory()
         {
             return typeof(T).GetAllProperties()
@@ -141,12 +142,10 @@ namespace MassTransit
                 .ToList();
         }
 
-        Type[] IMessageTypeCache.MessageTypes => _messageTypes ??= GetMessageTypes().ToArray();
-
         static bool CheckIfTemporaryMessageType(Type messageTypeInfo)
         {
             return (!messageTypeInfo.IsVisible && messageTypeInfo.IsClass)
-                   || (messageTypeInfo.IsGenericType && messageTypeInfo.GetGenericArguments().Any(x => CheckIfTemporaryMessageType(x)));
+                || (messageTypeInfo.IsGenericType && messageTypeInfo.GetGenericArguments().Any(x => CheckIfTemporaryMessageType(x)));
         }
 
         /// <summary>
@@ -161,12 +160,14 @@ namespace MassTransit
                 yield return typeof(T);
 
             if (typeof(T).ClosesType(typeof(Fault<>), out Type[] arguments))
+            {
                 foreach (var faultMessageType in MessageTypeCache.GetMessageTypes(arguments[0]))
                 {
                     var faultInterfaceType = typeof(Fault<>).MakeGenericType(faultMessageType);
                     if (faultInterfaceType != typeof(T))
                         yield return faultInterfaceType;
                 }
+            }
 
             var baseType = typeof(T).BaseType;
             while (baseType != null && MessageTypeCache.IsValidMessageType(baseType))
@@ -176,7 +177,7 @@ namespace MassTransit
                 baseType = baseType.BaseType;
             }
 
-            var interfaces = typeof(T)
+            IEnumerable<Type>? interfaces = typeof(T)
                 .GetInterfaces()
                 .Where(MessageTypeCache.IsValidMessageType);
 
@@ -267,7 +268,7 @@ namespace MassTransit
 
                 if (typeDefinition == typeof(Observes<,>))
                 {
-                    var closingArguments = type.GetClosingArguments(typeof(Observes<,>)).ToArray();
+                    Type[]? closingArguments = type.GetClosingArguments(typeof(Observes<,>)).ToArray();
                     _invalidMessageTypeReason = $"Observes<{closingArguments[0].Name},{closingArguments[1].Name}> is not a valid message type";
                     return false;
                 }

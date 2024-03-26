@@ -52,9 +52,9 @@
             try
             {
                 var typeBuilder = builder.DefineType(typeName,
-#pragma warning disable SYSLIB0050 // Formatter-based serialization is obsolete and should not be used.
+                    #pragma warning disable SYSLIB0050 // Formatter-based serialization is obsolete and should not be used.
                     TypeAttributes.Serializable |
-#pragma warning restore SYSLIB0050
+                    #pragma warning restore SYSLIB0050
                     TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed,
                     typeof(object), new[] { interfaceType });
 

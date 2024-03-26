@@ -5,6 +5,7 @@
     using System.Threading.Tasks;
     using SagaStateMachine;
 
+
     public partial class MassTransitStateMachine<TInstance>
         where TInstance : class, SagaStateMachineInstance
     {

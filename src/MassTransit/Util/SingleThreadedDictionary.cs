@@ -66,7 +66,7 @@ namespace MassTransit.Util
                     return false;
 
                 var value = valueFactory(key);
-                _dictionary = new Dictionary<TKey, TValue>(_dictionary, _comparer) {[key] = value};
+                _dictionary = new Dictionary<TKey, TValue>(_dictionary, _comparer) { [key] = value };
 
                 return true;
             }

@@ -31,7 +31,7 @@ namespace MassTransit.Configuration
 
         public Uri? InstanceAddress { get; set; }
         public IReceiveEndpointConfigurator? InstanceEndpointConfigurator { get; set; }
-        public IJobService JobService { get;  }
+        public IJobService JobService { get; }
 
         public void AddConfigureAction(Action<IReceiveEndpointConfigurator>? configure)
         {

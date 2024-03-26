@@ -1,7 +1,8 @@
-using System;
-
 namespace MassTransit.Scheduling
 {
+    using System;
+
+
     /// <summary>
     /// A cache of convention-based CorrelationId mappers, used unless overridden by some mystical force
     /// </summary>
@@ -27,7 +28,7 @@ namespace MassTransit.Scheduling
 
         public bool TryGetTokenId(T message, out Guid tokenId)
         {
-            var result = _selector(message);
+            Guid? result = _selector(message);
             if (result.HasValue)
             {
                 tokenId = result.Value;

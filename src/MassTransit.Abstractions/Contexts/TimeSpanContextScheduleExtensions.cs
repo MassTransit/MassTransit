@@ -227,7 +227,6 @@ namespace MassTransit
             return scheduler.ScheduleSend(scheduledTime, message, callback.ToPipe(), cancellationToken);
         }
 
-
         /// <summary>
         /// Sends an object as a message, using the message type specified. If the object cannot be cast
         /// to the specified message type, an exception will be thrown.

@@ -2,6 +2,7 @@ namespace MassTransit
 {
     using System.Threading.Tasks;
 
+
     public partial class MassTransitStateMachine<TInstance>
         where TInstance : class, SagaStateMachineInstance
     {

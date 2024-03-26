@@ -34,7 +34,7 @@ namespace MassTransit.Internals
                     yield return prop;
             }
 
-            var specialGetPropertyNames = typeInfo.DeclaredMethods
+            IEnumerable<string>? specialGetPropertyNames = typeInfo.DeclaredMethods
                 .Where(x => x.IsSpecialName && x.Name.StartsWith("get_") && !x.IsStatic)
                 .Select(x => x.Name.Substring("get_".Length)).Distinct();
 
@@ -46,8 +46,8 @@ namespace MassTransit.Internals
             {
                 IEnumerable<PropertyInfo> sourceProperties = properties
                     .Concat(typeInfo.ImplementedInterfaces.SelectMany(x => x.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Instance |
-                                                                                           BindingFlags.Static | BindingFlags.Public |
-                                                                                           BindingFlags.NonPublic)));
+                        BindingFlags.Static | BindingFlags.Public |
+                        BindingFlags.NonPublic)));
 
                 foreach (var prop in sourceProperties)
                     yield return prop;
@@ -78,23 +78,22 @@ namespace MassTransit.Internals
                     yield return prop;
             }
 
-            IEnumerable<PropertyInfo> props = info.DeclaredMethods
+            IEnumerable<PropertyInfo?> props = info.DeclaredMethods
                 .Where(x => x.IsSpecialName && x.Name.StartsWith("get_") && x.IsStatic)
-                .Select(x => info.GetDeclaredProperty(x.Name.Substring("get_".Length)))
-                .Cast<PropertyInfo>();
+                .Select(x => info.GetDeclaredProperty(x.Name.Substring("get_".Length)));
 
             foreach (var propertyInfo in props)
-                yield return propertyInfo;
+                if (propertyInfo != null)
+                    yield return propertyInfo;
         }
 
-        public static IEnumerable<PropertyInfo> GetStaticProperties(this Type type)
+        public static IEnumerable<PropertyInfo?> GetStaticProperties(this Type type)
         {
             var info = type.GetTypeInfo();
 
             return info.DeclaredMethods
                 .Where(x => x.IsSpecialName && x.Name.StartsWith("get_") && x.IsStatic)
-                .Select(x => info.GetDeclaredProperty(x.Name.Substring("get_".Length)))
-                .Cast<PropertyInfo>();
+                .Select(x => info.GetDeclaredProperty(x.Name.Substring("get_".Length)));
         }
 
         /// <summary>
@@ -175,8 +174,8 @@ namespace MassTransit.Internals
         public static bool CanBeNull(this Type type)
         {
             return !type.IsValueType
-                   || type == typeof(string)
-                   || type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
+                || type == typeof(string)
+                || (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>));
         }
 
         /// <summary>

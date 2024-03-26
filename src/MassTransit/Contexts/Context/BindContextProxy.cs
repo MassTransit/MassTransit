@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.Context
 {
     using System;
-    using System.Reflection;
     using System.Threading;
 
 

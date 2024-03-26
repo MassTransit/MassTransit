@@ -287,7 +287,7 @@ namespace MassTransit.Util
         async Task RunResultSet<TKey, T>(IGrouping<TKey, T> results, ResultCallback<T> resultCallback, OrderCallback<T> orderCallback,
             CancellationToken cancellationToken = default)
         {
-            int count = 0;
+            var count = 0;
 
             try
             {

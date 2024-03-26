@@ -2,6 +2,7 @@
 {
     using System;
 
+
     public partial class MassTransitStateMachine<TInstance>
         where TInstance : class, SagaStateMachineInstance
     {

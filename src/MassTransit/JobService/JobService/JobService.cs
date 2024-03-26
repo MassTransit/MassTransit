@@ -56,7 +56,8 @@
             if (_jobs.ContainsKey(startJob.JobId))
                 throw new JobAlreadyExistsException(startJob.JobId);
 
-            var jobContext = new ConsumeJobContext<T>(context, InstanceAddress, startJob.JobId, startJob.AttemptId, startJob.RetryAttempt, job, jobOptions.JobTimeout);
+            var jobContext = new ConsumeJobContext<T>(context, InstanceAddress, startJob.JobId, startJob.AttemptId, startJob.RetryAttempt, job,
+                jobOptions.JobTimeout);
 
             LogContext.Debug?.Log("Executing job: {JobType} {JobId} ({RetryAttempt})", TypeCache<T>.ShortName, startJob.JobId,
                 startJob.RetryAttempt);
@@ -187,6 +188,8 @@
                 JobTypeName = string.IsNullOrWhiteSpace(options.JobTypeName) ? jobTypeName : options.JobTypeName;
             }
 
+            string JobTypeName { get; }
+
             public Task PublishConcurrentJobLimit(IPublishEndpoint publishEndpoint, Uri instanceAddress)
             {
                 LogContext.Debug?.Log("Job Service type: {JobType}", TypeCache<T>.ShortName);
@@ -229,7 +232,6 @@
             }
 
             public Guid JobTypeId { get; }
-            string JobTypeName { get; }
         }
     }
 }

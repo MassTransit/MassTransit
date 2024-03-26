@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Reflection;
 
 
     public class GraphStateMachineVisitor<TSaga> :
@@ -14,9 +13,9 @@
         readonly Dictionary<Event, Vertex> _events;
         readonly StateMachine<TSaga> _machine;
         readonly Dictionary<State, Vertex> _states;
+        Edge _currentEdge;
         Vertex _currentEvent;
         Vertex _currentState;
-        Edge _currentEdge;
 
         public GraphStateMachineVisitor(StateMachine<TSaga> machine)
         {
@@ -68,15 +67,6 @@
             _currentEdge = null;
 
             next(@event);
-        }
-
-        void AddCurrentEdge()
-        {
-            if (_currentEvent.IsComposite || _currentEdge != null)
-                return;
-
-            _currentEdge = new Edge(_currentState, _currentEvent, _currentEvent.Title);
-            _edges.Add(_currentEdge);
         }
 
         public void Visit(IStateMachineActivity activity)
@@ -157,6 +147,15 @@
             }
 
             next(activity);
+        }
+
+        void AddCurrentEdge()
+        {
+            if (_currentEvent.IsComposite || _currentEdge != null)
+                return;
+
+            _currentEdge = new Edge(_currentState, _currentEvent, _currentEvent.Title);
+            _edges.Add(_currentEdge);
         }
 
         void InspectTransitionActivity(TransitionActivity<TSaga> transitionActivity)

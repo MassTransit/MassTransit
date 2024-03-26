@@ -44,7 +44,7 @@ namespace MassTransit.DependencyInjection
             {
                 Context = context;
                 _scope = context.TryGetPayload(out IServiceProvider provider)
-                    || context.TryGetPayload(out ConsumeContext consumeContext) && consumeContext.TryGetPayload(out provider)
+                    || (context.TryGetPayload(out ConsumeContext consumeContext) && consumeContext.TryGetPayload(out provider))
                         ? new NoopScope(provider)
                         : serviceProvider.CreateScope();
             }

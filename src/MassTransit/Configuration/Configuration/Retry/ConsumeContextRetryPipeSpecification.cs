@@ -74,7 +74,7 @@
 
         public void Apply(IPipeBuilder<TFilter> builder)
         {
-            if(_policyFactory == null)
+            if (_policyFactory == null)
                 throw new ConfigurationException("The retry policy was not configured");
 
             var retryPolicy = _policyFactory(Filter);

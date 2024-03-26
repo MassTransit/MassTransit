@@ -86,7 +86,8 @@ namespace MassTransit.SqlTransport.Middleware
             if (IsStopping)
                 return;
 
-            var context = new SqlReceiveContext(message, message.DeliveryCount > 0, _context, _receiveSettings, _client, _client.ConnectionContext, lockContext);
+            var context =
+                new SqlReceiveContext(message, message.DeliveryCount > 0, _context, _receiveSettings, _client, _client.ConnectionContext, lockContext);
             try
             {
                 await Dispatch(message.TransportMessageId, context, lockContext).ConfigureAwait(false);

@@ -45,9 +45,9 @@ namespace MassTransit
             if (_concurrentMessageLimit.HasValue)
                 executeActivityConfigurator.ConcurrentMessageLimit = _concurrentMessageLimit;
 
-        #pragma warning disable CS0618
+            #pragma warning disable CS0618
             ConfigureExecuteActivity(endpointConfigurator, executeActivityConfigurator);
-        #pragma warning restore CS0618
+            #pragma warning restore CS0618
             ConfigureExecuteActivity(endpointConfigurator, executeActivityConfigurator, context);
         }
 

@@ -1,11 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using MassTransit.Metadata;
-using MassTransit.Util;
-
-namespace MassTransit.Configuration
+﻿namespace MassTransit.Configuration
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Metadata;
+    using Util;
+
+
     public class ConsumerConnector<T> :
         IConsumerConnector
         where T : class
@@ -28,7 +29,7 @@ namespace MassTransit.Configuration
             var handles = new List<ConnectHandle>(_connectors.Count);
             try
             {
-                foreach (var connector in _connectors.Cast<IConsumerMessageConnector<TConsumer>>())
+                foreach (IConsumerMessageConnector<TConsumer> connector in _connectors.Cast<IConsumerMessageConnector<TConsumer>>())
                 {
                     var handle = connector.ConnectConsumer(consumePipe, consumerFactory, specification);
 
@@ -47,7 +48,7 @@ namespace MassTransit.Configuration
 
         IConsumerSpecification<TConsumer> IConsumerConnector.CreateConsumerSpecification<TConsumer>()
         {
-            var messageSpecifications =
+            List<IConsumerMessageSpecification<TConsumer>> messageSpecifications =
                 _connectors.Select(x => x.CreateConsumerMessageSpecification())
                     .Cast<IConsumerMessageSpecification<TConsumer>>()
                     .ToList();

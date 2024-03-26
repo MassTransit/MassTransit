@@ -25,7 +25,7 @@ namespace MassTransit.MessageData.Configuration
 
             Replace = true;
 
-            var types = new HashSet<Type>(knownTypes ?? Enumerable.Empty<Type>()) {typeof(TMessage)};
+            var types = new HashSet<Type>(knownTypes ?? Enumerable.Empty<Type>()) { typeof(TMessage) };
 
             AddMessageDataProperties(repository, types);
         }

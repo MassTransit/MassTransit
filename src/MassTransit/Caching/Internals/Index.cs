@@ -32,9 +32,7 @@
         public void Clear()
         {
             lock (_lock)
-            {
                 _index.Clear();
-            }
         }
 
         public async Task<bool> Add(INode<TValue> node)
@@ -65,9 +63,7 @@
             var key = _keyProvider(value);
 
             lock (_lock)
-            {
                 return TryGetExistingNode(key, out node);
-            }
         }
 
         public void ValueAdded(INode<TValue> node, TValue value)
@@ -75,9 +71,7 @@
             var key = _keyProvider(value);
 
             lock (_lock)
-            {
                 _index[key] = new WeakReference<INode<TValue>>(node, false);
-            }
         }
 
         public void ValueRemoved(INode<TValue> node, TValue value)
@@ -85,9 +79,7 @@
             var key = _keyProvider(value);
 
             lock (_lock)
-            {
                 _index.Remove(key);
-            }
         }
 
         public void CacheCleared()

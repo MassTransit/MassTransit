@@ -1,12 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using MassTransit.Internals;
-
-
 namespace MassTransit.Metadata
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Internals;
+
+
     public class ImplementedMessageTypeCache<TMessage> :
         IImplementedMessageTypeCache<TMessage>
         where TMessage : class
@@ -43,7 +42,6 @@ namespace MassTransit.Metadata
         {
         }
 
-
         /// <summary>
         /// Enumerate the implemented message types
         /// </summary>
@@ -62,7 +60,7 @@ namespace MassTransit.Metadata
         {
             if (messageType.ClosesType(typeof(Fault<>), out Type[] arguments))
             {
-                bool directFault = direct;
+                var directFault = direct;
                 foreach (var faultMessageType in GetMessageTypes(used, arguments[0], false))
                 {
                     var faultInterfaceType = typeof(Fault<>).MakeGenericType(faultMessageType.Type);
@@ -86,7 +84,7 @@ namespace MassTransit.Metadata
                     yield return new ImplementedType(baseType, direct);
             }
 
-            var interfaces = messageType.GetInterfaces();
+            Type[]? interfaces = messageType.GetInterfaces();
 
             for (var index = 0; index < interfaces.Length; index++)
             {

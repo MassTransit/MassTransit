@@ -6,6 +6,7 @@ namespace MassTransit
     using Contracts;
     using Internals;
 
+
     public partial class MassTransitStateMachine<TInstance>
         where TInstance : class, SagaStateMachineInstance
     {

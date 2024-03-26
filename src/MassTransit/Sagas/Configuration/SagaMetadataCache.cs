@@ -1,12 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using MassTransit.Saga;
-
 namespace MassTransit.Configuration
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Saga;
+
+
     public class SagaMetadataCache<TSaga> :
         ISagaMetadataCache<TSaga>
         where TSaga : class, ISaga

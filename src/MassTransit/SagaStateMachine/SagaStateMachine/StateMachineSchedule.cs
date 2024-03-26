@@ -4,6 +4,7 @@ namespace MassTransit
     using System.Linq.Expressions;
     using Internals;
 
+
     public partial class MassTransitStateMachine<TInstance>
         where TInstance : class, SagaStateMachineInstance
     {

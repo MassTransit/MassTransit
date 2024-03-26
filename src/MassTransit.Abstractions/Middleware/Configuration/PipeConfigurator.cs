@@ -3,6 +3,7 @@ namespace MassTransit.Configuration
     using System;
     using System.Collections.Generic;
 
+
     public partial class PipeConfigurator<TContext> :
         IBuildPipeConfigurator<TContext>
         where TContext : class, PipeContext
@@ -19,12 +20,10 @@ namespace MassTransit.Configuration
             if (_specifications.Count == 0)
                 yield break;
 
-            for (int i = 0; i < _specifications.Count; i++)
+            for (var i = 0; i < _specifications.Count; i++)
             {
                 foreach (var result in _specifications[i].Validate())
-                {
                     yield return result;
-                }
             }
         }
 

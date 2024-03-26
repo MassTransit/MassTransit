@@ -94,6 +94,5 @@
         public void Method6()
         {
         }
-
     }
 }

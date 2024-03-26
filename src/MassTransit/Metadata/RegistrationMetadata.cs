@@ -1,9 +1,10 @@
-using System;
-using System.Linq;
-using MassTransit.Internals;
-
 namespace MassTransit.Metadata
 {
+    using System;
+    using System.Linq;
+    using Internals;
+
+
     public static class RegistrationMetadata
     {
         /// <summary>
@@ -13,11 +14,11 @@ namespace MassTransit.Metadata
         /// <returns></returns>
         public static bool IsConsumerOrDefinition(Type type)
         {
-            var interfaces = type.GetInterfaces();
+            Type[] interfaces = type.GetInterfaces();
 
             return !IsSaga(type) && interfaces.Any(t => t.HasInterface(typeof(IConsumer<>))
-                                                        || t.HasInterface(typeof(IJobConsumer<>))
-                                                        || t.HasInterface(typeof(IConsumerDefinition<>)));
+                || t.HasInterface(typeof(IJobConsumer<>))
+                || t.HasInterface(typeof(IConsumerDefinition<>)));
         }
 
         /// <summary>
@@ -27,10 +28,10 @@ namespace MassTransit.Metadata
         /// <returns></returns>
         public static bool IsConsumer(Type type)
         {
-            var interfaces = type.GetInterfaces();
+            Type[] interfaces = type.GetInterfaces();
 
             return interfaces.Any(t => t.HasInterface(typeof(IConsumer<>))
-                                       || t.HasInterface(typeof(IJobConsumer<>)));
+                || t.HasInterface(typeof(IJobConsumer<>)));
         }
 
         /// <summary>
@@ -40,16 +41,16 @@ namespace MassTransit.Metadata
         /// <returns></returns>
         public static bool IsSagaOrDefinition(Type type)
         {
-            var interfaces = type.GetInterfaces();
+            Type[] interfaces = type.GetInterfaces();
 
             if (interfaces.Contains(typeof(ISaga)))
                 return true;
 
             return interfaces.Any(t => t.HasInterface(typeof(InitiatedBy<>))
-                                       || t.HasInterface(typeof(Orchestrates<>))
-                                       || t.HasInterface(typeof(InitiatedByOrOrchestrates<>))
-                                       || t.HasInterface(typeof(Observes<,>))
-                                       || t.HasInterface(typeof(ISagaDefinition<>)));
+                || t.HasInterface(typeof(Orchestrates<>))
+                || t.HasInterface(typeof(InitiatedByOrOrchestrates<>))
+                || t.HasInterface(typeof(Observes<,>))
+                || t.HasInterface(typeof(ISagaDefinition<>)));
         }
 
         /// <summary>
@@ -59,15 +60,15 @@ namespace MassTransit.Metadata
         /// <returns></returns>
         public static bool IsSaga(Type type)
         {
-            var interfaces = type.GetInterfaces();
+            Type[] interfaces = type.GetInterfaces();
 
             if (interfaces.Contains(typeof(ISaga)))
                 return true;
 
             return interfaces.Any(t => t.HasInterface(typeof(InitiatedBy<>))
-                                       || t.HasInterface(typeof(Orchestrates<>))
-                                       || t.HasInterface(typeof(InitiatedByOrOrchestrates<>))
-                                       || t.HasInterface(typeof(Observes<,>)));
+                || t.HasInterface(typeof(Orchestrates<>))
+                || t.HasInterface(typeof(InitiatedByOrOrchestrates<>))
+                || t.HasInterface(typeof(Observes<,>)));
         }
 
         /// <summary>
@@ -77,10 +78,10 @@ namespace MassTransit.Metadata
         /// <returns></returns>
         public static bool IsSagaStateMachineOrDefinition(Type type)
         {
-            var interfaces = type.GetInterfaces();
+            Type[] interfaces = type.GetInterfaces();
 
             return interfaces.Any(t => t.HasInterface(typeof(SagaStateMachine<>))
-                                       || t.HasInterface(typeof(ISagaDefinition<>)));
+                || t.HasInterface(typeof(ISagaDefinition<>)));
         }
 
         /// <summary>
@@ -90,12 +91,12 @@ namespace MassTransit.Metadata
         /// <returns></returns>
         public static bool IsActivityOrDefinition(Type type)
         {
-            var interfaces = type.GetInterfaces();
+            Type[] interfaces = type.GetInterfaces();
 
             return interfaces.Any(t => t.HasInterface(typeof(IExecuteActivity<>))
-                                       || t.HasInterface(typeof(ICompensateActivity<>))
-                                       || t.HasInterface(typeof(IActivityDefinition<,,>))
-                                       || t.HasInterface(typeof(IExecuteActivityDefinition<,>)));
+                || t.HasInterface(typeof(ICompensateActivity<>))
+                || t.HasInterface(typeof(IActivityDefinition<,,>))
+                || t.HasInterface(typeof(IExecuteActivityDefinition<,>)));
         }
 
         /// <summary>
@@ -105,10 +106,10 @@ namespace MassTransit.Metadata
         /// <returns></returns>
         public static bool IsFutureOrDefinition(Type type)
         {
-            var interfaces = type.GetInterfaces();
+            Type[] interfaces = type.GetInterfaces();
 
             return interfaces.Any(t => t.HasInterface(typeof(SagaStateMachine<FutureState>))
-                                       || t.HasInterface(typeof(IFutureDefinition<>)));
+                || t.HasInterface(typeof(IFutureDefinition<>)));
         }
     }
 }

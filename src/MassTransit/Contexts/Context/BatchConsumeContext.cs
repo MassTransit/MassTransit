@@ -51,6 +51,5 @@ namespace MassTransit.Context
         public void Method6()
         {
         }
-
     }
 }

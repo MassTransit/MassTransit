@@ -1,7 +1,8 @@
-﻿using System;
-
-namespace MassTransit.Configuration
+﻿namespace MassTransit.Configuration
 {
+    using System;
+
+
     /// <summary>
     /// Caches the saga connectors for the saga
     /// </summary>

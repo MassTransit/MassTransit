@@ -1,7 +1,8 @@
-using System;
-
 namespace MassTransit.Configuration
 {
+    using System;
+
+
     public class ObserverConnectorCache<TMessage> :
         IObserverConnectorCache<TMessage>
         where TMessage : class

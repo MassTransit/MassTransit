@@ -4,6 +4,7 @@ namespace MassTransit.Configuration
     using System.Collections.Generic;
     using System.Linq;
 
+
     public class MessagePublishPipeSpecification<TMessage> :
         IMessagePublishPipeSpecification<TMessage>,
         IMessagePublishPipeSpecification

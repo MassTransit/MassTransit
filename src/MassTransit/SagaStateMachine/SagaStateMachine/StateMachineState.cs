@@ -6,6 +6,7 @@ namespace MassTransit
     using System.Threading.Tasks;
     using SagaStateMachine;
 
+
     public partial class MassTransitStateMachine<TInstance>
         where TInstance : class, SagaStateMachineInstance
     {
@@ -221,7 +222,7 @@ namespace MassTransit
 
             public bool IsStateOf(State<TInstance> state)
             {
-                return Name.Equals(state.Name) || SuperState != null && SuperState.IsStateOf(state);
+                return Name.Equals(state.Name) || (SuperState != null && SuperState.IsStateOf(state));
             }
 
             public IEnumerable<Event> Events => SuperState != null ? SuperState.Events.Union(GetStateEvents()).Distinct() : GetStateEvents();

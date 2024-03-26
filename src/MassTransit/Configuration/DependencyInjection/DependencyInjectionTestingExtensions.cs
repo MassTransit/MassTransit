@@ -297,9 +297,9 @@ namespace MassTransit
             services.TryAddSingleton<RegistrationSagaStateMachineTestHarness<TStateMachine, T>>();
             services.TryAddSingleton<ISagaStateMachineTestHarness<TStateMachine, T>>(provider =>
                 provider.GetRequiredService<RegistrationSagaStateMachineTestHarness<TStateMachine, T>>());
-        #pragma warning disable CS0618
+            #pragma warning disable CS0618
             services.TryAddSingleton<IStateMachineSagaTestHarness<T, TStateMachine>>(provider =>
-            #pragma warning restore CS0618
+                #pragma warning restore CS0618
                 provider.GetRequiredService<RegistrationSagaStateMachineTestHarness<TStateMachine, T>>());
         }
 
@@ -344,9 +344,9 @@ namespace MassTransit
             configurator.AddSingleton<RegistrationSagaStateMachineTestHarness<TStateMachine, TSaga>>();
             configurator.AddSingleton<ISagaStateMachineTestHarness<TStateMachine, TSaga>>(provider =>
                 provider.GetRequiredService<RegistrationSagaStateMachineTestHarness<TStateMachine, TSaga>>());
-        #pragma warning disable CS0618
+            #pragma warning disable CS0618
             configurator.AddSingleton<IStateMachineSagaTestHarness<TSaga, TStateMachine>>(provider =>
-            #pragma warning restore CS0618
+                #pragma warning restore CS0618
                 provider.GetRequiredService<RegistrationSagaStateMachineTestHarness<TStateMachine, TSaga>>());
         }
 

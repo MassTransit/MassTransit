@@ -2,7 +2,7 @@
 {
     using System;
     using Contracts;
-    using MassTransit.Serialization;
+    using Serialization;
 
 
     public interface IRoutingSlipSendEndpointTarget

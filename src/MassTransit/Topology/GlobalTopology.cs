@@ -2,7 +2,6 @@ namespace MassTransit
 {
     using System;
     using System.Collections.Generic;
-    using System.Threading;
     using Configuration;
     using Courier.Contracts;
     using Topology;

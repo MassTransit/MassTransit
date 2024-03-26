@@ -3,6 +3,7 @@
     using System;
     using System.IO;
     using System.Text;
+    using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
     using MessageData.Values;
@@ -83,7 +84,7 @@
             if (value == null)
                 return EmptyMessageData<byte[]>.Instance;
 
-            var bytes = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(value, objectType, SystemTextJsonMessageSerializer.Options);
+            var bytes = JsonSerializer.SerializeToUtf8Bytes(value, objectType, SystemTextJsonMessageSerializer.Options);
 
             if (bytes.Length < MessageDataDefaults.Threshold && !MessageDataDefaults.AlwaysWriteToRepository)
                 return new BytesInlineMessageData(bytes);

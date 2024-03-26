@@ -87,6 +87,5 @@ namespace MassTransit.Configuration
         public void Method6()
         {
         }
-
     }
 }

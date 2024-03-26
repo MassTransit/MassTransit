@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Reflection;
     using System.Threading.Tasks;
 
 
@@ -116,7 +115,7 @@
                     return false;
                 }
 
-                if (interfaceType is {IsGenericTypeDefinition: false, ContainsGenericParameters: false})
+                if (interfaceType is { IsGenericTypeDefinition: false, ContainsGenericParameters: false })
                 {
                     closedType = interfaceType;
                     return true;

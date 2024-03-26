@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace MassTransit
+﻿namespace MassTransit
 {
     using System;
     using System.Threading.Tasks;

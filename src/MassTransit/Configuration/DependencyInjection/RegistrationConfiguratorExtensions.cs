@@ -1,9 +1,8 @@
-using MassTransit.Metadata;
-
 namespace MassTransit
 {
     using System;
     using Internals;
+    using Metadata;
 
 
     public static class RegistrationConfiguratorExtensions

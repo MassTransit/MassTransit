@@ -43,9 +43,7 @@ namespace MassTransit.Configuration
         public void ConfigureConsumers(IReceiveEndpointConfigurator configurator)
         {
             foreach (var consumer in Selector.GetRegistrations<IConsumerRegistration>(_provider).Where(x => x.IncludeInConfigureEndpoints))
-            {
                 consumer.Configure(configurator, this);
-            }
         }
 
         public void ConfigureSaga(Type sagaType, IReceiveEndpointConfigurator configurator)
@@ -70,9 +68,7 @@ namespace MassTransit.Configuration
         public void ConfigureSagas(IReceiveEndpointConfigurator configurator)
         {
             foreach (var saga in Selector.GetRegistrations<ISagaRegistration>(_provider).Where(x => x.IncludeInConfigureEndpoints))
-            {
                 saga.Configure(configurator, this);
-            }
         }
 
         public void ConfigureExecuteActivity(Type activityType, IReceiveEndpointConfigurator configurator)

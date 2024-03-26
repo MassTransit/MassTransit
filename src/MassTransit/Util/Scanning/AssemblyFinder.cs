@@ -26,7 +26,7 @@
             if (Path.IsPathRooted(binPath))
                 return FindAssemblies(binPath, loadFailure, includeExeFiles, filter);
 
-            string[] binPaths = binPath.Split(';');
+            var binPaths = binPath.Split(';');
             return binPaths.SelectMany(bin =>
             {
                 var path = Path.Combine(assemblyPath, bin);

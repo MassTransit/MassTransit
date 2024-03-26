@@ -3,7 +3,6 @@ namespace MassTransit
     using System;
     using System.Collections.Concurrent;
     using System.Linq;
-    using System.Threading;
 
 
     public static class EndpointConventionCache

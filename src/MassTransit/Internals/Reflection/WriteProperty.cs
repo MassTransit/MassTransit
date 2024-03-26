@@ -25,7 +25,7 @@
 
             void SetUsingReflection(T entity, TProperty property)
             {
-                setMethod.Invoke(entity, new object[] {property});
+                setMethod.Invoke(entity, new object[] { property });
             }
 
             void Initialize(T entity, TProperty property)

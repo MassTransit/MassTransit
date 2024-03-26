@@ -10,8 +10,8 @@ namespace MassTransit.Context
         where TLog : class
     {
         readonly CompensateContext<TLog> _context;
-        readonly IRetryPolicy _retryPolicy;
         readonly CompensationResult _existingResult;
+        readonly IRetryPolicy _retryPolicy;
 
         public RetryCompensateContext(CompensateContext<TLog> context, IRetryPolicy retryPolicy, RetryContext retryContext)
             : base(context)

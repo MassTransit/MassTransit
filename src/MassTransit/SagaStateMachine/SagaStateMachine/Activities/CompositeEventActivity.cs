@@ -10,8 +10,8 @@ namespace MassTransit.SagaStateMachine
     {
         readonly ICompositeEventStatusAccessor<TSaga> _accessor;
         readonly CompositeEventStatus _complete;
-        readonly CompositeEventOptions _options;
         readonly int _flag;
+        readonly CompositeEventOptions _options;
 
         public CompositeEventActivity(ICompositeEventStatusAccessor<TSaga> accessor, int flag, CompositeEventStatus complete, Event @event,
             CompositeEventOptions options)

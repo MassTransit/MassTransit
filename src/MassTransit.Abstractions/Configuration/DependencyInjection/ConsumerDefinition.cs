@@ -48,9 +48,9 @@ namespace MassTransit
             if (_concurrentMessageLimit.HasValue)
                 consumerConfigurator.ConcurrentMessageLimit = _concurrentMessageLimit;
 
-        #pragma warning disable CS0618
+            #pragma warning disable CS0618
             ConfigureConsumer(endpointConfigurator, consumerConfigurator);
-        #pragma warning restore CS0618
+            #pragma warning restore CS0618
             ConfigureConsumer(endpointConfigurator, consumerConfigurator, context);
         }
 

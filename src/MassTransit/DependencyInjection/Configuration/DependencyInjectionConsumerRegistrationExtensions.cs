@@ -1,10 +1,9 @@
-using MassTransit.Metadata;
-
 namespace MassTransit.Configuration
 {
     using System;
     using DependencyInjection.Registration;
     using Internals;
+    using Metadata;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
 

@@ -615,6 +615,7 @@ namespace MassTransit
             return source.Add(new FaultedScheduleActivity<TSaga, TData, TException, TMessage>(schedule, TimeProvider,
                 MessageFactory<TMessage>.Create(messageFactory, callback)));
         }
+
         public static ExceptionActivityBinder<TSaga, TData, TException> Schedule<TSaga, TData, TException, TMessage>(
             this ExceptionActivityBinder<TSaga, TData, TException> source, Schedule<TSaga, TMessage> schedule,
             Func<BehaviorExceptionContext<TSaga, TData, TException>, Task<SendTuple<TMessage>>> messageFactory,

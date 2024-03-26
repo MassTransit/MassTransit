@@ -33,7 +33,7 @@ namespace MassTransit.Util
 
                 lock (_connections)
                 {
-                    Volatile.Read(ref _connected);
+                    read = Volatile.Read(ref _connected);
                     if (read != null)
                         return read;
 
@@ -41,9 +41,9 @@ namespace MassTransit.Util
                     _connections.Values.CopyTo(connected, 0);
 
                     Volatile.Write(ref _connected, connected);
-                }
 
-                return _connected;
+                    return connected;
+                }
             }
         }
 
@@ -83,7 +83,7 @@ namespace MassTransit.Util
             if (callback == null)
                 throw new ArgumentNullException(nameof(callback));
 
-            var connected = Connected;
+            T[] connected = Connected;
 
             if (connected.Length == 0)
                 return Task.CompletedTask;
@@ -110,7 +110,7 @@ namespace MassTransit.Util
 
         public void ForEach(Action<T> callback)
         {
-            var connected = Connected;
+            T[] connected = Connected;
 
             switch (connected.Length)
             {
@@ -130,7 +130,7 @@ namespace MassTransit.Util
 
         public bool All(Func<T, bool> callback)
         {
-            var connected = Connected;
+            T[] connected = Connected;
 
             if (connected.Length == 0)
                 return true;

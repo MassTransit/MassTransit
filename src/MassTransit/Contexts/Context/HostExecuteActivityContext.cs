@@ -27,6 +27,5 @@ namespace MassTransit.Context
         public void Method9()
         {
         }
-
     }
 }

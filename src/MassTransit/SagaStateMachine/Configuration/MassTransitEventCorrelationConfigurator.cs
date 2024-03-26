@@ -6,6 +6,7 @@
     using Saga;
     using SagaStateMachine;
 
+
     public partial class StateMachineInterfaceType<TInstance, TData>
     {
         public class MassTransitEventCorrelationConfigurator :

@@ -1,10 +1,10 @@
 namespace MassTransit.Middleware.Outbox
 {
-    using MassTransit.Internals;
     using System;
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using Internals;
 
 
     public class InMemoryOutboxMessageRepository

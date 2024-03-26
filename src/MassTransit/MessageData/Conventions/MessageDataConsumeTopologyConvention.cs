@@ -1,7 +1,6 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace MassTransit.MessageData.Conventions
 {
+    using System.Diagnostics.CodeAnalysis;
     using MassTransit.Configuration;
 
 

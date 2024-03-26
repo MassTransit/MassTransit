@@ -1,8 +1,7 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace MassTransit
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
     using Configuration;
 
 

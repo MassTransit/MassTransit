@@ -254,7 +254,6 @@ namespace MassTransit.Internals
             }
         }
 
-
         /// <summary>
         /// Register a callback on the <paramref name="cancellationToken" /> which completes the resulting task.
         /// </summary>

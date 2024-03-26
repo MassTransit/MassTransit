@@ -2,7 +2,6 @@ namespace MassTransit.Context
 {
     using System;
     using System.Collections.Concurrent;
-    using System.Threading;
     using System.Threading.Tasks;
 
 
@@ -36,7 +35,7 @@ namespace MassTransit.Context
             var converterType = typeof(ResponseEndpointConverter<>).MakeGenericType(type);
 
             return Activator.CreateInstance(converterType) as IResponseEndpointConverter
-                   ?? throw new InvalidOperationException("Failed to create ResponseEndpointConverter");
+                ?? throw new InvalidOperationException("Failed to create ResponseEndpointConverter");
         }
 
 

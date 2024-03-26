@@ -28,14 +28,14 @@
         public void IncrementBy(long val)
         {
             var payload = $"{_fullName}:{val}|c";
-            byte[] datagram = Encoding.UTF8.GetBytes(payload);
+            var datagram = Encoding.UTF8.GetBytes(payload);
             Task<int> t = _client.SendAsync(datagram, datagram.Length);
         }
 
         public void Set(long val)
         {
             var payload = $"{_fullName}:{val}|g";
-            byte[] datagram = Encoding.UTF8.GetBytes(payload);
+            var datagram = Encoding.UTF8.GetBytes(payload);
             Task<int> t = _client.SendAsync(datagram, datagram.Length);
         }
 

@@ -55,7 +55,7 @@ namespace MassTransit.SqlTransport
 
                     transportHeaders.Set(MessageHeaders.RedeliveryCount, redeliveryCount + 1);
 
-                    bool unlocked = await _clientContext.Unlock(_message.LockId.Value, _message.MessageDeliveryId, delay, transportHeaders)
+                    var unlocked = await _clientContext.Unlock(_message.LockId.Value, _message.MessageDeliveryId, delay, transportHeaders)
                         .ConfigureAwait(false);
 
                     _locked = false;

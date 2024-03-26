@@ -2,6 +2,7 @@ namespace MassTransit.Configuration
 {
     using System.Diagnostics.CodeAnalysis;
 
+
     public interface IMessageConsumeTopologyConvention<TMessage> :
         IMessageConsumeTopologyConvention
         where TMessage : class

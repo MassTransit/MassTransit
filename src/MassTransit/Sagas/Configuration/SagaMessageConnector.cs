@@ -2,6 +2,7 @@ namespace MassTransit.Configuration
 {
     using System;
 
+
     public partial class SagaConnector<TSaga, TMessage>
         where TSaga : class, ISaga
         where TMessage : class
@@ -9,6 +10,7 @@ namespace MassTransit.Configuration
         public abstract class SagaMessageConnector :
             ISagaMessageConnector<TSaga>
         {
+            const ConnectPipeOptions NotConfigureConsumeTopology = ConnectPipeOptions.All & ~ConnectPipeOptions.ConfigureConsumeTopology;
             readonly IFilter<SagaConsumeContext<TSaga, TMessage>> _consumeFilter;
 
             protected SagaMessageConnector(IFilter<SagaConsumeContext<TSaga, TMessage>> consumeFilter)
@@ -42,8 +44,6 @@ namespace MassTransit.Configuration
                     ? consumePipe.ConnectConsumePipe(messagePipe)
                     : consumePipe.ConnectConsumePipe(messagePipe, NotConfigureConsumeTopology);
             }
-
-            const ConnectPipeOptions NotConfigureConsumeTopology = ConnectPipeOptions.All & ~ConnectPipeOptions.ConfigureConsumeTopology;
 
             /// <summary>
             /// Configure the message pipe that is prior to the saga repository

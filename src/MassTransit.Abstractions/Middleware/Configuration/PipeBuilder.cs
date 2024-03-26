@@ -4,6 +4,7 @@ namespace MassTransit.Configuration
     using System.Diagnostics;
     using System.Threading.Tasks;
 
+
     public partial class PipeConfigurator<TContext>
         where TContext : class, PipeContext
     {
@@ -49,11 +50,13 @@ namespace MassTransit.Configuration
             }
         }
 
+
         internal static class Cache
         {
             internal static readonly IPipe<TContext> EmptyPipe = new EmptyPipe();
             internal static readonly IPipe<TContext> LastPipe = new Last();
         }
+
 
         public class EmptyPipe :
             IPipe<TContext>
@@ -68,6 +71,7 @@ namespace MassTransit.Configuration
             {
             }
         }
+
 
         public class FilterPipe :
             IPipe<TContext>
@@ -94,6 +98,7 @@ namespace MassTransit.Configuration
             }
         }
 
+
         /// <summary>
         /// The last pipe in a pipeline is always an end pipe that does nothing and returns synchronously
         /// </summary>
@@ -118,6 +123,7 @@ namespace MassTransit.Configuration
                 return _filter.Send(context, Cache.LastPipe);
             }
         }
+
 
         class Last :
             IPipe<TContext>

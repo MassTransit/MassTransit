@@ -13,7 +13,8 @@ namespace MassTransit.SqlTransport
     {
         public IPipeContextAgent<ConnectionContext> CreateContext(ISupervisor supervisor)
         {
-            var transportSupervisor = supervisor as ITransportSupervisor<ConnectionContext> ?? throw new ArgumentException(nameof(supervisor));
+            ITransportSupervisor<ConnectionContext> transportSupervisor =
+                supervisor as ITransportSupervisor<ConnectionContext> ?? throw new ArgumentException(nameof(supervisor));
 
             return supervisor.AddContext(CreateConnection(transportSupervisor));
         }

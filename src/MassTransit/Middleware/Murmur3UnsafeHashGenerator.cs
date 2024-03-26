@@ -18,7 +18,7 @@ namespace MassTransit.Middleware
 
         public unsafe uint Hash(string s)
         {
-            char[] data = s.ToCharArray();
+            var data = s.ToCharArray();
             fixed (char* input = &data[0])
             {
                 return Hash((byte*)input, (uint)data.Length * sizeof(char), Seed);

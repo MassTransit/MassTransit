@@ -1,8 +1,9 @@
-using System;
-using System.Linq;
-
 namespace MassTransit.Configuration
 {
+    using System;
+    using System.Linq;
+
+
     public class ConsumerMetadataCache<T> :
         IConsumerMetadataCache<T>
         where T : class

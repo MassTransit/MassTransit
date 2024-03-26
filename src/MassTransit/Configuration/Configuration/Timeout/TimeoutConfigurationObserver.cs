@@ -74,6 +74,5 @@
         public void Method6()
         {
         }
-
     }
 }

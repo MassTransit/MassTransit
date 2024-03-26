@@ -1,9 +1,10 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Threading.Tasks;
-
-namespace MassTransit.Observables
+﻿namespace MassTransit.Observables
 {
+    using System;
+    using System.Collections.Concurrent;
+    using System.Threading.Tasks;
+
+
     public class RetryFaultObserverCache
     {
         readonly ConcurrentDictionary<Type, Lazy<IRetryFaultObserver>> _types = new ConcurrentDictionary<Type, Lazy<IRetryFaultObserver>>();
@@ -25,7 +26,7 @@ namespace MassTransit.Observables
             var converterType = typeof(RetryFaultObserver<>).MakeGenericType(type);
 
             return Activator.CreateInstance(converterType) as IRetryFaultObserver
-                   ?? throw new InvalidOperationException("Failed to create Retry Fault Observer");
+                ?? throw new InvalidOperationException("Failed to create Retry Fault Observer");
         }
 
 

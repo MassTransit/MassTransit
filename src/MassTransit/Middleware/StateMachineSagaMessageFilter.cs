@@ -5,7 +5,6 @@ namespace MassTransit.Middleware
     using System.Linq;
     using System.Threading.Tasks;
     using Logging;
-    using SagaStateMachine;
 
 
     /// <summary>

@@ -76,7 +76,7 @@
             var open = classification.HasFlag(TypeClassification.Open);
             var closed = classification.HasFlag(TypeClassification.Closed);
 
-            if (open && closed || !open && !closed)
+            if ((open && closed) || (!open && !closed))
             {
                 yield return OpenTypes;
                 yield return ClosedTypes;

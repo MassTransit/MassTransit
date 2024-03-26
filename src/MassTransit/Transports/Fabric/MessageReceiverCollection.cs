@@ -54,7 +54,7 @@ namespace MassTransit.Transports.Fabric
 
                 IMessageReceiver<T>[] connected = _receivers.Values.ToArray();
 
-                var balancer = connected.Length == 1
+                IReceiverLoadBalancer<T> balancer = connected.Length == 1
                     ? new SingleReceiverLoadBalancer<T>(connected[0])
                     : _balancerFactory(connected);
 
@@ -73,15 +73,15 @@ namespace MassTransit.Transports.Fabric
             Task<IReceiverLoadBalancer<T>> task = _balancer.Task;
             if (task.IsCompletedSuccessfully())
             {
-                var balancer = task.GetAwaiter().GetResult();
-                var consumer = balancer.SelectReceiver(message);
+                IReceiverLoadBalancer<T> balancer = task.GetAwaiter().GetResult();
+                IMessageReceiver<T> consumer = balancer.SelectReceiver(message);
 
                 return Task.FromResult(consumer);
             }
 
             async Task<IMessageReceiver<T>> NextAsync()
             {
-                var balancer = await _balancer.Task.OrCanceled(cancellationToken).ConfigureAwait(false);
+                IReceiverLoadBalancer<T> balancer = await _balancer.Task.OrCanceled(cancellationToken).ConfigureAwait(false);
 
                 return balancer.SelectReceiver(message);
             }
@@ -107,7 +107,7 @@ namespace MassTransit.Transports.Fabric
                 if (connected.Length <= 0)
                     return;
 
-                var balancer = connected.Length == 1
+                IReceiverLoadBalancer<T> balancer = connected.Length == 1
                     ? new SingleReceiverLoadBalancer<T>(connected[0])
                     : _balancerFactory(connected);
 

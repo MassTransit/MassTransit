@@ -2,7 +2,6 @@ namespace MassTransit
 {
     using System;
     using System.Threading.Tasks;
-    using Configuration;
     using DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
 

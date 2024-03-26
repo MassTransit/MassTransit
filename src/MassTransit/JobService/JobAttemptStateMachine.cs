@@ -156,8 +156,9 @@ namespace MassTransit
             SetCompletedWhenFinalized();
         }
 
-        // ReSharper disable MemberCanBePrivate.Global
+        //
         // ReSharper disable UnassignedGetOnlyAutoProperty
+        // ReSharper disable MemberCanBePrivate.Global
         public State Starting { get; }
         public State Running { get; }
         public State CheckingStatus { get; }

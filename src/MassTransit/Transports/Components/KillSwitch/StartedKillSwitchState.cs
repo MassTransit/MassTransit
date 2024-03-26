@@ -32,11 +32,6 @@ namespace MassTransit.Transports.Components
             });
         }
 
-        public void LogThreshold()
-        {
-            LogContext.Debug?.Log("Kill Switch threshold reached, failures: {FailureCount}, attempts: {AttemptCount}", _failureCount, _attemptCount);
-        }
-
         public Task PreConsume<T>(ConsumeContext<T> context)
             where T : class
         {
@@ -66,6 +61,11 @@ namespace MassTransit.Transports.Components
                     _timer?.Dispose();
                 }
             }
+        }
+
+        public void LogThreshold()
+        {
+            LogContext.Debug?.Log("Kill Switch threshold reached, failures: {FailureCount}, attempts: {AttemptCount}", _failureCount, _attemptCount);
         }
 
         public void Activate()

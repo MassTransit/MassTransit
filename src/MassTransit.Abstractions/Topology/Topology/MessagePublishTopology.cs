@@ -11,9 +11,9 @@ namespace MassTransit.Topology
         IMessagePublishTopologyConfigurator<TMessage>
         where TMessage : class
     {
-        readonly IPublishTopology _publishTopology;
         readonly List<IMessagePublishTopologyConvention<TMessage>> _conventions;
         readonly List<IMessagePublishTopology<TMessage>> _delegateTopologies;
+        readonly IPublishTopology _publishTopology;
         readonly List<IMessagePublishTopology<TMessage>> _topologies;
         bool? _exclude;
 
@@ -46,9 +46,7 @@ namespace MassTransit.Topology
             ITopologyPipeBuilder<PublishContext<TMessage>> delegatedBuilder = builder.CreateDelegatedBuilder();
 
             for (var i = 0; i < _delegateTopologies.Count; i++)
-            {
                 _delegateTopologies[i].Apply(delegatedBuilder);
-            }
 
             for (var i = 0; i < _conventions.Count; i++)
             {

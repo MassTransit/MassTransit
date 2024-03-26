@@ -76,6 +76,8 @@ namespace MassTransit
 
         public Action<IReceiveEndpointConfigurator> OnConfigureEndpoint { get; set; }
 
+        public int? ConcurrentMessageLimit => SagaPartitionCount;
+
         IEnumerable<ValidationResult> ISpecification.Validate()
         {
             if (SlotWaitTime < TimeSpan.FromSeconds(1))
@@ -135,7 +137,5 @@ namespace MassTransit
         /// If true, completed jobs will be finalized, removing the saga from the repository
         /// </summary>
         public bool FinalizeCompleted { get; set; }
-
-        public int? ConcurrentMessageLimit => SagaPartitionCount;
     }
 }

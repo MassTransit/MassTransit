@@ -14,7 +14,7 @@ namespace MassTransit.Transports
 
         public SendEndpointCache()
         {
-            var options = new CacheOptions {Capacity = SendEndpointCacheDefaults.Capacity};
+            var options = new CacheOptions { Capacity = SendEndpointCacheDefaults.Capacity };
             var policy = new TimeToLiveCachePolicy<CachedSendEndpoint<TKey>>(SendEndpointCacheDefaults.MaxAge);
 
             _cache = new MassTransitCache<TKey, CachedSendEndpoint<TKey>, ITimeToLiveCacheValue<CachedSendEndpoint<TKey>>>(policy, options);

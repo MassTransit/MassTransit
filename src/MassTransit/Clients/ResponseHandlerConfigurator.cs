@@ -42,7 +42,7 @@
 
         public HandlerConnectHandle<TResponse> Connect(IRequestPipeConnector connector, Guid requestId)
         {
-            MessageHandler<TResponse> messageHandler = _handler != null ? (MessageHandler<TResponse>)AsyncMessageHandler : MessageHandler;
+            MessageHandler<TResponse> messageHandler = _handler != null ? AsyncMessageHandler : MessageHandler;
 
             var connectHandle = connector.ConnectRequestHandler(requestId, messageHandler, _pipeConfigurator);
 

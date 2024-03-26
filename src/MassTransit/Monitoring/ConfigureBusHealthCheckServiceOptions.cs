@@ -4,7 +4,7 @@ namespace MassTransit.Monitoring
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-    using MassTransit.Configuration;
+    using Configuration;
     using Microsoft.Extensions.Diagnostics.HealthChecks;
     using Microsoft.Extensions.Options;
     using Transports;

@@ -3,6 +3,7 @@
     using System;
     using Middleware;
 
+
     public partial class StateMachineInterfaceType<TInstance, TData>
     {
         public class StateMachineEventConnectorFactory :

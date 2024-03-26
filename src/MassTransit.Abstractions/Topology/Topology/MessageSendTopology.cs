@@ -1,9 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace MassTransit.Topology
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using Configuration;
 
@@ -38,9 +37,7 @@ namespace MassTransit.Topology
             ITopologyPipeBuilder<SendContext<TMessage>> delegatedBuilder = builder.CreateDelegatedBuilder();
 
             for (var i = 0; i < _delegateTopologies.Count; i++)
-            {
                 _delegateTopologies[i].Apply(delegatedBuilder);
-            }
 
             for (var i = 0; i < _conventions.Count; i++)
             {
@@ -49,9 +46,7 @@ namespace MassTransit.Topology
             }
 
             for (var i = 0; i < _topologies.Count; i++)
-            {
                 _topologies[i].Apply(builder);
-            }
         }
 
         public bool TryGetConvention<TConvention>([NotNullWhen(true)] out TConvention? convention)
@@ -61,9 +56,7 @@ namespace MassTransit.Topology
             {
                 convention = _conventions[i] as TConvention;
                 if (convention != null)
-                {
                     return true;
-                }
             }
 
             convention = default;

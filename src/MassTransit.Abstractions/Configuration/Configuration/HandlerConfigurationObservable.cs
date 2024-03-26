@@ -24,6 +24,5 @@
         public void Method6()
         {
         }
-
     }
 }

@@ -5,7 +5,6 @@ namespace MassTransit.Logging
     using System.Diagnostics;
     using System.Diagnostics.Metrics;
     using System.Linq;
-    using System.Reflection;
     using System.Text;
     using Courier.Contracts;
     using Metadata;

@@ -38,13 +38,15 @@ namespace MassTransit.Serialization
                 WriteIndented = true,
                 Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
 
-#if NET8_0_OR_GREATER
+            #if NET8_0_OR_GREATER
                 // Set the TypeInfoResolver property based on whether reflection-based is enabled.
                 // If reflection is enabled, combine the default resolver (reflection-based) context with the custom serializer context
                 // Otherwise, use only the custom serializer context.
                 // User can overwrite it directly or by modifying the TypeInfoResolverChain.
-                TypeInfoResolver = JsonSerializer.IsReflectionEnabledByDefault ? JsonTypeInfoResolver.Combine(SystemTextJsonSerializationContext.Default, new DefaultJsonTypeInfoResolver()) : SystemTextJsonSerializationContext.Default
-#endif
+                TypeInfoResolver = JsonSerializer.IsReflectionEnabledByDefault
+                    ? JsonTypeInfoResolver.Combine(SystemTextJsonSerializationContext.Default, new DefaultJsonTypeInfoResolver())
+                    : SystemTextJsonSerializationContext.Default
+            #endif
             };
 
             Options.Converters.Add(new StringDecimalJsonConverter());
@@ -146,7 +148,8 @@ namespace MassTransit.Serialization
                     return returnValue;
                 case string text when string.IsNullOrWhiteSpace(text):
                     return defaultValue;
-                case string text when TypeConverterCache.TryGetTypeConverter(out ITypeConverter<T, string>? typeConverter) && typeConverter.TryConvert(text, out var result):
+                case string text when TypeConverterCache.TryGetTypeConverter(out ITypeConverter<T, string>? typeConverter)
+                    && typeConverter.TryConvert(text, out var result):
                     return result;
                 case string text:
                     return JsonSerializer.Deserialize<T>(text, Options);

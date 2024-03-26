@@ -5,6 +5,7 @@ namespace MassTransit
     using Context;
     using Initializers;
 
+
     public partial class MassTransitStateMachine<TInstance>
         where TInstance : class, SagaStateMachineInstance
     {

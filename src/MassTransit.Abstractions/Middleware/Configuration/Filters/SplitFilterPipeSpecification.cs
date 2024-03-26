@@ -3,6 +3,7 @@ namespace MassTransit.Configuration
     using System.Collections.Generic;
     using Middleware;
 
+
     public partial class PipeConfigurator<TContext>
         where TContext : class, PipeContext
     {

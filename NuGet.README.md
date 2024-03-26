@@ -2,10 +2,10 @@
 
 MassTransit provides a developer-focused, modern platform for creating distributed applications without complexity.
 
-   - First class testing support
-   - Write once, then deploy using RabbitMQ, Azure Service Bus, and Amazon SQS
-   - Observability via Open Telemetry (OTEL)
-   - Fully-supported, widely-adopted, a complete end-to-end solution
+- First class testing support
+- Write once, then deploy using RabbitMQ, Azure Service Bus, and Amazon SQS
+- Observability via Open Telemetry (OTEL)
+- Fully-supported, widely-adopted, a complete end-to-end solution
 
 ## Documentation
 
@@ -112,7 +112,7 @@ The following packages from earlier versions of MassTransit are no longer suppor
 * MassTransit.StructureMapSigned
 * MassTransit.Unity
 
-## Discord 
+## Discord
 
 Get help live at the MassTransit Discord server.
 
@@ -120,6 +120,7 @@ Get help live at the MassTransit Discord server.
 
 ## GitHub Issues
 
-> Please do not open an issue on GitHub, unless you have spotted an actual bug in MassTransit. 
+> Please do not open an issue on GitHub, unless you have spotted an actual bug in MassTransit.
 
-Use [GitHub Discussions](https://github.com/MassTransit/MassTransit/discussions) to ask questions, bring up ideas, or other general items. Issues are not the place for questions, and will either be converted to a discussion or closed.
+Use [GitHub Discussions](https://github.com/MassTransit/MassTransit/discussions) to ask questions, bring up ideas, or other general items. Issues are not the
+place for questions, and will either be converted to a discussion or closed.

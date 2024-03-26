@@ -2,7 +2,6 @@ namespace MassTransit.Testing.Implementations
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Runtime.CompilerServices;
     using System.Threading;
     using System.Threading.Channels;
@@ -15,10 +14,10 @@ namespace MassTransit.Testing.Implementations
         where TElement : class, IAsyncListElement
     {
         readonly Connectable<Channel<TElement>> _channels;
-        readonly List<TElement> _messages;
         readonly IDictionary<Guid, TElement> _messageLookup;
-        readonly TimeSpan _timeout;
+        readonly List<TElement> _messages;
         readonly CancellationToken _testCompleted;
+        readonly TimeSpan _timeout;
 
         protected AsyncElementList(TimeSpan timeout, CancellationToken testCompleted = default)
         {
@@ -192,7 +191,7 @@ namespace MassTransit.Testing.Implementations
             {
                 var elementId = context.ElementId.Value;
 
-                if(_messageLookup.ContainsKey(elementId))
+                if (_messageLookup.ContainsKey(elementId))
                     return;
 
                 _messages.Add(context);

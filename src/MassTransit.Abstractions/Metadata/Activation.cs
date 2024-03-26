@@ -1,8 +1,9 @@
-﻿using System;
-using System.Collections.Concurrent;
-
-namespace MassTransit.Metadata
+﻿namespace MassTransit.Metadata
 {
+    using System;
+    using System.Collections.Concurrent;
+
+
     public static class Activation
     {
         public static TResult Activate<TResult>(Type type, IActivationType<TResult> activationType)
@@ -28,6 +29,7 @@ namespace MassTransit.Metadata
                     _ => (CachedType)(Activator.CreateInstance(typeof(TypeAdapter<>).MakeGenericType(type)) ?? throw new InvalidOperationException()))
                 .ActivateType(activationType, arg1, arg2);
         }
+
 
         interface CachedType
         {

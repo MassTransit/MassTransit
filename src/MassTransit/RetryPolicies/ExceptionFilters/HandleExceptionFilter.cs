@@ -2,7 +2,6 @@ namespace MassTransit.RetryPolicies.ExceptionFilters
 {
     using System;
     using System.Linq;
-    using System.Reflection;
 
 
     public class HandleExceptionFilter :
@@ -18,10 +17,7 @@ namespace MassTransit.RetryPolicies.ExceptionFilters
         void IProbeSite.Probe(ProbeContext context)
         {
             var scope = context.CreateScope("selected");
-            scope.Set(new
-            {
-                ExceptionTypes = _exceptionTypes.Select(x => x.Name).ToArray()
-            });
+            scope.Set(new { ExceptionTypes = _exceptionTypes.Select(x => x.Name).ToArray() });
         }
 
         bool IExceptionFilter.Match(Exception exception)

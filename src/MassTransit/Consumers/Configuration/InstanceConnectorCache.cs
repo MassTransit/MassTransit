@@ -1,8 +1,9 @@
-﻿using System;
-using System.Collections.Concurrent;
-
-namespace MassTransit.Configuration
+﻿namespace MassTransit.Configuration
 {
+    using System;
+    using System.Collections.Concurrent;
+
+
     public class InstanceConnectorCache<T> :
         IInstanceConnectorCache<T>
         where T : class

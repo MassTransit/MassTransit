@@ -12,7 +12,6 @@ namespace MassTransit.SagaStateMachine
         readonly StateMachineAsyncExceptionCondition<TInstance, TException> _condition;
         readonly EventActivities<TInstance> _elseActivities;
         readonly EventActivities<TInstance> _thenActivities;
-        public Event Event { get; }
 
         public ConditionalExceptionActivityBinder(Event @event, StateMachineExceptionCondition<TInstance, TException> condition,
             EventActivities<TInstance> thenActivities, EventActivities<TInstance> elseActivities)
@@ -29,16 +28,18 @@ namespace MassTransit.SagaStateMachine
             Event = @event;
         }
 
+        public Event Event { get; }
+
         public bool IsStateTransitionEvent(State state)
         {
             return Equals(Event, state.Enter) || Equals(Event, state.BeforeEnter)
-                   || Equals(Event, state.AfterLeave) || Equals(Event, state.Leave);
+                || Equals(Event, state.AfterLeave) || Equals(Event, state.Leave);
         }
 
         public void Bind(State<TInstance> state)
         {
-            var thenBehavior = GetBehavior(_thenActivities);
-            var elseBehavior = GetBehavior(_elseActivities);
+            IBehavior<TInstance> thenBehavior = GetBehavior(_thenActivities);
+            IBehavior<TInstance> elseBehavior = GetBehavior(_elseActivities);
 
             var conditionActivity = new ConditionExceptionActivity<TInstance, TException>(_condition, thenBehavior, elseBehavior);
 
@@ -47,8 +48,8 @@ namespace MassTransit.SagaStateMachine
 
         public void Bind(IBehaviorBuilder<TInstance> builder)
         {
-            var thenBehavior = GetBehavior(_thenActivities);
-            var elseBehavior = GetBehavior(_elseActivities);
+            IBehavior<TInstance> thenBehavior = GetBehavior(_thenActivities);
+            IBehavior<TInstance> elseBehavior = GetBehavior(_elseActivities);
 
             var conditionActivity = new ConditionExceptionActivity<TInstance, TException>(_condition, thenBehavior, elseBehavior);
 
@@ -59,7 +60,7 @@ namespace MassTransit.SagaStateMachine
         {
             var builder = new CatchBehaviorBuilder<TInstance>();
 
-            foreach (var activity in activities.GetStateActivityBinders())
+            foreach (IActivityBinder<TInstance> activity in activities.GetStateActivityBinders())
                 activity.Bind(builder);
 
             return builder.Behavior;
@@ -76,7 +77,6 @@ namespace MassTransit.SagaStateMachine
         readonly StateMachineAsyncExceptionCondition<TInstance, TData, TException> _condition;
         readonly EventActivities<TInstance> _elseActivities;
         readonly EventActivities<TInstance> _thenActivities;
-        public Event Event { get; }
 
         public ConditionalExceptionActivityBinder(Event @event, StateMachineExceptionCondition<TInstance, TData, TException> condition,
             EventActivities<TInstance> thenActivities, EventActivities<TInstance> elseActivities)
@@ -93,16 +93,18 @@ namespace MassTransit.SagaStateMachine
             Event = @event;
         }
 
+        public Event Event { get; }
+
         public bool IsStateTransitionEvent(State state)
         {
             return Equals(Event, state.Enter) || Equals(Event, state.BeforeEnter)
-                   || Equals(Event, state.AfterLeave) || Equals(Event, state.Leave);
+                || Equals(Event, state.AfterLeave) || Equals(Event, state.Leave);
         }
 
         public void Bind(State<TInstance> state)
         {
-            var thenBehavior = GetBehavior(_thenActivities);
-            var elseBehavior = GetBehavior(_elseActivities);
+            IBehavior<TInstance> thenBehavior = GetBehavior(_thenActivities);
+            IBehavior<TInstance> elseBehavior = GetBehavior(_elseActivities);
 
             var conditionActivity = new ConditionExceptionActivity<TInstance, TData, TException>(_condition, thenBehavior, elseBehavior);
 
@@ -111,8 +113,8 @@ namespace MassTransit.SagaStateMachine
 
         public void Bind(IBehaviorBuilder<TInstance> builder)
         {
-            var thenBehavior = GetBehavior(_thenActivities);
-            var elseBehavior = GetBehavior(_elseActivities);
+            IBehavior<TInstance> thenBehavior = GetBehavior(_thenActivities);
+            IBehavior<TInstance> elseBehavior = GetBehavior(_elseActivities);
 
             var conditionActivity = new ConditionExceptionActivity<TInstance, TData, TException>(_condition, thenBehavior, elseBehavior);
 
@@ -123,7 +125,7 @@ namespace MassTransit.SagaStateMachine
         {
             var builder = new CatchBehaviorBuilder<TInstance>();
 
-            foreach (var activity in activities.GetStateActivityBinders())
+            foreach (IActivityBinder<TInstance> activity in activities.GetStateActivityBinders())
                 activity.Bind(builder);
 
             return builder.Behavior;

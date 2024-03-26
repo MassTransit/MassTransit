@@ -290,6 +290,16 @@
         }
 
         /// <summary>
+        /// Builds the routing slip using the current state of the builder
+        /// </summary>
+        /// <returns>The RoutingSlip</returns>
+        public RoutingSlip Build()
+        {
+            return new RoutingSlipRoutingSlip(TrackingNumber, _createTimestamp, _itinerary, _activityLogs, _compensateLogs, _activityExceptions,
+                _variables, _subscriptions);
+        }
+
+        /// <summary>
         /// Adds a custom subscription message to the routing slip which is sent at the specified events
         /// </summary>
         /// <param name="address">The destination address where the events are sent</param>
@@ -301,16 +311,6 @@
             MessageEnvelope message)
         {
             _subscriptions.Add(new RoutingSlipSubscription(address, events, contents, activityName, message));
-        }
-
-        /// <summary>
-        /// Builds the routing slip using the current state of the builder
-        /// </summary>
-        /// <returns>The RoutingSlip</returns>
-        public RoutingSlip Build()
-        {
-            return new RoutingSlipRoutingSlip(TrackingNumber, _createTimestamp, _itinerary, _activityLogs, _compensateLogs, _activityExceptions,
-                _variables, _subscriptions);
         }
 
         public void AddActivityLog(HostInfo host, string name, Guid activityTrackingNumber, DateTime timestamp, TimeSpan duration)

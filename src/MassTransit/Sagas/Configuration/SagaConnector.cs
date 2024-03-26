@@ -1,10 +1,9 @@
-﻿using MassTransit.Metadata;
-
-namespace MassTransit.Configuration
+﻿namespace MassTransit.Configuration
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Metadata;
     using Util;
 
 

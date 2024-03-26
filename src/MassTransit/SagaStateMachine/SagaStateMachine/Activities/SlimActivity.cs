@@ -35,7 +35,8 @@ namespace MassTransit.SagaStateMachine
             return _activity.Execute(context, new WidenBehavior<TSaga, TMessage>(behavior, context));
         }
 
-        Task IStateMachineActivity<TSaga, TMessage>.Faulted<TException>(BehaviorExceptionContext<TSaga, TMessage, TException> context, IBehavior<TSaga, TMessage> next)
+        Task IStateMachineActivity<TSaga, TMessage>.Faulted<TException>(BehaviorExceptionContext<TSaga, TMessage, TException> context,
+            IBehavior<TSaga, TMessage> next)
         {
             return _activity.Faulted(context, next);
         }

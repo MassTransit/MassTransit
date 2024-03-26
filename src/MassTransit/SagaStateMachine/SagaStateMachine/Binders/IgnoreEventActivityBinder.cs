@@ -4,17 +4,17 @@ namespace MassTransit.SagaStateMachine
         IActivityBinder<TInstance>
         where TInstance : class, SagaStateMachineInstance
     {
-        public Event Event { get; }
-
         public IgnoreEventActivityBinder(Event @event)
         {
             Event = @event;
         }
 
+        public Event Event { get; }
+
         public bool IsStateTransitionEvent(State state)
         {
             return Equals(Event, state.Enter) || Equals(Event, state.BeforeEnter)
-                   || Equals(Event, state.AfterLeave) || Equals(Event, state.Leave);
+                || Equals(Event, state.AfterLeave) || Equals(Event, state.Leave);
         }
 
         public void Bind(State<TInstance> state)
@@ -35,7 +35,6 @@ namespace MassTransit.SagaStateMachine
     {
         readonly Event<TData> _event;
         readonly StateMachineCondition<TInstance, TData> _filter;
-        public Event Event => _event;
 
         public IgnoreEventActivityBinder(Event<TData> @event, StateMachineCondition<TInstance, TData> filter)
         {
@@ -43,10 +42,12 @@ namespace MassTransit.SagaStateMachine
             _filter = filter;
         }
 
+        public Event Event => _event;
+
         public bool IsStateTransitionEvent(State state)
         {
             return Equals(_event, state.Enter) || Equals(_event, state.BeforeEnter)
-                   || Equals(_event, state.AfterLeave) || Equals(_event, state.Leave);
+                || Equals(_event, state.AfterLeave) || Equals(_event, state.Leave);
         }
 
         public void Bind(State<TInstance> state)

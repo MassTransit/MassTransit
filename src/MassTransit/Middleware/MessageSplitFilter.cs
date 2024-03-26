@@ -25,7 +25,7 @@ namespace MassTransit.Middleware
         void IProbeSite.Probe(ProbeContext context)
         {
             var scope = context.CreateFilterScope("split");
-            scope.Set(new {MessageType = TypeCache<TMessage>.ShortName});
+            scope.Set(new { MessageType = TypeCache<TMessage>.ShortName });
 
             _next.Probe(scope);
         }

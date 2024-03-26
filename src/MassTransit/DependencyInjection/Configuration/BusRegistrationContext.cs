@@ -219,6 +219,7 @@ namespace MassTransit.Configuration
         {
         }
 
+
         class Endpoint
         {
             public Endpoint(IEndpointDefinition definition, IEnumerable<IConsumerDefinition>? consumers, IEnumerable<ISagaDefinition>? sagas,

@@ -17,10 +17,7 @@ namespace MassTransit.RetryPolicies.ExceptionFilters
         void IProbeSite.Probe(ProbeContext context)
         {
             var scope = context.CreateScope("filter");
-            scope.Set(new
-            {
-                ExceptionType = typeof(T).Name
-            });
+            scope.Set(new { ExceptionType = typeof(T).Name });
         }
 
         bool IExceptionFilter.Match(Exception exception)

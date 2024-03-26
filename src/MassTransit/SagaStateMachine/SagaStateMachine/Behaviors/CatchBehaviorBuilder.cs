@@ -1,9 +1,8 @@
-﻿using System.Threading.Tasks;
-
-namespace MassTransit.SagaStateMachine
+﻿namespace MassTransit.SagaStateMachine
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
 
 
     public class CatchBehaviorBuilder<TSaga> :
@@ -41,6 +40,7 @@ namespace MassTransit.SagaStateMachine
 
             return current;
         }
+
 
         class LastCatchBehavior :
             IBehavior<TSaga>
@@ -86,6 +86,5 @@ namespace MassTransit.SagaStateMachine
                 return _activity.Faulted(context, SagaStateMachine.Behavior.Empty<TSaga>());
             }
         }
-
     }
 }

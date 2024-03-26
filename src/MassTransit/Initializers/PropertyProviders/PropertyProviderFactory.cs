@@ -139,7 +139,7 @@ namespace MassTransit.Initializers.PropertyProviders
             bool IProviderFactory.TryGetProvider<T>(PropertyInfo propertyInfo, out IPropertyProvider<TInput, T> provider)
             {
                 if (TryGetConverter(out IPropertyConverter<T, TInputProperty> propertyConverter)
-                    && _factory.TryGetPropertyProvider<TInputProperty>(propertyInfo, out IPropertyProvider<TInput, TInputProperty> inputFactory))
+                    && _factory.TryGetPropertyProvider(propertyInfo, out IPropertyProvider<TInput, TInputProperty> inputFactory))
                 {
                     provider = new PropertyConverterPropertyProvider<TInput, T, TInputProperty>(propertyConverter, inputFactory);
                     return true;
@@ -159,7 +159,7 @@ namespace MassTransit.Initializers.PropertyProviders
                         return converter != default;
                     }
 
-                    if (TypeConverterCache.TryGetTypeConverter<T, TProperty>(out ITypeConverter<T, TProperty> typeConverter))
+                    if (TypeConverterCache.TryGetTypeConverter(out ITypeConverter<T, TProperty> typeConverter))
                     {
                         converter = new TypePropertyConverter<T, TProperty>(typeConverter);
                         return true;
@@ -224,7 +224,7 @@ namespace MassTransit.Initializers.PropertyProviders
                     return converter != default;
                 }
 
-                if (_factory.TryGetPropertyConverter<T, TTask>(out IPropertyConverter<T, TTask> taskConverter))
+                if (_factory.TryGetPropertyConverter(out IPropertyConverter<T, TTask> taskConverter))
                 {
                     converter = new TaskPropertyConverter<T, TTask>(taskConverter) as IPropertyConverter<T, TProperty>;
                     return converter != default;
@@ -250,7 +250,7 @@ namespace MassTransit.Initializers.PropertyProviders
             {
                 if (typeof(T).IsTask(out var taskType) && taskType == typeof(TTask))
                 {
-                    if (_factory.TryGetPropertyProvider<TTask>(propertyInfo, out IPropertyProvider<TInput, TTask> providerFactory))
+                    if (_factory.TryGetPropertyProvider(propertyInfo, out IPropertyProvider<TInput, TTask> providerFactory))
                     {
                         provider = new TaskPropertyProvider<TInput, TTask>(providerFactory) as IPropertyProvider<TInput, T>;
                         return provider != null;
@@ -269,7 +269,7 @@ namespace MassTransit.Initializers.PropertyProviders
                     return converter != default;
                 }
 
-                if (_factory.TryGetPropertyConverter<T, TTask>(out IPropertyConverter<T, TTask> taskConverter))
+                if (_factory.TryGetPropertyConverter(out IPropertyConverter<T, TTask> taskConverter))
                 {
                     converter = new TaskPropertyConverter<T, TTask>(taskConverter) as IPropertyConverter<T, TProperty>;
                     return converter != default;
@@ -296,7 +296,7 @@ namespace MassTransit.Initializers.PropertyProviders
             {
                 if (typeof(T).IsNullable(out var underlyingType) && underlyingType == typeof(TValue))
                 {
-                    if (_factory.TryGetPropertyProvider<TValue>(propertyInfo, out IPropertyProvider<TInput, TValue> providerFactory))
+                    if (_factory.TryGetPropertyProvider(propertyInfo, out IPropertyProvider<TInput, TValue> providerFactory))
                     {
                         provider = new ToNullablePropertyProvider<TInput, TValue>(providerFactory) as IPropertyProvider<TInput, T>;
                         return provider != null;
@@ -317,7 +317,7 @@ namespace MassTransit.Initializers.PropertyProviders
                         return converter != default;
                     }
 
-                    if (TypeConverterCache.TryGetTypeConverter<T, TProperty>(out ITypeConverter<T, TProperty> typeConverter))
+                    if (TypeConverterCache.TryGetTypeConverter(out ITypeConverter<T, TProperty> typeConverter))
                     {
                         converter = new TypePropertyConverter<T, TProperty>(typeConverter);
                         return true;
@@ -429,7 +429,7 @@ namespace MassTransit.Initializers.PropertyProviders
                         return converter != default;
                     }
 
-                    if (TypeConverterCache.TryGetTypeConverter<T, TValue>(out ITypeConverter<T, TValue> typeConverter))
+                    if (TypeConverterCache.TryGetTypeConverter(out ITypeConverter<T, TValue> typeConverter))
                     {
                         var typePropertyConverter = new TypePropertyConverter<T, TValue>(typeConverter);
                         converter = new FromNullablePropertyConverter<T, TValue>(typePropertyConverter) as IPropertyConverter<T, TProperty>;
@@ -483,7 +483,7 @@ namespace MassTransit.Initializers.PropertyProviders
                     return converter != null;
                 }
 
-                if (_factory.TryGetPropertyConverter<T, TValue>(out IPropertyConverter<T, TValue> elementConverter))
+                if (_factory.TryGetPropertyConverter(out IPropertyConverter<T, TValue> elementConverter))
                 {
                     converter = new VariablePropertyConverter<T, TVariable, TValue>(elementConverter) as IPropertyConverter<T, TProperty>;
                     return converter != null;
@@ -624,7 +624,7 @@ namespace MassTransit.Initializers.PropertyProviders
                         return converter != null;
                     }
 
-                    if (_factory.TryGetPropertyConverter<TElement, TInputElement>(out IPropertyConverter<TElement, TInputElement> elementConverter))
+                    if (_factory.TryGetPropertyConverter(out IPropertyConverter<TElement, TInputElement> elementConverter))
                     {
                         converter = new ArrayPropertyConverter<TElement, TInputElement>(elementConverter) as IPropertyConverter<T, TProperty>;
                         return converter != null;
@@ -668,7 +668,7 @@ namespace MassTransit.Initializers.PropertyProviders
                         return converter != null;
                     }
 
-                    if (_factory.TryGetPropertyConverter<TElement, TInputElement>(out IPropertyConverter<TElement, TInputElement> elementConverter))
+                    if (_factory.TryGetPropertyConverter(out IPropertyConverter<TElement, TInputElement> elementConverter))
                     {
                         converter = new ListPropertyConverter<TElement, TInputElement>(elementConverter) as IPropertyConverter<T, TProperty>;
                         return converter != null;
@@ -713,7 +713,8 @@ namespace MassTransit.Initializers.PropertyProviders
             {
                 if (type.ClosesType(typeof(IDictionary<,>), out Type[] types)
                     || type.ClosesType(typeof(IReadOnlyDictionary<,>), out types)
-                    || type.ClosesType(typeof(IEnumerable<>), out Type[] enumerableTypes) && enumerableTypes[0].ClosesType(typeof(KeyValuePair<,>), out types))
+                    || (type.ClosesType(typeof(IEnumerable<>), out Type[] enumerableTypes)
+                        && enumerableTypes[0].ClosesType(typeof(KeyValuePair<,>), out types)))
                 {
                     var factoryType = typeof(DictionaryResult<,>).MakeGenericType(typeof(TInput), typeof(TInputProperty), typeof(TInputKey),
                         typeof(TInputValue), types[0], types[1]);

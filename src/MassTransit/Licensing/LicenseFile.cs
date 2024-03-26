@@ -1,5 +1,5 @@
 #nullable enable
-    namespace MassTransit.Licensing
+namespace MassTransit.Licensing
 {
     using System.Collections.Generic;
 

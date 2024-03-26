@@ -135,9 +135,7 @@
         public void Rebucket(IBucketNode<TValue> node)
         {
             lock (_lock)
-            {
                 node.AssignToBucket(_currentBucket);
-            }
         }
 
         public ConnectHandle Connect(ICacheValueObserver<TValue> observer)
@@ -225,9 +223,7 @@
                 if (_currentBucket != null)
                 {
                     lock (_currentBucket)
-                    {
                         _currentBucket.Stop(now);
-                    }
                 }
 
                 CurrentBucketIndex = index;
@@ -279,8 +275,8 @@
                 var expiration = now - _maxAge;
                 var aged = now - _minAge;
                 while (AreLowOnBuckets
-                    || bucket.HasExpired(expiration)
-                    || itemsAboveCapacity > 0 && bucket.IsOldEnough(aged))
+                       || bucket.HasExpired(expiration)
+                       || (itemsAboveCapacity > 0 && bucket.IsOldEnough(aged)))
                 {
                     IBucketNode<TValue> node = bucket.Head;
 
@@ -298,9 +294,9 @@
                                 --itemsAboveCapacity;
 
                                 // so if we don't await this, can't be too bad can it?
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                                #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                                 EvictNode(node);
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                                #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                             }
                             else
                             {

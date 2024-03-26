@@ -30,13 +30,13 @@
             _observers.Connect(this);
         }
 
-        public IDeadLetterQueueNameFormatter DeadLetterQueueNameFormatter { get; set; }
-        public IErrorQueueNameFormatter ErrorQueueNameFormatter { get; set; }
-
         void ISendTopologyConfigurationObserver.MessageTopologyCreated<T>(IMessageSendTopologyConfigurator<T> messageTopology)
         {
             ApplyConventionsToMessageTopology(messageTopology);
         }
+
+        public IDeadLetterQueueNameFormatter DeadLetterQueueNameFormatter { get; set; }
+        public IErrorQueueNameFormatter ErrorQueueNameFormatter { get; set; }
 
         public IMessageSendTopologyConfigurator<T> GetMessageTopology<T>()
             where T : class
@@ -44,7 +44,8 @@
             if (MessageTypeCache<T>.IsValidMessageType == false)
                 throw new ArgumentException(MessageTypeCache<T>.InvalidMessageTypeReason, nameof(T));
 
-            var specification = _messageTypes.GetOrAdd(typeof(T), type => new Lazy<IMessageSendTopologyConfigurator>(() => CreateMessageTopology<T>(type)));
+            Lazy<IMessageSendTopologyConfigurator>? specification = _messageTypes.GetOrAdd(typeof(T),
+                type => new Lazy<IMessageSendTopologyConfigurator>(() => CreateMessageTopology<T>(type)));
 
             return (IMessageSendTopologyConfigurator<T>)specification.Value;
         }

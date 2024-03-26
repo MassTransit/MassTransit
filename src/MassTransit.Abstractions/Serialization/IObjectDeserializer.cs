@@ -1,4 +1,3 @@
-#nullable enable
 namespace MassTransit
 {
     public interface IObjectDeserializer

@@ -24,6 +24,11 @@ namespace MassTransit
             FinalizeCompleted = true;
         }
 
+        /// <summary>
+        /// The number of concurrent messages
+        /// </summary>
+        public int? ConcurrentMessageLimit { get; set; }
+
         IEnumerable<ValidationResult> ISpecification.Validate()
         {
             if (SlotWaitTime < TimeSpan.FromSeconds(1))
@@ -31,11 +36,6 @@ namespace MassTransit
             if (StatusCheckInterval < TimeSpan.FromSeconds(30))
                 yield return this.Failure(nameof(StatusCheckInterval), "must be >= 30 seconds");
         }
-
-        /// <summary>
-        /// The number of concurrent messages
-        /// </summary>
-        public int? ConcurrentMessageLimit { get; set; }
 
         Uri JobSagaSettingsConfigurator.JobSagaEndpointAddress
         {

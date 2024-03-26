@@ -74,12 +74,16 @@ namespace MassTransit.Configuration
             Type activityDefinitionType = null)
         {
             if (activityType.ClosesType(typeof(IActivity<,>), out Type[] _))
+            {
                 throw new ArgumentException($"Activities must be registered using RegisterActivity: {TypeCache.GetShortName(activityType)}",
                     nameof(activityType));
+            }
 
             if (!activityType.ClosesType(typeof(IExecuteActivity<>), out Type[] argumentTypes))
+            {
                 throw new ArgumentException($"Execute activities must implement IExecuteActivity<TArguments>: {TypeCache.GetShortName(activityType)}",
                     nameof(activityType));
+            }
 
             if (activityDefinitionType != null)
             {

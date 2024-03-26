@@ -2,6 +2,7 @@ namespace MassTransit.Configuration
 {
     using Middleware;
 
+
     public partial class SagaConnector<TSaga, TMessage>
         where TSaga : class, ISaga
         where TMessage : class

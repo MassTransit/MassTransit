@@ -78,8 +78,10 @@ namespace MassTransit.Configuration
             Type activityDefinitionType = null)
         {
             if (!activityType.ClosesType(typeof(IActivity<,>), out Type[] argumentTypes))
+            {
                 throw new ArgumentException($" activities must implement IActivity<TArguments, TLog>: {TypeCache.GetShortName(activityType)}",
                     nameof(activityType));
+            }
 
             if (activityDefinitionType != null)
             {

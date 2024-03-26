@@ -2,6 +2,7 @@ namespace MassTransit.Configuration
 {
     using System;
 
+
     public partial class StateMachineInterfaceType<TInstance, TData>
     {
         public class MessageCorrelationIdEventCorrelationBuilder :

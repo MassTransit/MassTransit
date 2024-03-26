@@ -44,7 +44,7 @@ namespace MassTransit.Serialization
         Headers GetHeaders()
         {
             return _envelope.Headers != null
-                ? (Headers)new ReadOnlyDictionaryHeaders(_objectDeserializer, _envelope.Headers)
+                ? new ReadOnlyDictionaryHeaders(_objectDeserializer, _envelope.Headers)
                 : EmptyHeaders.Instance;
         }
 

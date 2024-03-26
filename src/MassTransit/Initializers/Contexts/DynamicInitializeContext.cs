@@ -35,7 +35,7 @@
         public bool TryGetParent<T>(out InitializeContext<T> parentContext)
             where T : class
         {
-            if (this is InitializeContext<T> parent || Parent != null && Parent.TryGetParent(out parent))
+            if (this is InitializeContext<T> parent || (Parent != null && Parent.TryGetParent(out parent)))
             {
                 parentContext = parent;
                 return true;

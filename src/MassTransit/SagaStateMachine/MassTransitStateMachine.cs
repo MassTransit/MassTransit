@@ -147,7 +147,7 @@
 
         Event StateMachine.GetEvent(string name)
         {
-            if (_eventCache.TryGetValue(name, out StateMachineEvent result))
+            if (_eventCache.TryGetValue(name, out var result))
                 return result.Event;
 
             throw new UnknownEventException(_name, name);
@@ -301,7 +301,7 @@
         protected void SetCompleted(Func<TInstance, Task<bool>> completed)
         {
             _isCompleted = completed != null
-                ? (Func<BehaviorContext<TInstance>, Task<bool>>)(context => completed(context.Saga))
+                ? context => completed(context.Saga)
                 : NotCompletedByDefault;
         }
 
@@ -751,7 +751,7 @@
 
             var name = $"{property.Name}.{stateProperty.Name}";
 
-            StateMachineState existingState = GetStateProperty(stateProperty, propertyValue);
+            var existingState = GetStateProperty(stateProperty, propertyValue);
             if (name.Equals(existingState?.Name))
                 return;
 
@@ -849,7 +849,7 @@
 
             var name = $"{property.Name}.{stateProperty.Name}";
 
-            StateMachineState existingState = GetStateProperty(stateProperty, propertyValue);
+            var existingState = GetStateProperty(stateProperty, propertyValue);
             if (name.Equals(existingState?.Name) && superState.Name.Equals(existingState?.SuperState?.Name))
                 return;
 
@@ -1799,9 +1799,10 @@
             if (settings.Received == null)
                 Event(propertyExpression, x => x.AnyReceived);
             else
-            {
-                Event(propertyExpression, x => x.AnyReceived, x => { settings.Received(x); });
-            }
+                Event(propertyExpression, x => x.AnyReceived, x =>
+                {
+                    settings.Received(x);
+                });
 
             DuringAny(
                 When(schedule.AnyReceived)
@@ -1903,7 +1904,7 @@
             var convertExpression = Expression.Convert(eventParameter, typeof(Event<>).MakeGenericType(messageType));
             var @new = Expression.New(constructorInfo, convertExpression);
 
-            var factoryMethod = Expression.Lambda<Func<Event, EventRegistration>>(@new, eventParameter).CompileFast();
+            Func<Event, EventRegistration> factoryMethod = Expression.Lambda<Func<Event, EventRegistration>>(@new, eventParameter).CompileFast();
 
             return factoryMethod(@event);
         }

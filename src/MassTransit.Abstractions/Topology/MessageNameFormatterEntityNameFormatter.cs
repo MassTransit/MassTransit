@@ -15,7 +15,7 @@ namespace MassTransit
 
         string IEntityNameFormatter.FormatEntityName<T>()
         {
-            return _formatter.GetMessageName(typeof(T)).ToString();
+            return _formatter.GetMessageName(typeof(T));
         }
     }
 }

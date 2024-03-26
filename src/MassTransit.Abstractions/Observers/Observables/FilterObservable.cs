@@ -38,7 +38,6 @@
         public void Method6()
         {
         }
-
     }
 
 
@@ -73,6 +72,5 @@
         public void Method6()
         {
         }
-
     }
 }

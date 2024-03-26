@@ -37,7 +37,7 @@
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
 
-            if (value == null || value is string s && string.IsNullOrEmpty(s))
+            if (value == null || (value is string s && string.IsNullOrEmpty(s)))
                 _variables.Remove(key);
             else
                 _variables[key] = value;
@@ -96,7 +96,7 @@
         {
             foreach (KeyValuePair<string, object> value in values)
             {
-                if (value.Value == null || value.Value is string s && string.IsNullOrEmpty(s))
+                if (value.Value == null || (value.Value is string s && string.IsNullOrEmpty(s)))
                     _variables.Remove(value.Key);
                 else
                     _variables[value.Key] = value.Value;

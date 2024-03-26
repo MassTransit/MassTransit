@@ -148,12 +148,12 @@
                 }
             }
 
-        #pragma warning disable 4014
+            #pragma warning disable 4014
             // ReSharper disable once MethodSupportsCancellation
             HandleSupervisorTask().ContinueWith(_ =>
             {
             });
-        #pragma warning restore 4014
+            #pragma warning restore 4014
 
             return await asyncContext.Context.ConfigureAwait(false);
         }

@@ -96,7 +96,7 @@ namespace MassTransit
 
                 _conventions.Add(convention);
 
-                foreach (var messageConsumeTopologyConfigurator in _messageTypes.Values)
+                foreach (Lazy<IMessageConsumeTopologyConfigurator> messageConsumeTopologyConfigurator in _messageTypes.Values)
                     messageConsumeTopologyConfigurator.Value.TryAddConvention(convention);
 
                 return true;
@@ -142,7 +142,8 @@ namespace MassTransit
             if (MessageTypeCache<T>.IsValidMessageType == false)
                 throw new ArgumentException(MessageTypeCache<T>.InvalidMessageTypeReason, nameof(T));
 
-            var specification = _messageTypes.GetOrAdd(typeof(T), type => new Lazy<IMessageConsumeTopologyConfigurator>(() => CreateMessageTopology<T>(type)));
+            Lazy<IMessageConsumeTopologyConfigurator> specification = _messageTypes.GetOrAdd(typeof(T),
+                type => new Lazy<IMessageConsumeTopologyConfigurator>(() => CreateMessageTopology<T>(type)));
 
             return specification.Value as IMessageConsumeTopologyConfigurator<T>;
         }

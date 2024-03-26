@@ -60,7 +60,7 @@ namespace MassTransit.SqlTransport
 
             var supervisor = new ClientContextSupervisor(context.ClientContextSupervisor);
 
-            return CreateSendTransport((Uri)endpointAddress, endpointAddress.Type == SqlEndpointAddress.AddressType.Queue
+            return CreateSendTransport(endpointAddress, endpointAddress.Type == SqlEndpointAddress.AddressType.Queue
                 ? new QueueSendTransportContext(_hostConfiguration, context, supervisor, configureTopology, settings.EntityName)
                 : new TopicSendTransportContext(_hostConfiguration, context, supervisor, configureTopology, settings.EntityName));
         }

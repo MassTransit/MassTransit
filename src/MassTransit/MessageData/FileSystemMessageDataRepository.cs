@@ -11,7 +11,7 @@ namespace MassTransit.MessageData
         IMessageDataRepository
     {
         const int DefaultBufferSize = 4096;
-        static readonly char[] _separator = {':'};
+        static readonly char[] _separator = { ':' };
         readonly DirectoryInfo _dataDirectory;
 
         public FileSystemMessageDataRepository(DirectoryInfo dataDirectory)
@@ -72,7 +72,7 @@ namespace MassTransit.MessageData
             if (address.Scheme != "urn")
                 throw new ArgumentException("The address must be a urn");
 
-            string[] parts = address.Segments[0].Split(_separator);
+            var parts = address.Segments[0].Split(_separator);
             if (parts[0] != "file")
                 throw new ArgumentException("The address must be a urn:file");
 

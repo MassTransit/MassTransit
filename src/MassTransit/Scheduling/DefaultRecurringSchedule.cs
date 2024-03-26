@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.Scheduling
 {
     using System;
-    using System.Reflection;
 
 
     public abstract class DefaultRecurringSchedule :

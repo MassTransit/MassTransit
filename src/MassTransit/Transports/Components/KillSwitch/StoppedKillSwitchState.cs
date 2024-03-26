@@ -9,9 +9,9 @@ namespace MassTransit.Transports.Components
     public class StoppedKillSwitchState :
         IKillSwitchState
     {
-        Stopwatch _elapsed;
         readonly Exception _exception;
         readonly IKillSwitch _killSwitch;
+        Stopwatch _elapsed;
         Timer _timer;
 
         public StoppedKillSwitchState(IKillSwitch killSwitch, Exception exception)
@@ -31,12 +31,6 @@ namespace MassTransit.Transports.Components
             });
         }
 
-        public void Activate()
-        {
-            _elapsed = Stopwatch.StartNew();
-            _timer = new Timer(Restart, this, _killSwitch.RestartTimeout, TimeSpan.FromMilliseconds(-1));
-        }
-
         public Task PreConsume<T>(ConsumeContext<T> context)
             where T : class
         {
@@ -53,6 +47,12 @@ namespace MassTransit.Transports.Components
             where T : class
         {
             return Task.CompletedTask;
+        }
+
+        public void Activate()
+        {
+            _elapsed = Stopwatch.StartNew();
+            _timer = new Timer(Restart, this, _killSwitch.RestartTimeout, TimeSpan.FromMilliseconds(-1));
         }
 
         void Restart(object state)

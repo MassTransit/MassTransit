@@ -15,14 +15,14 @@ namespace MassTransit.Logging
             _disabled = new List<string>();
         }
 
+        public LogLevel LogLevel { get; set; }
+
         public TextWriterLoggerOptions Disable(string name)
         {
             _disabled.Add(name);
 
             return this;
         }
-
-        public LogLevel LogLevel { get; set; }
 
         public bool IsEnabled(string name)
         {

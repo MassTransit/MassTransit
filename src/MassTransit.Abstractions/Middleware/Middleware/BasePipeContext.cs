@@ -2,7 +2,6 @@ namespace MassTransit.Middleware
 {
     using System;
     using System.Diagnostics.CodeAnalysis;
-    using System.Reflection;
     using System.Threading;
     using Payloads;
 
@@ -81,11 +80,6 @@ namespace MassTransit.Middleware
             _payloadCache = payloadCache;
         }
 
-        /// <summary>
-        /// Returns the CancellationToken for the context (implicit interface)
-        /// </summary>
-        public virtual CancellationToken CancellationToken { get; }
-
         protected IPayloadCache PayloadCache
         {
             get
@@ -99,6 +93,11 @@ namespace MassTransit.Middleware
                 return _payloadCache!;
             }
         }
+
+        /// <summary>
+        /// Returns the CancellationToken for the context (implicit interface)
+        /// </summary>
+        public virtual CancellationToken CancellationToken { get; }
 
         /// <summary>
         /// Returns true if the payload type is included with or supported by the context type

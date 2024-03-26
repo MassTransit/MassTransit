@@ -37,7 +37,8 @@ namespace MassTransit
         /// <param name="consumerFactory"></param>
         /// <param name="configure">Configure the consumer pipe</param>
         /// <typeparam name="TConsumer"></typeparam>
-        void Consumer<TConsumer>(IConsumerFactory<TConsumer> consumerFactory, Action<IConsumerMessageConfigurator<TConsumer, Batch<TMessage>>>? configure = null)
+        void Consumer<TConsumer>(IConsumerFactory<TConsumer> consumerFactory,
+            Action<IConsumerMessageConfigurator<TConsumer, Batch<TMessage>>>? configure = null)
             where TConsumer : class, IConsumer<Batch<TMessage>>;
     }
 }

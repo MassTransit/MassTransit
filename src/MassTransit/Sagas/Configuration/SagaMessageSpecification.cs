@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
 
+
     public partial class SagaConnector<TSaga, TMessage>
         where TSaga : class, ISaga
         where TMessage : class

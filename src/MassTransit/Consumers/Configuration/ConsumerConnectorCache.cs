@@ -1,9 +1,10 @@
-﻿using System;
-using System.Collections.Concurrent;
-using MassTransit.Consumer;
-
-namespace MassTransit.Configuration
+﻿namespace MassTransit.Configuration
 {
+    using System;
+    using System.Collections.Concurrent;
+    using Consumer;
+
+
     public class ConsumerConnectorCache<TConsumer> :
         IConsumerConnectorCache
         where TConsumer : class
@@ -69,7 +70,7 @@ namespace MassTransit.Configuration
             {
                 var consumerFactory = new ObjectConsumerFactory<T>(objectFactory);
 
-                var specification = _connector.Value.CreateConsumerSpecification<T>();
+                IConsumerSpecification<T> specification = _connector.Value.CreateConsumerSpecification<T>();
 
                 return _connector.Value.ConnectConsumer(consumePipe, consumerFactory, specification);
             }

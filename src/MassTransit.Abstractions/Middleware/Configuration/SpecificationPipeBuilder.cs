@@ -2,6 +2,7 @@ namespace MassTransit.Configuration
 {
     using System.Collections.Generic;
 
+
     public partial class PipeConfigurator<TContext>
         where TContext : class, PipeContext
     {
@@ -18,6 +19,19 @@ namespace MassTransit.Configuration
             public void AddFilter(IFilter<TContext> filter)
             {
                 _filters.Add(filter);
+            }
+
+            public bool IsDelegated => false;
+            public bool IsImplemented => false;
+
+            public ISpecificationPipeBuilder<TContext> CreateDelegatedBuilder()
+            {
+                return new ChildSpecificationPipeBuilder(this, IsImplemented, true);
+            }
+
+            public ISpecificationPipeBuilder<TContext> CreateImplementedBuilder()
+            {
+                return new ChildSpecificationPipeBuilder(this, true, IsDelegated);
             }
 
             public IPipe<TContext> Build()
@@ -44,19 +58,6 @@ namespace MassTransit.Configuration
                     current = new FilterPipe(_filters[i], current);
 
                 return current;
-            }
-
-            public bool IsDelegated => false;
-            public bool IsImplemented => false;
-
-            public ISpecificationPipeBuilder<TContext> CreateDelegatedBuilder()
-            {
-                return new ChildSpecificationPipeBuilder(this, IsImplemented, true);
-            }
-
-            public ISpecificationPipeBuilder<TContext> CreateImplementedBuilder()
-            {
-                return new ChildSpecificationPipeBuilder(this, true, IsDelegated);
             }
         }
     }

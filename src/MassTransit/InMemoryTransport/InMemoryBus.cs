@@ -1,10 +1,11 @@
-using System;
-using MassTransit.Configuration;
-using MassTransit.InMemoryTransport.Configuration;
-using MassTransit.Topology;
-
 namespace MassTransit
 {
+    using System;
+    using Configuration;
+    using InMemoryTransport.Configuration;
+    using Topology;
+
+
     public static class InMemoryBus
     {
         public static IMessageTopologyConfigurator MessageTopology => Cached.MessageTopologyValue.Value;

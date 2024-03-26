@@ -22,7 +22,7 @@
             if (address == null)
                 throw new ArgumentNullException(nameof(address));
 
-            if (_values.TryGetValue(address, out byte[] value))
+            if (_values.TryGetValue(address, out var value))
                 return Task.FromResult<Stream>(new MemoryStream(value, false));
 
             throw new MessageDataNotFoundException(address);

@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Threading;
-using MassTransit.Internals;
-
-namespace MassTransit.Metadata
+﻿namespace MassTransit.Metadata
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Reflection;
+    using Internals;
+
+
     public static class TypeMetadataCache
     {
         static readonly object _builderLock = new object();
@@ -14,9 +14,7 @@ namespace MassTransit.Metadata
         public static Type GetImplementationType(Type type)
         {
             lock (_builderLock)
-            {
                 return Cached.Builder.GetImplementationType(type);
-            }
         }
 
         public static string GetShortName(Type type)
@@ -48,7 +46,6 @@ namespace MassTransit.Metadata
         {
             return MessageTypeCache.GetMessageTypeNames(type);
         }
-
 
         public static bool IsValidMessageDataType(Type type)
         {

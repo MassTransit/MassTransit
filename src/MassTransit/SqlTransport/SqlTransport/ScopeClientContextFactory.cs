@@ -45,9 +45,9 @@ namespace MassTransit.SqlTransport
                 return Task.FromResult(connectionContext.CreateClientContext(createCancellationToken));
             }
 
-        #pragma warning disable CS4014
+            #pragma warning disable CS4014
             _connectionContextSupervisor.CreateAgent(asyncContext, Create, cancellationToken);
-        #pragma warning restore CS4014
+            #pragma warning restore CS4014
         }
     }
 }

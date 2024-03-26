@@ -3,7 +3,6 @@ namespace MassTransit
     using System;
     using System.Threading.Tasks;
     using Configuration;
-    using Middleware;
 
 
     public static class Pipe
@@ -151,8 +150,8 @@ namespace MassTransit
             IPipe<T>
             where T : class, PipeContext
         {
-            readonly IPipe<T> _nextPipe;
             readonly Action<T> _callback;
+            readonly IPipe<T> _nextPipe;
 
             public PushPipe(IPipe<T> nextPipe, Action<T> callback)
             {

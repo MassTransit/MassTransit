@@ -30,7 +30,7 @@ namespace MassTransit.Configuration
                 ? instanceConfigurator.Options(options)
                 : instanceConfigurator.Options<JobServiceOptions>();
 
-            var settings = new InstanceJobServiceSettings(new JobConsumerOptions() { HeartbeatInterval = _options.HeartbeatInterval })
+            var settings = new InstanceJobServiceSettings(new JobConsumerOptions { HeartbeatInterval = _options.HeartbeatInterval })
             {
                 InstanceEndpointConfigurator = instanceConfigurator.InstanceEndpointConfigurator,
                 InstanceAddress = instanceConfigurator.InstanceAddress
@@ -147,9 +147,9 @@ namespace MassTransit.Configuration
             void UseInMemoryOutbox(IReceiveEndpointConfigurator configurator)
             {
                 if (context == null)
-            #pragma warning disable CS0618
+                    #pragma warning disable CS0618
                     configurator.UseInMemoryOutbox();
-            #pragma warning restore CS0618
+                #pragma warning restore CS0618
                 else
                     configurator.UseInMemoryOutbox(context);
             }

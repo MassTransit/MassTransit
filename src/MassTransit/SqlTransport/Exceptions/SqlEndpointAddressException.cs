@@ -18,7 +18,7 @@ namespace MassTransit
         }
 
         public SqlEndpointAddressException(Uri address, string message, Exception innerException)
-            : base(address,message, innerException)
+            : base(address, message, innerException)
         {
         }
 

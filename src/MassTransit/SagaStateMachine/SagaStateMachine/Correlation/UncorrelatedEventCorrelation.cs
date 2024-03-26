@@ -3,6 +3,7 @@ namespace MassTransit
     using System;
     using System.Collections.Generic;
 
+
     public partial class MassTransitStateMachine<TInstance>
         where TInstance : class, SagaStateMachineInstance
     {

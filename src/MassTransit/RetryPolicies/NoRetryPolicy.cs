@@ -15,10 +15,7 @@
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            context.Set(new
-            {
-                Policy = "None"
-            });
+            context.Set(new { Policy = "None" });
         }
 
         RetryPolicyContext<T> IRetryPolicy.CreatePolicyContext<T>(T context)

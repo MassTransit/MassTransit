@@ -5,6 +5,7 @@ namespace MassTransit
     using System.Collections.Generic;
     using Configuration;
 
+
     public partial class MassTransitStateMachine<TInstance>
         where TInstance : class, SagaStateMachineInstance
     {

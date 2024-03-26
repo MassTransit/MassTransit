@@ -55,6 +55,3 @@ namespace MassTransit.SagaStateMachine
         }
     }
 }
-
-
-

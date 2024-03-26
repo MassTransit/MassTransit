@@ -6,11 +6,13 @@
             where T : class;
     }
 
+
     public interface IActivationType<out TResult, in T1>
     {
         TResult ActivateType<T>(T1 arg1)
             where T : class;
     }
+
 
     public interface IActivationType<out TResult, in T1, in T2>
     {

@@ -34,7 +34,6 @@ namespace MassTransit.Configuration
         /// </summary>
         public HealthStatus? MinimalFailureStatus { get; set; }
 
-
         /// <summary>
         /// A list of tags that can be used to filter sets of health checks. If empty, the default tags
         /// will be used.

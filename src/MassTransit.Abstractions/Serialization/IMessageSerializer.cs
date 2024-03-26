@@ -1,4 +1,3 @@
-#nullable enable
 namespace MassTransit
 {
     using System.Net.Mime;

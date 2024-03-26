@@ -7,6 +7,7 @@ namespace MassTransit
     using System.Threading.Tasks;
     using Internals;
 
+
     public partial class MassTransitStateMachine<TInstance>
         where TInstance : class, SagaStateMachineInstance
     {
@@ -68,7 +69,7 @@ namespace MassTransit
 
                 var statePropertyExpression = Expression.Property(parameterExpression, _propertyInfo.GetMethod);
 
-                var stateExpression = states.Select(state => Expression.Equal(statePropertyExpression, Expression.Constant(_index[(string)state.Name])))
+                var stateExpression = states.Select(state => Expression.Equal(statePropertyExpression, Expression.Constant(_index[state.Name])))
                     .Aggregate((left, right) => Expression.Or(left, right));
 
                 return Expression.Lambda<Func<TInstance, bool>>(stateExpression, parameterExpression);
