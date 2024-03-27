@@ -9,7 +9,7 @@ namespace MassTransit.SqlTransport.SqlServer
     public class SqlServerDatabaseMigrator :
         ISqlTransportDatabaseMigrator
     {
-        const string DbExistsSql = @"SELECT DB_ID('{0}')";
+        const string DbExistsSql = @"SELECT [database_id] from [sys].[databases] WHERE name = '{0}'";
         const string DbCreateSql = @"CREATE DATABASE {0}";
 
         const string SchemaCreateSql = @"USE {0};
