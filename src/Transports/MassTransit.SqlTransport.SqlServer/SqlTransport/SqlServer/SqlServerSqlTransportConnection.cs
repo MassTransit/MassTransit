@@ -3,7 +3,6 @@ namespace MassTransit.SqlTransport.SqlServer
     using System.Data;
     using System.Threading;
     using System.Threading.Tasks;
-    using MassTransit.SqlTransport;
     using Microsoft.Data.SqlClient;
 
 
@@ -50,7 +49,7 @@ namespace MassTransit.SqlTransport.SqlServer
         {
             var builder = new SqlConnectionStringBuilder
             {
-                DataSource = options.Host,
+                DataSource = FormatDataSource(options),
                 InitialCatalog = "master",
                 UserID = options.AdminUsername ?? options.Username,
                 Password = options.AdminPassword ?? options.Password,
@@ -65,7 +64,7 @@ namespace MassTransit.SqlTransport.SqlServer
         {
             var builder = new SqlConnectionStringBuilder
             {
-                DataSource = options.Host,
+                DataSource = FormatDataSource(options),
                 InitialCatalog = options.Database,
                 UserID = options.AdminUsername ?? options.Username,
                 Password = options.AdminPassword ?? options.Password,
@@ -80,7 +79,7 @@ namespace MassTransit.SqlTransport.SqlServer
         {
             var builder = new SqlConnectionStringBuilder
             {
-                DataSource = options.Host,
+                DataSource = FormatDataSource(options),
                 InitialCatalog = options.Database,
                 UserID = options.Username,
                 Password = options.Password,
@@ -88,6 +87,11 @@ namespace MassTransit.SqlTransport.SqlServer
             };
 
             return new SqlServerSqlTransportConnection(builder.ToString());
+        }
+
+        static string? FormatDataSource(SqlTransportOptions options)
+        {
+            return options.Port.HasValue ? $"{options.Host},{options.Port}" : options.Host;
         }
     }
 }
