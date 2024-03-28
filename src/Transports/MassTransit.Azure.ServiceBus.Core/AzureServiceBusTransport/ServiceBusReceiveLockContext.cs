@@ -55,7 +55,13 @@ namespace MassTransit.AzureServiceBusTransport
             if (_message.LockedUntil <= DateTime.UtcNow)
                 throw new MessageLockExpiredException(_inputAddress, $"The message lock expired: {_message.MessageId}");
 
-            if (_message.ExpiresAt < DateTime.UtcNow)
+            // The value of _message.ExpiresAt is not correct is some edge cases due to an issue in Azure Service Bus core.
+            // It is getting calculated based on EnqueuedTime and TimeToLive
+            var expiresAt = _message.TimeToLive == TimeSpan.MaxValue
+                ? DateTimeOffset.MaxValue
+                : _message.EnqueuedTime.Add(_message.TimeToLive);
+
+            if (expiresAt < DateTime.UtcNow)
                 throw new MessageTimeToLiveExpiredException(_inputAddress, $"The message expired: {_message.MessageId}");
 
             return Task.CompletedTask;
