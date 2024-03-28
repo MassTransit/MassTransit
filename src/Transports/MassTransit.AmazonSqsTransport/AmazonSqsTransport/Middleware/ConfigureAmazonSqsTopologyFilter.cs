@@ -72,7 +72,11 @@ public class ConfigureAmazonSqsTopologyFilter<TSettings> :
         await Task.WhenAll(queues).ConfigureAwait(false);
 
         IEnumerable<Task> subscriptions = _brokerTopology.QueueSubscriptions.Select(subscription => Declare(context, subscription));
-        await Task.WhenAll(subscriptions).ConfigureAwait(false);
+
+        foreach (var subscription in subscriptions)
+        {
+            await subscription.ConfigureAwait(false);
+        }
     }
 
     bool AnyAutoDelete()
