@@ -2,7 +2,6 @@ namespace MassTransit.SqlTransport.PostgreSql
 {
     using System;
     using Configuration;
-    using MassTransit.SqlTransport;
     using Npgsql;
 
 

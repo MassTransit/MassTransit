@@ -1,4 +1,4 @@
-namespace MassTransit.SqlTransport
+namespace MassTransit
 {
     public enum SqlReceiveMode
     {
