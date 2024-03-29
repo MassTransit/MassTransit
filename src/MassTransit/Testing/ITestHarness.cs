@@ -64,6 +64,14 @@ namespace MassTransit.Testing
             where T : class, IConsumer;
 
         /// <summary>
+        /// Use the endpoint name formatter to get the send endpoint for the message handler by message type
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <returns></returns>
+        Task<ISendEndpoint> GetHandlerEndpoint<T>()
+            where T : class;
+
+        /// <summary>
         /// Returns the endpoint address for the specified consumer type
         /// </summary>
         /// <typeparam name="T"></typeparam>

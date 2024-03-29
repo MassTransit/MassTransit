@@ -5,6 +5,7 @@
     using System.Linq;
     using Amazon.SQS;
     using Amazon.SQS.Model;
+    using Internals;
     using Transports;
 
 
@@ -36,9 +37,9 @@
             {
                 if (_message.Attributes.TryGetValue(MessageSystemAttributeName.SentTimestamp, out var sentTimestamp))
                 {
-                    if (DateTime.TryParse(sentTimestamp, out var timestamp))
+                    if (long.TryParse(sentTimestamp, out var milliseconds))
                     {
-                        value = timestamp;
+                        value = DateTimeConstants.Epoch + TimeSpan.FromMilliseconds(milliseconds);
                         return true;
                     }
                 }

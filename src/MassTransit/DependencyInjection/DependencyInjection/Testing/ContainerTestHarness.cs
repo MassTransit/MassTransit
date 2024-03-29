@@ -146,6 +146,12 @@ namespace MassTransit.DependencyInjection.Testing
             return provider.GetSendEndpoint(GetConsumerAddress<T>());
         }
 
+        public Task<ISendEndpoint> GetHandlerEndpoint<T>()
+            where T : class
+        {
+            return GetConsumerEndpoint<MessageHandlerConsumer<T>>();
+        }
+
         public Uri GetConsumerAddress<T>()
             where T : class, IConsumer
         {
