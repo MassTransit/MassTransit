@@ -4,13 +4,12 @@ namespace MassTransit.Serialization
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
+    using Internals;
 
 
     public class RawMessageContext :
         MessageContext
     {
-        static readonly DateTime _unixEpoch = new DateTime(1970, 1, 1);
-
         readonly RawSerializerOptions _options;
         readonly Headers _transportHeaders;
 
@@ -56,7 +55,7 @@ namespace MassTransit.Serialization
             {
                 DateTime? sentTime = MessageId?.ToNewId().Timestamp;
 
-                return sentTime > _unixEpoch ? sentTime : default;
+                return sentTime > DateTimeConstants.Epoch ? sentTime : default;
             }
             catch (Exception)
             {

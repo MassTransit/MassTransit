@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.Initializers.TypeConverters
 {
     using System;
+    using Internals;
 
 
     public class DateTimeOffsetTypeConverter :
@@ -10,8 +11,6 @@
         ITypeConverter<DateTimeOffset, string>,
         ITypeConverter<DateTimeOffset, object>
     {
-        readonly DateTime _epoch = new DateTime(1970, 1, 1);
-
         public bool TryConvert(object input, out DateTimeOffset result)
         {
             switch (input)
@@ -40,9 +39,9 @@
 
         public bool TryConvert(DateTimeOffset input, out int result)
         {
-            if (input >= _epoch)
+            if (input >= DateTimeConstants.Epoch)
             {
-                var timeSpan = input.UtcDateTime - _epoch;
+                var timeSpan = input.UtcDateTime - DateTimeConstants.Epoch;
                 if (timeSpan.TotalMilliseconds <= int.MaxValue)
                 {
                     result = (int)timeSpan.TotalMilliseconds;
@@ -56,9 +55,9 @@
 
         public bool TryConvert(DateTimeOffset input, out long result)
         {
-            if (input >= _epoch)
+            if (input >= DateTimeConstants.Epoch)
             {
-                var timeSpan = input.UtcDateTime - _epoch;
+                var timeSpan = input.UtcDateTime - DateTimeConstants.Epoch;
                 if (timeSpan.TotalMilliseconds <= long.MaxValue)
                 {
                     result = (long)timeSpan.TotalMilliseconds;
