@@ -14,7 +14,7 @@ namespace MassTransit.Util
         readonly TimerCallback _callback;
         readonly object _lock = new object();
         readonly object _state;
-        readonly TimeSpan _timeout;
+        TimeSpan _timeout;
         Timer _timer;
         int _triggered;
 
@@ -65,10 +65,13 @@ namespace MassTransit.Util
         /// <summary>
         /// Restarts the existing timer, creates and starts a new timer if it does not exist.
         /// </summary>
-        public void Restart()
+        public void Restart(TimeSpan? timeout = null)
         {
             lock (_lock)
             {
+                if (timeout.HasValue)
+                    _timeout = timeout.Value;
+
                 if (_timer == null)
                     StartInternal();
                 else
