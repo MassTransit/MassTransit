@@ -1,5 +1,6 @@
 namespace MassTransit
 {
+    using System;
     using Microsoft.Extensions.DependencyInjection;
     using SqlTransport;
     using SqlTransport.PostgreSql;
@@ -7,7 +8,7 @@ namespace MassTransit
 
     public static class PostgresSqlTransportConfigurationExtensions
     {
-        public static IServiceCollection AddPostgresMigrationHostedService(this IServiceCollection services, bool createDatabase = true, bool delete = false, bool createInfrastructure = true)
+        public static IServiceCollection AddPostgresMigrationHostedService(this IServiceCollection services, bool create = true, bool delete = false)
         {
             services.AddTransient<ISqlTransportDatabaseMigrator, PostgresDatabaseMigrator>();
 
@@ -15,10 +16,22 @@ namespace MassTransit
             services.AddOptions<SqlTransportMigrationOptions>()
                 .Configure(options =>
                 {
-                    options.CreateDatabase = createDatabase;
-                    options.CreateInfrastructure = createInfrastructure;
+                    options.CreateDatabase = create;
                     options.DeleteDatabase = delete;
+                    options.CreateInfrastructure = create;
                 });
+            services.AddHostedService<SqlTransportMigrationHostedService>();
+
+            return services;
+        }
+
+        public static IServiceCollection AddPostgresMigrationHostedService(this IServiceCollection services, Action<SqlTransportMigrationOptions> options)
+        {
+            services.AddTransient<ISqlTransportDatabaseMigrator, PostgresDatabaseMigrator>();
+
+            services.AddOptions<SqlTransportOptions>();
+            services.AddOptions<SqlTransportMigrationOptions>()
+                .Configure(options);
             services.AddHostedService<SqlTransportMigrationHostedService>();
 
             return services;
