@@ -187,6 +187,35 @@ namespace MassTransit.DbTransport.Tests
         }
 
         [Test]
+        public void Should_support_the_backslash_in_sql_host_names()
+        {
+            var hostAddress = new SqlHostAddress("localhost", "instance", default, "customer_a", "billing");
+            var address = new SqlEndpointAddress(hostAddress, new Uri("queue:input-queue"));
+
+            Assert.AreEqual("db", address.Scheme);
+            Assert.AreEqual("localhost", address.Host);
+            Assert.AreEqual("instance", address.InstanceName);
+            Assert.AreEqual("customer_a", address.VirtualHost);
+            Assert.AreEqual("billing", address.Area);
+            Assert.AreEqual("input-queue", address.Name);
+
+            Assert.AreEqual(new Uri("db://localhost/customer_a.billing/input-queue?instance=instance"), (Uri)address);
+        }
+
+        [Test]
+        public void Should_parse_the_instance_name_from_url()
+        {
+            var address = new SqlHostAddress(new Uri("db://localhost/customer_a?instance=instance"));
+
+            Assert.AreEqual("db", address.Scheme);
+            Assert.AreEqual("localhost", address.Host);
+            Assert.AreEqual("instance", address.InstanceName);
+            Assert.AreEqual("customer_a", address.VirtualHost);
+
+            Assert.AreEqual(new Uri("db://localhost/customer_a?instance=instance"), (Uri)address);
+        }
+
+        [Test]
         public void Should_support_a_virtual_host_and_scope_with_topic()
         {
             var address = new SqlEndpointAddress(new SqlHostAddress(new Uri("db://localhost/customer_a.billing/")),

@@ -11,7 +11,8 @@ namespace MassTransit
     /// <summary>
     /// Settings to configure a DbTransport host explicitly without requiring the fluent interface
     /// </summary>
-    public interface SqlHostSettings
+    public interface SqlHostSettings :
+        ISpecification
     {
         Uri HostAddress { get; }
 

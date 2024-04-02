@@ -37,6 +37,11 @@ namespace MassTransit.SqlTransport.Configuration
             set => _settings.Host = value;
         }
 
+        public string? InstanceName
+        {
+            set => _settings.InstanceName = value;
+        }
+
         public int? Port
         {
             set => _settings.Port = value;

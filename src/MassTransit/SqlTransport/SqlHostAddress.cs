@@ -2,44 +2,48 @@
 namespace MassTransit
 {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
+    using Internals;
 
 
     /// <summary>
     /// The database host address is composed of specific parts
-    ///
-    ///     db://localhost/virtual_host_name.scope
-    ///     db://localhost/.scope
-    ///
+    /// db://localhost/virtual_host_name.scope
+    /// db://localhost/.scope
     /// <list type="table">
-    ///     <listheader>
-    ///         <term>Fragment</term>
-    ///         <description>Description</description>
-    ///     </listheader>
-    ///     <item>
-    ///         <term>Host</term>
-    ///         <description>The host name from the connection string, or the host alias if configured</description>
-    ///     </item>
-    ///     <item>
-    ///         <term>Virtual Host</term>
-    ///         <description>The name for an isolated set of topics, queues, and subscriptions in the host/schema specified by the connection string.
+    /// <listheader>
+    /// <term>Fragment</term>
+    /// <description>Description</description>
+    /// </listheader>
+    /// <item>
+    /// <term>Host</term>
+    /// <description>The host name from the connection string, or the host alias if configured</description>
+    /// </item>
+    /// <item>
+    /// <term>Virtual Host</term>
+    /// <description>
+    /// The name for an isolated set of topics, queues, and subscriptions in the host/schema specified by the connection string.
     /// If not specified, the default virtual host is used.
-    ///         </description>
-    ///     </item>
-    ///     <item>
-    ///         <term>Area</term>
-    ///         <description>The name an area, which contains one or more queues. If not specified, the default area within the virtual host is used.</description>
-    ///     </item>
+    /// </description>
+    /// </item>
+    /// <item>
+    /// <term>Area</term>
+    /// <description>The name an area, which contains one or more queues. If not specified, the default area within the virtual host is used.</description>
+    /// </item>
     /// </list>
-    ///
     /// </summary>
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
     public readonly struct SqlHostAddress
     {
         public const string DbScheme = "db";
 
+        const string InstanceNameKey = "instance";
+
         public readonly string Scheme;
         public readonly string Host;
+        public readonly int? Port;
+        public readonly string? InstanceName;
         public readonly string VirtualHost;
         public readonly string? Area;
 
@@ -49,26 +53,39 @@ namespace MassTransit
             switch (scheme)
             {
                 case DbScheme:
-                    ParseLeft(address, out Scheme, out Host, out VirtualHost, out Area);
+                    ParseLeft(address, out Scheme, out Host, out Port, out VirtualHost, out Area);
                     break;
 
                 default:
                     throw new ArgumentException($"The address scheme is not supported: {address.Scheme}", nameof(address));
             }
+
+            foreach (var (key, value) in address.SplitQueryString())
+            {
+                switch (key)
+                {
+                    case InstanceNameKey when !string.IsNullOrWhiteSpace(value):
+                        InstanceName = value;
+                        break;
+                }
+            }
         }
 
-        public SqlHostAddress(string host, string virtualHost, string? area)
+        public SqlHostAddress(string host, string? instanceName, int? port, string virtualHost, string? area)
         {
             Scheme = DbScheme;
             Host = host;
+            InstanceName = instanceName;
+            Port = port;
             VirtualHost = virtualHost;
             Area = area;
         }
 
-        internal static void ParseLeft(Uri address, out string scheme, out string host, out string virtualHost, out string? area)
+        internal static void ParseLeft(Uri address, out string scheme, out string host, out int? port, out string virtualHost, out string? area)
         {
             scheme = address.Scheme;
             host = address.Host;
+            port = address.IsDefaultPort ? null : address.Port;
 
             (virtualHost, area) = GetVirtualHostAndArea(address);
         }
@@ -126,13 +143,22 @@ namespace MassTransit
             {
                 Scheme = address.Scheme,
                 Host = address.Host,
+                Port = address.Port ?? -1,
                 Path = path
             };
+
+            builder.Query += string.Join("&", address.GetQueryStringOptions());
 
             return builder.Uri;
         }
 
         Uri DebuggerDisplay => this;
+
+        IEnumerable<string> GetQueryStringOptions()
+        {
+            if (!string.IsNullOrEmpty(InstanceName))
+                yield return $"{InstanceNameKey}={InstanceName}";
+        }
 
         static bool IsValidSymbol(string? className)
         {

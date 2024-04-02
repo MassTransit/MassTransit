@@ -1,27 +1,27 @@
 namespace MassTransit.DbTransport.Tests.SqlServer;
 
+using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using NUnit.Framework;
-using SqlTransport.PostgreSql;
 using SqlTransport.SqlServer;
+using Testing;
 
 
 [TestFixture]
-public class PortAddress_Specs
+public class InstanceName_Specs
 {
     [Test]
-    public async Task Should_include_the_port()
+    public async Task Should_include_the_instance_name()
     {
         await using var provider = new ServiceCollection()
             .AddMassTransitTestHarness(x =>
             {
                 x.AddOptions<SqlTransportOptions>().Configure(options =>
                 {
-                    options.Host = "localhost";
+                    options.Host = "localhost\\instance";
                     options.Database = "masstransit_transport_tests";
-                    options.Port = 8675;
                     options.Schema = "transport";
                     options.Role = "transport";
                     options.Username = "unit_tests";
@@ -29,24 +29,25 @@ public class PortAddress_Specs
                     options.AdminUsername = "sa";
                     options.AdminPassword = "Password12!";
                 });
+
+                x.UsingSqlServer();
             })
             .BuildServiceProvider(true);
 
         var connection = SqlServerSqlTransportConnection.GetDatabaseConnection(provider.GetRequiredService<IOptions<SqlTransportOptions>>().Value);
 
-        Assert.That(connection.Connection.ConnectionString.Contains("Data Source=localhost,8675"));
+        Assert.That(connection.Connection.ConnectionString, Contains.Substring("Data Source=localhost\\instance"));
     }
 
     [Test]
-    public async Task Should_include_the_port_for_postgres()
+    public async Task Should_include_the_instance_name_and_start()
     {
         await using var provider = new ServiceCollection()
             .AddMassTransitTestHarness(x =>
             {
                 x.AddOptions<SqlTransportOptions>().Configure(options =>
                 {
-                    options.Host = "localhost";
-                    options.Port = 5544;
+                    options.Host = "localhost\\instance";
                     options.Database = "masstransit_transport_tests";
                     options.Schema = "transport";
                     options.Role = "transport";
@@ -55,23 +56,27 @@ public class PortAddress_Specs
                     options.AdminUsername = "sa";
                     options.AdminPassword = "Password12!";
                 });
+
+                x.UsingSqlServer();
             })
             .BuildServiceProvider(true);
 
-        var connection = PostgresSqlTransportConnection.GetDatabaseConnection(provider.GetRequiredService<IOptions<SqlTransportOptions>>().Value);
+        var harness = await provider.StartTestHarness();
 
-        Assert.That(connection.Connection.ConnectionString.Contains("Port=5544"));
+        Assert.That(harness.Bus.Address.GetLeftPart(UriPartial.Authority), Is.EqualTo("db://localhost"));
+        Assert.That(harness.Bus.Address.Query, Is.EqualTo("?autodelete=300&instance=instance"));
     }
 
     [Test]
-    public async Task Should_not_include_the_port()
+    public async Task Should_include_the_instance_name_and_port_and_start()
     {
         await using var provider = new ServiceCollection()
             .AddMassTransitTestHarness(x =>
             {
                 x.AddOptions<SqlTransportOptions>().Configure(options =>
                 {
-                    options.Host = "localhost";
+                    options.Host = "localhost\\instance";
+                    options.Port = 3381;
                     options.Database = "masstransit_transport_tests";
                     options.Schema = "transport";
                     options.Role = "transport";
@@ -80,36 +85,19 @@ public class PortAddress_Specs
                     options.AdminUsername = "sa";
                     options.AdminPassword = "Password12!";
                 });
+
+                x.UsingSqlServer();
             })
             .BuildServiceProvider(true);
+
+        var harness = await provider.StartTestHarness();
+
+        Assert.That(harness.Bus.Address.Host, Is.EqualTo("localhost"));
+        Assert.That(harness.Bus.Address.Port, Is.EqualTo(3381));
+        Assert.That(harness.Bus.Address.Query, Is.EqualTo("?autodelete=300&instance=instance"));
 
         var connection = SqlServerSqlTransportConnection.GetDatabaseConnection(provider.GetRequiredService<IOptions<SqlTransportOptions>>().Value);
 
-        Assert.That(connection.Connection.ConnectionString.Contains("Data Source=localhost;"));
-    }
-
-    [Test]
-    public async Task Should_not_include_the_port_for_postgres()
-    {
-        await using var provider = new ServiceCollection()
-            .AddMassTransitTestHarness(x =>
-            {
-                x.AddOptions<SqlTransportOptions>().Configure(options =>
-                {
-                    options.Host = "localhost";
-                    options.Database = "masstransit_transport_tests";
-                    options.Schema = "transport";
-                    options.Role = "transport";
-                    options.Username = "unit_tests";
-                    options.Password = "H4rd2Gu3ss!";
-                    options.AdminUsername = "sa";
-                    options.AdminPassword = "Password12!";
-                });
-            })
-            .BuildServiceProvider(true);
-
-        var connection = PostgresSqlTransportConnection.GetDatabaseConnection(provider.GetRequiredService<IOptions<SqlTransportOptions>>().Value);
-
-        Assert.That(connection.Connection.ConnectionString.Contains("Port="), Is.False);
+        Assert.That(connection.Connection.ConnectionString, Contains.Substring("Data Source=localhost\\instance,3381"));
     }
 }

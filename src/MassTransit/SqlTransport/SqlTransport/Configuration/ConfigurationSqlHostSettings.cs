@@ -2,6 +2,7 @@
 namespace MassTransit.SqlTransport.Configuration
 {
     using System;
+    using System.Collections.Generic;
     using System.Data;
     using Licensing;
 
@@ -47,6 +48,7 @@ namespace MassTransit.SqlTransport.Configuration
         }
 
         public string? Host { get; set; }
+        public string? InstanceName { get; set; }
         public int? Port { get; set; }
         public string? Database { get; set; }
         public string? Schema { get; set; }
@@ -81,6 +83,12 @@ namespace MassTransit.SqlTransport.Configuration
 
         public Uri HostAddress => _hostAddress.Value;
 
+        public virtual IEnumerable<ValidationResult> Validate()
+        {
+            if (string.IsNullOrWhiteSpace(Host))
+                yield return this.Failure("Host", "Host must be specified");
+        }
+
         static string UriDecode(string uri)
         {
             return Uri.UnescapeDataString(uri.Replace("+", "%2B"));
@@ -93,7 +101,7 @@ namespace MassTransit.SqlTransport.Configuration
             if (string.IsNullOrWhiteSpace(VirtualHost))
                 throw new ConfigurationException("Domain cannot be empty");
 
-            return new SqlHostAddress(Host!, VirtualHost!, Area);
+            return new SqlHostAddress(Host!, InstanceName, Port, VirtualHost!, Area);
         }
     }
 }

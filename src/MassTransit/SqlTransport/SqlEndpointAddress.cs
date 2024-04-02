@@ -12,6 +12,7 @@ namespace MassTransit
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
     public readonly struct SqlEndpointAddress
     {
+        const string InstanceNameKey = "instance";
         const string AutoDeleteKey = "autodelete";
         const string TypeKey = "type";
 
@@ -27,6 +28,8 @@ namespace MassTransit
 
         public readonly string Scheme;
         public readonly string Host;
+        public readonly string? InstanceName;
+        public readonly int? Port;
         public readonly string VirtualHost;
         public readonly string? Area;
         public readonly string Name;
@@ -36,10 +39,12 @@ namespace MassTransit
 
         public SqlEndpointAddress(Uri hostAddress, Uri address, AddressType type = AddressType.Queue)
         {
+            Port = default;
+
             AutoDeleteOnIdle = null;
             Type = type;
 
-            ParseLeft(hostAddress, out Scheme, out Host, out VirtualHost, out Area);
+            ParseLeft(hostAddress, out Scheme, out Host, out InstanceName, out Port, out VirtualHost, out Area);
 
             var scheme = address.Scheme.ToLowerInvariant();
             switch (scheme)
@@ -86,7 +91,7 @@ namespace MassTransit
 
         public SqlEndpointAddress(Uri hostAddress, string name, TimeSpan? autoDeleteOnIdle = null, AddressType type = AddressType.Queue)
         {
-            ParseLeft(hostAddress, out Scheme, out Host, out VirtualHost, out Area);
+            ParseLeft(hostAddress, out Scheme, out Host, out InstanceName, out Port, out VirtualHost, out Area);
 
             Name = name;
 
@@ -98,11 +103,14 @@ namespace MassTransit
                 Area = default;
         }
 
-        static void ParseLeft(Uri address, out string scheme, out string host, out string virtualHost, out string? area)
+        static void ParseLeft(Uri address, out string scheme, out string host, out string? instanceName, out int? port, out string virtualHost,
+            out string? area)
         {
             var hostAddress = new SqlHostAddress(address);
             scheme = hostAddress.Scheme;
             host = hostAddress.Host;
+            instanceName = hostAddress.InstanceName;
+            port = address.IsDefaultPort ? null : address.Port;
             virtualHost = hostAddress.VirtualHost;
             area = hostAddress.Area;
         }
@@ -120,6 +128,7 @@ namespace MassTransit
             {
                 Scheme = address.Scheme,
                 Host = address.Host,
+                Port = address.Port ?? -1,
                 Path = path
             };
 
@@ -137,6 +146,9 @@ namespace MassTransit
 
             if (Type != AddressType.Queue)
                 yield return $"{TypeKey}=topic";
+
+            if (!string.IsNullOrEmpty(InstanceName))
+                yield return $"{InstanceNameKey}={InstanceName}";
         }
     }
 }

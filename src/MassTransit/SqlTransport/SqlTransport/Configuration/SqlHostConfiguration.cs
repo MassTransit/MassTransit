@@ -115,6 +115,9 @@ namespace MassTransit.SqlTransport.Configuration
                 yield return this.Failure("Host", "Database must be configured");
             else
             {
+                foreach (var result in _hostSettings.Validate())
+                    yield return result;
+
                 _licenseInfo = _hostSettings.GetLicenseInfo();
                 if (_licenseInfo == null)
                 {
