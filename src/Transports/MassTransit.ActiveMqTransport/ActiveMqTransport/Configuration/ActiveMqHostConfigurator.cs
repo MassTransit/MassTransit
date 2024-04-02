@@ -36,6 +36,13 @@ namespace MassTransit.ActiveMqTransport.Configuration
                 _settings.Port = 61617;
         }
 
+        public void UseSsl(bool enabled, bool updatePort)
+        {
+            _settings.UseSsl = enabled;
+            if (enabled && updatePort && _settings.Port == 61616)
+                _settings.Port = 61617;
+        }
+
         public void FailoverHosts(string[] hosts)
         {
             _settings.FailoverHosts = hosts;

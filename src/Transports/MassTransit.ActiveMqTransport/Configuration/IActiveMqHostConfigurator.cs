@@ -20,6 +20,13 @@
         void UseSsl(bool enabled = true);
 
         /// <summary>
+        /// Specify if SSL should be used, and if the port should be updated automatically to the default SSL port.
+        /// </summary>
+        /// <param name="enabled"></param>
+        /// <param name="updatePort"></param>
+        void UseSsl(bool enabled, bool updatePort);
+
+        /// <summary>
         /// Sets a list of hosts to enable the failover transport
         /// </summary>
         /// <param name="hosts"></param>
