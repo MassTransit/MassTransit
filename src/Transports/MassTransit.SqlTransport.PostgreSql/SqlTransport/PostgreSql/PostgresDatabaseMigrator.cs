@@ -974,8 +974,6 @@ namespace MassTransit.SqlTransport.PostgreSql
             await CreateDatabaseIfNotExist(options, cancellationToken);
 
             await CreateSchemaIfNotExist(options, cancellationToken);
-
-            await CreateInfrastructure(options, cancellationToken);
         }
 
         public async Task DeleteDatabase(SqlTransportOptions options, CancellationToken cancellationToken = default)
@@ -1034,7 +1032,7 @@ namespace MassTransit.SqlTransport.PostgreSql
             }
         }
 
-        async Task CreateInfrastructure(SqlTransportOptions options, CancellationToken cancellationToken)
+        public async Task CreateInfrastructure(SqlTransportOptions options, CancellationToken cancellationToken)
         {
             await using var connection = PostgresSqlTransportConnection.GetDatabaseConnection(options);
             await connection.Open(cancellationToken);

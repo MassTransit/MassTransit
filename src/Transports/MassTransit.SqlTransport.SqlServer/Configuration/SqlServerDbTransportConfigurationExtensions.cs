@@ -7,7 +7,7 @@ namespace MassTransit
 
     public static class SqlServerDbTransportConfigurationExtensions
     {
-        public static IServiceCollection AddSqlServerMigrationHostedService(this IServiceCollection services, bool create = true, bool delete = false)
+        public static IServiceCollection AddSqlServerMigrationHostedService(this IServiceCollection services, bool createDatabase = true, bool delete = false, bool createInfrastructure = true)
         {
             services.AddTransient<ISqlTransportDatabaseMigrator, SqlServerDatabaseMigrator>();
 
@@ -15,7 +15,8 @@ namespace MassTransit
             services.AddOptions<SqlTransportMigrationOptions>()
                 .Configure(options =>
                 {
-                    options.CreateDatabase = create;
+                    options.CreateDatabase = createDatabase;
+                    options.CreateInfrastructure = createInfrastructure;
                     options.DeleteDatabase = delete;
                 });
             services.AddHostedService<SqlTransportMigrationHostedService>();

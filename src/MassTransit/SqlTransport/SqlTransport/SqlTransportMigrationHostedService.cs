@@ -29,9 +29,16 @@ namespace MassTransit.SqlTransport
         {
             if (_options.CreateDatabase)
             {
-                _logger.LogInformation("MassTransit DbTransport creating PostgreSQL database {Database}", _transportOptions.Database);
+                _logger.LogInformation("MassTransit DbTransport creating database {Database}", _transportOptions.Database);
 
                 await _migrator.CreateDatabase(_transportOptions, cancellationToken).ConfigureAwait(false);
+            }
+
+            if (_options.CreateInfrastructure)
+            {
+                _logger.LogInformation("MassTransit DbTransport creating infrastructure for database {Database}", _transportOptions.Database);
+
+                await _migrator.CreateInfrastructure(_transportOptions, cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -39,7 +46,7 @@ namespace MassTransit.SqlTransport
         {
             if (_options.DeleteDatabase)
             {
-                _logger.LogInformation("Deleting PostgreSQL Database {Database}", _transportOptions.Database);
+                _logger.LogInformation("Deleting Database {Database}", _transportOptions.Database);
 
                 await _migrator.DeleteDatabase(_transportOptions, cancellationToken).ConfigureAwait(false);
             }
