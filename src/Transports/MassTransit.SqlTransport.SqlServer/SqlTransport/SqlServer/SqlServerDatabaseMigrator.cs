@@ -1333,8 +1333,6 @@ END
             await CreateDatabaseIfNotExist(options, cancellationToken);
 
             await CreateSchemaIfNotExist(options, cancellationToken);
-
-            await CreateInfrastructure(options, cancellationToken);
         }
 
         public async Task DeleteDatabase(SqlTransportOptions options, CancellationToken cancellationToken)
@@ -1393,7 +1391,7 @@ END
             }
         }
 
-        async Task CreateInfrastructure(SqlTransportOptions options, CancellationToken cancellationToken)
+        public async Task CreateInfrastructure(SqlTransportOptions options, CancellationToken cancellationToken)
         {
             await using var connection = SqlServerSqlTransportConnection.GetDatabaseConnection(options);
             await connection.Open(cancellationToken);

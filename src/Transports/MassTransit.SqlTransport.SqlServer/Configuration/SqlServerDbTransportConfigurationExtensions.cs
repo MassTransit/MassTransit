@@ -1,5 +1,6 @@
 namespace MassTransit
 {
+    using System;
     using Microsoft.Extensions.DependencyInjection;
     using SqlTransport;
     using SqlTransport.SqlServer;
@@ -9,14 +10,29 @@ namespace MassTransit
     {
         public static IServiceCollection AddSqlServerMigrationHostedService(this IServiceCollection services, bool create = true, bool delete = false)
         {
+            services.AddSqlServerMigrationHostedService(options =>
+            {
+                options.CreateDatabase = create;
+                options.CreateInfrastructure = create;
+                options.DeleteDatabase = delete;
+            });
+
+            return services;
+        }
+
+        public static IServiceCollection AddSqlServerMigrationHostedService(this IServiceCollection services, Action<SqlTransportMigrationOptions>? configure)
+        {
             services.AddTransient<ISqlTransportDatabaseMigrator, SqlServerDatabaseMigrator>();
 
             services.AddOptions<SqlTransportOptions>();
             services.AddOptions<SqlTransportMigrationOptions>()
                 .Configure(options =>
                 {
-                    options.CreateDatabase = create;
-                    options.DeleteDatabase = delete;
+                    options.CreateDatabase = true;
+                    options.CreateInfrastructure = true;
+                    options.DeleteDatabase = false;
+
+                    configure?.Invoke(options);
                 });
             services.AddHostedService<SqlTransportMigrationHostedService>();
 
