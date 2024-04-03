@@ -1978,8 +1978,7 @@
 
         bool TryGetBackingField(PropertyInfo property, out FieldInfo backingField)
         {
-            _backingFields ??= GetType()
-                .GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
+            _backingFields ??= GetBackingFields(GetType())
                 .Where(field =>
                     field.Attributes.HasFlag(FieldAttributes.Private) &&
                     field.Attributes.HasFlag(FieldAttributes.InitOnly) &&
@@ -1995,6 +1994,23 @@
                 );
 
             return backingField != null;
+        }
+
+        static IEnumerable<FieldInfo> GetBackingFields(Type type)
+        {
+            while (true)
+            {
+                foreach (var fieldInfo in type.GetFields(BindingFlags.NonPublic | BindingFlags.Instance))
+                    yield return fieldInfo;
+
+                if (type.BaseType == null)
+                    break;
+
+                if (type.BaseType.IsGenericType && type.BaseType.GetGenericTypeDefinition() == typeof(MassTransitStateMachine<>))
+                    break;
+
+                type = type.BaseType;
+            }
         }
 
         void InitializeState(MassTransitStateMachine<TInstance> stateMachine, PropertyInfo property, StateMachineState state)
