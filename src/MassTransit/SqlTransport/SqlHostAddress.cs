@@ -142,10 +142,11 @@ namespace MassTransit
             var builder = new UriBuilder
             {
                 Scheme = address.Scheme,
-                Host = address.Host,
+                Host = address.Host.Trim().Trim('(', ')'),
                 Port = address.Port ?? -1,
                 Path = path
             };
+
 
             builder.Query += string.Join("&", address.GetQueryStringOptions());
 
