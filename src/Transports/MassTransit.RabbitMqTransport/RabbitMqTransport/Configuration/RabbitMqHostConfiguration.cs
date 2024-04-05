@@ -38,6 +38,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             ReceiveTransportRetryPolicy = Retry.CreatePolicy(x =>
             {
                 x.Handle<ConnectionException>();
+                x.Handle<AlreadyClosedException>();
                 x.Handle<MessageNotConfirmedException>(exception =>
                     exception.Message.Contains("CONNECTION_FORCED")
                     || exception.Message.Contains("End of stream")
