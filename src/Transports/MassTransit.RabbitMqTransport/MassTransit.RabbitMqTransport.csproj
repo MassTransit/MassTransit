@@ -22,7 +22,6 @@
 
   <ItemGroup>
     <PackageReference Include="RabbitMQ.Client" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net472' ">

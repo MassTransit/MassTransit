@@ -22,7 +22,6 @@
   <ItemGroup>
     <PackageReference Include="MongoDB.Driver" />
     <PackageReference Include="MongoDB.Driver.GridFS" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 

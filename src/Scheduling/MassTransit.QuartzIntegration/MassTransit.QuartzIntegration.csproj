@@ -27,6 +27,5 @@
     <PackageReference Include="Quartz.Plugins.TimeZoneConverter" />
     <PackageReference Include="Quartz.Serialization.Json" />
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
   </ItemGroup>
 </Project>

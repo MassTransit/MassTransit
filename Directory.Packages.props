@@ -76,7 +76,6 @@
     <PackageVersion Include="Microsoft.Extensions.Options" Version="7.0.1" Condition="'$(TargetFramework)' == 'net7.0'"/>
     <PackageVersion Include="Microsoft.Extensions.Options" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'"/>
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.9.0"/>
-    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0"/>
     <PackageVersion Include="MongoDB.Driver" Version="2.24.0"/>
     <PackageVersion Include="MongoDB.Driver.GridFS" Version="2.24.0"/>
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3"/>
@@ -102,19 +101,16 @@
     <PackageVersion Include="StackExchange.Redis" Version="2.7.33"/>
     <PackageVersion Include="System.Data.SqlClient" Version="4.8.6"/>
     <PackageVersion Include="System.Data.SQLite" Version="1.0.118"/>
-    <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="6.0.1" Condition="'$(TargetFramework)' != 'net7.0' AND '$(TargetFramework)' != 'net8.0'"/>
-    <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="7.0.1" Condition="'$(TargetFramework)' == 'net7.0'"/>
-    <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'"/>
-    <PackageVersion Include="System.Net.Http" Version="4.3.4" Condition="'$(TargetFramework)' == 'net472'"/>
+    <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="6.0.1" />
+    <PackageVersion Include="System.Net.Http" Version="4.3.4" />
     <PackageVersion Include="System.Reflection.Emit" Version="4.7.0"/>
     <PackageVersion Include="System.Reflection.Emit.Lightweight" Version="4.7.0"/>
-    <PackageVersion Include="System.Text.Json" Version="6.0.8" Condition="'$(TargetFramework)' != 'net7.0' AND '$(TargetFramework)' != 'net8.0'"/>
-    <PackageVersion Include="System.Text.Json" Version="7.0.3" Condition="'$(TargetFramework)' == 'net7.0'"/>
-    <PackageVersion Include="System.Text.Json" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'"/>
-    <PackageVersion Include="System.Threading.Channels" Version="6.0.0" Condition="'$(TargetFramework)' != 'net7.0' AND '$(TargetFramework)' != 'net8.0'"/>
-    <PackageVersion Include="System.Threading.Channels" Version="7.0.0" Condition="'$(TargetFramework)' == 'net7.0'"/>
-    <PackageVersion Include="System.Threading.Channels" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'"/>
+    <PackageVersion Include="System.Text.Json" Version="6.0.8" />
+    <PackageVersion Include="System.Threading.Channels" Version="6.0.0" />
     <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.5.4"/>
     <PackageVersion Include="System.ValueTuple" Version="4.5.0"/>
+  </ItemGroup>
+  <ItemGroup>
+    <GlobalPackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
   </ItemGroup>
 </Project>

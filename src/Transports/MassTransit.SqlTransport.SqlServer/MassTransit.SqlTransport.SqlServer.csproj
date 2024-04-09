@@ -18,9 +18,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dapper"/>
+    <PackageReference Include="Dapper" />
     <PackageReference Include="Microsoft.Data.SqlClient" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
