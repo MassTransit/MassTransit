@@ -22,7 +22,6 @@
 
   <ItemGroup>
     <PackageReference Include="AWSSDK.DynamoDBv2" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 
