@@ -27,7 +27,7 @@ namespace MassTransit
     {
         readonly FutureFault<TFault> _fault = new FutureFault<TFault>();
         readonly FutureResult<TCommand, TResult> _result = new FutureResult<TCommand, TResult>();
-
+        readonly FutureActivity _activity = new FutureActivity();
         protected Future()
         {
             InstanceState(x => x.CurrentState, WaitingForCompletion, Completed, Faulted);
@@ -314,7 +314,7 @@ namespace MassTransit
                         notCompleted => notCompleted.If(context => context.Saga.Faulted.HasValue,
                             faulted => faulted
                                 .ThenAsync(context => _fault.SetFaulted(context))
-                                .TransitionTo(Faulted)))
+                                .TransitionTo(Faulted))).IfAllCompletedOrFaulted(_activity.Action)
             );
         }
 
@@ -415,6 +415,18 @@ namespace MassTransit
             var configurator = new FutureFaultConfigurator<TFault>(_fault);
 
             configure?.Invoke(configurator);
+        }
+
+        /// <summary>
+        /// When all requests have either completed or faulted, execute Activity
+        /// </summary>
+        /// <param name="configure"></param>
+        protected void WhenAllCompletedOrFaulted(Action<IFutureActivityConfigurator> configure)
+        {
+            var configurator = new FutureActivityConfigurator(_activity);
+
+            configure?.Invoke(configurator);
+
         }
 
         static Task<TResult> GetResult(BehaviorContext<FutureState> context)
