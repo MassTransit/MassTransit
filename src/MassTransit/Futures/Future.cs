@@ -417,6 +417,18 @@ namespace MassTransit
             configure?.Invoke(configurator);
         }
 
+        /// <summary>
+        /// When all requests have either completed or faulted, Set the future Faulted
+        /// </summary>
+        /// <param name="configure"></param>
+        protected void WhenAllCompletedOrFaulted(Action<IFutureFaultConfigurator<TFault>> configure)
+        {
+            _fault.WaitForPending = true;
+            var configurator = new FutureFaultConfigurator<TFault>(_fault);
+
+            configure?.Invoke(configurator);
+        }
+
         static Task<TResult> GetResult(BehaviorContext<FutureState> context)
         {
             if (context.TryGetResult(context.Saga.CorrelationId, out TResult completed))
