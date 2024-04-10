@@ -148,7 +148,9 @@
                 {
                     return string.IsNullOrEmpty(forwardTo)
                         ? string.Empty
-                        : forwardTo.Replace(Endpoint.ToString(), string.Empty).Trim('/');
+                        : Uri.IsWellFormedUriString(forwardTo, UriKind.Absolute)
+                            ? new Uri(forwardTo).AbsolutePath.TrimStart('/')
+                            : forwardTo.Replace(Endpoint.ToString(), string.Empty).Trim('/');
                 }
 
                 var targetForwardTo = NormalizeForwardTo(createSubscriptionOptions.ForwardTo);
