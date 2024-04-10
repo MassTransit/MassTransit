@@ -3,7 +3,6 @@ namespace MassTransit.Tests.ContainerTests.Scenarios;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using TestFramework.Futures;
 using TestFramework.Futures.Tests;
