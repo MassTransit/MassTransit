@@ -68,12 +68,9 @@ public class WhenAllCompletedOrFaulted : BatchFuture_Specs
 
         var batchUploaded = TestHarness.Published
             .Select<BatchProcessed>()
-            .ToList();
+            .Single();
 
-        Assert.IsNotEmpty(batchUploaded);
-
-        LogContext.Current.Logger.LogInformation("{@Request}", batchUploaded.Count);
         //Batch is partially successful, downstream consumers are notified of succeeded uploads
-        Assert.That(batchUploaded[0].Context.Message.SuccessfulJobNumbers, Is.EquivalentTo(new[] { "C12345", "C54321" }));
+        Assert.That(batchUploaded.Context.Message.SuccessfulJobNumbers, Is.EquivalentTo(new[] { "C12345", "C54321" }));
     }
 }
