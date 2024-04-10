@@ -7,7 +7,6 @@ namespace MassTransit
     using System.Security.Cryptography;
     using System.Text;
     using Configuration;
-    using Metadata;
     using NewIdFormatters;
 
 
@@ -44,32 +43,7 @@ namespace MassTransit
 
         public virtual string CreateTemporaryQueueName(string tag)
         {
-            if (string.IsNullOrWhiteSpace(tag))
-                tag = "endpoint";
-
-            var host = HostMetadataCache.Host;
-
-            var sb = new StringBuilder(host.MachineName.Length + host.ProcessName.Length + tag.Length + 35);
-
-            foreach (var c in host.MachineName)
-            {
-                if (char.IsLetterOrDigit(c) || c == '_')
-                    sb.Append(c);
-            }
-
-            sb.Append('_');
-            foreach (var c in host.ProcessName)
-            {
-                if (char.IsLetterOrDigit(c) || c == '_')
-                    sb.Append(c);
-            }
-
-            sb.Append('_');
-            sb.Append(tag);
-            sb.Append('_');
-            sb.Append(NewId.Next().ToString(ZBase32Formatter.LowerCase));
-
-            return ShrinkToFit(sb.ToString(), _maxQueueNameLength);
+            return ShrinkToFit(DefaultEndpointNameFormatter.GetTemporaryQueueName(tag), _maxQueueNameLength);
         }
 
         IMessageConsumeTopologyConfigurator<T> IConsumeTopologyConfigurator.GetMessageTopology<T>()

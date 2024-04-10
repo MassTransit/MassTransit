@@ -91,6 +91,52 @@ namespace MassTransit
 
         public virtual string TemporaryEndpoint(string tag)
         {
+            return GetTemporaryQueueName(tag);
+        }
+
+        public virtual string Consumer<T>()
+            where T : class, IConsumer
+        {
+            return GetConsumerName(typeof(T));
+        }
+
+        public virtual string Message<T>()
+            where T : class
+        {
+            return GetMessageName(typeof(T));
+        }
+
+        public virtual string Saga<T>()
+            where T : class, ISaga
+        {
+            return GetSagaName(typeof(T));
+        }
+
+        public virtual string ExecuteActivity<T, TArguments>()
+            where T : class, IExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            var activityName = GetActivityName(typeof(T), typeof(TArguments));
+
+            return $"{activityName}_execute";
+        }
+
+        public virtual string CompensateActivity<T, TLog>()
+            where T : class, ICompensateActivity<TLog>
+            where TLog : class
+        {
+            var activityName = GetActivityName(typeof(T), typeof(TLog));
+
+            return $"{activityName}_compensate";
+        }
+
+        public virtual string SanitizeName(string name)
+        {
+            return name;
+        }
+
+        public static string GetTemporaryQueueName(string tag)
+        {
             if (string.IsNullOrWhiteSpace(tag))
                 tag = "endpoint";
 
@@ -140,47 +186,6 @@ namespace MassTransit
             sb.Append(NewId.Next().ToString(ZBase32Formatter.LowerCase));
 
             return sb.ToString();
-        }
-
-        public virtual string Consumer<T>()
-            where T : class, IConsumer
-        {
-            return GetConsumerName(typeof(T));
-        }
-
-        public virtual string Message<T>()
-            where T : class
-        {
-            return GetMessageName(typeof(T));
-        }
-
-        public virtual string Saga<T>()
-            where T : class, ISaga
-        {
-            return GetSagaName(typeof(T));
-        }
-
-        public virtual string ExecuteActivity<T, TArguments>()
-            where T : class, IExecuteActivity<TArguments>
-            where TArguments : class
-        {
-            var activityName = GetActivityName(typeof(T), typeof(TArguments));
-
-            return $"{activityName}_execute";
-        }
-
-        public virtual string CompensateActivity<T, TLog>()
-            where T : class, ICompensateActivity<TLog>
-            where TLog : class
-        {
-            var activityName = GetActivityName(typeof(T), typeof(TLog));
-
-            return $"{activityName}_compensate";
-        }
-
-        public virtual string SanitizeName(string name)
-        {
-            return name;
         }
 
         /// <summary>
