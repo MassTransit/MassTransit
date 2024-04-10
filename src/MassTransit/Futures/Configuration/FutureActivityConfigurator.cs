@@ -1,6 +1,7 @@
 namespace MassTransit.Configuration
 {
     using System;
+    using System.Threading.Tasks;
     using Futures;
     using SagaStateMachine;
 
@@ -19,7 +20,15 @@ namespace MassTransit.Configuration
             if (action == null)
                 throw new ArgumentNullException(nameof(action));
 
-            _activity.Action = new ActionActivity<FutureState>(action);
+            _activity.Activity = new ActionActivity<FutureState>(action);
+        }
+
+        public void ThenAsync(Func<BehaviorContext<FutureState>, Task> action)
+        {
+            if (action == null)
+                throw new ArgumentNullException(nameof(action));
+
+            _activity.Activity = new AsyncActivity<FutureState>(action);
         }
     }
 }

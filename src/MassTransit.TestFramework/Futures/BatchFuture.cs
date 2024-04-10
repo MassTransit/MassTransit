@@ -1,6 +1,7 @@
 namespace MassTransit.TestFramework.Futures;
 
 using System.Linq;
+using System.Threading.Tasks;
 
 
 public class BatchFuture : Future<BatchRequest, BatchSuccessResponse>
@@ -25,7 +26,7 @@ public class BatchFuture : Future<BatchRequest, BatchSuccessResponse>
             });
 
         WhenAllCompleted(r => r.SetCompletedUsingInitializer(MapResponse));
-        WhenAllCompletedOrFaulted(r => r.Then(PublishAllCompletedOrFaulted));
+        WhenAllCompletedOrFaulted(r => r.ThenAsync(PublishAllCompletedOrFaulted));
     }
 
     object MapResponse(BehaviorContext<FutureState> context)
@@ -41,12 +42,13 @@ public class BatchFuture : Future<BatchRequest, BatchSuccessResponse>
             ProcessedJobsNumbers = processedJobNumbers
         };
     }
-    void PublishAllCompletedOrFaulted(BehaviorContext<FutureState> context)
+
+    async Task PublishAllCompletedOrFaulted(BehaviorContext<FutureState> context)
     {
         var processedJobNumbers = context
             .SelectResults<ProcessJobCompleted>()
             .Select(r => r.ClientNumber).ToList();
 
-        context.Publish<BatchProcessed>(new { SuccessfulJobNumbers = processedJobNumbers });
+        await context.Publish<BatchProcessed>(new { SuccessfulJobNumbers = processedJobNumbers });
     }
 }

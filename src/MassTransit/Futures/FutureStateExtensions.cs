@@ -4,7 +4,7 @@ namespace MassTransit
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using SagaStateMachine;
+    using Futures;
 
 
     public static class FutureStateExtensions
@@ -206,11 +206,12 @@ namespace MassTransit
         }
 
         public static EventActivityBinder<FutureState, T> IfAllCompletedOrFaulted<T>(this EventActivityBinder<FutureState, T> context,
-            ActionActivity<FutureState> actionActivity)
+            FutureActivity activity)
             where T : class
         {
-            return context.If(x => !x.Saga.HasPending(),
-                x => x.Add(actionActivity)
+            return context.If(x =>
+                    !x.Saga.HasPending(),
+                x => activity.Execute(x)
             );
         }
     }

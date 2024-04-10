@@ -314,7 +314,7 @@ namespace MassTransit
                         notCompleted => notCompleted.If(context => context.Saga.Faulted.HasValue,
                             faulted => faulted
                                 .ThenAsync(context => _fault.SetFaulted(context))
-                                .TransitionTo(Faulted))).IfAllCompletedOrFaulted(_activity.Action)
+                                .TransitionTo(Faulted))).IfAllCompletedOrFaulted(_activity)
             );
         }
 
@@ -327,7 +327,7 @@ namespace MassTransit
                     .If(context => context.Saga.Faulted.HasValue,
                         faulted => faulted
                             .ThenAsync(context => _fault.SetFaulted(context))
-                            .TransitionTo(Faulted))
+                            .TransitionTo(Faulted)).IfAllCompletedOrFaulted(_activity)
             );
         }
 
@@ -339,7 +339,7 @@ namespace MassTransit
                     .If(context => context.Saga.Faulted.HasValue,
                         faulted => faulted
                             .ThenAsync(context => _fault.SetFaulted(context))
-                            .TransitionTo(Faulted))
+                            .TransitionTo(Faulted)).IfAllCompletedOrFaulted(_activity)
             );
         }
 
@@ -357,6 +357,7 @@ namespace MassTransit
                 When(resultEvent)
                     .ThenAsync(context => callback(context))
                     .TransitionTo(Completed)
+                    .IfAllCompletedOrFaulted(_activity)
             );
         }
 
@@ -367,6 +368,7 @@ namespace MassTransit
                 When(faultEvent)
                     .ThenAsync(context => callback(context))
                     .TransitionTo(Faulted)
+                    .IfAllCompletedOrFaulted(_activity)
             );
         }
 
@@ -426,7 +428,6 @@ namespace MassTransit
             var configurator = new FutureActivityConfigurator(_activity);
 
             configure?.Invoke(configurator);
-
         }
 
         static Task<TResult> GetResult(BehaviorContext<FutureState> context)

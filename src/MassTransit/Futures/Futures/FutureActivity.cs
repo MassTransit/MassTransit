@@ -8,17 +8,28 @@ namespace MassTransit.Futures
     {
         public FutureActivity()
         {
-            Action = DefaultActionActivity;
+            _activity = DefaultActionActivity;
         }
 
-        public ActionActivity<FutureState> Action { set; get; }
+        IStateMachineActivity<FutureState> _activity;
+
+        public IStateMachineActivity<FutureState> Activity
+        {
+            set => _activity = value;
+        }
 
         public IEnumerable<ValidationResult> Validate()
         {
             yield break;
         }
 
-        static readonly ActionActivity<FutureState> DefaultActionActivity = new (_ =>
+        public EventActivityBinder<FutureState, T> Execute<T>(EventActivityBinder<FutureState, T> eventActivityBinder)
+            where T : class
+        {
+            return eventActivityBinder.Execute(_ => _activity);
+        }
+
+        static readonly ActionActivity<FutureState> DefaultActionActivity = new(_ =>
         {
         });
     }
