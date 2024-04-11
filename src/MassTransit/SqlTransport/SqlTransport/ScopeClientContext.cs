@@ -72,9 +72,10 @@ namespace MassTransit.SqlTransport
             return _context.Unlock(lockId, messageDeliveryId, delay, sendHeaders);
         }
 
-        public Task<IEnumerable<SqlTransportMessage>> ReceiveMessages(string queueName, SqlReceiveMode mode, int messageLimit, TimeSpan lockDuration)
+        public Task<IEnumerable<SqlTransportMessage>> ReceiveMessages(string queueName, SqlReceiveMode mode, int messageLimit, int concurrentLimit,
+            TimeSpan lockDuration)
         {
-            return _context.ReceiveMessages(queueName, mode, messageLimit, lockDuration);
+            return _context.ReceiveMessages(queueName, mode, messageLimit, concurrentLimit, lockDuration);
         }
 
         public Task<bool> DeleteMessage(Guid lockId, long messageDeliveryId)
