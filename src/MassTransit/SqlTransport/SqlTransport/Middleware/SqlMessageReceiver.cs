@@ -62,7 +62,7 @@ namespace MassTransit.SqlTransport.Middleware
             {
                 var lockContext = new SqlReceiveLockContext(_context.InputAddress, message, _receiveSettings, _client);
 
-                return _receiveSettings.ReceiveMode != SqlReceiveMode.Normal
+                return _receiveSettings.ReceiveMode == SqlReceiveMode.Normal
                     ? HandleMessage(message, lockContext)
                     : _executorPool.Run(message, () => HandleMessage(message, lockContext), cancellationToken);
             }
