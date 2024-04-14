@@ -39,7 +39,11 @@ namespace MassTransit.Serialization
         {
             try
             {
-                var jsonElement = JsonSerializer.Deserialize<JsonElement>(body.GetBytes(), SystemTextJsonMessageSerializer.Options);
+                var bytes = body.GetBytes();
+
+                var jsonElement = bytes.Length > 0
+                    ? JsonSerializer.Deserialize<JsonElement>(bytes, SystemTextJsonMessageSerializer.Options)
+                    : JsonDocument.Parse("{}").RootElement;
 
                 var messageTypes = headers.GetMessageTypes();
 
