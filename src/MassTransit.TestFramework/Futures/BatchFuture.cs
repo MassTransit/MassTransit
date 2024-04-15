@@ -1,10 +1,9 @@
 namespace MassTransit.TestFramework.Futures;
 
 using System.Linq;
-using System.Threading.Tasks;
 
 
-public class BatchFuture : Future<BatchRequest, BatchSuccessResponse>
+public class BatchFuture : Future<BatchRequest, BatchCompleted, BatchFaulted>
 {
     public BatchFuture()
     {
@@ -16,7 +15,7 @@ public class BatchFuture : Future<BatchRequest, BatchSuccessResponse>
                     x.UsingRequestInitializer(context => new
                     {
                         CorrelationId = InVar.Id,
-                        ClientNumber = context.Message
+                        JobNumber = context.Message
                     });
                     x.TrackPendingRequest(message => message.CorrelationId);
                 })
@@ -26,7 +25,7 @@ public class BatchFuture : Future<BatchRequest, BatchSuccessResponse>
             });
 
         WhenAllCompleted(r => r.SetCompletedUsingInitializer(MapResponse));
-        WhenAllCompletedOrFaulted(r => r.ThenAsync(PublishAllCompletedOrFaulted));
+        WhenAllCompletedOrFaulted(r => r.SetFaultedUsingInitializer(MapResponse));
     }
 
     object MapResponse(BehaviorContext<FutureState> context)
@@ -34,21 +33,12 @@ public class BatchFuture : Future<BatchRequest, BatchSuccessResponse>
         var command = context.GetCommand<BatchRequest>();
         var processedJobNumbers = context
             .SelectResults<ProcessJobCompleted>()
-            .Select(r => r.ClientNumber).ToList();
+            .Select(r => r.JobNumber).ToList();
 
         return new
         {
             command.CorrelationId,
             ProcessedJobsNumbers = processedJobNumbers
         };
-    }
-
-    async Task PublishAllCompletedOrFaulted(BehaviorContext<FutureState> context)
-    {
-        var processedJobNumbers = context
-            .SelectResults<ProcessJobCompleted>()
-            .Select(r => r.ClientNumber).ToList();
-
-        await context.Publish<BatchProcessed>(new { SuccessfulJobNumbers = processedJobNumbers });
     }
 }

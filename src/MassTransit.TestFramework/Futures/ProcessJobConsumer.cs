@@ -14,11 +14,11 @@ public class ProcessJobConsumer: IConsumer<ProcessJob>
             await context.RespondAsync<ProcessJobCompleted>(new
             {
                 context.Message.CorrelationId,
-                context.Message.ClientNumber
+                ClientNumber = context.Message.JobNumber
             });
         }
 
-        return context.Message.ClientNumber switch
+        return context.Message.JobNumber switch
         {
             "Delay" => WaitAndRespond(2000),
             "Error" => throw new InvalidOperationException(),

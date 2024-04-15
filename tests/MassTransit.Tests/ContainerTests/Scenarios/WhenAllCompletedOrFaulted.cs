@@ -15,17 +15,18 @@ public class WhenAllCompletedOrFaulted : BatchFuture_Specs
         : base(new InMemoryFutureTestFixtureConfigurator())
     {
     }
+
     [Test]
     public async Task Delayed_success()
     {
         var batchId = NewId.NextGuid();
-        var jobNumbers = new [] {"C12345", "Delay"};
+        var jobNumbers = new[] { "C12345", "Delay" };
 
         var scope = Provider.CreateScope();
 
         var client = scope.ServiceProvider.GetRequiredService<IRequestClient<BatchRequest>>();
 
-        Response<BatchSuccessResponse> response = await client.GetResponse<BatchSuccessResponse>(new
+        Response<BatchCompleted> response = await client.GetResponse<BatchCompleted>(new
         {
             CorrelationId = batchId,
             JobNumbers = jobNumbers
@@ -38,13 +39,13 @@ public class WhenAllCompletedOrFaulted : BatchFuture_Specs
     public async Task Should_succeed()
     {
         var batchId = NewId.NextGuid();
-        var jobNumbers = new[] {"C12345", "C54321" };
+        var jobNumbers = new[] { "C12345", "C54321" };
 
         var scope = Provider.CreateScope();
 
         var client = scope.ServiceProvider.GetRequiredService<IRequestClient<BatchRequest>>();
 
-        Response<BatchSuccessResponse> response = await client.GetResponse<BatchSuccessResponse>(new
+        Response<BatchCompleted> response = await client.GetResponse<BatchCompleted>(new
         {
             CorrelationId = batchId,
             JobNumbers = jobNumbers
@@ -57,19 +58,27 @@ public class WhenAllCompletedOrFaulted : BatchFuture_Specs
     public async Task Error_partially_uploaded()
     {
         var batchId = NewId.NextGuid();
-        var jobNumbers = new[] {"C12345", "Error", "C54321", "Error" };
+        var jobNumbers = new[] { "C12345", "Error", "C54321", "Error" };
 
-        await TestHarness.Bus.Publish<BatchRequest>(new
+        var scope = Provider.CreateScope();
+
+        var client = scope.ServiceProvider.GetRequiredService<IRequestClient<BatchRequest>>();
+
+        Response response = await client.GetResponse<BatchCompleted, BatchFaulted>(new
         {
             CorrelationId = batchId,
             JobNumbers = jobNumbers
         });
 
-        var batchUploaded = TestHarness.Published
-            .Select<BatchProcessed>()
-            .Single();
-
-        //Batch is partially successful, downstream consumers are notified of succeeded uploads
-        Assert.That(batchUploaded.Context.Message.SuccessfulJobNumbers, Is.EquivalentTo(new[] { "C12345", "C54321" }));
+        switch (response)
+        {
+            case (_, BatchFaulted faulted):
+                //Batch is partially successful, downstream consumers are notified of succeeded uploads
+                Assert.That(faulted.ProcessedJobsNumbers, Is.EquivalentTo(new[] { "C12345", "C54321" }));
+                break;
+            default:
+                Assert.Fail("Unexpected response");
+                break;
+        }
     }
 }

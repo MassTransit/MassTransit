@@ -4,8 +4,8 @@ using System;
 using System.Collections.Generic;
 
 
-public interface BatchSuccessResponse
+public interface BatchFaulted
 {
-    public Guid CorrelationId { get;}
+    public Guid CorrelationId { get; }
     public IReadOnlyList<string> ProcessedJobsNumbers { get; }
 }

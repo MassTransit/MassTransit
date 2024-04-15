@@ -27,7 +27,7 @@ namespace MassTransit
     {
         readonly FutureFault<TFault> _fault = new FutureFault<TFault>();
         readonly FutureResult<TCommand, TResult> _result = new FutureResult<TCommand, TResult>();
-        readonly FutureActivity _activity = new FutureActivity();
+        readonly FutureFault<TFault> _completedWithFault = new FutureFault<TFault>();
         protected Future()
         {
             InstanceState(x => x.CurrentState, WaitingForCompletion, Completed, Faulted);
@@ -314,7 +314,10 @@ namespace MassTransit
                         notCompleted => notCompleted.If(context => context.Saga.Faulted.HasValue,
                             faulted => faulted
                                 .ThenAsync(context => _fault.SetFaulted(context))
-                                .TransitionTo(Faulted))).IfAllCompletedOrFaulted(_activity)
+                                .TransitionTo(Faulted)))
+                    .If(context => !context.Saga.HasPending() && context.Saga.HasFaults(),
+                        faulted => faulted
+                            .ThenAsync(context => _completedWithFault.SetFaulted(context)))
             );
         }
 
@@ -327,7 +330,10 @@ namespace MassTransit
                     .If(context => context.Saga.Faulted.HasValue,
                         faulted => faulted
                             .ThenAsync(context => _fault.SetFaulted(context))
-                            .TransitionTo(Faulted)).IfAllCompletedOrFaulted(_activity)
+                            .TransitionTo(Faulted))
+                    .If(context => !context.Saga.HasPending() && context.Saga.HasFaults(),
+                        faulted => faulted
+                            .ThenAsync(context => _completedWithFault.SetFaulted(context)))
             );
         }
 
@@ -339,7 +345,10 @@ namespace MassTransit
                     .If(context => context.Saga.Faulted.HasValue,
                         faulted => faulted
                             .ThenAsync(context => _fault.SetFaulted(context))
-                            .TransitionTo(Faulted)).IfAllCompletedOrFaulted(_activity)
+                            .TransitionTo(Faulted))
+                    .If(context => !context.Saga.HasPending() && context.Saga.HasFaults(),
+                        faulted => faulted
+                            .ThenAsync(context => _completedWithFault.SetFaulted(context)))
             );
         }
 
@@ -357,7 +366,9 @@ namespace MassTransit
                 When(resultEvent)
                     .ThenAsync(context => callback(context))
                     .TransitionTo(Completed)
-                    .IfAllCompletedOrFaulted(_activity)
+                    .If(context => !context.Saga.HasPending() && context.Saga.HasFaults(),
+                        faulted => faulted
+                            .ThenAsync(context => _completedWithFault.SetFaulted(context)))
             );
         }
 
@@ -368,7 +379,9 @@ namespace MassTransit
                 When(faultEvent)
                     .ThenAsync(context => callback(context))
                     .TransitionTo(Faulted)
-                    .IfAllCompletedOrFaulted(_activity)
+                    .If(context => !context.Saga.HasPending() && context.Saga.HasFaults(),
+                        faulted => faulted
+                            .ThenAsync(context => _completedWithFault.SetFaulted(context)))
             );
         }
 
@@ -420,12 +433,12 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// When all requests have either completed or faulted, execute Activity
+        /// When all requests have either completed or faulted, Set the future Faulted
         /// </summary>
         /// <param name="configure"></param>
-        protected void WhenAllCompletedOrFaulted(Action<IFutureActivityConfigurator> configure)
+        protected void WhenAllCompletedOrFaulted(Action<IFutureFaultConfigurator<TFault>> configure)
         {
-            var configurator = new FutureActivityConfigurator(_activity);
+            var configurator = new FutureFaultConfigurator<TFault>(_completedWithFault);
 
             configure?.Invoke(configurator);
         }

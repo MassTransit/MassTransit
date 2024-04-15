@@ -204,15 +204,5 @@ namespace MassTransit
             fault = default;
             return false;
         }
-
-        public static EventActivityBinder<FutureState, T> IfAllCompletedOrFaulted<T>(this EventActivityBinder<FutureState, T> context,
-            FutureActivity activity)
-            where T : class
-        {
-            return context.If(x =>
-                    !x.Saga.HasPending(),
-                x => activity.Execute(x)
-            );
-        }
     }
 }
