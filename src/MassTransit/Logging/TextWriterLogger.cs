@@ -16,7 +16,7 @@ namespace MassTransit.Logging
             _factory = factory;
             _logLevel = logLevel;
         }
-    #if NET7_0_OR_GREATER
+    #if NET8_0_OR_GREATER
         public IDisposable BeginScope<TState>(TState state)
             where TState : notnull
         {
