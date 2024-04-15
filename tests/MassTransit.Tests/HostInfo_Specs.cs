@@ -18,16 +18,19 @@
 
             ConsumeContext<PingMessage> context = await _handled;
 
-            Assert.IsNotNull(context.Host);
+            Assert.That(context.Host, Is.Not.Null);
 
-            Assert.AreEqual(HostMetadataCache.Host.MachineName, context.Host.MachineName);
-            Assert.AreEqual(HostMetadataCache.Host.Assembly, context.Host.Assembly);
-            Assert.AreEqual(HostMetadataCache.Host.AssemblyVersion, context.Host.AssemblyVersion);
-            Assert.AreEqual(HostMetadataCache.Host.FrameworkVersion, context.Host.FrameworkVersion);
-            Assert.AreEqual(HostMetadataCache.Host.MassTransitVersion, context.Host.MassTransitVersion);
-            Assert.AreEqual(HostMetadataCache.Host.OperatingSystemVersion, context.Host.OperatingSystemVersion);
-            Assert.AreEqual(HostMetadataCache.Host.ProcessName, context.Host.ProcessName);
-            Assert.AreEqual(HostMetadataCache.Host.ProcessId, context.Host.ProcessId);
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.Host.MachineName, Is.EqualTo(HostMetadataCache.Host.MachineName));
+                Assert.That(context.Host.Assembly, Is.EqualTo(HostMetadataCache.Host.Assembly));
+                Assert.That(context.Host.AssemblyVersion, Is.EqualTo(HostMetadataCache.Host.AssemblyVersion));
+                Assert.That(context.Host.FrameworkVersion, Is.EqualTo(HostMetadataCache.Host.FrameworkVersion));
+                Assert.That(context.Host.MassTransitVersion, Is.EqualTo(HostMetadataCache.Host.MassTransitVersion));
+                Assert.That(context.Host.OperatingSystemVersion, Is.EqualTo(HostMetadataCache.Host.OperatingSystemVersion));
+                Assert.That(context.Host.ProcessName, Is.EqualTo(HostMetadataCache.Host.ProcessName));
+                Assert.That(context.Host.ProcessId, Is.EqualTo(HostMetadataCache.Host.ProcessId));
+            });
         }
 
         Task<ConsumeContext<PingMessage>> _handled;

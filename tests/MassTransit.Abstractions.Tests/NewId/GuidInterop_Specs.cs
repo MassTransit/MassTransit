@@ -17,7 +17,7 @@
             var ns = n.ToString();
             var gs = g.ToString();
 
-            Assert.AreEqual(ns, gs);
+            Assert.That(gs, Is.EqualTo(ns));
         }
 
         [Test]
@@ -30,7 +30,7 @@
             var ns = n.ToString();
             var gs = g.ToString();
 
-            Assert.AreEqual(ns, gs);
+            Assert.That(gs, Is.EqualTo(ns));
         }
 
         [Test]
@@ -41,7 +41,7 @@
             var ns = g.ToNewId().ToString();
             var gs = g.ToString();
 
-            Assert.AreEqual(ns, gs);
+            Assert.That(gs, Is.EqualTo(ns));
         }
 
         [Test]
@@ -61,7 +61,7 @@
 
             var gn = new Guid(n.ToByteArray());
 
-            Assert.AreEqual(g, gn);
+            Assert.That(gn, Is.EqualTo(g));
         }
 
         [Test]
@@ -73,7 +73,7 @@
 
             var gn = n.ToGuid();
 
-            Assert.AreEqual(g, gn);
+            Assert.That(gn, Is.EqualTo(g));
         }
 
         [Test]
@@ -85,63 +85,7 @@
 
             var gn = n.ToSequentialGuid();
 
-            Assert.AreEqual(g, gn);
-        }
-
-        [Test]
-        public void Should_match_string_output_b()
-        {
-            var bytes = new byte[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
-
-            var g = new Guid(bytes);
-            var n = new NewId(bytes);
-
-            var gs = g.ToString("B");
-            var ns = n.ToString("B");
-
-            Assert.AreEqual(gs, ns);
-        }
-
-        [Test]
-        public void Should_match_string_output_d()
-        {
-            var bytes = new byte[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
-
-            var g = new Guid(bytes);
-            var n = new NewId(bytes);
-
-            var gs = g.ToString("d");
-            var ns = n.ToString("d");
-
-            Assert.AreEqual(gs, ns);
-        }
-
-        [Test]
-        public void Should_match_string_output_n()
-        {
-            var bytes = new byte[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
-
-            var g = new Guid(bytes);
-            var n = new NewId(bytes);
-
-            var gs = g.ToString("N");
-            var ns = n.ToString("N");
-
-            Assert.AreEqual(gs, ns);
-        }
-
-        [Test]
-        public void Should_match_string_output_p()
-        {
-            var bytes = new byte[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
-
-            var g = new Guid(bytes);
-            var n = new NewId(bytes);
-
-            var gs = g.ToString("P");
-            var ns = n.ToString("P");
-
-            Assert.AreEqual(gs, ns);
+            Assert.That(gn, Is.EqualTo(g));
         }
 
         [Test]
@@ -156,7 +100,7 @@
             var gsn = Guid.Parse(ns);
             var g = n.ToSequentialGuid();
 
-            Assert.AreEqual(g, gsn);
+            Assert.That(gsn, Is.EqualTo(g));
         }
 
         [Test]
@@ -171,8 +115,8 @@
             var gsn = Guid.Parse(ns);
             var g = n.ToSequentialGuid();
 
-            Assert.AreEqual(g, gsn);
-            Assert.AreNotEqual(gsn, n.ToGuid());
+            Assert.That(gsn, Is.EqualTo(g));
+            Assert.That(n.ToGuid(), Is.Not.EqualTo(gsn));
         }
 
         [Test]
@@ -187,7 +131,7 @@
             var gsn = Guid.Parse(ns);
             var g = n.ToSequentialGuid();
 
-            Assert.AreEqual(g, gsn);
+            Assert.That(gsn, Is.EqualTo(g));
         }
 
         [Test]
@@ -202,8 +146,95 @@
             var gsn = Guid.Parse(ns);
             var g = n.ToSequentialGuid();
 
-            Assert.AreEqual(g, gsn);
+            Assert.That(gsn, Is.EqualTo(g));
         }
+
+        [Test]
+        public void Should_match_string_output_b()
+        {
+            var bytes = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+
+            var g = new Guid(bytes);
+            var n = new NewId(bytes);
+
+            var gs = g.ToString("B");
+            var ns = n.ToString("B");
+
+            Assert.That(ns, Is.EqualTo(gs));
+        }
+
+        [Test]
+        public void Should_match_string_output_d()
+        {
+            var bytes = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+
+            var g = new Guid(bytes);
+            var n = new NewId(bytes);
+
+            var gs = g.ToString("d");
+            var ns = n.ToString("d");
+
+            Assert.That(ns, Is.EqualTo(gs));
+        }
+
+        [Test]
+        public void Should_match_string_output_n()
+        {
+            var bytes = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+
+            var g = new Guid(bytes);
+            var n = new NewId(bytes);
+
+            var gs = g.ToString("N");
+            var ns = n.ToString("N");
+
+            Assert.That(ns, Is.EqualTo(gs));
+        }
+
+        [Test]
+        public void Should_match_string_output_p()
+        {
+            var bytes = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+
+            var g = new Guid(bytes);
+            var n = new NewId(bytes);
+
+            var gs = g.ToString("P");
+            var ns = n.ToString("P");
+
+            Assert.That(ns, Is.EqualTo(gs));
+        }
+
+        [Test]
+        public void Should_parse_newid_guid_as_newid()
+        {
+            var n = NewId.Next(2)[1];
+            var g = n.ToGuid();
+
+            var ng = NewId.FromGuid(g);
+
+            Assert.That(ng, Is.EqualTo(n));
+
+            // Also checks to see if this would throw
+            Assert.IsTrue(ng.Timestamp != default);
+        }
+
+        [Test]
+        public void Should_parse_sequential_guid_as_newid()
+        {
+            var n = NewId.Next(2)[1];
+
+            var nn = n.ToGuid();
+            var g = n.ToSequentialGuid();
+
+            var ng = NewId.FromSequentialGuid(g);
+
+            Assert.That(ng, Is.EqualTo(n));
+
+            // Also checks to see if this would throw
+            Assert.That(ng.Timestamp, Is.Not.EqualTo(default));
+        }
+
         [Test]
         public void Should_properly_handle_string_passthrough()
         {
@@ -215,7 +246,7 @@
 
             var nn = new NewId(g.ToString("D"));
 
-            Assert.AreEqual(n, nn);
+            Assert.That(nn, Is.EqualTo(n));
         }
 
         [Test]
@@ -225,7 +256,7 @@
             var guid = new Guid(0x01020304, 0x0506, 0x0708, 9, 10, 11, 12, 13, 14, 15, 16);
             var newid = new NewId(0x01020304, 0x0506, 0x0708, 9, 10, 11, 12, 13, 14, 15, 16);
 
-            Assert.AreEqual(guid.ToString(), newid.ToString());
+            Assert.That(newid.ToString(), Is.EqualTo(guid.ToString()));
         }
 
         [Test]
@@ -239,38 +270,7 @@
 
             Console.WriteLine(g.ToString("D"));
 
-            Assert.AreEqual(n, ng);
-        }
-
-
-        [Test]
-        public void Should_parse_newid_guid_as_newid()
-        {
-            NewId n = NewId.Next(2)[1];
-            var g = n.ToGuid();
-
-            var ng = NewId.FromGuid(g);
-
-            Assert.AreEqual(n, ng);
-
-            // Also checks to see if this would throw
-            Assert.IsTrue(ng.Timestamp != default);
-        }
-
-        [Test]
-        public void Should_parse_sequential_guid_as_newid()
-        {
-            NewId n = NewId.Next(2)[1];
-
-            var nn = n.ToGuid();
-            var g = n.ToSequentialGuid();
-
-            var ng = NewId.FromSequentialGuid(g);
-
-            Assert.AreEqual(n, ng);
-
-            // Also checks to see if this would throw
-            Assert.IsTrue(ng.Timestamp != default);
+            Assert.That(ng, Is.EqualTo(n));
         }
     }
 }

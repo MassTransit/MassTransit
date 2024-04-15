@@ -132,7 +132,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
                 var myId = harness.Scope.ServiceProvider.GetRequiredService<MyId>();
 
                 var result = await taskCompletionSource.Task;
-                Assert.AreEqual(myId, result);
+                Assert.That(result, Is.EqualTo(myId));
             }
             finally
             {

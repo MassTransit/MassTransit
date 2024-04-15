@@ -24,10 +24,13 @@ namespace MassTransit.QuartzIntegration.Tests
 
             Response<Status, InstanceNotFound> result = await response;
 
-            Assert.That(result.Is(out Response<InstanceNotFound> _), Is.False);
-            Assert.That(result.Is(out Response<Status> status), Is.True);
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.Is(out Response<InstanceNotFound> _), Is.False);
+                Assert.That(result.Is(out Response<Status> status), Is.True);
 
-            Assert.AreEqual("A", status.Message.ServiceName);
+                Assert.That(status.Message.ServiceName, Is.EqualTo("A"));
+            });
 
             (Task<Response<Status>> statusTask, Task<Response<InstanceNotFound>> notFoundTask) = result;
 

@@ -16,20 +16,6 @@
         }
 
         [Test]
-        public void Should_show_the_goods()
-        {
-            var generator = new StateMachineGraphvizGenerator(_graph);
-
-            string dots = generator.CreateDotFile();
-
-            Console.WriteLine(dots);
-
-            var expected = Expected.Replace("\r", "").Replace("\n", Environment.NewLine);
-
-            Assert.AreEqual(expected, dots);
-        }
-
-        [Test]
         public void Should_show_the_differences()
         {
             var dotsAssigned = new StateMachineGraphvizGenerator(new TestStateMachine().GetGraph()).CreateDotFile();
@@ -39,8 +25,22 @@
             var expectedAssigned = ExpectedAssigned.Replace("\r", "").Replace("\n", Environment.NewLine);
             var expectedNotAssigned = ExpectedNotAssigned.Replace("\r", "").Replace("\n", Environment.NewLine);
 
-            Assert.AreEqual(expectedAssigned, dotsAssigned);
-            Assert.AreNotEqual(expectedNotAssigned, dotsAssigned);
+            Assert.That(dotsAssigned, Is.EqualTo(expectedAssigned));
+            Assert.That(dotsAssigned, Is.Not.EqualTo(expectedNotAssigned));
+        }
+
+        [Test]
+        public void Should_show_the_goods()
+        {
+            var generator = new StateMachineGraphvizGenerator(_graph);
+
+            var dots = generator.CreateDotFile();
+
+            Console.WriteLine(dots);
+
+            var expected = Expected.Replace("\r", "").Replace("\n", Environment.NewLine);
+
+            Assert.That(dots, Is.EqualTo(expected));
         }
 
         InstanceStateMachine _machine;
@@ -116,11 +116,12 @@
 6 -> 5;
 }";
 
+
         class Instance :
             SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public State CurrentState { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 
@@ -168,10 +169,10 @@
             public string Name { get; set; }
         }
 
+
         class CompositeInstance :
             SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public CompositeEventStatus CompositeStatus { get; set; }
             public bool Called { get; set; }
             public bool CalledAfterAll { get; set; }
@@ -179,6 +180,7 @@
             public bool SecondFirst { get; set; }
             public bool First { get; set; }
             public bool Second { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 

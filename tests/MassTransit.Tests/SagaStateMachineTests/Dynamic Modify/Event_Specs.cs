@@ -11,13 +11,13 @@
         [Test]
         public void It_should_capture_a_simple_event_name()
         {
-            Assert.AreEqual("Hello", _hello.Name);
+            Assert.That(_hello.Name, Is.EqualTo("Hello"));
         }
 
         [Test]
         public void It_should_capture_the_data_event_name()
         {
-            Assert.AreEqual("EventA", _eventA.Name);
+            Assert.That(_eventA.Name, Is.EqualTo("EventA"));
         }
 
         [Test]

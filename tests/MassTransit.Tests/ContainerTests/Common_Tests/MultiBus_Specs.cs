@@ -221,9 +221,12 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
         [Test]
         public async Task Should_configure_endpoints_correctly()
         {
-            Assert.AreEqual(1, _busOneConfigured);
-            Assert.AreEqual(1, _busTwoConfigured);
-            Assert.AreEqual(2, _globalConfigured);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_busOneConfigured, Is.EqualTo(1));
+                Assert.That(_busTwoConfigured, Is.EqualTo(1));
+                Assert.That(_globalConfigured, Is.EqualTo(2));
+            });
         }
 
         protected override IServiceCollection ConfigureServices(IServiceCollection collection)
@@ -259,6 +262,18 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
             });
         }
 
+        [OneTimeSetUp]
+        public async Task Setup()
+        {
+            await Task.WhenAll(HostedServices.Select(x => x.StartAsync(InMemoryTestHarness.TestCancellationToken)));
+        }
+
+        [OneTimeTearDown]
+        public async Task TearDown()
+        {
+            await Task.WhenAll(HostedServices.Select(x => x.StopAsync(InMemoryTestHarness.TestCancellationToken)));
+        }
+
 
         class GlobalConfigureReceiveEndpoint :
             IConfigureReceiveEndpoint
@@ -274,19 +289,6 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
             {
                 _action();
             }
-        }
-
-
-        [OneTimeSetUp]
-        public async Task Setup()
-        {
-            await Task.WhenAll(HostedServices.Select(x => x.StartAsync(InMemoryTestHarness.TestCancellationToken)));
-        }
-
-        [OneTimeTearDown]
-        public async Task TearDown()
-        {
-            await Task.WhenAll(HostedServices.Select(x => x.StopAsync(InMemoryTestHarness.TestCancellationToken)));
         }
 
 

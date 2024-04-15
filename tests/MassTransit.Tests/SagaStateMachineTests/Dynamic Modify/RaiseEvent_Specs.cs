@@ -22,31 +22,28 @@
                     .Event("Thing", out Thing)
                     .Event("Initialize", out Event Initialize)
                     .During(builder.Initial)
-                        .When(Thing, context => context.Data.Condition, b => b
-                            .TransitionTo(True)
-                            .Then(context => context.Raise(Initialize)))
-                        .When(Thing, context => !context.Data.Condition, b => b
-                            .TransitionTo(False))
+                    .When(Thing, context => context.Data.Condition, b => b
+                        .TransitionTo(True)
+                        .Then(context => context.Raise(Initialize)))
+                    .When(Thing, context => !context.Data.Condition, b => b
+                        .TransitionTo(False))
                     .DuringAny()
-                        .When(Initialize, b => b
-                            .Then(context => context.Instance.Initialized = DateTime.Now))
+                    .When(Initialize, b => b
+                        .Then(context => context.Instance.Initialized = DateTime.Now))
                 );
 
-            await machine.RaiseEvent(instance, Thing, new Data
-            {
-                Condition = true
-            });
-            Assert.AreEqual(True, instance.CurrentState);
-            Assert.IsTrue(instance.Initialized.HasValue);
+            await machine.RaiseEvent(instance, Thing, new Data { Condition = true });
+            Assert.That(instance.CurrentState, Is.EqualTo(True));
+            Assert.That(instance.Initialized.HasValue, Is.True);
         }
 
 
         class Instance :
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public State CurrentState { get; set; }
             public DateTime? Initialized { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 

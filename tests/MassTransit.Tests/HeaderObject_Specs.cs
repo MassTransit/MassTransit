@@ -27,8 +27,11 @@
 
             var identity = await _header.Task;
 
-            Assert.AreEqual(27, identity.IdentityId);
-            Assert.AreEqual("AAD:Claims", identity.IdentityType);
+            Assert.Multiple(() =>
+            {
+                Assert.That(identity.IdentityId, Is.EqualTo(27));
+                Assert.That(identity.IdentityType, Is.EqualTo("AAD:Claims"));
+            });
         }
 
         Task<ConsumeContext<PingMessage>> _handled;

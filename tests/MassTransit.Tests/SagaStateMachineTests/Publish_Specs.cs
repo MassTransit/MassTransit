@@ -22,17 +22,20 @@ namespace MassTransit.Tests.SagaStateMachineTests
 
             ConsumeContext<StartupComplete> received = await messageReceived;
 
-            Assert.AreEqual(message.CorrelationId, received.Message.TransactionId);
+            Assert.Multiple(() =>
+            {
+                Assert.That(received.Message.TransactionId, Is.EqualTo(message.CorrelationId));
 
-            Assert.IsTrue(received.InitiatorId.HasValue, "The initiator should be copied from the CorrelationId");
+                Assert.That(received.InitiatorId.HasValue, Is.True, "The initiator should be copied from the CorrelationId");
 
-            Assert.AreEqual(received.InitiatorId.Value, message.CorrelationId, "The initiator should be the saga CorrelationId");
+                Assert.That(received.InitiatorId.Value, Is.EqualTo(message.CorrelationId), "The initiator should be the saga CorrelationId");
 
-            Assert.AreEqual(received.SourceAddress, InputQueueAddress, "The published message should have the input queue source address");
+                Assert.That(received.SourceAddress, Is.EqualTo(InputQueueAddress), "The published message should have the input queue source address");
+            });
 
             Guid? saga = await _repository.ShouldContainSagaInState(message.CorrelationId, _machine, x => x.Running, TestTimeout);
 
-            Assert.IsTrue(saga.HasValue);
+            Assert.That(saga.HasValue, Is.True);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

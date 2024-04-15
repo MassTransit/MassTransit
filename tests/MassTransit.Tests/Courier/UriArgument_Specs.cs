@@ -34,11 +34,11 @@
 
             ConsumeContext<RoutingSlipActivityCompleted> consumeContext = await activity;
 
-            Assert.AreEqual(new Uri("http://google.com/"), consumeContext.GetResult<string>("UsedAddress"));
+            Assert.That(consumeContext.GetResult<string>("UsedAddress"), Is.EqualTo("http://google.com/"));
 
             ConsumeContext<RoutingSlipActivityCompensated> context = await activityCompensated;
 
-            Assert.AreEqual(new Uri("http://google.com/"), context.GetResult<string>("UsedAddress"));
+            Assert.That(context.GetResult<string>("UsedAddress"), Is.EqualTo("http://google.com/"));
         }
 
         [Test]
@@ -61,7 +61,7 @@
 
             ConsumeContext<RoutingSlipActivityCompleted> consumeContext = await activity;
 
-            Assert.AreEqual(new Uri("http://google.com/"), consumeContext.GetResult<string>("UsedAddress"));
+            Assert.That(consumeContext.GetResult<string>("UsedAddress"), Is.EqualTo("http://google.com/"));
         }
 
         protected override void SetupActivities(BusTestHarness testHarness)

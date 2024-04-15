@@ -72,10 +72,10 @@ namespace MassTransit.EventHubIntegration.Tests
 
                 ConsumeContext<Batch<BatchEventHubMessage>> result = await taskCompletionSource.Task;
 
-                Assert.AreEqual(batchSize, result.Message.Length);
+                Assert.That(result.Message.Length, Is.EqualTo(batchSize));
 
                 for (var i = 0; i < batchSize; i++)
-                    Assert.AreEqual(i, result.Message[i].Message.Index);
+                    Assert.That(result.Message[i].Message.Index, Is.EqualTo(i));
             }
             finally
             {

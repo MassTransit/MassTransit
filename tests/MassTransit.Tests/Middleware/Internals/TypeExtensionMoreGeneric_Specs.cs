@@ -21,9 +21,12 @@ namespace MassTransit.Tests.Middleware.Internals
         {
             Type[] types = typeof(NestedDoubleGenericInterface).GetClosingArguments(typeof(INestedDoubleGeneric<,>)).ToArray();
 
-            Assert.AreEqual(2, types.Length);
-            Assert.AreEqual(typeof(SingleGenericInterface), types[0]);
-            Assert.AreEqual(typeof(int), types[1]);
+            Assert.That(types, Has.Length.EqualTo(2));
+            Assert.Multiple(() =>
+            {
+                Assert.That(types[0], Is.EqualTo(typeof(SingleGenericInterface)));
+                Assert.That(types[1], Is.EqualTo(typeof(int)));
+            });
         }
 
         [Test]
@@ -31,9 +34,12 @@ namespace MassTransit.Tests.Middleware.Internals
         {
             Type[] types = typeof(DeepDoubleNestedGeneric).GetClosingArguments(typeof(Dictionary<,>)).ToArray();
 
-            Assert.AreEqual(2, types.Length);
-            Assert.AreEqual(typeof(int), types[0]);
-            Assert.AreEqual(typeof(string), types[1]);
+            Assert.That(types, Has.Length.EqualTo(2));
+            Assert.Multiple(() =>
+            {
+                Assert.That(types[0], Is.EqualTo(typeof(int)));
+                Assert.That(types[1], Is.EqualTo(typeof(string)));
+            });
         }
 
         [Test]
@@ -41,8 +47,8 @@ namespace MassTransit.Tests.Middleware.Internals
         {
             Type[] types = typeof(DeepSingleNestedGeneric).GetClosingArguments(typeof(List<>)).ToArray();
 
-            Assert.AreEqual(1, types.Length);
-            Assert.AreEqual(typeof(string), types[0]);
+            Assert.That(types, Has.Length.EqualTo(1));
+            Assert.That(types[0], Is.EqualTo(typeof(string)));
         }
 
         [Test]
@@ -50,9 +56,12 @@ namespace MassTransit.Tests.Middleware.Internals
         {
             Type[] types = typeof(DoubleGenericInterface).GetClosingArguments(typeof(IDoubleGeneric<,>)).ToArray();
 
-            Assert.AreEqual(2, types.Length);
-            Assert.AreEqual(typeof(int), types[0]);
-            Assert.AreEqual(typeof(string), types[1]);
+            Assert.That(types, Has.Length.EqualTo(2));
+            Assert.Multiple(() =>
+            {
+                Assert.That(types[0], Is.EqualTo(typeof(int)));
+                Assert.That(types[1], Is.EqualTo(typeof(string)));
+            });
         }
 
         [Test]
@@ -60,9 +69,12 @@ namespace MassTransit.Tests.Middleware.Internals
         {
             Type[] types = typeof(Dictionary<int, string>).GetClosingArguments(typeof(Dictionary<,>)).ToArray();
 
-            Assert.AreEqual(2, types.Length);
-            Assert.AreEqual(typeof(int), types[0]);
-            Assert.AreEqual(typeof(string), types[1]);
+            Assert.That(types, Has.Length.EqualTo(2));
+            Assert.Multiple(() =>
+            {
+                Assert.That(types[0], Is.EqualTo(typeof(int)));
+                Assert.That(types[1], Is.EqualTo(typeof(string)));
+            });
         }
 
         [Test]
@@ -70,9 +82,12 @@ namespace MassTransit.Tests.Middleware.Internals
         {
             Type[] types = typeof(DoubleNestedGeneric).GetClosingArguments(typeof(Dictionary<,>)).ToArray();
 
-            Assert.AreEqual(2, types.Length);
-            Assert.AreEqual(typeof(int), types[0]);
-            Assert.AreEqual(typeof(string), types[1]);
+            Assert.That(types, Has.Length.EqualTo(2));
+            Assert.Multiple(() =>
+            {
+                Assert.That(types[0], Is.EqualTo(typeof(int)));
+                Assert.That(types[1], Is.EqualTo(typeof(string)));
+            });
         }
 
         [Test]
@@ -80,8 +95,8 @@ namespace MassTransit.Tests.Middleware.Internals
         {
             Type[] types = typeof(SingleGenericInterface).GetClosingArguments(typeof(ISingleGeneric<>)).ToArray();
 
-            Assert.AreEqual(1, types.Length);
-            Assert.AreEqual(typeof(int), types[0]);
+            Assert.That(types, Has.Length.EqualTo(1));
+            Assert.That(types[0], Is.EqualTo(typeof(int)));
         }
 
         [Test]
@@ -89,8 +104,8 @@ namespace MassTransit.Tests.Middleware.Internals
         {
             Type[] types = typeof(List<string>).GetClosingArguments(typeof(List<>)).ToArray();
 
-            Assert.AreEqual(1, types.Length);
-            Assert.AreEqual(typeof(string), types[0]);
+            Assert.That(types, Has.Length.EqualTo(1));
+            Assert.That(types[0], Is.EqualTo(typeof(string)));
         }
 
         [Test]
@@ -98,8 +113,8 @@ namespace MassTransit.Tests.Middleware.Internals
         {
             Type[] types = typeof(SingleNestedGeneric).GetClosingArguments(typeof(List<>)).ToArray();
 
-            Assert.AreEqual(1, types.Length);
-            Assert.AreEqual(typeof(string), types[0]);
+            Assert.That(types, Has.Length.EqualTo(1));
+            Assert.That(types[0], Is.EqualTo(typeof(string)));
         }
 
 

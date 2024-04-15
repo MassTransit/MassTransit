@@ -16,21 +16,27 @@
         [Test]
         public void Should_have_first_moved_to_initial()
         {
-            Assert.AreEqual(null, _observer.Events[0].Previous);
-            Assert.AreEqual(_machine.Initial, _observer.Events[0].Current);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_observer.Events[0].Previous, Is.EqualTo(null));
+                Assert.That(_observer.Events[0].Current, Is.EqualTo(_machine.Initial));
+            });
         }
 
         [Test]
         public void Should_have_second_moved_to_running()
         {
-            Assert.AreEqual(_machine.Initial, _observer.Events[1].Previous);
-            Assert.AreEqual(_machine.Running, _observer.Events[1].Current);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_observer.Events[1].Previous, Is.EqualTo(_machine.Initial));
+                Assert.That(_observer.Events[1].Current, Is.EqualTo(_machine.Running));
+            });
         }
 
         [Test]
         public void Should_raise_the_event()
         {
-            Assert.AreEqual(2, _observer.Events.Count);
+            Assert.That(_observer.Events, Has.Count.EqualTo(2));
         }
 
         Instance _instance;
@@ -53,11 +59,11 @@
 
 
         class Instance :
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public State CurrentState { get; set; }
             public bool EnterCalled { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 
@@ -91,40 +97,49 @@ SagaStateMachineInstance
         [Test]
         public void Should_call_the_enter_event()
         {
-            Assert.IsTrue(_instance.EnterCalled);
+            Assert.That(_instance.EnterCalled, Is.True);
         }
 
         [Test]
         public void Should_have_first_moved_to_initial()
         {
-            Assert.AreEqual(null, _observer.Events[0].Previous);
-            Assert.AreEqual(_machine.Initial, _observer.Events[0].Current);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_observer.Events[0].Previous, Is.EqualTo(null));
+                Assert.That(_observer.Events[0].Current, Is.EqualTo(_machine.Initial));
+            });
         }
 
         [Test]
         public void Should_have_invoked_final_entered()
         {
-            Assert.IsTrue(_instance.FinalEntered);
+            Assert.That(_instance.FinalEntered, Is.True);
         }
 
         [Test]
         public void Should_have_second_moved_to_running()
         {
-            Assert.AreEqual(_machine.Initial, _observer.Events[1].Previous);
-            Assert.AreEqual(_machine.Running, _observer.Events[1].Current);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_observer.Events[1].Previous, Is.EqualTo(_machine.Initial));
+                Assert.That(_observer.Events[1].Current, Is.EqualTo(_machine.Running));
+            });
         }
 
         [Test]
         public void Should_have_third_moved_to_final()
         {
-            Assert.AreEqual(_machine.Running, _observer.Events[2].Previous);
-            Assert.AreEqual(_machine.Final, _observer.Events[2].Current);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_observer.Events[2].Previous, Is.EqualTo(_machine.Running));
+                Assert.That(_observer.Events[2].Current, Is.EqualTo(_machine.Final));
+            });
         }
 
         [Test]
         public void Should_raise_the_event()
         {
-            Assert.AreEqual(3, _observer.Events.Count);
+            Assert.That(_observer.Events, Has.Count.EqualTo(3));
         }
 
         Instance _instance;
@@ -148,13 +163,13 @@ SagaStateMachineInstance
 
 
         class Instance :
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public State CurrentState { get; set; }
             public bool EnterCalled { get; set; }
 
             public bool FinalEntered { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 

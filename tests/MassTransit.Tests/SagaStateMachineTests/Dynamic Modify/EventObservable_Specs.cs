@@ -11,13 +11,13 @@
         [Test]
         public void Should_have_raised_the_initialized_event()
         {
-            Assert.AreEqual(Initialized, _observer.Events[0].Event);
+            Assert.That(_observer.Events[0].Event, Is.EqualTo(Initialized));
         }
 
         [Test]
         public void Should_raise_the_event()
         {
-            Assert.AreEqual(1, _observer.Events.Count);
+            Assert.That(_observer.Events, Has.Count.EqualTo(1));
         }
 
         State Running;
@@ -35,7 +35,7 @@
                     .Event("Initialized", out Initialized)
                     .State("Running", out Running)
                     .During(builder.Initial)
-                        .When(Initialized, b => b.TransitionTo(Running))
+                    .When(Initialized, b => b.TransitionTo(Running))
                 );
             _observer = new EventRaisedObserver<Instance>();
 
@@ -43,11 +43,12 @@
                 _machine.RaiseEvent(_instance, Initialized).Wait();
         }
 
+
         class Instance :
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public State CurrentState { get; set; }
+            public Guid CorrelationId { get; set; }
         }
     }
 }

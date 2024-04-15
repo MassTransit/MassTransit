@@ -23,11 +23,11 @@
 
             for (var i = 0; i < limit - 1; i++)
             {
-                Assert.AreNotEqual(ids[i], ids[i + 1]);
+                Assert.That(ids[i + 1], Is.Not.EqualTo(ids[i]));
 
                 SqlGuid left = ids[i].ToGuid();
                 SqlGuid right = ids[i + 1].ToGuid();
-                Assert.Less(left, right);
+                Assert.That(left, Is.LessThan(right));
                 if (i % 128 == 0)
                     Console.WriteLine("Normal: {0} Sql: {1}", left, ids[i].ToSequentialGuid());
             }

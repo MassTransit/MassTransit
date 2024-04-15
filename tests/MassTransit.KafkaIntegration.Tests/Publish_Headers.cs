@@ -71,21 +71,25 @@ namespace MassTransit.KafkaIntegration.Tests
             var result = await provider.GetTask<ConsumeContext<OriginalMessage>>();
             var ping = await provider.GetTask<ConsumeContext<FollowingMessage>>();
 
-            Assert.AreEqual(result.ConversationId, ping.ConversationId);
+            Assert.Multiple(() =>
+            {
+                Assert.That(ping.ConversationId, Is.EqualTo(result.ConversationId));
 
-            Assert.That(ping.SourceAddress, Is.EqualTo(new Uri($"loopback://localhost/{KafkaTopicAddress.PathPrefix}/{OriginalTopic}")));
-            Assert.That(ping.DestinationAddress, Is.EqualTo(new Uri($"loopback://localhost/{KafkaTopicAddress.PathPrefix}/{FollowingTopic}")));
-            Assert.AreEqual(result.DestinationAddress, ping.SourceAddress);
+                Assert.That(ping.SourceAddress, Is.EqualTo(new Uri($"loopback://localhost/{KafkaTopicAddress.PathPrefix}/{OriginalTopic}")));
+                Assert.That(ping.DestinationAddress, Is.EqualTo(new Uri($"loopback://localhost/{KafkaTopicAddress.PathPrefix}/{FollowingTopic}")));
 
-            Assert.AreNotEqual(result.MessageId, ping.MessageId);
+                Assert.That(ping.SourceAddress, Is.EqualTo(result.DestinationAddress));
+
+                Assert.That(ping.MessageId, Is.Not.EqualTo(result.MessageId));
+            });
         }
 
 
         class OriginalMessageConsumer :
             IConsumer<OriginalMessage>
         {
-            readonly TaskCompletionSource<ConsumeContext<OriginalMessage>> _orginalMessageTaskCompletionSource;
             readonly ITopicProducer<FollowingMessage> _followingMessageTopicProducer;
+            readonly TaskCompletionSource<ConsumeContext<OriginalMessage>> _orginalMessageTaskCompletionSource;
 
             public OriginalMessageConsumer(TaskCompletionSource<ConsumeContext<OriginalMessage>> orginalMessageTaskCompletionSource,
                 ITopicProducer<FollowingMessage> followingMessageTopicProducer)

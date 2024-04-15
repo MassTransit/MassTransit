@@ -69,19 +69,22 @@
 
             ConsumeContext<A> context = await handler;
 
-            Assert.AreEqual(Bus.Address, context.FaultAddress);
-            Assert.AreEqual(InputQueueAddress, context.ResponseAddress);
-            Assert.IsTrue(context.RequestId.HasValue);
-            Assert.AreEqual(requestId, context.RequestId.Value);
-            Assert.IsTrue(context.CorrelationId.HasValue);
-            Assert.AreEqual(correlationId, context.CorrelationId.Value);
-            Assert.IsTrue(context.ConversationId.HasValue);
-            Assert.AreEqual(conversationId, context.ConversationId.Value);
-            Assert.IsTrue(context.InitiatorId.HasValue);
-            Assert.AreEqual(initiatorId, context.InitiatorId.Value);
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.FaultAddress, Is.EqualTo(Bus.Address));
+                Assert.That(context.ResponseAddress, Is.EqualTo(InputQueueAddress));
+                Assert.That(context.RequestId.HasValue, Is.True);
+                Assert.That(context.RequestId.Value, Is.EqualTo(requestId));
+                Assert.That(context.CorrelationId.HasValue, Is.True);
+                Assert.That(context.CorrelationId.Value, Is.EqualTo(correlationId));
+                Assert.That(context.ConversationId.HasValue, Is.True);
+                Assert.That(context.ConversationId.Value, Is.EqualTo(conversationId));
+                Assert.That(context.InitiatorId.HasValue, Is.True);
+                Assert.That(context.InitiatorId.Value, Is.EqualTo(initiatorId));
 
-            Assert.IsTrue(context.Headers.TryGetHeader("Hello", out var value));
-            Assert.AreEqual("World", value);
+                Assert.That(context.Headers.TryGetHeader("Hello", out var value), Is.True);
+                Assert.That(value, Is.EqualTo("World"));
+            });
         }
 
         [Test]
@@ -127,7 +130,7 @@
             });
 
             ConsumeContext<A> result = await handler;
-            Assert.AreEqual(expected, result.Message.Name);
+            Assert.That(result.Message.Name, Is.EqualTo(expected));
         }
 
         public Specifying_an_event_reschedule_if_exists()

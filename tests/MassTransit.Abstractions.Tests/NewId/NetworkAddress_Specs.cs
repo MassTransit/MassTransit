@@ -30,8 +30,8 @@
 
             var networkId = networkIdProvider.GetWorkerId(0);
 
-            Assert.IsNotNull(networkId);
-            Assert.AreEqual(6, networkId.Length);
+            Assert.That(networkId, Is.Not.Null);
+            Assert.That(networkId, Has.Length.EqualTo(6));
         }
 
         [Test]
@@ -41,8 +41,8 @@
 
             var networkId = networkIdProvider.GetWorkerId(0);
 
-            Assert.IsNotNull(networkId);
-            Assert.AreEqual(6, networkId.Length);
+            Assert.That(networkId, Is.Not.Null);
+            Assert.That(networkId, Has.Length.EqualTo(6));
         }
 
         [Test]

@@ -10,13 +10,13 @@
         [Test]
         public void Should_have_the_proper_value()
         {
-            Assert.AreEqual("Hello", _instance.Value);
+            Assert.That(_instance.Value, Is.EqualTo("Hello"));
         }
 
         [Test]
         public void Should_transition_to_the_proper_state()
         {
-            Assert.AreEqual(Running, _instance.CurrentState);
+            Assert.That(_instance.CurrentState, Is.EqualTo(Running));
         }
 
         State Running;
@@ -45,12 +45,12 @@
 
 
         class Instance :
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public string Value { get; set; }
             public int OtherValue { get; set; }
             public State CurrentState { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 

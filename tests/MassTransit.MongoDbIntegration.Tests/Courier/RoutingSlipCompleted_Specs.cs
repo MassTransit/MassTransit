@@ -21,10 +21,13 @@
         {
             ConsumeContext<RoutingSlipCompleted> context = await _completed;
 
-            Assert.AreEqual(_trackingNumber, context.Message.TrackingNumber);
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.Message.TrackingNumber, Is.EqualTo(_trackingNumber));
 
-            Assert.IsTrue(context.CorrelationId.HasValue);
-            Assert.AreEqual(_trackingNumber, context.CorrelationId.Value);
+                Assert.That(context.CorrelationId.HasValue, Is.True);
+                Assert.That(context.CorrelationId.Value, Is.EqualTo(_trackingNumber));
+            });
         }
 
         [Test]
@@ -38,14 +41,17 @@
 
             var routingSlip = await (await _collection.FindAsync(query).ConfigureAwait(false)).SingleOrDefaultAsync().ConfigureAwait(false);
 
-            Assert.IsNotNull(routingSlip);
-            Assert.IsNotNull(routingSlip.Events);
-            Assert.AreEqual(1, routingSlip.Events.Length);
+            Assert.That(routingSlip, Is.Not.Null);
+            Assert.That(routingSlip.Events, Is.Not.Null);
+            Assert.That(routingSlip.Events.Length, Is.EqualTo(1));
 
             var completed = routingSlip.Events[0] as RoutingSlipCompletedDocument;
-            Assert.IsNotNull(completed);
-            Assert.IsTrue(completed.Variables.ContainsKey("Client"));
-            Assert.AreEqual(27, completed.Variables["Client"]);
+            Assert.That(completed, Is.Not.Null);
+            Assert.Multiple(() =>
+            {
+                Assert.That(completed.Variables.ContainsKey("Client"), Is.True);
+                Assert.That(completed.Variables["Client"], Is.EqualTo(27));
+            });
             //Assert.AreEqual(received.Timestamp.ToMongoDbDateTime(), read.Timestamp);
         }
 

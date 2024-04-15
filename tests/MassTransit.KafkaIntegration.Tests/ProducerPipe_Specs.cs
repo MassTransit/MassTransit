@@ -63,10 +63,13 @@ namespace MassTransit.KafkaIntegration.Tests
 
             var result = await provider.GetTask<SendContext>();
 
-            Assert.IsTrue(result.TryGetPayload<KafkaSendContext>(out _));
-            Assert.IsTrue(result.TryGetPayload<KafkaSendContext<KafkaMessage>>(out _));
-            Assert.AreEqual(correlationId, result.CorrelationId);
-            Assert.That(result.DestinationAddress, Is.EqualTo(new Uri($"loopback://localhost/{KafkaTopicAddress.PathPrefix}/{Topic}")));
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.TryGetPayload<KafkaSendContext>(out _), Is.True);
+                Assert.That(result.TryGetPayload<KafkaSendContext<KafkaMessage>>(out _), Is.True);
+                Assert.That(result.CorrelationId, Is.EqualTo(correlationId));
+                Assert.That(result.DestinationAddress, Is.EqualTo(new Uri($"loopback://localhost/{KafkaTopicAddress.PathPrefix}/{Topic}")));
+            });
 
             await provider.GetTask<ConsumeContext<KafkaMessage>>();
         }
@@ -217,10 +220,16 @@ namespace MassTransit.KafkaIntegration.Tests
 
             var result = await provider.GetTask<SendContext>();
 
-            Assert.IsTrue(result.TryGetPayload(out KafkaSendContext<Guid, KafkaMessage> context));
-            Assert.AreEqual(context.Key, key);
-            Assert.AreEqual(context.CorrelationId, key);
-            Assert.That(result.DestinationAddress, Is.EqualTo(new Uri($"loopback://localhost/{KafkaTopicAddress.PathPrefix}/{Topic}")));
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.TryGetPayload(out KafkaSendContext<Guid, KafkaMessage> context), Is.True);
+                Assert.That(context.Key, Is.EqualTo(key));
+                Assert.Multiple(() =>
+                {
+                    Assert.That(key, Is.EqualTo(context.CorrelationId));
+                    Assert.That(result.DestinationAddress, Is.EqualTo(new Uri($"loopback://localhost/{KafkaTopicAddress.PathPrefix}/{Topic}")));
+                });
+            });
 
             await provider.GetTask<ConsumeContext<KafkaMessage>>();
         }

@@ -19,9 +19,12 @@
 
             ConsumeContext<PingMessage> received = await _receivedA;
 
-            Assert.AreEqual(message.CorrelationId, received.Message.CorrelationId);
+            Assert.Multiple(() =>
+            {
+                Assert.That(received.Message.CorrelationId, Is.EqualTo(message.CorrelationId));
 
-            Assert.AreEqual(_logicalHostAddress.Host, received.DestinationAddress.Host);
+                Assert.That(received.DestinationAddress.Host, Is.EqualTo(_logicalHostAddress.Host));
+            });
         }
 
         public When_clustering_nodes_into_a_logical_broker()

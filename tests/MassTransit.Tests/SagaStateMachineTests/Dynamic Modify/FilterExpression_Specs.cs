@@ -23,26 +23,26 @@
                     .Event("Thing", out Thing)
                     .InstanceState(b => b.CurrentState)
                     .During(builder.Initial)
-                        .When(Thing, context => context.Data.Condition, b => b.TransitionTo(True))
-                        .When(Thing, context => !context.Data.Condition, b => b.TransitionTo(False))
+                    .When(Thing, context => context.Data.Condition, b => b.TransitionTo(True))
+                    .When(Thing, context => !context.Data.Condition, b => b.TransitionTo(False))
                 );
 
-            await machine.RaiseEvent(instance, Thing, new Data {Condition = true});
-            Assert.AreEqual(True, instance.CurrentState);
+            await machine.RaiseEvent(instance, Thing, new Data { Condition = true });
+            Assert.That(instance.CurrentState, Is.EqualTo(True));
 
             // reset
             instance.CurrentState = machine.Initial;
 
-            await machine.RaiseEvent(instance, Thing, new Data {Condition = false});
-            Assert.AreEqual(False, instance.CurrentState);
+            await machine.RaiseEvent(instance, Thing, new Data { Condition = false });
+            Assert.That(instance.CurrentState, Is.EqualTo(False));
         }
 
 
         class Instance :
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public State CurrentState { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 

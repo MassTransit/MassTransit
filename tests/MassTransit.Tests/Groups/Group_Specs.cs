@@ -19,7 +19,7 @@ namespace MassTransit.Tests.Groups
 
             CorrelatedMessageGroup<Guid> messageGroup = createOrder.CombineWith(orderItemList.ToArray());
 
-            Assert.AreEqual(1, messageGroup.Count());
+            Assert.That(messageGroup.Count(), Is.EqualTo(1));
         }
 
         [Test]
@@ -35,7 +35,7 @@ namespace MassTransit.Tests.Groups
 
             CorrelatedMessageGroup<Guid> messageGroup = createOrder.CombineWith(orderItemList.ToArray());
 
-            Assert.AreEqual(3, messageGroup.Count());
+            Assert.That(messageGroup.Count(), Is.EqualTo(3));
         }
 
         [Test]
@@ -55,7 +55,7 @@ namespace MassTransit.Tests.Groups
 
             messageGroup.CombineWith(secondGroup);
 
-            Assert.AreEqual(5, messageGroup.Count());
+            Assert.That(messageGroup.Count(), Is.EqualTo(5));
         }
 
         [SetUp]
@@ -73,7 +73,7 @@ namespace MassTransit.Tests.Groups
         public static CorrelatedMessageGroup<TKey> CombineWith<TMessage, TKey>(this CorrelatedBy<TKey> message, params TMessage[] messages)
             where TMessage : CorrelatedBy<TKey>
         {
-            var group = new CorrelatedMessageGroup<TKey> {message};
+            var group = new CorrelatedMessageGroup<TKey> { message };
 
             group.AddRange(messages);
 

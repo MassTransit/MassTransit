@@ -14,11 +14,8 @@
             var instance = new Instance();
             var machine = new InstanceStateMachine();
 
-            await machine.RaiseEvent(instance, machine.Thing, new Data
-            {
-                Condition = true
-            });
-            Assert.AreEqual(machine.True, instance.CurrentState);
+            await machine.RaiseEvent(instance, machine.Thing, new Data { Condition = true });
+            Assert.That(instance.CurrentState, Is.EqualTo(machine.True));
 
             var serializer = new JsonStateSerializer<InstanceStateMachine, Instance>(machine);
 
@@ -27,15 +24,15 @@
             Console.WriteLine("Body: {0}", body);
             var reInstance = serializer.Deserialize<Instance>(body);
 
-            Assert.AreEqual(machine.True, reInstance.CurrentState);
+            Assert.That(reInstance.CurrentState, Is.EqualTo(machine.True));
         }
 
 
         class Instance :
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public State CurrentState { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 

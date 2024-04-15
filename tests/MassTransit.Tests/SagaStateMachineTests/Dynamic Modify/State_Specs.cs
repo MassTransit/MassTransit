@@ -2,7 +2,6 @@
 {
     using System;
     using NUnit.Framework;
-    using SagaStateMachine;
 
 
     [TestFixture(Category = "Dynamic Modify")]
@@ -11,34 +10,35 @@
         [Test]
         public void It_should_capture_the_name_of_final()
         {
-            Assert.AreEqual("Final", _machine.Final.Name);
+            Assert.That(_machine.Final.Name, Is.EqualTo("Final"));
         }
 
         [Test]
         public void It_should_capture_the_name_of_initial()
         {
-            Assert.AreEqual("Initial", _machine.Initial.Name);
+            Assert.That(_machine.Initial.Name, Is.EqualTo("Initial"));
         }
 
         [Test]
         public void It_should_capture_the_name_of_running()
         {
-            Assert.AreEqual("Running", Running.Name);
+            Assert.That(Running.Name, Is.EqualTo("Running"));
         }
 
         [Test]
         public void Should_be_an_instance_of_the_proper_type()
         {
-            Assert.IsInstanceOf<MassTransitStateMachine<Instance>.StateMachineState>(_machine.Initial);
+            Assert.That(_machine.Initial, Is.InstanceOf<MassTransitStateMachine<Instance>.StateMachineState>());
         }
 
 
         class Instance :
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public State CurrentState { get; set; }
+            public Guid CorrelationId { get; set; }
         }
+
 
         State Running;
         StateMachine<Instance> _machine;
@@ -61,7 +61,7 @@ SagaStateMachineInstance
         [Test]
         public void It_should_get_the_name_right()
         {
-            Assert.AreEqual("Running", _instance.CurrentState);
+            Assert.That(_instance.CurrentState, Is.EqualTo("Running"));
         }
 
         Event Started;
@@ -77,7 +77,7 @@ SagaStateMachineInstance
                     .State("Running", out State Running)
                     .InstanceState(x => x.CurrentState)
                     .Initially()
-                        .When(Started, b => b.TransitionTo(Running))
+                    .When(Started, b => b.TransitionTo(Running))
                 );
             _instance = new Instance();
 
@@ -93,13 +93,14 @@ SagaStateMachineInstance
         /// an ORM that doesn't support user types (cough, EF, cough).
         /// </summary>
         class Instance :
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             /// <summary>
             /// The CurrentState is exposed as a string for the ORM
             /// </summary>
             public string CurrentState { get; private set; }
+
+            public Guid CorrelationId { get; set; }
         }
     }
 
@@ -110,7 +111,7 @@ SagaStateMachineInstance
         [Test]
         public void It_should_get_the_name_right()
         {
-            Assert.AreEqual(Running, _machine.GetState(_instance).Result);
+            Assert.That(_machine.GetState(_instance).Result, Is.EqualTo(Running));
         }
 
         State Running;
@@ -127,7 +128,7 @@ SagaStateMachineInstance
                     .Event("Started", out Started)
                     .InstanceState(x => x.CurrentState, Running)
                     .Initially()
-                        .When(Started, b => b.TransitionTo(Running))
+                    .When(Started, b => b.TransitionTo(Running))
                 );
             _instance = new Instance();
 
@@ -143,13 +144,14 @@ SagaStateMachineInstance
         /// an ORM that doesn't support user types (cough, EF, cough).
         /// </summary>
         class Instance :
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             /// <summary>
             /// The CurrentState is exposed as a string for the ORM
             /// </summary>
             public int CurrentState { get; private set; }
+
+            public Guid CorrelationId { get; set; }
         }
     }
 }

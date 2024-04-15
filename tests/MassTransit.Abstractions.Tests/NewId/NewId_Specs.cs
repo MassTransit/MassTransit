@@ -161,7 +161,7 @@
 
             for (var i = 0; i < limit - 1; i++)
             {
-                Assert.AreNotEqual(ids[i], ids[i + 1]);
+                Assert.That(ids[i + 1], Is.Not.EqualTo(ids[i]));
                 Console.WriteLine(ids[i]);
             }
         }
@@ -184,7 +184,7 @@
 
             for (var i = 0; i < limit - 1; i++)
             {
-                Assert.AreNotEqual(ids[i], ids[i + 1]);
+                Assert.That(ids[i + 1], Is.Not.EqualTo(ids[i]));
                 var end = ids[i].ToString().Substring(32, 4);
                 if (end == "0000")
                     Console.WriteLine("{0}", ids[i].ToString());

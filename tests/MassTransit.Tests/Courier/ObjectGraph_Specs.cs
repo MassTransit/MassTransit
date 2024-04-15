@@ -52,10 +52,8 @@
 
             if (faulted.Status == TaskStatus.RanToCompletion)
             {
-                Assert.Fail("Failed due to exception {0}", faulted.Result.Message.ActivityExceptions.Any()
-                    ? faulted.Result.Message.ActivityExceptions.First()
-                        .ExceptionInfo.Message
-                    : "VisitUnknownFilter");
+                Assert.Fail(
+                    $"Failed due to exception {(faulted.Result.Message.ActivityExceptions.Any() ? faulted.Result.Message.ActivityExceptions.First().ExceptionInfo.Message : "VisitUnknownFilter")}");
             }
 
             Assert.That(completed.Status, Is.EqualTo(TaskStatus.RanToCompletion));
@@ -97,10 +95,8 @@
 
             if (faulted.Status == TaskStatus.RanToCompletion)
             {
-                Assert.Fail("Failed due to exception {0}", faulted.Result.Message.ActivityExceptions.Any()
-                    ? faulted.Result.Message.ActivityExceptions.First()
-                        .ExceptionInfo.Message
-                    : "VisitUnknownFilter");
+                Assert.Fail(
+                    $"Failed due to exception {(faulted.Result.Message.ActivityExceptions.Any() ? faulted.Result.Message.ActivityExceptions.First().ExceptionInfo.Message : "VisitUnknownFilter")}");
             }
 
             Assert.That(completed.Status, Is.EqualTo(TaskStatus.RanToCompletion));

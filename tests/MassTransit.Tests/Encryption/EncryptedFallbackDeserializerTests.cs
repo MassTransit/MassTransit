@@ -41,7 +41,7 @@ namespace MassTransit.Tests.Encryption
 
             // Assert
 
-            Assert.AreNotEqual(inputMessage, encryptedMessage);
+            Assert.That(encryptedMessage, Is.Not.EqualTo(inputMessage));
             Assert.Throws<SerializationException>(DeserializeAction);
         }
 
@@ -66,10 +66,13 @@ namespace MassTransit.Tests.Encryption
             var deserializerContext = deserializer.Deserialize(messageBody, EmptyHeaders.Instance);
             var canDecryptMessage = deserializerContext.TryGetMessage(out TestMessage? decryptedReceivedTestEvent);
 
-            // Assert
-            Assert.AreNotEqual(inputMessage, encryptedMessage);
-            Assert.IsTrue(canDecryptMessage);
-            Assert.AreEqual(inputTestEvent, decryptedReceivedTestEvent);
+            Assert.Multiple(() =>
+            {
+                // Assert
+                Assert.That(encryptedMessage, Is.Not.EqualTo(inputMessage));
+                Assert.That(canDecryptMessage, Is.True);
+                Assert.That(decryptedReceivedTestEvent, Is.EqualTo(inputTestEvent));
+            });
         }
 
         [Test]
@@ -98,10 +101,13 @@ namespace MassTransit.Tests.Encryption
             var deserializerContext = secondDeserializer.Deserialize(messageBody, EmptyHeaders.Instance);
             var canDecryptMessage = deserializerContext.TryGetMessage(out TestMessage? decryptedReceivedTestEvent);
 
-            // Assert
-            Assert.AreNotEqual(inputMessage, encryptedMessage);
-            Assert.IsTrue(canDecryptMessage);
-            Assert.AreEqual(inputTestEvent, decryptedReceivedTestEvent);
+            Assert.Multiple(() =>
+            {
+                // Assert
+                Assert.That(encryptedMessage, Is.Not.EqualTo(inputMessage));
+                Assert.That(canDecryptMessage, Is.True);
+                Assert.That(decryptedReceivedTestEvent, Is.EqualTo(inputTestEvent));
+            });
         }
 
         static string CreateTestMessage(out TestMessage inputTestEvent)

@@ -39,43 +39,55 @@ namespace MassTransit.Tests.Middleware.Internals
         {
             IEnumerable<Type> types = typeof(SuperGenericBaseClass<>).GetClosingArguments(typeof(IGeneric<>));
 
-            Assert.AreEqual(0, types.Count());
+            Assert.That(types.Count(), Is.EqualTo(0));
         }
 
         [Test]
         public void Should_return_the_appropriate_generic_type()
         {
-            IEnumerable<Type> types = typeof(GenericClass).GetClosingArguments(typeof(IGeneric<>));
+            IEnumerable<Type> types = typeof(GenericClass).GetClosingArguments(typeof(IGeneric<>)).ToArray();
 
-            Assert.AreEqual(1, types.Count());
-            Assert.AreEqual(typeof(int), types.First());
+            Assert.Multiple(() =>
+            {
+                Assert.That(types.Count(), Is.EqualTo(1));
+                Assert.That(types.First(), Is.EqualTo(typeof(int)));
+            });
         }
 
         [Test]
         public void Should_return_the_appropriate_generic_type_for_a_subclass_non_generic()
         {
-            IEnumerable<Type> types = typeof(SubClass).GetClosingArguments(typeof(IGeneric<>));
+            IEnumerable<Type> types = typeof(SubClass).GetClosingArguments(typeof(IGeneric<>)).ToArray();
 
-            Assert.AreEqual(1, types.Count());
-            Assert.AreEqual(typeof(int), types.First());
+            Assert.Multiple(() =>
+            {
+                Assert.That(types.Count(), Is.EqualTo(1));
+                Assert.That(types.First(), Is.EqualTo(typeof(int)));
+            });
         }
 
         [Test]
         public void Should_return_the_appropriate_generic_type_with_a_generic_base_class()
         {
-            IEnumerable<Type> types = typeof(NonGenericSubClass).GetClosingArguments(typeof(IGeneric<>));
+            IEnumerable<Type> types = typeof(NonGenericSubClass).GetClosingArguments(typeof(IGeneric<>)).ToArray();
 
-            Assert.AreEqual(1, types.Count());
-            Assert.AreEqual(typeof(int), types.First());
+            Assert.Multiple(() =>
+            {
+                Assert.That(types.Count(), Is.EqualTo(1));
+                Assert.That(types.First(), Is.EqualTo(typeof(int)));
+            });
         }
 
         [Test]
         public void Should_return_the_generic_type_from_a_class()
         {
-            IEnumerable<Type> types = typeof(NonGenericSubClass).GetClosingArguments(typeof(GenericBaseClass<>));
+            IEnumerable<Type> types = typeof(NonGenericSubClass).GetClosingArguments(typeof(GenericBaseClass<>)).ToArray();
 
-            Assert.AreEqual(1, types.Count());
-            Assert.AreEqual(typeof(int), types.First());
+            Assert.Multiple(() =>
+            {
+                Assert.That(types.Count(), Is.EqualTo(1));
+                Assert.That(types.First(), Is.EqualTo(typeof(int)));
+            });
         }
 
 

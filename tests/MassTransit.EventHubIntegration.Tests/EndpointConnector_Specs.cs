@@ -78,19 +78,25 @@ namespace MassTransit.EventHubIntegration.Tests
                 await connected.Ready;
                 ConsumeContext<EventHubMessage> result = await taskCompletionSource.Task;
 
-                Assert.AreEqual("text", result.Message.Text);
-                Assert.That(result.SourceAddress, Is.EqualTo(new Uri("loopback://localhost/")));
-                Assert.That(result.DestinationAddress,
-                    Is.EqualTo(new Uri($"loopback://localhost/{EventHubEndpointAddress.PathPrefix}/{Configuration.EventHubName}")));
-                Assert.That(result.MessageId, Is.EqualTo(messageId));
-                Assert.That(result.CorrelationId, Is.EqualTo(correlationId));
-                Assert.That(result.InitiatorId, Is.EqualTo(initiatorId));
-                Assert.That(result.ConversationId, Is.EqualTo(conversationId));
+                Assert.Multiple(() =>
+                {
+                    Assert.That(result.Message.Text, Is.EqualTo("text"));
+                    Assert.That(result.SourceAddress, Is.EqualTo(new Uri("loopback://localhost/")));
+                    Assert.That(result.DestinationAddress,
+                        Is.EqualTo(new Uri($"loopback://localhost/{EventHubEndpointAddress.PathPrefix}/{Configuration.EventHubName}")));
+                    Assert.That(result.MessageId, Is.EqualTo(messageId));
+                    Assert.That(result.CorrelationId, Is.EqualTo(correlationId));
+                    Assert.That(result.InitiatorId, Is.EqualTo(initiatorId));
+                    Assert.That(result.ConversationId, Is.EqualTo(conversationId));
+                });
 
                 var headerType = result.Headers.Get<HeaderType>("Special");
                 Assert.That(headerType, Is.Not.Null);
-                Assert.That(headerType.Key, Is.EqualTo("Hello"));
-                Assert.That(headerType.Value, Is.EqualTo("World"));
+                Assert.Multiple(() =>
+                {
+                    Assert.That(headerType.Key, Is.EqualTo("Hello"));
+                    Assert.That(headerType.Value, Is.EqualTo("World"));
+                });
             }
             finally
             {

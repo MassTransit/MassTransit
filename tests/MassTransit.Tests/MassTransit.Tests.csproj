@@ -29,6 +29,10 @@
     <PackageReference Include="MathNet.Numerics" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="NUnit" />
+    <PackageReference Include="NUnit.Analyzers">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="NUnit3TestAdapter" />
     <ProjectReference Include="..\..\src\MassTransit.Interop.NServiceBus\MassTransit.Interop.NServiceBus.csproj" />
     <ProjectReference Include="..\..\src\MassTransit.Newtonsoft\MassTransit.Newtonsoft.csproj" />

@@ -10,21 +10,27 @@
         [Test]
         public void Should_have_first_moved_to_initial()
         {
-            Assert.AreEqual(null, _observer.Events[0].Previous);
-            Assert.AreEqual(_machine.Initial, _observer.Events[0].Current);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_observer.Events[0].Previous, Is.EqualTo(null));
+                Assert.That(_observer.Events[0].Current, Is.EqualTo(_machine.Initial));
+            });
         }
 
         [Test]
         public void Should_have_second_switched_to_running()
         {
-            Assert.AreEqual(_machine.Initial, _observer.Events[1].Previous);
-            Assert.AreEqual(_machine.Running, _observer.Events[1].Current);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_observer.Events[1].Previous, Is.EqualTo(_machine.Initial));
+                Assert.That(_observer.Events[1].Current, Is.EqualTo(_machine.Running));
+            });
         }
 
         [Test]
         public void Should_raise_the_event()
         {
-            Assert.AreEqual(3, _observer.Events.Count);
+            Assert.That(_observer.Events, Has.Count.EqualTo(3));
         }
 
         Instance _instance;
@@ -49,8 +55,8 @@
         class Instance :
             SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public State CurrentState { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 
@@ -81,53 +87,65 @@
         [Test]
         public void Should_have_all_events()
         {
-            Assert.AreEqual(2, _eventObserver.Events.Count);
+            Assert.That(_eventObserver.Events.Count, Is.EqualTo(2));
         }
 
         [Test]
         public void Should_have_first_moved_to_initial()
         {
-            Assert.AreEqual(null, _observer.Events[0].Previous);
-            Assert.AreEqual(_machine.Initial, _observer.Events[0].Current);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_observer.Events[0].Previous, Is.EqualTo(null));
+                Assert.That(_observer.Events[0].Current, Is.EqualTo(_machine.Initial));
+            });
         }
 
         [Test]
         public void Should_have_fourth_switched_to_finished()
         {
-            Assert.AreEqual(_machine.Resting, _observer.Events[3].Previous);
-            Assert.AreEqual(_machine.Final, _observer.Events[3].Current);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_observer.Events[3].Previous, Is.EqualTo(_machine.Resting));
+                Assert.That(_observer.Events[3].Current, Is.EqualTo(_machine.Final));
+            });
         }
 
         [Test]
         public void Should_have_second_switched_to_running()
         {
-            Assert.AreEqual(_machine.Initial, _observer.Events[1].Previous);
-            Assert.AreEqual(_machine.Running, _observer.Events[1].Current);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_observer.Events[1].Previous, Is.EqualTo(_machine.Initial));
+                Assert.That(_observer.Events[1].Current, Is.EqualTo(_machine.Running));
+            });
         }
 
         [Test]
         public void Should_have_third_switched_to_resting()
         {
-            Assert.AreEqual(_machine.Running, _observer.Events[2].Previous);
-            Assert.AreEqual(_machine.Resting, _observer.Events[2].Current);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_observer.Events[2].Previous, Is.EqualTo(_machine.Running));
+                Assert.That(_observer.Events[2].Current, Is.EqualTo(_machine.Resting));
+            });
         }
 
         [Test]
         public void Should_have_transition_1()
         {
-            Assert.AreEqual("Initialized", _eventObserver.Events[0].Event.Name);
+            Assert.That(_eventObserver.Events[0].Event.Name, Is.EqualTo("Initialized"));
         }
 
         [Test]
         public void Should_have_transition_2()
         {
-            Assert.AreEqual("LegCramped", _eventObserver.Events[1].Event.Name);
+            Assert.That(_eventObserver.Events[1].Event.Name, Is.EqualTo("LegCramped"));
         }
 
         [Test]
         public void Should_raise_the_event()
         {
-            Assert.AreEqual(4, _observer.Events.Count);
+            Assert.That(_observer.Events, Has.Count.EqualTo(4));
         }
 
         Instance _instance;
@@ -157,8 +175,8 @@
         class Instance :
             SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public State CurrentState { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 
@@ -208,60 +226,75 @@
         [Test]
         public void Should_have_all_events()
         {
-            Assert.AreEqual(2, _eventObserver.Events.Count);
+            Assert.That(_eventObserver.Events, Has.Count.EqualTo(2));
         }
 
         [Test]
         public void Should_have_fifth_switched_to_finished()
         {
-            Assert.AreEqual(_machine.Running, _observer.Events[4].Previous);
-            Assert.AreEqual(_machine.Final, _observer.Events[4].Current);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_observer.Events[4].Previous, Is.EqualTo(_machine.Running));
+                Assert.That(_observer.Events[4].Current, Is.EqualTo(_machine.Final));
+            });
         }
 
         [Test]
         public void Should_have_first_moved_to_initial()
         {
-            Assert.AreEqual(null, _observer.Events[0].Previous);
-            Assert.AreEqual(_machine.Initial, _observer.Events[0].Current);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_observer.Events[0].Previous, Is.EqualTo(null));
+                Assert.That(_observer.Events[0].Current, Is.EqualTo(_machine.Initial));
+            });
         }
 
         [Test]
         public void Should_have_fourth_switched_to_finished()
         {
-            Assert.AreEqual(_machine.Resting, _observer.Events[3].Previous);
-            Assert.AreEqual(_machine.Running, _observer.Events[3].Current);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_observer.Events[3].Previous, Is.EqualTo(_machine.Resting));
+                Assert.That(_observer.Events[3].Current, Is.EqualTo(_machine.Running));
+            });
         }
 
         [Test]
         public void Should_have_second_switched_to_running()
         {
-            Assert.AreEqual(_machine.Initial, _observer.Events[1].Previous);
-            Assert.AreEqual(_machine.Running, _observer.Events[1].Current);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_observer.Events[1].Previous, Is.EqualTo(_machine.Initial));
+                Assert.That(_observer.Events[1].Current, Is.EqualTo(_machine.Running));
+            });
         }
 
         [Test]
         public void Should_have_third_switched_to_resting()
         {
-            Assert.AreEqual(_machine.Running, _observer.Events[2].Previous);
-            Assert.AreEqual(_machine.Resting, _observer.Events[2].Current);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_observer.Events[2].Previous, Is.EqualTo(_machine.Running));
+                Assert.That(_observer.Events[2].Current, Is.EqualTo(_machine.Resting));
+            });
         }
 
         [Test]
         public void Should_have_transition_1()
         {
-            Assert.AreEqual("Running.BeforeEnter", _eventObserver.Events[0].Event.Name);
+            Assert.That(_eventObserver.Events[0].Event.Name, Is.EqualTo("Running.BeforeEnter"));
         }
 
         [Test]
         public void Should_have_transition_2()
         {
-            Assert.AreEqual("Running.AfterLeave", _eventObserver.Events[1].Event.Name);
+            Assert.That(_eventObserver.Events[1].Event.Name, Is.EqualTo("Running.AfterLeave"));
         }
 
         [Test]
         public void Should_raise_the_event()
         {
-            Assert.AreEqual(5, _observer.Events.Count);
+            Assert.That(_observer.Events, Has.Count.EqualTo(5));
         }
 
         Instance _instance;
@@ -292,8 +325,8 @@
         class Instance :
             SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public State CurrentState { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 

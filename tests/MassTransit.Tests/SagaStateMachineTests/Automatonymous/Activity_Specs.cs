@@ -10,7 +10,7 @@
         [Test]
         public void Should_transition_to_the_proper_state()
         {
-            Assert.AreEqual(_machine.Running, _instance.CurrentState);
+            Assert.That(_instance.CurrentState, Is.EqualTo(_machine.Running));
         }
 
         Instance _instance;
@@ -60,7 +60,7 @@
         [Test]
         public void Should_transition_to_the_proper_state()
         {
-            Assert.AreEqual(_machine.Running, _instance.CurrentState);
+            Assert.That(_instance.CurrentState, Is.EqualTo(_machine.Running));
         }
 
         Instance _instance;
@@ -107,13 +107,13 @@
         [Test]
         public void Should_have_called_the_finally_activity()
         {
-            Assert.AreEqual(InstanceStateMachine.Finalized, _instance.Value);
+            Assert.That(_instance.Value, Is.EqualTo(InstanceStateMachine.Finalized));
         }
 
         [Test]
         public void Should_transition_to_the_proper_state()
         {
-            Assert.AreEqual(_machine.Final, _instance.CurrentState);
+            Assert.That(_instance.CurrentState, Is.EqualTo(_machine.Final));
         }
 
         Instance _instance;
@@ -166,25 +166,25 @@
         [Test]
         public void Should_call_the_activity()
         {
-            Assert.AreEqual(_machine.Final, _instance.CurrentState);
+            Assert.That(_instance.CurrentState, Is.EqualTo(_machine.Final));
         }
 
         [Test]
         public void Should_have_trigger_the_final_before_enter_event()
         {
-            Assert.AreEqual(_machine.Running, _instance.FinalState);
+            Assert.That(_instance.FinalState, Is.EqualTo(_machine.Running));
         }
 
         [Test]
         public void Should_have_triggered_the_after_leave_event()
         {
-            Assert.AreEqual(_machine.Initial, _instance.LeftState);
+            Assert.That(_instance.LeftState, Is.EqualTo(_machine.Initial));
         }
 
         [Test]
         public void Should_have_triggered_the_before_enter_event()
         {
-            Assert.AreEqual(_machine.Initializing, _instance.EnteredState);
+            Assert.That(_instance.EnteredState, Is.EqualTo(_machine.Initializing));
         }
 
         Instance _instance;

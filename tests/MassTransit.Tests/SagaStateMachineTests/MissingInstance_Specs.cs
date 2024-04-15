@@ -21,7 +21,7 @@
 
             await notFound;
 
-            Assert.AreEqual("A", notFound.Result.Message.ServiceName);
+            Assert.That(notFound.Result.Message.ServiceName, Is.EqualTo("A"));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

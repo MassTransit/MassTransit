@@ -17,7 +17,7 @@
             {
                 var value = NewtonsoftJsonMessageSerializer.Deserializer.Deserialize<int>(jsonReader);
 
-                Assert.AreEqual(27, value);
+                Assert.That(value, Is.EqualTo(27));
             }
         }
     }

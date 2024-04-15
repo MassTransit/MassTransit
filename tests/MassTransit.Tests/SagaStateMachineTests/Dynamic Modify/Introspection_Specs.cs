@@ -15,35 +15,38 @@ namespace MassTransit.Tests.SagaStateMachineTests.Dynamic_Modify
         {
             List<Event> events = _machine.Events.ToList();
 
-            Assert.AreEqual(4, events.Count);
-            Assert.Contains(Ignored, events);
-            Assert.Contains(Handshake, events);
-            Assert.Contains(Hello, events);
-            Assert.Contains(YelledAt, events);
+            Assert.That(events.Count, Is.EqualTo(4));
+            Assert.That(events, Does.Contain(Ignored));
+            Assert.That(events, Does.Contain(Handshake));
+            Assert.That(events, Does.Contain(Hello));
+            Assert.That(events, Does.Contain(YelledAt));
         }
 
         [Test]
         public void The_machine_should_expose_all_states()
         {
-            Assert.AreEqual(5, _machine.States.Count());
-            Assert.Contains(_machine.Initial, _machine.States.ToList());
-            Assert.Contains(_machine.Final, _machine.States.ToList());
-            Assert.Contains(Greeted, _machine.States.ToList());
-            Assert.Contains(Loved, _machine.States.ToList());
-            Assert.Contains(Pissed, _machine.States.ToList());
+            Assert.Multiple(() =>
+            {
+                Assert.That(_machine.States.Count(), Is.EqualTo(5));
+                Assert.That(_machine.States.ToList(), Does.Contain(_machine.Initial));
+            });
+            Assert.That(_machine.States.ToList(), Does.Contain(_machine.Final));
+            Assert.That(_machine.States.ToList(), Does.Contain(Greeted));
+            Assert.That(_machine.States.ToList(), Does.Contain(Loved));
+            Assert.That(_machine.States.ToList(), Does.Contain(Pissed));
         }
 
         [Test]
         public void The_machine_should_report_its_instance_type()
         {
-            Assert.AreEqual(typeof(Instance), _machine.InstanceType);
+            Assert.That(_machine.InstanceType, Is.EqualTo(typeof(Instance)));
         }
 
         [Test]
         public async Task The_next_events_should_be_known()
         {
             List<Event> events = (await _machine.NextEvents(_instance)).ToList();
-            Assert.AreEqual(3, events.Count);
+            Assert.That(events, Has.Count.EqualTo(3));
         }
 
         Event<B> Ignored;

@@ -27,9 +27,12 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
 
             var sent = await _taskCompletionSource.Task;
 
-            Assert.IsTrue(sent.TryGetPayload<IServiceProvider>(out var serviceProvider));
+            Assert.Multiple(() =>
+            {
+                Assert.That(sent.TryGetPayload<IServiceProvider>(out var serviceProvider), Is.True);
 
-            Assert.AreEqual(serviceProvider, ServiceScope.ServiceProvider);
+                Assert.That(ServiceScope.ServiceProvider, Is.EqualTo(serviceProvider));
+            });
         }
 
         protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
@@ -68,9 +71,12 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
 
             var sent = await _taskCompletionSource.Task;
 
-            Assert.IsTrue(sent.TryGetPayload<IServiceProvider>(out var serviceProvider));
+            Assert.Multiple(() =>
+            {
+                Assert.That(sent.TryGetPayload<IServiceProvider>(out var serviceProvider), Is.True);
 
-            Assert.AreEqual(serviceProvider, ServiceScope.ServiceProvider);
+                Assert.That(ServiceScope.ServiceProvider, Is.EqualTo(serviceProvider));
+            });
         }
 
         protected override IServiceCollection ConfigureServices(IServiceCollection collection)
@@ -121,9 +127,9 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
 
             var sent = await _taskCompletionSource.Task;
 
-            Assert.IsTrue(sent.TryGetPayload<IServiceProvider>(out var serviceProvider));
+            Assert.That(sent.TryGetPayload<IServiceProvider>(out var serviceProvider), Is.True);
 
-            Assert.AreEqual(serviceProvider, ServiceScope.ServiceProvider);
+            Assert.That(ServiceScope.ServiceProvider, Is.EqualTo(serviceProvider));
         }
 
         protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)

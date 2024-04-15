@@ -15,10 +15,13 @@
         async Task AssertMessageAsync(TestClient client)
         {
             var message = await client.ReadAsync().OrTimeout() as InvocationMessage;
-            Assert.NotNull(message);
-            Assert.AreEqual("Hello", message.Target);
-            Assert.AreEqual(1, message.Arguments.Length);
-            Assert.AreEqual("World", message.Arguments[0].ToString());
+            Assert.That(message, Is.Not.Null);
+            Assert.Multiple(() =>
+            {
+                Assert.That(message.Target, Is.EqualTo("Hello"));
+                Assert.That(message.Arguments, Has.Length.EqualTo(1));
+            });
+            Assert.That(message.Arguments[0].ToString(), Is.EqualTo("World"));
         }
 
         [Test]
@@ -36,7 +39,7 @@
                 await manager1.OnConnectedAsync(connection1).OrTimeout(Harness.TestTimeout);
                 await manager2.OnConnectedAsync(connection2).OrTimeout(Harness.TestTimeout);
 
-                await manager1.SendAllAsync("Hello", new object[] {"World"}).OrTimeout(Harness.TestTimeout);
+                await manager1.SendAllAsync("Hello", new object[] { "World" }).OrTimeout(Harness.TestTimeout);
 
                 Assert.IsTrue(Backplane1Harness.All.Consumed.Select<All<MyHub>>().Any());
                 Assert.IsTrue(Backplane2Harness.All.Consumed.Select<All<MyHub>>().Any());
@@ -63,7 +66,7 @@
 
                 await manager2.OnDisconnectedAsync(connection2).OrTimeout(Harness.TestTimeout);
 
-                await manager2.SendAllAsync("Hello", new object[] {"World"}).OrTimeout(Harness.TestTimeout);
+                await manager2.SendAllAsync("Hello", new object[] { "World" }).OrTimeout(Harness.TestTimeout);
 
                 await AssertMessageAsync(client1);
 
@@ -83,7 +86,7 @@
 
                 await manager1.OnConnectedAsync(connection).OrTimeout(Harness.TestTimeout);
 
-                await manager2.SendConnectionAsync(connection.ConnectionId, "Hello", new object[] {"World"}).OrTimeout(Harness.TestTimeout);
+                await manager2.SendConnectionAsync(connection.ConnectionId, "Hello", new object[] { "World" }).OrTimeout(Harness.TestTimeout);
 
                 Assert.IsTrue(Backplane1Harness.Connection.Consumed.Select<Connection<MyHub>>().Any());
 
@@ -105,7 +108,7 @@
 
                 await manager1.AddToGroupAsync(connection.ConnectionId, "name").OrTimeout(Harness.TestTimeout);
 
-                await manager2.SendGroupAsync("name", "Hello", new object[] {"World"}).OrTimeout(Harness.TestTimeout);
+                await manager2.SendGroupAsync("name", "Hello", new object[] { "World" }).OrTimeout(Harness.TestTimeout);
 
                 Assert.IsTrue(Backplane1Harness.Group.Consumed.Select<Group<MyHub>>().Any());
 
@@ -129,11 +132,11 @@
 
                 await manager2.RemoveFromGroupAsync(connection.ConnectionId, "name").OrTimeout(Harness.TestTimeout);
 
-                Assert.IsTrue(Backplane1Harness.GroupManagement.Consumed.Select<GroupManagement<MyHub>>().Any());
+                Assert.That(Backplane1Harness.GroupManagement.Consumed.Select<GroupManagement<MyHub>>().Any(), Is.True);
 
                 ConsumeContext<Ack<MyHub>> responseContext = await ackHandler;
 
-                Assert.AreEqual(manager1.ServerName, responseContext.Message.ServerName);
+                Assert.That(responseContext.Message.ServerName, Is.EqualTo(manager1.ServerName));
             }
         }
 
@@ -153,13 +156,13 @@
 
                 await manager2.AddToGroupAsync(connection.ConnectionId, "name").OrTimeout(Harness.TestTimeout);
 
-                Assert.IsTrue(Backplane1Harness.GroupManagement.Consumed.Select<GroupManagement<MyHub>>().Any());
+                Assert.That(Backplane1Harness.GroupManagement.Consumed.Select<GroupManagement<MyHub>>().Any(), Is.True);
 
                 ConsumeContext<Ack<MyHub>> responseContext = await ackHandler;
 
-                Assert.AreEqual(manager1.ServerName, responseContext.Message.ServerName);
+                Assert.That(responseContext.Message.ServerName, Is.EqualTo(manager1.ServerName));
 
-                await manager2.SendGroupAsync("name", "Hello", new object[] {"World"}).OrTimeout(Harness.TestTimeout);
+                await manager2.SendGroupAsync("name", "Hello", new object[] { "World" }).OrTimeout(Harness.TestTimeout);
 
                 Assert.IsTrue(Backplane1Harness.Group.Consumed.Select<Group<MyHub>>().Any());
 
@@ -184,18 +187,18 @@
                 await manager1.AddToGroupAsync(connection.ConnectionId, "name").OrTimeout(Harness.TestTimeout);
                 await manager2.AddToGroupAsync(connection.ConnectionId, "name").OrTimeout(Harness.TestTimeout);
 
-                Assert.IsTrue(Backplane1Harness.GroupManagement.Consumed.Select<GroupManagement<MyHub>>().Any());
+                Assert.That(Backplane1Harness.GroupManagement.Consumed.Select<GroupManagement<MyHub>>().Any(), Is.True);
 
                 ConsumeContext<Ack<MyHub>> responseContext = await ackHandler;
 
-                Assert.AreEqual(manager1.ServerName, responseContext.Message.ServerName);
+                Assert.That(responseContext.Message.ServerName, Is.EqualTo(manager1.ServerName));
 
-                await manager2.SendGroupAsync("name", "Hello", new object[] {"World"}).OrTimeout(Harness.TestTimeout);
+                await manager2.SendGroupAsync("name", "Hello", new object[] { "World" }).OrTimeout(Harness.TestTimeout);
 
-                Assert.IsTrue(Backplane1Harness.Group.Consumed.Select<Group<MyHub>>().Any());
+                Assert.That(Backplane1Harness.Group.Consumed.Select<Group<MyHub>>().Any(), Is.True);
 
                 await AssertMessageAsync(client);
-                Assert.Null(client.TryRead());
+                Assert.That(client.TryRead(), Is.Null);
             }
         }
 
@@ -215,7 +218,7 @@
 
                 await manager1.AddToGroupAsync(connection.ConnectionId, "name").OrTimeout(Harness.TestTimeout);
 
-                await manager2.SendGroupAsync("name", "Hello", new object[] {"World"}).OrTimeout(Harness.TestTimeout);
+                await manager2.SendGroupAsync("name", "Hello", new object[] { "World" }).OrTimeout(Harness.TestTimeout);
 
                 IReceivedMessage<Group<MyHub>> firstMessage = Backplane1Harness.Group.Consumed.Select<Group<MyHub>>().FirstOrDefault();
 
@@ -225,19 +228,22 @@
 
                 await manager2.RemoveFromGroupAsync(connection.ConnectionId, "name").OrTimeout(Harness.TestTimeout);
 
-                Assert.IsTrue(Backplane1Harness.GroupManagement.Consumed.Select<GroupManagement<MyHub>>().Any());
+                Assert.That(Backplane1Harness.GroupManagement.Consumed.Select<GroupManagement<MyHub>>().Any(), Is.True);
 
                 ConsumeContext<Ack<MyHub>> responseContext = await ackHandler;
 
-                Assert.AreEqual(manager1.ServerName, responseContext.Message.ServerName);
+                Assert.That(responseContext.Message.ServerName, Is.EqualTo(manager1.ServerName));
 
-                await manager2.SendGroupAsync("name", "Hello", new object[] {"World"}).OrTimeout(Harness.TestTimeout);
+                await manager2.SendGroupAsync("name", "Hello", new object[] { "World" }).OrTimeout(Harness.TestTimeout);
 
                 IReceivedMessage<Group<MyHub>> secondMessage = Backplane1Harness.Group.Consumed.Select<Group<MyHub>>().Skip(1).FirstOrDefault();
 
-                Assert.NotNull(secondMessage);
+                Assert.Multiple(() =>
+                {
+                    Assert.That(secondMessage, Is.Not.Null);
 
-                Assert.Null(client.TryRead());
+                    Assert.That(client.TryRead(), Is.Null);
+                });
             }
         }
 
@@ -255,13 +261,16 @@
                 await manager1.OnConnectedAsync(connection).OrTimeout(Harness.TestTimeout);
                 await manager2.OnConnectedAsync(connection).OrTimeout(Harness.TestTimeout);
 
-                await manager1.SendConnectionAsync(connection.ConnectionId, "Hello", new object[] {"World"}).OrTimeout(Harness.TestTimeout);
+                await manager1.SendConnectionAsync(connection.ConnectionId, "Hello", new object[] { "World" }).OrTimeout(Harness.TestTimeout);
 
-                Assert.IsFalse(Backplane1Harness.Connection.Consumed.Select<Connection<MyHub>>().Any());
-                Assert.IsFalse(Backplane2Harness.Connection.Consumed.Select<Connection<MyHub>>().Any());
+                Assert.Multiple(() =>
+                {
+                    Assert.That(Backplane1Harness.Connection.Consumed.Select<Connection<MyHub>>().Any(), Is.False);
+                    Assert.That(Backplane2Harness.Connection.Consumed.Select<Connection<MyHub>>().Any(), Is.False);
+                });
 
                 await AssertMessageAsync(client);
-                Assert.Null(client.TryRead());
+                Assert.That(client.TryRead(), Is.Null);
             }
         }
 
@@ -280,7 +289,7 @@
 
                 // This doesn't throw because there is no connection.ConnectionId on this server so it has to publish to the backplane.
                 // And once that happens there is no way to know if the invocation was successful or not.
-                await manager1.SendConnectionAsync(connectionMock.ConnectionId, "Hello", new object[] {"World"}).OrTimeout(Harness.TestTimeout);
+                await manager1.SendConnectionAsync(connectionMock.ConnectionId, "Hello", new object[] { "World" }).OrTimeout(Harness.TestTimeout);
 
                 Assert.IsTrue(Backplane2Harness.Connection.Consumed.Select<Connection<MyHub>>().Any());
             }

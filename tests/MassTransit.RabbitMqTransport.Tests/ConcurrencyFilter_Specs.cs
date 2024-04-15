@@ -28,7 +28,7 @@
 
             await _complete.Task;
 
-            Assert.AreEqual(2, _consumer.MaxDeliveryCount);
+            Assert.That(_consumer.MaxDeliveryCount, Is.EqualTo(2));
         }
 
         Consumer _consumer;
@@ -93,6 +93,7 @@
         }
     }
 
+
     [TestFixture]
     [Category("Flaky")]
     public class Using_a_consumer_concurrency_limit_set_to_1 :
@@ -112,8 +113,11 @@
 
             await _complete.Task;
 
-            Assert.AreEqual(1, _consumer.MaxDeliveryCount);
-            Assert.AreEqual(true, _consumer.CompletedConsumingSequentially);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_consumer.MaxDeliveryCount, Is.EqualTo(1));
+                Assert.That(_consumer.CompletedConsumingSequentially, Is.EqualTo(true));
+            });
         }
 
         Consumer _consumer;
@@ -134,11 +138,11 @@
             IConsumer<A>,
             IConsumer<B>
         {
+            bool _completedConsumingSequentially = true;
             int _currentPendingDeliveryCount;
             long _deliveryCount;
             int _maxPendingDeliveryCount;
             int _previousSequenceIndex;
-            bool _completedConsumingSequentially = true;
 
             public int MaxDeliveryCount => _maxPendingDeliveryCount;
             public bool CompletedConsumingSequentially => _completedConsumingSequentially;

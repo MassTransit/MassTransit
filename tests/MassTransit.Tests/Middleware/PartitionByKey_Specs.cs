@@ -30,7 +30,7 @@
 
             await completed.Task;
 
-            Assert.AreEqual(Limit, count);
+            Assert.That(count, Is.EqualTo(Limit));
 
             Console.WriteLine("Processed: {0}", count);
         }

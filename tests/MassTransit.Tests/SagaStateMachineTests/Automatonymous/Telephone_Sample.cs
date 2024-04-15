@@ -26,8 +26,11 @@
 
                 await _machine.RaiseEvent(phone, x => x.HungUp);
 
-                Assert.AreEqual(_machine.OffHook.Name, phone.CurrentState);
-                Assert.GreaterOrEqual(phone.CallTimer.ElapsedMilliseconds, 45);
+                Assert.Multiple(() =>
+                {
+                    Assert.That(phone.CurrentState, Is.EqualTo(_machine.OffHook.Name));
+                    Assert.That(phone.CallTimer.ElapsedMilliseconds, Is.GreaterThanOrEqualTo(45));
+                });
             }
 
             PhoneStateMachine _machine;
@@ -74,8 +77,11 @@
                 await _machine.RaiseEvent(phone, x => x.TakenOffHold);
                 await _machine.RaiseEvent(phone, x => x.HungUp);
 
-                Assert.AreEqual(_machine.OffHook.Name, phone.CurrentState);
-                Assert.GreaterOrEqual(phone.CallTimer.ElapsedMilliseconds, 45);
+                Assert.Multiple(() =>
+                {
+                    Assert.That(phone.CurrentState, Is.EqualTo(_machine.OffHook.Name));
+                    Assert.That(phone.CallTimer.ElapsedMilliseconds, Is.GreaterThanOrEqualTo(45));
+                });
             }
 
             PhoneStateMachine _machine;
@@ -105,8 +111,11 @@
 
                 await _machine.RaiseEvent(phone, x => x.HungUp);
 
-                Assert.AreEqual(_machine.OffHook.Name, phone.CurrentState);
-                Assert.GreaterOrEqual(phone.CallTimer.ElapsedMilliseconds, 45);
+                Assert.Multiple(() =>
+                {
+                    Assert.That(phone.CurrentState, Is.EqualTo(_machine.OffHook.Name));
+                    Assert.That(phone.CallTimer.ElapsedMilliseconds, Is.GreaterThanOrEqualTo(45));
+                });
             }
 
             PhoneStateMachine _machine;

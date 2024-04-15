@@ -29,9 +29,12 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
 
             var sent = await _taskCompletionSource.Task;
 
-            Assert.IsTrue(sent.TryGetPayload<IServiceScope>(out var scope));
+            Assert.Multiple(() =>
+            {
+                Assert.That(sent.TryGetPayload<IServiceScope>(out var scope), Is.True);
 
-            Assert.AreEqual(scope.ServiceProvider, ServiceScope.ServiceProvider);
+                Assert.That(scope.ServiceProvider, Is.EqualTo(ServiceScope.ServiceProvider));
+            });
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -65,9 +68,12 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
 
             var sent = await _taskCompletionSource.Task;
 
-            Assert.IsTrue(sent.TryGetPayload<IServiceScope>(out var scope));
+            Assert.Multiple(() =>
+            {
+                Assert.That(sent.TryGetPayload<IServiceScope>(out var scope), Is.True);
 
-            Assert.AreEqual(scope.ServiceProvider, ServiceScope.ServiceProvider);
+                Assert.That(scope.ServiceProvider, Is.EqualTo(ServiceScope.ServiceProvider));
+            });
         }
 
         protected override IServiceCollection ConfigureServices(IServiceCollection collection)
@@ -131,7 +137,7 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
             await endpoint.Send<SimpleMessageInterface>(new { Name = "test" });
 
             var result = await _taskCompletionSource.Task;
-            Assert.AreEqual(MyId, result);
+            Assert.That(result, Is.EqualTo(MyId));
         }
 
         protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
@@ -179,7 +185,7 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
             await SendEndpoint.Send<SimpleMessageInterface>(new { Name = "test" });
 
             var result = await _taskCompletionSource.Task;
-            Assert.AreEqual(MyId, result);
+            Assert.That(result, Is.EqualTo(MyId));
         }
 
         protected override IServiceCollection ConfigureServices(IServiceCollection collection)

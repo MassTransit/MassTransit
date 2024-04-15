@@ -10,19 +10,19 @@
         [Test]
         public void Should_be_running()
         {
-            Assert.AreEqual(_machine.Running, _instance.CurrentState);
+            Assert.That(_instance.CurrentState, Is.EqualTo(_machine.Running));
         }
 
         [Test]
         public void Should_have_entered_running()
         {
-            Assert.AreEqual(_machine.Running, _instance.LastEntered);
+            Assert.That(_instance.LastEntered, Is.EqualTo(_machine.Running));
         }
 
         [Test]
         public void Should_have_left_initial()
         {
-            Assert.AreEqual(_machine.Initial, _instance.LastLeft);
+            Assert.That(_instance.LastLeft, Is.EqualTo(_machine.Initial));
         }
 
         Instance _instance;
@@ -40,13 +40,13 @@
 
 
         class Instance :
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public State CurrentState { get; set; }
 
             public State LastEntered { get; set; }
             public State LastLeft { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 

@@ -56,13 +56,14 @@
 
 
         class Instance :
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public CompositeEventStatus CompositeStatus { get; set; }
             public bool Called { get; set; }
             public State CurrentState { get; set; }
+            public Guid CorrelationId { get; set; }
         }
+
 
         private StateMachine<Instance> CreateStateMachine()
         {
@@ -74,12 +75,12 @@ SagaStateMachineInstance
                     .Event("Second", out Second)
                     .CompositeEvent("Third", out Third, b => b.CompositeStatus, First, Second)
                     .Initially()
-                        .When(Start, b => b.TransitionTo(Waiting))
+                    .When(Start, b => b.TransitionTo(Waiting))
                     .During(Waiting)
-                        .When(Third, b => b
-                            .Then(context => context.Instance.Called = true)
-                            .Finalize()
-                        )
+                    .When(Third, b => b
+                        .Then(context => context.Instance.Called = true)
+                        .Finalize()
+                    )
                 );
         }
     }
@@ -95,14 +96,17 @@ SagaStateMachineInstance
             _instance = new Instance();
             await _machine.RaiseEvent(_instance, Start);
 
-            Assert.IsFalse(_instance.Called);
+            Assert.That(_instance.Called, Is.False);
 
             await _machine.RaiseEvent(_instance, First);
             await _machine.RaiseEvent(_instance, Second);
 
-            Assert.IsTrue(_instance.Called);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_instance.Called, Is.True);
 
-            Assert.AreEqual(2, _instance.CurrentState);
+                Assert.That(_instance.CurrentState, Is.EqualTo(2));
+            });
         }
 
         [Test]
@@ -112,7 +116,7 @@ SagaStateMachineInstance
             _instance = new Instance();
             await _machine.RaiseEvent(_instance, Start);
 
-            Assert.AreEqual(3, _instance.CurrentState);
+            Assert.That(_instance.CurrentState, Is.EqualTo(3));
         }
 
         [Test]
@@ -124,7 +128,7 @@ SagaStateMachineInstance
 
             await _machine.RaiseEvent(_instance, First);
 
-            Assert.IsFalse(_instance.Called);
+            Assert.That(_instance.Called, Is.False);
         }
 
         [Test]
@@ -150,13 +154,14 @@ SagaStateMachineInstance
 
 
         class Instance :
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public int CompositeStatus { get; set; }
             public bool Called { get; set; }
             public int CurrentState { get; set; }
+            public Guid CorrelationId { get; set; }
         }
+
 
         private StateMachine<Instance> CreateStateMachine()
         {
@@ -168,13 +173,13 @@ SagaStateMachineInstance
                     .Event("Second", out Second)
                     .InstanceState(b => b.CurrentState)
                     .Initially()
-                        .When(Start, b => b.TransitionTo(Waiting))
+                    .When(Start, b => b.TransitionTo(Waiting))
                     .CompositeEvent("Third", out Third, b => b.CompositeStatus, First, Second)
                     .During(Waiting)
-                        .When(Third, b => b
-                            .Then(context => context.Instance.Called = true)
-                            .Finalize()
-                        )
+                    .When(Third, b => b
+                        .Then(context => context.Instance.Called = true)
+                        .Finalize()
+                    )
                 );
         }
     }

@@ -15,7 +15,7 @@
         {
             IEnumerable<PropertyInfo> properties = typeof(B).GetAllProperties();
 
-            Assert.AreEqual(3, properties.Count());
+            Assert.That(properties.Count(), Is.EqualTo(3));
         }
 
         [Test]
@@ -23,7 +23,7 @@
         {
             IEnumerable<PropertyInfo> properties = typeof(C).GetAllProperties();
 
-            Assert.AreEqual(2, properties.Count());
+            Assert.That(properties.Count(), Is.EqualTo(2));
         }
 
         [Test]
@@ -31,7 +31,7 @@
         {
             IEnumerable<PropertyInfo> properties = typeof(D).GetAllProperties();
 
-            Assert.AreEqual(4, properties.Count());
+            Assert.That(properties.Count(), Is.EqualTo(4));
         }
 
         [Test]
@@ -39,7 +39,7 @@
         {
             IEnumerable<PropertyInfo> properties = typeof(ID).GetAllProperties();
 
-            Assert.AreEqual(4, properties.Count());
+            Assert.That(properties.Count(), Is.EqualTo(4));
         }
 
         [Test]
@@ -47,7 +47,7 @@
         {
             IEnumerable<PropertyInfo> properties = typeof(A).GetAllStaticProperties();
 
-            Assert.AreEqual(1, properties.Count());
+            Assert.That(properties.Count(), Is.EqualTo(1));
         }
 
         [Test]
@@ -55,7 +55,7 @@
         {
             IEnumerable<PropertyInfo> properties = typeof(B).GetAllStaticProperties();
 
-            Assert.AreEqual(1, properties.Count());
+            Assert.That(properties.Count(), Is.EqualTo(1));
         }
 
         [Test]
@@ -63,7 +63,7 @@
         {
             IEnumerable<PropertyInfo> properties = typeof(A).GetAllProperties();
 
-            Assert.AreEqual(2, properties.Count());
+            Assert.That(properties.Count(), Is.EqualTo(2));
         }
 
 

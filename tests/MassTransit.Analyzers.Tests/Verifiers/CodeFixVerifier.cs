@@ -84,7 +84,7 @@ namespace MassTransit.Analyzers.Tests
             bool allowNewCompilerDiagnostics)
         {
             var document = CreateDocument(oldSource, language);
-            Diagnostic[] analyzerDiagnostics = GetSortedDiagnosticsFromDocuments(analyzer, new[] {document});
+            Diagnostic[] analyzerDiagnostics = GetSortedDiagnosticsFromDocuments(analyzer, new[] { document });
             IEnumerable<Diagnostic> compilerDiagnostics = GetCompilerDiagnostics(document);
             var attempts = analyzerDiagnostics.Length;
 
@@ -104,7 +104,7 @@ namespace MassTransit.Analyzers.Tests
                 }
 
                 document = ApplyFix(document, actions.ElementAt(0));
-                analyzerDiagnostics = GetSortedDiagnosticsFromDocuments(analyzer, new[] {document});
+                analyzerDiagnostics = GetSortedDiagnosticsFromDocuments(analyzer, new[] { document });
 
                 IEnumerable<Diagnostic> newCompilerDiagnostics = GetNewDiagnostics(compilerDiagnostics, GetCompilerDiagnostics(document));
 
@@ -116,10 +116,8 @@ namespace MassTransit.Analyzers.Tests
                         document.Project.Solution.Workspace));
                     newCompilerDiagnostics = GetNewDiagnostics(compilerDiagnostics, GetCompilerDiagnostics(document));
 
-                    Assert.IsTrue(false,
-                        string.Format("Fix introduced new compiler diagnostics:\r\n{0}\r\n\r\nNew document:\r\n{1}\r\n",
-                            string.Join("\r\n", newCompilerDiagnostics.Select(d => d.ToString())),
-                            document.GetSyntaxRootAsync().Result.ToFullString()));
+                    Assert.Fail(
+                        $"Fix introduced new compiler diagnostics:\r\n{string.Join("\r\n", newCompilerDiagnostics.Select(d => d.ToString()))}\r\n\r\nNew document:\r\n{document.GetSyntaxRootAsync().Result.ToFullString()}\r\n");
                 }
 
                 //check if there are analyzer diagnostics left after the code fix
@@ -130,7 +128,7 @@ namespace MassTransit.Analyzers.Tests
             //after applying all of the code fixes, compare the resulting string to the inputted one
             var actual = GetStringFromDocument(document).Replace("\r\n", "\n");
 
-            Assert.AreEqual(newSource, actual);
+            Assert.That(actual, Is.EqualTo(newSource));
         }
     }
 }

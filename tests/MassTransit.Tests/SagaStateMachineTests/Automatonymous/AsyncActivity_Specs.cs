@@ -16,16 +16,16 @@
 
             await machine.RaiseEvent(claim, machine.Create, new CreateInstance());
 
-            Assert.AreEqual("ExecuteAsync", claim.Value);
+            Assert.That(claim.Value, Is.EqualTo("ExecuteAsync"));
         }
 
 
         class TestInstance :
             SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public State CurrentState { get; set; }
             public string Value { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 
@@ -38,7 +38,8 @@
                 context.Instance.Value = "ExecuteAsync";
             }
 
-            Task IStateMachineActivity<TestInstance, CreateInstance>.Faulted<TException>(BehaviorExceptionContext<TestInstance, CreateInstance, TException> context,
+            Task IStateMachineActivity<TestInstance, CreateInstance>.Faulted<TException>(
+                BehaviorExceptionContext<TestInstance, CreateInstance, TException> context,
                 IBehavior<TestInstance, CreateInstance> next)
             {
                 return next.Faulted(context);
@@ -56,11 +57,11 @@
 
 
         class CreateInstance :
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public int X { get; set; }
             public int Y { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 

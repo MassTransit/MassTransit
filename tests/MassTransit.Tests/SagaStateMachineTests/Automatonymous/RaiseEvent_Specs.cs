@@ -14,21 +14,21 @@
             var instance = new Instance();
             var machine = new InstanceStateMachine();
 
-            await machine.RaiseEvent(instance, machine.Thing, new Data
+            await machine.RaiseEvent(instance, machine.Thing, new Data { Condition = true });
+            Assert.Multiple(() =>
             {
-                Condition = true
+                Assert.That(instance.CurrentState, Is.EqualTo(machine.True));
+                Assert.That(instance.Initialized.HasValue, Is.True);
             });
-            Assert.AreEqual(machine.True, instance.CurrentState);
-            Assert.IsTrue(instance.Initialized.HasValue);
         }
 
 
         class Instance :
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public State CurrentState { get; set; }
             public DateTime? Initialized { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 

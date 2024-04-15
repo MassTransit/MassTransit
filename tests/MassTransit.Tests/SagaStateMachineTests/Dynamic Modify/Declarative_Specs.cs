@@ -10,8 +10,11 @@
         [Test]
         public void Should_handle_both_states()
         {
-            Assert.AreEqual(TopGreeted, _instance.Top);
-            Assert.AreEqual(BottomIgnored, _instance.Bottom);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_instance.Top, Is.EqualTo(TopGreeted));
+                Assert.That(_instance.Bottom, Is.EqualTo(BottomIgnored));
+            });
         }
 
         State TopGreeted;
@@ -34,7 +37,7 @@
                     .Event("Initialized", out TopInitialized)
                     .InstanceState(b => b.Top)
                     .During(builder.Initial)
-                        .When(TopInitialized, b => b.TransitionTo(TopGreeted))
+                    .When(TopInitialized, b => b.TransitionTo(TopGreeted))
                 );
             _bottom = MassTransitStateMachine<MyState>
                 .New(builder => builder
@@ -42,27 +45,23 @@
                     .Event("Initialized", out BottomInitialized)
                     .InstanceState(b => b.Bottom)
                     .During(builder.Initial)
-                        .When(BottomInitialized, b => b.TransitionTo(BottomIgnored))
+                    .When(BottomInitialized, b => b.TransitionTo(BottomIgnored))
                 );
 
-            _top.RaiseEvent(_instance, TopInitialized, new Init
-            {
-                Value = "Hello"
-            }).Wait();
+            _top.RaiseEvent(_instance, TopInitialized, new Init { Value = "Hello" }).Wait();
 
-            _bottom.RaiseEvent(_instance, BottomInitialized, new Init
-            {
-                Value = "Goodbye"
-            }).Wait();
+            _bottom.RaiseEvent(_instance, BottomInitialized, new Init { Value = "Goodbye" }).Wait();
         }
+
 
         class MyState :
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public State Top { get; set; }
             public State Bottom { get; set; }
+            public Guid CorrelationId { get; set; }
         }
+
 
         class Init
         {

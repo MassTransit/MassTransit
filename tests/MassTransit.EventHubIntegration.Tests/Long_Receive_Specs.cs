@@ -65,7 +65,7 @@ namespace MassTransit.EventHubIntegration.Tests
 
                 ConsumeContext<EventHubMessage> result = await taskCompletionSource.Task;
 
-                Assert.AreEqual(messageId, result.MessageId);
+                Assert.That(result.MessageId, Is.EqualTo(messageId));
             }
             finally
             {

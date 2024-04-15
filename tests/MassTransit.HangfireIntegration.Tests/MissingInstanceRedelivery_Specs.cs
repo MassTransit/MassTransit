@@ -28,7 +28,7 @@ namespace MassTransit.HangfireIntegration.Tests
 
             await status;
 
-            Assert.AreEqual("A", status.Result.Message.ServiceName);
+            Assert.That(status.Result.Message.ServiceName, Is.EqualTo("A"));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

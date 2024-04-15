@@ -27,11 +27,14 @@ namespace MassTransit.Tests.SagaStateMachineTests
                 });
                 ConsumeContext<MemberRegistered> registered = await handler;
                 Guid? saga = await _repository.ShouldContainSagaInState(memberId, _machine, x => x.Rejected, TestTimeout);
-                Assert.IsTrue(saga.HasValue);
+                Assert.That(saga.HasValue, Is.True);
                 var sagaInstance = _repository[saga.Value].Instance;
-                Assert.AreEqual("Invalid ID", sagaInstance.Result);
-                Assert.AreEqual("REJECTED!", sagaInstance.Name);
-                Assert.AreEqual("REJECTED!", sagaInstance.Surname);
+                Assert.Multiple(() =>
+                {
+                    Assert.That(sagaInstance.Result, Is.EqualTo("Invalid ID"));
+                    Assert.That(sagaInstance.Name, Is.EqualTo("REJECTED!"));
+                    Assert.That(sagaInstance.Surname, Is.EqualTo("REJECTED!"));
+                });
             }
 
             [Test]
@@ -47,11 +50,14 @@ namespace MassTransit.Tests.SagaStateMachineTests
                 });
                 ConsumeContext<MemberRegistered> registered = await handler;
                 Guid? saga = await _repository.ShouldContainSagaInState(memberId, _machine, x => x.Registered, TestInactivityTimeout);
-                Assert.IsTrue(saga.HasValue);
+                Assert.That(saga.HasValue, Is.True);
                 var sagaInstance = _repository[saga.Value].Instance;
-                Assert.AreEqual("Success", sagaInstance.Result);
-                Assert.AreEqual("Frank", sagaInstance.Name);
-                Assert.AreEqual("Castle", sagaInstance.Surname);
+                Assert.Multiple(() =>
+                {
+                    Assert.That(sagaInstance.Result, Is.EqualTo("Success"));
+                    Assert.That(sagaInstance.Name, Is.EqualTo("Frank"));
+                    Assert.That(sagaInstance.Surname, Is.EqualTo("Castle"));
+                });
             }
 
             [Test]
@@ -67,11 +73,14 @@ namespace MassTransit.Tests.SagaStateMachineTests
                 });
                 ConsumeContext<MemberRegistered> registered = await handler;
                 Guid? saga = await _repository.ShouldContainSagaInState(memberId, _machine, x => x.Rejected, TestTimeout);
-                Assert.IsTrue(saga.HasValue);
+                Assert.That(saga.HasValue, Is.True);
                 var sagaInstance = _repository[saga.Value].Instance;
-                Assert.AreEqual("Invalid Name", sagaInstance.Result);
-                Assert.AreEqual("REJECTED!", sagaInstance.Name);
-                Assert.AreEqual("Kent", sagaInstance.Surname);
+                Assert.Multiple(() =>
+                {
+                    Assert.That(sagaInstance.Result, Is.EqualTo("Invalid Name"));
+                    Assert.That(sagaInstance.Name, Is.EqualTo("REJECTED!"));
+                    Assert.That(sagaInstance.Surname, Is.EqualTo("Kent"));
+                });
             }
 
             [Test]
@@ -95,11 +104,14 @@ namespace MassTransit.Tests.SagaStateMachineTests
                 });
                 ConsumeContext<MemberRegistered> registered = await handler;
                 Guid? saga = await _repository.ShouldContainSagaInState(memberId, _machine, x => x.Rejected, TestTimeout);
-                Assert.IsTrue(saga.HasValue);
+                Assert.That(saga.HasValue, Is.True);
                 var sagaInstance = _repository[saga.Value].Instance;
-                Assert.AreEqual("Invalid Surname", sagaInstance.Result);
-                Assert.AreEqual("Peter", sagaInstance.Name);
-                Assert.AreEqual("REJECTED!", sagaInstance.Surname);
+                Assert.Multiple(() =>
+                {
+                    Assert.That(sagaInstance.Result, Is.EqualTo("Invalid Surname"));
+                    Assert.That(sagaInstance.Name, Is.EqualTo("Peter"));
+                    Assert.That(sagaInstance.Surname, Is.EqualTo("REJECTED!"));
+                });
             }
 
             InMemorySagaRepository<TestState> _repository;
@@ -257,7 +269,6 @@ namespace MassTransit.Tests.SagaStateMachineTests
                         })
                         .PublishAsync(context => context.Init<MemberRegistered>(context.Instance))
                         .TransitionTo(Registered)
-
                     ,
 
                     //--

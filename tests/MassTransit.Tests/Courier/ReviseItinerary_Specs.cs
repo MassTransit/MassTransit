@@ -43,7 +43,7 @@
             await reviseActivityCompleted;
 
             ConsumeContext<RoutingSlipRevised> revisions = await revised;
-            Assert.AreEqual(0, revisions.Message.DiscardedItinerary.Length);
+            Assert.That(revisions.Message.DiscardedItinerary, Is.Empty);
         }
 
         [Test]
@@ -105,10 +105,13 @@
             await reviseActivityCompleted;
 
             ConsumeContext<RoutingSlipRevised> revisions = await revised;
-            Assert.AreEqual(1, revisions.Message.DiscardedItinerary.Length);
-            Assert.AreEqual(0, revisions.Message.Itinerary.Length);
+            Assert.Multiple(() =>
+            {
+                Assert.That(revisions.Message.DiscardedItinerary, Has.Length.EqualTo(1));
+                Assert.That(revisions.Message.Itinerary, Is.Empty);
 
-            Assert.That(testActivityCompleted.Wait(TimeSpan.FromSeconds(3)), Is.False);
+                Assert.That(testActivityCompleted.Wait(TimeSpan.FromSeconds(3)), Is.False);
+            });
         }
 
         protected override void SetupActivities(BusTestHarness testHarness)

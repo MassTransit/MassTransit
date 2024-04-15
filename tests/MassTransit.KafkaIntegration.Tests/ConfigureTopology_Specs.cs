@@ -45,14 +45,14 @@ namespace MassTransit.KafkaIntegration.Tests
 
             var meta = client.GetMetadata(topicName, TimeSpan.FromSeconds(10));
 
-            Assert.AreEqual(1, meta.Topics.Count);
+            Assert.That(meta.Topics.Count, Is.EqualTo(1));
 
             foreach (var topic in meta.Topics)
             {
-                Assert.AreEqual(partitionCount, topic.Partitions.Count);
+                Assert.That(topic.Partitions.Count, Is.EqualTo(partitionCount));
 
                 foreach (var partition in topic.Partitions)
-                    Assert.AreEqual(replicaCount, partition.Replicas.Length);
+                    Assert.That(partition.Replicas.Length, Is.EqualTo(replicaCount));
             }
         }
 

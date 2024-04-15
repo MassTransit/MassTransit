@@ -29,7 +29,7 @@
 
             await Task.Delay(1000);
 
-            Assert.AreEqual(0, _repository.Count);
+            Assert.That(_repository.Count, Is.EqualTo(0));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

@@ -12,7 +12,7 @@
         [Test]
         public void Should_capture_the_value()
         {
-            Assert.AreEqual("79", _claim.Value);
+            Assert.That(_claim.Value, Is.EqualTo("79"));
         }
 
         State Running;
@@ -52,11 +52,11 @@
 
         class ClaimAdjustmentInstance :
             ClaimAdjustment,
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public State CurrentState { get; set; }
             public string Value { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 

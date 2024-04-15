@@ -56,7 +56,7 @@
 
                 Response<InstanceNotFound> result = await notFound;
 
-                Assert.AreEqual("A", result.Message.ServiceName);
+                Assert.That(result.Message.ServiceName, Is.EqualTo("A"));
 
                 Assert.That(async () => await status, Throws.TypeOf<TaskCanceledException>());
             }

@@ -526,7 +526,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         public void TheQueueName()
         {
             var guid = new Guid(_receiveSettings.QueueName);
-            Assert.AreNotEqual(Guid.Empty, guid);
+            Assert.That(guid, Is.Not.EqualTo(Guid.Empty));
         }
 
         readonly Uri _uri = new Uri("rabbitmq://localhost/mttest/*?temporary=true");
