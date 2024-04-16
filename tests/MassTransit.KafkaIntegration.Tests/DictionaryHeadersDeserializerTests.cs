@@ -19,6 +19,16 @@
         }
 
         [Test]
+        public async Task Should_Deserialize_with_duplicate_header_value()
+        {
+            var headers = new Headers { new Header("TestValue", null), new Header("TestValue", null) };
+
+            var result = DictionaryHeadersSerialize.Deserializer.Deserialize(headers);
+            Assert.IsTrue(result.TryGetHeader("TestValue", out var emptyValue));
+            Assert.IsNull(emptyValue);
+        }
+
+        [Test]
         public async Task Should_not_throw_when_header_in_different_encoding()
         {
             var bytes = Encoding.Unicode.GetBytes("test");
