@@ -10,9 +10,9 @@ namespace MassTransit.SqlTransport.SqlServer
         ISqlTransportDatabaseMigrator
     {
         const string DbExistsSql = @"SELECT [database_id] from [sys].[databases] WHERE name = '{0}'";
-        const string DbCreateSql = @"CREATE DATABASE {0}";
+        const string DbCreateSql = @"CREATE DATABASE [{0}]";
 
-        const string SchemaCreateSql = @"USE {0};
+        const string SchemaCreateSql = @"USE [{0}];
 IF (SCHEMA_ID('{1}') IS NULL)
 BEGIN
     EXEC('CREATE SCHEMA [{1}] AUTHORIZATION [dbo]')
@@ -34,7 +34,7 @@ GRANT REFERENCES to {0};
         const string LoginExistsSql = @"SELECT 1 FROM sys.syslogins WHERE [name] = '{0}'";
         const string CreateLoginSql = @"CREATE LOGIN {0} WITH PASSWORD = '{1}';";
 
-        const string CreateUserSql = @"USE {0};
+        const string CreateUserSql = @"USE [{0}];
 CREATE USER {2} FOR LOGIN {2} WITH DEFAULT_SCHEMA = {1};
 EXEC sp_addrolemember '{3}', '{2}';";
 
