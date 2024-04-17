@@ -4,7 +4,6 @@
     using System.Threading.Tasks;
     using Configuration;
     using Middleware;
-    using Topology;
     using Transports;
 
 
@@ -40,7 +39,7 @@
 
             var brokerTopology = settings.GetBrokerTopology();
 
-            ConfigureRabbitMqTopologyFilter<SendSettings> configureTopology = new ConfigureRabbitMqTopologyFilter<SendSettings>(settings, brokerTopology);
+            var configureTopology = new ConfigureRabbitMqTopologyFilter<SendSettings>(settings, brokerTopology);
 
             return CreateSendTransport(receiveEndpointContext, modelContextSupervisor, configureTopology, settings.ExchangeName, endpointAddress);
         }
@@ -57,7 +56,7 @@
 
             var brokerTopology = publishTopology.GetBrokerTopology();
 
-            ConfigureRabbitMqTopologyFilter<SendSettings> configureTopology = new ConfigureRabbitMqTopologyFilter<SendSettings>(settings, brokerTopology);
+            var configureTopology = new ConfigureRabbitMqTopologyFilter<SendSettings>(settings, brokerTopology);
 
             var endpointAddress = settings.GetSendAddress(_hostConfiguration.HostAddress);
 
@@ -70,11 +69,7 @@
         {
             var supervisor = new ModelContextSupervisor(modelContextSupervisor);
 
-            var delayedExchangeAddress = endpointAddress.GetDelayAddress();
-
-            var delaySettings = new RabbitMqDelaySettings(delayedExchangeAddress);
-
-            delaySettings.BindToExchange(exchangeName);
+            var delaySettings = endpointAddress.GetDelaySettings();
 
             IPipe<ModelContext> delayPipe = new ConfigureRabbitMqTopologyFilter<DelaySettings>(delaySettings, delaySettings.GetBrokerTopology()).ToPipe();
 

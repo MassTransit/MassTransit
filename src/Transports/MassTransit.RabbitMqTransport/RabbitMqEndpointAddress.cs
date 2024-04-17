@@ -23,7 +23,7 @@ namespace MassTransit
         const string DelayedTypeKey = "delayedtype";
         const string SingleActiveConsumerKey = "singleactiveconsumer";
 
-        const string DelayedMessageExchangeType = "x-delayed-message";
+        public const string DelayedMessageExchangeType = "x-delayed-message";
 
         public readonly string Scheme;
         public readonly string Host;
@@ -186,12 +186,18 @@ namespace MassTransit
             AlternateExchange = alternateExchange;
         }
 
-        public RabbitMqEndpointAddress GetDelayAddress()
+        public RabbitMqDelaySettings GetDelaySettings()
         {
-            var name = $"{Name}_delay";
+            var delayExchangeName = $"{Name}_delay";
 
-            return new RabbitMqEndpointAddress(Scheme, Host, Port, VirtualHost, name, DelayedMessageExchangeType, Durable, AutoDelete, false,
-                default, ExchangeType, BindExchanges, AlternateExchange, SingleActiveConsumer);
+            var delayExchangeAddress = new RabbitMqEndpointAddress(Scheme, Host, Port, VirtualHost, delayExchangeName, DelayedMessageExchangeType, Durable,
+                AutoDelete, false, default, RabbitMQ.Client.ExchangeType.Fanout, null, null, false);
+
+            var delaySettings = new RabbitMqDelaySettings(delayExchangeAddress);
+
+            delaySettings.BindToExchange(this);
+
+            return delaySettings;
         }
 
         public Uri ToShortAddress()

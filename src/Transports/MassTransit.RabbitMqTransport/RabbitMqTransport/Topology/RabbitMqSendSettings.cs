@@ -89,6 +89,14 @@ namespace MassTransit.RabbitMqTransport.Topology
             _exchangeBindings.Add(specification);
         }
 
+        public void BindToExchange(RabbitMqEndpointAddress address)
+        {
+            string exchangeType = ExchangeArguments.TryGetValue("x-delayed-type", out var argument) ? (string)argument : RabbitMQ.Client.ExchangeType.Fanout;
+            var specification = new ExchangeBindingPublishTopologySpecification(address.Name, address.ExchangeType, address.Durable, address.AutoDelete);
+
+            _exchangeBindings.Add(specification);
+        }
+
         public void SetQueueArgument(string key, object value)
         {
             if (key == null)
