@@ -1066,7 +1066,9 @@ namespace MassTransit.SqlTransport.PostgreSql
                 _logger.LogDebug("Role {Role} created", options.Role);
             }
 
-            await connection.Connection.ExecuteScalarAsync<int>(string.Format(GrantRoleSql, options.Role, options.Schema, options.AdminUsername ?? "postgres"))
+            var principal = PostgresSqlTransportConnection.GetAdminMigrationPrincipal(options);
+
+            await connection.Connection.ExecuteScalarAsync<int>(string.Format(GrantRoleSql, options.Role, options.Schema, principal))
                 .ConfigureAwait(false);
 
             _logger.LogDebug("Role {Role} granted access to schema {Schema}", options.Role, options.Schema);
