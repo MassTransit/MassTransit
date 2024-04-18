@@ -198,6 +198,12 @@ namespace MassTransit
             var ns = type.Namespace;
             if (ns == null)
             {
+                if (type.IsAnonymousType())
+                {
+                    _invalidMessageTypeReason = $"Message types must not be anonymous types: {TypeCache<T>.ShortName}";
+                    return false;
+                }
+
                 _invalidMessageTypeReason = $"Messages types must have a valid namespace: {TypeCache<T>.ShortName}";
                 return false;
             }
@@ -214,12 +220,6 @@ namespace MassTransit
             if (typeof(object).Assembly.Equals(type.Assembly))
             {
                 _invalidMessageTypeReason = $"Messages types must not be System types: {TypeCache<T>.ShortName}";
-                return false;
-            }
-
-            if (type.IsAnonymousType())
-            {
-                _invalidMessageTypeReason = $"Message types must not be anonymous types: {TypeCache<T>.ShortName}";
                 return false;
             }
 
