@@ -36,16 +36,21 @@ namespace MassTransit.AzureServiceBusTransport
 
         public async Task DeadLetter()
         {
-            var headers = new Dictionary<string, object> { { MessageHeaders.Reason, "dead-letter" } };
+            const string deadLetterReason = "dead-letter";
+            var headers = new Dictionary<string, object> { { MessageHeaders.Reason, deadLetterReason } };
 
-            await _session.DeadLetterMessageAsync(_message, headers).ConfigureAwait(false);
+            await _session.DeadLetterMessageAsync(_message, headers, deadLetterReason).ConfigureAwait(false);
 
             _deadLettered = true;
         }
 
         public async Task DeadLetter(Exception exception)
         {
-            await _session.DeadLetterMessageAsync(_message, ExceptionUtil.GetExceptionHeaderDictionary(exception)).ConfigureAwait(false);
+            Dictionary<string, object> exceptionHeaderDictionary = ExceptionUtil.GetExceptionHeaderDictionary(exception);
+            var deadLetterReason = (string)exceptionHeaderDictionary[MessageHeaders.Reason];
+            var deadLetterErrorDescription = (string)exceptionHeaderDictionary[MessageHeaders.FaultMessage];
+
+            await _session.DeadLetterMessageAsync(_message, exceptionHeaderDictionary, deadLetterReason, deadLetterErrorDescription).ConfigureAwait(false);
 
             _deadLettered = true;
         }

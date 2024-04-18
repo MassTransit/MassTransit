@@ -39,7 +39,7 @@ namespace MassTransit.Util
             return _cleanup.Replace(stackTrace, "");
         }
 
-        public static IDictionary<string, object> GetExceptionHeaderDictionary(Exception exception)
+        public static Dictionary<string, object> GetExceptionHeaderDictionary(Exception exception)
         {
             exception = exception.GetBaseException() ?? exception;
 
