@@ -41,17 +41,24 @@ namespace MassTransit.Util
 
         public static IDictionary<string, object> GetExceptionHeaderDictionary(Exception exception)
         {
+            (Dictionary<string, object>? dictionary, var message) = GetExceptionHeaderDetail(exception);
+
+            return dictionary;
+        }
+
+        public static (Dictionary<string, object>, string) GetExceptionHeaderDetail(Exception exception)
+        {
             exception = exception.GetBaseException() ?? exception;
 
             var exceptionMessage = GetMessage(exception);
 
-            return new Dictionary<string, object>
+            return (new Dictionary<string, object>
             {
                 { MessageHeaders.Reason, "fault" },
                 { MessageHeaders.FaultExceptionType, TypeCache.GetShortName(exception.GetType()) },
                 { MessageHeaders.FaultMessage, exceptionMessage },
                 { MessageHeaders.FaultStackTrace, GetStackTrace(exception) }
-            };
+            }, exceptionMessage);
         }
     }
 }
