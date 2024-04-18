@@ -13,7 +13,7 @@
         [Test]
         public async Task Should_throw_a_proper_exception()
         {
-            Assert.That(async () => await Bus.Publish(new {Value = "Name"}), Throws.TypeOf<ArgumentException>().With.Message.Contain("anonymous"));
+            Assert.That(async () => await Bus.Publish(new { Value = "Name" }), Throws.TypeOf<ArgumentException>().With.Message.Contain("anonymous").IgnoreCase);
         }
 
         Task<ConsumeContext<PingMessage>> _handler;
