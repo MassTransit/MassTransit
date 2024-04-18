@@ -997,6 +997,23 @@ namespace MassTransit.SqlTransport.PostgreSql
             }
         }
 
+        public async Task CreateInfrastructure(SqlTransportOptions options, CancellationToken cancellationToken)
+        {
+            await using var connection = PostgresSqlTransportConnection.GetDatabaseConnection(options);
+            await connection.Open(cancellationToken);
+
+            try
+            {
+                await connection.Connection.ExecuteScalarAsync<int>(string.Format(CreateInfrastructureSql, options.Schema, options.Role)).ConfigureAwait(false);
+
+                _logger.LogDebug("Transport infrastructure in schema {Schema} created (or updated)", options.Schema);
+            }
+            finally
+            {
+                await connection.Close();
+            }
+        }
+
         async Task CreateDatabaseIfNotExist(SqlTransportOptions options, CancellationToken cancellationToken)
         {
             await using var connection = PostgresSqlTransportConnection.GetSystemDatabaseConnection(options);
@@ -1032,23 +1049,6 @@ namespace MassTransit.SqlTransport.PostgreSql
                 _logger.LogDebug("Schema {Schema} created", options.Schema);
 
                 await GrantAccess(connection, options);
-            }
-            finally
-            {
-                await connection.Close();
-            }
-        }
-
-        public async Task CreateInfrastructure(SqlTransportOptions options, CancellationToken cancellationToken)
-        {
-            await using var connection = PostgresSqlTransportConnection.GetDatabaseConnection(options);
-            await connection.Open(cancellationToken);
-
-            try
-            {
-                await connection.Connection.ExecuteScalarAsync<int>(string.Format(CreateInfrastructureSql, options.Schema, options.Role)).ConfigureAwait(false);
-
-                _logger.LogDebug("Transport infrastructure in schema {Schema} created (or updated)", options.Schema);
             }
             finally
             {

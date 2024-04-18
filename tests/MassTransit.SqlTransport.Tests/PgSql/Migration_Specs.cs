@@ -42,8 +42,8 @@ public class Migration_Specs
         var connection = PostgresSqlTransportConnection.GetDatabaseAdminConnection(opts);
         var builder = new NpgsqlConnectionStringBuilder(connection.Connection.ConnectionString);
 
-        Assert.AreEqual(builder.Database,"sample");
-        Assert.AreEqual(builder.Password,"2Legit2Quit");
+        Assert.AreEqual(builder.Database, "sample");
+        Assert.AreEqual(builder.Password, "2Legit2Quit");
         Assert.IsTrue(builder.Username.StartsWith("mtAdmin"));
         Assert.AreEqual(builder.Host, connectionStringBuilder.Host);
 

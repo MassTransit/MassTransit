@@ -4,7 +4,6 @@ namespace MassTransit.SqlTransport.PostgreSql
     using System.Data;
     using System.Threading;
     using System.Threading.Tasks;
-    using MassTransit.SqlTransport;
     using Npgsql;
 
 
