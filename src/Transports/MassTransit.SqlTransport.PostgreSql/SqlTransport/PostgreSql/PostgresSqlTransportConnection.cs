@@ -1,5 +1,6 @@
 namespace MassTransit.SqlTransport.PostgreSql
 {
+    using System;
     using System.Data;
     using System.Threading;
     using System.Threading.Tasks;
@@ -88,6 +89,17 @@ namespace MassTransit.SqlTransport.PostgreSql
                 builder.Port = options.Port.Value;
 
             return new PostgresSqlTransportConnection(builder.ToString());
+        }
+
+        public static string? GetAdminMigrationPrincipal(SqlTransportOptions options)
+        {
+            var principal = options.AdminUsername ?? "postgres";
+
+            principal = principal?.Contains("@") ?? false
+                ? principal.Substring(0, principal.IndexOf("@", StringComparison.Ordinal))
+                : principal;
+
+            return principal;
         }
     }
 }
