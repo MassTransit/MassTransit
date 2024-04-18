@@ -118,8 +118,8 @@ namespace MassTransit.Topology
             if (MessageTypeCache<T>.IsValidMessageType == false)
                 throw new ArgumentException(MessageTypeCache<T>.InvalidMessageTypeReason, nameof(T));
 
-            Lazy<IMessagePublishTopologyConfigurator>? topology =
-                _messageTypes.GetOrAdd(typeof(T), type => new Lazy<IMessagePublishTopologyConfigurator>(() => CreateMessageTopology<T>()));
+            Lazy<IMessagePublishTopologyConfigurator> topology =
+                _messageTypes.GetOrAdd(typeof(T), _ => new Lazy<IMessagePublishTopologyConfigurator>(() => CreateMessageTopology<T>()));
 
             return (IMessagePublishTopologyConfigurator<T>)topology.Value;
         }
@@ -162,12 +162,12 @@ namespace MassTransit.Topology
 
 
         readonly struct Factory :
-            IActivationType<IMessageTypeFactory, IPublishTopologyConfigurator>
+            IActivationType<IMessageTypeFactory, PublishTopology>
         {
-            public IMessageTypeFactory ActivateType<T>(IPublishTopologyConfigurator configurator)
+            public IMessageTypeFactory ActivateType<T>(PublishTopology publishTopology)
                 where T : class
             {
-                return new MessageTypeFactory<T>(configurator);
+                return new MessageTypeFactory<T>(publishTopology);
             }
         }
 
@@ -200,16 +200,16 @@ namespace MassTransit.Topology
             IMessageTypeFactory
             where T : class
         {
-            readonly IPublishTopologyConfigurator _configurator;
+            readonly PublishTopology _publishTopology;
 
-            public MessageTypeFactory(IPublishTopologyConfigurator configurator)
+            public MessageTypeFactory(PublishTopology publishTopology)
             {
-                _configurator = configurator;
+                _publishTopology = publishTopology;
             }
 
             public IMessagePublishTopologyConfigurator CreateMessageType()
             {
-                return _configurator.GetMessageTopology<T>();
+                return _publishTopology.CreateMessageTopology<T>();
             }
         }
     }
