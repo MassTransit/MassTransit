@@ -31,6 +31,7 @@ namespace MassTransit.Util
         readonly SemaphoreSlim? _rateLimitSemaphore;
         readonly Timer? _rateLimitTimer;
         readonly int _refreshThreshold;
+        readonly TimeSpan _requestCancellationTimeout;
         readonly int _requestLimit;
         readonly object _requestLock = new object();
         readonly SemaphoreSlim _requestSemaphore;
@@ -56,6 +57,7 @@ namespace MassTransit.Util
 
             _options = options;
 
+            _requestCancellationTimeout = _options.RequestCancellationTimeout ?? TimeSpan.FromSeconds(1);
 
             _disposeToken = new CancellationTokenSource();
             _requestCount = 1;
@@ -154,7 +156,7 @@ namespace MassTransit.Util
         {
             using var activeRequest = await BeginRequest(cancellationToken).ConfigureAwait(false);
 
-            var count = await requestCallback(activeRequest.ResultLimit, cancellationToken).ConfigureAwait(false);
+            var count = await requestCallback(activeRequest.ResultLimit, activeRequest.CancellationToken).ConfigureAwait(false);
 
             await activeRequest.Complete(count, CancellationToken.None).ConfigureAwait(false);
         }
@@ -190,20 +192,20 @@ namespace MassTransit.Util
         {
             using var activeRequest = await BeginRequest(cancellationToken).ConfigureAwait(false);
 
-            IEnumerable<T> results = await requestCallback(activeRequest.ResultLimit, cancellationToken).ConfigureAwait(false);
+            IEnumerable<T> results = await requestCallback(activeRequest.ResultLimit, activeRequest.CancellationToken).ConfigureAwait(false);
 
             var count = 0;
             try
             {
                 foreach (var result in results)
                 {
-                    await _resultSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+                    await _resultSemaphore.WaitAsync(activeRequest.CancellationToken).ConfigureAwait(false);
 
                     async Task RunResultCallback()
                     {
                         try
                         {
-                            await resultCallback(result, cancellationToken).ConfigureAwait(false);
+                            await resultCallback(result, activeRequest.CancellationToken).ConfigureAwait(false);
                         }
                         finally
                         {
@@ -277,7 +279,7 @@ namespace MassTransit.Util
         {
             using var activeRequest = await BeginRequest(cancellationToken).ConfigureAwait(false);
 
-            List<T> results = (await requestCallback(activeRequest.ResultLimit, cancellationToken).ConfigureAwait(false)).ToList();
+            List<T> results = (await requestCallback(activeRequest.ResultLimit, activeRequest.CancellationToken).ConfigureAwait(false)).ToList();
 
             await activeRequest.Complete(results.Count, CancellationToken.None).ConfigureAwait(false);
 
@@ -354,7 +356,7 @@ namespace MassTransit.Util
                     _pendingResultCount += resultLimit;
                 }
 
-                return new ActiveRequest(this, resultLimit);
+                return new ActiveRequest(this, resultLimit, cancellationToken, _requestCancellationTimeout);
             }
             catch (OperationCanceledException)
             {

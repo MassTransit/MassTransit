@@ -8,14 +8,25 @@ namespace MassTransit.Util
     public struct ActiveRequest :
         IDisposable
     {
-        public readonly int ResultLimit;
         readonly RequestRateAlgorithm _algorithm;
+        readonly CancellationTokenRegistration _registration;
+        readonly CancellationTokenSource _source;
+        readonly TimeSpan _timeout;
         bool _completed;
 
-        public ActiveRequest(RequestRateAlgorithm algorithm, int resultLimit)
+        public readonly CancellationToken CancellationToken;
+        public readonly int ResultLimit;
+
+        public ActiveRequest(RequestRateAlgorithm algorithm, int resultLimit, CancellationToken cancellationToken, TimeSpan timeout)
         {
-            ResultLimit = resultLimit;
             _algorithm = algorithm;
+            _timeout = timeout;
+            _source = new CancellationTokenSource();
+            _registration = cancellationToken.Register(Callback, this);
+
+            CancellationToken = _source.Token;
+            ResultLimit = resultLimit;
+
             _completed = false;
         }
 
@@ -28,10 +39,18 @@ namespace MassTransit.Util
 
         public void Dispose()
         {
+            _registration.Dispose();
+            _source.Dispose();
+
             if (_completed)
                 return;
 
             _algorithm.CancelRequest(ResultLimit);
+        }
+
+        void Callback(object? obj)
+        {
+            _source.CancelAfter(_timeout);
         }
     }
 }

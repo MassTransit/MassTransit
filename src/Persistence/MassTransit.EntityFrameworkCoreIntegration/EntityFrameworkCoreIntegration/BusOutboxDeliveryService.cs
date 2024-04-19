@@ -62,7 +62,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             using var algorithm = new RequestRateAlgorithm(new RequestRateAlgorithmOptions
             {
                 PrefetchCount = _options.QueryMessageLimit,
-                RequestResultLimit = 10
+                RequestResultLimit = 1,
             });
 
             while (!stoppingToken.IsCancellationRequested)
@@ -156,16 +156,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                     }
                     catch (OperationCanceledException)
                     {
-                        throw;
-                    }
-                    catch (DbUpdateConcurrencyException)
-                    {
-                        await RollbackTransaction(transaction).ConfigureAwait(false);
-                        throw;
-                    }
-                    catch (DbUpdateException)
-                    {
-                        await RollbackTransaction(transaction).ConfigureAwait(false);
                         throw;
                     }
                     catch (Exception)

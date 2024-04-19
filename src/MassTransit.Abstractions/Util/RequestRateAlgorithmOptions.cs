@@ -29,5 +29,10 @@ namespace MassTransit.Util
         /// The interval at which the request rate limit is reset
         /// </summary>
         public TimeSpan? RequestRateInterval { get; set; }
+
+        /// <summary>
+        /// If specified, provides additional time when a request is canceled to avoid interrupting in-progress requests
+        /// </summary>
+        public TimeSpan? RequestCancellationTimeout { get; set; }
     }
 }
