@@ -19,7 +19,7 @@
             Assert.Multiple(() =>
             {
                 Assert.That(message.Target, Is.EqualTo("Hello"));
-                Assert.That(message.Arguments.Length, Is.EqualTo(1));
+                Assert.That(message.Arguments, Has.Length.EqualTo(1));
             });
             Assert.That(message.Arguments[0].ToString(), Is.EqualTo("World"));
         }

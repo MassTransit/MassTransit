@@ -33,7 +33,7 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
             {
                 Assert.That(sent.TryGetPayload<IServiceScope>(out var scope), Is.True);
 
-                Assert.That(ServiceScope.ServiceProvider, Is.EqualTo(scope.ServiceProvider));
+                Assert.That(scope.ServiceProvider, Is.EqualTo(ServiceScope.ServiceProvider));
             });
         }
 
@@ -72,7 +72,7 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
             {
                 Assert.That(sent.TryGetPayload<IServiceScope>(out var scope), Is.True);
 
-                Assert.That(ServiceScope.ServiceProvider, Is.EqualTo(scope.ServiceProvider));
+                Assert.That(scope.ServiceProvider, Is.EqualTo(ServiceScope.ServiceProvider));
             });
         }
 

@@ -29,9 +29,9 @@
 
                 Assert.That(received.InitiatorId.HasValue, Is.True, "The initiator should be copied from the CorrelationId");
 
-                Assert.That(message.CorrelationId, Is.EqualTo(received.InitiatorId.Value), "The initiator should be the saga CorrelationId");
+                Assert.That(received.InitiatorId.Value, Is.EqualTo(message.CorrelationId), "The initiator should be the saga CorrelationId");
 
-                Assert.That(InputQueueAddress, Is.EqualTo(received.SourceAddress), "The published message should have the input queue source address");
+                Assert.That(received.SourceAddress, Is.EqualTo(InputQueueAddress), "The published message should have the input queue source address");
             });
 
             Guid? saga = await _repository.ShouldContainSagaInState(message.CorrelationId, _machine, x => x.Running, TestTimeout);

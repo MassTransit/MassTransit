@@ -192,7 +192,7 @@ namespace MassTransit.Tests.Saga
             }
             catch (SagaException sex)
             {
-                Assert.That(typeof(InitiateSimpleSaga), Is.EqualTo(sex.MessageType));
+                Assert.That(sex.MessageType, Is.EqualTo(typeof(InitiateSimpleSaga)));
             }
         }
 

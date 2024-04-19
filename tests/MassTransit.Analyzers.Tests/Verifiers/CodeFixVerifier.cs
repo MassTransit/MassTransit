@@ -116,7 +116,7 @@ namespace MassTransit.Analyzers.Tests
                         document.Project.Solution.Workspace));
                     newCompilerDiagnostics = GetNewDiagnostics(compilerDiagnostics, GetCompilerDiagnostics(document));
 
-                    Assert.That(false, Is.True,
+                    Assert.Fail(
                         $"Fix introduced new compiler diagnostics:\r\n{string.Join("\r\n", newCompilerDiagnostics.Select(d => d.ToString()))}\r\n\r\nNew document:\r\n{document.GetSyntaxRootAsync().Result.ToFullString()}\r\n");
                 }
 

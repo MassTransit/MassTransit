@@ -29,8 +29,8 @@
                 {
                     Assert.That(rescheduledEvent.Message.NewScheduleTokenId, Is.Not.Null);
                     Assert.That(rescheduledEvent.Message.CorrelationId, Is.EqualTo(sagaInstance.CorrelationId));
+                    Assert.That(rescheduledEvent.Message.NewScheduleTokenId, Is.EqualTo(sagaInstance.ScheduleId));
                 });
-                Assert.That(rescheduledEvent.Message.NewScheduleTokenId, Is.EqualTo(sagaInstance.ScheduleId));
 
                 await InputQueueSendEndpoint.Send(new StopCommand(correlationId));
 

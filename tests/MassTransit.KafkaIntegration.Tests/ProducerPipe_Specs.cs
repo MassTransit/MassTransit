@@ -223,7 +223,7 @@ namespace MassTransit.KafkaIntegration.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result.TryGetPayload(out KafkaSendContext<Guid, KafkaMessage> context), Is.True);
-                Assert.That(key, Is.EqualTo(context.Key));
+                Assert.That(context.Key, Is.EqualTo(key));
                 Assert.Multiple(() =>
                 {
                     Assert.That(key, Is.EqualTo(context.CorrelationId));
