@@ -67,11 +67,14 @@ namespace MassTransit.KafkaIntegration.Tests
 
             var result = await provider.GetTask<ConsumeContext<KafkaMessage>>();
 
-            Assert.AreEqual(message.Value.Text, result.Message.Text);
-            Assert.AreEqual(sendContext.MessageId, result.MessageId);
-            Assert.That(result.DestinationAddress, Is.EqualTo(new Uri($"loopback://localhost/{KafkaTopicAddress.PathPrefix}/{Topic}")));
+            Assert.Multiple(async () =>
+            {
+                Assert.That(result.Message.Text, Is.EqualTo(message.Value.Text));
+                Assert.That(result.MessageId, Is.EqualTo(sendContext.MessageId));
+                Assert.That(result.DestinationAddress, Is.EqualTo(new Uri($"loopback://localhost/{KafkaTopicAddress.PathPrefix}/{Topic}")));
 
-            Assert.That(await harness.Consumed.Any<KafkaMessage>());
+                Assert.That(await harness.Consumed.Any<KafkaMessage>());
+            });
         }
 
 
@@ -333,7 +336,7 @@ namespace MassTransit.KafkaIntegration.Tests
             var result = await provider.GetTask<ConsumeContext<Batch<KafkaMessage>>>();
 
             for (var i = 0; i < batchSize; i++)
-                Assert.AreEqual(i, result.Message[i].Message.Index);
+                Assert.That(result.Message[i].Message.Index, Is.EqualTo(i));
         }
 
 

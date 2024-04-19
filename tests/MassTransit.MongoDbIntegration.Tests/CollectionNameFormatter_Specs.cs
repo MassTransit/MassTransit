@@ -13,7 +13,7 @@ namespace MassTransit.MongoDbIntegration.Tests
         public void Should_return_correct_collection()
         {
             var collectionName = _collectionNameFormatter.Saga<SimpleSaga>();
-            Assert.AreEqual("simple.sagas", collectionName);
+            Assert.That(collectionName, Is.EqualTo("simple.sagas"));
         }
 
         readonly ICollectionNameFormatter _collectionNameFormatter;
@@ -32,7 +32,7 @@ namespace MassTransit.MongoDbIntegration.Tests
         public void Should_return_default_collection_when_null()
         {
             var collectionName = _collectionNameFormatter(null).Saga<SimpleSaga>();
-            Assert.AreEqual("sagas", collectionName);
+            Assert.That(collectionName, Is.EqualTo("sagas"));
         }
 
         readonly Func<string, ICollectionNameFormatter> _collectionNameFormatter;
@@ -48,7 +48,7 @@ namespace MassTransit.MongoDbIntegration.Tests
         public void Should_return_correct_collection(string expected, string result)
         {
             var collectionName = _collectionNameFormatter(expected).Saga<SimpleSaga>();
-            Assert.AreEqual(result, collectionName);
+            Assert.That(collectionName, Is.EqualTo(result));
         }
     }
 }

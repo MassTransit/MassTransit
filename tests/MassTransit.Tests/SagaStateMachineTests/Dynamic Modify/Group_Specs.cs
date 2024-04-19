@@ -16,8 +16,8 @@
         [Test]
         public void Should_have_captured_initial_data()
         {
-            Assert.AreEqual("Audi", _instance.VehicleMake);
-            Assert.AreEqual("A6", _instance.VehicleModel);
+            Assert.That(_instance.VehicleMake, Is.EqualTo("Audi"));
+            Assert.That(_instance.VehicleModel, Is.EqualTo("A6"));
         }
 
         State BeingServiced;
@@ -36,13 +36,13 @@
                     .Event("VehicleArrived", out VehicleArrived)
                     .InstanceState(b => b.OverallState)
                     .During(builder.Initial)
-                        .When(VehicleArrived, b => b
-                            .Then(context =>
-                            {
-                                context.Instance.VehicleMake = context.Data.Make;
-                                context.Instance.VehicleModel = context.Data.Model;
-                            })
-                            .TransitionTo(BeingServiced))
+                    .When(VehicleArrived, b => b
+                        .Then(context =>
+                        {
+                            context.Instance.VehicleMake = context.Data.Make;
+                            context.Instance.VehicleModel = context.Data.Model;
+                        })
+                        .TransitionTo(BeingServiced))
                 );
 
             var vehicle = new Vehicle
@@ -56,9 +56,8 @@
 
 
         class PitStopInstance :
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public State OverallState { get; private set; }
             public State FuelState { get; private set; }
             public State OilState { get; private set; }
@@ -73,36 +72,38 @@ SagaStateMachineInstance
             public decimal OilQuarts { get; set; }
             public decimal OilPricePerQuart { get; set; }
             public decimal OilCost { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
+
         // NOTE: Left in place due to the incompleteness of this test.
-//        class PitStop :
-//            MassTransitStateMachine<PitStopInstance>
-//        {
-//            public PitStop()
-//            {
-//                InstanceState(x => x.OverallState);
+        //        class PitStop :
+        //            MassTransitStateMachine<PitStopInstance>
+        //        {
+        //            public PitStop()
+        //            {
+        //                InstanceState(x => x.OverallState);
 
-//                During(Initial,
-//                    When(VehicleArrived)
-//                        .Then(context =>
-//                        {
-//                            context.Instance.VehicleMake = context.Data.Make;
-//                            context.Instance.VehicleModel = context.Data.Model;
-//                        })
-//                        .TransitionTo(BeingServiced)
-////                        .RunParallel(p =>
-////                            {
-////                                p.Start<FillTank>(x => x.BeginFilling);
-////                                p.Start<CheckOil>(x => x.BeginChecking);
-////                            }))
-//                    );
-//            }
+        //                During(Initial,
+        //                    When(VehicleArrived)
+        //                        .Then(context =>
+        //                        {
+        //                            context.Instance.VehicleMake = context.Data.Make;
+        //                            context.Instance.VehicleModel = context.Data.Model;
+        //                        })
+        //                        .TransitionTo(BeingServiced)
+        ////                        .RunParallel(p =>
+        ////                            {
+        ////                                p.Start<FillTank>(x => x.BeginFilling);
+        ////                                p.Start<CheckOil>(x => x.BeginChecking);
+        ////                            }))
+        //                    );
+        //            }
 
-//            public State BeingServiced { get; private set; }
+        //            public State BeingServiced { get; private set; }
 
-//            public Event<Vehicle> VehicleArrived { get; private set; }
-//        }
+        //            public Event<Vehicle> VehicleArrived { get; private set; }
+        //        }
 
 
         class FillTank :

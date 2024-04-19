@@ -10,7 +10,7 @@
         [Test]
         public void Should_transition_to_the_proper_state()
         {
-            Assert.AreEqual(Running, _instance.CurrentState);
+            Assert.That(_instance.CurrentState, Is.EqualTo(Running));
         }
 
         State Running;
@@ -29,7 +29,7 @@
                     .Event("Initialized", out Initialized)
                     .InstanceState(b => b.CurrentState)
                     .During(builder.Initial)
-                        .When(Initialized, b => b.TransitionTo(Running))
+                    .When(Initialized, b => b.TransitionTo(Running))
                 );
 
             _machine.RaiseEvent(_instance, Initialized)
@@ -38,10 +38,10 @@
 
 
         class Instance :
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public State CurrentState { get; set; }
+            public Guid CorrelationId { get; set; }
         }
     }
 
@@ -52,7 +52,7 @@ SagaStateMachineInstance
         [Test]
         public void Should_transition_to_the_proper_state()
         {
-            Assert.AreEqual(Running, _instance.CurrentState);
+            Assert.That(_instance.CurrentState, Is.EqualTo(Running));
         }
 
         State Running;
@@ -71,7 +71,7 @@ SagaStateMachineInstance
                     .Event("Initialized", out Initialized)
                     .InstanceState(b => b.CurrentState)
                     .During(builder.Initial)
-                        .When(Initialized, b => b.TransitionTo(Running))
+                    .When(Initialized, b => b.TransitionTo(Running))
                 );
 
             _machine.RaiseEvent(_instance, Initialized);
@@ -79,10 +79,10 @@ SagaStateMachineInstance
 
 
         class Instance :
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public State CurrentState { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 
@@ -109,13 +109,13 @@ SagaStateMachineInstance
         [Test]
         public void Should_have_called_the_finally_activity()
         {
-            Assert.AreEqual(Finalized, _instance.Value);
+            Assert.That(_instance.Value, Is.EqualTo(Finalized));
         }
 
         [Test]
         public void Should_transition_to_the_proper_state()
         {
-            Assert.AreEqual(_machine.Final, _instance.CurrentState);
+            Assert.That(_instance.CurrentState, Is.EqualTo(_machine.Final));
         }
 
         const string Finalized = "Finalized";
@@ -138,7 +138,7 @@ SagaStateMachineInstance
                     .Event("Initialized", out Initialized)
                     .InstanceState(b => b.CurrentState)
                     .During(builder.Initial)
-                        .When(Initialized, b => b.Finalize())
+                    .When(Initialized, b => b.Finalize())
                     .Finally(b => b.Then(context => context.Instance.Value = Finalized))
                 );
 
@@ -148,11 +148,11 @@ SagaStateMachineInstance
 
 
         class Instance :
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public string Value { get; set; }
             public State CurrentState { get; set; }
+            public Guid CorrelationId { get; set; }
         }
     }
 
@@ -163,25 +163,25 @@ SagaStateMachineInstance
         [Test]
         public void Should_call_the_activity()
         {
-            Assert.AreEqual(_machine.Final, _instance.CurrentState);
+            Assert.That(_instance.CurrentState, Is.EqualTo(_machine.Final));
         }
 
         [Test]
         public void Should_have_trigger_the_final_before_enter_event()
         {
-            Assert.AreEqual(Running, _instance.FinalState);
+            Assert.That(_instance.FinalState, Is.EqualTo(Running));
         }
 
         [Test]
         public void Should_have_triggered_the_after_leave_event()
         {
-            Assert.AreEqual(_machine.Initial, _instance.LeftState);
+            Assert.That(_instance.LeftState, Is.EqualTo(_machine.Initial));
         }
 
         [Test]
         public void Should_have_triggered_the_before_enter_event()
         {
-            Assert.AreEqual(Initializing, _instance.EnteredState);
+            Assert.That(_instance.EnteredState, Is.EqualTo(Initializing));
         }
 
         State Running;
@@ -202,27 +202,28 @@ SagaStateMachineInstance
                     .Event("Initialized", out Initialized)
                     .InstanceState(b => b.CurrentState)
                     .During(Initializing)
-                        .When(Initialized, b => b.TransitionTo(Running))
+                    .When(Initialized, b => b.TransitionTo(Running))
                     .DuringAny()
-                        .When(builder.Initial.Enter, b => b.TransitionTo(Initializing))
-                        .When(builder.Initial.AfterLeave, b => b.Then(context => context.Instance.LeftState = context.Data))
-                        .When(Initializing.BeforeEnter, b => b.Then(context => context.Instance.EnteredState = context.Data))
-                        .When(Running.Enter, b => b.Finalize())
-                        .When(builder.Final.BeforeEnter, b => b.Then(context => context.Instance.FinalState = context.Instance.CurrentState))
+                    .When(builder.Initial.Enter, b => b.TransitionTo(Initializing))
+                    .When(builder.Initial.AfterLeave, b => b.Then(context => context.Instance.LeftState = context.Data))
+                    .When(Initializing.BeforeEnter, b => b.Then(context => context.Instance.EnteredState = context.Data))
+                    .When(Running.Enter, b => b.Finalize())
+                    .When(builder.Final.BeforeEnter, b => b.Then(context => context.Instance.FinalState = context.Instance.CurrentState))
                 );
 
             _machine.RaiseEvent(_instance, Initialized)
                 .Wait();
         }
 
+
         class Instance :
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public State CurrentState { get; set; }
             public State EnteredState { get; set; }
             public State LeftState { get; set; }
             public State FinalState { get; set; }
+            public Guid CorrelationId { get; set; }
         }
     }
 }

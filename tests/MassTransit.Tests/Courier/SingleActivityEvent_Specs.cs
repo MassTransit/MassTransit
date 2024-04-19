@@ -18,7 +18,7 @@
         {
             ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
 
-            Assert.AreEqual(_trackingNumber, context.Message.TrackingNumber);
+            Assert.That(context.Message.TrackingNumber, Is.EqualTo(_trackingNumber));
         }
 
         [Test]
@@ -26,7 +26,7 @@
         {
             ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
 
-            Assert.AreEqual(_originalValue, context.GetResult<string>("OriginalValue"));
+            Assert.That(context.GetResult<string>("OriginalValue"), Is.EqualTo(_originalValue));
         }
 
         [Test]
@@ -34,7 +34,7 @@
         {
             ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
 
-            Assert.AreEqual("Knife", context.GetVariable<string>("Variable"));
+            Assert.That(context.GetVariable<string>("Variable"), Is.EqualTo("Knife"));
         }
 
         [Test]
@@ -42,7 +42,7 @@
         {
             ConsumeContext<RoutingSlipCompleted> context = await _completed;
 
-            Assert.AreEqual(_trackingNumber, context.Message.TrackingNumber);
+            Assert.That(context.Message.TrackingNumber, Is.EqualTo(_trackingNumber));
         }
 
         [Test]
@@ -51,7 +51,7 @@
             ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
             ConsumeContext<RoutingSlipCompleted> completeContext = await _completed;
 
-            Assert.AreEqual(completeContext.Message.Timestamp, context.Message.Timestamp + context.Message.Duration);
+            Assert.That(context.Message.Timestamp + context.Message.Duration, Is.EqualTo(completeContext.Message.Timestamp));
 
             Console.WriteLine("Duration: {0}", context.Message.Duration);
         }
@@ -61,7 +61,7 @@
         {
             ConsumeContext<RoutingSlipCompleted> context = await _completed;
 
-            Assert.AreEqual("Knife", context.GetVariable<string>("Variable"));
+            Assert.That(context.GetVariable<string>("Variable"), Is.EqualTo("Knife"));
         }
 
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
@@ -106,7 +106,7 @@
         {
             ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
 
-            Assert.AreEqual(_trackingNumber, context.Message.TrackingNumber);
+            Assert.That(context.Message.TrackingNumber, Is.EqualTo(_trackingNumber));
         }
 
         [Test]
@@ -114,7 +114,7 @@
         {
             ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
 
-            Assert.AreEqual("Hello", context.GetResult<string>("OriginalValue"));
+            Assert.That(context.GetResult<string>("OriginalValue"), Is.EqualTo("Hello"));
         }
 
         [Test]
@@ -122,7 +122,7 @@
         {
             ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
 
-            Assert.AreEqual("Knife", context.GetVariable<string>("Variable"));
+            Assert.That(context.GetVariable<string>("Variable"), Is.EqualTo("Knife"));
         }
 
         [Test]
@@ -130,7 +130,7 @@
         {
             ConsumeContext<RoutingSlipCompleted> context = await _completed;
 
-            Assert.AreEqual(_trackingNumber, context.Message.TrackingNumber);
+            Assert.That(context.Message.TrackingNumber, Is.EqualTo(_trackingNumber));
         }
 
         [Test]
@@ -139,7 +139,7 @@
             ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
             ConsumeContext<RoutingSlipCompleted> completeContext = await _completed;
 
-            Assert.AreEqual(completeContext.Message.Timestamp, context.Message.Timestamp + context.Message.Duration);
+            Assert.That(context.Message.Timestamp + context.Message.Duration, Is.EqualTo(completeContext.Message.Timestamp));
 
             Console.WriteLine("Duration: {0}", context.Message.Duration);
         }
@@ -149,7 +149,7 @@
         {
             ConsumeContext<RoutingSlipCompleted> context = await _completed;
 
-            Assert.AreEqual("Knife", context.GetVariable<string>("Variable"));
+            Assert.That(context.GetVariable<string>("Variable"), Is.EqualTo("Knife"));
         }
 
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;

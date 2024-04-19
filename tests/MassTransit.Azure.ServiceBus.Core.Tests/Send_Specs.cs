@@ -81,7 +81,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         {
             Response<PongMessage> message = await _response;
 
-            Assert.AreEqual(message.Message.CorrelationId, _ping.Result.Message.CorrelationId);
+            Assert.That(_ping.Result.Message.CorrelationId, Is.EqualTo(message.Message.CorrelationId));
         }
 
         Task<ConsumeContext<PingMessage>> _ping;

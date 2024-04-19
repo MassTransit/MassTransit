@@ -39,7 +39,7 @@
 
             ConsumeContext<Fault<Start>> fault = await faultReceived;
 
-            Assert.AreEqual(message.CorrelationId, fault.Message.Message.CorrelationId);
+            Assert.That(fault.Message.Message.CorrelationId, Is.EqualTo(message.CorrelationId));
         }
 
         [Test]
@@ -58,7 +58,7 @@
 
             ConsumeContext<Fault<Start>> fault = await faultReceived;
 
-            Assert.AreEqual(message.CorrelationId, fault.Message.Message.CorrelationId);
+            Assert.That(fault.Message.Message.CorrelationId, Is.EqualTo(message.CorrelationId));
 
             saga = await _repository.ShouldContainSagaInState(message.CorrelationId, _machine, x => x.FailedToStart, TestTimeout);
 
@@ -77,7 +77,7 @@
 
             ConsumeContext<Fault<Stop>> fault = await faultReceived;
 
-            Assert.AreEqual(message.CorrelationId, fault.Message.Message.CorrelationId);
+            Assert.That(fault.Message.Message.CorrelationId, Is.EqualTo(message.CorrelationId));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

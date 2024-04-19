@@ -77,13 +77,16 @@ namespace MassTransit.KafkaIntegration.Tests
 
             var result = await provider.GetTask<ConsumeContext<KafkaMessage>>();
 
-            Assert.AreEqual("text", result.Message.Test);
-            Assert.That(result.SourceAddress, Is.EqualTo(new Uri("loopback://localhost/")));
-            Assert.That(result.DestinationAddress, Is.EqualTo(new Uri($"loopback://localhost/{KafkaTopicAddress.PathPrefix}/{Topic}")));
-            Assert.That(result.MessageId, Is.EqualTo(messageId));
-            Assert.That(result.CorrelationId, Is.EqualTo(correlationId));
-            Assert.That(result.InitiatorId, Is.EqualTo(initiatorId));
-            Assert.That(result.ConversationId, Is.EqualTo(conversationId));
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.Message.Test, Is.EqualTo("text"));
+                Assert.That(result.SourceAddress, Is.EqualTo(new Uri("loopback://localhost/")));
+                Assert.That(result.DestinationAddress, Is.EqualTo(new Uri($"loopback://localhost/{KafkaTopicAddress.PathPrefix}/{Topic}")));
+                Assert.That(result.MessageId, Is.EqualTo(messageId));
+                Assert.That(result.CorrelationId, Is.EqualTo(correlationId));
+                Assert.That(result.InitiatorId, Is.EqualTo(initiatorId));
+                Assert.That(result.ConversationId, Is.EqualTo(conversationId));
+            });
         }
     }
 

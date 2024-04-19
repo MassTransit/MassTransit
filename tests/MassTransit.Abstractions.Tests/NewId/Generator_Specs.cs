@@ -9,6 +9,110 @@
     public class When_generating_id
     {
         [Test]
+        public void Should_generate_known_guid()
+        {
+            var expected = Guid.Parse("437f0b01-bf34-7d81-3cf0-74b719ec7596");
+            var tickProvider = new MockTickProvider(8410219332513447152);
+            var networkProvider = new MockNetworkProvider(BitConverter.GetBytes(6857996259202924925));
+            var generator = new NewIdGenerator(tickProvider, networkProvider);
+
+            for (var i = 0; i < 267; i++)
+                generator.NextGuid();
+
+            var guid = generator.NextGuid();
+
+            Assert.That(guid, Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void Should_generate_known_guid_batch()
+        {
+            var exp = new string[] { "74b719ec-7596-3cf0-7d81-bf34437f0b01", "74b719ec-7596-3cf0-7d81-bf34437f0c01", "74b719ec-7596-3cf0-7d81-bf34437f0d01" };
+            var tickProvider = new MockTickProvider(8410219332513447152);
+            var networkProvider = new MockNetworkProvider(BitConverter.GetBytes(6857996259202924925));
+            var generator = new NewIdGenerator(tickProvider, networkProvider);
+
+            for (var i = 0; i < 267; i++)
+                generator.NextGuid();
+
+            var batch = new Guid[3];
+            generator.NextSequentialGuid(batch, 0, batch.Length);
+
+            for (var i = 0; i < exp.Length; i++)
+            {
+                var guid = Guid.Parse(exp[i]);
+                Assert.That(batch[i], Is.EqualTo(guid));
+            }
+        }
+
+        [Test]
+        public void Should_generate_known_sequential_guid()
+        {
+            var expected = Guid.Parse("74b719ec-7596-3cf0-7d81-bf34437f0b01");
+            var tickProvider = new MockTickProvider(8410219332513447152);
+            var networkProvider = new MockNetworkProvider(BitConverter.GetBytes(6857996259202924925));
+            var generator = new NewIdGenerator(tickProvider, networkProvider);
+
+            for (var i = 0; i < 267; i++)
+                generator.NextSequentialGuid();
+
+            var guid = generator.NextSequentialGuid();
+
+            Assert.That(guid, Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void Should_match_sequentially()
+        {
+            var generator = new NewIdGenerator(_tickProvider, _workerIdProvider);
+
+            var id1 = generator.Next().ToGuid();
+            var id2 = generator.NextGuid();
+            var id3 = generator.NextGuid();
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(id2, Is.Not.EqualTo(id1));
+                Assert.That(id3, Is.Not.EqualTo(id2));
+            });
+            Assert.That(id2, Is.GreaterThan(id1));
+
+            Console.WriteLine(id1);
+            Console.WriteLine(id2);
+            Console.WriteLine(id3);
+
+            var nid1 = id1.ToNewId();
+            var nid2 = id2.ToNewId();
+        }
+
+        [Test]
+        public void Should_match_sequentially_with_sequential_guid()
+        {
+            var generator = new NewIdGenerator(_tickProvider, _workerIdProvider);
+
+            var nid = generator.Next();
+            var id1 = nid.ToSequentialGuid();
+            var id2 = generator.NextSequentialGuid();
+            var id3 = generator.NextSequentialGuid();
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(id2, Is.Not.EqualTo(id1));
+                Assert.That(id3, Is.Not.EqualTo(id2));
+            });
+            Assert.That(id2, Is.GreaterThan(id1));
+
+            Console.WriteLine(id1);
+            Console.WriteLine(id2);
+            Console.WriteLine(id3);
+
+            var nid1 = id1.ToNewIdFromSequential();
+            var nid2 = id2.ToNewIdFromSequential();
+
+            Assert.That(nid1, Is.EqualTo(nid));
+        }
+
+        [Test]
         public void Should_match_when_all_providers_equal()
         {
             // Arrange
@@ -20,7 +124,7 @@
             var id2 = generator2.Next();
 
             // Assert
-            Assert.AreEqual(id1, id2);
+            Assert.That(id2, Is.EqualTo(id1));
         }
 
         [Test]
@@ -37,7 +141,7 @@
             var id2 = generator2.NextGuid();
 
             // Assert
-            Assert.AreEqual(id1, id2);
+            Assert.That(id2, Is.EqualTo(id1));
         }
 
         [Test]
@@ -54,7 +158,7 @@
             var id2 = generator2.Next();
 
             // Assert
-            Assert.AreNotEqual(id1, id2);
+            Assert.That(id2, Is.Not.EqualTo(id1));
         }
 
         [Test]
@@ -69,110 +173,7 @@
             var id2 = generator2.Next();
 
             // Assert
-            Assert.AreNotEqual(id1, id2);
-        }
-
-        [Test]
-        public void Should_match_sequentially()
-        {
-            var generator = new NewIdGenerator(_tickProvider, _workerIdProvider);
-
-            var id1 = generator.Next().ToGuid();
-            var id2 = generator.NextGuid();
-            var id3 = generator.NextGuid();
-
-            Assert.AreNotEqual(id1, id2);
-            Assert.AreNotEqual(id2, id3);
-            Assert.Greater(id2, id1);
-
-            Console.WriteLine(id1);
-            Console.WriteLine(id2);
-            Console.WriteLine(id3);
-
-            NewId nid1 = id1.ToNewId();
-            NewId nid2 = id2.ToNewId();
-
-        }
-
-        [Test]
-        public void Should_match_sequentially_with_sequential_guid()
-        {
-            var generator = new NewIdGenerator(_tickProvider, _workerIdProvider);
-
-            var nid = generator.Next();
-            var id1 = nid.ToSequentialGuid();
-            var id2 = generator.NextSequentialGuid();
-            var id3 = generator.NextSequentialGuid();
-
-            Assert.AreNotEqual(id1, id2);
-            Assert.AreNotEqual(id2, id3);
-            Assert.Greater(id2, id1);
-
-            Console.WriteLine(id1);
-            Console.WriteLine(id2);
-            Console.WriteLine(id3);
-
-            NewId nid1 = id1.ToNewIdFromSequential();
-            NewId nid2 = id2.ToNewIdFromSequential();
-
-            Assert.AreEqual(nid, nid1);
-        }
-
-        [Test]
-        public void Should_generate_known_sequential_guid()
-        {
-            var expected = Guid.Parse("74b719ec-7596-3cf0-7d81-bf34437f0b01");
-            var tickProvider = new MockTickProvider(8410219332513447152);
-            var networkProvider = new MockNetworkProvider(BitConverter.GetBytes(6857996259202924925));
-            var generator = new NewIdGenerator(tickProvider, networkProvider);
-
-            for (int i = 0; i < 267; i++)
-            {
-                generator.NextSequentialGuid();
-            }
-            var guid = generator.NextSequentialGuid();
-
-            Assert.AreEqual(expected, guid);
-        }
-
-        [Test]
-        public void Should_generate_known_guid()
-        {
-            var expected = Guid.Parse("437f0b01-bf34-7d81-3cf0-74b719ec7596");
-            var tickProvider = new MockTickProvider(8410219332513447152);
-            var networkProvider = new MockNetworkProvider(BitConverter.GetBytes(6857996259202924925));
-            var generator = new NewIdGenerator(tickProvider, networkProvider);
-
-            for (int i = 0; i < 267; i++)
-            {
-                generator.NextGuid();
-            }
-            var guid = generator.NextGuid();
-
-            Assert.AreEqual(expected, guid);
-        }
-
-        [Test]
-        public void Should_generate_known_guid_batch()
-        {
-            var exp = new string[] { "74b719ec-7596-3cf0-7d81-bf34437f0b01", "74b719ec-7596-3cf0-7d81-bf34437f0c01", "74b719ec-7596-3cf0-7d81-bf34437f0d01" };
-            var tickProvider = new MockTickProvider(8410219332513447152);
-            var networkProvider = new MockNetworkProvider(BitConverter.GetBytes(6857996259202924925));
-            var generator = new NewIdGenerator(tickProvider, networkProvider);
-
-            for (int i = 0; i < 267; i++)
-            {
-                generator.NextGuid();
-            }
-
-            var batch = new Guid[3];
-            generator.NextSequentialGuid(batch, 0, batch.Length);
-
-            for (int i = 0; i < exp.Length; i++)
-            {
-                var guid = Guid.Parse(exp[i]);
-                Assert.AreEqual(guid, batch[i]);
-            }
+            Assert.That(id2, Is.Not.EqualTo(id1));
         }
 
         [SetUp]

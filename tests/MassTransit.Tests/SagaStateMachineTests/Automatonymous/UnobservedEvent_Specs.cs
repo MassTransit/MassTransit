@@ -127,7 +127,7 @@
 
             await _machine.RaiseEvent(instance, x => x.Charge, new A { Volts = 12 });
 
-            Assert.AreEqual(0, instance.Volts);
+            Assert.That(instance.Volts, Is.EqualTo(0));
         }
 
         [Test]
@@ -137,11 +137,11 @@
 
             await _machine.RaiseEvent(instance, x => x.Start);
 
-            Assert.AreEqual(_machine.Running, await _machine.GetState(instance));
+            Assert.That(await _machine.GetState(instance), Is.EqualTo(_machine.Running));
 
             var nextEvents = await _machine.NextEvents(instance);
 
-            Assert.IsTrue(nextEvents.Any(x => x.Name.Equals("Charge")));
+            Assert.That(nextEvents.Any(x => x.Name.Equals("Charge")), Is.True);
         }
 
         [Test]

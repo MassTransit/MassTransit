@@ -1,22 +1,16 @@
 ﻿namespace MassTransit.RabbitMqTransport.Tests
 {
-    using System;
-    using System.Threading.Tasks;
-    using NUnit.Framework;
-    using Shouldly;
-
-
     namespace Send_Specs
     {
         using System;
         using System.Linq;
         using System.Threading.Tasks;
-        using MassTransit.Testing;
         using NUnit.Framework;
         using RabbitMQ.Client;
         using Serialization;
         using Shouldly;
         using TestFramework;
+        using Testing;
 
 
         [TestFixture]
@@ -33,7 +27,7 @@
 
                 ConsumeContext<A> received = await _receivedA;
 
-                Assert.AreEqual(message.Id, received.Message.Id);
+                Assert.That(received.Message.Id, Is.EqualTo(message.Id));
             }
 
             Task<ConsumeContext<A>> _receivedA;
@@ -65,7 +59,7 @@
 
                 ConsumeContext<A> received = await _receivedA;
 
-                Assert.AreEqual(message.Id, received.Message.Id);
+                Assert.That(received.Message.Id, Is.EqualTo(message.Id));
             }
 
             Task<ConsumeContext<A>> _receivedA;
@@ -93,7 +87,7 @@
 
                 ConsumeContext<A> received = await receivedA;
 
-                Assert.AreEqual(message.Id, received.Message.Id);
+                Assert.That(received.Message.Id, Is.EqualTo(message.Id));
             }
         }
 
@@ -112,9 +106,12 @@
 
                 ConsumeContext<A> received = await _receivedA;
 
-                Assert.AreEqual(message.Id, received.Message.Id);
+                Assert.Multiple(() =>
+                {
+                    Assert.That(received.Message.Id, Is.EqualTo(message.Id));
 
-                Assert.AreEqual(EncryptedMessageSerializer.EncryptedContentType, received.ReceiveContext.ContentType);
+                    Assert.That(received.ReceiveContext.ContentType, Is.EqualTo(EncryptedMessageSerializer.EncryptedContentType));
+                });
             }
 
             Task<ConsumeContext<A>> _receivedA;
@@ -149,7 +146,7 @@
 
                 ConsumeContext<A> received = await _receivedA;
 
-                Assert.AreEqual(message.Id, received.Message.Id);
+                Assert.That(received.Message.Id, Is.EqualTo(message.Id));
             }
 
             Task<ConsumeContext<A>> _receivedA;
@@ -176,7 +173,7 @@
 
                 ConsumeContext<A> received = await _receivedA;
 
-                Assert.AreEqual(message.Id, received.Message.Id);
+                Assert.That(received.Message.Id, Is.EqualTo(message.Id));
             }
 
             [Test]
@@ -211,7 +208,7 @@
 
                 ConsumeContext<Fault<A>> received = await _faultA;
 
-                Assert.AreEqual(message.Id, received.Message.Message.Id);
+                Assert.That(received.Message.Message.Id, Is.EqualTo(message.Id));
             }
 
             [Test]
@@ -305,7 +302,7 @@
 
                 ConsumeContext<A> received = await _receivedA;
 
-                Assert.AreEqual(message.Id, received.Message.Id);
+                Assert.That(received.Message.Id, Is.EqualTo(message.Id));
 
                 ConsumeContext<GotA> consumeContext = await _receivedGotA;
 
@@ -360,7 +357,7 @@
 
                 IReceivedMessage<B> receivedMessage = _consumer.Received.Select<B>().First();
 
-                Assert.AreEqual(message.Id, receivedMessage.Context.Message.Id);
+                Assert.That(receivedMessage.Context.Message.Id, Is.EqualTo(message.Id));
             }
 
             MultiTestConsumer _consumer;
@@ -455,7 +452,7 @@
 
                 ConsumeContext<A> received = await _receivedA;
 
-                Assert.AreEqual(message.Id, received.Message.Id);
+                Assert.That(received.Message.Id, Is.EqualTo(message.Id));
             }
 
             Task<ConsumeContext<A>> _receivedA;
@@ -496,7 +493,7 @@
 
                 ConsumeContext<A> received = await _receivedA;
 
-                Assert.AreEqual(message.Id, received.Message.Id);
+                Assert.That(received.Message.Id, Is.EqualTo(message.Id));
             }
 
             Task<ConsumeContext<A>> _receivedA;

@@ -20,9 +20,9 @@ namespace MassTransit.Tests.Courier
         {
             ConsumeContext<RoutingSlipCompleted> context = await _completed;
 
-            Assert.AreEqual(_trackingNumber, context.Message.TrackingNumber);
+            Assert.That(context.Message.TrackingNumber, Is.EqualTo(_trackingNumber));
 
-            Assert.AreEqual("Frank", context.GetVariable<string>("Name"));
+            Assert.That(context.GetVariable<string>("Name"), Is.EqualTo("Frank"));
         }
 
         [Test]
@@ -30,7 +30,7 @@ namespace MassTransit.Tests.Courier
         {
             ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
 
-            Assert.AreEqual(_trackingNumber, context.Message.TrackingNumber);
+            Assert.That(context.Message.TrackingNumber, Is.EqualTo(_trackingNumber));
         }
 
         public Using_message_data_arguments()

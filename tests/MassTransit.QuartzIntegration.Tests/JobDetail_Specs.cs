@@ -29,9 +29,12 @@
 
             await scheduler.ScheduleJob(jobDetail, trigger).ConfigureAwait(false);
 
-            Assert.IsTrue(MyJob.Signaled.WaitOne(Utils.Timeout));
+            Assert.Multiple(() =>
+            {
+                Assert.That(MyJob.Signaled.WaitOne(Utils.Timeout), Is.True);
 
-            Assert.AreEqual("By Jake", MyJob.SignaledBody);
+                Assert.That(MyJob.SignaledBody, Is.EqualTo("By Jake"));
+            });
         }
 
         [Test]
@@ -52,9 +55,12 @@
 
             await scheduler.ScheduleJob(jobDetail, trigger).ConfigureAwait(false);
 
-            Assert.IsTrue(MyJob.Signaled.WaitOne(Utils.Timeout));
+            Assert.Multiple(() =>
+            {
+                Assert.That(MyJob.Signaled.WaitOne(Utils.Timeout), Is.True);
 
-            Assert.AreEqual("By Jake", MyJob.SignaledBody);
+                Assert.That(MyJob.SignaledBody, Is.EqualTo("By Jake"));
+            });
         }
 
 

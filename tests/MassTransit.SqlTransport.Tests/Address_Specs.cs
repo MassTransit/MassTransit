@@ -8,42 +8,19 @@ namespace MassTransit.DbTransport.Tests
     public class Specifying_a_host_address
     {
         [Test]
-        public void Should_support_the_simplest_use_case()
-        {
-            var uri = new Uri("db://localhost");
-            var address = new SqlHostAddress(uri);
-
-            Assert.AreEqual("db", address.Scheme);
-            Assert.AreEqual("localhost", address.Host);
-            Assert.AreEqual("/", address.VirtualHost);
-
-            Assert.AreEqual(uri, (Uri)address);
-        }
-
-        [Test]
-        public void Should_support_the_simplest_use_case_option_2()
-        {
-            var uri = new Uri("db://localhost/");
-            var address = new SqlHostAddress(uri);
-
-            Assert.AreEqual("db", address.Scheme);
-            Assert.AreEqual("localhost", address.Host);
-            Assert.AreEqual("/", address.VirtualHost);
-
-            Assert.AreEqual(uri, (Uri)address);
-        }
-
-        [Test]
         public void Should_support_a_virtual_host()
         {
             var uri = new Uri("db://localhost/customer_a");
             var address = new SqlHostAddress(uri);
 
-            Assert.AreEqual("db", address.Scheme);
-            Assert.AreEqual("localhost", address.Host);
-            Assert.AreEqual("customer_a", address.VirtualHost);
+            Assert.Multiple(() =>
+            {
+                Assert.That(address.Scheme, Is.EqualTo("db"));
+                Assert.That(address.Host, Is.EqualTo("localhost"));
+                Assert.That(address.VirtualHost, Is.EqualTo("customer_a"));
 
-            Assert.AreEqual(uri, (Uri)address);
+                Assert.That((Uri)address, Is.EqualTo(uri));
+            });
         }
 
         [Test]
@@ -52,12 +29,15 @@ namespace MassTransit.DbTransport.Tests
             var uri = new Uri("db://localhost/customer_a.billing");
             var address = new SqlHostAddress(uri);
 
-            Assert.AreEqual("db", address.Scheme);
-            Assert.AreEqual("localhost", address.Host);
-            Assert.AreEqual("customer_a", address.VirtualHost);
-            Assert.AreEqual("billing", address.Area);
+            Assert.Multiple(() =>
+            {
+                Assert.That(address.Scheme, Is.EqualTo("db"));
+                Assert.That(address.Host, Is.EqualTo("localhost"));
+                Assert.That(address.VirtualHost, Is.EqualTo("customer_a"));
+                Assert.That(address.Area, Is.EqualTo("billing"));
 
-            Assert.AreEqual(uri, (Uri)address);
+                Assert.That((Uri)address, Is.EqualTo(uri));
+            });
         }
 
         [Test]
@@ -66,12 +46,15 @@ namespace MassTransit.DbTransport.Tests
             var uri = new Uri("db://localhost/customer_a.billing/");
             var address = new SqlHostAddress(uri);
 
-            Assert.AreEqual("db", address.Scheme);
-            Assert.AreEqual("localhost", address.Host);
-            Assert.AreEqual("customer_a", address.VirtualHost);
-            Assert.AreEqual("billing", address.Area);
+            Assert.Multiple(() =>
+            {
+                Assert.That(address.Scheme, Is.EqualTo("db"));
+                Assert.That(address.Host, Is.EqualTo("localhost"));
+                Assert.That(address.VirtualHost, Is.EqualTo("customer_a"));
+                Assert.That(address.Area, Is.EqualTo("billing"));
 
-            Assert.AreEqual(new Uri("db://localhost/customer_a.billing"), (Uri)address);
+                Assert.That((Uri)address, Is.EqualTo(new Uri("db://localhost/customer_a.billing")));
+            });
         }
 
         [Test]
@@ -81,18 +64,47 @@ namespace MassTransit.DbTransport.Tests
 
             var address = new SqlHostAddress(uri);
 
-            Assert.AreEqual("db", address.Scheme);
-            Assert.AreEqual("localhost", address.Host);
-            Assert.AreEqual("customer_a", address.VirtualHost);
-            Assert.AreEqual("billing", address.Area);
+            Assert.Multiple(() =>
+            {
+                Assert.That(address.Scheme, Is.EqualTo("db"));
+                Assert.That(address.Host, Is.EqualTo("localhost"));
+                Assert.That(address.VirtualHost, Is.EqualTo("customer_a"));
+                Assert.That(address.Area, Is.EqualTo("billing"));
 
-            Assert.AreEqual(new Uri("db://localhost/customer_a.billing"), (Uri)address);
+                Assert.That((Uri)address, Is.EqualTo(new Uri("db://localhost/customer_a.billing")));
+            });
         }
 
         [Test]
-        public void Should_throw_on_invalid_virtual_host()
+        public void Should_support_the_simplest_use_case()
         {
-            Assert.That(() => new SqlHostAddress(new Uri("db://localhost/customer-a.billing/input-queue")), Throws.InstanceOf<SqlEndpointAddressException>());
+            var uri = new Uri("db://localhost");
+            var address = new SqlHostAddress(uri);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(address.Scheme, Is.EqualTo("db"));
+                Assert.That(address.Host, Is.EqualTo("localhost"));
+                Assert.That(address.VirtualHost, Is.EqualTo("/"));
+
+                Assert.That((Uri)address, Is.EqualTo(uri));
+            });
+        }
+
+        [Test]
+        public void Should_support_the_simplest_use_case_option_2()
+        {
+            var uri = new Uri("db://localhost/");
+            var address = new SqlHostAddress(uri);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(address.Scheme, Is.EqualTo("db"));
+                Assert.That(address.Host, Is.EqualTo("localhost"));
+                Assert.That(address.VirtualHost, Is.EqualTo("/"));
+
+                Assert.That((Uri)address, Is.EqualTo(uri));
+            });
         }
 
         [Test]
@@ -100,12 +112,142 @@ namespace MassTransit.DbTransport.Tests
         {
             Assert.That(() => new SqlHostAddress(new Uri("db://localhost/customer.16/input-queue")), Throws.InstanceOf<SqlEndpointAddressException>());
         }
+
+        [Test]
+        public void Should_throw_on_invalid_virtual_host()
+        {
+            Assert.That(() => new SqlHostAddress(new Uri("db://localhost/customer-a.billing/input-queue")), Throws.InstanceOf<SqlEndpointAddressException>());
+        }
     }
 
 
     [TestFixture]
     public class Specifying_an_endpoint_address
     {
+        [Test]
+        public void Should_parse_the_instance_name_from_url()
+        {
+            var address = new SqlHostAddress(new Uri("db://localhost/customer_a?instance=instance"));
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(address.Scheme, Is.EqualTo("db"));
+                Assert.That(address.Host, Is.EqualTo("localhost"));
+                Assert.That(address.InstanceName, Is.EqualTo("instance"));
+                Assert.That(address.VirtualHost, Is.EqualTo("customer_a"));
+
+                Assert.That((Uri)address, Is.EqualTo(new Uri("db://localhost/customer_a?instance=instance")));
+            });
+        }
+
+        [Test]
+        public void Should_support_a_virtual_host()
+        {
+            var uri = new Uri("db://localhost/customer_a/input-queue");
+            var address = new SqlEndpointAddress(new SqlHostAddress(new Uri("db://localhost/customer_a")), uri);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(address.Scheme, Is.EqualTo("db"));
+                Assert.That(address.Host, Is.EqualTo("localhost"));
+                Assert.That(address.VirtualHost, Is.EqualTo("customer_a"));
+                Assert.That(address.Name, Is.EqualTo("input-queue"));
+
+                Assert.That((Uri)address, Is.EqualTo(uri));
+            });
+        }
+
+        [Test]
+        public void Should_support_a_virtual_host_and_scope()
+        {
+            var uri = new Uri("db://localhost/customer_a.billing/input-queue");
+            var address = new SqlEndpointAddress(new SqlHostAddress(new Uri("db://localhost/customer_a.billing")), uri);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(address.Scheme, Is.EqualTo("db"));
+                Assert.That(address.Host, Is.EqualTo("localhost"));
+                Assert.That(address.VirtualHost, Is.EqualTo("customer_a"));
+                Assert.That(address.Area, Is.EqualTo("billing"));
+                Assert.That(address.Name, Is.EqualTo("input-queue"));
+
+                Assert.That((Uri)address, Is.EqualTo(uri));
+            });
+        }
+
+        [Test]
+        public void Should_support_a_virtual_host_and_scope_option_2()
+        {
+            var uri = new Uri("db://localhost/customer_a.billing/input-queue");
+            var address = new SqlEndpointAddress(new SqlHostAddress(new Uri("db://localhost/customer_a.billing/")), uri);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(address.Scheme, Is.EqualTo("db"));
+                Assert.That(address.Host, Is.EqualTo("localhost"));
+                Assert.That(address.VirtualHost, Is.EqualTo("customer_a"));
+                Assert.That(address.Area, Is.EqualTo("billing"));
+                Assert.That(address.Name, Is.EqualTo("input-queue"));
+
+                Assert.That((Uri)address, Is.EqualTo(uri));
+            });
+        }
+
+        [Test]
+        public void Should_support_a_virtual_host_and_scope_with_queue()
+        {
+            var address = new SqlEndpointAddress(new SqlHostAddress(new Uri("db://localhost/customer_a.billing/")),
+                new Uri("queue:input-queue"));
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(address.Scheme, Is.EqualTo("db"));
+                Assert.That(address.Host, Is.EqualTo("localhost"));
+                Assert.That(address.VirtualHost, Is.EqualTo("customer_a"));
+                Assert.That(address.Area, Is.EqualTo("billing"));
+                Assert.That(address.Name, Is.EqualTo("input-queue"));
+
+                Assert.That((Uri)address, Is.EqualTo(new Uri("db://localhost/customer_a.billing/input-queue")));
+            });
+        }
+
+        [Test]
+        public void Should_support_a_virtual_host_and_scope_with_topic()
+        {
+            var address = new SqlEndpointAddress(new SqlHostAddress(new Uri("db://localhost/customer_a.billing/")),
+                new Uri("topic:namespace:type"));
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(address.Scheme, Is.EqualTo("db"));
+                Assert.That(address.Host, Is.EqualTo("localhost"));
+                Assert.That(address.VirtualHost, Is.EqualTo("customer_a"));
+                Assert.That(address.Area, Is.Null);
+                Assert.That(address.Name, Is.EqualTo("namespace:type"));
+
+                Assert.That((Uri)address, Is.EqualTo(new Uri("db://localhost/customer_a/namespace:type?type=topic")));
+            });
+        }
+
+        [Test]
+        public void Should_support_the_backslash_in_sql_host_names()
+        {
+            var hostAddress = new SqlHostAddress("localhost", "instance", default, "customer_a", "billing");
+            var address = new SqlEndpointAddress(hostAddress, new Uri("queue:input-queue"));
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(address.Scheme, Is.EqualTo("db"));
+                Assert.That(address.Host, Is.EqualTo("localhost"));
+                Assert.That(address.InstanceName, Is.EqualTo("instance"));
+                Assert.That(address.VirtualHost, Is.EqualTo("customer_a"));
+                Assert.That(address.Area, Is.EqualTo("billing"));
+                Assert.That(address.Name, Is.EqualTo("input-queue"));
+
+                Assert.That((Uri)address, Is.EqualTo(new Uri("db://localhost/customer_a.billing/input-queue?instance=instance")));
+            });
+        }
+
         [Test]
         public void Should_support_the_simplest_use_case()
         {
@@ -119,122 +261,15 @@ namespace MassTransit.DbTransport.Tests
             var uri = new Uri("db://localhost/input-queue");
             var address = new SqlEndpointAddress(new SqlHostAddress(new Uri("db://localhost")), uri);
 
-            Assert.AreEqual("db", address.Scheme);
-            Assert.AreEqual("localhost", address.Host);
-            Assert.AreEqual("/", address.VirtualHost);
-            Assert.AreEqual("input-queue", address.Name);
+            Assert.Multiple(() =>
+            {
+                Assert.That(address.Scheme, Is.EqualTo("db"));
+                Assert.That(address.Host, Is.EqualTo("localhost"));
+                Assert.That(address.VirtualHost, Is.EqualTo("/"));
+                Assert.That(address.Name, Is.EqualTo("input-queue"));
 
-            Assert.AreEqual(uri, (Uri)address);
-        }
-
-        [Test]
-        public void Should_support_a_virtual_host()
-        {
-            var uri = new Uri("db://localhost/customer_a/input-queue");
-            var address = new SqlEndpointAddress(new SqlHostAddress(new Uri("db://localhost/customer_a")), uri);
-
-            Assert.AreEqual("db", address.Scheme);
-            Assert.AreEqual("localhost", address.Host);
-            Assert.AreEqual("customer_a", address.VirtualHost);
-            Assert.AreEqual("input-queue", address.Name);
-
-            Assert.AreEqual(uri, (Uri)address);
-        }
-
-        [Test]
-        public void Should_support_a_virtual_host_and_scope()
-        {
-            var uri = new Uri("db://localhost/customer_a.billing/input-queue");
-            var address = new SqlEndpointAddress(new SqlHostAddress(new Uri("db://localhost/customer_a.billing")), uri);
-
-            Assert.AreEqual("db", address.Scheme);
-            Assert.AreEqual("localhost", address.Host);
-            Assert.AreEqual("customer_a", address.VirtualHost);
-            Assert.AreEqual("billing", address.Area);
-            Assert.AreEqual("input-queue", address.Name);
-
-            Assert.AreEqual(uri, (Uri)address);
-        }
-
-        [Test]
-        public void Should_support_a_virtual_host_and_scope_option_2()
-        {
-            var uri = new Uri("db://localhost/customer_a.billing/input-queue");
-            var address = new SqlEndpointAddress(new SqlHostAddress(new Uri("db://localhost/customer_a.billing/")), uri);
-
-            Assert.AreEqual("db", address.Scheme);
-            Assert.AreEqual("localhost", address.Host);
-            Assert.AreEqual("customer_a", address.VirtualHost);
-            Assert.AreEqual("billing", address.Area);
-            Assert.AreEqual("input-queue", address.Name);
-
-            Assert.AreEqual(uri, (Uri)address);
-        }
-
-        [Test]
-        public void Should_support_a_virtual_host_and_scope_with_queue()
-        {
-            var address = new SqlEndpointAddress(new SqlHostAddress(new Uri("db://localhost/customer_a.billing/")),
-                new Uri("queue:input-queue"));
-
-            Assert.AreEqual("db", address.Scheme);
-            Assert.AreEqual("localhost", address.Host);
-            Assert.AreEqual("customer_a", address.VirtualHost);
-            Assert.AreEqual("billing", address.Area);
-            Assert.AreEqual("input-queue", address.Name);
-
-            Assert.AreEqual(new Uri("db://localhost/customer_a.billing/input-queue"), (Uri)address);
-        }
-
-        [Test]
-        public void Should_support_the_backslash_in_sql_host_names()
-        {
-            var hostAddress = new SqlHostAddress("localhost", "instance", default, "customer_a", "billing");
-            var address = new SqlEndpointAddress(hostAddress, new Uri("queue:input-queue"));
-
-            Assert.AreEqual("db", address.Scheme);
-            Assert.AreEqual("localhost", address.Host);
-            Assert.AreEqual("instance", address.InstanceName);
-            Assert.AreEqual("customer_a", address.VirtualHost);
-            Assert.AreEqual("billing", address.Area);
-            Assert.AreEqual("input-queue", address.Name);
-
-            Assert.AreEqual(new Uri("db://localhost/customer_a.billing/input-queue?instance=instance"), (Uri)address);
-        }
-
-        [Test]
-        public void Should_parse_the_instance_name_from_url()
-        {
-            var address = new SqlHostAddress(new Uri("db://localhost/customer_a?instance=instance"));
-
-            Assert.AreEqual("db", address.Scheme);
-            Assert.AreEqual("localhost", address.Host);
-            Assert.AreEqual("instance", address.InstanceName);
-            Assert.AreEqual("customer_a", address.VirtualHost);
-
-            Assert.AreEqual(new Uri("db://localhost/customer_a?instance=instance"), (Uri)address);
-        }
-
-        [Test]
-        public void Should_support_a_virtual_host_and_scope_with_topic()
-        {
-            var address = new SqlEndpointAddress(new SqlHostAddress(new Uri("db://localhost/customer_a.billing/")),
-                new Uri("topic:namespace:type"));
-
-            Assert.AreEqual("db", address.Scheme);
-            Assert.AreEqual("localhost", address.Host);
-            Assert.AreEqual("customer_a", address.VirtualHost);
-            Assert.IsNull(address.Area);
-            Assert.AreEqual("namespace:type", address.Name);
-
-            Assert.AreEqual(new Uri("db://localhost/customer_a/namespace:type?type=topic"), (Uri)address);
-        }
-
-        [Test]
-        public void Should_throw_on_invalid_virtual_host()
-        {
-            Assert.That(() => new SqlEndpointAddress(new SqlHostAddress(new Uri("db://localhost/customer-a.billing")),
-                new Uri("db://localhost/customer-a.billing/input-queue")), Throws.InstanceOf<SqlEndpointAddressException>());
+                Assert.That((Uri)address, Is.EqualTo(uri));
+            });
         }
 
         [Test]
@@ -242,6 +277,13 @@ namespace MassTransit.DbTransport.Tests
         {
             Assert.That(() => new SqlEndpointAddress(new SqlHostAddress(new Uri("db://localhost/customer.16")),
                 new Uri("db://localhost/customer.16/input-queue")), Throws.InstanceOf<SqlEndpointAddressException>());
+        }
+
+        [Test]
+        public void Should_throw_on_invalid_virtual_host()
+        {
+            Assert.That(() => new SqlEndpointAddress(new SqlHostAddress(new Uri("db://localhost/customer-a.billing")),
+                new Uri("db://localhost/customer-a.billing/input-queue")), Throws.InstanceOf<SqlEndpointAddressException>());
         }
     }
 }

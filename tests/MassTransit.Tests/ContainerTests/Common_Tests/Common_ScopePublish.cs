@@ -30,9 +30,12 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
 
             var published = await _taskCompletionSource.Task;
 
-            Assert.IsTrue(published.TryGetPayload<IServiceProvider>(out var serviceProvider));
+            Assert.Multiple(() =>
+            {
+                Assert.That(published.TryGetPayload<IServiceProvider>(out var serviceProvider), Is.True);
 
-            Assert.AreEqual(serviceProvider, ServiceScope.ServiceProvider);
+                Assert.That(ServiceScope.ServiceProvider, Is.EqualTo(serviceProvider));
+            });
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -66,9 +69,12 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
 
             var published = await _taskCompletionSource.Task;
 
-            Assert.IsTrue(published.TryGetPayload<IServiceProvider>(out var serviceProvider));
+            Assert.Multiple(() =>
+            {
+                Assert.That(published.TryGetPayload<IServiceProvider>(out var serviceProvider), Is.True);
 
-            Assert.AreEqual(serviceProvider, ServiceScope.ServiceProvider);
+                Assert.That(ServiceScope.ServiceProvider, Is.EqualTo(serviceProvider));
+            });
         }
 
         protected override IServiceCollection ConfigureServices(IServiceCollection collection)
@@ -131,7 +137,7 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
             await PublishEndpoint.Publish<SimpleMessageInterface>(new { Name = "test" });
 
             var result = await TaskCompletionSource.Task;
-            Assert.AreEqual(MyId, result);
+            Assert.That(result, Is.EqualTo(MyId));
         }
 
         protected override IServiceCollection ConfigureServices(IServiceCollection collection)
@@ -179,7 +185,7 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
             await PublishEndpoint.Publish<SimpleMessageInterface>(new { Name = "test" });
 
             var result = await TaskCompletionSource.Task;
-            Assert.AreEqual(MyId, result);
+            Assert.That(result, Is.EqualTo(MyId));
         }
 
         protected override IServiceCollection ConfigureServices(IServiceCollection collection)
@@ -249,7 +255,7 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
 
             var consumer = await ConsumerSource.Task.OrCanceled(InMemoryTestHarness.InactivityToken);
 
-            Assert.AreEqual(myId, consumer.MyId);
+            Assert.That(consumer.MyId, Is.EqualTo(myId));
         }
 
         protected override IServiceCollection ConfigureServices(IServiceCollection collection)

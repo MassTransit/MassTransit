@@ -45,20 +45,21 @@
                     await manager1.OnConnectedAsync(connection1).OrTimeout(Harness.TestTimeout);
                     await manager2.OnConnectedAsync(connection2).OrTimeout(Harness.TestTimeout);
 
-                    await manager1.SendAllAsync("Hello", new object[] {new TestObject {TestProperty = "Foo"}}).OrTimeout(Harness.TestTimeout);
+                    await manager1.SendAllAsync("Hello", new object[] { new TestObject { TestProperty = "Foo" } }).OrTimeout(Harness.TestTimeout);
 
-                    Assert.IsTrue(backplane2Harness.All.Consumed.Select<All<MyHub>>().Any());
+                    Assert.That(backplane2Harness.All.Consumed.Select<All<MyHub>>().Any(), Is.True);
 
                     var message = await client2.ReadAsync().OrTimeout() as InvocationMessage;
-                    Assert.NotNull(message);
-                    Assert.AreEqual("Hello", message.Target);
-                    CollectionAssert.AllItemsAreInstancesOfType(message.Arguments, typeof(JsonElement));
+                    Assert.That(message, Is.Not.Null);
+                    Assert.Multiple(() =>
+                    {
+                        Assert.That(message.Target, Is.EqualTo("Hello"));
+                        Assert.That(message.Arguments, Is.All.InstanceOf(typeof(JsonElement)));
+                    });
                     var jsonElement = message.Arguments[0] as JsonElement?;
-                    Assert.NotNull(jsonElement);
-                    Assert.NotNull(jsonElement.Value);
+                    Assert.That(jsonElement, Is.Not.Null);
                     var testProperty = jsonElement.Value.GetProperty("testProperty");
-                    Assert.NotNull(testProperty);;
-                    Assert.AreEqual("Foo", testProperty.GetString());
+                    Assert.That(testProperty.GetString(), Is.EqualTo("Foo"));
                 }
             }
             finally

@@ -25,15 +25,18 @@
 
                 var sagaInstance = _repository[correlationId].Instance;
 
-                Assert.NotNull(rescheduledEvent.Message.NewScheduleTokenId);
-                Assert.AreEqual(sagaInstance.CorrelationId, rescheduledEvent.Message.CorrelationId);
-                Assert.AreEqual(sagaInstance.ScheduleId, rescheduledEvent.Message.NewScheduleTokenId);
+                Assert.Multiple(() =>
+                {
+                    Assert.That(rescheduledEvent.Message.NewScheduleTokenId, Is.Not.Null);
+                    Assert.That(rescheduledEvent.Message.CorrelationId, Is.EqualTo(sagaInstance.CorrelationId));
+                });
+                Assert.That(rescheduledEvent.Message.NewScheduleTokenId, Is.EqualTo(sagaInstance.ScheduleId));
 
                 await InputQueueSendEndpoint.Send(new StopCommand(correlationId));
 
                 Guid? saga = await LoadSagaRepository.ShouldNotContainSaga(correlationId, TestTimeout);
 
-                Assert.IsNull(saga);
+                Assert.That(saga, Is.Null);
             }
 
             InMemorySagaRepository<TestState> _repository;

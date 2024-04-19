@@ -122,9 +122,12 @@ namespace MassTransit.Tests.SagaStateMachineTests
             await Task.Delay(50);
 
             Guid? saga = await _repository.ShouldNotContainSaga(sagaId, TestTimeout);
-            Assert.IsFalse(saga.HasValue);
+            Assert.Multiple(() =>
+            {
+                Assert.That(saga.HasValue, Is.False);
 
-            Assert.AreEqual(sagaId, response.CorrelationId);
+                Assert.That(response.CorrelationId, Is.EqualTo(sagaId));
+            });
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

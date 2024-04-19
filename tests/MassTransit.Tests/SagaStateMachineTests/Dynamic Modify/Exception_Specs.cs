@@ -11,79 +11,79 @@
         [Test]
         public void Should_capture_the_exception_message()
         {
-            Assert.AreEqual("Boom!", _instance.ExceptionMessage);
+            Assert.That(_instance.ExceptionMessage, Is.EqualTo("Boom!"));
         }
 
         [Test]
         public void Should_capture_the_exception_type()
         {
-            Assert.AreEqual(typeof(ApplicationException), _instance.ExceptionType);
+            Assert.That(_instance.ExceptionType, Is.EqualTo(typeof(ApplicationException)));
         }
 
         [Test]
         public void Should_have_called_the_async_if_block()
         {
-            Assert.IsTrue(_instance.CalledThenClauseAsync);
+            Assert.That(_instance.CalledThenClauseAsync, Is.True);
         }
 
         [Test]
         public void Should_have_called_the_async_then_block()
         {
-            Assert.IsTrue(_instance.ThenAsyncShouldBeCalled);
+            Assert.That(_instance.ThenAsyncShouldBeCalled, Is.True);
         }
 
         [Test]
         public void Should_have_called_the_exception_handler()
         {
-            Assert.AreEqual(Failed, _instance.CurrentState);
+            Assert.That(_instance.CurrentState, Is.EqualTo(Failed));
         }
 
         [Test]
         public void Should_have_called_the_false_async_condition_else_block()
         {
-            Assert.IsTrue(_instance.ElseAsyncShouldBeCalled);
+            Assert.That(_instance.ElseAsyncShouldBeCalled, Is.True);
         }
 
         [Test]
         public void Should_have_called_the_false_condition_else_block()
         {
-            Assert.IsTrue(_instance.ElseShouldBeCalled);
+            Assert.That(_instance.ElseShouldBeCalled, Is.True);
         }
 
         [Test]
         public void Should_have_called_the_first_action()
         {
-            Assert.IsTrue(_instance.Called);
+            Assert.That(_instance.Called, Is.True);
         }
 
         [Test]
         public void Should_have_called_the_first_if_block()
         {
-            Assert.IsTrue(_instance.CalledThenClause);
+            Assert.That(_instance.CalledThenClause, Is.True);
         }
 
         [Test]
         public void Should_not_have_called_the_false_async_condition_then_block()
         {
-            Assert.IsFalse(_instance.ThenAsyncShouldNotBeCalled);
+            Assert.That(_instance.ThenAsyncShouldNotBeCalled, Is.False);
         }
 
         [Test]
         public void Should_not_have_called_the_false_condition_then_block()
         {
-            Assert.IsFalse(_instance.ThenShouldNotBeCalled);
+            Assert.That(_instance.ThenShouldNotBeCalled, Is.False);
         }
 
         [Test]
         public void Should_not_have_called_the_regular_exception()
         {
-            Assert.IsFalse(_instance.ShouldNotBeCalled);
+            Assert.That(_instance.ShouldNotBeCalled, Is.False);
         }
 
         [Test]
         public void Should_not_have_called_the_second_action()
         {
-            Assert.IsTrue(_instance.NotCalled);
+            Assert.That(_instance.NotCalled, Is.True);
         }
 
         State Failed;
@@ -147,8 +147,6 @@
         class Instance :
             SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
-
             public Instance()
             {
                 NotCalled = true;
@@ -171,6 +169,7 @@
             public bool ElseAsyncShouldBeCalled { get; set; }
 
             public bool ThenAsyncShouldBeCalled { get; set; }
+            public Guid CorrelationId { get; set; }
         }
     }
 
@@ -181,31 +180,31 @@
         [Test]
         public void Should_capture_the_exception_message()
         {
-            Assert.AreEqual("Boom!", _instance.ExceptionMessage);
+            Assert.That(_instance.ExceptionMessage, Is.EqualTo("Boom!"));
         }
 
         [Test]
         public void Should_capture_the_exception_type()
         {
-            Assert.AreEqual(typeof(ApplicationException), _instance.ExceptionType);
+            Assert.That(_instance.ExceptionType, Is.EqualTo(typeof(ApplicationException)));
         }
 
         [Test]
         public void Should_have_called_the_exception_handler()
         {
-            Assert.AreEqual(Failed, _instance.CurrentState);
+            Assert.That(_instance.CurrentState, Is.EqualTo(Failed));
         }
 
         [Test]
         public void Should_have_called_the_first_action()
         {
-            Assert.IsTrue(_instance.Called);
+            Assert.That(_instance.Called, Is.True);
         }
 
         [Test]
         public void Should_not_have_called_the_second_action()
         {
-            Assert.IsTrue(_instance.NotCalled);
+            Assert.That(_instance.NotCalled, Is.True);
         }
 
         State Failed;
@@ -248,8 +247,6 @@
         class Instance :
             SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
-
             public Instance()
             {
                 NotCalled = true;
@@ -260,6 +257,7 @@
             public Type ExceptionType { get; set; }
             public string ExceptionMessage { get; set; }
             public State CurrentState { get; set; }
+            public Guid CorrelationId { get; set; }
         }
     }
 
@@ -270,7 +268,7 @@
         [Test]
         public void Should_have_called_the_subsequent_action()
         {
-            Assert.IsTrue(_instance.Called);
+            Assert.That(_instance.Called, Is.True);
         }
 
         Instance _instance;
@@ -305,9 +303,9 @@
         class Instance :
             SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public bool Called { get; set; }
             public State CurrentState { get; set; }
+            public Guid CorrelationId { get; set; }
         }
     }
 
@@ -318,67 +316,67 @@
         [Test]
         public void Should_capture_the_exception_message()
         {
-            Assert.AreEqual("Boom!", _instance.ExceptionMessage);
+            Assert.That(_instance.ExceptionMessage, Is.EqualTo("Boom!"));
         }
 
         [Test]
         public void Should_capture_the_exception_type()
         {
-            Assert.AreEqual(typeof(ApplicationException), _instance.ExceptionType);
+            Assert.That(_instance.ExceptionType, Is.EqualTo(typeof(ApplicationException)));
         }
 
         [Test]
         public void Should_have_called_the_async_if_block()
         {
-            Assert.IsTrue(_instance.CalledSecondThenClause);
+            Assert.That(_instance.CalledSecondThenClause, Is.True);
         }
 
         [Test]
         public void Should_have_called_the_exception_handler()
         {
-            Assert.AreEqual(Failed, _instance.CurrentState);
+            Assert.That(_instance.CurrentState, Is.EqualTo(Failed));
         }
 
         [Test]
         public void Should_have_called_the_false_async_condition_else_block()
         {
-            Assert.IsTrue(_instance.ElseAsyncShouldBeCalled);
+            Assert.That(_instance.ElseAsyncShouldBeCalled, Is.True);
         }
 
         [Test]
         public void Should_have_called_the_false_condition_else_block()
         {
-            Assert.IsTrue(_instance.ElseShouldBeCalled);
+            Assert.That(_instance.ElseShouldBeCalled, Is.True);
         }
 
         [Test]
         public void Should_have_called_the_first_action()
         {
-            Assert.IsTrue(_instance.Called);
+            Assert.That(_instance.Called, Is.True);
         }
 
         [Test]
         public void Should_have_called_the_first_if_block()
         {
-            Assert.IsTrue(_instance.CalledThenClause);
+            Assert.That(_instance.CalledThenClause, Is.True);
         }
 
         [Test]
         public void Should_not_have_called_the_false_async_condition_then_block()
         {
-            Assert.IsFalse(_instance.ThenAsyncShouldNotBeCalled);
+            Assert.That(_instance.ThenAsyncShouldNotBeCalled, Is.False);
         }
 
         [Test]
         public void Should_not_have_called_the_false_condition_then_block()
         {
-            Assert.IsFalse(_instance.ThenShouldNotBeCalled);
+            Assert.That(_instance.ThenShouldNotBeCalled, Is.False);
         }
 
         [Test]
         public void Should_not_have_called_the_second_action()
         {
-            Assert.IsTrue(_instance.NotCalled);
+            Assert.That(_instance.NotCalled, Is.True);
         }
 
         State Failed;
@@ -435,8 +433,6 @@
         class Instance :
             SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
-
             public Instance()
             {
                 NotCalled = true;
@@ -455,6 +451,7 @@
             public bool ElseShouldBeCalled { get; set; }
             public bool ThenAsyncShouldNotBeCalled { get; set; }
             public bool ElseAsyncShouldBeCalled { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 

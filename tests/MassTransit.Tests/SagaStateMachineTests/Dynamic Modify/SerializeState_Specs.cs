@@ -23,15 +23,12 @@
                     .State("False", out False)
                     .Event("Thing", out Thing)
                     .During(builder.Initial)
-                        .When(Thing, context => context.Data.Condition, b => b.TransitionTo(True))
-                        .When(Thing, context => !context.Data.Condition, b => b.TransitionTo(False))
+                    .When(Thing, context => context.Data.Condition, b => b.TransitionTo(True))
+                    .When(Thing, context => !context.Data.Condition, b => b.TransitionTo(False))
                 );
 
-            await machine.RaiseEvent(instance, Thing, new Data
-            {
-                Condition = true
-            });
-            Assert.AreEqual(True, instance.CurrentState);
+            await machine.RaiseEvent(instance, Thing, new Data { Condition = true });
+            Assert.That(instance.CurrentState, Is.EqualTo(True));
 
             var serializer = new JsonStateSerializer<StateMachine<Instance>, Instance>(machine);
 
@@ -40,15 +37,15 @@
             Console.WriteLine("Body: {0}", body);
             var reInstance = serializer.Deserialize<Instance>(body);
 
-            Assert.AreEqual(True, reInstance.CurrentState);
+            Assert.That(reInstance.CurrentState, Is.EqualTo(True));
         }
 
 
         class Instance :
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public State CurrentState { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 

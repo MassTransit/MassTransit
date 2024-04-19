@@ -112,7 +112,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
             ConsumeContext<PingMessage> received = await _handler;
 
-            Assert.AreEqual(EncryptedMessageSerializerV2.EncryptedContentType, received.ReceiveContext.ContentType);
+            Assert.That(received.ReceiveContext.ContentType, Is.EqualTo(EncryptedMessageSerializerV2.EncryptedContentType));
         }
 
         Task<ConsumeContext<PingMessage>> _handler;

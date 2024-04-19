@@ -1,9 +1,9 @@
 ﻿namespace MassTransit.Tests.SagaStateMachineTests.Dynamic_Modify
 {
     using System;
-    using Visualizer;
     using NUnit.Framework;
     using SagaStateMachine;
+    using Visualizer;
 
 
     [TestFixture(Category = "Dynamic Modify")]
@@ -26,7 +26,7 @@
 
             var expected = ExpectedGraphvizFile.Replace("\r", "").Replace("\n", Environment.NewLine);
 
-            Assert.AreEqual(expected, output);
+            Assert.That(output, Is.EqualTo(expected));
         }
 
         [Test]
@@ -40,7 +40,7 @@
 
             var expected = ExpectedMermaidFile.Replace("\r", "").Replace("\n", Environment.NewLine);
 
-            Assert.AreEqual(expected, output);
+            Assert.That(output, Is.EqualTo(expected));
         }
 
         StateMachine<Instance> _machine;
@@ -60,18 +60,18 @@
                     .Event("Finished", out Event Finished)
                     .Event<RestartData>("Restart", out Event<RestartData> Restart)
                     .During(b.Initial)
-                        .When(Initialized, (binder) => binder
-                            .TransitionTo(Running)
-                            .Catch<Exception>(h => h.TransitionTo(Failed))
-                        )
+                    .When(Initialized, (binder) => binder
+                        .TransitionTo(Running)
+                        .Catch<Exception>(h => h.TransitionTo(Failed))
+                    )
                     .During(Running)
-                        .When(Finished, (binder) => binder.TransitionTo(b.Final))
-                        .When(Suspend, (binder) => binder.TransitionTo(Suspended))
-                        .Ignore(Resume)
+                    .When(Finished, (binder) => binder.TransitionTo(b.Final))
+                    .When(Suspend, (binder) => binder.TransitionTo(Suspended))
+                    .Ignore(Resume)
                     .During(Suspended)
-                        .When(Resume, b => b.TransitionTo(Running))
+                    .When(Resume, b => b.TransitionTo(Running))
                     .During(Failed)
-                        .When(Restart, context => context.Data.Name != null, b => b.TransitionTo(Running))
+                    .When(Restart, context => context.Data.Name != null, b => b.TransitionTo(Running))
                 );
 
             _graph = _machine.GetGraph();
@@ -119,10 +119,10 @@
 
 
         class Instance :
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public State CurrentState { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 

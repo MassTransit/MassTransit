@@ -175,9 +175,12 @@
 
                 Response<Status, InstanceNotFound> response = await statusClient.GetResponse<Status, InstanceNotFound>(new CheckStatus("A"));
 
-                Assert.That(response.Is(out MassTransit.Response<Status> status), Is.True);
+                Assert.Multiple(() =>
+                {
+                    Assert.That(response.Is(out MassTransit.Response<Status> status), Is.True);
 
-                Assert.AreEqual("A", status.Message.ServiceName);
+                    Assert.That(status.Message.ServiceName, Is.EqualTo("A"));
+                });
             }
 
             readonly string _databaseName;
@@ -237,7 +240,7 @@
 
                 MassTransit.Response<Status> result = await status;
 
-                Assert.AreEqual("A", result.Message.ServiceName);
+                Assert.That(result.Message.ServiceName, Is.EqualTo("A"));
 
                 Assert.That(async () => await notFound, Throws.TypeOf<TaskCanceledException>());
             }
@@ -254,7 +257,7 @@
 
                 MassTransit.Response<InstanceNotFound> result = await notFound;
 
-                Assert.AreEqual("Z", result.Message.ServiceName);
+                Assert.That(result.Message.ServiceName, Is.EqualTo("Z"));
 
                 Assert.That(async () => await status, Throws.TypeOf<TaskCanceledException>());
             }

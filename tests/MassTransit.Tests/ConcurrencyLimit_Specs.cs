@@ -33,7 +33,7 @@ namespace MassTransit.Tests
 
             await _complete.Task;
 
-            Assert.AreEqual(2, _consumer.MaxDeliveryCount);
+            Assert.That(_consumer.MaxDeliveryCount, Is.EqualTo(2));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -119,7 +119,7 @@ namespace MassTransit.Tests
 
             await _complete.Task;
 
-            Assert.AreEqual(2, ConsumerSaga.MaxDeliveryCount);
+            Assert.That(ConsumerSaga.MaxDeliveryCount, Is.EqualTo(2));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

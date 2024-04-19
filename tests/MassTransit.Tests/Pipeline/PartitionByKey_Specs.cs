@@ -19,7 +19,7 @@
 
             var count = await _completed.Task;
 
-            Assert.AreEqual(Limit, count);
+            Assert.That(count, Is.EqualTo(Limit));
 
             Console.WriteLine("Processed: {0}", count);
         }
@@ -81,7 +81,7 @@
 
             var count = await _completed.Task;
 
-            Assert.AreEqual(Limit, count);
+            Assert.That(count, Is.EqualTo(Limit));
 
             Console.WriteLine("Processed: {0}", count);
         }

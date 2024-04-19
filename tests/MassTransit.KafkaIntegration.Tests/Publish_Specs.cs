@@ -56,9 +56,12 @@ namespace MassTransit.KafkaIntegration.Tests
             var result = await provider.GetTask<ConsumeContext<KafkaMessage>>();
             var ping = await provider.GetTask<ConsumeContext<BusPing>>();
 
-            Assert.AreEqual(result.CorrelationId, ping.InitiatorId);
+            Assert.Multiple(() =>
+            {
+                Assert.That(ping.InitiatorId, Is.EqualTo(result.CorrelationId));
 
-            Assert.That(ping.SourceAddress, Is.EqualTo(new Uri($"loopback://localhost/{KafkaTopicAddress.PathPrefix}/{Topic}")));
+                Assert.That(ping.SourceAddress, Is.EqualTo(new Uri($"loopback://localhost/{KafkaTopicAddress.PathPrefix}/{Topic}")));
+            });
         }
 
 

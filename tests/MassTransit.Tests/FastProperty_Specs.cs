@@ -25,7 +25,7 @@ namespace MassTransit.Tests
             const string expectedValue = "Chris";
             fastProperty.Set(instance, expectedValue);
 
-            Assert.AreEqual(expectedValue, fastProperty.Get(instance));
+            Assert.That(fastProperty.Get(instance), Is.EqualTo(expectedValue));
         }
 
         [Test]
@@ -38,7 +38,7 @@ namespace MassTransit.Tests
             const string expectedValue = "Chris";
             cache["Name"].Set(instance, expectedValue);
 
-            Assert.AreEqual(expectedValue, instance.Name);
+            Assert.That(instance.Name, Is.EqualTo(expectedValue));
         }
 
 

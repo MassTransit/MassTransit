@@ -76,11 +76,14 @@ namespace MassTransit.EventHubIntegration.Tests
                 ConsumeContext<EventHubMessage> result = await taskCompletionSource.Task;
                 ConsumeContext<BusPing> ping = await pingTaskCompletionSource.Task;
 
-                Assert.AreEqual(message.Text, result.Message.Text);
+                Assert.Multiple(() =>
+                {
+                    Assert.That(result.Message.Text, Is.EqualTo(message.Text));
 
-                Assert.AreEqual(result.CorrelationId, ping.InitiatorId);
-                Assert.That(ping.SourceAddress,
-                    Is.EqualTo(new Uri($"loopback://localhost/{EventHubEndpointAddress.PathPrefix}/{Configuration.EventHubName}/{consumerGroup}")));
+                    Assert.That(ping.InitiatorId, Is.EqualTo(result.CorrelationId));
+                    Assert.That(ping.SourceAddress,
+                        Is.EqualTo(new Uri($"loopback://localhost/{EventHubEndpointAddress.PathPrefix}/{Configuration.EventHubName}/{consumerGroup}")));
+                });
             }
             finally
             {

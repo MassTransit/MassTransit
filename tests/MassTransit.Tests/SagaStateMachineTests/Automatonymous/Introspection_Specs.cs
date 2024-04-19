@@ -13,7 +13,7 @@ namespace MassTransit.Tests.SagaStateMachineTests.Automatonymous
         [Test]
         public void The_machine_shoud_report_its_instance_type()
         {
-            Assert.AreEqual(typeof(Instance), ((StateMachine<Instance>)_machine).InstanceType);
+            Assert.That(((StateMachine<Instance>)_machine).InstanceType, Is.EqualTo(typeof(Instance)));
         }
 
         [Test]
@@ -21,29 +21,32 @@ namespace MassTransit.Tests.SagaStateMachineTests.Automatonymous
         {
             List<Event> events = _machine.Events.ToList();
 
-            Assert.AreEqual(4, events.Count);
-            Assert.Contains(_machine.Ignored, events);
-            Assert.Contains(_machine.Handshake, events);
-            Assert.Contains(_machine.Hello, events);
-            Assert.Contains(_machine.YelledAt, events);
+            Assert.That(events, Has.Count.EqualTo(4));
+            Assert.That(events, Does.Contain(_machine.Ignored));
+            Assert.That(events, Does.Contain(_machine.Handshake));
+            Assert.That(events, Does.Contain(_machine.Hello));
+            Assert.That(events, Does.Contain(_machine.YelledAt));
         }
 
         [Test]
         public void The_machine_should_expose_all_states()
         {
-            Assert.AreEqual(5, ((StateMachine)_machine).States.Count());
-            Assert.Contains(_machine.Initial, _machine.States.ToList());
-            Assert.Contains(_machine.Final, _machine.States.ToList());
-            Assert.Contains(_machine.Greeted, _machine.States.ToList());
-            Assert.Contains(_machine.Loved, _machine.States.ToList());
-            Assert.Contains(_machine.Pissed, _machine.States.ToList());
+            Assert.Multiple(() =>
+            {
+                Assert.That(((StateMachine)_machine).States.Count(), Is.EqualTo(5));
+                Assert.That(_machine.States.ToList(), Does.Contain(_machine.Initial));
+            });
+            Assert.That(_machine.States.ToList(), Does.Contain(_machine.Final));
+            Assert.That(_machine.States.ToList(), Does.Contain(_machine.Greeted));
+            Assert.That(_machine.States.ToList(), Does.Contain(_machine.Loved));
+            Assert.That(_machine.States.ToList(), Does.Contain(_machine.Pissed));
         }
 
         [Test]
         public async Task The_next_events_should_be_known()
         {
             List<Event> events = (await _machine.NextEvents(_instance)).ToList();
-            Assert.AreEqual(3, events.Count);
+            Assert.That(events, Has.Count.EqualTo(3));
         }
 
         Instance _instance;

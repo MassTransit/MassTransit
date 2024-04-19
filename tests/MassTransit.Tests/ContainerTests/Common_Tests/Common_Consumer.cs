@@ -837,10 +837,10 @@
             var scope = consumerContext.GetPayload<IServiceScope>();
 
             ConsumerConsumeContext<EasyConsumer, EasyMessage> consumerMessageContext = await _consumerMessageCompletion.Task;
-            Assert.AreEqual(scope, consumerMessageContext.GetPayload<IServiceScope>());
+            Assert.That(consumerMessageContext.GetPayload<IServiceScope>(), Is.EqualTo(scope));
 
             ConsumeContext<EasyMessage> messageContext = await MessageCompletion.Task;
-            Assert.AreEqual(scope, messageContext.GetPayload<IServiceScope>());
+            Assert.That(messageContext.GetPayload<IServiceScope>(), Is.EqualTo(scope));
         }
 
         protected override IServiceCollection ConfigureServices(IServiceCollection collection)

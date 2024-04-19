@@ -10,19 +10,19 @@
         [Test]
         public void Should_be_running()
         {
-            Assert.AreEqual(Running, _instance.CurrentState);
+            Assert.That(_instance.CurrentState, Is.EqualTo(Running));
         }
 
         [Test]
         public void Should_have_entered_running()
         {
-            Assert.AreEqual(Running, _instance.LastEntered);
+            Assert.That(_instance.LastEntered, Is.EqualTo(Running));
         }
 
         [Test]
         public void Should_have_left_initial()
         {
-            Assert.AreEqual(_machine.Initial, _instance.LastLeft);
+            Assert.That(_instance.LastLeft, Is.EqualTo(_machine.Initial));
         }
 
         State Running;
@@ -43,9 +43,9 @@
                     .Event("Finish", out Finish)
                     .InstanceState(b => b.CurrentState)
                     .During(builder.Initial)
-                        .When(Initialized, b => b.TransitionTo(Running))
+                    .When(Initialized, b => b.TransitionTo(Running))
                     .During(Running)
-                        .When(Finish, b => b.Finalize())
+                    .When(Finish, b => b.Finalize())
                     .BeforeEnterAny(b => b.Then(context => context.Instance.LastEntered = context.Data))
                     .AfterLeaveAny(b => b.Then(context => context.Instance.LastLeft = context.Data))
                 );
@@ -56,13 +56,13 @@
 
 
         class Instance :
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public State CurrentState { get; set; }
 
             public State LastEntered { get; set; }
             public State LastLeft { get; set; }
+            public Guid CorrelationId { get; set; }
         }
     }
 }

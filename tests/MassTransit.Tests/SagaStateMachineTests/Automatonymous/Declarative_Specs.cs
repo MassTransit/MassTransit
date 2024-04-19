@@ -10,8 +10,11 @@
         [Test]
         public void Should_handle_both_states()
         {
-            Assert.AreEqual(_top.Greeted, _instance.Top);
-            Assert.AreEqual(_bottom.Ignored, _instance.Bottom);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_instance.Top, Is.EqualTo(_top.Greeted));
+                Assert.That(_instance.Bottom, Is.EqualTo(_bottom.Ignored));
+            });
         }
 
         MyState _instance;
@@ -26,24 +29,18 @@
             _top = new TopInstanceStateMachine();
             _bottom = new BottomInstanceStateMachine();
 
-            _top.RaiseEvent(_instance, _top.Initialized, new Init
-            {
-                Value = "Hello"
-            }).Wait();
+            _top.RaiseEvent(_instance, _top.Initialized, new Init { Value = "Hello" }).Wait();
 
-            _bottom.RaiseEvent(_instance, _bottom.Initialized, new Init
-            {
-                Value = "Goodbye"
-            }).Wait();
+            _bottom.RaiseEvent(_instance, _bottom.Initialized, new Init { Value = "Goodbye" }).Wait();
         }
 
 
         class MyState :
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public State Top { get; set; }
             public State Bottom { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 

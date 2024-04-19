@@ -259,7 +259,7 @@ namespace MassTransit.KafkaIntegration.Tests
                     groupInfo = adminClient.ListGroup(nameof(MultiBus_ReBalance_Specs), TimeSpan.FromSeconds(5));
                 }
 
-                Assert.AreEqual(groupInfo.Members.Count, 2); // this fails, second instance consumer assigned to all partitions
+                Assert.That(groupInfo.Members.Count, Is.EqualTo(2)); // this fails, second instance consumer assigned to all partitions
 
                 await secondBus.BusControl.StopAsync(TestCancellationToken);
             }
@@ -402,7 +402,7 @@ namespace MassTransit.KafkaIntegration.Tests
                     groupInfo = adminClient.ListGroup(nameof(MultiBus_ConcurrentConsumers_ReBalance_Specs), TimeSpan.FromSeconds(5));
                 }
 
-                Assert.AreEqual(groupInfo.Members.Count, 6); // this fails, second instance consumer assigned to all partitions
+                Assert.That(groupInfo.Members.Count, Is.EqualTo(6)); // this fails, second instance consumer assigned to all partitions
 
                 await secondBus.BusControl.StopAsync(TestCancellationToken);
             }

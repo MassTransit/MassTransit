@@ -47,10 +47,13 @@
 
             var identity = await _header.Task;
 
-            Assert.AreEqual(27, identity.IdentityId);
-            Assert.AreEqual("AAD:Claims", identity.IdentityType);
-            Assert.AreEqual(3, identity.Claims.Length);
-            Assert.AreEqual("Azure", identity.Claims[0].Issuer);
+            Assert.Multiple(() =>
+            {
+                Assert.That(identity.IdentityId, Is.EqualTo(27));
+                Assert.That(identity.IdentityType, Is.EqualTo("AAD:Claims"));
+                Assert.That(identity.Claims, Has.Length.EqualTo(3));
+            });
+            Assert.That(identity.Claims[0].Issuer, Is.EqualTo("Azure"));
         }
 
         Task<ConsumeContext<PingMessage>> _handled;
@@ -127,11 +130,14 @@
 
             ConsumeContext<PingMessage> context = await _handled;
 
-            Assert.AreEqual(_now, context.Headers.Get("Now", default(DateTime?)));
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.Headers.Get("Now", default(DateTime?)), Is.EqualTo(_now));
 
-            Assert.AreEqual(_later, context.Headers.Get("Later", default(DateTimeOffset?)));
+                Assert.That(context.Headers.Get("Later", default(DateTimeOffset?)), Is.EqualTo(_later));
 
-            Assert.AreEqual(_sometime, context.Headers.Get("Sometime", default(DateTime?)));
+                Assert.That(context.Headers.Get("Sometime", default(DateTime?)), Is.EqualTo(_sometime));
+            });
         }
 
         Task<ConsumeContext<PingMessage>> _handled;

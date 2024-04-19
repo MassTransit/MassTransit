@@ -18,9 +18,9 @@
         {
             ConsumeContext<RoutingSlipCompleted> context = await _completed;
 
-            Assert.AreEqual(_trackingNumber, context.Message.TrackingNumber);
+            Assert.That(context.Message.TrackingNumber, Is.EqualTo(_trackingNumber));
 
-            Assert.AreEqual("Used", context.GetVariable<string>("Test"));
+            Assert.That(context.GetVariable<string>("Test"), Is.EqualTo("Used"));
         }
 
         [Test]
@@ -28,7 +28,7 @@
         {
             ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
 
-            Assert.AreEqual(_trackingNumber, context.Message.TrackingNumber);
+            Assert.That(context.Message.TrackingNumber, Is.EqualTo(_trackingNumber));
         }
 
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
@@ -75,7 +75,7 @@
         {
             ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
 
-            Assert.AreEqual(_trackingNumber, context.Message.TrackingNumber);
+            Assert.That(context.Message.TrackingNumber, Is.EqualTo(_trackingNumber));
         }
 
         [Test]
@@ -83,9 +83,12 @@
         {
             ConsumeContext<RoutingSlipCompleted> context = await _completed;
 
-            Assert.AreEqual(_trackingNumber, context.Message.TrackingNumber);
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.Message.TrackingNumber, Is.EqualTo(_trackingNumber));
 
-            Assert.AreEqual("Used", context.GetVariable<string>("Test"));
+                Assert.That(context.GetVariable<string>("Test"), Is.EqualTo("Used"));
+            });
         }
 
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
@@ -128,7 +131,7 @@
         {
             ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
 
-            Assert.AreEqual(_trackingNumber, context.Message.TrackingNumber);
+            Assert.That(context.Message.TrackingNumber, Is.EqualTo(_trackingNumber));
         }
 
         [Test]
@@ -136,9 +139,12 @@
         {
             ConsumeContext<RoutingSlipCompleted> context = await _completed;
 
-            Assert.AreEqual(_trackingNumber, context.Message.TrackingNumber);
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.Message.TrackingNumber, Is.EqualTo(_trackingNumber));
 
-            Assert.AreEqual("Used", context.GetVariable<string>("Test"));
+                Assert.That(context.GetVariable<string>("Test"), Is.EqualTo("Used"));
+            });
         }
 
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
@@ -185,9 +191,12 @@
         {
             ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
 
-            Assert.AreEqual(_trackingNumber, context.Message.TrackingNumber);
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.Message.TrackingNumber, Is.EqualTo(_trackingNumber));
 
-            Assert.That(context.GetArgument<Guid>("GuidValue"), Is.EqualTo(_trackingNumber));
+                Assert.That(context.GetArgument<Guid>("GuidValue"), Is.EqualTo(_trackingNumber));
+            });
         }
 
         [Test]
@@ -195,9 +204,12 @@
         {
             ConsumeContext<RoutingSlipCompleted> context = await _completed;
 
-            Assert.AreEqual(_trackingNumber, context.Message.TrackingNumber);
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.Message.TrackingNumber, Is.EqualTo(_trackingNumber));
 
-            Assert.AreEqual("Used", context.GetVariable<string>("Test"));
+                Assert.That(context.GetVariable<string>("Test"), Is.EqualTo("Used"));
+            });
         }
 
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;

@@ -69,8 +69,11 @@ namespace MassTransit.EventHubIntegration.Tests
 
                 ConsumeContext<EventHubMessage> result = await taskCompletionSource.Task;
 
-                Assert.AreEqual("Key: ABC123", result.Message.Text);
-                Assert.AreEqual(correlationId, result.InitiatorId);
+                Assert.Multiple(() =>
+                {
+                    Assert.That(result.Message.Text, Is.EqualTo("Key: ABC123"));
+                    Assert.That(result.InitiatorId, Is.EqualTo(correlationId));
+                });
             }
             finally
             {

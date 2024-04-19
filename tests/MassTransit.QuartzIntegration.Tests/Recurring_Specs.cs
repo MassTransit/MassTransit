@@ -24,7 +24,7 @@
             await _done;
 
             var countBeforeCancel = _count;
-            Assert.AreEqual(8, _count, "Expected to see 8 interval messages");
+            Assert.That(_count, Is.EqualTo(8), "Expected to see 8 interval messages");
 
             await Bus.CancelScheduledRecurringSend(scheduledRecurringMessage);
 
@@ -32,7 +32,7 @@
 
             await _doneAgain;
 
-            Assert.AreEqual(countBeforeCancel, _count, "Expected to see the count matches.");
+            Assert.That(_count, Is.EqualTo(countBeforeCancel), "Expected to see the count matches.");
         }
 
         [Test]
@@ -66,13 +66,16 @@
 
             await _done;
 
-            Assert.Greater(_count, 0, "Expected to see at least one interval");
+            Assert.Multiple(() =>
+            {
+                Assert.That(_count, Is.GreaterThan(0), "Expected to see at least one interval");
 
 
-            Assert.IsNotNull(_lastInterval.Headers.Get<DateTimeOffset>(MessageHeaders.Quartz.Scheduled));
-            Assert.IsNotNull(_lastInterval.Headers.Get<DateTimeOffset>(MessageHeaders.Quartz.Sent));
-            Assert.IsNotNull(_lastInterval.Headers.Get<DateTimeOffset>(MessageHeaders.Quartz.NextScheduled));
-            Assert.IsNotNull(_lastInterval.Headers.Get<DateTimeOffset>(MessageHeaders.Quartz.PreviousSent));
+                Assert.That(_lastInterval.Headers.Get<DateTimeOffset>(MessageHeaders.Quartz.Scheduled), Is.Not.Null);
+                Assert.That(_lastInterval.Headers.Get<DateTimeOffset>(MessageHeaders.Quartz.Sent), Is.Not.Null);
+                Assert.That(_lastInterval.Headers.Get<DateTimeOffset>(MessageHeaders.Quartz.NextScheduled), Is.Not.Null);
+                Assert.That(_lastInterval.Headers.Get<DateTimeOffset>(MessageHeaders.Quartz.PreviousSent), Is.Not.Null);
+            });
 
             Console.WriteLine("{0}", _lastInterval.Headers.Get<DateTimeOffset>(MessageHeaders.Quartz.NextScheduled));
         }
@@ -87,7 +90,7 @@
 
             await _done;
 
-            Assert.AreEqual(8, _count, "Expected to see 8 interval messages");
+            Assert.That(_count, Is.EqualTo(8), "Expected to see 8 interval messages");
         }
 
         [Test]
@@ -103,7 +106,7 @@
             await _done;
 
             var countBeforeCancel = _count;
-            Assert.AreEqual(8, _count, "Expected to see 8 interval messages");
+            Assert.That(_count, Is.EqualTo(8), "Expected to see 8 interval messages");
 
             await Bus.PauseScheduledRecurringSend(scheduledRecurringMessage);
 
@@ -111,7 +114,7 @@
 
             await _doneAgain;
 
-            Assert.AreEqual(countBeforeCancel, _count, "Expected to see the count matches.");
+            Assert.That(_count, Is.EqualTo(countBeforeCancel), "Expected to see the count matches.");
         }
 
         Task<ConsumeContext<Done>> _done;

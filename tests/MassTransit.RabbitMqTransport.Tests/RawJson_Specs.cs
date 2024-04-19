@@ -32,9 +32,12 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             ConsumeContext<RawContract> received = await _receivedA;
 
-            Assert.AreEqual(message.Name, received.Message.Name);
-            Assert.AreEqual(message.Value, received.Message.Value);
-            Assert.AreEqual(message.Timestamp, received.Message.Timestamp);
+            Assert.Multiple(() =>
+            {
+                Assert.That(received.Message.Name, Is.EqualTo(message.Name));
+                Assert.That(received.Message.Value, Is.EqualTo(message.Value));
+                Assert.That(received.Message.Timestamp, Is.EqualTo(message.Timestamp));
+            });
         }
 
         Task<ConsumeContext<RawContract>> _receivedA;
@@ -106,9 +109,12 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             ConsumeContext<RawContract> received = await _receivedA;
 
-            Assert.AreEqual(message.Name, received.Message.Name);
-            Assert.AreEqual(message.Value, received.Message.Value);
-            Assert.AreEqual(message.Timestamp, received.Message.Timestamp);
+            Assert.Multiple(() =>
+            {
+                Assert.That(received.Message.Name, Is.EqualTo(message.Name));
+                Assert.That(received.Message.Value, Is.EqualTo(message.Value));
+                Assert.That(received.Message.Timestamp, Is.EqualTo(message.Timestamp));
+            });
         }
 
         Task<ConsumeContext<RawContract>> _receivedA;

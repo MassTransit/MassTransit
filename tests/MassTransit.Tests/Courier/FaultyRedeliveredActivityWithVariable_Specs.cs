@@ -12,20 +12,6 @@ namespace MassTransit.Tests.Courier
     public class FaultyRedeliveredActivityVariables_Specs :
         InMemoryActivityTestFixture
     {
-        class MessageVariables
-        {
-            public string Test { get; set; }
-        }
-
-
-        class MessageWithVariables
-        {
-            public MessageVariables Variables { get; set; }
-        }
-
-
-        TaskCompletionSource<ConsumeContext<MessageWithVariables>> _received;
-
         [Test]
         public async Task Should_publish_the_completed_event_and_redeliver()
         {
@@ -43,8 +29,23 @@ namespace MassTransit.Tests.Courier
             await completed;
 
             var message = (await _received.Task).Message;
-            Assert.AreEqual("Data", message.Variables.Test);
+            Assert.That(message.Variables.Test, Is.EqualTo("Data"));
         }
+
+
+        class MessageVariables
+        {
+            public string Test { get; set; }
+        }
+
+
+        class MessageWithVariables
+        {
+            public MessageVariables Variables { get; set; }
+        }
+
+
+        TaskCompletionSource<ConsumeContext<MessageWithVariables>> _received;
 
         protected override void SetupActivities(BusTestHarness testHarness)
         {

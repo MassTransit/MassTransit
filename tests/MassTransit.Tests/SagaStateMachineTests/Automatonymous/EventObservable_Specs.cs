@@ -10,13 +10,13 @@
         [Test]
         public void Should_have_raised_the_initialized_event()
         {
-            Assert.AreEqual(_machine.Initialized, _observer.Events[0].Event);
+            Assert.That(_observer.Events[0].Event, Is.EqualTo(_machine.Initialized));
         }
 
         [Test]
         public void Should_raise_the_event()
         {
-            Assert.AreEqual(1, _observer.Events.Count);
+            Assert.That(_observer.Events.Count, Is.EqualTo(1));
         }
 
         Instance _instance;
@@ -36,10 +36,10 @@
 
 
         class Instance :
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public State CurrentState { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 

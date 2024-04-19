@@ -11,25 +11,25 @@
         [Test]
         public void It_should_capture_a_simple_event_name()
         {
-            Assert.AreEqual("Hello", _machine.Hello.Name);
+            Assert.That(_machine.Hello.Name, Is.EqualTo("Hello"));
         }
 
         [Test]
         public void It_should_capture_the_data_event_name()
         {
-            Assert.AreEqual("EventA", _machine.EventA.Name);
+            Assert.That(_machine.EventA.Name, Is.EqualTo("EventA"));
         }
 
         [Test]
         public void It_should_create_the_proper_event_type_for_data_events()
         {
-            Assert.IsInstanceOf<MessageEvent<A>>(_machine.EventA);
+            Assert.That(_machine.EventA, Is.InstanceOf<MessageEvent<A>>());
         }
 
         [Test]
         public void It_should_create_the_proper_event_type_for_simple_events()
         {
-            Assert.IsInstanceOf<TriggerEvent>(_machine.Hello);
+            Assert.That(_machine.Hello, Is.InstanceOf<TriggerEvent>());
         }
 
         TestStateMachine _machine;

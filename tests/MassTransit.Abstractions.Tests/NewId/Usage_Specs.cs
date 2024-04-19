@@ -12,7 +12,7 @@
         {
             var newId = new NewId();
 
-            Assert.AreEqual("00000000-0000-0000-0000-000000000000", newId.ToString());
+            Assert.That(newId.ToString(), Is.EqualTo("00000000-0000-0000-0000-000000000000"));
         }
 
         [Test]
@@ -20,7 +20,7 @@
         {
             var newId = new NewId();
 
-            Assert.AreEqual("{00000000-0000-0000-0000-000000000000}", newId.ToString("B"));
+            Assert.That(newId.ToString("B"), Is.EqualTo("{00000000-0000-0000-0000-000000000000}"));
         }
 
         [Test]
@@ -28,7 +28,7 @@
         {
             var newId = new NewId();
 
-            Assert.AreEqual("00000000000000000000000000000000", newId.ToString("N"));
+            Assert.That(newId.ToString("N"), Is.EqualTo("00000000000000000000000000000000"));
         }
 
         [Test]
@@ -36,7 +36,7 @@
         {
             var newId = new NewId();
 
-            Assert.AreEqual("(00000000-0000-0000-0000-000000000000)", newId.ToString("P"));
+            Assert.That(newId.ToString("P"), Is.EqualTo("(00000000-0000-0000-0000-000000000000)"));
         }
 
         [Test]
@@ -49,7 +49,7 @@
             var gs = g.ToString("d");
             var ns = n.ToString("d");
 
-            Assert.AreEqual(gs, ns);
+            Assert.That(ns, Is.EqualTo(gs));
         }
     }
 }

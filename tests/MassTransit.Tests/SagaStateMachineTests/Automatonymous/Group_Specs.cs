@@ -15,8 +15,11 @@
         [Test]
         public void Should_have_captured_initial_data()
         {
-            Assert.AreEqual("Audi", _instance.VehicleMake);
-            Assert.AreEqual("A6", _instance.VehicleModel);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_instance.VehicleMake, Is.EqualTo("Audi"));
+                Assert.That(_instance.VehicleModel, Is.EqualTo("A6"));
+            });
         }
 
         PitStop _machine;
@@ -39,9 +42,8 @@
 
 
         class PitStopInstance :
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public State OverallState { get; private set; }
             public State FuelState { get; private set; }
             public State OilState { get; private set; }
@@ -56,6 +58,7 @@ SagaStateMachineInstance
             public decimal OilQuarts { get; set; }
             public decimal OilPricePerQuart { get; set; }
             public decimal OilCost { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 
@@ -74,12 +77,12 @@ SagaStateMachineInstance
                             context.Instance.VehicleModel = context.Data.Model;
                         })
                         .TransitionTo(BeingServiced)
-//                        .RunParallel(p =>
-//                            {
-//                                p.Start<FillTank>(x => x.BeginFilling);
-//                                p.Start<CheckOil>(x => x.BeginChecking);
-//                            }))
-                    );
+                    //                        .RunParallel(p =>
+                    //                            {
+                    //                                p.Start<FillTank>(x => x.BeginFilling);
+                    //                                p.Start<CheckOil>(x => x.BeginChecking);
+                    //                            }))
+                );
             }
 
             public State BeingServiced { get; private set; }

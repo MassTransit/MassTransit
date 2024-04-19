@@ -20,7 +20,7 @@ namespace MassTransit.Tests.SagaStateMachineTests.Automatonymous
 
             Assert.That(async () => await _machine.RaiseEvent(_claim, _machine.Create, data), Throws.TypeOf<EventExecutionException>());
 
-            Assert.AreEqual(default, _claim.Value);
+            Assert.That(_claim.Value, Is.EqualTo(default));
         }
 
         ClaimAdjustmentInstance _claim;
@@ -36,11 +36,11 @@ namespace MassTransit.Tests.SagaStateMachineTests.Automatonymous
 
         class ClaimAdjustmentInstance :
             ClaimAdjustment,
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public State CurrentState { get; set; }
             public string Value { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 

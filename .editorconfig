@@ -15,6 +15,7 @@ indent_size = 2
 
 [*.cs]
 end_of_line = lf
+dotnet_diagnostic.NUnit1032.severity = suggestion
 
 [*.md]
 trim_trailing_whitespace = false
@@ -25,5 +26,3 @@ end_of_line = lf
 [*.{cmd, bat}]
 end_of_line = crlf
 
-# Set up additional disposal methods for a specific diagnostic rule
-dotnet_diagnostic.NUnit1032.severity = silent

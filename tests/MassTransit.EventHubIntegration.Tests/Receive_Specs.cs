@@ -64,7 +64,7 @@ namespace MassTransit.EventHubIntegration.Tests
 
                 ConsumeContext<EventHubMessage> result = await taskCompletionSource.Task;
 
-                Assert.AreEqual(message.Text, result.Message.Text);
+                Assert.That(result.Message.Text, Is.EqualTo(message.Text));
             }
             finally
             {
@@ -103,6 +103,7 @@ namespace MassTransit.EventHubIntegration.Tests
             }
         }
     }
+
 
     public class ReceiveWithPayload_Specs :
         InMemoryTestFixture

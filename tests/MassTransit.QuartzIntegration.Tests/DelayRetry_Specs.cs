@@ -350,9 +350,9 @@
 
             ConsumeContext<PingMessage> context = await _received.Task;
 
-            Assert.GreaterOrEqual(_receivedTimeSpan, TimeSpan.FromSeconds(1));
+            Assert.That(_receivedTimeSpan, Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(1)));
             var customHeaderValue = context.Headers.Get(customHeader, default(int?));
-            Assert.AreEqual(2, customHeaderValue);
+            Assert.That(customHeaderValue, Is.EqualTo(2));
         }
 
         TaskCompletionSource<ConsumeContext<PingMessage>> _received;

@@ -29,7 +29,7 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
             await Mediator.Send<SimpleMessageInterface>(new { Name = "test" });
 
             var result = await _taskCompletionSource.Task;
-            Assert.AreEqual(MyId, result);
+            Assert.That(result, Is.EqualTo(MyId));
         }
 
         protected override IServiceCollection ConfigureServices(IServiceCollection collection)
@@ -71,7 +71,7 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
             await Mediator.Publish<SimpleMessageInterface>(new { Name = "test" });
 
             var result = await _taskCompletionSource.Task;
-            Assert.AreEqual(MyId, result);
+            Assert.That(result, Is.EqualTo(MyId));
         }
 
         protected override IServiceCollection ConfigureServices(IServiceCollection collection)
@@ -116,10 +116,10 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
             await Mediator.Send<SimplePublishedInterface>(new { Name = "test" });
 
             var myOtherId = await _otherTaskCompletionSource.Task;
-            Assert.AreEqual(MyOtherId, myOtherId);
+            Assert.That(myOtherId, Is.EqualTo(MyOtherId));
 
             var myId = await _taskCompletionSource.Task;
-            Assert.AreEqual(MyId, myId);
+            Assert.That(myId, Is.EqualTo(MyId));
         }
 
         protected override IServiceCollection ConfigureServices(IServiceCollection collection)
@@ -167,10 +167,10 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
             await Mediator.Publish<SimplePublishedInterface>(new { Name = "test" });
 
             var myOtherId = await _otherTaskCompletionSource.Task;
-            Assert.AreEqual(MyOtherId, myOtherId);
+            Assert.That(myOtherId, Is.EqualTo(MyOtherId));
 
             var myId = await _taskCompletionSource.Task;
-            Assert.AreEqual(MyId, myId);
+            Assert.That(myId, Is.EqualTo(MyId));
         }
 
         protected override IServiceCollection ConfigureServices(IServiceCollection collection)
@@ -214,7 +214,7 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
             await client.GetResponse<ISimpleMessageResponse>(new { Name = "test" });
 
             var result = await _taskCompletionSource.Task;
-            Assert.AreEqual(MyId, result);
+            Assert.That(result, Is.EqualTo(MyId));
         }
 
         protected override IServiceCollection ConfigureServices(IServiceCollection collection)

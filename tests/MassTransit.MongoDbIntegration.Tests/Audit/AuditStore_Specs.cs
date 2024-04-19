@@ -16,17 +16,20 @@
         [Test]
         public async Task Audit_document_gets_created()
         {
-            Assert.AreEqual("Send", _auditDocument.ContextType);
-            Assert.AreEqual(_sent.Context.MessageId.Value.ToString(), _auditDocument.MessageId);
-            Assert.AreEqual(_sent.Context.ConversationId.Value.ToString(), _auditDocument.ConversationId);
-            Assert.AreEqual(_sent.Context.DestinationAddress.ToString(), _auditDocument.DestinationAddress);
-            Assert.AreEqual(typeof(A).FullName, _auditDocument.MessageType);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_auditDocument.ContextType, Is.EqualTo("Send"));
+                Assert.That(_auditDocument.MessageId, Is.EqualTo(_sent.Context.MessageId.Value.ToString()));
+                Assert.That(_auditDocument.ConversationId, Is.EqualTo(_sent.Context.ConversationId.Value.ToString()));
+                Assert.That(_auditDocument.DestinationAddress, Is.EqualTo(_sent.Context.DestinationAddress.ToString()));
+                Assert.That(_auditDocument.MessageType, Is.EqualTo(typeof(A).FullName));
+            });
         }
 
         [Test]
         public void Message_payload_matches_sent_message()
         {
-            Assert.AreEqual(_sent.Context.Message.Data, JsonConvert.DeserializeObject<A>(_auditDocument.Message).Data);
+            Assert.That(JsonConvert.DeserializeObject<A>(_auditDocument.Message).Data, Is.EqualTo(_sent.Context.Message.Data));
         }
 
         [Test]
@@ -74,18 +77,21 @@
         [Test]
         public async Task Audit_document_gets_created()
         {
-            Assert.AreEqual("Consume", _auditDocument.ContextType);
-            Assert.AreEqual(_consumed.Context.MessageId.Value.ToString(), _auditDocument.MessageId);
-            Assert.AreEqual(_consumed.Context.ConversationId.Value.ToString(), _auditDocument.ConversationId);
-            Assert.AreEqual(_consumed.Context.ReceiveContext.InputAddress.ToString(), _auditDocument.InputAddress);
-            Assert.AreEqual(_consumed.Context.DestinationAddress.ToString(), _auditDocument.DestinationAddress);
-            Assert.AreEqual(typeof(A).FullName, _auditDocument.MessageType);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_auditDocument.ContextType, Is.EqualTo("Consume"));
+                Assert.That(_auditDocument.MessageId, Is.EqualTo(_consumed.Context.MessageId.Value.ToString()));
+                Assert.That(_auditDocument.ConversationId, Is.EqualTo(_consumed.Context.ConversationId.Value.ToString()));
+                Assert.That(_auditDocument.InputAddress, Is.EqualTo(_consumed.Context.ReceiveContext.InputAddress.ToString()));
+                Assert.That(_auditDocument.DestinationAddress, Is.EqualTo(_consumed.Context.DestinationAddress.ToString()));
+                Assert.That(_auditDocument.MessageType, Is.EqualTo(typeof(A).FullName));
+            });
         }
 
         [Test]
         public void Message_payload_matches_sent_message()
         {
-            Assert.AreEqual(_consumed.Context.Message.Data, JsonConvert.DeserializeObject<A>(_auditDocument.Message).Data);
+            Assert.That(JsonConvert.DeserializeObject<A>(_auditDocument.Message).Data, Is.EqualTo(_consumed.Context.Message.Data));
         }
 
         [Test]
@@ -134,7 +140,7 @@
         {
             var sentRecord = _audit.FirstOrDefault(x => x.ContextType == "Send");
 
-            Assert.NotNull(sentRecord);
+            Assert.That(sentRecord, Is.Not.Null);
         }
 
         [Test]
@@ -142,13 +148,13 @@
         {
             var consumedRecord = _audit.FirstOrDefault(x => x.ContextType == "Consume");
 
-            Assert.NotNull(consumedRecord);
+            Assert.That(consumedRecord, Is.Not.Null);
         }
 
         [Test]
         public void The_number_of_records_is_two()
         {
-            Assert.AreEqual(2, _audit.Count);
+            Assert.That(_audit, Has.Count.EqualTo(2));
         }
 
         InMemoryTestHarness _harness;

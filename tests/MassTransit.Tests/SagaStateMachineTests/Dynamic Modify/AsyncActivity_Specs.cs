@@ -28,12 +28,12 @@
 
             await machine.RaiseEvent(claim, Create, new CreateInstance());
 
-            Assert.AreEqual("ExecuteAsync", claim.Value);
+            Assert.That(claim.Value, Is.EqualTo("ExecuteAsync"));
         }
 
 
         class TestInstance :
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
             public State CurrentState { get; set; }
             public string Value { get; set; }

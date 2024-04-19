@@ -19,10 +19,13 @@
         {
             ConsumeContext<RoutingSlipActivityCompleted> context = await _prepareCompleted;
 
-            Assert.AreEqual(_trackingNumber, context.Message.TrackingNumber);
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.Message.TrackingNumber, Is.EqualTo(_trackingNumber));
 
-            Assert.IsTrue(context.CorrelationId.HasValue);
-            Assert.AreNotEqual(_trackingNumber, context.CorrelationId.Value);
+                Assert.That(context.CorrelationId.HasValue, Is.True);
+                Assert.That(context.CorrelationId.Value, Is.Not.EqualTo(_trackingNumber));
+            });
         }
 
         [Test]
@@ -30,10 +33,13 @@
         {
             ConsumeContext<RoutingSlipCompleted> context = await _completed;
 
-            Assert.AreEqual(_trackingNumber, context.Message.TrackingNumber);
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.Message.TrackingNumber, Is.EqualTo(_trackingNumber));
 
-            Assert.IsTrue(context.CorrelationId.HasValue);
-            Assert.AreEqual(_trackingNumber, context.CorrelationId.Value);
+                Assert.That(context.CorrelationId.HasValue, Is.True);
+                Assert.That(context.CorrelationId.Value, Is.EqualTo(_trackingNumber));
+            });
         }
 
         [Test]
@@ -41,10 +47,13 @@
         {
             ConsumeContext<RoutingSlipActivityCompleted> context = await _sendCompleted;
 
-            Assert.AreEqual(_trackingNumber, context.Message.TrackingNumber);
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.Message.TrackingNumber, Is.EqualTo(_trackingNumber));
 
-            Assert.IsTrue(context.CorrelationId.HasValue);
-            Assert.AreNotEqual(_trackingNumber, context.CorrelationId.Value);
+                Assert.That(context.CorrelationId.HasValue, Is.True);
+                Assert.That(context.CorrelationId.Value, Is.Not.EqualTo(_trackingNumber));
+            });
         }
 
         [Test]
@@ -61,9 +70,9 @@
 
             var routingSlip = await (await _collection.FindAsync(query).ConfigureAwait(false)).SingleOrDefaultAsync().ConfigureAwait(false);
 
-            Assert.IsNotNull(routingSlip);
-            Assert.IsNotNull(routingSlip.Events);
-            Assert.AreEqual(3, routingSlip.Events.Length);
+            Assert.That(routingSlip, Is.Not.Null);
+            Assert.That(routingSlip.Events, Is.Not.Null);
+            Assert.That(routingSlip.Events, Has.Length.EqualTo(3));
         }
 
         [OneTimeSetUp]

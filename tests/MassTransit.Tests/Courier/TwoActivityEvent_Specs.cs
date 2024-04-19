@@ -18,7 +18,7 @@
         {
             ConsumeContext<RoutingSlipActivityCompleted> activityCompleted = await _firstActivityCompleted;
 
-            Assert.AreEqual("Hello", activityCompleted.GetResult<string>("OriginalValue"));
+            Assert.That(activityCompleted.GetResult<string>("OriginalValue"), Is.EqualTo("Hello"));
         }
 
         [Test]
@@ -26,7 +26,7 @@
         {
             ConsumeContext<RoutingSlipCompleted> completed = await _completed;
 
-            Assert.AreEqual("Hello, World!", completed.GetVariable<string>("Value"));
+            Assert.That(completed.GetVariable<string>("Value"), Is.EqualTo("Hello, World!"));
         }
 
         [Test]
@@ -34,7 +34,7 @@
         {
             ConsumeContext<RoutingSlipCompleted> completed = await _completed;
 
-            Assert.AreEqual("Knife", completed.GetVariable<string>("Variable"));
+            Assert.That(completed.GetVariable<string>("Variable"), Is.EqualTo("Knife"));
         }
 
         [Test]
@@ -42,7 +42,7 @@
         {
             ConsumeContext<RoutingSlipActivityCompleted> activityCompleted = await _firstActivityCompleted;
 
-            Assert.AreEqual("Knife", activityCompleted.GetVariable<string>("Variable"));
+            Assert.That(activityCompleted.GetVariable<string>("Variable"), Is.EqualTo("Knife"));
         }
 
         [Test]
@@ -50,7 +50,7 @@
         {
             var activityCompleted = (await _firstActivityCompleted).Message;
 
-            Assert.AreEqual(_routingSlip.TrackingNumber, activityCompleted.TrackingNumber);
+            Assert.That(activityCompleted.TrackingNumber, Is.EqualTo(_routingSlip.TrackingNumber));
         }
 
         [Test]
@@ -58,11 +58,11 @@
         {
             var completed = (await _completed).Message;
 
-            Assert.AreEqual(_routingSlip.TrackingNumber, completed.TrackingNumber);
+            Assert.That(completed.TrackingNumber, Is.EqualTo(_routingSlip.TrackingNumber));
 
             Console.WriteLine("Duration: {0}", completed.Duration);
 
-            Assert.IsFalse(completed.Variables.ContainsKey("ToBeRemoved"));
+            Assert.That(completed.Variables.ContainsKey("ToBeRemoved"), Is.False);
         }
 
         [Test]
@@ -70,7 +70,7 @@
         {
             var activityCompleted = (await _secondActivityCompleted).Message;
 
-            Assert.AreEqual(_routingSlip.TrackingNumber, activityCompleted.TrackingNumber);
+            Assert.That(activityCompleted.TrackingNumber, Is.EqualTo(_routingSlip.TrackingNumber));
         }
 
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;

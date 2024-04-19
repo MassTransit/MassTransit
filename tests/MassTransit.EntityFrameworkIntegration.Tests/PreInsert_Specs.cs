@@ -120,17 +120,20 @@
 
                 ConsumeContext<StartupComplete> received = await messageReceived;
 
-                Assert.AreEqual(message.CorrelationId, received.Message.TransactionId);
+                Assert.Multiple(() =>
+                {
+                    Assert.That(received.Message.TransactionId, Is.EqualTo(message.CorrelationId));
 
-                Assert.IsTrue(received.InitiatorId.HasValue, "The initiator should be copied from the CorrelationId");
+                    Assert.That(received.InitiatorId.HasValue, Is.True, "The initiator should be copied from the CorrelationId");
 
-                Assert.AreEqual(received.InitiatorId.Value, message.CorrelationId, "The initiator should be the saga CorrelationId");
+                    Assert.That(message.CorrelationId, Is.EqualTo(received.InitiatorId.Value), "The initiator should be the saga CorrelationId");
 
-                Assert.AreEqual(received.SourceAddress, InputQueueAddress, "The published message should have the input queue source address");
+                    Assert.That(InputQueueAddress, Is.EqualTo(received.SourceAddress), "The published message should have the input queue source address");
+                });
 
                 Guid? saga = await _repository.ShouldContainSagaInState(message.CorrelationId, _machine, _machine.Running, TestTimeout);
 
-                Assert.IsTrue(saga.HasValue);
+                Assert.That(saga.HasValue, Is.True);
             }
 
             public When_pre_inserting_the_state_machine_instance_using_ef()
@@ -173,7 +176,7 @@
 
                     Initially(
                         When(Started)
-                            .Publish(context => new StartupComplete {TransactionId = context.Data.CorrelationId})
+                            .Publish(context => new StartupComplete { TransactionId = context.Data.CorrelationId })
                             .TransitionTo(Running));
                 }
 
@@ -209,17 +212,20 @@
 
                 ConsumeContext<StartupComplete> received = await messageReceived;
 
-                Assert.AreEqual(sagaId, received.Message.TransactionId);
+                Assert.Multiple(() =>
+                {
+                    Assert.That(received.Message.TransactionId, Is.EqualTo(sagaId));
 
-                Assert.IsTrue(received.InitiatorId.HasValue, "The initiator should be copied from the CorrelationId");
+                    Assert.That(received.InitiatorId.HasValue, Is.True, "The initiator should be copied from the CorrelationId");
 
-                Assert.AreEqual(received.InitiatorId.Value, message.CorrelationId, "The initiator should be the saga CorrelationId");
+                    Assert.That(message.CorrelationId, Is.EqualTo(received.InitiatorId.Value), "The initiator should be the saga CorrelationId");
 
-                Assert.AreEqual(received.SourceAddress, InputQueueAddress, "The published message should have the input queue source address");
+                    Assert.That(InputQueueAddress, Is.EqualTo(received.SourceAddress), "The published message should have the input queue source address");
+                });
 
                 Guid? saga = await _repository.ShouldContainSagaInState(message.CorrelationId, _machine, _machine.Running, TestTimeout);
 
-                Assert.IsTrue(saga.HasValue);
+                Assert.That(saga.HasValue, Is.True);
             }
 
             public When_pre_inserting_in_an_invalid_state_using_ef()
@@ -267,7 +273,7 @@
                             {
                             }),
                         When(Started)
-                            .Publish(context => new StartupComplete {TransactionId = context.Data.CorrelationId})
+                            .Publish(context => new StartupComplete { TransactionId = context.Data.CorrelationId })
                             .TransitionTo(Running));
                 }
 

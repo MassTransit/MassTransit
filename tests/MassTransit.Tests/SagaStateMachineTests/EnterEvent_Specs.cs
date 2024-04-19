@@ -16,12 +16,15 @@
         {
             var sagaId = Guid.NewGuid();
 
-            await InputQueueSendEndpoint.Send(new Start {CorrelationId = sagaId});
+            await InputQueueSendEndpoint.Send(new Start { CorrelationId = sagaId });
 
             Guid? saga = await _repository.ShouldContainSagaInState(sagaId, _machine, _machine.RunningFaster, TestTimeout);
-            Assert.IsTrue(saga.HasValue);
+            Assert.Multiple(() =>
+            {
+                Assert.That(saga.HasValue, Is.True);
 
-            Assert.AreEqual(1, _repository[saga.Value].Instance.OnEnter);
+                Assert.That(_repository[saga.Value].Instance.OnEnter, Is.EqualTo(1));
+            });
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

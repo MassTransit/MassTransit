@@ -153,7 +153,7 @@
 
             ConsumeContext<RoutingSlipFaulted> context = await handled;
 
-            Assert.AreEqual("Data", context.GetVariable<string>("Test"));
+            Assert.That(context.GetVariable<string>("Test"), Is.EqualTo("Data"));
         }
 
         protected override void SetupActivities(BusTestHarness testHarness)
