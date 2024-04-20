@@ -138,15 +138,21 @@ namespace MassTransit.Tests.ContainerTests
                 OrderNumber = "123"
             });
 
-            Assert.That(await harness.Published.SelectAsync<Fault<SubmitOrder>>().Count(), Is.EqualTo(1));
+            Assert.Multiple(async () =>
+            {
+                Assert.That(await harness.Published.SelectAsync<Fault<SubmitOrder>>().Count(), Is.EqualTo(1));
 
-            Assert.That(await harness.Consumed.SelectAsync<SubmitOrder>().Count(), Is.EqualTo(1));
+                Assert.That(await harness.Consumed.SelectAsync<SubmitOrder>().Count(), Is.EqualTo(1));
+            });
 
             IConsumerTestHarness<SubmitOrderConsumer> consumerHarness = harness.GetConsumerHarness<SubmitOrderConsumer>();
 
-            Assert.That(await consumerHarness.Consumed.SelectAsync<SubmitOrder>().Count(), Is.EqualTo(1));
+            Assert.Multiple(async () =>
+            {
+                Assert.That(await consumerHarness.Consumed.SelectAsync<SubmitOrder>().Count(), Is.EqualTo(1));
 
-            Assert.That(SubmitOrderConsumer.Attempts, Is.EqualTo(4));
+                Assert.That(SubmitOrderConsumer.Attempts, Is.EqualTo(4));
+            });
         }
 
 
@@ -190,9 +196,12 @@ namespace MassTransit.Tests.ContainerTests
                 OrderNumber = "123"
             });
 
-            Assert.IsTrue(await harness.Sent.Any<OrderSubmitted>());
+            Assert.Multiple(async () =>
+            {
+                Assert.That(await harness.Sent.Any<OrderSubmitted>(), Is.True);
 
-            Assert.IsTrue(await harness.Consumed.Any<SubmitOrder>());
+                Assert.That(await harness.Consumed.Any<SubmitOrder>(), Is.True);
+            });
         }
 
 
@@ -233,15 +242,21 @@ namespace MassTransit.Tests.ContainerTests
                 TestKey = "Unique"
             });
 
-            Assert.IsTrue(await harness.Consumed.Any<StartTest>());
+            Assert.That(await harness.Consumed.Any<StartTest>(), Is.True);
             IReceivedMessage<StartTest> startTest = await harness.Consumed.SelectAsync<StartTest>().First();
-            Assert.That(startTest.Context.CorrelationId, Is.EqualTo(correlationId));
+            Assert.Multiple(async () =>
+            {
+                Assert.That(startTest.Context.CorrelationId, Is.EqualTo(correlationId));
 
-            Assert.IsTrue(await harness.Published.Any<TestStarted>());
+                Assert.That(await harness.Published.Any<TestStarted>(), Is.True);
+            });
             IPublishedMessage<TestStarted> testStarted = await harness.Published.SelectAsync<TestStarted>().First();
-            Assert.That(testStarted.Context.InitiatorId, Is.EqualTo(correlationId));
+            Assert.Multiple(() =>
+            {
+                Assert.That(testStarted.Context.InitiatorId, Is.EqualTo(correlationId));
 
-            Assert.That(startTest.Context.ConversationId, Is.EqualTo(testStarted.Context.ConversationId));
+                Assert.That(startTest.Context.ConversationId, Is.EqualTo(testStarted.Context.ConversationId));
+            });
         }
     }
 }

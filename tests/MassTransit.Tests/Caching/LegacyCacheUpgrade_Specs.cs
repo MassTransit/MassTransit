@@ -35,8 +35,11 @@ namespace MassTransit.Tests.Caching
             var value = await cache.GetOrAdd(helloKey, SimpleValueFactory.Healthy);
 
             Assert.That(value, Is.Not.Null);
-            Assert.That(value.Id, Is.EqualTo(helloKey));
-            Assert.That(value.Value, Is.EqualTo("The key is Hello"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(value.Id, Is.EqualTo(helloKey));
+                Assert.That(value.Value, Is.EqualTo("The key is Hello"));
+            });
         }
 
         [Test]
@@ -51,14 +54,20 @@ namespace MassTransit.Tests.Caching
             Task<SimpleValue> readValueTask = cache.Get(helloKey);
 
             Assert.That(value, Is.Not.Null);
-            Assert.That(value.Id, Is.EqualTo(helloKey));
-            Assert.That(value.Value, Is.EqualTo("The key is Hello"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(value.Id, Is.EqualTo(helloKey));
+                Assert.That(value.Value, Is.EqualTo("The key is Hello"));
+            });
 
             var readValue = await readValueTask;
 
             Assert.That(readValue, Is.Not.Null);
-            Assert.That(readValue.Id, Is.EqualTo(helloKey));
-            Assert.That(readValue.Value, Is.EqualTo("The key is Hello"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(readValue.Id, Is.EqualTo(helloKey));
+                Assert.That(readValue.Value, Is.EqualTo("The key is Hello"));
+            });
         }
 
         [Test]
@@ -80,14 +89,20 @@ namespace MassTransit.Tests.Caching
             var value = await goodValueTask;
 
             Assert.That(value, Is.Not.Null);
-            Assert.That(value.Id, Is.EqualTo(helloKey));
-            Assert.That(value.Value, Is.EqualTo("The key is Hello"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(value.Id, Is.EqualTo(helloKey));
+                Assert.That(value.Value, Is.EqualTo("The key is Hello"));
+            });
 
             var readValue = await readValueTask;
 
             Assert.That(readValue, Is.Not.Null);
-            Assert.That(readValue.Id, Is.EqualTo(helloKey));
-            Assert.That(readValue.Value, Is.EqualTo("The key is Hello"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(readValue.Id, Is.EqualTo(helloKey));
+                Assert.That(readValue.Value, Is.EqualTo("The key is Hello"));
+            });
         }
 
         [Test]
@@ -108,16 +123,22 @@ namespace MassTransit.Tests.Caching
             var value = await goodValueTask;
 
             Assert.That(value, Is.Not.Null);
-            Assert.That(value.Id, Is.EqualTo(helloKey));
-            Assert.That(value.Value, Is.EqualTo("The key is Hello"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(value.Id, Is.EqualTo(helloKey));
+                Assert.That(value.Value, Is.EqualTo("The key is Hello"));
+            });
 
             Task<SimpleValue> readValueTask = cache.Get(helloKey);
 
             var readValue = await readValueTask;
 
             Assert.That(readValue, Is.Not.Null);
-            Assert.That(readValue.Id, Is.EqualTo(helloKey));
-            Assert.That(readValue.Value, Is.EqualTo("The key is Hello"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(readValue.Id, Is.EqualTo(helloKey));
+                Assert.That(readValue.Value, Is.EqualTo("The key is Hello"));
+            });
         }
     }
 }

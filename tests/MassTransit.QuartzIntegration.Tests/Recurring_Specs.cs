@@ -47,11 +47,14 @@
 
             await _done;
 
-            Assert.Greater(_count, 0, "Expected to see at least one interval");
+            Assert.Multiple(() =>
+            {
+                Assert.That(_count, Is.GreaterThan(0), "Expected to see at least one interval");
 
 
-            Assert.IsNotNull(_lastInterval.Headers.Get<string>(MessageHeaders.Quartz.ScheduleId));
-            Assert.IsNotNull(_lastInterval.Headers.Get<string>(MessageHeaders.Quartz.ScheduleGroup));
+                Assert.That(_lastInterval.Headers.Get<string>(MessageHeaders.Quartz.ScheduleId), Is.Not.Null);
+                Assert.That(_lastInterval.Headers.Get<string>(MessageHeaders.Quartz.ScheduleGroup), Is.Not.Null);
+            });
         }
 
         [Test]

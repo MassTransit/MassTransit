@@ -20,7 +20,7 @@ namespace MassTransit.Tests.Initializers
         {
             IRequestClient<SimpleRequest> client = CreateRequestClient<SimpleRequest>();
 
-            Response<SimpleResponse> response = await client.GetResponse<SimpleResponse>(new {Name = "Hello"});
+            Response<SimpleResponse> response = await client.GetResponse<SimpleResponse>(new { Name = "Hello" });
 
             Assert.That(response.Message.Name, Is.EqualTo("Hello"));
             Assert.That(response.Message.Value, Is.EqualTo("World"));
@@ -30,7 +30,7 @@ namespace MassTransit.Tests.Initializers
         {
             configurator.Handler<SimpleRequest>(async context =>
             {
-                await context.RespondAsync<SimpleResponse>(new {Value = "World"});
+                await context.RespondAsync<SimpleResponse>(new { Value = "World" });
             });
         }
     }
@@ -66,7 +66,7 @@ namespace MassTransit.Tests.Initializers
         {
             IRequestClient<SimpleRequest> client = CreateRequestClient<SimpleRequest>();
 
-            Response<SimpleResponse> response = await client.GetResponse<SimpleResponse>(new {Name = "Hello"});
+            Response<SimpleResponse> response = await client.GetResponse<SimpleResponse>(new { Name = "Hello" });
 
             Assert.That(response.Message.Name, Is.EqualTo("Hello"));
             Assert.That(response.Message.Value, Is.Null);
@@ -122,7 +122,7 @@ namespace MassTransit.Tests.Initializers
         public void Should_handle_basic_dictionary()
         {
             Assert.That(_response.Message.Strings, Is.Not.Null);
-            Assert.That(_response.Message.Strings.Count, Is.EqualTo(2));
+            Assert.That(_response.Message.Strings, Has.Count.EqualTo(2));
             Assert.That(_response.Message.Strings["Hello"], Is.EqualTo("World"));
             Assert.That(_response.Message.Strings["Thank You"], Is.EqualTo("Next"));
         }
@@ -131,7 +131,7 @@ namespace MassTransit.Tests.Initializers
         public void Should_handle_conversion_dictionary()
         {
             Assert.That(_response.Message.IntToStrings, Is.Not.Null);
-            Assert.That(_response.Message.IntToStrings.Count, Is.EqualTo(2));
+            Assert.That(_response.Message.IntToStrings, Has.Count.EqualTo(2));
             Assert.That(_response.Message.IntToStrings[100], Is.EqualTo("1000"));
             Assert.That(_response.Message.IntToStrings[200], Is.EqualTo("2000"));
         }
@@ -159,7 +159,7 @@ namespace MassTransit.Tests.Initializers
         public void Should_handle_enumerable_decimal()
         {
             Assert.That(_response.Message.Amounts, Is.Not.Null);
-            Assert.That(_response.Message.Amounts.Count, Is.EqualTo(2));
+            Assert.That(_response.Message.Amounts, Has.Count.EqualTo(2));
             Assert.That(_response.Message.Amounts[0], Is.EqualTo(98.6m));
             Assert.That(_response.Message.Amounts[1], Is.EqualTo(98.6m));
         }
@@ -196,7 +196,7 @@ namespace MassTransit.Tests.Initializers
         public void Should_handle_int_to_string_array()
         {
             Assert.That(_response.Message.Numbers, Is.Not.Null);
-            Assert.That(_response.Message.Numbers.Length, Is.EqualTo(3));
+            Assert.That(_response.Message.Numbers, Has.Length.EqualTo(3));
             Assert.That(_response.Message.Numbers[0], Is.EqualTo("12"));
             Assert.That(_response.Message.Numbers[1], Is.EqualTo("24"));
             Assert.That(_response.Message.Numbers[2], Is.EqualTo("36"));
@@ -212,7 +212,7 @@ namespace MassTransit.Tests.Initializers
         [Test]
         public void Should_handle_interface_type_array()
         {
-            Assert.That(_response.Message.SubValues.Length, Is.EqualTo(2));
+            Assert.That(_response.Message.SubValues, Has.Length.EqualTo(2));
             Assert.That(_response.Message.SubValues[0].Text, Is.EqualTo("Frank"));
             Assert.That(_response.Message.SubValues[1].Text, Is.EqualTo("Lola"));
         }
@@ -221,7 +221,7 @@ namespace MassTransit.Tests.Initializers
         public void Should_handle_lists()
         {
             Assert.That(_response.Message.StringList, Is.Not.Null);
-            Assert.That(_response.Message.StringList.Count, Is.EqualTo(2));
+            Assert.That(_response.Message.StringList, Has.Count.EqualTo(2));
             Assert.That(_response.Message.StringList[0], Is.EqualTo("Frank"));
             Assert.That(_response.Message.StringList[1], Is.EqualTo("Estelle"));
         }
@@ -248,9 +248,12 @@ namespace MassTransit.Tests.Initializers
         public void Should_handle_object_dictionary()
         {
             Assert.That(_response.Message.StringSubValues, Is.Not.Null);
-            Assert.That(_response.Message.StringSubValues.Count, Is.EqualTo(2));
-            Assert.That(_response.Message.StringSubValues["A"].Text, Is.EqualTo("Eh"));
-            Assert.That(_response.Message.StringSubValues["B"].Text, Is.EqualTo("Bee"));
+            Assert.That(_response.Message.StringSubValues, Has.Count.EqualTo(2));
+            Assert.Multiple(() =>
+            {
+                Assert.That(_response.Message.StringSubValues["A"].Text, Is.EqualTo("Eh"));
+                Assert.That(_response.Message.StringSubValues["B"].Text, Is.EqualTo("Bee"));
+            });
         }
 
         [Test]
@@ -263,10 +266,13 @@ namespace MassTransit.Tests.Initializers
         public void Should_handle_string_array()
         {
             Assert.That(_response.Message.Names, Is.Not.Null);
-            Assert.That(_response.Message.Names.Length, Is.EqualTo(3));
-            Assert.That(_response.Message.Names[0], Is.EqualTo("Curly"));
-            Assert.That(_response.Message.Names[1], Is.EqualTo("Larry"));
-            Assert.That(_response.Message.Names[2], Is.EqualTo("Moe"));
+            Assert.That(_response.Message.Names, Has.Length.EqualTo(3));
+            Assert.Multiple(() =>
+            {
+                Assert.That(_response.Message.Names[0], Is.EqualTo("Curly"));
+                Assert.That(_response.Message.Names[1], Is.EqualTo("Larry"));
+                Assert.That(_response.Message.Names[2], Is.EqualTo("Moe"));
+            });
         }
 
         [Test]
@@ -312,11 +318,11 @@ namespace MassTransit.Tests.Initializers
                 NullableValue = 42,
                 NotNullableValue = (int?)69,
                 NullableDecimalValue = 123.45m,
-                Numbers = new[] {12, 24, 36},
-                Names = new[] {"Curly", "Larry", "Moe"},
+                Numbers = new[] { 12, 24, 36 },
+                Names = new[] { "Curly", "Larry", "Moe" },
                 Exception = new IntentionalTestException("It Happens"),
-                SubValue = new {Text = "Mary"},
-                SubValues = new object[] {new {Text = "Frank"}, new {Text = "Lola"}},
+                SubValue = new { Text = "Mary" },
+                SubValues = new object[] { new { Text = "Frank" }, new { Text = "Lola" } },
                 Amount = 867.53m,
                 Amounts = Enumerable.Repeat(98.6m, 2),
                 AsyncValue = GetIntResult().Select(x => x.Number),
@@ -326,22 +332,22 @@ namespace MassTransit.Tests.Initializers
                 ServiceAddress = new Uri("http://masstransit-project.com"),
                 OtherAddress = "http://github.com",
                 StringAddress = new Uri("loopback://localhost"),
-                StringList = new[] {"Frank", "Estelle"},
-                NewProperty = new SubProperty {NewProperty = "Hello"},
+                StringList = new[] { "Frank", "Estelle" },
+                NewProperty = new SubProperty { NewProperty = "Hello" },
                 Strings = new Dictionary<string, string>
                 {
-                    {"Hello", "World"},
-                    {"Thank You", "Next"}
+                    { "Hello", "World" },
+                    { "Thank You", "Next" }
                 },
                 StringSubValues = new Dictionary<string, object>
                 {
-                    {"A", new {Text = "Eh"}},
-                    {"B", new {Text = "Bee"}}
+                    { "A", new { Text = "Eh" } },
+                    { "B", new { Text = "Bee" } }
                 },
                 IntToStrings = new Dictionary<int, long>
                 {
-                    {100, 1000},
-                    {200, 2000}
+                    { 100, 1000 },
+                    { 200, 2000 }
                 }
             });
         }

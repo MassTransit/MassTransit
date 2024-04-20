@@ -13,13 +13,13 @@ namespace MassTransit.Tests.Serialization
         public void Should_return_the_array_values()
         {
             var tb = new TradesBookedMT();
-            tb.Trades.Add(new TradeBookedMT {Currency = "AUD"});
-            tb.Trades.Add(new TradeBookedMT {Currency = "USD"});
+            tb.Trades.Add(new TradeBookedMT { Currency = "AUD" });
+            tb.Trades.Add(new TradeBookedMT { Currency = "USD" });
 
             var result = SerializeAndReturn(tb);
 
             Assert.That(result.Trades, Is.Not.Null);
-            Assert.That(result.Trades.Count, Is.EqualTo(2));
+            Assert.That(result.Trades, Has.Count.EqualTo(2));
         }
 
         public Serializing_a_protocol_buffer_message(Type serializerType)

@@ -48,7 +48,7 @@ namespace MassTransit.Tests.ContainerTests
 
                 // Assert
                 // did the actual saga consume the message
-                Assert.True(await sagaHarness.Consumed.Any<StartCommand>());
+                Assert.That(await sagaHarness.Consumed.Any<StartCommand>(), Is.True);
             }
             finally
             {
@@ -84,7 +84,7 @@ namespace MassTransit.Tests.ContainerTests
             // Assert
             // did the actual saga consume the message
             var sagaHarness = provider.GetRequiredService<ISagaStateMachineTestHarness<TestSagaStateMachine, TestSaga>>();
-            Assert.True(await sagaHarness.Consumed.Any<StartCommand>());
+            Assert.That(await sagaHarness.Consumed.Any<StartCommand>(), Is.True);
         }
 
 

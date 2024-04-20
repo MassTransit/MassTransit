@@ -18,7 +18,7 @@
         public void Should_extract_receive_endpoint_addresses()
         {
             List<Uri> receiveAddresses = Bus.GetReceiveEndpointAddresses().ToList();
-            Assert.Contains(InputQueueAddress, receiveAddresses);
+            Assert.That(receiveAddresses, Does.Contain(InputQueueAddress));
         }
 
         [Test]

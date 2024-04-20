@@ -233,10 +233,13 @@
 
             await fault;
 
-            Assert.That(_attempts, Is.EqualTo(4));
+            Assert.Multiple(() =>
+            {
+                Assert.That(_attempts, Is.EqualTo(4));
 
-            Assert.That(_lastCount, Is.EqualTo(2));
-            Assert.That(_lastAttempt, Is.EqualTo(3));
+                Assert.That(_lastCount, Is.EqualTo(2));
+                Assert.That(_lastAttempt, Is.EqualTo(3));
+            });
         }
 
         int _attempts;
@@ -283,10 +286,13 @@
 
             await fault;
 
-            Assert.That(_attempts, Is.EqualTo(6));
+            Assert.Multiple(() =>
+            {
+                Assert.That(_attempts, Is.EqualTo(6));
 
-            Assert.That(_lastCount, Is.EqualTo(4));
-            Assert.That(_lastAttempt, Is.EqualTo(5));
+                Assert.That(_lastCount, Is.EqualTo(4));
+                Assert.That(_lastAttempt, Is.EqualTo(5));
+            });
         }
 
         static int _attempts;
@@ -326,6 +332,17 @@
             IConsumer<YourMessage>,
             IConsumer<Fault<YourMessage>>
         {
+            public Task Consume(ConsumeContext<Fault<YourMessage>> context)
+            {
+                var faultRetryCount = context.Headers.Get(MessageHeaders.FaultRetryCount, default(int?)) ?? 0;
+
+                TestContext.Out.WriteLine($"Attempt (from fault consumer): {faultRetryCount}");
+
+                TestContext.Out.WriteLine(@"Faulted, won't retry any more.");
+
+                return Task.CompletedTask;
+            }
+
             public Task Consume(ConsumeContext<YourMessage> context)
             {
                 Interlocked.Increment(ref _attempts);
@@ -336,17 +353,6 @@
                 TestContext.Out.WriteLine($"Attempt: {context.GetRetryAttempt()}");
 
                 throw new Exception("Big bad exception");
-            }
-
-            public Task Consume(ConsumeContext<Fault<YourMessage>> context)
-            {
-                var faultRetryCount = context.Headers.Get(MessageHeaders.FaultRetryCount, default(int?)) ?? 0;
-
-                TestContext.Out.WriteLine($"Attempt (from fault consumer): {faultRetryCount}");
-
-                TestContext.Out.WriteLine(@"Faulted, won't retry any more.");
-
-                return Task.CompletedTask;
             }
         }
     }
@@ -369,10 +375,13 @@
 
             await fault;
 
-            Assert.That(Consumer.Attempts, Is.EqualTo(4));
+            Assert.Multiple(() =>
+            {
+                Assert.That(Consumer.Attempts, Is.EqualTo(4));
 
-            Assert.That(Consumer.LastCount, Is.EqualTo(2));
-            Assert.That(Consumer.LastAttempt, Is.EqualTo(3));
+                Assert.That(Consumer.LastCount, Is.EqualTo(2));
+                Assert.That(Consumer.LastAttempt, Is.EqualTo(3));
+            });
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -423,10 +432,13 @@
 
             await fault;
 
-            Assert.That(_attempts, Is.EqualTo(1));
+            Assert.Multiple(() =>
+            {
+                Assert.That(_attempts, Is.EqualTo(1));
 
-            Assert.That(_lastAttempt, Is.EqualTo(0));
-            Assert.That(_lastCount, Is.EqualTo(0));
+                Assert.That(_lastAttempt, Is.EqualTo(0));
+                Assert.That(_lastCount, Is.EqualTo(0));
+            });
         }
 
         int _attempts;
@@ -476,9 +488,12 @@
 
             await fault;
 
-            Assert.That(_attempts, Is.EqualTo(1));
+            Assert.Multiple(() =>
+            {
+                Assert.That(_attempts, Is.EqualTo(1));
 
-            Assert.That(_lastAttempt, Is.EqualTo(0));
+                Assert.That(_lastAttempt, Is.EqualTo(0));
+            });
         }
 
         int _attempts;
@@ -571,11 +586,14 @@
 
             var payload = await _payload.Task;
 
-            Assert.That(payload.PostCreateCount, Is.EqualTo(0), "PostCreateCount");
-            Assert.That(payload.RetryCompletedCount, Is.EqualTo(1), "RetryCompletedCount");
-            Assert.That(payload.PreRetryCount, Is.EqualTo(1), "PreRetryCount");
-            Assert.That(payload.PostFaultCount, Is.EqualTo(1), "PostFaultCount");
-            Assert.That(payload.RetryFaultCount, Is.EqualTo(0), "RetryFaultCount");
+            Assert.Multiple(() =>
+            {
+                Assert.That(payload.PostCreateCount, Is.EqualTo(0), "PostCreateCount");
+                Assert.That(payload.RetryCompletedCount, Is.EqualTo(1), "RetryCompletedCount");
+                Assert.That(payload.PreRetryCount, Is.EqualTo(1), "PreRetryCount");
+                Assert.That(payload.PostFaultCount, Is.EqualTo(1), "PostFaultCount");
+                Assert.That(payload.RetryFaultCount, Is.EqualTo(0), "RetryFaultCount");
+            });
         }
 
         int _attempts;

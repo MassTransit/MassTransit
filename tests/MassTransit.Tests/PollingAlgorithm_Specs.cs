@@ -87,8 +87,11 @@ namespace MassTransit.Tests
             await algorithm.Run(GetMessages, ProcessMessage, GroupMessages, OrderMessages);
             await algorithm.Run(GetMessages, ProcessMessage, GroupMessages, OrderMessages);
 
-            Assert.That(algorithm.ActiveRequestCount, Is.EqualTo(0));
-            Assert.That(algorithm.MaxActiveRequestCount, Is.EqualTo(10));
+            Assert.Multiple(() =>
+            {
+                Assert.That(algorithm.ActiveRequestCount, Is.EqualTo(0));
+                Assert.That(algorithm.MaxActiveRequestCount, Is.EqualTo(10));
+            });
         }
 
         [Test]
@@ -120,9 +123,12 @@ namespace MassTransit.Tests
 
             request = await state.BeginRequest();
             await request.Complete(state.ResultLimit);
-            Assert.That(state.RequestCount, Is.EqualTo(10));
+            Assert.Multiple(() =>
+            {
+                Assert.That(state.RequestCount, Is.EqualTo(10));
 
-            Assert.That(state.ActiveRequestCount, Is.EqualTo(0));
+                Assert.That(state.ActiveRequestCount, Is.EqualTo(0));
+            });
         }
 
         [Test]
@@ -134,8 +140,11 @@ namespace MassTransit.Tests
                 RequestResultLimit = 10
             });
 
-            Assert.That(algorithm.RequestCount, Is.EqualTo(1));
-            Assert.That(algorithm.ResultLimit, Is.EqualTo(1));
+            Assert.Multiple(() =>
+            {
+                Assert.That(algorithm.RequestCount, Is.EqualTo(1));
+                Assert.That(algorithm.ResultLimit, Is.EqualTo(1));
+            });
         }
 
         [Test]
@@ -147,14 +156,20 @@ namespace MassTransit.Tests
                 RequestResultLimit = 100
             });
 
-            Assert.That(algorithm.RequestCount, Is.EqualTo(1));
-            Assert.That(algorithm.ResultLimit, Is.EqualTo(100));
+            Assert.Multiple(() =>
+            {
+                Assert.That(algorithm.RequestCount, Is.EqualTo(1));
+                Assert.That(algorithm.ResultLimit, Is.EqualTo(100));
+            });
 
             var request = await algorithm.BeginRequest();
             await request.Complete(algorithm.ResultLimit);
 
-            Assert.That(algorithm.RequestCount, Is.EqualTo(1));
-            Assert.That(algorithm.ResultLimit, Is.EqualTo(100));
+            Assert.Multiple(() =>
+            {
+                Assert.That(algorithm.RequestCount, Is.EqualTo(1));
+                Assert.That(algorithm.ResultLimit, Is.EqualTo(100));
+            });
         }
 
         [Test]
@@ -166,14 +181,20 @@ namespace MassTransit.Tests
                 RequestResultLimit = 100
             });
 
-            Assert.That(algorithm.RequestCount, Is.EqualTo(1));
-            Assert.That(algorithm.ResultLimit, Is.EqualTo(100));
+            Assert.Multiple(() =>
+            {
+                Assert.That(algorithm.RequestCount, Is.EqualTo(1));
+                Assert.That(algorithm.ResultLimit, Is.EqualTo(100));
+            });
 
             var request = await algorithm.BeginRequest();
             await request.Complete(0);
 
-            Assert.That(algorithm.RequestCount, Is.EqualTo(1));
-            Assert.That(algorithm.ResultLimit, Is.EqualTo(100));
+            Assert.Multiple(() =>
+            {
+                Assert.That(algorithm.RequestCount, Is.EqualTo(1));
+                Assert.That(algorithm.ResultLimit, Is.EqualTo(100));
+            });
         }
 
 

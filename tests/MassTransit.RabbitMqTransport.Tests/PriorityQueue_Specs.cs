@@ -2,11 +2,11 @@
 {
     using System;
     using System.Threading.Tasks;
-    using MassTransit.Testing;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
     using RabbitMQ.Client;
     using TestFramework.Messages;
+    using Testing;
 
 
     [TestFixture]
@@ -118,8 +118,11 @@
 
             Assert.That(message, Is.Not.Null);
 
-            Assert.That(message.Context.TryGetPayload<RabbitMqBasicConsumeContext>(out var rmqContext), Is.True);
-            Assert.That(rmqContext.Properties.Priority, Is.EqualTo(3));
+            Assert.Multiple(() =>
+            {
+                Assert.That(message.Context.TryGetPayload<RabbitMqBasicConsumeContext>(out var rmqContext), Is.True);
+                Assert.That(rmqContext.Properties.Priority, Is.EqualTo(3));
+            });
         }
 
 

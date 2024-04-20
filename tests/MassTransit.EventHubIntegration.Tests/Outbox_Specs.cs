@@ -67,8 +67,11 @@ namespace MassTransit.EventHubIntegration.Tests
 
             Assert.That(message, Is.Not.Null);
 
-            Assert.That(message.Context.Message.OriginalMessageId, Is.EqualTo(messageId));
-            Assert.That(message.Context.Message.OriginalCorrelationId, Is.EqualTo(correlationId));
+            Assert.Multiple(() =>
+            {
+                Assert.That(message.Context.Message.OriginalMessageId, Is.EqualTo(messageId));
+                Assert.That(message.Context.Message.OriginalCorrelationId, Is.EqualTo(correlationId));
+            });
         }
 
 

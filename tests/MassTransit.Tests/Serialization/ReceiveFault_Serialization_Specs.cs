@@ -68,7 +68,7 @@
         void TestCanSerialize(ReceiveFaultEvent fault)
         {
             byte[] bytes = Serialize(fault);
-            Assert.That(bytes.Length, Is.GreaterThan(0));
+            Assert.That(bytes, Is.Not.Empty);
         }
     }
 }

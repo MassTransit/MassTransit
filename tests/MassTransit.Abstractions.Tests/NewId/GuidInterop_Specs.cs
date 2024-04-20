@@ -115,8 +115,11 @@
             var gsn = Guid.Parse(ns);
             var g = n.ToSequentialGuid();
 
-            Assert.That(gsn, Is.EqualTo(g));
-            Assert.That(n.ToGuid(), Is.Not.EqualTo(gsn));
+            Assert.Multiple(() =>
+            {
+                Assert.That(gsn, Is.EqualTo(g));
+                Assert.That(n.ToGuid(), Is.Not.EqualTo(gsn));
+            });
         }
 
         [Test]
@@ -216,7 +219,7 @@
             Assert.That(ng, Is.EqualTo(n));
 
             // Also checks to see if this would throw
-            Assert.IsTrue(ng.Timestamp != default);
+            Assert.That(ng.Timestamp, Is.Not.EqualTo(default));
         }
 
         [Test]

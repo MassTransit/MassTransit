@@ -10,7 +10,7 @@
         [Test]
         public void Should_call_the_enter_event()
         {
-            Assert.IsTrue(_instance.EnterCalled);
+            Assert.That(_instance.EnterCalled, Is.True);
         }
 
         [Test]

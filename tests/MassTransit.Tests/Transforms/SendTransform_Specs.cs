@@ -12,12 +12,15 @@
         [Test]
         public async Task Should_not_affect_published_messages()
         {
-            await Bus.Publish(new A {First = "Hello"});
+            await Bus.Publish(new A { First = "Hello" });
 
             ConsumeContext<A> result = await _received;
 
-            Assert.That(result.Message.First, Is.EqualTo("Hello"));
-            Assert.That(result.Message.Second, Is.Null);
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.Message.First, Is.EqualTo("Hello"));
+                Assert.That(result.Message.Second, Is.Null);
+            });
         }
 
         Task<ConsumeContext<A>> _received;
@@ -54,12 +57,15 @@
         [Test]
         public async Task Should_change_the_property()
         {
-            await InputQueueSendEndpoint.Send(new A {First = "Hello"});
+            await InputQueueSendEndpoint.Send(new A { First = "Hello" });
 
             ConsumeContext<A> result = await _received;
 
-            Assert.That(result.Message.First, Is.EqualTo("Hello"));
-            Assert.That(result.Message.Second, Is.EqualTo("World"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.Message.First, Is.EqualTo("Hello"));
+                Assert.That(result.Message.Second, Is.EqualTo("World"));
+            });
         }
 
         Task<ConsumeContext<A>> _received;
@@ -96,12 +102,15 @@
         [Test]
         public async Task Should_transform_on_publish()
         {
-            await Bus.Publish(new A {First = "Hello"});
+            await Bus.Publish(new A { First = "Hello" });
 
             ConsumeContext<A> result = await _received;
 
-            Assert.That(result.Message.First, Is.EqualTo("Hello"));
-            Assert.That(result.Message.Second, Is.EqualTo("World"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.Message.First, Is.EqualTo("Hello"));
+                Assert.That(result.Message.Second, Is.EqualTo("World"));
+            });
         }
 
         Task<ConsumeContext<A>> _received;
@@ -138,12 +147,15 @@
         [Test]
         public async Task Should_not_transform_on_send()
         {
-            await InputQueueSendEndpoint.Send(new A {First = "Hello"});
+            await InputQueueSendEndpoint.Send(new A { First = "Hello" });
 
             ConsumeContext<A> result = await _received;
 
-            Assert.That(result.Message.First, Is.EqualTo("Hello"));
-            Assert.That(result.Message.Second, Is.Null);
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.Message.First, Is.EqualTo("Hello"));
+                Assert.That(result.Message.Second, Is.Null);
+            });
         }
 
         Task<ConsumeContext<A>> _received;

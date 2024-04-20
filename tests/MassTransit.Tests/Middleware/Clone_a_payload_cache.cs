@@ -20,11 +20,12 @@
 
             p2.GetOrAddPayload(() => new Item2("bill"));
 
-            Item2 i2;
-            Assert.That(p.TryGetPayload(out i2), Is.False);
-            Assert.That(p2.TryGetPayload(out i2), Is.True);
-            Item i1;
-            Assert.That(p2.TryGetPayload(out i1), Is.True);
+            Assert.Multiple(() =>
+            {
+                Assert.That(p.TryGetPayload(out Item2 _), Is.False);
+                Assert.That(p2.TryGetPayload(out Item2 _), Is.True);
+            });
+            Assert.That(p2.TryGetPayload(out Item _), Is.True);
         }
 
 

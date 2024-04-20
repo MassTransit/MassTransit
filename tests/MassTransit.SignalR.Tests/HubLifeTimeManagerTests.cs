@@ -18,7 +18,7 @@
             Assert.Multiple(() =>
             {
                 Assert.That(message.Target, Is.EqualTo("Hello"));
-                Assert.That(message.Arguments.Length, Is.EqualTo(1));
+                Assert.That(message.Arguments, Has.Length.EqualTo(1));
             });
             Assert.That(message.Arguments[0].ToString(), Is.EqualTo("World"));
         }
@@ -51,7 +51,7 @@
                 Assert.Multiple(() =>
                 {
                     Assert.That(message.Target, Is.EqualTo("Hello"));
-                    Assert.That(message.Arguments.Length, Is.EqualTo(1));
+                    Assert.That(message.Arguments, Has.Length.EqualTo(1));
                 });
                 Assert.That(message.Arguments[0].ToString(), Is.EqualTo("World"));
 
@@ -60,7 +60,7 @@
                 Assert.Multiple(() =>
                 {
                     Assert.That(message.Target, Is.EqualTo("Hello"));
-                    Assert.That(message.Arguments.Length, Is.EqualTo(1));
+                    Assert.That(message.Arguments, Has.Length.EqualTo(1));
                 });
                 Assert.That(message.Arguments[0].ToString(), Is.EqualTo("World"));
             }
@@ -123,7 +123,7 @@
 
                 await manager.SendGroupAsync("group", "Hello", new object[] { "World" }).OrTimeout(Harness.TestTimeout);
 
-                Assert.IsTrue(BackplaneHarness.Group.Consumed.Select<Group<MyHub>>().Any());
+                Assert.That(BackplaneHarness.Group.Consumed.Select<Group<MyHub>>().Any(), Is.True);
 
                 var message = client1.TryRead() as InvocationMessage;
                 Assert.That(message, Is.Not.Null);
@@ -166,7 +166,7 @@
 
                 await Task.Delay(2000);
 
-                Assert.Null(client.TryRead());
+                Assert.That(client.TryRead(), Is.Null);
             }
         }
 
@@ -183,8 +183,8 @@
 
                 await manager.RemoveFromGroupAsync(connection.ConnectionId, "name").OrTimeout(Harness.TestTimeout);
 
-                Assert.IsFalse(BackplaneHarness.GroupManagement.Consumed.Select<GroupManagement<MyHub>>()
-                    .Any()); // Should not have published, because connection was local
+                Assert.That(BackplaneHarness.GroupManagement.Consumed.Select<GroupManagement<MyHub>>()
+                    .Any(), Is.False); // Should not have published, because connection was local
             }
         }
 
@@ -205,7 +205,7 @@
                 await manager.SendGroupAsync("name", "Hello", new object[] { "World" }).OrTimeout(Harness.TestTimeout);
 
                 await AssertMessageAsync(client);
-                Assert.Null(client.TryRead());
+                Assert.That(client.TryRead(), Is.Null);
             }
         }
 

@@ -33,7 +33,7 @@ namespace MassTransit.HangfireIntegration.Tests
 
             Dictionary<string, string> items = connection.GetAllEntriesFromHash(hashId);
 
-            Assert.Null(items);
+            Assert.That(items, Is.Null);
         }
 
         [Test]
@@ -52,7 +52,7 @@ namespace MassTransit.HangfireIntegration.Tests
 
             Dictionary<string, string> items = connection.GetAllEntriesFromHash(hashId);
 
-            Assert.Null(items);
+            Assert.That(items, Is.Null);
         }
 
         Task<ConsumeContext<FirstMessage>> _first;

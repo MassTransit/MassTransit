@@ -2,11 +2,11 @@
 {
     using System;
     using System.Threading.Tasks;
-    using MassTransit.Testing;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
     using RabbitMQ.Client;
     using TestFramework.Messages;
+    using Testing;
 
 
     public class Using_alternate_exchange_with_the_outbox
@@ -46,7 +46,7 @@
                     {
                         if (cfg is IRabbitMqReceiveEndpointConfigurator rmq)
                         {
-                            if(name == alternateQueueName)
+                            if (name == alternateQueueName)
                             {
                                 rmq.Bind(alternateExchangeName);
                             }
@@ -114,11 +114,14 @@
         [Test]
         public async Task Should_have_the_proper_address()
         {
-            Assert.That(Bus.Topology.TryGetPublishAddress<TheWorldImploded>(out var address));
+            Assert.Multiple(() =>
+            {
+                Assert.That(Bus.Topology.TryGetPublishAddress<TheWorldImploded>(out var address));
 
-            Assert.That(address,
-                Is.EqualTo(new Uri(
-                    "rabbitmq://localhost/test/MassTransit.RabbitMqTransport.Tests:AlternateExchange_Specs-TheWorldImploded?alternateexchange=publish-not-delivered")));
+                Assert.That(address,
+                    Is.EqualTo(new Uri(
+                        "rabbitmq://localhost/test/MassTransit.RabbitMqTransport.Tests:AlternateExchange_Specs-TheWorldImploded?alternateexchange=publish-not-delivered")));
+            });
         }
 
         Task<ConsumeContext<TheWorldImploded>> _handled;

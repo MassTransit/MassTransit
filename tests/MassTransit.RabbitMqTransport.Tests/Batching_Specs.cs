@@ -20,7 +20,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
                 Batch<PingMessage> batch = await _consumer[0];
 
-                Assert.That(batch.Length, Is.EqualTo(5));
+                Assert.That(batch, Has.Length.EqualTo(5));
                 Assert.That(batch.Mode, Is.EqualTo(BatchCompletionMode.Size));
             }
 
@@ -54,12 +54,12 @@ namespace MassTransit.RabbitMqTransport.Tests
 
                 Batch<PingMessage> batch = await _consumer[0];
 
-                Assert.That(batch.Length, Is.EqualTo(5));
+                Assert.That(batch, Has.Length.EqualTo(5));
                 Assert.That(batch.Mode, Is.EqualTo(BatchCompletionMode.Time));
 
                 batch = await _consumer[1];
 
-                Assert.That(batch.Length, Is.EqualTo(5));
+                Assert.That(batch, Has.Length.EqualTo(5));
                 Assert.That(batch.Mode, Is.EqualTo(BatchCompletionMode.Time));
             }
 

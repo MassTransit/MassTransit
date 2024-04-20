@@ -152,9 +152,12 @@ namespace MassTransit.Tests.SagaStateMachineTests
 
             ISagaStateMachineTestHarness<SomeStateMachine, SomeState> sagaHarness = harness.GetSagaStateMachineHarness<SomeStateMachine, SomeState>();
 
-            Assert.That(await sagaHarness.Consumed.Any<SomeEvent>(), Is.True);
+            Assert.Multiple(async () =>
+            {
+                Assert.That(await sagaHarness.Consumed.Any<SomeEvent>(), Is.True);
 
-            Assert.That(await sagaHarness.NotExists(id), Is.Null);
+                Assert.That(await sagaHarness.NotExists(id), Is.Null);
+            });
         }
     }
 }

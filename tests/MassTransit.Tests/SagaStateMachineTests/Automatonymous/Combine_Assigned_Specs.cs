@@ -19,8 +19,11 @@
             await _machine.RaiseEvent(_instance, _machine.First);
             await _machine.RaiseEvent(_instance, _machine.Second);
 
-            Assert.IsTrue(_instance.Called);
-            Assert.IsEmpty(_machine.NextEvents(_instance.CurrentState));
+            Assert.Multiple(() =>
+            {
+                Assert.That(_instance.Called, Is.True);
+                Assert.That(_machine.NextEvents(_instance.CurrentState), Is.Empty);
+            });
         }
 
         [Test]
@@ -195,8 +198,11 @@
 
             await _machine.RaiseEvent(_instance, _machine.Second);
 
-            Assert.That(_instance.Called, Is.False);
-            Assert.That(_machine.NextEvents(_machine.GetState("Final")), Is.Empty);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_instance.Called, Is.False);
+                Assert.That(_machine.NextEvents(_machine.GetState("Final")), Is.Empty);
+            });
         }
 
         TestStateMachine _machine;

@@ -62,10 +62,13 @@ namespace MassTransit.EventHubIntegration.Tests
 
                 var result = await sendFilterTaskCompletionSource.Task;
 
-                Assert.IsTrue(result.TryGetPayload<EventHubSendContext>(out _));
-                Assert.IsTrue(result.TryGetPayload<EventHubSendContext<EventHubMessage>>(out _));
-                Assert.That(result.DestinationAddress,
-                    Is.EqualTo(new Uri($"loopback://localhost/{EventHubEndpointAddress.PathPrefix}/{Configuration.EventHubName}")));
+                Assert.Multiple(() =>
+                {
+                    Assert.That(result.TryGetPayload<EventHubSendContext>(out _), Is.True);
+                    Assert.That(result.TryGetPayload<EventHubSendContext<EventHubMessage>>(out _), Is.True);
+                    Assert.That(result.DestinationAddress,
+                        Is.EqualTo(new Uri($"loopback://localhost/{EventHubEndpointAddress.PathPrefix}/{Configuration.EventHubName}")));
+                });
 
                 await taskCompletionSource.Task;
             }

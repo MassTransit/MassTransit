@@ -47,8 +47,11 @@ namespace MassTransit.Tests
                 __Header_Test_Value = "Hello, World"
             }, timeout: harness.TestInactivityTimeout);
 
-            Assert.That(response.Message.Value, Is.EqualTo("Key: Hello"));
-            Assert.That(response.Headers.Get<string>("Test-Value"), Is.EqualTo("Hello, World"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(response.Message.Value, Is.EqualTo("Key: Hello"));
+                Assert.That(response.Headers.Get<string>("Test-Value"), Is.EqualTo("Hello, World"));
+            });
         }
 
 

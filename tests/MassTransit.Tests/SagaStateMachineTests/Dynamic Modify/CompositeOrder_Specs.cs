@@ -18,7 +18,7 @@
             await _machine.RaiseEvent(_instance, First);
             await _machine.RaiseEvent(_instance, Second);
 
-            Assert.IsTrue(_instance.Called);
+            Assert.That(_instance.Called, Is.True);
         }
 
         [Test]
@@ -31,7 +31,7 @@
             await _machine.RaiseEvent(_instance, First);
             await _machine.RaiseEvent(_instance, Second);
 
-            Assert.IsTrue(_instance.CalledAfterAll);
+            Assert.That(_instance.CalledAfterAll, Is.True);
         }
 
         [Test]
@@ -43,7 +43,7 @@
 
             await _machine.RaiseEvent(_instance, First);
 
-            Assert.IsFalse(_instance.Called);
+            Assert.That(_instance.Called, Is.False);
         }
 
         [Test]
@@ -55,18 +55,20 @@
 
             await _machine.RaiseEvent(_instance, Second);
 
-            Assert.IsFalse(_instance.Called);
+            Assert.That(_instance.Called, Is.False);
         }
 
+
         class Instance :
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public CompositeEventStatus CompositeStatus { get; set; }
             public bool Called { get; set; }
             public bool CalledAfterAll { get; set; }
             public State CurrentState { get; set; }
+            public Guid CorrelationId { get; set; }
         }
+
 
         State Waiting;
         Event Start;
@@ -86,21 +88,26 @@ SagaStateMachineInstance
                     .Event("First", out First)
                     .Event("Second", out Second)
                     .Initially()
-                        .When(Start, b => b.TransitionTo(Waiting))
+                    .When(Start, b => b.TransitionTo(Waiting))
                     .During(Waiting)
-                        .When(First, b => b.Then(context => { context.Instance.CalledAfterAll = false; }))
-                        .When(Second, b => b.Then(context => { context.Instance.CalledAfterAll = false; }))
+                    .When(First, b => b.Then(context =>
+                    {
+                        context.Instance.CalledAfterAll = false;
+                    }))
+                    .When(Second, b => b.Then(context =>
+                    {
+                        context.Instance.CalledAfterAll = false;
+                    }))
                     .CompositeEvent("Third", out Third, b => b.CompositeStatus, First, Second)
                     .During(Waiting)
-                        .When(Third, b => b
-                            .Then(context =>
-                            {
-                                context.Instance.Called = true;
-                                context.Instance.CalledAfterAll = true;
-                            })
-                            .Finalize()
-                        )
-
+                    .When(Third, b => b
+                        .Then(context =>
+                        {
+                            context.Instance.Called = true;
+                            context.Instance.CalledAfterAll = true;
+                        })
+                        .Finalize()
+                    )
                 );
         }
     }

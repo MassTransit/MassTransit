@@ -63,7 +63,7 @@ namespace MassTransit.Tests.Serialization
             var job = startJobContext.GetJob<ConvertVideo>()
                 ?? throw new SerializationException($"The job could not be deserialized: {TypeCache<ConvertVideo>.ShortName}");
 
-            Assert.That(job.Details.Count, Is.EqualTo(2));
+            Assert.That(job.Details, Has.Count.EqualTo(2));
         }
 
         protected async Task<ConsumeContext<T>> GetConsumeContext<T>(object values)

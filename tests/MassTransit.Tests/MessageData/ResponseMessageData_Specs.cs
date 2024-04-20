@@ -22,9 +22,12 @@ namespace MassTransit.Tests.MessageData
                 Key = "Hello"
             });
 
-            Assert.That(response.Message.Key, Is.EqualTo("Hello"));
+            Assert.Multiple(async () =>
+            {
+                Assert.That(response.Message.Key, Is.EqualTo("Hello"));
 
-            Assert.That(await response.Message.Value.Value, Is.Not.Empty);
+                Assert.That(await response.Message.Value.Value, Is.Not.Empty);
+            });
         }
 
         [Test]

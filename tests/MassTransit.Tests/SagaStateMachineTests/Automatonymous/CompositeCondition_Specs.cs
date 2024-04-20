@@ -18,8 +18,11 @@
             await _machine.RaiseEvent(_instance, _machine.Second);
             await _machine.RaiseEvent(_instance, _machine.First);
 
-            Assert.IsTrue(_instance.Called);
-            Assert.IsTrue(_instance.SecondFirst);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_instance.Called, Is.True);
+                Assert.That(_instance.SecondFirst, Is.True);
+            });
         }
 
         [Test]
@@ -32,19 +35,20 @@
             await _machine.RaiseEvent(_instance, _machine.First);
             await _machine.RaiseEvent(_instance, _machine.Second);
 
-            Assert.IsFalse(_instance.Called);
-            Assert.IsFalse(_instance.SecondFirst);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_instance.Called, Is.False);
+                Assert.That(_instance.SecondFirst, Is.False);
+            });
         }
-
 
         TestStateMachine _machine;
         Instance _instance;
 
 
         class Instance :
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public CompositeEventStatus CompositeStatus { get; set; }
             public bool Called { get; set; }
             public bool CalledAfterAll { get; set; }
@@ -52,6 +56,7 @@ SagaStateMachineInstance
             public bool SecondFirst { get; set; }
             public bool First { get; set; }
             public bool Second { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 
@@ -78,7 +83,7 @@ SagaStateMachineInstance
                             context.Instance.Second = true;
                             context.Instance.CalledAfterAll = false;
                         })
-                    );
+                );
 
                 CompositeEvent(() => Third, x => x.CompositeStatus, First, Second);
 

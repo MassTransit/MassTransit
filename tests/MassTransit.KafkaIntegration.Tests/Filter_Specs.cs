@@ -61,9 +61,12 @@ namespace MassTransit.KafkaIntegration.Tests
 
             await provider.GetTask<ConsumeContext<KafkaMessage>>();
 
-            Assert.That(_attempts, Is.EqualTo(4));
-            Assert.That(_lastCount, Is.EqualTo(2));
-            Assert.That(_lastAttempt, Is.EqualTo(3));
+            Assert.Multiple(() =>
+            {
+                Assert.That(_attempts, Is.EqualTo(4));
+                Assert.That(_lastCount, Is.EqualTo(2));
+                Assert.That(_lastAttempt, Is.EqualTo(3));
+            });
         }
 
 

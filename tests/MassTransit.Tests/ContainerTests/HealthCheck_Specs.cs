@@ -157,7 +157,7 @@ namespace MassTransit.Tests.ContainerTests
             IHostedService[] hostedServices = provider.GetServices<IHostedService>().ToArray();
 
             var result = await healthChecks.CheckHealthAsync(TestCancellationToken);
-            Assert.That(result.Status == HealthStatus.Unhealthy);
+            Assert.That(result.Status, Is.EqualTo(HealthStatus.Unhealthy));
 
             await Task.WhenAll(hostedServices.Select(x => x.StartAsync(TestCancellationToken)));
             try
@@ -204,7 +204,7 @@ namespace MassTransit.Tests.ContainerTests
             IHostedService[] hostedServices = provider.GetServices<IHostedService>().ToArray();
 
             var result = await healthChecks.CheckHealthAsync(TestCancellationToken);
-            Assert.That(result.Status == HealthStatus.Unhealthy);
+            Assert.That(result.Status, Is.EqualTo(HealthStatus.Unhealthy));
 
             await Task.WhenAll(hostedServices.Select(x => x.StartAsync(TestCancellationToken)));
             try

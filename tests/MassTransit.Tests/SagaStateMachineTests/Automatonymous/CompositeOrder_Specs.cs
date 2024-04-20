@@ -18,7 +18,7 @@
             await _machine.RaiseEvent(_instance, _machine.First);
             await _machine.RaiseEvent(_instance, _machine.Second);
 
-            Assert.IsTrue(_instance.Called);
+            Assert.That(_instance.Called, Is.True);
         }
 
         [Test]
@@ -31,7 +31,7 @@
             await _machine.RaiseEvent(_instance, _machine.First);
             await _machine.RaiseEvent(_instance, _machine.Second);
 
-            Assert.IsTrue(_instance.CalledAfterAll);
+            Assert.That(_instance.CalledAfterAll, Is.True);
         }
 
         [Test]
@@ -43,7 +43,7 @@
 
             await _machine.RaiseEvent(_instance, _machine.First);
 
-            Assert.IsFalse(_instance.Called);
+            Assert.That(_instance.Called, Is.False);
         }
 
         [Test]
@@ -55,7 +55,7 @@
 
             await _machine.RaiseEvent(_instance, _machine.Second);
 
-            Assert.IsFalse(_instance.Called);
+            Assert.That(_instance.Called, Is.False);
         }
 
         TestStateMachine _machine;
@@ -63,13 +63,13 @@
 
 
         class Instance :
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public CompositeEventStatus CompositeStatus { get; set; }
             public bool Called { get; set; }
             public bool CalledAfterAll { get; set; }
             public State CurrentState { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 
@@ -84,9 +84,15 @@ SagaStateMachineInstance
 
                 During(Waiting,
                     When(First)
-                        .Then(context => { context.Instance.CalledAfterAll = false; }),
+                        .Then(context =>
+                        {
+                            context.Instance.CalledAfterAll = false;
+                        }),
                     When(Second)
-                        .Then(context => { context.Instance.CalledAfterAll = false; }));
+                        .Then(context =>
+                        {
+                            context.Instance.CalledAfterAll = false;
+                        }));
 
                 CompositeEvent(() => Third, x => x.CompositeStatus, First, Second);
 

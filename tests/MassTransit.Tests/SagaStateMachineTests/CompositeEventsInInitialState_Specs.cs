@@ -22,7 +22,7 @@
             await InputQueueSendEndpoint.Send(secondMessage);
 
             Guid? saga = await _repository.ShouldContainSaga(x => x.CorrelationId == correlationId, TestTimeout);
-            Assert.IsTrue(saga.HasValue);
+            Assert.That(saga.HasValue, Is.True);
 
             Task<ConsumeContext<CompleteMessage>> received =
                 await ConnectPublishHandler<CompleteMessage>(x => x.Message.CorrelationId == correlationId);

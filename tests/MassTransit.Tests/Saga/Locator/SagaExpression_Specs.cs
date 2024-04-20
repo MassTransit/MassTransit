@@ -26,7 +26,7 @@ namespace MassTransit.Tests.Saga.Locator
 
             Guid? matches = await _repository.ShouldContainSaga(filter, TestTimeout);
 
-            Assert.IsTrue(matches.HasValue);
+            Assert.That(matches.HasValue, Is.True);
         }
 
         [Test]
@@ -41,7 +41,7 @@ namespace MassTransit.Tests.Saga.Locator
 
             Guid? matches = await _repository.ShouldContainSaga(filter, TestTimeout);
 
-            Assert.IsTrue(matches.HasValue);
+            Assert.That(matches.HasValue, Is.True);
         }
 
         public SagaExpression_Specs()

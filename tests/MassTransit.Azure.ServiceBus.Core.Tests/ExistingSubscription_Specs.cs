@@ -55,10 +55,13 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
             Response<SubscriptionProperties> response = await managementClient.GetSubscriptionAsync(topicName, subscriptionName);
 
-            Assert.That(response?.Value, Is.Not.Null);
+            Assert.Multiple(() =>
+            {
+                Assert.That(response?.Value, Is.Not.Null);
 
-            Assert.That(Uri.IsWellFormedUriString(response.Value.ForwardTo, UriKind.Absolute));
-            Assert.That(new Uri(response.Value.ForwardTo).AbsolutePath.TrimStart('/'), Is.EqualTo(queueName));
+                Assert.That(Uri.IsWellFormedUriString(response.Value.ForwardTo, UriKind.Absolute));
+                Assert.That(new Uri(response.Value.ForwardTo).AbsolutePath.TrimStart('/'), Is.EqualTo(queueName));
+            });
 
             bus = Bus.Factory.CreateUsingAzureServiceBus(x =>
             {
@@ -82,10 +85,13 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
             await managementClient.GetSubscriptionAsync(topicName, subscriptionName);
 
-            Assert.That(response?.Value, Is.Not.Null);
+            Assert.Multiple(() =>
+            {
+                Assert.That(response?.Value, Is.Not.Null);
 
-            Assert.That(Uri.IsWellFormedUriString(response.Value.ForwardTo, UriKind.Absolute));
-            Assert.That(new Uri(response.Value.ForwardTo).AbsolutePath.TrimStart('/'), Is.EqualTo(queueName));
+                Assert.That(Uri.IsWellFormedUriString(response.Value.ForwardTo, UriKind.Absolute));
+                Assert.That(new Uri(response.Value.ForwardTo).AbsolutePath.TrimStart('/'), Is.EqualTo(queueName));
+            });
         }
 
         public Specifying_an_existing_subscription()

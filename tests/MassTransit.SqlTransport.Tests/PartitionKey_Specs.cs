@@ -52,7 +52,7 @@ public class Using_partition_keys<T>
         await provider.GetTask<ConsumeContext<PartitionedTestMessage>>();
 
         IList<IReceivedMessage<PartitionedTestMessage>> receivedMessages = await harness.Consumed.SelectAsync<PartitionedTestMessage>().ToListAsync();
-        Assert.That(receivedMessages.Count, Is.EqualTo(MessageLimit));
+        Assert.That(receivedMessages, Has.Count.EqualTo(MessageLimit));
         var result = new int[NumKeys];
 
         foreach (IReceivedMessage<PartitionedTestMessage> receivedMessage in receivedMessages)

@@ -16,8 +16,11 @@
         [Test]
         public void Should_have_captured_initial_data()
         {
-            Assert.That(_instance.VehicleMake, Is.EqualTo("Audi"));
-            Assert.That(_instance.VehicleModel, Is.EqualTo("A6"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(_instance.VehicleMake, Is.EqualTo("Audi"));
+                Assert.That(_instance.VehicleModel, Is.EqualTo("A6"));
+            });
         }
 
         State BeingServiced;

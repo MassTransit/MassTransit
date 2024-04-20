@@ -73,7 +73,7 @@ namespace MassTransit.DbTransport.Tests
                     Assert.That(await consumerHarness.Consumed.Any<PingMessage>(cts.Token), Is.False);
 
                     await dbContext.SaveChangesAsync(harness.CancellationToken);
-                    
+
                     await transaction.CommitAsync();
                 }
 
@@ -81,10 +81,13 @@ namespace MassTransit.DbTransport.Tests
 
                 IReceivedMessage<PingMessage> context = harness.Consumed.Select<PingMessage>().First();
 
-                Assert.That(context.Context.MessageId, Is.Not.Null);
-                Assert.That(context.Context.ConversationId, Is.Not.Null);
-                Assert.That(context.Context.DestinationAddress, Is.Not.Null);
-                Assert.That(context.Context.SourceAddress, Is.Not.Null);
+                Assert.Multiple(() =>
+                {
+                    Assert.That(context.Context.MessageId, Is.Not.Null);
+                    Assert.That(context.Context.ConversationId, Is.Not.Null);
+                    Assert.That(context.Context.DestinationAddress, Is.Not.Null);
+                    Assert.That(context.Context.SourceAddress, Is.Not.Null);
+                });
             }
             finally
             {
@@ -135,7 +138,7 @@ namespace MassTransit.DbTransport.Tests
 
             foreach (var entity in modelBuilder.Model.GetEntityTypes())
             {
-            #pragma warning disable EF1001
+                #pragma warning disable EF1001
                 if (entity is EntityType { IsImplicitlyCreatedJoinEntityType: true })
                     continue;
 

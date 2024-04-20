@@ -3,7 +3,6 @@
     namespace Request_Specs
     {
         using System;
-        using System.Runtime.Intrinsics.Arm;
         using System.Threading.Tasks;
         using Contracts;
         using NUnit.Framework;
@@ -32,10 +31,10 @@
 
                 Guid? saga = await _repository.ShouldContainSagaInState(x => x.MemberNumber == memberNumber, _machine, x => x.Registered, TestTimeout);
 
-                Assert.IsTrue(saga.HasValue);
+                Assert.That(saga.HasValue, Is.True);
 
                 var sagaInstance = _repository[saga.Value].Instance;
-                Assert.IsFalse(sagaInstance.ValidateAddressRequestId.HasValue);
+                Assert.That(sagaInstance.ValidateAddressRequestId.HasValue, Is.False);
             }
 
             static Sending_a_request_from_a_state_machine()

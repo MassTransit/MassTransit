@@ -16,16 +16,17 @@
         {
             var message = new StartMessage();
 
-            Task<ConsumeContext<CompleteMessage>> received = await ConnectPublishHandler<CompleteMessage>(x => x.Message.CorrelationId == message.CorrelationId);
+            Task<ConsumeContext<CompleteMessage>> received =
+                await ConnectPublishHandler<CompleteMessage>(x => x.Message.CorrelationId == message.CorrelationId);
 
             await Bus.Publish(message);
 
             Guid? saga = await _repository.ShouldContainSagaInState(message.CorrelationId, _machine, x => x.Waiting, TestTimeout);
-            Assert.IsTrue(saga.HasValue);
+            Assert.That(saga.HasValue, Is.True);
 
             await Bus.Publish(new FirstMessage(message.CorrelationId));
             saga = await _repository.ShouldContainSagaInState(message.CorrelationId, _machine, x => x.WaitingForSecond, TestTimeout);
-            Assert.IsTrue(saga.HasValue);
+            Assert.That(saga.HasValue, Is.True);
 
             await Bus.Publish(new SecondMessage(message.CorrelationId));
 

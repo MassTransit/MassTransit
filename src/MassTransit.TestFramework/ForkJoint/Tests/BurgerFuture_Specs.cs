@@ -36,10 +36,13 @@ namespace MassTransit.TestFramework.ForkJoint.Tests
                 }
             });
 
-            Assert.That(response.Message.OrderId, Is.EqualTo(orderId));
-            Assert.That(response.Message.OrderLineId, Is.EqualTo(orderLineId));
-            Assert.That(response.Message.Burger.Cheese, Is.True);
-            Assert.That(response.Message.Burger.Weight, Is.EqualTo(1.0m));
+            Assert.Multiple(() =>
+            {
+                Assert.That(response.Message.OrderId, Is.EqualTo(orderId));
+                Assert.That(response.Message.OrderLineId, Is.EqualTo(orderLineId));
+                Assert.That(response.Message.Burger.Cheese, Is.True);
+                Assert.That(response.Message.Burger.Weight, Is.EqualTo(1.0m));
+            });
         }
 
         [Test]
@@ -71,9 +74,12 @@ namespace MassTransit.TestFramework.ForkJoint.Tests
             }
             catch (RequestFaultException exception)
             {
-                Assert.That(exception.Fault.Host, Is.Not.Null);
-                Assert.That(exception.Fault.Exceptions, Is.Not.Null.Or.Empty);
-                Assert.That(exception.Message, Contains.Substring("lettuce"));
+                Assert.Multiple(() =>
+                {
+                    Assert.That(exception.Fault.Host, Is.Not.Null);
+                    Assert.That(exception.Fault.Exceptions, Is.Not.Null.Or.Empty);
+                    Assert.That(exception.Message, Contains.Substring("lettuce"));
+                });
             }
         }
 

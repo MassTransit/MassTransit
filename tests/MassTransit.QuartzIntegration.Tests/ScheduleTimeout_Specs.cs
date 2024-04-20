@@ -23,7 +23,7 @@
 
                 Guid? saga = await _repository.ShouldContainSagaInState(x => x.MemberNumber == memberNumber, _machine, _machine.Active, TestTimeout);
 
-                Assert.IsTrue(saga.HasValue);
+                Assert.That(saga.HasValue, Is.True);
 
                 await InputQueueSendEndpoint.Send<OrderSubmitted>(new { MemberNumber = memberNumber });
 
@@ -55,7 +55,7 @@
 
                 Guid? saga = await _repository.ShouldContainSagaInState(x => x.MemberNumber == memberNumber, _machine, _machine.Active, TestTimeout);
 
-                Assert.IsTrue(saga.HasValue);
+                Assert.That(saga.HasValue, Is.True);
 
                 await InputQueueSendEndpoint.Send<CartItemAdded>(new { MemberNumber = memberNumber });
 

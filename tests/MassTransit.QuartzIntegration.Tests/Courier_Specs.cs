@@ -50,7 +50,7 @@ namespace MassTransit.QuartzIntegration.Tests
 
             await completed;
 
-            Assert.IsFalse(activityFaulted.IsCompleted);
+            Assert.That(activityFaulted.IsCompleted, Is.False);
         }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
@@ -111,7 +111,7 @@ namespace MassTransit.QuartzIntegration.Tests
 
             await completed;
 
-            Assert.IsFalse(activityFaulted.IsCompleted);
+            Assert.That(activityFaulted.IsCompleted, Is.False);
         }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)

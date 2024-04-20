@@ -2,9 +2,9 @@ namespace MassTransit.RabbitMqTransport.Tests
 {
     using System.Threading.Tasks;
     using HarnessContracts;
-    using MassTransit.Testing;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
+    using Testing;
 
 
     namespace HarnessContracts
@@ -67,9 +67,12 @@ namespace MassTransit.RabbitMqTransport.Tests
                 OrderNumber = "123"
             });
 
-            Assert.IsTrue(await harness.Sent.Any<OrderSubmitted>());
+            Assert.Multiple(async () =>
+            {
+                Assert.That(await harness.Sent.Any<OrderSubmitted>(), Is.True);
 
-            Assert.IsTrue(await harness.Consumed.Any<SubmitOrder>());
+                Assert.That(await harness.Consumed.Any<SubmitOrder>(), Is.True);
+            });
         }
 
 
@@ -126,9 +129,12 @@ namespace MassTransit.RabbitMqTransport.Tests
                 OrderNumber = "123"
             });
 
-            Assert.IsTrue(await harness.Sent.Any<OrderSubmitted>());
+            Assert.Multiple(async () =>
+            {
+                Assert.That(await harness.Sent.Any<OrderSubmitted>(), Is.True);
 
-            Assert.IsTrue(await harness.Consumed.Any<SubmitOrder>());
+                Assert.That(await harness.Consumed.Any<SubmitOrder>(), Is.True);
+            });
         }
 
 

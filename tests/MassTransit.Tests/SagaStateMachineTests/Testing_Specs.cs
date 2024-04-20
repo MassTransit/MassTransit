@@ -21,12 +21,12 @@
             await harness.Start();
             try
             {
-                await harness.InputQueueSendEndpoint.Send(new Start {CorrelationId = sagaId});
+                await harness.InputQueueSendEndpoint.Send(new Start { CorrelationId = sagaId });
 
-                Assert.IsTrue(harness.Consumed.Select<Start>().Any(), "Message not received");
+                Assert.That(harness.Consumed.Select<Start>().Any(), Is.True, "Message not received");
 
                 var instance = saga.Created.ContainsInState(sagaId, _machine, _machine.Running);
-                Assert.IsNotNull(instance, "Saga instance not found");
+                Assert.That(instance, Is.Not.Null, "Saga instance not found");
             }
             finally
             {
@@ -45,16 +45,16 @@
             await harness.Start();
             try
             {
-                await harness.InputQueueSendEndpoint.Send(new Start {CorrelationId = sagaId});
+                await harness.InputQueueSendEndpoint.Send(new Start { CorrelationId = sagaId });
 
-                Assert.IsTrue(harness.Consumed.Select<Start>().Any(), "Start not received");
+                Assert.That(harness.Consumed.Select<Start>().Any(), Is.True, "Start not received");
 
-                await harness.InputQueueSendEndpoint.Send(new Stop {CorrelationId = sagaId});
+                await harness.InputQueueSendEndpoint.Send(new Stop { CorrelationId = sagaId });
 
-                Assert.IsTrue(harness.Consumed.Select<Stop>().Any(), "Stop not received");
+                Assert.That(harness.Consumed.Select<Stop>().Any(), Is.True, "Stop not received");
 
                 var instance = saga.Created.ContainsInState(sagaId, _machine, _machine.Final);
-                Assert.IsNotNull(instance, "Saga instance not found");
+                Assert.That(instance, Is.Not.Null, "Saga instance not found");
             }
             finally
             {

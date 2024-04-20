@@ -46,12 +46,12 @@ namespace MassTransit.Tests.Caching
             {
                 await Task.Delay(1000);
 
-                return new Item(key) {Value = "First"};
+                return new Item(key) { Value = "First" };
             });
 
             Task<Item> second = _newCache.GetOrAdd(key, async key =>
             {
-                return new Item(key) {Value = "Second"};
+                return new Item(key) { Value = "Second" };
             });
 
             var item = await second;
@@ -62,9 +62,12 @@ namespace MassTransit.Tests.Caching
 
             await _newCache.Get(key);
 
-            Assert.That(timer.Elapsed + TimeSpan.FromSeconds(0.1), Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(1)));
+            Assert.Multiple(() =>
+            {
+                Assert.That(timer.Elapsed + TimeSpan.FromSeconds(0.1), Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(1)));
 
-            Assert.That(item.Value, Is.EqualTo("First"));
+                Assert.That(item.Value, Is.EqualTo("First"));
+            });
         }
     }
 
@@ -76,7 +79,7 @@ namespace MassTransit.Tests.Caching
         [OneTimeSetUp]
         public void Setup()
         {
-            _newCache = new MassTransitCache<Guid, Item, CacheValue<Item>>(new UsageCachePolicy<Item>(), new CacheOptions {Capacity = 1000});
+            _newCache = new MassTransitCache<Guid, Item, CacheValue<Item>>(new UsageCachePolicy<Item>(), new CacheOptions { Capacity = 1000 });
         }
 
         [Test]
@@ -99,7 +102,7 @@ namespace MassTransit.Tests.Caching
         [OneTimeSetUp]
         public void Setup()
         {
-            _newCache = new MassTransitCache<Guid, Item, CacheValue<Item>>(new UsageCachePolicy<Item>(), new CacheOptions {Capacity = 1000});
+            _newCache = new MassTransitCache<Guid, Item, CacheValue<Item>>(new UsageCachePolicy<Item>(), new CacheOptions { Capacity = 1000 });
         }
 
         [Test]
@@ -134,7 +137,7 @@ namespace MassTransit.Tests.Caching
         [OneTimeSetUp]
         public void Setup()
         {
-            _newCache = new MassTransitCache<Guid, Item, CacheValue<Item>>(new UsageCachePolicy<Item>(), new CacheOptions {Capacity = 1000});
+            _newCache = new MassTransitCache<Guid, Item, CacheValue<Item>>(new UsageCachePolicy<Item>(), new CacheOptions { Capacity = 1000 });
 
             _samples = new int[SampleCount];
 
@@ -192,7 +195,7 @@ namespace MassTransit.Tests.Caching
         public void Setup()
         {
             _massTransitCache = new MassTransitCache<Guid, Item, ITimeToLiveCacheValue<Item>>(new TimeToLiveCachePolicy<Item>(TimeSpan.FromSeconds(30)),
-                new CacheOptions {Capacity = 1000});
+                new CacheOptions { Capacity = 1000 });
 
             _samples = new int[SampleCount];
 

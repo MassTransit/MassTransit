@@ -11,67 +11,67 @@ namespace MassTransit.Tests.Middleware.Internals
         [Test]
         public void Should_match_a_generic_base_class_implementation_of_the_interface()
         {
-            Assert.IsTrue(typeof(NonGenericSubClass).HasInterface<IGeneric<int>>());
+            Assert.That(typeof(NonGenericSubClass).HasInterface<IGeneric<int>>(), Is.True);
         }
 
         [Test]
         public void Should_match_a_generic_interface()
         {
-            Assert.IsTrue(typeof(GenericClass).HasInterface<IGeneric<int>>());
+            Assert.That(typeof(GenericClass).HasInterface<IGeneric<int>>(), Is.True);
         }
 
         [Test]
         public void Should_match_a_regular_interface_by_type_argument_on_an_object()
         {
-            Assert.IsTrue(typeof(GenericClass).HasInterface(typeof(INotGeneric)));
+            Assert.That(typeof(GenericClass).HasInterface(typeof(INotGeneric)), Is.True);
         }
 
         [Test]
         public void Should_match_a_regular_interface_on_an_object()
         {
-            Assert.IsTrue(typeof(GenericClass).HasInterface<INotGeneric>());
+            Assert.That(typeof(GenericClass).HasInterface<INotGeneric>(), Is.True);
         }
 
         [Test]
         public void Should_match_a_regular_interface_using_the_generic_argument()
         {
-            Assert.IsTrue(typeof(GenericClass).HasInterface<INotGeneric>());
+            Assert.That(typeof(GenericClass).HasInterface<INotGeneric>(), Is.True);
         }
 
         [Test]
         public void Should_match_a_regular_interface_using_the_generic_argument_on_a_subclass()
         {
-            Assert.IsTrue(typeof(GenericSubClass).HasInterface<INotGeneric>());
+            Assert.That(typeof(GenericSubClass).HasInterface<INotGeneric>(), Is.True);
         }
 
         [Test]
         public void Should_match_a_regular_interface_using_the_type_argument()
         {
-            Assert.IsTrue(typeof(GenericClass).HasInterface(typeof(INotGeneric)));
+            Assert.That(typeof(GenericClass).HasInterface(typeof(INotGeneric)), Is.True);
         }
 
         [Test]
         public void Should_match_a_regular_interface_using_the_type_argument_on_a_subclass()
         {
-            Assert.IsTrue(typeof(GenericSubClass).HasInterface(typeof(INotGeneric)));
+            Assert.That(typeof(GenericSubClass).HasInterface(typeof(INotGeneric)), Is.True);
         }
 
         [Test]
         public void Should_match_an_open_generic_interface()
         {
-            Assert.IsTrue(typeof(GenericClass).HasInterface(typeof(IGeneric<>)));
+            Assert.That(typeof(GenericClass).HasInterface(typeof(IGeneric<>)), Is.True);
         }
 
         [Test]
         public void Should_match_an_open_generic_interface_in_a_base_class()
         {
-            Assert.IsTrue(typeof(NonGenericSubClass).HasInterface(typeof(IGeneric<>)));
+            Assert.That(typeof(NonGenericSubClass).HasInterface(typeof(IGeneric<>)), Is.True);
         }
 
         [Test]
         public void Should_not_match_a_regular_interface_that_is_not_implemented()
         {
-            Assert.IsFalse(typeof(GenericClass).HasInterface<IDisposable>());
+            Assert.That(typeof(GenericClass).HasInterface<IDisposable>(), Is.False);
         }
 
 

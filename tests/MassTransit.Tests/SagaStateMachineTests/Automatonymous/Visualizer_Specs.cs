@@ -12,7 +12,7 @@
         [Test]
         public void Should_parse_the_graph()
         {
-            Assert.IsNotNull(_graph);
+            Assert.That(_graph, Is.Not.Null);
         }
 
         [Test]

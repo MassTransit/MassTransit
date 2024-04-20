@@ -69,7 +69,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
                         options.StopTimeout = TimeSpan.FromSeconds(30);
                         options.ConsumerStopTimeout = TimeSpan.FromSeconds(10);
                     });
-
                 })
                 .BuildServiceProvider(true);
 
@@ -85,8 +84,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
             await harness.Stop();
 
-            Assert.That(await harness.Consumed.Any<SloMessage>(), Is.True);
-            Assert.That(await harness.Published.Any<SloResult>(), Is.True);
+            Assert.Multiple(async () =>
+            {
+                Assert.That(await harness.Consumed.Any<SloMessage>(), Is.True);
+                Assert.That(await harness.Published.Any<SloResult>(), Is.True);
+            });
         }
 
 

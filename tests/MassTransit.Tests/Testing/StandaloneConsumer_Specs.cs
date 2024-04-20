@@ -22,9 +22,12 @@
             {
                 await harness.InputQueueSendEndpoint.Send(new PingMessage());
 
-                Assert.That(harness.Consumed.Select<PingMessage>().Any(), Is.True);
+                Assert.Multiple(() =>
+                {
+                    Assert.That(harness.Consumed.Select<PingMessage>().Any(), Is.True);
 
-                Assert.That(consumer.Consumed.Select<PingMessage>().Any(), Is.True);
+                    Assert.That(consumer.Consumed.Select<PingMessage>().Any(), Is.True);
+                });
             }
             finally
             {

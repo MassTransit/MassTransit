@@ -34,11 +34,14 @@ namespace MassTransit.TestFramework.ForkJoint.Tests
                 Size = Size.Medium
             });
 
-            Assert.That(response.Message.OrderId, Is.EqualTo(orderId));
-            Assert.That(response.Message.OrderLineId, Is.EqualTo(orderLineId));
-            Assert.That(response.Message.Size, Is.EqualTo(Size.Medium));
-            Assert.That(response.Message.Created, Is.GreaterThanOrEqualTo(startedAt));
-            Assert.That(response.Message.Completed, Is.GreaterThanOrEqualTo(response.Message.Created));
+            Assert.Multiple(() =>
+            {
+                Assert.That(response.Message.OrderId, Is.EqualTo(orderId));
+                Assert.That(response.Message.OrderLineId, Is.EqualTo(orderLineId));
+                Assert.That(response.Message.Size, Is.EqualTo(Size.Medium));
+                Assert.That(response.Message.Created, Is.GreaterThanOrEqualTo(startedAt));
+                Assert.That(response.Message.Completed, Is.GreaterThanOrEqualTo(response.Message.Created));
+            });
         }
 
         [Test]
@@ -65,8 +68,11 @@ namespace MassTransit.TestFramework.ForkJoint.Tests
             }
             catch (RequestFaultException exception)
             {
-                Assert.That(exception.Fault.Host, Is.Not.Null);
-                Assert.That(exception.Message, Contains.Substring("Strawberry is not available"));
+                Assert.Multiple(() =>
+                {
+                    Assert.That(exception.Fault.Host, Is.Not.Null);
+                    Assert.That(exception.Message, Contains.Substring("Strawberry is not available"));
+                });
             }
         }
 

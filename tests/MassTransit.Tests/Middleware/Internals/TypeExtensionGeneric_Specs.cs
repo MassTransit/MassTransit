@@ -13,25 +13,25 @@ namespace MassTransit.Tests.Middleware.Internals
         [Test]
         public void Should_close_generic_type()
         {
-            Assert.IsTrue(typeof(GenericClass).ClosesType(typeof(IGeneric<>)));
+            Assert.That(typeof(GenericClass).ClosesType(typeof(IGeneric<>)), Is.True);
         }
 
         [Test]
         public void Should_not_close_nested_open_generic_base_class()
         {
-            Assert.IsFalse(typeof(SuperGenericBaseClass<>).ClosesType(typeof(GenericBaseClass<>)));
+            Assert.That(typeof(SuperGenericBaseClass<>).ClosesType(typeof(GenericBaseClass<>)), Is.False);
         }
 
         [Test]
         public void Should_not_close_nested_open_generic_interface_in_base_class()
         {
-            Assert.IsFalse(typeof(SuperGenericBaseClass<>).ClosesType(typeof(IGeneric<>)));
+            Assert.That(typeof(SuperGenericBaseClass<>).ClosesType(typeof(IGeneric<>)), Is.False);
         }
 
         [Test]
         public void Should_not_close_open_generic_type()
         {
-            Assert.IsFalse(typeof(GenericBaseClass<>).ClosesType(typeof(IGeneric<>)));
+            Assert.That(typeof(GenericBaseClass<>).ClosesType(typeof(IGeneric<>)), Is.False);
         }
 
         [Test]

@@ -1,14 +1,14 @@
 ﻿namespace MassTransit.Tests.SagaStateMachineTests
 {
-    using System;
-    using System.Threading.Tasks;
-    using MassTransit.Testing;
-    using NUnit.Framework;
-    using TestFramework;
-
-
     namespace Request3_Specs
     {
+        using System;
+        using System.Threading.Tasks;
+        using MassTransit.Testing;
+        using NUnit.Framework;
+        using TestFramework;
+
+
         [TestFixture]
         public class Sending_a_request_from_a_state_machine :
             InMemoryTestFixture
@@ -30,7 +30,7 @@
 
                 Guid? saga = await _repository.ShouldContainSagaInState(memberId, _machine, x => x.Registered, TestTimeout);
 
-                Assert.IsTrue(saga.HasValue);
+                Assert.That(saga.HasValue, Is.True);
 
                 var sagaInstance = _repository[saga.Value].Instance;
                 Assert.That(sagaInstance.Name, Is.EqualTo("Frank"));
@@ -167,9 +167,7 @@
                         .TransitionTo(NameValidationFaulted),
                     When(ValidateName.TimeoutExpired)
                         .TransitionTo(NameValidationTimeout));
-            }
-
-            // ReSharper disable UnassignedGetOnlyAutoProperty
+            } // ReSharper disable UnassignedGetOnlyAutoProperty
             public Request<TestState, ValidateName, NameValidated, NameInvalid, NameAlreadyExists> ValidateName { get; }
 
             public Event<RegisterMember> Register { get; }

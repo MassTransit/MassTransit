@@ -221,8 +221,11 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             var address = new RabbitMqEndpointAddress(hostAddress, new Uri("rabbitmq://remote-host/production/client/input-queue"));
 
-            Assert.That(address.VirtualHost, Is.EqualTo("production/client"));
-            Assert.That(address.Name, Is.EqualTo("input-queue"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(address.VirtualHost, Is.EqualTo("production/client"));
+                Assert.That(address.Name, Is.EqualTo("input-queue"));
+            });
 
             Uri uri = address;
 
@@ -236,9 +239,12 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             var address = new RabbitMqEndpointAddress(hostAddress, new Uri("rabbitmq://remote-host/input-queue"));
 
-            Assert.That(address.VirtualHost, Is.EqualTo("/"));
-            Assert.That(address.Name, Is.EqualTo("input-queue"));
-            Assert.That(address.Port, Is.EqualTo(5672));
+            Assert.Multiple(() =>
+            {
+                Assert.That(address.VirtualHost, Is.EqualTo("/"));
+                Assert.That(address.Name, Is.EqualTo("input-queue"));
+                Assert.That(address.Port, Is.EqualTo(5672));
+            });
 
             Uri uri = address;
 
@@ -252,8 +258,11 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             var address = new RabbitMqEndpointAddress(hostAddress, new Uri("rabbitmq://remote-host/production%2Fclient/input-queue"));
 
-            Assert.That(address.VirtualHost, Is.EqualTo("production/client"));
-            Assert.That(address.Name, Is.EqualTo("input-queue"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(address.VirtualHost, Is.EqualTo("production/client"));
+                Assert.That(address.Name, Is.EqualTo("input-queue"));
+            });
 
             Uri uri = address;
 

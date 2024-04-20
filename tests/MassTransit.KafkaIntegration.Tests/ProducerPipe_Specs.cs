@@ -152,7 +152,7 @@ namespace MassTransit.KafkaIntegration.Tests
                 context.ValueSerializer = new CustomSerializer<KafkaMessage>();
             }), harness.CancellationToken);
 
-            Assert.IsFalse(await harness.Consumed.Any<KafkaMessage>());
+            Assert.That(await harness.Consumed.Any<KafkaMessage>(), Is.False);
         }
 
 

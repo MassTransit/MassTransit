@@ -15,7 +15,7 @@ namespace MassTransit.Tests.SagaStateMachineTests.Dynamic_Modify
         {
             List<Event> events = _machine.Events.ToList();
 
-            Assert.That(events.Count, Is.EqualTo(4));
+            Assert.That(events, Has.Count.EqualTo(4));
             Assert.That(events, Does.Contain(Ignored));
             Assert.That(events, Does.Contain(Handshake));
             Assert.That(events, Does.Contain(Hello));

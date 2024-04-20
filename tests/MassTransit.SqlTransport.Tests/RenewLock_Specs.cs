@@ -7,6 +7,7 @@ using NUnit.Framework;
 using Testing;
 using UnitTests;
 
+
 [Explicit]
 [TestFixture(typeof(PostgresDatabaseTestConfiguration))]
 [TestFixture(typeof(SqlServerDatabaseTestConfiguration))]
@@ -33,7 +34,7 @@ public class Using_a_slow_consumer<T>
 
         await harness.Bus.Publish(new SlowMessage());
 
-        Assert.IsTrue(await harness.Consumed.Any<SlowMessage>());
+        Assert.That(await harness.Consumed.Any<SlowMessage>(), Is.True);
     }
 
     readonly T _configuration;

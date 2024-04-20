@@ -34,7 +34,7 @@ public class PortAddress_Specs
 
         var connection = SqlServerSqlTransportConnection.GetDatabaseConnection(provider.GetRequiredService<IOptions<SqlTransportOptions>>().Value);
 
-        Assert.That(connection.Connection.ConnectionString.Contains("Data Source=localhost,8675"));
+        Assert.That(connection.Connection.ConnectionString, Does.Contain("Data Source=localhost,8675"));
     }
 
     [Test]
@@ -61,9 +61,12 @@ public class PortAddress_Specs
 
         var connection = SqlServerSqlTransportConnection.GetDatabaseConnection(provider.GetRequiredService<IOptions<SqlTransportOptions>>().Value);
 
-        Assert.That(connection.Connection.ConnectionString, Contains.Substring("Data Source=(LocalDb)"));
+        Assert.Multiple(() =>
+        {
+            Assert.That(connection.Connection.ConnectionString, Contains.Substring("Data Source=(LocalDb)"));
 
-        Assert.That(provider.GetRequiredService<IBus>().Address.Host, Is.EqualTo("localdb"));
+            Assert.That(provider.GetRequiredService<IBus>().Address.Host, Is.EqualTo("localdb"));
+        });
     }
 
     [Test]
@@ -90,6 +93,6 @@ public class PortAddress_Specs
 
         var connection = SqlServerSqlTransportConnection.GetDatabaseConnection(provider.GetRequiredService<IOptions<SqlTransportOptions>>().Value);
 
-        Assert.That(connection.Connection.ConnectionString.Contains("Data Source=localhost;"));
+        Assert.That(connection.Connection.ConnectionString, Does.Contain("Data Source=localhost;"));
     }
 }

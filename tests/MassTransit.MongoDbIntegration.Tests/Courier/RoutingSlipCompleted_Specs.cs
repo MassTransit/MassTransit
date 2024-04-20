@@ -43,7 +43,7 @@
 
             Assert.That(routingSlip, Is.Not.Null);
             Assert.That(routingSlip.Events, Is.Not.Null);
-            Assert.That(routingSlip.Events.Length, Is.EqualTo(1));
+            Assert.That(routingSlip.Events, Has.Length.EqualTo(1));
 
             var completed = routingSlip.Events[0] as RoutingSlipCompletedDocument;
             Assert.That(completed, Is.Not.Null);

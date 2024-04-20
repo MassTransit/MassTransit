@@ -52,10 +52,13 @@ namespace MassTransit.TestFramework.ForkJoint.Tests
                 FryShakes = default(FryShake[])
             }, timeout: RequestTimeout.After(s: 5));
 
-            Assert.That(response.Is(out Response<OrderCompleted> completed), "Order did not complete");
+            Assert.Multiple(() =>
+            {
+                Assert.That(response.Is(out Response<OrderCompleted> completed), "Order did not complete");
 
-            Assert.That(completed.Message.OrderId, Is.EqualTo(orderId));
-            Assert.That(completed.Message.LinesCompleted.Count, Is.EqualTo(2));
+                Assert.That(completed.Message.OrderId, Is.EqualTo(orderId));
+                Assert.That(completed.Message.LinesCompleted, Has.Count.EqualTo(2));
+            });
         }
 
         [Test]

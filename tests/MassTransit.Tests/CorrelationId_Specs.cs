@@ -19,8 +19,11 @@
 
             ConsumeContext<PingMessage> context = await _handled;
 
-            Assert.That(context.CorrelationId.HasValue, Is.True);
-            Assert.That(context.CorrelationId.Value, Is.EqualTo(pingMessage.CorrelationId));
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.CorrelationId.HasValue, Is.True);
+                Assert.That(context.CorrelationId.Value, Is.EqualTo(pingMessage.CorrelationId));
+            });
         }
 
         Task<ConsumeContext<PingMessage>> _handled;
@@ -45,8 +48,11 @@
 
             ConsumeContext<PingMessage> context = await _handled;
 
-            Assert.That(context.CorrelationId.HasValue, Is.True);
-            Assert.That(context.CorrelationId.Value, Is.EqualTo(pingMessage.CorrelationId));
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.CorrelationId.HasValue, Is.True);
+                Assert.That(context.CorrelationId.Value, Is.EqualTo(pingMessage.CorrelationId));
+            });
         }
 
         Task<ConsumeContext<PingMessage>> _handled;
@@ -71,8 +77,11 @@
 
             ConsumeContext<A> context = await _handled;
 
-            Assert.That(context.CorrelationId.HasValue, Is.True);
-            Assert.That(context.CorrelationId.Value, Is.EqualTo(message.CorrelationId));
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.CorrelationId.HasValue, Is.True);
+                Assert.That(context.CorrelationId.Value, Is.EqualTo(message.CorrelationId));
+            });
         }
 
         Task<ConsumeContext<A>> _handled;
@@ -103,8 +112,11 @@
 
             ConsumeContext<A> context = await _handled;
 
-            Assert.That(context.CorrelationId.HasValue, Is.True);
-            Assert.That(context.CorrelationId.Value, Is.EqualTo(message.CommandId));
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.CorrelationId.HasValue, Is.True);
+                Assert.That(context.CorrelationId.Value, Is.EqualTo(message.CommandId));
+            });
         }
 
         Task<ConsumeContext<A>> _handled;
@@ -135,8 +147,11 @@
 
             ConsumeContext<A> context = await _handled;
 
-            Assert.That(context.CorrelationId.HasValue, Is.True);
-            Assert.That(context.CorrelationId.Value, Is.EqualTo(message.EventId));
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.CorrelationId.HasValue, Is.True);
+                Assert.That(context.CorrelationId.Value, Is.EqualTo(message.EventId));
+            });
         }
 
         Task<ConsumeContext<A>> _handled;
@@ -168,8 +183,11 @@
 
             ConsumeContext<A> context = await _handled;
 
-            Assert.That(context.CorrelationId.HasValue, Is.True);
-            Assert.That(context.CorrelationId.Value, Is.EqualTo(message.CorrelationId.Value));
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.CorrelationId.HasValue, Is.True);
+                Assert.That(context.CorrelationId.Value, Is.EqualTo(message.CorrelationId.Value));
+            });
         }
 
         Task<ConsumeContext<A>> _handled;
@@ -200,8 +218,11 @@
 
             ConsumeContext<A> context = await _handled;
 
-            Assert.That(context.CorrelationId.HasValue, Is.True);
-            Assert.That(context.CorrelationId.Value, Is.EqualTo(message.CorrelationId.Value));
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.CorrelationId.HasValue, Is.True);
+                Assert.That(context.CorrelationId.Value, Is.EqualTo(message.CorrelationId.Value));
+            });
         }
 
         Task<ConsumeContext<A>> _handled;

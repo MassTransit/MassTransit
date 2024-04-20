@@ -5,7 +5,6 @@
     using System.Linq;
     using MassTransit.Serialization;
     using NUnit.Framework;
-    using RequestClientMessages;
 
 
     [TestFixture(typeof(NewtonsoftJsonMessageSerializer))]
@@ -47,12 +46,15 @@
         [Test]
         public void Should_not_convert_to_a_dictionary()
         {
-            var message = new ListStringObjectMessage { Properties = new[]
+            var message = new ListStringObjectMessage
             {
-                new KeyValuePair<string, object>("Frank", "Mary"),
-                new KeyValuePair<string, object>("Peter", "Mary"),
-                new KeyValuePair<string, object>("Frank", "Peter")
-            }.ToList() };
+                Properties = new[]
+                {
+                    new KeyValuePair<string, object>("Frank", "Mary"),
+                    new KeyValuePair<string, object>("Peter", "Mary"),
+                    new KeyValuePair<string, object>("Frank", "Peter")
+                }.ToList()
+            };
 
             var result = SerializeAndReturn(message);
 
@@ -81,7 +83,7 @@
             var result = SerializeAndReturn(message);
 
             Assert.That(result.Values, Is.Not.Null);
-            Assert.That(result.Values.Length, Is.EqualTo(6), "Length");
+            Assert.That(result.Values, Has.Length.EqualTo(6), "Length");
             Assert.That(result.Values[1, 1], Is.EqualTo(4), "Value");
         }
 

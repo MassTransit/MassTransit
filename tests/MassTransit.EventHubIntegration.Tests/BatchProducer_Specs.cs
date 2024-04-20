@@ -78,13 +78,16 @@ namespace MassTransit.EventHubIntegration.Tests
 
                 ConsumeContext<EventHubMessage> result = await taskCompletionSource.Task;
 
-                Assert.That(result.SourceAddress, Is.EqualTo(new Uri("loopback://localhost/")));
-                Assert.That(result.DestinationAddress,
-                    Is.EqualTo(new Uri($"loopback://localhost/{EventHubEndpointAddress.PathPrefix}/{Configuration.EventHubName}")));
-                Assert.That(result.MessageId, Is.EqualTo(messageId));
-                Assert.That(result.CorrelationId, Is.EqualTo(correlationId));
-                Assert.That(result.InitiatorId, Is.EqualTo(initiatorId));
-                Assert.That(result.ConversationId, Is.EqualTo(conversationId));
+                Assert.Multiple(() =>
+                {
+                    Assert.That(result.SourceAddress, Is.EqualTo(new Uri("loopback://localhost/")));
+                    Assert.That(result.DestinationAddress,
+                        Is.EqualTo(new Uri($"loopback://localhost/{EventHubEndpointAddress.PathPrefix}/{Configuration.EventHubName}")));
+                    Assert.That(result.MessageId, Is.EqualTo(messageId));
+                    Assert.That(result.CorrelationId, Is.EqualTo(correlationId));
+                    Assert.That(result.InitiatorId, Is.EqualTo(initiatorId));
+                    Assert.That(result.ConversationId, Is.EqualTo(conversationId));
+                });
             }
             finally
             {

@@ -139,7 +139,7 @@
         [Test]
         public void Should_raise_the_event()
         {
-            Assert.That(_observer.Events.Count, Is.EqualTo(4));
+            Assert.That(_observer.Events, Has.Count.EqualTo(4));
         }
 
         State<Instance> Resting;

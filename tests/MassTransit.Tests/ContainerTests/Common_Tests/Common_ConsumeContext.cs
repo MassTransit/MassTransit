@@ -33,8 +33,11 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
             var publishEndpoint = await PublishEndpoint;
             var sendEndpointProvider = await SendEndpointProvider;
 
-            Assert.That(ReferenceEquals(publishEndpoint, sendEndpointProvider), "ReferenceEquals(publishEndpoint, sendEndpointProvider)");
-            Assert.That(ReferenceEquals(consumeContext, sendEndpointProvider), "ReferenceEquals(messageConsumeContext, sendEndpointProvider)");
+            Assert.Multiple(() =>
+            {
+                Assert.That(ReferenceEquals(publishEndpoint, sendEndpointProvider), "ReferenceEquals(publishEndpoint, sendEndpointProvider)");
+                Assert.That(ReferenceEquals(consumeContext, sendEndpointProvider), "ReferenceEquals(messageConsumeContext, sendEndpointProvider)");
+            });
         }
 
         protected override IServiceCollection ConfigureServices(IServiceCollection collection)
@@ -83,8 +86,11 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
             var publishEndpoint = await PublishEndpoint;
             var sendEndpointProvider = await SendEndpointProvider;
 
-            Assert.That(ReferenceEquals(publishEndpoint, sendEndpointProvider), "ReferenceEquals(publishEndpoint, sendEndpointProvider)");
-            Assert.That(ReferenceEquals(consumeContext, sendEndpointProvider), "ReferenceEquals(outboxConsumeContext, sendEndpointProvider)");
+            Assert.Multiple(() =>
+            {
+                Assert.That(ReferenceEquals(publishEndpoint, sendEndpointProvider), "ReferenceEquals(publishEndpoint, sendEndpointProvider)");
+                Assert.That(ReferenceEquals(consumeContext, sendEndpointProvider), "ReferenceEquals(outboxConsumeContext, sendEndpointProvider)");
+            });
 
             await fault;
 
@@ -145,8 +151,11 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
             var publishEndpoint = await PublishEndpoint;
             var sendEndpointProvider = await SendEndpointProvider;
 
-            Assert.That(ReferenceEquals(publishEndpoint, sendEndpointProvider), "ReferenceEquals(publishEndpoint, sendEndpointProvider)");
-            Assert.That(ReferenceEquals(consumeContext, sendEndpointProvider), "ReferenceEquals(outboxConsumeContext, sendEndpointProvider)");
+            Assert.Multiple(() =>
+            {
+                Assert.That(ReferenceEquals(publishEndpoint, sendEndpointProvider), "ReferenceEquals(publishEndpoint, sendEndpointProvider)");
+                Assert.That(ReferenceEquals(consumeContext, sendEndpointProvider), "ReferenceEquals(outboxConsumeContext, sendEndpointProvider)");
+            });
 
             await fault;
 
@@ -210,8 +219,11 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
             var publishEndpoint = await PublishEndpoint;
             var sendEndpointProvider = await SendEndpointProvider;
 
-            Assert.That(ReferenceEquals(publishEndpoint, sendEndpointProvider), "ReferenceEquals(publishEndpoint, sendEndpointProvider)");
-            Assert.That(ReferenceEquals(consumeContext, sendEndpointProvider), "ReferenceEquals(outboxConsumeContext, sendEndpointProvider)");
+            Assert.Multiple(() =>
+            {
+                Assert.That(ReferenceEquals(publishEndpoint, sendEndpointProvider), "ReferenceEquals(publishEndpoint, sendEndpointProvider)");
+                Assert.That(ReferenceEquals(consumeContext, sendEndpointProvider), "ReferenceEquals(outboxConsumeContext, sendEndpointProvider)");
+            });
 
             await fault;
 
@@ -279,8 +291,11 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
             var publishEndpoint = await PublishEndpoint;
             var sendEndpointProvider = await SendEndpointProvider;
 
-            Assert.That(ReferenceEquals(publishEndpoint, sendEndpointProvider), "ReferenceEquals(publishEndpoint, sendEndpointProvider)");
-            Assert.That(ReferenceEquals(consumeContext, sendEndpointProvider), "ReferenceEquals(outboxConsumeContext, sendEndpointProvider)");
+            Assert.Multiple(() =>
+            {
+                Assert.That(ReferenceEquals(publishEndpoint, sendEndpointProvider), "ReferenceEquals(publishEndpoint, sendEndpointProvider)");
+                Assert.That(ReferenceEquals(consumeContext, sendEndpointProvider), "ReferenceEquals(outboxConsumeContext, sendEndpointProvider)");
+            });
 
             await fault;
 
@@ -348,8 +363,11 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
             var publishEndpoint = await PublishEndpoint;
             var sendEndpointProvider = await SendEndpointProvider;
 
-            Assert.That(ReferenceEquals(publishEndpoint, sendEndpointProvider), "ReferenceEquals(publishEndpoint, sendEndpointProvider)");
-            Assert.That(ReferenceEquals(consumeContext, sendEndpointProvider), "ReferenceEquals(outboxConsumeContext, sendEndpointProvider)");
+            Assert.Multiple(() =>
+            {
+                Assert.That(ReferenceEquals(publishEndpoint, sendEndpointProvider), "ReferenceEquals(publishEndpoint, sendEndpointProvider)");
+                Assert.That(ReferenceEquals(consumeContext, sendEndpointProvider), "ReferenceEquals(outboxConsumeContext, sendEndpointProvider)");
+            });
 
             await fault;
 
@@ -415,8 +433,11 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
             var publishEndpoint = await PublishEndpoint;
             var sendEndpointProvider = await SendEndpointProvider;
 
-            Assert.That(ReferenceEquals(publishEndpoint, sendEndpointProvider), "ReferenceEquals(publishEndpoint, sendEndpointProvider)");
-            Assert.That(ReferenceEquals(consumeContext, sendEndpointProvider), "ReferenceEquals(outboxConsumeContext, sendEndpointProvider)");
+            Assert.Multiple(() =>
+            {
+                Assert.That(ReferenceEquals(publishEndpoint, sendEndpointProvider), "ReferenceEquals(publishEndpoint, sendEndpointProvider)");
+                Assert.That(ReferenceEquals(consumeContext, sendEndpointProvider), "ReferenceEquals(outboxConsumeContext, sendEndpointProvider)");
+            });
 
             await fault;
 
@@ -479,8 +500,11 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
             var publishEndpoint = await PublishEndpoint;
             var sendEndpointProvider = await SendEndpointProvider;
 
-            Assert.That(ReferenceEquals(publishEndpoint, sendEndpointProvider), "ReferenceEquals(publishEndpoint, sendEndpointProvider)");
-            Assert.That(ReferenceEquals(consumeContext, sendEndpointProvider), "ReferenceEquals(outboxConsumeContext, sendEndpointProvider)");
+            Assert.Multiple(() =>
+            {
+                Assert.That(ReferenceEquals(publishEndpoint, sendEndpointProvider), "ReferenceEquals(publishEndpoint, sendEndpointProvider)");
+                Assert.That(ReferenceEquals(consumeContext, sendEndpointProvider), "ReferenceEquals(outboxConsumeContext, sendEndpointProvider)");
+            });
 
             await fault;
 
@@ -541,8 +565,11 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
             var publishEndpoint = await PublishEndpoint;
             var sendEndpointProvider = await SendEndpointProvider;
 
-            Assert.That(ReferenceEquals(publishEndpoint, sendEndpointProvider), "ReferenceEquals(publishEndpoint, sendEndpointProvider)");
-            Assert.That(ReferenceEquals(consumeContext, sendEndpointProvider), "ReferenceEquals(outboxConsumeContext, sendEndpointProvider)");
+            Assert.Multiple(() =>
+            {
+                Assert.That(ReferenceEquals(publishEndpoint, sendEndpointProvider), "ReferenceEquals(publishEndpoint, sendEndpointProvider)");
+                Assert.That(ReferenceEquals(consumeContext, sendEndpointProvider), "ReferenceEquals(outboxConsumeContext, sendEndpointProvider)");
+            });
 
             await fault;
 
@@ -741,7 +768,6 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
 
     namespace UnitOfWorkComponents
     {
-        using System;
         using MassTransit.Configuration;
 
 

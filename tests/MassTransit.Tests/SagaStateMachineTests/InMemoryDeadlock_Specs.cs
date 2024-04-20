@@ -16,24 +16,24 @@
         {
             var id = NewId.NextGuid();
 
-            await InputQueueSendEndpoint.Send<CreateInstance>(new {CorrelationId = id});
+            await InputQueueSendEndpoint.Send<CreateInstance>(new { CorrelationId = id });
 
             Guid? saga = await _repository.ShouldContainSagaInState(id, _machine, _machine.Active, TestTimeout);
 
-            Assert.IsTrue(saga.HasValue);
+            Assert.That(saga.HasValue, Is.True);
 
-            await InputQueueSendEndpoint.Send<CompleteInstance>(new {CorrelationId = id});
+            await InputQueueSendEndpoint.Send<CompleteInstance>(new { CorrelationId = id });
 
             await Task.Delay(990);
 
             await Console.Out.WriteLineAsync("Sending duplicate message");
 
-            await InputQueueSendEndpoint.Send<CancelInstance>(new {CorrelationId = id});
+            await InputQueueSendEndpoint.Send<CancelInstance>(new { CorrelationId = id });
 
             id = NewId.NextGuid();
-            await InputQueueSendEndpoint.Send<CreateInstance>(new {CorrelationId = id});
+            await InputQueueSendEndpoint.Send<CreateInstance>(new { CorrelationId = id });
             Guid? saga2 = await _repository.ShouldContainSagaInState(id, _machine, _machine.Active, TestTimeout);
-            Assert.IsTrue(saga2.HasValue);
+            Assert.That(saga2.HasValue, Is.True);
         }
 
         InMemorySagaRepository<Instance> _repository;

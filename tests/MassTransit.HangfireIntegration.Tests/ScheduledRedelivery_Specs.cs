@@ -19,9 +19,12 @@ namespace MassTransit.HangfireIntegration.Tests
 
             await Task.WhenAll(_received.Select(x => x.Task));
 
-            Assert.That(_timestamps[1] - _timestamps[0], Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(0.8)));
-            Assert.That(_timestamps[2] - _timestamps[1], Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(1.8)));
-            Assert.That(_timestamps[3] - _timestamps[2], Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(2.8)));
+            Assert.Multiple(() =>
+            {
+                Assert.That(_timestamps[1] - _timestamps[0], Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(0.8)));
+                Assert.That(_timestamps[2] - _timestamps[1], Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(1.8)));
+                Assert.That(_timestamps[3] - _timestamps[2], Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(2.8)));
+            });
 
             TestContext.Out.WriteLine("Interval: {0}", _timestamps[1] - _timestamps[0]);
             TestContext.Out.WriteLine("Interval: {0}", _timestamps[2] - _timestamps[1]);

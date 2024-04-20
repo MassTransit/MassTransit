@@ -72,16 +72,22 @@ namespace MassTransit.Tests.Testing
         public async Task Should_receive_the_fault_with_data()
         {
             await _saga.Exists(_sagaId);
-            Assert.That(_harness.Consumed.Select<StartMessage>().Any(), Is.True);
-            Assert.That(_harness.Consumed.Select<Fault<ExecuteRequest>>().Any(), Is.True);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_harness.Consumed.Select<StartMessage>().Any(), Is.True);
+                Assert.That(_harness.Consumed.Select<Fault<ExecuteRequest>>().Any(), Is.True);
+            });
 
             var result = (Fault<ExecuteRequest>)_harness.Consumed.Select<Fault<ExecuteRequest>>().Single().MessageObject;
-            Assert.That(result.FaultId, Is.EqualTo(_faultId));
-            Assert.That(result.FaultedMessageId, Is.EqualTo(_faultedMessageId));
-            Assert.That(result.Timestamp, Is.EqualTo(_timestamp));
-            Assert.That(result.FaultMessageTypes, Is.EqualTo(_faultMessageTypes));
-            Assert.That(result.Message, Is.Not.Null);
-            Assert.That(result.Exceptions, Is.Not.Null);
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.FaultId, Is.EqualTo(_faultId));
+                Assert.That(result.FaultedMessageId, Is.EqualTo(_faultedMessageId));
+                Assert.That(result.Timestamp, Is.EqualTo(_timestamp));
+                Assert.That(result.FaultMessageTypes, Is.EqualTo(_faultMessageTypes));
+                Assert.That(result.Message, Is.Not.Null);
+                Assert.That(result.Exceptions, Is.Not.Null);
+            });
         }
 
         [OneTimeTearDown]

@@ -20,9 +20,12 @@ namespace MassTransit.Tests
 
             await Task.WhenAll(_received.Select(x => x.Task));
 
-            Assert.That(_timestamps[1] - _timestamps[0], Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(0.9)));
-            Assert.That(_timestamps[2] - _timestamps[1], Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(1.9)));
-            Assert.That(_timestamps[3] - _timestamps[2], Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(2.9)));
+            Assert.Multiple(() =>
+            {
+                Assert.That(_timestamps[1] - _timestamps[0], Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(0.9)));
+                Assert.That(_timestamps[2] - _timestamps[1], Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(1.9)));
+                Assert.That(_timestamps[3] - _timestamps[2], Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(2.9)));
+            });
 
             TestContext.Out.WriteLine("Interval: {0}", _timestamps[1] - _timestamps[0]);
             TestContext.Out.WriteLine("Interval: {0}", _timestamps[2] - _timestamps[1]);
@@ -74,9 +77,12 @@ namespace MassTransit.Tests
 
             await Task.WhenAll(_received.Select(x => x.Task));
 
-            Assert.That(_timestamps[1] - _timestamps[0], Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(0.9)));
-            Assert.That(_timestamps[2] - _timestamps[1], Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(1.9)));
-            Assert.That(_timestamps[3] - _timestamps[2], Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(2.9)));
+            Assert.Multiple(() =>
+            {
+                Assert.That(_timestamps[1] - _timestamps[0], Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(0.9)));
+                Assert.That(_timestamps[2] - _timestamps[1], Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(1.9)));
+                Assert.That(_timestamps[3] - _timestamps[2], Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(2.9)));
+            });
 
             TestContext.Out.WriteLine("Interval: {0}", _timestamps[1] - _timestamps[0]);
             TestContext.Out.WriteLine("Interval: {0}", _timestamps[2] - _timestamps[1]);
@@ -113,6 +119,7 @@ namespace MassTransit.Tests
         }
     }
 
+
     [TestFixture]
     [Category("Flaky")]
     public class Using_delayed_redelivery_with_new_message_id :
@@ -127,22 +134,28 @@ namespace MassTransit.Tests
 
             await Task.WhenAll(_received.Select(x => x.Task));
 
-            Assert.That(_timestamps[1] - _timestamps[0], Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(0.9)));
-            Assert.That(_timestamps[2] - _timestamps[1], Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(1.9)));
-            Assert.That(_timestamps[3] - _timestamps[2], Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(2.9)));
+            Assert.Multiple(() =>
+            {
+                Assert.That(_timestamps[1] - _timestamps[0], Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(0.9)));
+                Assert.That(_timestamps[2] - _timestamps[1], Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(1.9)));
+                Assert.That(_timestamps[3] - _timestamps[2], Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(2.9)));
+            });
 
             TestContext.Out.WriteLine("Interval: {0}", _timestamps[1] - _timestamps[0]);
             TestContext.Out.WriteLine("Interval: {0}", _timestamps[2] - _timestamps[1]);
             TestContext.Out.WriteLine("Interval: {0}", _timestamps[3] - _timestamps[2]);
 
-            Assert.That(_received[0].Task.Result.MessageId.Value, Is.EqualTo(messageId));
-            Assert.That(_received[1].Task.Result.MessageId.Value, Is.Not.EqualTo(messageId));
-            Assert.That(_received[2].Task.Result.MessageId.Value, Is.Not.EqualTo(messageId));
-            Assert.That(_received[3].Task.Result.MessageId.Value, Is.Not.EqualTo(messageId));
+            Assert.Multiple(() =>
+            {
+                Assert.That(_received[0].Task.Result.MessageId.Value, Is.EqualTo(messageId));
+                Assert.That(_received[1].Task.Result.MessageId.Value, Is.Not.EqualTo(messageId));
+                Assert.That(_received[2].Task.Result.MessageId.Value, Is.Not.EqualTo(messageId));
+                Assert.That(_received[3].Task.Result.MessageId.Value, Is.Not.EqualTo(messageId));
 
-            Assert.That(_received[1].Task.Result.GetHeader(MessageHeaders.OriginalMessageId, default(Guid?)), Is.EqualTo((Guid?)messageId));
-            Assert.That(_received[2].Task.Result.GetHeader(MessageHeaders.OriginalMessageId, default(Guid?)), Is.EqualTo((Guid?)messageId));
-            Assert.That(_received[3].Task.Result.GetHeader(MessageHeaders.OriginalMessageId, default(Guid?)), Is.EqualTo((Guid?)messageId));
+                Assert.That(_received[1].Task.Result.GetHeader(MessageHeaders.OriginalMessageId, default(Guid?)), Is.EqualTo((Guid?)messageId));
+                Assert.That(_received[2].Task.Result.GetHeader(MessageHeaders.OriginalMessageId, default(Guid?)), Is.EqualTo((Guid?)messageId));
+                Assert.That(_received[3].Task.Result.GetHeader(MessageHeaders.OriginalMessageId, default(Guid?)), Is.EqualTo((Guid?)messageId));
+            });
         }
 
         TaskCompletionSource<ConsumeContext<PingMessage>>[] _received;

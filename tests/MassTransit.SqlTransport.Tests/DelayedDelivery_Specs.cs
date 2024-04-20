@@ -44,7 +44,7 @@ public class Using_delayed_send<T>
 
         await endpoint.Send(testMessage, x => x.Delay = TimeSpan.FromSeconds(3));
 
-        Assert.IsTrue(await harness.Consumed.Any<TestMessage>(x => x.Context.Message.Id == testMessage.Id));
+        Assert.That(await harness.Consumed.Any<TestMessage>(x => x.Context.Message.Id == testMessage.Id), Is.True);
 
         var then = DateTime.UtcNow;
 
@@ -92,7 +92,7 @@ public class Using_delayed_publish<T>
 
         await harness.Bus.Publish(testMessage, x => x.Delay = TimeSpan.FromSeconds(3));
 
-        Assert.IsTrue(await harness.Consumed.Any<TestMessage>(x => x.Context.Message.Id == testMessage.Id));
+        Assert.That(await harness.Consumed.Any<TestMessage>(x => x.Context.Message.Id == testMessage.Id), Is.True);
 
         var then = DateTime.UtcNow;
 

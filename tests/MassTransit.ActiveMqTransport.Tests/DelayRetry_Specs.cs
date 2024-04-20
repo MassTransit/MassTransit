@@ -21,7 +21,7 @@
 
             ConsumeContext<PingMessage> context = await _received.Task;
 
-            Assert.GreaterOrEqual(_receivedTimeSpan, TimeSpan.FromSeconds(1));
+            Assert.That(_receivedTimeSpan, Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(1)));
         }
 
         TaskCompletionSource<ConsumeContext<PingMessage>> _received;
@@ -156,8 +156,11 @@
             ConsumeContext<Fault<OneMessage>> pingFaultContext = await pingFault;
             ConsumeContext<Fault<TwoMessage>> pongFaultContext = await pongFault;
 
-            Assert.That(_consumer.PingCount, Is.EqualTo(3));
-            Assert.That(_consumer.PongCount, Is.EqualTo(3));
+            Assert.Multiple(() =>
+            {
+                Assert.That(_consumer.PingCount, Is.EqualTo(3));
+                Assert.That(_consumer.PongCount, Is.EqualTo(3));
+            });
         }
 
         Consumer _consumer;
@@ -212,8 +215,6 @@
     [TestFixture]
     public class Delayed_redelivery
     {
-        Consumer _consumer;
-
         [Test]
         [Category("Flaky")]
         [TestCase("activemq")]
@@ -275,11 +276,16 @@
             ConsumeContext<Fault<OneMessage>> pingFaultContext = await pingFault;
             ConsumeContext<Fault<TwoMessage>> pongFaultContext = await pongFault;
 
-            Assert.That(_consumer.PingCount, Is.EqualTo(3));
-            Assert.That(_consumer.PongCount, Is.EqualTo(3));
+            Assert.Multiple(() =>
+            {
+                Assert.That(_consumer.PingCount, Is.EqualTo(3));
+                Assert.That(_consumer.PongCount, Is.EqualTo(3));
+            });
 
             await busControl.StopAsync();
         }
+
+        Consumer _consumer;
 
         public Task<ConsumeContext<T>> SubscribeHandler<T>(IBus bus, Func<ConsumeContext<T>, bool> filter)
             where T : class
@@ -438,7 +444,7 @@
 
             ConsumeContext<PingMessage> context = await _received.Task;
 
-            Assert.GreaterOrEqual(_receivedTimeSpan, TimeSpan.FromSeconds(1));
+            Assert.That(_receivedTimeSpan, Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(1)));
         }
 
         TaskCompletionSource<ConsumeContext<PingMessage>> _received;
@@ -490,8 +496,11 @@
 
             ConsumeContext<PingMessage> context = await _received.Task;
 
-            Assert.GreaterOrEqual(_receivedTimeSpan, TimeSpan.FromSeconds(1));
-            Assert.IsTrue(_hit);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_receivedTimeSpan, Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(1)));
+                Assert.That(_hit, Is.True);
+            });
         }
 
         TaskCompletionSource<ConsumeContext<PingMessage>> _received;

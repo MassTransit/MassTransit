@@ -21,9 +21,13 @@
 
             TestExecutionContext.CurrentContext.OutWriter.Flush();
 
-            Assert.IsNotNull(response);
-            Assert.NotNull(_replyToAddress);
-            Assert.IsTrue(_replyAddressPattern.IsMatch(_replyToAddress?.ToString()), "Reply address '{0}' does not match desired pattern", _replyToAddress);
+            Assert.Multiple(() =>
+            {
+                Assert.That(response, Is.Not.Null);
+                Assert.That(_replyToAddress, Is.Not.Null);
+                Assert.That(_replyAddressPattern.IsMatch(_replyToAddress?.ToString()), Is.True,
+                    $"Reply address '{_replyToAddress}' does not match desired pattern");
+            });
         }
 
         Uri _replyToAddress;
@@ -62,9 +66,13 @@
             RequestHandle<PingMessage> request = clientFactory.CreateRequest(new PingMessage(_pingId));
             Response<PongMessage> response = await request.GetResponse<PongMessage>();
 
-            Assert.IsNotNull(response);
-            Assert.NotNull(_replyToAddress);
-            Assert.IsTrue(_replyAddressPattern.IsMatch(_replyToAddress?.ToString()), "Reply address '{0}' does not match desired pattern", _replyToAddress);
+            Assert.Multiple(() =>
+            {
+                Assert.That(response, Is.Not.Null);
+                Assert.That(_replyToAddress, Is.Not.Null);
+                Assert.That(_replyAddressPattern.IsMatch(_replyToAddress?.ToString()), Is.True,
+                    $"Reply address '{_replyToAddress}' does not match desired pattern");
+            });
         }
 
         Uri _replyToAddress;

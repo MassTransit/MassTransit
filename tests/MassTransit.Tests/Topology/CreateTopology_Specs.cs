@@ -43,22 +43,31 @@
 
                 ConsumeContext<INewUserEvent> context = await handled;
 
-                Assert.IsTrue(context.CorrelationId.HasValue);
-                Assert.That(context.CorrelationId.Value, Is.EqualTo(transactionId));
+                Assert.Multiple(() =>
+                {
+                    Assert.That(context.CorrelationId.HasValue, Is.True);
+                    Assert.That(context.CorrelationId.Value, Is.EqualTo(transactionId));
+                });
 
                 await harness.InputQueueSendEndpoint.Send<OtherMessage>(new { CorrelationId = transactionId });
 
                 ConsumeContext<OtherMessage> otherContext = await otherHandled;
 
-                Assert.IsTrue(otherContext.CorrelationId.HasValue);
-                Assert.That(otherContext.CorrelationId.Value, Is.EqualTo(transactionId));
+                Assert.Multiple(() =>
+                {
+                    Assert.That(otherContext.CorrelationId.HasValue, Is.True);
+                    Assert.That(otherContext.CorrelationId.Value, Is.EqualTo(transactionId));
+                });
 
                 await harness.InputQueueSendEndpoint.Send<LegacyMessage>(new { TransactionId = transactionId });
 
                 ConsumeContext<LegacyMessage> legacyContext = await legacyHandled;
 
-                Assert.IsTrue(legacyContext.CorrelationId.HasValue);
-                Assert.That(legacyContext.CorrelationId.Value, Is.EqualTo(transactionId));
+                Assert.Multiple(() =>
+                {
+                    Assert.That(legacyContext.CorrelationId.HasValue, Is.True);
+                    Assert.That(legacyContext.CorrelationId.Value, Is.EqualTo(transactionId));
+                });
             }
             finally
             {

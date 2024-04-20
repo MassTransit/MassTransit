@@ -38,9 +38,12 @@
                 response = await request.GetResponse<Value>();
             }
 
-            Assert.That(response.RequestId.HasValue, Is.True);
-            Assert.That(response.Headers.TryGetHeader("Frank", out var value), Is.True);
-            Assert.That(value, Is.EqualTo("Mary"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(response.RequestId.HasValue, Is.True);
+                Assert.That(response.Headers.TryGetHeader("Frank", out var value), Is.True);
+                Assert.That(value, Is.EqualTo("Mary"));
+            });
         }
 
         [Test]
@@ -104,9 +107,12 @@
             }
             catch (RequestFaultException exception)
             {
-                Assert.That(exception.Fault.Exceptions.First().ExceptionType, Is.EqualTo(TypeCache<IntentionalTestException>.ShortName));
-                Assert.That(exception.RequestType, Is.EqualTo(TypeCache<GetValue>.ShortName));
-                Assert.That(exception.Fault.FaultMessageTypes, Is.EqualTo(MessageTypeCache<GetValue>.MessageTypeNames));
+                Assert.Multiple(() =>
+                {
+                    Assert.That(exception.Fault.Exceptions.First().ExceptionType, Is.EqualTo(TypeCache<IntentionalTestException>.ShortName));
+                    Assert.That(exception.RequestType, Is.EqualTo(TypeCache<GetValue>.ShortName));
+                    Assert.That(exception.Fault.FaultMessageTypes, Is.EqualTo(MessageTypeCache<GetValue>.MessageTypeNames));
+                });
             }
             catch
             {
@@ -163,9 +169,12 @@
 
             Response<MemberRegistered, ExistingMemberFound> response = await client.GetResponse<MemberRegistered, ExistingMemberFound>(new RegisterMember());
 
-            Assert.That(response.Is(out Response<MemberRegistered> _), Is.True, "Should have been registered");
+            Assert.Multiple(() =>
+            {
+                Assert.That(response.Is(out Response<MemberRegistered> _), Is.True, "Should have been registered");
 
-            Assert.That(response.Is(out Response<ExistingMemberFound> _), Is.False, "Should not have been an existing member");
+                Assert.That(response.Is(out Response<ExistingMemberFound> _), Is.False, "Should not have been an existing member");
+            });
         }
 
         [Test]
@@ -176,9 +185,12 @@
             Response<MemberRegistered, ExistingMemberFound> response =
                 await client.GetResponse<MemberRegistered, ExistingMemberFound>(new RegisterMember { MemberId = "Johnny5" });
 
-            Assert.That(response.Is(out Response<MemberRegistered> _), Is.False, "Should not have been registered");
+            Assert.Multiple(() =>
+            {
+                Assert.That(response.Is(out Response<MemberRegistered> _), Is.False, "Should not have been registered");
 
-            Assert.That(response.Is(out Response<ExistingMemberFound> _), Is.True, "Should have been an existing member");
+                Assert.That(response.Is(out Response<ExistingMemberFound> _), Is.True, "Should have been an existing member");
+            });
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

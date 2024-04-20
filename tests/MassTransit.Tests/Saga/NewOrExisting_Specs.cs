@@ -21,9 +21,12 @@ namespace MassTransit.Tests.Saga
             await InputQueueSendEndpoint.Send(message);
 
             var saga = _sagaHarness.Sagas.Contains(sagaId);
-            Assert.That(saga, Is.Not.Null);
+            Assert.Multiple(async () =>
+            {
+                Assert.That(saga, Is.Not.Null);
 
-            Assert.That(await _sagaHarness.Consumed.Any<EventMessage>());
+                Assert.That(await _sagaHarness.Consumed.Any<EventMessage>());
+            });
         }
 
         [Test]
@@ -36,9 +39,12 @@ namespace MassTransit.Tests.Saga
             await InputQueueSendEndpoint.Send(message);
 
             var saga = _sagaHarness.Sagas.Contains(sagaId);
-            Assert.That(saga, Is.Not.Null);
+            Assert.Multiple(async () =>
+            {
+                Assert.That(saga, Is.Not.Null);
 
-            Assert.That(await _sagaHarness.Consumed.Any<CreateMessage>());
+                Assert.That(await _sagaHarness.Consumed.Any<CreateMessage>());
+            });
 
             await InputQueueSendEndpoint.Send(new EventMessage(sagaId));
 

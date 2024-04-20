@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using NUnit.Framework;
 using SqlTransport.PostgreSql;
 
+
 [TestFixture]
 public class PortAddress_Specs
 {
@@ -34,7 +35,7 @@ public class PortAddress_Specs
 
         var connection = PostgresSqlTransportConnection.GetDatabaseConnection(provider.GetRequiredService<IOptions<SqlTransportOptions>>().Value);
 
-        Assert.That(connection.Connection.ConnectionString.Contains("Port=5544"));
+        Assert.That(connection.Connection.ConnectionString, Does.Contain("Port=5544"));
     }
 
     [Test]
@@ -61,6 +62,6 @@ public class PortAddress_Specs
 
         var connection = PostgresSqlTransportConnection.GetDatabaseConnection(provider.GetRequiredService<IOptions<SqlTransportOptions>>().Value);
 
-        Assert.That(connection.Connection.ConnectionString.Contains("Port="), Is.False);
+        Assert.That(connection.Connection.ConnectionString, Does.Not.Contain("Port="));
     }
 }

@@ -19,8 +19,11 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             ConsumeContext<OtherMessage> otherContext = await _otherHandled;
 
-            Assert.IsTrue(otherContext.CorrelationId.HasValue);
-            Assert.That(otherContext.CorrelationId.Value, Is.EqualTo(transactionId));
+            Assert.Multiple(() =>
+            {
+                Assert.That(otherContext.CorrelationId.HasValue, Is.True);
+                Assert.That(otherContext.CorrelationId.Value, Is.EqualTo(transactionId));
+            });
         }
 
         Task<ConsumeContext<OtherMessage>> _otherHandled;
@@ -43,11 +46,6 @@ namespace MassTransit.RabbitMqTransport.Tests
     public class When_using_named_legacy_config :
         RabbitMqTestFixture
     {
-        public When_using_named_legacy_config()
-        {
-            MessageCorrelation.UseCorrelationId<LegacyMessage>(x => x.TransactionId);
-        }
-
         [Test]
         public async Task Should_handle_named_configured_legacy()
         {
@@ -57,8 +55,16 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             ConsumeContext<LegacyMessage> legacyContext = await _legacyHandled;
 
-            Assert.IsTrue(legacyContext.CorrelationId.HasValue);
-            Assert.That(legacyContext.CorrelationId.Value, Is.EqualTo(transactionId));
+            Assert.Multiple(() =>
+            {
+                Assert.That(legacyContext.CorrelationId.HasValue, Is.True);
+                Assert.That(legacyContext.CorrelationId.Value, Is.EqualTo(transactionId));
+            });
+        }
+
+        public When_using_named_legacy_config()
+        {
+            MessageCorrelation.UseCorrelationId<LegacyMessage>(x => x.TransactionId);
         }
 
         Task<ConsumeContext<LegacyMessage>> _legacyHandled;
@@ -90,8 +96,11 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             ConsumeContext<INewUserEvent> context = await _handled;
 
-            Assert.IsTrue(context.CorrelationId.HasValue);
-            Assert.That(context.CorrelationId.Value, Is.EqualTo(transactionId));
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.CorrelationId.HasValue, Is.True);
+                Assert.That(context.CorrelationId.Value, Is.EqualTo(transactionId));
+            });
         }
 
         Task<ConsumeContext<INewUserEvent>> _handled;

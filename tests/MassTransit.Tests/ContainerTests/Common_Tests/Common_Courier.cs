@@ -12,6 +12,11 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
     public class Courier_ExecuteActivity :
         InMemoryContainerTestFixture
     {
+        Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
+        Task<ConsumeContext<RoutingSlipCompleted>> _completed;
+        Uri _executeAddress;
+        Guid _trackingNumber;
+
         [Test]
         public async Task Should_register_and_execute_the_activity()
         {
@@ -34,11 +39,6 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
             await _activityCompleted;
         }
 
-        Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
-        Task<ConsumeContext<RoutingSlipCompleted>> _completed;
-        Uri _executeAddress;
-        Guid _trackingNumber;
-
         protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
         {
             configurator.AddExecuteActivity<SetVariableActivity, SetVariableArguments>();
@@ -59,6 +59,10 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
     public class Courier_ExecuteActivity_Endpoint :
         InMemoryContainerTestFixture
     {
+        Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
+        Task<ConsumeContext<RoutingSlipCompleted>> _completed;
+        Guid _trackingNumber;
+
         [Test]
         public async Task Should_register_and_execute_the_activity()
         {
@@ -81,10 +85,6 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
             await _activityCompleted;
         }
 
-        Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
-        Task<ConsumeContext<RoutingSlipCompleted>> _completed;
-        Guid _trackingNumber;
-
         protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
         {
             configurator.AddExecuteActivity<SetVariableActivity, SetVariableArguments>()
@@ -96,6 +96,11 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
     public class Courier_Activity :
         InMemoryContainerTestFixture
     {
+        Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
+        Task<ConsumeContext<RoutingSlipCompleted>> _completed;
+        Uri _executeAddress;
+        Guid _trackingNumber;
+
         [Test]
         public async Task Should_register_and_execute_the_activity()
         {
@@ -113,11 +118,6 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
             await _completed;
             await _activityCompleted;
         }
-
-        Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
-        Task<ConsumeContext<RoutingSlipCompleted>> _completed;
-        Uri _executeAddress;
-        Guid _trackingNumber;
 
         protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
         {
@@ -142,6 +142,10 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
     public class Courier_Activity_Custom_Subscription :
         InMemoryContainerTestFixture
     {
+        Task<ConsumeContext<RegistrationCompleted>> _completed;
+        Uri _executeAddress;
+        Guid _trackingNumber;
+
         [Test]
         public async Task Should_register_and_execute_the_activity()
         {
@@ -162,10 +166,6 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
 
             Assert.That(completed.Message.Value, Is.EqualTo("Secret Value"));
         }
-
-        Task<ConsumeContext<RegistrationCompleted>> _completed;
-        Uri _executeAddress;
-        Guid _trackingNumber;
 
         protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
         {
@@ -197,6 +197,16 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
     public class Common_Activity_Filter :
         InMemoryContainerTestFixture
     {
+        readonly TaskCompletionSource<(TestActivity, MyId)> _activityTaskCompletionSource;
+        readonly TaskCompletionSource<MyId> _executeTaskCompletionSource;
+        Uri _executeAddress;
+
+        public Common_Activity_Filter()
+        {
+            _activityTaskCompletionSource = GetTask<(TestActivity, MyId)>();
+            _executeTaskCompletionSource = GetTask<MyId>();
+        }
+
         [Test]
         public async Task Should_use_scope()
         {
@@ -214,26 +224,15 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
             await executor.Execute(builder.Build(), InMemoryTestHarness.CancellationToken);
 
             var result = await _executeTaskCompletionSource.Task;
-            Assert.IsNotNull(result);
+            Assert.That(result, Is.Not.Null);
 
             var activityResult = await _activityTaskCompletionSource.Task;
-            Assert.IsNotNull(activityResult);
 
             Assert.That(result, Is.EqualTo(activityResult.Item2));
 
             ConsumeContext<RoutingSlipCompleted> completedContext = await completed;
 
             Assert.That(completedContext.GetVariable("HeaderValue", ""), Is.EqualTo("Bingo!"));
-        }
-
-        readonly TaskCompletionSource<(TestActivity, MyId)> _activityTaskCompletionSource;
-        readonly TaskCompletionSource<MyId> _executeTaskCompletionSource;
-        Uri _executeAddress;
-
-        public Common_Activity_Filter()
-        {
-            _activityTaskCompletionSource = GetTask<(TestActivity, MyId)>();
-            _executeTaskCompletionSource = GetTask<MyId>();
         }
 
         protected override IServiceCollection ConfigureServices(IServiceCollection collection)
@@ -348,6 +347,10 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
     public class Courier_Activity_Endpoint :
         InMemoryContainerTestFixture
     {
+        Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
+        Task<ConsumeContext<RoutingSlipCompleted>> _completed;
+        Guid _trackingNumber;
+
         [Test]
         public async Task Should_register_and_execute_the_activity()
         {
@@ -365,10 +368,6 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
             await _completed;
             await _activityCompleted;
         }
-
-        Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
-        Task<ConsumeContext<RoutingSlipCompleted>> _completed;
-        Guid _trackingNumber;
 
         protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
         {

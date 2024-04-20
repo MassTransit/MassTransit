@@ -16,7 +16,7 @@
         [Test]
         public void Should_raise_the_event()
         {
-            Assert.That(_observer.Events.Count, Is.EqualTo(1));
+            Assert.That(_observer.Events, Has.Count.EqualTo(1));
         }
 
         Instance _instance;

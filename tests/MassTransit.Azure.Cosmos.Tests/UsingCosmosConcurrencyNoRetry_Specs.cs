@@ -25,7 +25,7 @@
 
             var saga = await GetSagaRetry(correlationId, TestTimeout);
 
-            Assert.IsNotNull(saga);
+            Assert.That(saga, Is.Not.Null);
 
             await Task.WhenAll(
                 InputQueueSendEndpoint.Send(new Bass
@@ -53,7 +53,7 @@
             // Because concurrency exception's happened without retry middleware configured, we aren't in our final state/
             var instance = await GetSaga(correlationId);
 
-            Assert.IsTrue(!instance.CurrentState.Equals("Harmony"));
+            Assert.That(instance.CurrentState, Is.Not.EqualTo("Harmony"));
         }
 
         [Test]
@@ -74,7 +74,7 @@
             for (var i = 0; i < 20; i++)
             {
                 var saga = await GetSagaRetry(sagaIds[i], TestTimeout);
-                Assert.IsNotNull(saga);
+                Assert.That(saga, Is.Not.Null);
             }
 
             for (var i = 0; i < 20; i++)
@@ -116,7 +116,7 @@
                     break;
             }
 
-            Assert.IsTrue(someNotInFinalState);
+            Assert.That(someNotInFinalState, Is.True);
         }
 
         ChoirStateMachine _machine;

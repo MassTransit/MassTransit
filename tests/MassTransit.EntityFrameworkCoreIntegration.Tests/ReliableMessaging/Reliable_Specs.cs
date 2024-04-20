@@ -109,9 +109,12 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
                 ISagaStateMachineTestHarness<ReliableStateMachine, ReliableState>? sagaHarness =
                     harness.GetSagaStateMachineHarness<ReliableStateMachine, ReliableState>();
 
-                Assert.That(await sagaHarness.Consumed.Any<CreateState>(), Is.True);
+                Assert.Multiple(async () =>
+                {
+                    Assert.That(await sagaHarness.Consumed.Any<CreateState>(), Is.True);
 
-                Assert.That(await sagaHarness.Exists(sagaId, x => x.Verified), Is.Not.Null);
+                    Assert.That(await sagaHarness.Exists(sagaId, x => x.Verified), Is.Not.Null);
+                });
             }
             finally
             {
@@ -145,9 +148,12 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
                 ISagaStateMachineTestHarness<ReliableStateMachine, ReliableState>? sagaHarness =
                     harness.GetSagaStateMachineHarness<ReliableStateMachine, ReliableState>();
 
-                Assert.That(await sagaHarness.Consumed.Any<CreateState>(), Is.True);
+                Assert.Multiple(async () =>
+                {
+                    Assert.That(await sagaHarness.Consumed.Any<CreateState>(), Is.True);
 
-                Assert.That(await sagaHarness.Exists(sagaId, x => x.Verified), Is.Not.Null);
+                    Assert.That(await sagaHarness.Exists(sagaId, x => x.Verified), Is.Not.Null);
+                });
             }
             finally
             {
@@ -181,9 +187,12 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
                 ISagaStateMachineTestHarness<ReliableStateMachine, ReliableState>? sagaHarness =
                     harness.GetSagaStateMachineHarness<ReliableStateMachine, ReliableState>();
 
-                Assert.That(await sagaHarness.Consumed.Any<CreateState>(), Is.True);
+                Assert.Multiple(async () =>
+                {
+                    Assert.That(await sagaHarness.Consumed.Any<CreateState>(), Is.True);
 
-                Assert.That(await sagaHarness.Exists(sagaId, x => x.Verified), Is.Not.Null);
+                    Assert.That(await sagaHarness.Exists(sagaId, x => x.Verified), Is.Not.Null);
+                });
             }
             finally
             {

@@ -123,7 +123,7 @@
 
             var nextEvents = await _machine.NextEvents(instance);
 
-            Assert.IsTrue(nextEvents.Any(x => x.Name.Equals("Charge")));
+            Assert.That(nextEvents.Any(x => x.Name.Equals("Charge")), Is.True);
         }
 
         [Test]

@@ -75,7 +75,7 @@
 
                 ConsumeContext<ITestMessage> context = await _handled;
 
-                Assert.IsInstanceOf<TestConcreteClass>(context.Message.Data);
+                Assert.That(context.Message.Data, Is.InstanceOf<TestConcreteClass>());
             }
 
             Task<ConsumeContext<ITestMessage>> _handled;
@@ -110,9 +110,9 @@
                 ConsumeContext<ITestArrayMessage> context = await _handled;
 
                 Assert.That(context.Message.Data, Is.Not.Null);
-                Assert.That(context.Message.Data.Length, Is.EqualTo(1));
+                Assert.That(context.Message.Data, Has.Length.EqualTo(1));
 
-                Assert.IsInstanceOf<TestConcreteClass>(context.Message.Data[0]);
+                Assert.That(context.Message.Data[0], Is.InstanceOf<TestConcreteClass>());
             }
 
             Task<ConsumeContext<ITestArrayMessage>> _handled;
@@ -149,9 +149,9 @@
                 ConsumeContext<ITestListMessage> context = await _handled;
 
                 Assert.That(context.Message.Data, Is.Not.Null);
-                Assert.That(context.Message.Data.Count, Is.EqualTo(1));
+                Assert.That(context.Message.Data, Has.Count.EqualTo(1));
 
-                Assert.IsInstanceOf<TestConcreteClass>(context.Message.Data[0]);
+                Assert.That(context.Message.Data[0], Is.InstanceOf<TestConcreteClass>());
             }
 
             Task<ConsumeContext<ITestListMessage>> _handled;

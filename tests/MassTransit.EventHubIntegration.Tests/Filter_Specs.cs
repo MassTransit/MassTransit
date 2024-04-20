@@ -58,9 +58,12 @@ namespace MassTransit.EventHubIntegration.Tests
 
             ConsumeContext<EventHubMessage> result = await provider.GetRequiredService<TaskCompletionSource<ConsumeContext<EventHubMessage>>>().Task;
 
-            Assert.That(_attempts, Is.EqualTo(4));
-            Assert.That(_lastCount, Is.EqualTo(2));
-            Assert.That(_lastAttempt, Is.EqualTo(3));
+            Assert.Multiple(() =>
+            {
+                Assert.That(_attempts, Is.EqualTo(4));
+                Assert.That(_lastCount, Is.EqualTo(2));
+                Assert.That(_lastAttempt, Is.EqualTo(3));
+            });
         }
 
 

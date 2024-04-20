@@ -18,9 +18,12 @@
         {
             ConsumeContext<RoutingSlipCompleted> context = await _completed;
 
-            Assert.That(context.Message.TrackingNumber, Is.EqualTo(_trackingNumber));
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.Message.TrackingNumber, Is.EqualTo(_trackingNumber));
 
-            Assert.That(context.GetVariable<string>("Test"), Is.EqualTo("Used"));
+                Assert.That(context.GetVariable<string>("Test"), Is.EqualTo("Used"));
+            });
         }
 
         [Test]

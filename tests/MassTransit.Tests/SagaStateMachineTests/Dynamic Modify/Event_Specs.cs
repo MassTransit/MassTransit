@@ -23,19 +23,19 @@
         [Test]
         public void It_should_create_configured_events()
         {
-            Assert.IsInstanceOf<TriggerEvent>(_eventB);
+            Assert.That(_eventB, Is.InstanceOf<TriggerEvent>());
         }
 
         [Test]
         public void It_should_create_the_proper_event_type_for_data_events()
         {
-            Assert.IsInstanceOf<MessageEvent<A>>(_eventA);
+            Assert.That(_eventA, Is.InstanceOf<MessageEvent<A>>());
         }
 
         [Test]
         public void It_should_create_the_proper_event_type_for_simple_events()
         {
-            Assert.IsInstanceOf<TriggerEvent>(_hello);
+            Assert.That(_hello, Is.InstanceOf<TriggerEvent>());
         }
 
         Event _hello;

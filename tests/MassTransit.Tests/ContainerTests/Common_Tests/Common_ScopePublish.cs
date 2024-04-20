@@ -356,8 +356,11 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
             await InputQueueSendEndpoint.Send<SimpleMessageInterface>(new { Name = "test" });
 
             ConsumeContext<Fault<SimpleMessageInterface>> result = await TaskCompletionSource.Task;
-            Assert.IsNotNull(result);
-            Assert.IsFalse(Marker.Called);
+            Assert.Multiple(() =>
+            {
+                Assert.That(result, Is.Not.Null);
+                Assert.That(Marker.Called, Is.False);
+            });
         }
 
         protected override IServiceCollection ConfigureServices(IServiceCollection collection)

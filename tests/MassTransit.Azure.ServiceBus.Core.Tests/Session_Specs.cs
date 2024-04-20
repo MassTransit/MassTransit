@@ -15,7 +15,7 @@
         {
             ConsumeContext<PingMessage> context = await _handler;
 
-            Assert.IsFalse(context.ReceiveContext.Redelivered);
+            Assert.That(context.ReceiveContext.Redelivered, Is.False);
         }
 
         [Test]

@@ -18,7 +18,7 @@
             await _machine.RaiseEvent(_instance, _machine.First);
             await _machine.RaiseEvent(_instance, _machine.Second);
 
-            Assert.IsTrue(_instance.Called);
+            Assert.That(_instance.Called, Is.True);
         }
 
         [Test]
@@ -30,7 +30,7 @@
 
             await _machine.RaiseEvent(_instance, _machine.First);
 
-            Assert.IsFalse(_instance.Called);
+            Assert.That(_instance.Called, Is.False);
         }
 
         [Test]
@@ -42,7 +42,7 @@
 
             await _machine.RaiseEvent(_instance, _machine.Second);
 
-            Assert.IsFalse(_instance.Called);
+            Assert.That(_instance.Called, Is.False);
         }
 
         TestStateMachine _machine;
