@@ -14,7 +14,7 @@ public class ProcessJobConsumer: IConsumer<ProcessJob>
             await context.RespondAsync<ProcessJobCompleted>(new
             {
                 context.Message.CorrelationId,
-                ClientNumber = context.Message.JobNumber
+                context.Message.JobNumber
             });
         }
 

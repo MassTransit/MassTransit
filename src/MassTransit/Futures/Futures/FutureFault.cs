@@ -26,6 +26,8 @@ namespace MassTransit.Futures
             set => _factory = value;
         }
 
+        public bool WaitForPending { get; set; }
+
         public IEnumerable<ValidationResult> Validate()
         {
             yield break;
@@ -33,12 +35,15 @@ namespace MassTransit.Futures
 
         public async Task SetFaulted(BehaviorContext<FutureState, TInput> context)
         {
-            context.SetFaulted(context.Saga.CorrelationId);
+            if (!WaitForPending || !context.Saga.HasPending())
+            {
+                context.SetFaulted(context.Saga.CorrelationId);
 
-            var fault = await context.SendMessageToSubscriptions(_factory,
-                context.Saga.HasSubscriptions() ? context.Saga.Subscriptions.ToArray() : Array.Empty<FutureSubscription>());
+                var fault = await context.SendMessageToSubscriptions(_factory,
+                    context.Saga.HasSubscriptions() ? context.Saga.Subscriptions.ToArray() : Array.Empty<FutureSubscription>());
 
-            context.SetFault(context.Saga.CorrelationId, fault);
+                context.SetFault(context.Saga.CorrelationId, fault);
+            }
         }
 
         static Task<SendTuple<TFault>> DefaultFactory(BehaviorContext<FutureState, TInput> context)
@@ -86,6 +91,8 @@ namespace MassTransit.Futures
             set => _factory = value;
         }
 
+        public bool WaitForPending { get; set; }
+
         public IEnumerable<ValidationResult> Validate()
         {
             yield break;
@@ -93,12 +100,15 @@ namespace MassTransit.Futures
 
         public async Task SetFaulted(BehaviorContext<FutureState> context)
         {
-            context.SetFaulted(context.Saga.CorrelationId);
+            if (!WaitForPending || !context.Saga.HasPending())
+            {
+                context.SetFaulted(context.Saga.CorrelationId);
 
-            var fault = await context.SendMessageToSubscriptions(_factory,
-                context.Saga.HasSubscriptions() ? context.Saga.Subscriptions.ToArray() : Array.Empty<FutureSubscription>());
+                var fault = await context.SendMessageToSubscriptions(_factory,
+                    context.Saga.HasSubscriptions() ? context.Saga.Subscriptions.ToArray() : Array.Empty<FutureSubscription>());
 
-            context.SetFault(context.Saga.CorrelationId, fault);
+                context.SetFault(context.Saga.CorrelationId, fault);
+            }
         }
 
         static Task<SendTuple<TFault>> DefaultFactory(BehaviorContext<FutureState> context)

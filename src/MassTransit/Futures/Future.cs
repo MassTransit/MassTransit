@@ -27,7 +27,6 @@ namespace MassTransit
     {
         readonly FutureFault<TFault> _fault = new FutureFault<TFault>();
         readonly FutureResult<TCommand, TResult> _result = new FutureResult<TCommand, TResult>();
-        readonly FutureFault<TFault> _completedWithFault = new FutureFault<TFault>();
         protected Future()
         {
             InstanceState(x => x.CurrentState, WaitingForCompletion, Completed, Faulted);
@@ -315,9 +314,6 @@ namespace MassTransit
                             faulted => faulted
                                 .ThenAsync(context => _fault.SetFaulted(context))
                                 .TransitionTo(Faulted)))
-                    .If(context => !context.Saga.HasPending() && context.Saga.HasFaults(),
-                        faulted => faulted
-                            .ThenAsync(context => _completedWithFault.SetFaulted(context)))
             );
         }
 
@@ -331,9 +327,6 @@ namespace MassTransit
                         faulted => faulted
                             .ThenAsync(context => _fault.SetFaulted(context))
                             .TransitionTo(Faulted))
-                    .If(context => !context.Saga.HasPending() && context.Saga.HasFaults(),
-                        faulted => faulted
-                            .ThenAsync(context => _completedWithFault.SetFaulted(context)))
             );
         }
 
@@ -346,9 +339,6 @@ namespace MassTransit
                         faulted => faulted
                             .ThenAsync(context => _fault.SetFaulted(context))
                             .TransitionTo(Faulted))
-                    .If(context => !context.Saga.HasPending() && context.Saga.HasFaults(),
-                        faulted => faulted
-                            .ThenAsync(context => _completedWithFault.SetFaulted(context)))
             );
         }
 
@@ -366,9 +356,6 @@ namespace MassTransit
                 When(resultEvent)
                     .ThenAsync(context => callback(context))
                     .TransitionTo(Completed)
-                    .If(context => !context.Saga.HasPending() && context.Saga.HasFaults(),
-                        faulted => faulted
-                            .ThenAsync(context => _completedWithFault.SetFaulted(context)))
             );
         }
 
@@ -379,9 +366,6 @@ namespace MassTransit
                 When(faultEvent)
                     .ThenAsync(context => callback(context))
                     .TransitionTo(Faulted)
-                    .If(context => !context.Saga.HasPending() && context.Saga.HasFaults(),
-                        faulted => faulted
-                            .ThenAsync(context => _completedWithFault.SetFaulted(context)))
             );
         }
 
@@ -438,7 +422,8 @@ namespace MassTransit
         /// <param name="configure"></param>
         protected void WhenAllCompletedOrFaulted(Action<IFutureFaultConfigurator<TFault>> configure)
         {
-            var configurator = new FutureFaultConfigurator<TFault>(_completedWithFault);
+            _fault.WaitForPending = true;
+            var configurator = new FutureFaultConfigurator<TFault>(_fault);
 
             configure?.Invoke(configurator);
         }
