@@ -22,7 +22,6 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.EventHubs" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
     <ProjectReference Include="..\MassTransit.Azure.ServiceBus.Core\MassTransit.Azure.ServiceBus.Core.csproj" />
     <ProjectReference Include="..\MassTransit.WebJobs.ServiceBusIntegration\MassTransit.WebJobs.ServiceBusIntegration.csproj" />
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />

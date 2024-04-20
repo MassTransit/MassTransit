@@ -818,7 +818,9 @@ CREATE OR ALTER PROCEDURE {0}.FetchMessagesPartitioned
     @consumerId uniqueidentifier,
     @lockId uniqueidentifier,
     @lockDuration int,
-    @fetchCount int = 1
+    @fetchCount int = 1,
+    @concurrentCount int = 1,
+    @ordered int = 0
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -879,15 +881,18 @@ BEGIN
                           mdx.EnqueueTime,
                           mdx.LockId,
                           mdx.Priority,
-                          row_number() over (partition by mdx.PartitionKey order by mdx.Priority, mdx.EnqueueTime, mdx.MessageDeliveryId) as row_number
+                          row_number() over (partition by mdx.PartitionKey order by mdx.Priority, mdx.EnqueueTime, mdx.MessageDeliveryId) as row_normal,
+                          row_number() over (partition by mdx.PartitionKey order by mdx.Priority, mdx.MessageDeliveryId, mdx.EnqueueTime) as row_ordered,
+                          first_value(CASE WHEN mdx.EnqueueTime > @now THEN mdx.ConsumerId END) over (partition by mdx.PartitionKey
+                           order by mdx.EnqueueTime DESC, mdx.MessageDeliveryId DESC) as ConsumerId
                    FROM transport.MessageDelivery mdx WITH (ROWLOCK, READPAST, UPDLOCK)
                    WHERE mdx.QueueId = @queueId
                      AND mdx.DeliveryCount < mdx.MaxDeliveryCount),
          so_ready as (SELECT ready.MessageDeliveryId
                       FROM ready
-                      WHERE ready.row_number = 1
-                        AND ready.LockId IS NULL
-                        AND ready.EnqueueTime < @now
+                      WHERE ( ( @ordered = 0 AND ready.row_normal <= @concurrentCount) OR ( @ordered = 1 AND ready.row_ordered <= @concurrentCount ) )
+                        AND (ready.ConsumerId IS NULL OR ready.ConsumerId = @consumerId)
+                        AND ready.EnqueueTime <= @now
                       ORDER BY ready.Priority, ready.EnqueueTime, ready.MessageDeliveryId
                       OFFSET 0 ROWS FETCH NEXT @fetchCount ROWS ONLY),
          msgs AS (SELECT md.*

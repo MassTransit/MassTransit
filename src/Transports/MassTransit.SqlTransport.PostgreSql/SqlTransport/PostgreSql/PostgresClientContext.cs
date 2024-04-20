@@ -100,22 +100,38 @@ namespace MassTransit.SqlTransport.PostgreSql
         }
 
         public override async Task<IEnumerable<SqlTransportMessage>> ReceiveMessages(string queueName, SqlReceiveMode mode, int messageLimit,
-            TimeSpan lockDuration)
+            int concurrentLimit, TimeSpan lockDuration)
         {
             try
             {
-                var sql = mode switch
+                if (mode == SqlReceiveMode.Normal)
                 {
-                    SqlReceiveMode.Normal => _receiveSql,
-                    _ => _receivePartitionedSql
+                    return await _context.Query((x, t) => x.QueryAsync<SqlTransportMessage>(_receiveSql, new
+                    {
+                        queue_name = queueName,
+                        fetch_consumer_id = _consumerId,
+                        fetch_lock_id = NewId.NextGuid(),
+                        lock_duration = lockDuration,
+                        fetch_count = messageLimit
+                    }), CancellationToken).ConfigureAwait(false);
+                }
+
+                var ordered = mode switch
+                {
+                    SqlReceiveMode.PartitionedOrdered => 1,
+                    SqlReceiveMode.PartitionedOrderedConcurrent => 1,
+                    _ => 0
                 };
-                return await _context.Query((x, t) => x.QueryAsync<SqlTransportMessage>(sql, new
+
+                return await _context.Query((x, t) => x.QueryAsync<SqlTransportMessage>(_receivePartitionedSql, new
                 {
                     queue_name = queueName,
                     fetch_consumer_id = _consumerId,
                     fetch_lock_id = NewId.NextGuid(),
                     lock_duration = lockDuration,
-                    fetch_count = messageLimit
+                    fetch_count = messageLimit,
+                    concurrent_count = concurrentLimit,
+                    ordered
                 }), CancellationToken).ConfigureAwait(false);
             }
             catch (PostgresException exception) when (exception.ErrorCode == 40001)

@@ -30,7 +30,7 @@ namespace MassTransit.SqlTransport.PostgreSql
         public const string DbReceiveSql = """SELECT * FROM "{0}".fetch_messages(@queue_name,@fetch_consumer_id,@fetch_lock_id,@lock_duration,@fetch_count)""";
 
         public const string DbReceivePartitionedSql =
-            """SELECT * FROM "{0}".fetch_messages_partitioned(@queue_name,@fetch_consumer_id,@fetch_lock_id,@lock_duration,@fetch_count)""";
+            """SELECT * FROM "{0}".fetch_messages_partitioned(@queue_name,@fetch_consumer_id,@fetch_lock_id,@lock_duration,@fetch_count,@concurrent_count,@ordered)""";
 
         public const string DbMoveMessageSql = """SELECT * FROM "{0}".move_message(@message_delivery_id,@lock_id,@queue_name,@queue_type,@headers)""";
         public const string DbDeleteMessageSql = """SELECT * FROM "{0}".delete_message(@message_delivery_id,@lock_id)""";

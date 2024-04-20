@@ -24,7 +24,6 @@
     <PackageReference Include="Dapper" />
     <PackageReference Include="dapper.contrib" />
     <PackageReference Include="Microsoft.Data.SqlClient" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
   </ItemGroup>
 
 </Project>

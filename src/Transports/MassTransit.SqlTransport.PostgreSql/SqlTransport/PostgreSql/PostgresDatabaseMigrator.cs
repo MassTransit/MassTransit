@@ -429,7 +429,9 @@ namespace MassTransit.SqlTransport.PostgreSql
                                                ,   fetch_consumer_id uuid
                                                ,   fetch_lock_id uuid
                                                ,   lock_duration interval
-                                               ,   fetch_count integer DEFAULT 1)
+                                               ,   fetch_count integer DEFAULT 1
+                                               ,   concurrent_count integer DEFAULT 1
+                                               ,   ordered integer DEFAULT 0)
                                                    RETURNS TABLE(
                                                    transport_message_id uuid
                                                ,   queue_id bigint
@@ -480,16 +482,21 @@ namespace MassTransit.SqlTransport.PostgreSql
                                                        WHERE md.message_delivery_id IN (
                                                            WITH ready AS (
                                                                SELECT mdx.message_delivery_id, mdx.enqueue_time, mdx.lock_id, mdx.priority,
-                                                                      row_number() over pw as row_number
+                                                                       row_number() over ( partition by mdx.partition_key
+                                                                           order by mdx.priority, mdx.enqueue_time, mdx.message_delivery_id ) as row_normal,
+                                                                       row_number() over ( partition by mdx.partition_key
+                                                                           order by mdx.priority, mdx.message_delivery_id,mdx.enqueue_time )  as row_ordered,
+                                                                      first_value(CASE WHEN mdx.enqueue_time > v_now THEN mdx.consumer_id END) over (partition by mdx.partition_key
+                                                                          order by mdx.enqueue_time DESC, mdx.message_delivery_id DESC) as consumer_id
                                                                FROM "{0}".message_delivery mdx
                                                                WHERE mdx.queue_id = v_queue_id
                                                                    AND mdx.delivery_count < mdx.max_delivery_count
-                                                               WINDOW pw as (partition by mdx.partition_key order by mdx.priority, mdx.enqueue_time, mdx.message_delivery_id)
                                                            )
                                                            SELECT ready.message_delivery_id
                                                                FROM ready
-                                                               WHERE row_number = 1 AND ready.lock_id IS NULL
-                                                               AND ready.enqueue_time < v_now
+                                                               WHERE ( ( ordered = 0 AND ready.row_normal <= concurrent_count) OR ( ordered = 1 AND ready.row_ordered <= concurrent_count ) )
+                                                               AND ready.enqueue_time <= v_now
+                                                               AND (ready.consumer_id IS NULL OR ready.consumer_id = fetch_consumer_id)
                                                                ORDER BY ready.priority, ready.enqueue_time, ready.message_delivery_id
                                                            LIMIT fetch_count FOR UPDATE SKIP LOCKED)
                                                        FOR UPDATE OF md SKIP LOCKED)

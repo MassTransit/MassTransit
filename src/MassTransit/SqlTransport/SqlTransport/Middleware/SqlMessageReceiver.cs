@@ -62,7 +62,7 @@ namespace MassTransit.SqlTransport.Middleware
             {
                 var lockContext = new SqlReceiveLockContext(_context.InputAddress, message, _receiveSettings, _client);
 
-                return _receiveSettings.ReceiveMode != SqlReceiveMode.Normal
+                return _receiveSettings.ReceiveMode == SqlReceiveMode.Normal
                     ? HandleMessage(message, lockContext)
                     : _executorPool.Run(message, () => HandleMessage(message, lockContext), cancellationToken);
             }
@@ -70,7 +70,7 @@ namespace MassTransit.SqlTransport.Middleware
             try
             {
                 while (!IsStopping)
-                    await algorithm.Run(ReceiveMessages, (m, c) => Handle(m, c), Stopping).ConfigureAwait(false);
+                    await algorithm.Run((messageLimit, token) => ReceiveMessages(messageLimit, token), (m, c) => Handle(m, c), Stopping).ConfigureAwait(false);
             }
             catch (OperationCanceledException exception) when (exception.CancellationToken == Stopping)
             {
@@ -107,7 +107,7 @@ namespace MassTransit.SqlTransport.Middleware
             try
             {
                 IList<SqlTransportMessage> messages = (await _client.ReceiveMessages(_receiveSettings.EntityName, _receiveSettings.ReceiveMode, messageLimit,
-                    _receiveSettings.LockDuration).ConfigureAwait(false)).ToList();
+                    _receiveSettings.ConcurrentDeliveryLimit, _receiveSettings.LockDuration).ConfigureAwait(false)).ToList();
 
                 if (messages.Count > 0)
                     return messages;

@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Internals;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
-using SqlTransport;
 using Testing;
 
 
@@ -31,8 +30,9 @@ public class Using_partition_keys<T>
                 {
                     cfg.ReceiveEndpoint("partitioned-input-queue", e =>
                     {
-                        e.PrefetchCount = MessageLimit;
-                        e.ConcurrentMessageLimit = MessageLimit;
+                        e.PrefetchCount = 10;
+                        e.ConcurrentMessageLimit = 10;
+                        e.PurgeOnStartup = true;
 
                         e.SetReceiveMode(SqlReceiveMode.Partitioned);
 
@@ -64,7 +64,7 @@ public class Using_partition_keys<T>
         }
     }
 
-    const int MessageLimit = 10;
+    const int MessageLimit = 30;
     const int NumKeys = 2;
 
     readonly T _configuration;
@@ -93,6 +93,8 @@ public class Using_partition_keys<T>
         {
             if (Interlocked.Decrement(ref _index) <= 0)
                 _taskCompletionSource.TrySetResult(context);
+
+            await Task.Delay(4);
         }
     }
 }

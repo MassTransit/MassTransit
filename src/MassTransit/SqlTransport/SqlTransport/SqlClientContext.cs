@@ -35,7 +35,7 @@ namespace MassTransit.SqlTransport
         public abstract Task Publish<T>(string topicName, SqlMessageSendContext<T> context)
             where T : class;
 
-        public abstract Task<IEnumerable<SqlTransportMessage>> ReceiveMessages(string queueName, SqlReceiveMode mode, int messageLimit,
+        public abstract Task<IEnumerable<SqlTransportMessage>> ReceiveMessages(string queueName, SqlReceiveMode mode, int messageLimit, int concurrentLimit,
             TimeSpan lockDuration);
 
         public abstract Task<bool> DeleteMessage(Guid lockId, long messageDeliveryId);

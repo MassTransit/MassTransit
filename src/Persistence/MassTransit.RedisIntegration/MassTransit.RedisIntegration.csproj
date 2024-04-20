@@ -21,7 +21,6 @@
 
   <ItemGroup>
     <PackageReference Include="StackExchange.Redis" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 

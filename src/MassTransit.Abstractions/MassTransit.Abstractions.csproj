@@ -24,10 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All"/>
-  </ItemGroup>
-
-  <ItemGroup>
     <Folder Include="Futures\Futures"/>
   </ItemGroup>
 </Project>

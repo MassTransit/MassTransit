@@ -109,23 +109,38 @@ namespace MassTransit.SqlTransport.SqlServer
         }
 
         public override async Task<IEnumerable<SqlTransportMessage>> ReceiveMessages(string queueName, SqlReceiveMode mode, int messageLimit,
-            TimeSpan lockDuration)
+            int concurrentLimit, TimeSpan lockDuration)
         {
             try
             {
-                var sql = mode switch
+                if (mode == SqlReceiveMode.Normal)
                 {
-                    SqlReceiveMode.Normal => _receiveSql,
-                    _ => _receivePartitionedSql
+                    return await Query<SqlTransportMessage>(_receiveSql, new
+                    {
+                        queueName,
+                        consumerId = _consumerId,
+                        lockId = NewId.NextGuid(),
+                        lockDuration = (int)lockDuration.TotalSeconds,
+                        fetchCount = messageLimit
+                    }).ConfigureAwait(false);
+                }
+
+                var ordered = mode switch
+                {
+                    SqlReceiveMode.PartitionedOrdered => 1,
+                    SqlReceiveMode.PartitionedOrderedConcurrent => 1,
+                    _ => 0
                 };
 
-                return await Query<SqlTransportMessage>(sql, new
+                return await Query<SqlTransportMessage>(_receivePartitionedSql, new
                 {
                     queueName,
                     consumerId = _consumerId,
                     lockId = NewId.NextGuid(),
                     lockDuration = (int)lockDuration.TotalSeconds,
-                    fetchCount = messageLimit
+                    fetchCount = messageLimit,
+                    concurrentCount = concurrentLimit,
+                    ordered
                 }).ConfigureAwait(false);
             }
             catch (SqlException exception) when (exception.Number == 1205)
