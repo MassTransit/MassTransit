@@ -10,6 +10,9 @@ namespace MassTransit.Tests.SagaStateMachineTests
 
     namespace CorrelationEvents
     {
+        using System;
+
+
         public interface BeginTransaction
         {
             Guid TransactionId { get; }
@@ -46,12 +49,12 @@ namespace MassTransit.Tests.SagaStateMachineTests
 
             Guid? saga = await _repository.ShouldContainSagaInState(id, _machine, x => x.Active, TestTimeout);
 
-            Assert.IsTrue(saga.HasValue);
+            Assert.That(saga.HasValue, Is.True);
 
             await Bus.Publish<CommitTransaction>(new { TransactionId = id });
 
             saga = await _repository.ShouldContainSagaInState(id, _machine, x => x.Final, TestTimeout);
-            Assert.IsTrue(saga.HasValue);
+            Assert.That(saga.HasValue, Is.True);
         }
 
         static Using_topology_for_event_correlation()

@@ -52,8 +52,11 @@ public class When_routing_via_a_routing_key
         await harness.Bus.Publish(new CustomerUpdatedEvent(NewId.NextGuid(), "11223344"), x => x.SetRoutingKey("11223344"));
         await harness.Bus.Publish(new CustomerDeletedEvent(NewId.NextGuid(), "655321"), x => x.SetRoutingKey("655321"));
 
-        Assert.That(await harness.Consumed.Any<CustomerUpdatedEvent>(), Is.False);
-        Assert.That(await harness.Consumed.Any<CustomerDeletedEvent>(), Is.True);
+        Assert.Multiple(async () =>
+        {
+            Assert.That(await harness.Consumed.Any<CustomerUpdatedEvent>(), Is.False);
+            Assert.That(await harness.Consumed.Any<CustomerDeletedEvent>(), Is.True);
+        });
 
         await harness.Stop();
     }
@@ -63,12 +66,12 @@ public class When_routing_via_a_routing_key
         IConsumer<CustomerUpdatedEvent>,
         IConsumer<CustomerDeletedEvent>
     {
-        public Task Consume(ConsumeContext<CustomerUpdatedEvent> context)
+        public Task Consume(ConsumeContext<CustomerDeletedEvent> context)
         {
             return Task.CompletedTask;
         }
 
-        public Task Consume(ConsumeContext<CustomerDeletedEvent> context)
+        public Task Consume(ConsumeContext<CustomerUpdatedEvent> context)
         {
             return Task.CompletedTask;
         }
@@ -126,8 +129,11 @@ public class When_routing_using_a_pattern
         await harness.Bus.Publish(new ClientUpdatedEvent(NewId.NextGuid(), "11223344"), x => x.SetRoutingKey("11223344"));
         await harness.Bus.Publish(new ClientDeletedEvent(NewId.NextGuid(), "655321"), x => x.SetRoutingKey("655321"));
 
-        Assert.That(await harness.Consumed.Any<ClientUpdatedEvent>(), Is.False);
-        Assert.That(await harness.Consumed.Any<ClientDeletedEvent>(), Is.True);
+        Assert.Multiple(async () =>
+        {
+            Assert.That(await harness.Consumed.Any<ClientUpdatedEvent>(), Is.False);
+            Assert.That(await harness.Consumed.Any<ClientDeletedEvent>(), Is.True);
+        });
 
         await harness.Stop();
     }
@@ -137,12 +143,12 @@ public class When_routing_using_a_pattern
         IConsumer<ClientUpdatedEvent>,
         IConsumer<ClientDeletedEvent>
     {
-        public Task Consume(ConsumeContext<ClientUpdatedEvent> context)
+        public Task Consume(ConsumeContext<ClientDeletedEvent> context)
         {
             return Task.CompletedTask;
         }
 
-        public Task Consume(ConsumeContext<ClientDeletedEvent> context)
+        public Task Consume(ConsumeContext<ClientUpdatedEvent> context)
         {
             return Task.CompletedTask;
         }

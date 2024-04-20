@@ -25,12 +25,12 @@
             await InputQueueSendEndpoint.Send(firstMessage);
 
             Guid? saga = await _repository.ShouldContainSagaInState(correlationId, _machine, x => x.OtherState, TestTimeout);
-            Assert.IsTrue(saga.HasValue);
+            Assert.That(saga.HasValue, Is.True);
 
             _taskCompletionSource.SetResult(true);
 
             saga = await LoadSagaRepository.ShouldNotContainSaga(correlationId, TestTimeout);
-            Assert.IsFalse(saga.HasValue);
+            Assert.That(saga.HasValue, Is.False);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

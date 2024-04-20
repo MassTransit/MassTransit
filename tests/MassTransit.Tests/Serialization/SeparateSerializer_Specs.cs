@@ -68,11 +68,14 @@
 
             ConsumeContext<Command> context = await _handled;
 
-            Assert.That(context.ReceiveContext.ContentType, Is.EqualTo(NewtonsoftRawJsonMessageSerializer.RawJsonContentType),
-                $"unexpected content-type {context.ReceiveContext.ContentType}");
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.ReceiveContext.ContentType, Is.EqualTo(NewtonsoftRawJsonMessageSerializer.RawJsonContentType),
+                    $"unexpected content-type {context.ReceiveContext.ContentType}");
 
-            Assert.That(context.Message.CommandId, Is.EqualTo(message.CommandId));
-            Assert.That(context.Message.ItemNumber, Is.EqualTo(message.ItemNumber));
+                Assert.That(context.Message.CommandId, Is.EqualTo(message.CommandId));
+                Assert.That(context.Message.ItemNumber, Is.EqualTo(message.ItemNumber));
+            });
         }
 
         Task<ConsumeContext<Command>> _handled;
@@ -104,6 +107,7 @@
         }
     }
 
+
     [TestFixture]
     public class Sending_and_consuming_raw_xml :
         InMemoryTestFixture
@@ -121,11 +125,14 @@
 
             ConsumeContext<Command> context = await _handled;
 
-            Assert.That(context.ReceiveContext.ContentType, Is.EqualTo(RawXmlMessageSerializer.RawXmlContentType),
-                $"unexpected content-type {context.ReceiveContext.ContentType}");
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.ReceiveContext.ContentType, Is.EqualTo(RawXmlMessageSerializer.RawXmlContentType),
+                    $"unexpected content-type {context.ReceiveContext.ContentType}");
 
-            Assert.That(context.Message.CommandId, Is.EqualTo(message.CommandId));
-            Assert.That(context.Message.ItemNumber, Is.EqualTo(message.ItemNumber));
+                Assert.That(context.Message.CommandId, Is.EqualTo(message.CommandId));
+                Assert.That(context.Message.ItemNumber, Is.EqualTo(message.ItemNumber));
+            });
         }
 
         Task<ConsumeContext<Command>> _handled;

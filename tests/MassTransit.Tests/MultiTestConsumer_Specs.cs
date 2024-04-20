@@ -27,8 +27,13 @@
                 await Bus.Publish(pingMessage);
                 await Bus.Publish(pingMessage2);
 
-                Assert.IsTrue(consumer.Received.Select<PingMessage>(received => received.Context.Message.CorrelationId == pingMessage.CorrelationId).Any());
-                Assert.IsTrue(consumer.Received.Select<PingMessage>(received => received.Context.Message.CorrelationId == pingMessage2.CorrelationId).Any());
+                Assert.Multiple(() =>
+                {
+                    Assert.That(consumer.Received.Select<PingMessage>(received => received.Context.Message.CorrelationId == pingMessage.CorrelationId).Any(),
+                        Is.True);
+                    Assert.That(consumer.Received.Select<PingMessage>(received => received.Context.Message.CorrelationId == pingMessage2.CorrelationId).Any(),
+                        Is.True);
+                });
             }
             finally
             {
@@ -49,7 +54,7 @@
             {
                 await Bus.Publish(new PingMessage());
 
-                Assert.IsTrue(received.Select().Any());
+                Assert.That(received.Select().Any(), Is.True);
             }
             finally
             {
@@ -71,8 +76,12 @@
                 await Bus.Publish(pingMessage);
                 await Bus.Publish(new PongMessage(pingMessage.CorrelationId));
 
-                Assert.IsTrue(consumer.Received.Select<PingMessage>().Any());
-                Assert.IsTrue(consumer.Received.Select<PongMessage>(received => received.Context.Message.CorrelationId == pingMessage.CorrelationId).Any());
+                Assert.Multiple(() =>
+                {
+                    Assert.That(consumer.Received.Select<PingMessage>().Any(), Is.True);
+                    Assert.That(consumer.Received.Select<PongMessage>(received => received.Context.Message.CorrelationId == pingMessage.CorrelationId).Any(),
+                        Is.True);
+                });
             }
             finally
             {

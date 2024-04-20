@@ -167,7 +167,7 @@ namespace MassTransit.KafkaIntegration.Tests
             await provider.GetTask<ConsumeContext<KafkaMessage>>();
 
             IList<IReceivedMessage<KafkaMessage>> receivedMessages = await harness.Consumed.SelectAsync<KafkaMessage>().ToListAsync();
-            Assert.That(receivedMessages.Count, Is.EqualTo(NumMessages));
+            Assert.That(receivedMessages, Has.Count.EqualTo(NumMessages));
             var result = new int[NumKeys];
 
             foreach (IReceivedMessage<KafkaMessage> receivedMessage in receivedMessages)

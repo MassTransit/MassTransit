@@ -13,7 +13,7 @@ namespace MassTransit.Tests.Middleware.Internals
         [Test]
         public void Should_not_close_open_generic()
         {
-            Assert.IsFalse(typeof(ISingleGeneric<>).ClosesType(typeof(ISingleGeneric<>)));
+            Assert.That(typeof(ISingleGeneric<>).ClosesType(typeof(ISingleGeneric<>)), Is.False);
         }
 
         [Test]

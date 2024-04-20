@@ -3,7 +3,6 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System;
     using System.Linq;
     using System.Threading.Tasks;
-    using MassTransit.Testing;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Logging;
@@ -11,6 +10,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
+    using Testing;
 
 
     [TestFixture]
@@ -42,9 +42,12 @@ namespace MassTransit.RabbitMqTransport.Tests
             var jsonString = busControl.GetProbeResult().ToJsonString();
             var probe = JObject.Parse(jsonString);
 
-            Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(120));
-            Assert.That(GetConcurrentMessageLimit(probe, 0), Is.EqualTo(100));
-            Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
+            Assert.Multiple(() =>
+            {
+                Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(120));
+                Assert.That(GetConcurrentMessageLimit(probe, 0), Is.EqualTo(100));
+                Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
+            });
 
             await provider.DisposeAsync();
         }
@@ -73,9 +76,12 @@ namespace MassTransit.RabbitMqTransport.Tests
             var jsonString = busControl.GetProbeResult().ToJsonString();
             var probe = JObject.Parse(jsonString);
 
-            Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(120));
-            Assert.That(GetConcurrentMessageLimit(probe, 0), Is.EqualTo(100));
-            Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
+            Assert.Multiple(() =>
+            {
+                Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(120));
+                Assert.That(GetConcurrentMessageLimit(probe, 0), Is.EqualTo(100));
+                Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
+            });
 
             await provider.DisposeAsync();
         }
@@ -104,9 +110,12 @@ namespace MassTransit.RabbitMqTransport.Tests
             var jsonString = busControl.GetProbeResult().ToJsonString();
             var probe = JObject.Parse(jsonString);
 
-            Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(351));
-            Assert.That(GetConcurrentMessageLimit(probe, 0), Is.EqualTo(100));
-            Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
+            Assert.Multiple(() =>
+            {
+                Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(351));
+                Assert.That(GetConcurrentMessageLimit(probe, 0), Is.EqualTo(100));
+                Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
+            });
 
             await provider.DisposeAsync();
         }
@@ -135,8 +144,11 @@ namespace MassTransit.RabbitMqTransport.Tests
             var jsonString = busControl.GetProbeResult().ToJsonString();
             var probe = JObject.Parse(jsonString);
 
-            Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(427));
-            Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
+            Assert.Multiple(() =>
+            {
+                Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(427));
+                Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
+            });
 
             await provider.DisposeAsync();
         }
@@ -157,8 +169,11 @@ namespace MassTransit.RabbitMqTransport.Tests
             var jsonString = busControl.GetProbeResult().ToJsonString();
             var probe = JObject.Parse(jsonString);
 
-            Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(351));
-            Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
+            Assert.Multiple(() =>
+            {
+                Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(351));
+                Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
+            });
         }
 
         [Test]
@@ -190,8 +205,11 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             var probe = JObject.Parse(busControl.GetProbeResult().ToJsonString());
 
-            Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(427));
-            Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
+            Assert.Multiple(() =>
+            {
+                Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(427));
+                Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
+            });
         }
 
 

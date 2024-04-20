@@ -21,12 +21,12 @@
             await Bus.Publish(new Start { CorrelationId = sagaId });
 
             Guid? saga = await _repository.ShouldContainSagaInState(sagaId, _machine, x => x.Running, TestTimeout);
-            Assert.IsTrue(saga.HasValue);
+            Assert.That(saga.HasValue, Is.True);
 
             await Bus.Publish(new Start { CorrelationId = sagaId });
 
             var faultMessage = await GetFaultMessage(TimeSpan.FromSeconds(3));
-            Assert.IsNull(faultMessage?.Exceptions.Select(ex => $"{ex.ExceptionType}: {ex.Message}").First());
+            Assert.That(faultMessage?.Exceptions.Select(ex => $"{ex.ExceptionType}: {ex.Message}").First(), Is.Null);
         }
 
         protected async Task<Fault> GetFaultMessage(TimeSpan timeout)

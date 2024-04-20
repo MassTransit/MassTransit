@@ -43,10 +43,13 @@
                 });
             });
 
-            Assert.That(observer.SagaTypes.Contains(typeof(Instance)));
-            Assert.That(observer.StateMachineTypes.Contains(typeof(TestStateMachine)));
-            Assert.That(observer.MessageTypes.Contains(Tuple.Create(typeof(Instance), typeof(Start))));
-            Assert.That(observer.MessageTypes.Contains(Tuple.Create(typeof(Instance), typeof(Stop))));
+            Assert.Multiple(() =>
+            {
+                Assert.That(observer.SagaTypes, Does.Contain(typeof(Instance)));
+                Assert.That(observer.StateMachineTypes, Does.Contain(typeof(TestStateMachine)));
+                Assert.That(observer.MessageTypes, Does.Contain(Tuple.Create(typeof(Instance), typeof(Start))));
+            });
+            Assert.That(observer.MessageTypes, Does.Contain(Tuple.Create(typeof(Instance), typeof(Stop))));
         }
 
 

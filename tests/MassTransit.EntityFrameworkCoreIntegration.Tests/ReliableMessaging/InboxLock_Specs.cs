@@ -47,7 +47,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
 
             var events = provider.GetRequiredService<IList<Event>>();
 
-            Assert.That(events.Count, Is.EqualTo(100));
+            Assert.That(events, Has.Count.EqualTo(100));
         }
     }
 

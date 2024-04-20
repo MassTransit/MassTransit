@@ -20,12 +20,12 @@
             await InputQueueSendEndpoint.Send(new GirlfriendYelling { CorrelationId = correlationId });
 
             Guid? sagaId = await _repository.ShouldContainSaga(correlationId, TestTimeout);
-            Assert.IsTrue(sagaId.HasValue);
+            Assert.That(sagaId.HasValue, Is.True);
 
             await InputQueueSendEndpoint.Send(new SodOff { CorrelationId = correlationId });
 
             sagaId = await _repository.ShouldNotContainSaga(correlationId, TestTimeout);
-            Assert.IsFalse(sagaId.HasValue);
+            Assert.That(sagaId.HasValue, Is.False);
         }
 
         [Test]
@@ -37,17 +37,17 @@
 
             Guid? sagaId = await _repository.ShouldContainSaga(correlationId, TestTimeout);
 
-            Assert.IsTrue(sagaId.HasValue);
+            Assert.That(sagaId.HasValue, Is.True);
 
             await InputQueueSendEndpoint.Send(new GotHitByACar { CorrelationId = correlationId });
 
             sagaId = await _repository.ShouldContainSagaInState(correlationId, _machine, x => x.Dead, TestTimeout);
 
-            Assert.IsTrue(sagaId.HasValue);
+            Assert.That(sagaId.HasValue, Is.True);
 
             var instance = await GetSaga(correlationId);
 
-            Assert.IsTrue(instance.Screwed);
+            Assert.That(instance.Screwed, Is.True);
         }
 
         SuperShopper _machine;

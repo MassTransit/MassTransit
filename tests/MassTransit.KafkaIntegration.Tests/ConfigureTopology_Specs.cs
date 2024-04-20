@@ -45,14 +45,14 @@ namespace MassTransit.KafkaIntegration.Tests
 
             var meta = client.GetMetadata(topicName, TimeSpan.FromSeconds(10));
 
-            Assert.That(meta.Topics.Count, Is.EqualTo(1));
+            Assert.That(meta.Topics, Has.Count.EqualTo(1));
 
             foreach (var topic in meta.Topics)
             {
-                Assert.That(topic.Partitions.Count, Is.EqualTo(partitionCount));
+                Assert.That(topic.Partitions, Has.Count.EqualTo(partitionCount));
 
                 foreach (var partition in topic.Partitions)
-                    Assert.That(partition.Replicas.Length, Is.EqualTo(replicaCount));
+                    Assert.That(partition.Replicas, Has.Length.EqualTo(replicaCount));
             }
         }
 
@@ -103,7 +103,7 @@ namespace MassTransit.KafkaIntegration.Tests
 
             var result = await provider.GetTask<ConsumeContext<KafkaMessage>>();
 
-            Assert.NotNull(result);
+            Assert.That(result, Is.Not.Null);
         }
 
 

@@ -52,6 +52,13 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
     public class Common_StateMachine_Filter :
         InMemoryContainerTestFixture
     {
+        readonly TaskCompletionSource<MyId> _taskCompletionSource;
+
+        public Common_StateMachine_Filter()
+        {
+            _taskCompletionSource = GetTask<MyId>();
+        }
+
         [Test]
         public async Task Should_use_scope()
         {
@@ -62,14 +69,7 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
             });
 
             var result = await _taskCompletionSource.Task;
-            Assert.NotNull(result);
-        }
-
-        readonly TaskCompletionSource<MyId> _taskCompletionSource;
-
-        public Common_StateMachine_Filter()
-        {
-            _taskCompletionSource = GetTask<MyId>();
+            Assert.That(result, Is.Not.Null);
         }
 
         protected override IServiceCollection ConfigureServices(IServiceCollection collection)
@@ -101,6 +101,17 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
     public class Common_StateMachine_FilterOrder :
         InMemoryContainerTestFixture
     {
+        readonly TaskCompletionSource<ConsumeContext<StartTest>> _messageCompletion;
+        readonly TaskCompletionSource<SagaConsumeContext<TestInstance>> _sagaCompletion;
+        readonly TaskCompletionSource<SagaConsumeContext<TestInstance, StartTest>> _sagaMessageCompletion;
+
+        public Common_StateMachine_FilterOrder()
+        {
+            _messageCompletion = GetTask<ConsumeContext<StartTest>>();
+            _sagaCompletion = GetTask<SagaConsumeContext<TestInstance>>();
+            _sagaMessageCompletion = GetTask<SagaConsumeContext<TestInstance, StartTest>>();
+        }
+
         [Test]
         public async Task Should_include_container_scope()
         {
@@ -115,17 +126,6 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
             await _sagaCompletion.Task;
 
             await _sagaMessageCompletion.Task;
-        }
-
-        readonly TaskCompletionSource<ConsumeContext<StartTest>> _messageCompletion;
-        readonly TaskCompletionSource<SagaConsumeContext<TestInstance>> _sagaCompletion;
-        readonly TaskCompletionSource<SagaConsumeContext<TestInstance, StartTest>> _sagaMessageCompletion;
-
-        public Common_StateMachine_FilterOrder()
-        {
-            _messageCompletion = GetTask<ConsumeContext<StartTest>>();
-            _sagaCompletion = GetTask<SagaConsumeContext<TestInstance>>();
-            _sagaMessageCompletion = GetTask<SagaConsumeContext<TestInstance, StartTest>>();
         }
 
         IFilter<SagaConsumeContext<TestInstance, StartTest>> CreateSagaMessageFilter()

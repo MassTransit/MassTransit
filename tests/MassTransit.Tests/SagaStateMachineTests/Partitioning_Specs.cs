@@ -28,7 +28,7 @@
             for (var i = 0; i < Limit; i++)
             {
                 Guid? guid = await _repository.ShouldContainSaga(ids[i], TestTimeout);
-                Assert.IsTrue(guid.HasValue);
+                Assert.That(guid.HasValue, Is.True);
             }
 
             timer.Stop();

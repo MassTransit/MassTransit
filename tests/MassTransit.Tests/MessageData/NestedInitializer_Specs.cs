@@ -69,14 +69,14 @@ namespace MassTransit.Tests.MessageData
             configurator.Handler<Documents>(async context =>
             {
                 Assert.That(context.Message.Bodies, Is.Not.Null);
-                Assert.That(context.Message.Bodies.Length, Is.EqualTo(2));
+                Assert.That(context.Message.Bodies, Has.Length.EqualTo(2));
 
                 Assert.That(context.Message.Bodies[0].Body, Is.Not.Null);
                 Assert.That(context.Message.Bodies[0].Body.HasValue);
 
                 byte[] bodyValue = await context.Message.Bodies[0].Body.Value;
                 Assert.That(bodyValue, Is.Not.Null);
-                Assert.That(bodyValue.Length, Is.EqualTo(10000));
+                Assert.That(bodyValue, Has.Length.EqualTo(10000));
 
                 Assert.That(context.Message.Bodies[0].FileName, Is.Not.Null);
                 Assert.That(context.Message.Bodies[0].FileName, Is.EqualTo("first.txt"));

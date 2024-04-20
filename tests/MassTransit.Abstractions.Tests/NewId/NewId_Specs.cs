@@ -17,7 +17,7 @@
             var id1 = new NewId("fc070000-9565-3668-e000-08d5893343c6");
             var id2 = new NewId("fc070000-9565-3668-e000-08d5893343c6");
 
-            Assert.IsTrue(id1 == id2);
+            Assert.That(id1, Is.EqualTo(id2));
         }
 
         [Test]
@@ -26,7 +26,7 @@
             var lowerId = new NewId("fc070000-9565-3668-e000-08d5893343c6");
             var greaterId = new NewId("fc070000-9565-3668-9180-08d589338b38");
 
-            Assert.IsTrue(lowerId < greaterId);
+            Assert.That(lowerId, Is.LessThan(greaterId));
         }
 
         [Test]
@@ -35,7 +35,7 @@
             var lowerId = new NewId("fc070000-9565-3668-e000-08d5893343c6");
             var greaterId = new NewId("fc070000-9565-3668-9180-08d589338b38");
 
-            Assert.IsFalse(lowerId > greaterId);
+            Assert.That(lowerId, Is.LessThanOrEqualTo(greaterId));
         }
 
         [Test]
@@ -53,7 +53,7 @@
             if (difference < TimeSpan.Zero)
                 difference = difference.Negate();
 
-            Assert.LessOrEqual(difference, TimeSpan.FromMinutes(1));
+            Assert.That(difference, Is.LessThanOrEqualTo(TimeSpan.FromMinutes(1)));
         }
 
         [Test]
@@ -72,7 +72,7 @@
             if (difference < TimeSpan.Zero)
                 difference = difference.Negate();
 
-            Assert.LessOrEqual(difference, TimeSpan.FromMinutes(1));
+            Assert.That(difference, Is.LessThanOrEqualTo(TimeSpan.FromMinutes(1)));
         }
 
         [Test]

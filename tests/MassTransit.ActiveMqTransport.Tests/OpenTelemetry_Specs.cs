@@ -1,6 +1,5 @@
 namespace MassTransit.ActiveMqTransport.Tests
 {
-    using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
     using HarnessContracts;
@@ -14,6 +13,9 @@ namespace MassTransit.ActiveMqTransport.Tests
 
     namespace HarnessContracts
     {
+        using System;
+
+
         public interface SubmitOrder
         {
             Guid OrderId { get; }
@@ -87,9 +89,12 @@ namespace MassTransit.ActiveMqTransport.Tests
                 OrderNumber = "123"
             });
 
-            Assert.IsTrue(await harness.Sent.Any<OrderSubmitted>());
+            Assert.Multiple(async () =>
+            {
+                Assert.That(await harness.Sent.Any<OrderSubmitted>(), Is.True);
 
-            Assert.IsTrue(await harness.Consumed.Any<SubmitOrder>());
+                Assert.That(await harness.Consumed.Any<SubmitOrder>(), Is.True);
+            });
         }
 
 

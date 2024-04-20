@@ -210,20 +210,26 @@ namespace MassTransit.Tests.ContainerTests
 
             await harness.Bus.Publish(new Start { CorrelationId = sagaId });
 
-            Assert.IsTrue(await harness.Consumed.Any<Start>(), "Message not received");
+            Assert.That(await harness.Consumed.Any<Start>(), Is.True, "Message not received");
 
             ISagaStateMachineTestHarness<TestStateMachine, Instance> sagaHarness = harness.GetSagaStateMachineHarness<TestStateMachine, Instance>();
 
-            Assert.That(await sagaHarness.Consumed.Any<Start>());
+            Assert.Multiple(async () =>
+            {
+                Assert.That(await sagaHarness.Consumed.Any<Start>());
 
-            Assert.That(await sagaHarness.Created.Any(x => x.CorrelationId == sagaId));
+                Assert.That(await sagaHarness.Created.Any(x => x.CorrelationId == sagaId));
+            });
 
             var machine = provider.GetRequiredService<TestStateMachine>();
 
             var instance = sagaHarness.Created.ContainsInState(sagaId, sagaHarness.StateMachine, machine.Running);
-            Assert.IsNotNull(instance, "Saga instance not found");
+            Assert.Multiple(async () =>
+            {
+                Assert.That(instance, Is.Not.Null, "Saga instance not found");
 
-            Assert.IsTrue(await harness.Published.Any<Started>(), "Event not published");
+                Assert.That(await harness.Published.Any<Started>(), Is.True, "Event not published");
+            });
         }
 
 

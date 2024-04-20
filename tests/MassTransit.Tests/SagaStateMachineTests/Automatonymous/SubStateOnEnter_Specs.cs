@@ -26,7 +26,7 @@ namespace MassTransit.Tests.SagaStateMachineTests.Automatonymous
             await machine.RaiseEvent(instance, machine.ToSub); // go to s21 --> Enter s2 is missing here!
             await machine.RaiseEvent(instance, machine.Quit);
 
-            Assert.That(eventObserver.Events.Count, Is.EqualTo(2));
+            Assert.That(eventObserver.Events, Has.Count.EqualTo(2));
         }
 
 

@@ -8,9 +8,6 @@
     [TestFixture]
     public class When_combining_events_into_a_single_event_into_a_single_event
     {
-        TestStateMachine _machine;
-        Instance _instance;
-
         [Test]
         public async Task Should_have_called_combined_event_when_compositeevent_defined_before()
         {
@@ -21,7 +18,7 @@
             await _machine.RaiseEvent(_instance, _machine.First);
             await _machine.RaiseEvent(_instance, _machine.Second);
 
-            Assert.IsTrue(_instance.Called);
+            Assert.That(_instance.Called, Is.True);
         }
 
         [Test]
@@ -34,8 +31,11 @@
             await _machine.RaiseEvent(_instance, _machine.First);
             await _machine.RaiseEvent(_instance, _machine.Second);
 
-            Assert.IsTrue(_instance.Called);
+            Assert.That(_instance.Called, Is.True);
         }
+
+        TestStateMachine _machine;
+        Instance _instance;
 
 
         sealed class TestStateMachine :
@@ -75,6 +75,7 @@
             public Event Third { get; private set; }
         }
 
+
         class Instance :
             SagaStateMachineInstance
         {
@@ -92,13 +93,13 @@
             public int CompositeStatus { get; set; }
             public int CurrentState { get; set; }
 
-            public Guid CorrelationId { get; set; }
-
             public bool? Called
             {
                 get { return _called; }
                 set { _called = value; }
             }
+
+            public Guid CorrelationId { get; set; }
         }
     }
 }

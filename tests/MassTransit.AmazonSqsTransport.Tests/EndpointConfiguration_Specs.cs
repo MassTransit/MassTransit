@@ -5,7 +5,6 @@ namespace MassTransit.AmazonSqsTransport.Tests
     using System.Threading.Tasks;
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
-    using MassTransit.Testing;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Logging;
@@ -13,6 +12,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
+    using Testing;
 
 
     [TestFixture]
@@ -46,9 +46,12 @@ namespace MassTransit.AmazonSqsTransport.Tests
             var jsonString = busControl.GetProbeResult().ToJsonString();
             var probe = JObject.Parse(jsonString);
 
-            Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(120));
-            Assert.That(GetConcurrentMessageLimit(probe, 0), Is.EqualTo(100));
-            Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
+            Assert.Multiple(() =>
+            {
+                Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(120));
+                Assert.That(GetConcurrentMessageLimit(probe, 0), Is.EqualTo(100));
+                Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
+            });
 
             await provider.DisposeAsync();
         }
@@ -79,23 +82,14 @@ namespace MassTransit.AmazonSqsTransport.Tests
             var jsonString = busControl.GetProbeResult().ToJsonString();
             var probe = JObject.Parse(jsonString);
 
-            Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(120));
-            Assert.That(GetConcurrentMessageLimit(probe, 0), Is.EqualTo(100));
-            Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
+            Assert.Multiple(() =>
+            {
+                Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(120));
+                Assert.That(GetConcurrentMessageLimit(probe, 0), Is.EqualTo(100));
+                Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
+            });
 
             await provider.DisposeAsync();
-        }
-
-        static void ConfigureHost(IAmazonSqsBusFactoryConfigurator cfg)
-        {
-            cfg.Host(new Uri("amazonsqs://localhost:4576"), h =>
-            {
-                h.AccessKey("admin");
-                h.SecretKey("admin");
-
-                h.Config(new AmazonSQSConfig {ServiceURL = "http://localhost:4566"});
-                h.Config(new AmazonSimpleNotificationServiceConfig {ServiceURL = "http://localhost:4566"});
-            });
         }
 
         [Test]
@@ -124,9 +118,12 @@ namespace MassTransit.AmazonSqsTransport.Tests
             var jsonString = busControl.GetProbeResult().ToJsonString();
             var probe = JObject.Parse(jsonString);
 
-            Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(351));
-            Assert.That(GetConcurrentMessageLimit(probe, 0), Is.EqualTo(100));
-            Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
+            Assert.Multiple(() =>
+            {
+                Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(351));
+                Assert.That(GetConcurrentMessageLimit(probe, 0), Is.EqualTo(100));
+                Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
+            });
 
             await provider.DisposeAsync();
         }
@@ -157,8 +154,11 @@ namespace MassTransit.AmazonSqsTransport.Tests
             var jsonString = busControl.GetProbeResult().ToJsonString();
             var probe = JObject.Parse(jsonString);
 
-            Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(427));
-            Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
+            Assert.Multiple(() =>
+            {
+                Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(427));
+                Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
+            });
 
             await provider.DisposeAsync();
         }
@@ -181,8 +181,11 @@ namespace MassTransit.AmazonSqsTransport.Tests
             var jsonString = busControl.GetProbeResult().ToJsonString();
             var probe = JObject.Parse(jsonString);
 
-            Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(351));
-            Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
+            Assert.Multiple(() =>
+            {
+                Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(351));
+                Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
+            });
         }
 
         [Test]
@@ -218,8 +221,23 @@ namespace MassTransit.AmazonSqsTransport.Tests
 
             var probe = JObject.Parse(busControl.GetProbeResult().ToJsonString());
 
-            Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(427));
-            Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
+            Assert.Multiple(() =>
+            {
+                Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(427));
+                Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
+            });
+        }
+
+        static void ConfigureHost(IAmazonSqsBusFactoryConfigurator cfg)
+        {
+            cfg.Host(new Uri("amazonsqs://localhost:4576"), h =>
+            {
+                h.AccessKey("admin");
+                h.SecretKey("admin");
+
+                h.Config(new AmazonSQSConfig { ServiceURL = "http://localhost:4566" });
+                h.Config(new AmazonSimpleNotificationServiceConfig { ServiceURL = "http://localhost:4566" });
+            });
         }
 
 

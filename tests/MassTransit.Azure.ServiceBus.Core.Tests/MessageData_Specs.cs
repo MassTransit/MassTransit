@@ -25,9 +25,12 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
             ConsumeContext<DataMessage> consumeContext = await _handler;
 
-            Assert.That(consumeContext.Message.Data.HasValue, Is.True);
+            Assert.Multiple(() =>
+            {
+                Assert.That(consumeContext.Message.Data.HasValue, Is.True);
 
-            Assert.That(_data, Is.EqualTo(data));
+                Assert.That(_data, Is.EqualTo(data));
+            });
         }
 
         Task<ConsumeContext<DataMessage>> _handler;
@@ -80,8 +83,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
             ConsumeContext<DataMessage> consumeContext = await _handler;
 
-            Assert.That(consumeContext.Message.Dictionary.HasValue, Is.True);
-            Assert.That(_data.Values, Is.EqualTo(dataDictionary.Values));
+            Assert.Multiple(() =>
+            {
+                Assert.That(consumeContext.Message.Dictionary.HasValue, Is.True);
+                Assert.That(_data.Values, Is.EqualTo(dataDictionary.Values));
+            });
         }
 
         Task<ConsumeContext<DataMessage>> _handler;
@@ -138,8 +144,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
             ConsumeContext<DataMessage> consumeContext = await _handler;
 
-            Assert.That(consumeContext.Message.Dictionary.HasValue, Is.True);
-            Assert.That(_data.Values, Is.EqualTo(dataDictionary.Values));
+            Assert.Multiple(() =>
+            {
+                Assert.That(consumeContext.Message.Dictionary.HasValue, Is.True);
+                Assert.That(_data.Values, Is.EqualTo(dataDictionary.Values));
+            });
         }
 
         Task<ConsumeContext<DataMessage>> _handler;

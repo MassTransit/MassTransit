@@ -87,7 +87,7 @@
         [Test]
         public void Should_have_all_events()
         {
-            Assert.That(_eventObserver.Events.Count, Is.EqualTo(2));
+            Assert.That(_eventObserver.Events, Has.Count.EqualTo(2));
         }
 
         [Test]

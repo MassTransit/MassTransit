@@ -55,8 +55,11 @@ namespace MassTransit.Tests.ContainerTests
 
             IReceivedMessage<MyMessage> message = await harness.Consumed.SelectAsync<MyMessage>().FirstOrDefault();
 
-            Assert.That(message.Context.Message.Date, Is.EqualTo(dateOnly));
-            Assert.That(message.Context.Message.Time, Is.EqualTo(timeOnly));
+            Assert.Multiple(() =>
+            {
+                Assert.That(message.Context.Message.Date, Is.EqualTo(dateOnly));
+                Assert.That(message.Context.Message.Time, Is.EqualTo(timeOnly));
+            });
         }
 
 

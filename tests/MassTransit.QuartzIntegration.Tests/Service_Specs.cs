@@ -52,7 +52,7 @@
 
             ConsumeContext<IA> context = await handlerIA;
 
-            Assert.IsTrue(context.GetQuartzSent().HasValue);
+            Assert.That(context.GetQuartzSent().HasValue, Is.True);
         }
 
 

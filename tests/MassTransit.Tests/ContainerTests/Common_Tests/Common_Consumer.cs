@@ -245,7 +245,7 @@
             await InputQueueSendEndpoint.Send<SimpleMessageInterface>(new { Name = "test" });
 
             var result = await TaskCompletionSource.Task;
-            Assert.IsNotNull(result);
+            Assert.That(result, Is.Not.Null);
         }
 
         protected override IServiceCollection ConfigureServices(IServiceCollection collection)

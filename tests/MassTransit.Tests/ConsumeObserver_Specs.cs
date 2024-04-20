@@ -126,8 +126,11 @@ namespace MassTransit.Tests
 
                 await pingObserver.PostConsumed;
 
-                Assert.That(observer.Messages.Select<PingMessage>().First(), Is.Not.Null);
-                Assert.That(observer.Messages.Select<PongMessage>().First(), Is.Not.Null);
+                Assert.Multiple(() =>
+                {
+                    Assert.That(observer.Messages.Select<PingMessage>().First(), Is.Not.Null);
+                    Assert.That(observer.Messages.Select<PongMessage>().First(), Is.Not.Null);
+                });
             }
         }
     }

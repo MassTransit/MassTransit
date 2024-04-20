@@ -97,8 +97,11 @@
             GC.WaitForPendingFinalizers();
             GC.Collect();
 
-            Assert.That(unhandledExceptions, Is.Empty);
-            Assert.That(unobservedTaskExceptions, Is.Empty);
+            Assert.Multiple(() =>
+            {
+                Assert.That(unhandledExceptions, Is.Empty);
+                Assert.That(unobservedTaskExceptions, Is.Empty);
+            });
         }
     }
 
@@ -113,7 +116,9 @@
         {
             var mediator = MassTransit.Bus.Factory.CreateMediator(x =>
             {
-                x.Handler<PingMessage>(async context => {});
+                x.Handler<PingMessage>(async context =>
+                {
+                });
             });
 
             List<object> unhandledExceptions = new List<object>();
@@ -140,10 +145,14 @@
             GC.WaitForPendingFinalizers();
             GC.Collect();
 
-            Assert.That(unhandledExceptions, Is.Empty, "Unhandled");
-            Assert.That(unobservedTaskExceptions, Is.Empty, "Unobserved");
+            Assert.Multiple(() =>
+            {
+                Assert.That(unhandledExceptions, Is.Empty, "Unhandled");
+                Assert.That(unobservedTaskExceptions, Is.Empty, "Unobserved");
+            });
         }
     }
+
 
     [TestFixture]
     [Explicit]
@@ -182,8 +191,11 @@
             GC.WaitForPendingFinalizers();
             GC.Collect();
 
-            Assert.That(unhandledExceptions, Is.Empty, "Unhandled");
-            Assert.That(unobservedTaskExceptions, Is.Empty, "Unobserved");
+            Assert.Multiple(() =>
+            {
+                Assert.That(unhandledExceptions, Is.Empty, "Unhandled");
+                Assert.That(unobservedTaskExceptions, Is.Empty, "Unobserved");
+            });
         }
     }
 

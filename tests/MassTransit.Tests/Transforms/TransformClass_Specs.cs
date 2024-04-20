@@ -13,12 +13,15 @@
         [Test]
         public async Task Should_have_the_message_property()
         {
-            await InputQueueSendEndpoint.Send(new A {First = "Hello"});
+            await InputQueueSendEndpoint.Send(new A { First = "Hello" });
 
             ConsumeContext<A> result = await _received;
 
-            Assert.That(result.Message.First, Is.EqualTo("First"));
-            Assert.That(result.Message.Second, Is.EqualTo("Second"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.Message.First, Is.EqualTo("First"));
+                Assert.That(result.Message.Second, Is.EqualTo("Second"));
+            });
         }
 
         Task<ConsumeContext<A>> _received;

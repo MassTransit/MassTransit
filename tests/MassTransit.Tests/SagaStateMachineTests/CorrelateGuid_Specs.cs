@@ -20,12 +20,12 @@
 
             Guid? saga = await _repository.ShouldContainSagaInState(state => state.TransactionId == id, _machine, x => x.Active, TestTimeout);
 
-            Assert.IsTrue(saga.HasValue);
+            Assert.That(saga.HasValue, Is.True);
 
             await Bus.Publish<CommitTransaction>(new { TransactionId = id });
 
             saga = await _repository.ShouldContainSagaInState(state => state.TransactionId == id, _machine, x => x.Final, TestTimeout);
-            Assert.IsTrue(saga.HasValue);
+            Assert.That(saga.HasValue, Is.True);
         }
 
         InMemorySagaRepository<TransactionState> _repository;

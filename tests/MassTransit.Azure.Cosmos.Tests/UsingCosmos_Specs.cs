@@ -23,12 +23,12 @@
             await InputQueueSendEndpoint.Send(new GirlfriendYelling { CorrelationId = correlationId });
 
             var saga = await GetSagaRetry(correlationId, TestTimeout);
-            Assert.IsNotNull(saga);
+            Assert.That(saga, Is.Not.Null);
 
             await InputQueueSendEndpoint.Send(new SodOff { CorrelationId = correlationId });
 
             saga = await GetNoSagaRetry(correlationId, TestTimeout);
-            Assert.IsNull(saga);
+            Assert.That(saga, Is.Null);
         }
 
         [Test]
@@ -40,18 +40,18 @@
 
             var saga = await GetSagaRetry(correlationId, TestTimeout);
 
-            Assert.IsNotNull(saga);
+            Assert.That(saga, Is.Not.Null);
 
             await InputQueueSendEndpoint.Send(new GotHitByACar { CorrelationId = correlationId });
 
             saga = await GetSagaRetry(correlationId, TestTimeout, x => x.CurrentState == _machine.Dead.Name);
 
-            Assert.IsNotNull(saga);
-            Assert.IsTrue(saga.CurrentState == _machine.Dead.Name);
+            Assert.That(saga, Is.Not.Null);
+            Assert.That(saga.CurrentState, Is.EqualTo(_machine.Dead.Name));
 
             var instance = await GetSaga(correlationId);
 
-            Assert.IsTrue(instance.Screwed);
+            Assert.That(instance.Screwed, Is.True);
         }
 
         SuperShopper _machine;

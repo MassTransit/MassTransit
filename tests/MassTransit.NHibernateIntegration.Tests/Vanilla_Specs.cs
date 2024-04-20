@@ -22,7 +22,7 @@
 
             var instance = await GetStateMachine(correlationId);
 
-            Assert.IsTrue(instance.Screwed);
+            Assert.That(instance.Screwed, Is.True);
         }
 
         SuperShopper _machine;

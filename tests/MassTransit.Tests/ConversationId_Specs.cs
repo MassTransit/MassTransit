@@ -70,9 +70,12 @@
 
             ConsumeContext<PongMessage> responseContext = await responseHandled;
 
-            Assert.That(responseContext.ConversationId.HasValue, Is.True);
+            Assert.Multiple(() =>
+            {
+                Assert.That(responseContext.ConversationId.HasValue, Is.True);
 
-            Assert.That(responseContext.ConversationId, Is.EqualTo(context.ConversationId));
+                Assert.That(responseContext.ConversationId, Is.EqualTo(context.ConversationId));
+            });
         }
 
         Task<ConsumeContext<PingMessage>> _handled;
@@ -103,11 +106,14 @@
 
             ConsumeContext<PongMessage> responseContext = await responseHandled;
 
-            Assert.That(responseContext.ConversationId.HasValue);
+            Assert.Multiple(() =>
+            {
+                Assert.That(responseContext.ConversationId.HasValue);
 
-            Assert.That(responseContext.ConversationId.Value, Is.Not.EqualTo(conversationId));
+                Assert.That(responseContext.ConversationId.Value, Is.Not.EqualTo(conversationId));
 
-            Assert.That(responseContext.Headers.Get<Guid>(MessageHeaders.InitiatingConversationId), Is.EqualTo(conversationId));
+                Assert.That(responseContext.Headers.Get<Guid>(MessageHeaders.InitiatingConversationId), Is.EqualTo(conversationId));
+            });
         }
 
         Task<ConsumeContext<PingMessage>> _handled;
@@ -118,6 +124,7 @@
                 context.RespondAsync(new PongMessage(context.Message.CorrelationId), x => x.StartNewConversation()));
         }
     }
+
 
     [TestFixture]
     public class Starting_a_new_conversation_from_a_new_message :

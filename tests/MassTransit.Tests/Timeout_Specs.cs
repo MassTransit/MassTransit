@@ -19,11 +19,14 @@
             await InputQueueSendEndpoint.Send(new PingMessage());
             await Task.WhenAny(_succeeded, faulted);
 
-            Assert.IsTrue(_firstCalled);
-            Assert.IsTrue(_firstRequested.HasValue);
-            Assert.IsFalse(_firstRequested.Value);
-            Assert.IsFalse(_secondCalled);
-            Assert.IsFalse(_secondRequested.HasValue);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_firstCalled, Is.True);
+                Assert.That(_firstRequested.HasValue, Is.True);
+                Assert.That(_firstRequested.Value, Is.False);
+                Assert.That(_secondCalled, Is.False);
+                Assert.That(_secondRequested.HasValue, Is.False);
+            });
         }
 
         Task _succeeded;

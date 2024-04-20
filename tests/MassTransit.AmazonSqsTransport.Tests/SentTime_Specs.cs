@@ -69,10 +69,13 @@ namespace MassTransit.AmazonSqsTransport.Tests
             IReceivedMessage<PongMessage> consumed = await harness.Consumed.SelectAsync<PongMessage>().FirstOrDefault();
             Assert.That(consumed, Is.Not.Null);
 
-            Assert.That(consumed.Context.SentTime.Value.Kind, Is.EqualTo(DateTimeKind.Utc));
-            Assert.That(consumed.Context.ReceiveContext.ContentType, Is.EqualTo(SystemTextJsonRawMessageSerializer.JsonContentType));
+            Assert.Multiple(() =>
+            {
+                Assert.That(consumed.Context.SentTime.Value.Kind, Is.EqualTo(DateTimeKind.Utc));
+                Assert.That(consumed.Context.ReceiveContext.ContentType, Is.EqualTo(SystemTextJsonRawMessageSerializer.JsonContentType));
 
-            Assert.That(consumed.Context.ReceiveContext.GetSentTime(), Is.GreaterThanOrEqualTo(consumed.Context.SentTime - TimeSpan.FromSeconds(30)));
+                Assert.That(consumed.Context.ReceiveContext.GetSentTime(), Is.GreaterThanOrEqualTo(consumed.Context.SentTime - TimeSpan.FromSeconds(30)));
+            });
             Assert.That(consumed.Context.ReceiveContext.GetSentTime(), Is.LessThanOrEqualTo(consumed.Context.SentTime + TimeSpan.FromSeconds(30)));
         }
     }

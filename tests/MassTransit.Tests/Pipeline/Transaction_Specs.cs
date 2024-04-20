@@ -26,7 +26,7 @@
                     {
                         Console.WriteLine("ExecuteAsync: {0}", Thread.CurrentThread.ManagedThreadId);
 
-                        Assert.IsNotNull(Transaction.Current);
+                        Assert.That(Transaction.Current, Is.Not.Null);
                         Console.WriteLine("Isolation Level: {0}", Transaction.Current.IsolationLevel);
                     }
                 }));
@@ -52,7 +52,7 @@
                     {
                         Console.WriteLine("ExecuteAsync: {0}", Thread.CurrentThread.ManagedThreadId);
 
-                        Assert.IsNotNull(Transaction.Current);
+                        Assert.That(Transaction.Current, Is.Not.Null);
                         Console.WriteLine("Isolation Level: {0}", Transaction.Current.IsolationLevel);
 
                         scope.Complete();
@@ -81,7 +81,7 @@
                     {
                         Console.WriteLine("ExecuteAsync: {0}", Thread.CurrentThread.ManagedThreadId);
 
-                        Assert.IsNotNull(Transaction.Current);
+                        Assert.That(Transaction.Current, Is.Not.Null);
                         Console.WriteLine("Isolation Level: {0}", Transaction.Current.IsolationLevel);
                         scope.Complete();
                     }
@@ -108,7 +108,7 @@
                     {
                         Console.WriteLine("ExecuteAsync: {0}", Thread.CurrentThread.ManagedThreadId);
 
-                        Assert.IsNotNull(Transaction.Current);
+                        Assert.That(Transaction.Current, Is.Not.Null);
                         Console.WriteLine("Isolation Level: {0}", Transaction.Current.IsolationLevel);
 
                         Thread.Sleep(5000);

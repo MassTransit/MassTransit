@@ -2,7 +2,6 @@ namespace MassTransit.Tests.Serialization
 {
     using System;
     using System.Linq;
-    using System.Reflection;
     using System.Threading.Tasks;
     using MassTransit.Configuration;
     using MassTransit.Serialization;
@@ -31,7 +30,9 @@ namespace MassTransit.Tests.Serialization
 
             var result = SerializeAndReturn(complaint);
 
+            #pragma warning disable NUnit2010
             Assert.That(complaint.Equals(result), Is.True);
+            #pragma warning restore NUnit2010
         }
 
         [Test]

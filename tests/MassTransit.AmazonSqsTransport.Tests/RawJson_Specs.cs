@@ -58,20 +58,23 @@ namespace MassTransit.AmazonSqsTransport.Tests
 
             ConsumeContext<Command> context = await _handled;
 
-            Assert.That(context.ReceiveContext.ContentType, Is.EqualTo(SystemTextJsonRawMessageSerializer.JsonContentType),
-                $"unexpected content-type {context.ReceiveContext.ContentType}");
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.ReceiveContext.ContentType, Is.EqualTo(SystemTextJsonRawMessageSerializer.JsonContentType),
+                    $"unexpected content-type {context.ReceiveContext.ContentType}");
 
-            Assert.That(context.Message.CommandId, Is.EqualTo(message.CommandId));
-            Assert.That(context.Message.ItemNumber, Is.EqualTo(message.ItemNumber));
+                Assert.That(context.Message.CommandId, Is.EqualTo(message.CommandId));
+                Assert.That(context.Message.ItemNumber, Is.EqualTo(message.ItemNumber));
 
-            Assert.That(context.Headers.Get<string>(headerName), Is.EqualTo(headerValue));
+                Assert.That(context.Headers.Get<string>(headerName), Is.EqualTo(headerValue));
 
-            Assert.IsTrue(context.MessageId.HasValue);
-            Assert.IsTrue(context.ConversationId.HasValue);
-            Assert.IsTrue(context.CorrelationId.HasValue);
-            Assert.IsTrue(context.SentTime.HasValue);
-            Assert.IsNotNull(context.DestinationAddress);
-            Assert.That(context.SupportedMessageTypes.Count(), Is.EqualTo(1));
+                Assert.That(context.MessageId.HasValue, Is.True);
+                Assert.That(context.ConversationId.HasValue, Is.True);
+                Assert.That(context.CorrelationId.HasValue, Is.True);
+                Assert.That(context.SentTime.HasValue, Is.True);
+                Assert.That(context.DestinationAddress, Is.Not.Null);
+                Assert.That(context.SupportedMessageTypes.Count(), Is.EqualTo(1));
+            });
         }
 
         Task<ConsumeContext<Command>> _handled;
@@ -118,12 +121,15 @@ namespace MassTransit.AmazonSqsTransport.Tests
 
             ConsumeContext<CrapConsumed> context = await _handled;
 
-            Assert.That(context.ReceiveContext.ContentType, Is.EqualTo(SystemTextJsonMessageSerializer.JsonContentType),
-                $"unexpected content-type {context.ReceiveContext.ContentType}");
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.ReceiveContext.ContentType, Is.EqualTo(SystemTextJsonMessageSerializer.JsonContentType),
+                    $"unexpected content-type {context.ReceiveContext.ContentType}");
 
-            Assert.That(context.Message.CorrelationId, Is.EqualTo(message.CommandId));
+                Assert.That(context.Message.CorrelationId, Is.EqualTo(message.CommandId));
 
-            Assert.That(context.Headers.Get<string>(headerName), Is.EqualTo(default));
+                Assert.That(context.Headers.Get<string>(headerName), Is.EqualTo(default));
+            });
         }
 
         Task<ConsumeContext<CrapConsumed>> _handled;
@@ -192,12 +198,15 @@ namespace MassTransit.AmazonSqsTransport.Tests
 
             ConsumeContext<CrapConsumed> context = await _handled;
 
-            Assert.That(context.ReceiveContext.ContentType, Is.EqualTo(SystemTextJsonMessageSerializer.JsonContentType),
-                $"unexpected content-type {context.ReceiveContext.ContentType}");
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.ReceiveContext.ContentType, Is.EqualTo(SystemTextJsonMessageSerializer.JsonContentType),
+                    $"unexpected content-type {context.ReceiveContext.ContentType}");
 
-            Assert.That(context.Message.CorrelationId, Is.EqualTo(message.CommandId));
+                Assert.That(context.Message.CorrelationId, Is.EqualTo(message.CommandId));
 
-            Assert.That(context.Headers.Get<string>(headerName), Is.EqualTo(headerValue));
+                Assert.That(context.Headers.Get<string>(headerName), Is.EqualTo(headerValue));
+            });
         }
 
         Task<ConsumeContext<CrapConsumed>> _handled;

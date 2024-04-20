@@ -153,7 +153,7 @@ namespace MassTransit.EventHubIntegration.Tests
 
                 ConsumeContext<EventHubMessage> result = await taskCompletionSource.Task;
 
-                Assert.IsTrue(result.TryGetPayload(out EventHubConsumeContext _));
+                Assert.That(result.TryGetPayload(out EventHubConsumeContext _), Is.True);
             }
             finally
             {

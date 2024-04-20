@@ -36,7 +36,7 @@
             for (var i = 0; i < 20; i++)
             {
                 var saga = await GetSagaRetry(sagaIds[i], TestTimeout);
-                Assert.IsNotNull(saga);
+                Assert.That(saga, Is.Not.Null);
             }
 
             for (var i = 0; i < 20; i++)
@@ -72,8 +72,8 @@
             {
                 var instance = await GetSagaRetry(sid, TestTimeout, x => x.CurrentState == _machine.Harmony.Name);
 
-                Assert.IsNotNull(instance);
-                Assert.IsTrue(instance.CurrentState.Equals("Harmony"));
+                Assert.That(instance, Is.Not.Null);
+                Assert.That(instance.CurrentState, Is.EqualTo("Harmony"));
             }
         }
 
@@ -87,7 +87,7 @@
 
             var saga = await GetSagaRetry(correlationId, TestTimeout);
 
-            Assert.IsNotNull(saga);
+            Assert.That(saga, Is.Not.Null);
 
             await Task.WhenAll(
                 InputQueueSendEndpoint.Send(new Bass
@@ -114,12 +114,12 @@
 
             saga = await GetSagaRetry(correlationId, TestTimeout, x => x.CurrentState == _machine.Harmony.Name);
 
-            Assert.IsNotNull(saga);
-            Assert.IsTrue(saga.CurrentState == _machine.Harmony.Name);
+            Assert.That(saga, Is.Not.Null);
+            Assert.That(saga.CurrentState, Is.EqualTo(_machine.Harmony.Name));
 
             var instance = await GetSaga(correlationId);
 
-            Assert.IsTrue(instance.CurrentState.Equals("Harmony"));
+            Assert.That(instance.CurrentState, Is.EqualTo("Harmony"));
         }
 
         ChoirStateMachine _machine;

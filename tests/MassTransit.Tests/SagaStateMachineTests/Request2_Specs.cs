@@ -30,7 +30,7 @@
 
                 Guid? saga = await _repository.ShouldContainSagaInState(memberId, _machine, x => x.Registered, TestTimeout);
 
-                Assert.IsTrue(saga.HasValue);
+                Assert.That(saga.HasValue, Is.True);
 
                 var sagaInstance = _repository[saga.Value].Instance;
                 Assert.That(sagaInstance.Name, Is.EqualTo("Frank"));

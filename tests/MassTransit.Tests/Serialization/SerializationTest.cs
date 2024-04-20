@@ -141,12 +141,15 @@ namespace MassTransit.Tests.Serialization
 
             Assert.That(messageContext, Is.Not.Null);
 
-            Assert.That(messageContext.SourceAddress, Is.EqualTo(_sourceAddress));
-            Assert.That(messageContext.DestinationAddress, Is.EqualTo(_destinationAddress));
-            Assert.That(messageContext.FaultAddress, Is.EqualTo(_faultAddress));
-            Assert.That(messageContext.ResponseAddress, Is.EqualTo(_responseAddress));
-            Assert.That(messageContext.RequestId.HasValue, Is.EqualTo(true));
-            Assert.That(messageContext.RequestId.Value, Is.EqualTo(_requestId));
+            Assert.Multiple(() =>
+            {
+                Assert.That(messageContext.SourceAddress, Is.EqualTo(_sourceAddress));
+                Assert.That(messageContext.DestinationAddress, Is.EqualTo(_destinationAddress));
+                Assert.That(messageContext.FaultAddress, Is.EqualTo(_faultAddress));
+                Assert.That(messageContext.ResponseAddress, Is.EqualTo(_responseAddress));
+                Assert.That(messageContext.RequestId.HasValue, Is.EqualTo(true));
+                Assert.That(messageContext.RequestId.Value, Is.EqualTo(_requestId));
+            });
 
             return messageContext.Message;
         }

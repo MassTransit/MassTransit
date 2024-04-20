@@ -20,8 +20,11 @@
 
             Response<CommonResponse> response = await client.GetResponse<CommonResponse>(request);
 
-            Assert.That(response.Message.Message, Is.EqualTo(message));
-            Assert.That(response.Message.Name, Is.EqualTo("I am lost!"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(response.Message.Message, Is.EqualTo(message));
+                Assert.That(response.Message.Name, Is.EqualTo("I am lost!"));
+            });
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

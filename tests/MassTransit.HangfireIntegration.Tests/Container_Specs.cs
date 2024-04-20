@@ -54,11 +54,14 @@ namespace MassTransit.HangfireIntegration.Tests
 
             await harness.Bus.Publish<FirstMessage>(new { });
 
-            Assert.That(await harness.GetConsumerHarness<FirstMessageConsumer>().Consumed.Any<FirstMessage>(), Is.True);
+            Assert.Multiple(async () =>
+            {
+                Assert.That(await harness.GetConsumerHarness<FirstMessageConsumer>().Consumed.Any<FirstMessage>(), Is.True);
 
-            Assert.That(await harness.Consumed.Any<ScheduleMessage>(), Is.True);
+                Assert.That(await harness.Consumed.Any<ScheduleMessage>(), Is.True);
 
-            Assert.That(await harness.GetConsumerHarness<SecondMessageConsumer>().Consumed.Any<SecondMessage>(), Is.True);
+                Assert.That(await harness.GetConsumerHarness<SecondMessageConsumer>().Consumed.Any<SecondMessage>(), Is.True);
+            });
         }
 
         [Test]
@@ -96,18 +99,24 @@ namespace MassTransit.HangfireIntegration.Tests
 
             await harness.Bus.Publish<FirstMessage>(new { }, x => x.Headers.Set("SimpleHeader", "SimpleValue"));
 
-            Assert.That(await harness.GetConsumerHarness<FirstMessageConsumer>().Consumed.Any<FirstMessage>(), Is.True);
+            Assert.Multiple(async () =>
+            {
+                Assert.That(await harness.GetConsumerHarness<FirstMessageConsumer>().Consumed.Any<FirstMessage>(), Is.True);
 
-            Assert.That(await harness.Consumed.Any<ScheduleMessage>(), Is.True);
+                Assert.That(await harness.Consumed.Any<ScheduleMessage>(), Is.True);
 
-            Assert.That(await harness.GetConsumerHarness<SecondMessageConsumer>().Consumed.Any<SecondMessage>(), Is.True);
+                Assert.That(await harness.GetConsumerHarness<SecondMessageConsumer>().Consumed.Any<SecondMessage>(), Is.True);
+            });
 
             ConsumeContext<SecondMessage> context =
                 (await harness.GetConsumerHarness<SecondMessageConsumer>().Consumed.SelectAsync<SecondMessage>().First()).Context;
 
-            Assert.That(context.Headers.TryGetHeader("SimpleHeader", out var header), Is.True);
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.Headers.TryGetHeader("SimpleHeader", out var header), Is.True);
 
-            Assert.That(header, Is.EqualTo("SimpleValue"));
+                Assert.That(header, Is.EqualTo("SimpleValue"));
+            });
         }
 
         readonly ITestBusConfiguration _configuration;

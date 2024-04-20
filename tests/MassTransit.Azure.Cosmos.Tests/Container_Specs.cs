@@ -108,10 +108,10 @@ namespace MassTransit.Azure.Cosmos.Tests
                     TestKey = "Unique"
                 });
 
-                Assert.IsTrue(await harness.Published.Any<TestStarted>(x => x.Context.Message.CorrelationId == correlationId));
+                Assert.That(await harness.Published.Any<TestStarted>(x => x.Context.Message.CorrelationId == correlationId), Is.True);
 
                 // For some reason, the LINQ provider for Cosmos does not properly resolve this query.
-                 var sagaHarness = harness.GetSagaStateMachineHarness<TestStateMachineSaga, TestInstance>();
+                var sagaHarness = harness.GetSagaStateMachineHarness<TestStateMachineSaga, TestInstance>();
                 // Assert.IsNotNull(await sagaHarness.Exists(correlationId, x => x.Active));
 
                 await harness.Bus.Publish(new UpdateTest
@@ -120,7 +120,7 @@ namespace MassTransit.Azure.Cosmos.Tests
                     TestKey = "Unique"
                 });
 
-                Assert.IsTrue(await harness.Published.Any<TestUpdated>(x => x.Context.Message.CorrelationId == correlationId));
+                Assert.That(await harness.Published.Any<TestUpdated>(x => x.Context.Message.CorrelationId == correlationId), Is.True);
             }
         }
 

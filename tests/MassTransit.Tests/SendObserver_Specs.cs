@@ -26,8 +26,11 @@
 
                     await observer.PreSent;
                     await observer.SendFaulted;
-                    Assert.That(observer.PreSentCount, Is.EqualTo(1));
-                    Assert.That(observer.SendFaultCount, Is.EqualTo(1));
+                    Assert.Multiple(() =>
+                    {
+                        Assert.That(observer.PreSentCount, Is.EqualTo(1));
+                        Assert.That(observer.SendFaultCount, Is.EqualTo(1));
+                    });
                 }
             }
 
@@ -42,8 +45,11 @@
                     await observer.PreSent;
                     await observer.PostSent;
 
-                    Assert.That(observer.PreSentCount, Is.EqualTo(1));
-                    Assert.That(observer.PostSentCount, Is.EqualTo(1));
+                    Assert.Multiple(() =>
+                    {
+                        Assert.That(observer.PreSentCount, Is.EqualTo(1));
+                        Assert.That(observer.PostSentCount, Is.EqualTo(1));
+                    });
                 }
             }
 
@@ -57,8 +63,11 @@
 
                     await observer.PreSent;
 
-                    Assert.That(observer.PreSentCount, Is.EqualTo(1));
-                    Assert.That(observer.PostSentCount, Is.EqualTo(1));
+                    Assert.Multiple(() =>
+                    {
+                        Assert.That(observer.PreSentCount, Is.EqualTo(1));
+                        Assert.That(observer.PostSentCount, Is.EqualTo(1));
+                    });
                 }
             }
 
@@ -73,11 +82,14 @@
 
                     await observer.SendFaulted;
 
-                    Assert.That(observer.PostSent.Status, Is.EqualTo(TaskStatus.WaitingForActivation));
+                    Assert.Multiple(() =>
+                    {
+                        Assert.That(observer.PostSent.Status, Is.EqualTo(TaskStatus.WaitingForActivation));
 
-                    Assert.That(observer.PreSentCount, Is.EqualTo(1));
-                    Assert.That(observer.PostSentCount, Is.EqualTo(0));
-                    Assert.That(observer.SendFaultCount, Is.EqualTo(1));
+                        Assert.That(observer.PreSentCount, Is.EqualTo(1));
+                        Assert.That(observer.PostSentCount, Is.EqualTo(0));
+                        Assert.That(observer.SendFaultCount, Is.EqualTo(1));
+                    });
                 }
             }
         }
@@ -99,9 +111,12 @@
                     await observer.PostSent;
                     await observer.SendFaulted;
 
-                    Assert.That(observer.PreSentCount, Is.EqualTo(2));
-                    Assert.That(observer.PostSentCount, Is.EqualTo(1));
-                    Assert.That(observer.SendFaultCount, Is.EqualTo(1));
+                    Assert.Multiple(() =>
+                    {
+                        Assert.That(observer.PreSentCount, Is.EqualTo(2));
+                        Assert.That(observer.PostSentCount, Is.EqualTo(1));
+                        Assert.That(observer.SendFaultCount, Is.EqualTo(1));
+                    });
                 }
             }
 
@@ -134,11 +149,14 @@
 
                 await _observer.SendFaulted;
 
-                Assert.That(_observer.PostSent.Status, Is.EqualTo(TaskStatus.WaitingForActivation));
+                Assert.Multiple(() =>
+                {
+                    Assert.That(_observer.PostSent.Status, Is.EqualTo(TaskStatus.WaitingForActivation));
 
-                Assert.That(_observer.PreSentCount, Is.EqualTo(1));
-                Assert.That(_observer.PostSentCount, Is.EqualTo(0));
-                Assert.That(_observer.SendFaultCount, Is.EqualTo(1));
+                    Assert.That(_observer.PreSentCount, Is.EqualTo(1));
+                    Assert.That(_observer.PostSentCount, Is.EqualTo(0));
+                    Assert.That(_observer.SendFaultCount, Is.EqualTo(1));
+                });
             }
 
             SendObserver _observer;
@@ -264,8 +282,11 @@
                 await observer.PreSent;
                 await observer.PostSent;
 
-                Assert.That(observer.PreSentCount, Is.EqualTo(1));
-                Assert.That(observer.PostSentCount, Is.EqualTo(1));
+                Assert.Multiple(() =>
+                {
+                    Assert.That(observer.PreSentCount, Is.EqualTo(1));
+                    Assert.That(observer.PostSentCount, Is.EqualTo(1));
+                });
             }
 
             [Test]
@@ -297,8 +318,11 @@
                 await observer.PreSent;
                 await observer.PostSent;
 
-                Assert.That(observer.PreSentCount, Is.EqualTo(2));
-                Assert.That(observer.PostSentCount, Is.EqualTo(2));
+                Assert.Multiple(() =>
+                {
+                    Assert.That(observer.PreSentCount, Is.EqualTo(2));
+                    Assert.That(observer.PostSentCount, Is.EqualTo(2));
+                });
             }
         }
 

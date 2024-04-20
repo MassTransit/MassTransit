@@ -20,8 +20,11 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             ConsumeContext<TransactionEvent> context = await _handled;
 
-            Assert.IsTrue(context.CorrelationId.HasValue);
-            Assert.That(context.CorrelationId.Value, Is.EqualTo(transactionId));
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.CorrelationId.HasValue, Is.True);
+                Assert.That(context.CorrelationId.Value, Is.EqualTo(transactionId));
+            });
 
             var settings = GetHostSettings();
 

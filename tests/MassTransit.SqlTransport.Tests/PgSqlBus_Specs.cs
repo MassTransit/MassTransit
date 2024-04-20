@@ -127,52 +127,6 @@ namespace MassTransit.DbTransport.Tests
         }
 
         [Test]
-        public async Task Should_support_standard_syntax_with_consumers()
-        {
-            await using var provider = new ServiceCollection()
-                .ConfigurePostgresTransport()
-                .AddMassTransitTestHarness(x =>
-                {
-                    x.AddConsumer<TestMessageConsumer>();
-                    x.SetTestTimeouts(testInactivityTimeout: TimeSpan.FromSeconds(2));
-
-                    x.UsingPostgres((context, cfg) =>
-                    {
-                        cfg.ReceiveEndpoint("input-queue", e =>
-                        {
-                            e.ConfigureConsumeTopology = false;
-                            e.PrefetchCount = 30;
-
-                            e.ConfigureConsumer<TestMessageConsumer>(context);
-                        });
-                    });
-                })
-                .BuildServiceProvider(true);
-
-            var harness = provider.GetTestHarness();
-
-            await harness.Start();
-
-            var endpoint = await harness.Bus.GetSendEndpoint(new Uri("queue:input-queue"));
-
-            await endpoint.Send(new TestMessage("Hello, World!"), x =>
-            {
-                x.Headers.Set("Simple-Header", "Some Value");
-            });
-
-            Assert.IsTrue(await harness.Consumed.Any<TestMessage>());
-
-            IReceivedMessage<TestMessage> context = harness.Consumed.Select<TestMessage>().Single();
-
-            Assert.That(context.Context.MessageId, Is.Not.Null);
-            Assert.That(context.Context.ConversationId, Is.Not.Null);
-            Assert.That(context.Context.DestinationAddress, Is.Not.Null);
-            Assert.That(context.Context.SourceAddress, Is.Not.Null);
-
-            await harness.Stop();
-        }
-
-        [Test]
         [Explicit]
         public async Task Should_give_me_so_much_of_the_datas()
         {
@@ -221,6 +175,55 @@ namespace MassTransit.DbTransport.Tests
             Console.WriteLine("Total send duration: {0:g}", sendElapsed);
             Console.WriteLine("Send message rate: {0:F2} (msg/s)",
                 limit * loop * 1000 / sendElapsed.TotalMilliseconds);
+
+            await harness.Stop();
+        }
+
+        [Test]
+        public async Task Should_support_standard_syntax_with_consumers()
+        {
+            await using var provider = new ServiceCollection()
+                .ConfigurePostgresTransport()
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.AddConsumer<TestMessageConsumer>();
+                    x.SetTestTimeouts(testInactivityTimeout: TimeSpan.FromSeconds(2));
+
+                    x.UsingPostgres((context, cfg) =>
+                    {
+                        cfg.ReceiveEndpoint("input-queue", e =>
+                        {
+                            e.ConfigureConsumeTopology = false;
+                            e.PrefetchCount = 30;
+
+                            e.ConfigureConsumer<TestMessageConsumer>(context);
+                        });
+                    });
+                })
+                .BuildServiceProvider(true);
+
+            var harness = provider.GetTestHarness();
+
+            await harness.Start();
+
+            var endpoint = await harness.Bus.GetSendEndpoint(new Uri("queue:input-queue"));
+
+            await endpoint.Send(new TestMessage("Hello, World!"), x =>
+            {
+                x.Headers.Set("Simple-Header", "Some Value");
+            });
+
+            Assert.That(await harness.Consumed.Any<TestMessage>(), Is.True);
+
+            IReceivedMessage<TestMessage> context = harness.Consumed.Select<TestMessage>().Single();
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.Context.MessageId, Is.Not.Null);
+                Assert.That(context.Context.ConversationId, Is.Not.Null);
+                Assert.That(context.Context.DestinationAddress, Is.Not.Null);
+                Assert.That(context.Context.SourceAddress, Is.Not.Null);
+            });
 
             await harness.Stop();
         }

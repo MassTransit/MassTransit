@@ -33,8 +33,11 @@
                 );
 
             await machine.RaiseEvent(instance, Thing, new Data { Condition = true });
-            Assert.That(instance.CurrentState, Is.EqualTo(True));
-            Assert.That(instance.Initialized.HasValue, Is.True);
+            Assert.Multiple(() =>
+            {
+                Assert.That(instance.CurrentState, Is.EqualTo(True));
+                Assert.That(instance.Initialized.HasValue, Is.True);
+            });
         }
 
 

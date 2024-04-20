@@ -24,7 +24,7 @@
             {
                 var timer = Stopwatch.StartNew();
                 Bus.Publish(new A());
-                Assert.IsTrue(_before.WaitOne(TimeSpan.FromSeconds(30)), "Consumer thread failed to start");
+                Assert.That(_before.WaitOne(TimeSpan.FromSeconds(30)), Is.True, "Consumer thread failed to start");
                 timer.Stop();
                 latency.Add(timer.ElapsedMilliseconds);
             }
@@ -34,7 +34,7 @@
             _wait.Set();
 
             for (var i = 0; i < 100; i++)
-                Assert.IsTrue(_after.WaitOne(TimeSpan.FromSeconds(30)), "Consumer thread failed to complete");
+                Assert.That(_after.WaitOne(TimeSpan.FromSeconds(30)), Is.True, "Consumer thread failed to complete");
 
             Console.WriteLine("Elapsed Time: {0}", DateTime.Now - now);
         }

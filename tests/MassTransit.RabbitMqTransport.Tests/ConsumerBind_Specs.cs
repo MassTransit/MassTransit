@@ -171,7 +171,7 @@
             public async Task Should_receive_the_message_a()
             {
                 Guid? sagaId = await SagaRepository.ShouldContainSaga(_sagaId, TestTimeout);
-                Assert.IsTrue(sagaId.HasValue);
+                Assert.That(sagaId.HasValue, Is.True);
 
                 var saga = _repository[sagaId.Value].Instance;
 
@@ -182,7 +182,7 @@
             public async Task Should_receive_the_message_b()
             {
                 Guid? sagaId = await SagaRepository.ShouldContainSaga(_sagaId, TestTimeout);
-                Assert.IsTrue(sagaId.HasValue);
+                Assert.That(sagaId.HasValue, Is.True);
 
                 var saga = _repository[sagaId.Value].Instance;
 

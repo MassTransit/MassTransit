@@ -21,7 +21,7 @@
 
             ConsumeContext<PingMessage> context = await _received.Task;
 
-            Assert.GreaterOrEqual(_receivedTimeSpan, TimeSpan.FromSeconds(1));
+            Assert.That(_receivedTimeSpan, Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(1)));
         }
 
         TaskCompletionSource<ConsumeContext<PingMessage>> _received;
@@ -169,8 +169,11 @@
             ConsumeContext<Fault<PingMessage>> pingFaultContext = await pingFault;
             ConsumeContext<Fault<PongMessage>> pongFaultContext = await pongFault;
 
-            Assert.That(_consumer.PingCount, Is.EqualTo(3));
-            Assert.That(_consumer.PongCount, Is.EqualTo(3));
+            Assert.Multiple(() =>
+            {
+                Assert.That(_consumer.PingCount, Is.EqualTo(3));
+                Assert.That(_consumer.PongCount, Is.EqualTo(3));
+            });
         }
 
         Consumer _consumer;
@@ -375,7 +378,7 @@
 
             await _received.Task;
 
-            Assert.IsTrue(_hit);
+            Assert.That(_hit, Is.True);
         }
 
         TaskCompletionSource<ConsumeContext<PingMessage>> _received;

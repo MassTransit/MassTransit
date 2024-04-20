@@ -3,9 +3,9 @@ namespace MassTransit.ActiveMqTransport.Tests
     using System;
     using System.Linq;
     using System.Threading.Tasks;
-    using MassTransit.Testing;
     using NUnit.Framework;
     using TestFramework.Messages;
+    using Testing;
     using Transports;
 
 
@@ -20,7 +20,7 @@ namespace MassTransit.ActiveMqTransport.Tests
             await Bus.Publish(new ReconnectMessage { Value = "Before" });
 
             var beforeFound = await Task.Run(() => _consumer.Received.Select<ReconnectMessage>(x => x.Context.Message.Value == "Before").Any());
-            Assert.IsTrue(beforeFound);
+            Assert.That(beforeFound, Is.True);
 
             Console.WriteLine("Okay, restart ActiveMQ");
 
@@ -46,7 +46,7 @@ namespace MassTransit.ActiveMqTransport.Tests
             await Bus.Publish(new ReconnectMessage { Value = "After" });
 
             var afterFound = await Task.Run(() => _consumer.Received.Select<ReconnectMessage>(x => x.Context.Message.Value == "After").Any());
-            Assert.IsTrue(afterFound);
+            Assert.That(afterFound, Is.True);
         }
 
         public Reconnecting_Specs()

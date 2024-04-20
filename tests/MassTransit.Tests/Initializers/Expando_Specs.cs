@@ -39,7 +39,7 @@ namespace MassTransit.Tests.Initializers
         public void Should_have_an_interface_from_dictionary_converter()
         {
             var factory = new PropertyProviderFactory<IDictionary<string, object>>();
-            Assert.IsTrue(factory.TryGetPropertyConverter(out IPropertyConverter<MessageContract, object> converter));
+            Assert.That(factory.TryGetPropertyConverter(out IPropertyConverter<MessageContract, object> converter), Is.True);
         }
 
         [Test]
@@ -101,7 +101,7 @@ namespace MassTransit.Tests.Initializers
             dto.Add(nameof(MessageContract.CustomerId), "SuperMart");
             dto.Add(nameof(MessageContract.UniqueId), uniqueId);
 
-            InitializeContext<MessageEnvelope> message = await MessageInitializerCache<MessageEnvelope>.Initialize(new {Contract = dto});
+            InitializeContext<MessageEnvelope> message = await MessageInitializerCache<MessageEnvelope>.Initialize(new { Contract = dto });
 
             Assert.That(message.Message.Contract, Is.Not.Null);
             Assert.That(message.Message.Contract.Id, Is.EqualTo(27));

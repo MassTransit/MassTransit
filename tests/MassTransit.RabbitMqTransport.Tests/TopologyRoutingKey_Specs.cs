@@ -18,11 +18,14 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             ConsumeContext<IRoutedEvent> context = await _handled;
 
-            Assert.IsTrue(context.CorrelationId.HasValue);
-            Assert.That(context.CorrelationId.Value, Is.EqualTo(transactionId));
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.CorrelationId.HasValue, Is.True);
+                Assert.That(context.CorrelationId.Value, Is.EqualTo(transactionId));
 
-            Assert.IsTrue(context.TryGetPayload<RabbitMqBasicConsumeContext>(out var basicConsumeContext));
-            Assert.That(basicConsumeContext.RoutingKey, Is.EqualTo(transactionId.ToString()));
+                Assert.That(context.TryGetPayload<RabbitMqBasicConsumeContext>(out var basicConsumeContext), Is.True);
+                Assert.That(basicConsumeContext.RoutingKey, Is.EqualTo(transactionId.ToString()));
+            });
         }
 
         Task<ConsumeContext<IRoutedEvent>> _handled;

@@ -12,12 +12,15 @@
         [Test]
         public async Task Should_have_the_message_property()
         {
-            await InputQueueSendEndpoint.Send(new A {First = "Hello"});
+            await InputQueueSendEndpoint.Send(new A { First = "Hello" });
 
             ConsumeContext<A> result = await _received;
 
-            Assert.That(result.Message.First, Is.EqualTo("Hello"));
-            Assert.That(result.Message.Second, Is.EqualTo("World"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.Message.First, Is.EqualTo("Hello"));
+                Assert.That(result.Message.Second, Is.EqualTo("World"));
+            });
         }
 
         Task<ConsumeContext<A>> _received;
@@ -52,12 +55,15 @@
         [Test]
         public async Task Should_have_the_message_property()
         {
-            await InputQueueSendEndpoint.Send(new A {First = "Hello"});
+            await InputQueueSendEndpoint.Send(new A { First = "Hello" });
 
             ConsumeContext<A> result = await _received;
 
-            Assert.That(result.Message.First, Is.EqualTo("Hello"));
-            Assert.That(result.Message.Second, Is.EqualTo("World"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.Message.First, Is.EqualTo("Hello"));
+                Assert.That(result.Message.Second, Is.EqualTo("World"));
+            });
         }
 
         Task<ConsumeContext<A>> _received;
@@ -92,18 +98,21 @@
         {
             Task<ConsumeContext<IA>> unmodified = await ConnectPublishHandler<IA>();
 
-            await Bus.Publish(new A {First = "Hello"});
+            await Bus.Publish(new A { First = "Hello" });
 
             ConsumeContext<IA> result = await _received;
             ConsumeContext<IA> original = await unmodified;
             var tweaked = await _tweaked.Task;
 
-            Assert.That(result.Message.First, Is.EqualTo("Hello"));
-            Assert.That(result.Message.Second, Is.EqualTo("World"));
-            Assert.That(tweaked.Second, Is.EqualTo("World"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.Message.First, Is.EqualTo("Hello"));
+                Assert.That(result.Message.Second, Is.EqualTo("World"));
+                Assert.That(tweaked.Second, Is.EqualTo("World"));
 
-            Assert.That(original.Message.First, Is.EqualTo("Hello"));
-            Assert.That(original.Message.Second, Is.Null);
+                Assert.That(original.Message.First, Is.EqualTo("Hello"));
+                Assert.That(original.Message.Second, Is.Null);
+            });
         }
 
         Task<ConsumeContext<IA>> _received;
@@ -149,19 +158,22 @@
         {
             Task<ConsumeContext<IA>> unmodified = await ConnectPublishHandler<IA>();
 
-            await Bus.Publish(new A {First = "Hello"});
+            await Bus.Publish(new A { First = "Hello" });
 
             ConsumeContext<IA> result = await _received;
             ConsumeContext<IA> original = await unmodified;
             var tweaked = await _tweaked.Task;
 
-            Assert.That(result.Message.First, Is.EqualTo("Hello"));
-            Assert.That(result.Message.Second, Is.Null);
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.Message.First, Is.EqualTo("Hello"));
+                Assert.That(result.Message.Second, Is.Null);
 
-            Assert.That(tweaked.Second, Is.EqualTo("World"));
+                Assert.That(tweaked.Second, Is.EqualTo("World"));
 
-            Assert.That(original.Message.First, Is.EqualTo("Hello"));
-            Assert.That(original.Message.Second, Is.Null);
+                Assert.That(original.Message.First, Is.EqualTo("Hello"));
+                Assert.That(original.Message.Second, Is.Null);
+            });
         }
 
         Task<ConsumeContext<IA>> _received;

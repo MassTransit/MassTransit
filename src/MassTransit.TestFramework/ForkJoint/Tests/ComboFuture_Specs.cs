@@ -33,12 +33,15 @@ namespace MassTransit.TestFramework.ForkJoint.Tests
                 Number = 5
             }, timeout: RequestTimeout.After(s: 5));
 
-            Assert.That(response.Message.OrderId, Is.EqualTo(orderId));
-            Assert.That(response.Message.OrderLineId, Is.EqualTo(orderLineId));
-            Assert.That(response.Message.Created, Is.GreaterThanOrEqualTo(startedAt));
-            Assert.That(response.Message.Completed, Is.GreaterThanOrEqualTo(response.Message.Created));
+            Assert.Multiple(() =>
+            {
+                Assert.That(response.Message.OrderId, Is.EqualTo(orderId));
+                Assert.That(response.Message.OrderLineId, Is.EqualTo(orderLineId));
+                Assert.That(response.Message.Created, Is.GreaterThanOrEqualTo(startedAt));
+                Assert.That(response.Message.Completed, Is.GreaterThanOrEqualTo(response.Message.Created));
 
-            Assert.That(response.Message.Description, Contains.Substring("Fries"));
+                Assert.That(response.Message.Description, Contains.Substring("Fries"));
+            });
             Assert.That(response.Message.Description, Contains.Substring("Shake"));
         }
 

@@ -13,6 +13,11 @@ namespace MassTransit.TestFramework.ForkJoint.Tests
     public class FryFuture_Specs :
         FutureTestFixture
     {
+        public FryFuture_Specs(IFutureTestFixtureConfigurator testFixtureConfigurator)
+            : base(testFixtureConfigurator)
+        {
+        }
+
         [Test]
         public async Task Should_complete()
         {
@@ -32,11 +37,14 @@ namespace MassTransit.TestFramework.ForkJoint.Tests
                 Size = Size.Medium
             });
 
-            Assert.That(response.Message.OrderId, Is.EqualTo(orderId));
-            Assert.That(response.Message.OrderLineId, Is.EqualTo(orderLineId));
-            Assert.That(response.Message.Size, Is.EqualTo(Size.Medium));
-            Assert.That(response.Message.Created, Is.GreaterThanOrEqualTo(startedAt));
-            Assert.That(response.Message.Completed, Is.GreaterThanOrEqualTo(response.Message.Created));
+            Assert.Multiple(() =>
+            {
+                Assert.That(response.Message.OrderId, Is.EqualTo(orderId));
+                Assert.That(response.Message.OrderLineId, Is.EqualTo(orderLineId));
+                Assert.That(response.Message.Size, Is.EqualTo(Size.Medium));
+                Assert.That(response.Message.Created, Is.GreaterThanOrEqualTo(startedAt));
+                Assert.That(response.Message.Completed, Is.GreaterThanOrEqualTo(response.Message.Created));
+            });
         }
 
         protected override void ConfigureServices(IServiceCollection collection)
@@ -48,11 +56,6 @@ namespace MassTransit.TestFramework.ForkJoint.Tests
         {
             configurator.AddConsumer<CookFryConsumer, CookFryConsumerDefinition>();
             configurator.AddFuture<FryFuture>();
-        }
-
-        public FryFuture_Specs(IFutureTestFixtureConfigurator testFixtureConfigurator)
-            : base(testFixtureConfigurator)
-        {
         }
     }
 }

@@ -57,7 +57,7 @@
 
             Task<SimpleValue>[] values = cache.GetAll().ToArray();
 
-            Assert.That(values.Length, Is.EqualTo(101));
+            Assert.That(values, Has.Length.EqualTo(101));
         }
 
         [Test]
@@ -89,7 +89,7 @@
 
             Task<SimpleValue>[] values = cache.GetAll().ToArray();
 
-            Assert.That(values.Length, Is.EqualTo(60));
+            Assert.That(values, Has.Length.EqualTo(60));
         }
 
         [Test]

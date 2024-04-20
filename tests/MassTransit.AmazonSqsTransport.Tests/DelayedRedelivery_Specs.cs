@@ -26,13 +26,16 @@ namespace MassTransit.AmazonSqsTransport.Tests
 
             ConsumeContext<Fault<PingMessage>> handled = await handler;
 
-            Assert.That(handled.Headers.Get<int>(MessageHeaders.FaultRedeliveryCount), Is.EqualTo(_limit));
+            Assert.Multiple(() =>
+            {
+                Assert.That(handled.Headers.Get<int>(MessageHeaders.FaultRedeliveryCount), Is.EqualTo(_limit));
 
-            Assert.That(handled.Headers.Get<int>(MessageHeaders.FaultRetryCount), Is.EqualTo(1));
+                Assert.That(handled.Headers.Get<int>(MessageHeaders.FaultRetryCount), Is.EqualTo(1));
+            });
 
             await InactivityTask;
 
-            Assert.LessOrEqual(_attempts[pingId], (_limit + 1) * 2);
+            Assert.That(_attempts[pingId], Is.LessThanOrEqualTo((_limit + 1) * 2));
         }
 
         readonly int _limit;

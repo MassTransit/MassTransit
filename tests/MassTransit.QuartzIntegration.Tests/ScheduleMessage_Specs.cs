@@ -24,7 +24,7 @@
             await _second;
 
             if (_secondActivityId != null && _firstActivityId != null)
-                Assert.That(_secondActivityId.StartsWith(_firstActivityId), Is.True);
+                Assert.That(_secondActivityId, Does.StartWith(_firstActivityId));
         }
 
         Task<ConsumeContext<SecondMessage>> _second;
@@ -74,7 +74,7 @@
             await _second;
 
             if (_secondActivityId != null && _firstActivityId != null)
-                Assert.That(_secondActivityId.StartsWith(_firstActivityId), Is.True);
+                Assert.That(_secondActivityId, Does.StartWith(_firstActivityId));
         }
 
         Task<ConsumeContext<SecondMessage>> _second;
@@ -113,6 +113,7 @@
         }
     }
 
+
     [TestFixture]
     public class ScheduleMessageUsingNewtonsoftRawJson_Specs :
         QuartzInMemoryTestFixture
@@ -129,7 +130,7 @@
             await _second;
 
             if (_secondActivityId != null && _firstActivityId != null)
-                Assert.That(_secondActivityId.StartsWith(_firstActivityId), Is.True);
+                Assert.That(_secondActivityId, Does.StartWith(_firstActivityId));
         }
 
         Task<ConsumeContext<SecondMessage>> _second;
@@ -185,7 +186,7 @@
             await _second;
 
             if (_secondActivityId != null && _firstActivityId != null)
-                Assert.That(_secondActivityId.StartsWith(_firstActivityId), Is.True);
+                Assert.That(_secondActivityId, Does.StartWith(_firstActivityId));
         }
 
         Task<ConsumeContext<SecondMessage>> _second;
@@ -242,7 +243,7 @@
             await _second;
 
             if (_secondActivityId != null && _firstActivityId != null)
-                Assert.That(_secondActivityId.StartsWith(_firstActivityId), Is.True);
+                Assert.That(_secondActivityId, Does.StartWith(_firstActivityId));
         }
 
         Task<ConsumeContext<SecondMessage>> _second;
@@ -303,8 +304,11 @@
 
             ConsumeContext<SecondMessage> second = await _second;
 
-            Assert.That(second.ExpirationTime.HasValue, Is.True);
-            Assert.That(second.ExpirationTime.Value, Is.GreaterThan(DateTime.UtcNow + TimeSpan.FromSeconds(20)));
+            Assert.Multiple(() =>
+            {
+                Assert.That(second.ExpirationTime.HasValue, Is.True);
+                Assert.That(second.ExpirationTime.Value, Is.GreaterThan(DateTime.UtcNow + TimeSpan.FromSeconds(20)));
+            });
         }
 
         Task<ConsumeContext<SecondMessage>> _second;

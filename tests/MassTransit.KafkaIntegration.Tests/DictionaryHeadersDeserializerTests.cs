@@ -14,18 +14,28 @@
         {
             var headers = new Headers { new Header("EmptyValue", null) };
             var result = DictionaryHeadersSerialize.Deserializer.Deserialize(headers);
-            Assert.IsTrue(result.TryGetHeader("EmptyValue", out var emptyValue));
-            Assert.IsNull(emptyValue);
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.TryGetHeader("EmptyValue", out var emptyValue), Is.True);
+                Assert.That(emptyValue, Is.Null);
+            });
         }
 
         [Test]
         public async Task Should_Deserialize_with_duplicate_header_value()
         {
-            var headers = new Headers { new Header("TestValue", null), new Header("TestValue", null) };
+            var headers = new Headers
+            {
+                new Header("TestValue", null),
+                new Header("TestValue", null)
+            };
 
             var result = DictionaryHeadersSerialize.Deserializer.Deserialize(headers);
-            Assert.IsTrue(result.TryGetHeader("TestValue", out var emptyValue));
-            Assert.IsNull(emptyValue);
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.TryGetHeader("TestValue", out var emptyValue), Is.True);
+                Assert.That(emptyValue, Is.Null);
+            });
         }
 
         [Test]
@@ -34,8 +44,11 @@
             var bytes = Encoding.Unicode.GetBytes("test");
             var headers = new Headers { new Header("BadValue", bytes) };
             var result = DictionaryHeadersSerialize.Deserializer.Deserialize(headers);
-            Assert.IsTrue(result.TryGetHeader("BadValue", out var value));
-            Assert.That(value, Is.EqualTo(Encoding.UTF8.GetString(bytes)));
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.TryGetHeader("BadValue", out var value), Is.True);
+                Assert.That(value, Is.EqualTo(Encoding.UTF8.GetString(bytes)));
+            });
         }
     }
 }

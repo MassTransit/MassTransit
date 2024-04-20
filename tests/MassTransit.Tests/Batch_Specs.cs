@@ -113,9 +113,12 @@
 
             var count = await BusTestHarness.Consumed.SelectAsync<PingMessage>().Take(6).Count();
 
-            Assert.That(count, Is.EqualTo(6));
+            Assert.Multiple(() =>
+            {
+                Assert.That(count, Is.EqualTo(6));
 
-            Assert.That(_batches.Select(x => x.Length), Is.EquivalentTo(new[] { 1, 2, 3 }));
+                Assert.That(_batches.Select(x => x.Length), Is.EquivalentTo(new[] { 1, 2, 3 }));
+            });
         }
 
         readonly List<Batch<PingMessage>> _batches = new List<Batch<PingMessage>>();
@@ -156,8 +159,11 @@
 
             var count = await BusTestHarness.Consumed.SelectAsync<PingMessage>().Take(6).Count();
 
-            Assert.That(count, Is.EqualTo(6));
-            Assert.That(_batches.Select(x => x.Length), Is.EquivalentTo(new[] { 1, 2, 3 }));
+            Assert.Multiple(() =>
+            {
+                Assert.That(count, Is.EqualTo(6));
+                Assert.That(_batches.Select(x => x.Length), Is.EquivalentTo(new[] { 1, 2, 3 }));
+            });
         }
 
         readonly List<Batch<PingMessage>> _batches = new List<Batch<PingMessage>>();
@@ -198,7 +204,7 @@
 
             Batch<PingMessage> batch = await consumer.Completed;
 
-            Assert.That(batch.Length, Is.EqualTo(4));
+            Assert.That(batch, Has.Length.EqualTo(4));
         }
     }
 
@@ -217,7 +223,7 @@
 
             await _completed.Task;
 
-            Assert.That(_duplicateMessages.Count, Is.EqualTo(0));
+            Assert.That(_duplicateMessages, Is.Empty);
         }
 
         public Using_a_batch_consumer()
