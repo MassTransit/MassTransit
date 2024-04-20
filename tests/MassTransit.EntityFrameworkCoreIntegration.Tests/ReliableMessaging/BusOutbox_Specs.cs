@@ -378,7 +378,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
             var totalTimer = Stopwatch.StartNew();
             var sendTimer = Stopwatch.StartNew();
 
-            const int loopCount = 100;
+            const int loopCount = 400;
             const int messagesPerLoop = 3;
             await Task.WhenAll(Enumerable.Range(0, loopCount).Select(async n =>
             {
