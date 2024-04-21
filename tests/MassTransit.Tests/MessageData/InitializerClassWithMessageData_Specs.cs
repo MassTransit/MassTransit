@@ -55,42 +55,72 @@ namespace MassTransit.Tests.MessageData
             });
 
             Assert.That(response.Message.StringData, Is.Not.Null);
-            Assert.That(response.Message.StringData.HasValue, Is.True);
-            Assert.That(response.Message.StringData.Address, Is.EqualTo(_stringDataAddress), "Should use the existing message data address");
+            Assert.Multiple(() =>
+            {
+                Assert.That(response.Message.StringData.HasValue, Is.True);
+                Assert.That(response.Message.StringData.Address, Is.EqualTo(_stringDataAddress), "Should use the existing message data address");
+            });
             var text = await response.Message.StringData.Value;
-            Assert.That(text, Is.EqualTo(stringData));
+            Assert.Multiple(() =>
+            {
+                Assert.That(text, Is.EqualTo(stringData));
 
-            Assert.That(response.Message.StringByteData, Is.Not.Null);
-            Assert.That(response.Message.StringByteData.HasValue, Is.True);
-            Assert.That(response.Message.StringByteData.Address, Is.EqualTo(_stringDataAddress), "Should use the existing message data address");
+                Assert.That(response.Message.StringByteData, Is.Not.Null);
+            });
+            Assert.Multiple(() =>
+            {
+                Assert.That(response.Message.StringByteData.HasValue, Is.True);
+                Assert.That(response.Message.StringByteData.Address, Is.EqualTo(_stringDataAddress), "Should use the existing message data address");
+            });
             var bytes = await response.Message.StringByteData.Value;
-            Assert.That(Encoding.UTF8.GetString(bytes), Is.EqualTo(stringData));
+            Assert.Multiple(() =>
+            {
+                Assert.That(Encoding.UTF8.GetString(bytes), Is.EqualTo(stringData));
 
-            Assert.That(response.Message.ByteData, Is.Not.Null);
-            Assert.That(response.Message.ByteData.HasValue, Is.True);
-            Assert.That(response.Message.ByteData.Address, Is.EqualTo(_byteDataAddress), "Should use the existing message data address");
+                Assert.That(response.Message.ByteData, Is.Not.Null);
+            });
+            Assert.Multiple(() =>
+            {
+                Assert.That(response.Message.ByteData.HasValue, Is.True);
+                Assert.That(response.Message.ByteData.Address, Is.EqualTo(_byteDataAddress), "Should use the existing message data address");
+            });
             bytes = await response.Message.ByteData.Value;
-            Assert.That(Encoding.UTF8.GetString(bytes), Is.EqualTo(byteData));
+            Assert.Multiple(() =>
+            {
+                Assert.That(Encoding.UTF8.GetString(bytes), Is.EqualTo(byteData));
 
-            Assert.That(response.Message.StreamData, Is.Not.Null);
-            Assert.That(response.Message.StreamData.HasValue, Is.True);
-            Assert.That(response.Message.StreamData.Address, Is.EqualTo(_streamDataAddress), "Should use the existing message data address");
+                Assert.That(response.Message.StreamData, Is.Not.Null);
+            });
+            Assert.Multiple(() =>
+            {
+                Assert.That(response.Message.StreamData.HasValue, Is.True);
+                Assert.That(response.Message.StreamData.Address, Is.EqualTo(_streamDataAddress), "Should use the existing message data address");
+            });
             using var receivedStream = new MemoryStream();
             var stream = await response.Message.StreamData.Value;
             await stream.CopyToAsync(receivedStream);
-            Assert.That(receivedStream.ToArray(), Is.EqualTo(streamBytes));
+            Assert.Multiple(() =>
+            {
+                Assert.That(receivedStream.ToArray(), Is.EqualTo(streamBytes));
 
-            Assert.That(response.Message.StringValue, Is.Not.Null);
+                Assert.That(response.Message.StringValue, Is.Not.Null);
+            });
             Assert.That(response.Message.StringValue.HasValue, Is.True);
             text = await response.Message.StringValue.Value;
-            Assert.That(text, Is.EqualTo(stringValue));
+            Assert.Multiple(() =>
+            {
+                Assert.That(text, Is.EqualTo(stringValue));
 
-            Assert.That(response.Message.StringByteValue, Is.Not.Null);
+                Assert.That(response.Message.StringByteValue, Is.Not.Null);
+            });
             Assert.That(response.Message.StringByteValue.HasValue, Is.True);
             bytes = await response.Message.StringByteValue.Value;
-            Assert.That(Encoding.UTF8.GetString(bytes), Is.EqualTo(stringValue));
+            Assert.Multiple(() =>
+            {
+                Assert.That(Encoding.UTF8.GetString(bytes), Is.EqualTo(stringValue));
 
-            Assert.That(response.Message.ByteValue, Is.Not.Null);
+                Assert.That(response.Message.ByteValue, Is.Not.Null);
+            });
             Assert.That(response.Message.ByteValue.HasValue, Is.True);
             bytes = await response.Message.ByteValue.Value;
             Assert.That(Encoding.UTF8.GetString(bytes), Is.EqualTo(byteValue));

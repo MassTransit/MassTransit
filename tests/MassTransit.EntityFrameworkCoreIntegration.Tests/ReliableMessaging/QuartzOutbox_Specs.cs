@@ -56,7 +56,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
             {
                 await harness.Bus.Publish<FirstMessage>(new { });
 
-                Assert.Multiple(async () =>
+                await Assert.MultipleAsync(async () =>
                 {
                     Assert.That(await harness.GetConsumerHarness<FirstMessageConsumer>().Consumed.Any<FirstMessage>(), Is.True);
 

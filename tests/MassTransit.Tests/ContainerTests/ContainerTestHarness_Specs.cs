@@ -138,7 +138,7 @@ namespace MassTransit.Tests.ContainerTests
                 OrderNumber = "123"
             });
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Published.SelectAsync<Fault<SubmitOrder>>().Count(), Is.EqualTo(1));
 
@@ -147,7 +147,7 @@ namespace MassTransit.Tests.ContainerTests
 
             IConsumerTestHarness<SubmitOrderConsumer> consumerHarness = harness.GetConsumerHarness<SubmitOrderConsumer>();
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await consumerHarness.Consumed.SelectAsync<SubmitOrder>().Count(), Is.EqualTo(1));
 
@@ -196,7 +196,7 @@ namespace MassTransit.Tests.ContainerTests
                 OrderNumber = "123"
             });
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Sent.Any<OrderSubmitted>(), Is.True);
 
@@ -244,7 +244,7 @@ namespace MassTransit.Tests.ContainerTests
 
             Assert.That(await harness.Consumed.Any<StartTest>(), Is.True);
             IReceivedMessage<StartTest> startTest = await harness.Consumed.SelectAsync<StartTest>().First();
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(startTest.Context.CorrelationId, Is.EqualTo(correlationId));
 

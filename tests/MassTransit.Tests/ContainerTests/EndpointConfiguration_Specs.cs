@@ -18,67 +18,15 @@ namespace MassTransit.Tests.ContainerTests
         BusTestFixture
     {
         [Test]
-        public void Should_properly_configure_the_prefetch_count()
-        {
-            var busControl = MassTransit.Bus.Factory.CreateUsingInMemory(cfg =>
-            {
-                cfg.PrefetchCount = 427;
-            });
-
-            var probe = JObject.Parse(busControl.GetProbeResult().ToJsonString());
-
-            var prefetchCount = GetPrefetchCount(probe, 0);
-
-            Assert.That(prefetchCount, Is.EqualTo(427));
-        }
-
-        [Test]
-        public void Should_use_bus_setting_if_not_specified()
-        {
-            var busControl = MassTransit.Bus.Factory.CreateUsingInMemory(cfg =>
-            {
-                cfg.PrefetchCount = 427;
-
-                cfg.ReceiveEndpoint("input-queue", e =>
-                {
-                });
-            });
-
-            var probe = JObject.Parse(busControl.GetProbeResult().ToJsonString());
-
-            Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(427));
-            Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
-        }
-
-        [Test]
-        public void Should_override_bus_setting_if_specified()
-        {
-            var busControl = MassTransit.Bus.Factory.CreateUsingInMemory(cfg =>
-            {
-                cfg.PrefetchCount = 427;
-
-                cfg.ReceiveEndpoint("input-queue", e =>
-                {
-                    e.PrefetchCount = 351;
-                });
-            });
-
-            var jsonString = busControl.GetProbeResult().ToJsonString();
-            var probe = JObject.Parse(jsonString);
-
-            Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(351));
-            Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
-        }
-
-        [Test]
-        public async Task Should_include_concurrency_filter_if_specified()
+        public async Task Should_include_concurrency_filter_if_concurrency_limit_overridden()
         {
             var services = new ServiceCollection();
             services.AddSingleton(LoggerFactory);
             services.TryAdd(ServiceDescriptor.Singleton(typeof(ILogger<>), typeof(Logger<>)));
             services.AddMassTransit(x =>
             {
-                x.AddConsumer<PingConsumer, EndpointPingConsumerDefinition>();
+                x.AddConsumer<PingConsumer>()
+                    .Endpoint(e => e.ConcurrentMessageLimit = 100);
 
                 x.UsingInMemory((context, cfg) =>
                 {
@@ -94,9 +42,12 @@ namespace MassTransit.Tests.ContainerTests
             var jsonString = busControl.GetProbeResult().ToJsonString();
             var probe = JObject.Parse(jsonString);
 
-            Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(351));
-            Assert.That(GetConcurrentMessageLimit(probe, 0), Is.EqualTo(100));
-            Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
+            Assert.Multiple(() =>
+            {
+                Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(120));
+                Assert.That(GetConcurrentMessageLimit(probe, 0), Is.EqualTo(100));
+                Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
+            });
 
             await provider.DisposeAsync();
         }
@@ -125,23 +76,25 @@ namespace MassTransit.Tests.ContainerTests
             var jsonString = busControl.GetProbeResult().ToJsonString();
             var probe = JObject.Parse(jsonString);
 
-            Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(120));
-            Assert.That(GetConcurrentMessageLimit(probe, 0), Is.EqualTo(100));
-            Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
+            Assert.Multiple(() =>
+            {
+                Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(120));
+                Assert.That(GetConcurrentMessageLimit(probe, 0), Is.EqualTo(100));
+                Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
+            });
 
             await provider.DisposeAsync();
         }
 
         [Test]
-        public async Task Should_include_concurrency_filter_if_concurrency_limit_overridden()
+        public async Task Should_include_concurrency_filter_if_specified()
         {
             var services = new ServiceCollection();
             services.AddSingleton(LoggerFactory);
             services.TryAdd(ServiceDescriptor.Singleton(typeof(ILogger<>), typeof(Logger<>)));
             services.AddMassTransit(x =>
             {
-                x.AddConsumer<PingConsumer>()
-                    .Endpoint(e => e.ConcurrentMessageLimit = 100);
+                x.AddConsumer<PingConsumer, EndpointPingConsumerDefinition>();
 
                 x.UsingInMemory((context, cfg) =>
                 {
@@ -157,9 +110,12 @@ namespace MassTransit.Tests.ContainerTests
             var jsonString = busControl.GetProbeResult().ToJsonString();
             var probe = JObject.Parse(jsonString);
 
-            Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(120));
-            Assert.That(GetConcurrentMessageLimit(probe, 0), Is.EqualTo(100));
-            Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
+            Assert.Multiple(() =>
+            {
+                Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(351));
+                Assert.That(GetConcurrentMessageLimit(probe, 0), Is.EqualTo(100));
+                Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
+            });
 
             await provider.DisposeAsync();
         }
@@ -188,10 +144,72 @@ namespace MassTransit.Tests.ContainerTests
             var jsonString = busControl.GetProbeResult().ToJsonString();
             var probe = JObject.Parse(jsonString);
 
-            Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(427));
-            Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
+            Assert.Multiple(() =>
+            {
+                Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(427));
+                Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
+            });
 
             await provider.DisposeAsync();
+        }
+
+        [Test]
+        public void Should_override_bus_setting_if_specified()
+        {
+            var busControl = MassTransit.Bus.Factory.CreateUsingInMemory(cfg =>
+            {
+                cfg.PrefetchCount = 427;
+
+                cfg.ReceiveEndpoint("input-queue", e =>
+                {
+                    e.PrefetchCount = 351;
+                });
+            });
+
+            var jsonString = busControl.GetProbeResult().ToJsonString();
+            var probe = JObject.Parse(jsonString);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(351));
+                Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
+            });
+        }
+
+        [Test]
+        public void Should_properly_configure_the_prefetch_count()
+        {
+            var busControl = MassTransit.Bus.Factory.CreateUsingInMemory(cfg =>
+            {
+                cfg.PrefetchCount = 427;
+            });
+
+            var probe = JObject.Parse(busControl.GetProbeResult().ToJsonString());
+
+            var prefetchCount = GetPrefetchCount(probe, 0);
+
+            Assert.That(prefetchCount, Is.EqualTo(427));
+        }
+
+        [Test]
+        public void Should_use_bus_setting_if_not_specified()
+        {
+            var busControl = MassTransit.Bus.Factory.CreateUsingInMemory(cfg =>
+            {
+                cfg.PrefetchCount = 427;
+
+                cfg.ReceiveEndpoint("input-queue", e =>
+                {
+                });
+            });
+
+            var probe = JObject.Parse(busControl.GetProbeResult().ToJsonString());
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(427));
+                Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
+            });
         }
 
 

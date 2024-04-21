@@ -100,8 +100,11 @@
 
             ConsumeContext<MyRoutingSlipCompleted> context = await myCompleted;
 
-            Assert.That(context.Message.Timestamp, Is.GreaterThanOrEqualTo(startTime));
-            Assert.That(context.Message.SomeValue, Is.EqualTo("Hello"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.Message.Timestamp, Is.GreaterThanOrEqualTo(startTime));
+                Assert.That(context.Message.SomeValue, Is.EqualTo("Hello"));
+            });
         }
 
         protected override void SetupActivities(BusTestHarness testHarness)

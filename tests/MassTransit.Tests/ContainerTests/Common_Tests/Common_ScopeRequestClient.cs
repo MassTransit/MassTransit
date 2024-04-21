@@ -127,9 +127,12 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
 
             var sent = await _taskCompletionSource.Task;
 
-            Assert.That(sent.TryGetPayload<IServiceProvider>(out var serviceProvider), Is.True);
+            Assert.Multiple(() =>
+            {
+                Assert.That(sent.TryGetPayload<IServiceProvider>(out var serviceProvider), Is.True);
 
-            Assert.That(ServiceScope.ServiceProvider, Is.EqualTo(serviceProvider));
+                Assert.That(ServiceScope.ServiceProvider, Is.EqualTo(serviceProvider));
+            });
         }
 
         protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)

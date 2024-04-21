@@ -36,13 +36,19 @@ namespace MassTransit.Tests.MessageData
                 RequestTimeout.After(s: 5));
 
             Assert.That(response.Message.Payload, Is.Not.Null);
-            Assert.That(response.Message.Payload.HasValue, Is.True);
-            Assert.That(response.Message.Payload.Address, Is.EqualTo(_payloadAddress), "Should use the existing message data address");
+            Assert.Multiple(() =>
+            {
+                Assert.That(response.Message.Payload.HasValue, Is.True);
+                Assert.That(response.Message.Payload.Address, Is.EqualTo(_payloadAddress), "Should use the existing message data address");
+            });
             var responsePayload = await response.Message.Payload.Value;
-            Assert.That(responsePayload.Value, Is.EqualTo(payload.Value));
-            Assert.That(responsePayload.Dictionary.ContainsKey("string"), Is.EqualTo(true)); // will pass
-            Assert.That(responsePayload.Dictionary.ContainsKey("bool_true"), Is.EqualTo(true)); // Will pass
-            Assert.That(responsePayload.Dictionary.ContainsKey("bool_false"), Is.EqualTo(true)); // Will fail
+            Assert.Multiple(() =>
+            {
+                Assert.That(responsePayload.Value, Is.EqualTo(payload.Value));
+                Assert.That(responsePayload.Dictionary.ContainsKey("string"), Is.EqualTo(true)); // will pass
+                Assert.That(responsePayload.Dictionary.ContainsKey("bool_true"), Is.EqualTo(true)); // Will pass
+                Assert.That(responsePayload.Dictionary.ContainsKey("bool_false"), Is.EqualTo(true)); // Will fail
+            });
         }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)

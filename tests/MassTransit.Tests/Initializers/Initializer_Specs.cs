@@ -13,7 +13,7 @@
         [Test]
         public async Task Should_convert_value_types_to_strings()
         {
-            InitializeContext<TestStringMessage> context = await MessageInitializerCache<TestStringMessage>.Initialize(new {Text = _intValue});
+            InitializeContext<TestStringMessage> context = await MessageInitializerCache<TestStringMessage>.Initialize(new { Text = _intValue });
 
             Assert.That(context.Message.Text, Is.EqualTo(_intValue.ToString()));
         }
@@ -40,19 +40,22 @@
 
             var message = context.Message;
 
-            Assert.That(message.StringValue, Is.EqualTo(_stringValue));
-            Assert.That(message.BoolValue, Is.EqualTo(_boolValue));
-            Assert.That(message.ByteValue, Is.EqualTo(_byteValue));
-            Assert.That(message.ShortValue, Is.EqualTo(_shortValue));
-            Assert.That(message.IntValue, Is.EqualTo(_intValue));
-            Assert.That(message.LongValue, Is.EqualTo(_longValue));
-            Assert.That(message.DoubleValue, Is.EqualTo(_doubleValue));
-            Assert.That(message.DecimalValue, Is.EqualTo(_decimalValue));
-            Assert.That(message.DateTimeValue, Is.EqualTo(_dateTimeValue));
-            Assert.That(message.DateTimeOffsetValue, Is.EqualTo(_dateTimeOffsetValue));
-            Assert.That(message.TimeSpanValue, Is.EqualTo(_timeSpanValue));
-            Assert.That(message.DayValue, Is.EqualTo(_dayValue));
-            Assert.That(message.ObjectValue, Is.EqualTo(_objectValue));
+            Assert.Multiple(() =>
+            {
+                Assert.That(message.StringValue, Is.EqualTo(_stringValue));
+                Assert.That(message.BoolValue, Is.EqualTo(_boolValue));
+                Assert.That(message.ByteValue, Is.EqualTo(_byteValue));
+                Assert.That(message.ShortValue, Is.EqualTo(_shortValue));
+                Assert.That(message.IntValue, Is.EqualTo(_intValue));
+                Assert.That(message.LongValue, Is.EqualTo(_longValue));
+                Assert.That(message.DoubleValue, Is.EqualTo(_doubleValue));
+                Assert.That(message.DecimalValue, Is.EqualTo(_decimalValue));
+                Assert.That(message.DateTimeValue, Is.EqualTo(_dateTimeValue));
+                Assert.That(message.DateTimeOffsetValue, Is.EqualTo(_dateTimeOffsetValue));
+                Assert.That(message.TimeSpanValue, Is.EqualTo(_timeSpanValue));
+                Assert.That(message.DayValue, Is.EqualTo(_dayValue));
+                Assert.That(message.ObjectValue, Is.EqualTo(_objectValue));
+            });
         }
 
         [Test]
@@ -76,18 +79,21 @@
 
             var message = context.Message;
 
-            Assert.That(message.StringValue, Is.EqualTo(_stringValue));
-            Assert.That(message.BoolValue, Is.EqualTo(_boolValue));
-            Assert.That(message.ByteValue, Is.EqualTo(_byteValue));
-            Assert.That(message.ShortValue, Is.EqualTo(_shortValue));
-            Assert.That(message.IntValue, Is.EqualTo(_intValue));
-            Assert.That(message.LongValue, Is.EqualTo(_longValue));
-            Assert.That(message.DoubleValue, Is.EqualTo(_doubleValue));
-            Assert.That(message.DecimalValue, Is.EqualTo(_decimalValue));
-            Assert.That(message.DateTimeValue, Is.EqualTo(_dateTimeValue));
-            Assert.That(message.DateTimeOffsetValue, Is.EqualTo(_dateTimeOffsetValue));
-            Assert.That(message.TimeSpanValue, Is.EqualTo(_timeSpanValue));
-            Assert.That(message.DayValue, Is.EqualTo(_dayValue));
+            Assert.Multiple(() =>
+            {
+                Assert.That(message.StringValue, Is.EqualTo(_stringValue));
+                Assert.That(message.BoolValue, Is.EqualTo(_boolValue));
+                Assert.That(message.ByteValue, Is.EqualTo(_byteValue));
+                Assert.That(message.ShortValue, Is.EqualTo(_shortValue));
+                Assert.That(message.IntValue, Is.EqualTo(_intValue));
+                Assert.That(message.LongValue, Is.EqualTo(_longValue));
+                Assert.That(message.DoubleValue, Is.EqualTo(_doubleValue));
+                Assert.That(message.DecimalValue, Is.EqualTo(_decimalValue));
+                Assert.That(message.DateTimeValue, Is.EqualTo(_dateTimeValue));
+                Assert.That(message.DateTimeOffsetValue, Is.EqualTo(_dateTimeOffsetValue));
+                Assert.That(message.TimeSpanValue, Is.EqualTo(_timeSpanValue));
+                Assert.That(message.DayValue, Is.EqualTo(_dayValue));
+            });
         }
 
         [Test]
@@ -112,19 +118,22 @@
 
             var message = context.Message;
 
-            Assert.That(message.StringValue, Is.EqualTo(_stringValue));
-            Assert.That(message.BoolValue, Is.EqualTo(_boolValue));
-            Assert.That(message.ByteValue, Is.EqualTo(_byteValue));
-            Assert.That(message.ShortValue, Is.EqualTo(_shortValue));
-            Assert.That(message.IntValue, Is.EqualTo(_intValue));
-            Assert.That(message.LongValue, Is.EqualTo(_longValue));
-            Assert.That(message.DoubleValue, Is.EqualTo(_doubleValue));
-            Assert.That(message.DecimalValue, Is.EqualTo(_decimalValue));
-            Assert.That(message.DateTimeValue, Is.EqualTo(_dateTimeValue));
-            Assert.That(message.DateTimeOffsetValue, Is.EqualTo(_dateTimeOffsetValue));
-            Assert.That(message.TimeSpanValue, Is.EqualTo(_timeSpanValue));
-            Assert.That(message.DayValue, Is.EqualTo(_dayValue));
-            Assert.That(message.ObjectValue, Is.EqualTo(_objectValue));
+            Assert.Multiple(() =>
+            {
+                Assert.That(message.StringValue, Is.EqualTo(_stringValue));
+                Assert.That(message.BoolValue, Is.EqualTo(_boolValue));
+                Assert.That(message.ByteValue, Is.EqualTo(_byteValue));
+                Assert.That(message.ShortValue, Is.EqualTo(_shortValue));
+                Assert.That(message.IntValue, Is.EqualTo(_intValue));
+                Assert.That(message.LongValue, Is.EqualTo(_longValue));
+                Assert.That(message.DoubleValue, Is.EqualTo(_doubleValue));
+                Assert.That(message.DecimalValue, Is.EqualTo(_decimalValue));
+                Assert.That(message.DateTimeValue, Is.EqualTo(_dateTimeValue));
+                Assert.That(message.DateTimeOffsetValue, Is.EqualTo(_dateTimeOffsetValue));
+                Assert.That(message.TimeSpanValue, Is.EqualTo(_timeSpanValue));
+                Assert.That(message.DayValue, Is.EqualTo(_dayValue));
+                Assert.That(message.ObjectValue, Is.EqualTo(_objectValue));
+            });
         }
 
         [Test]
@@ -148,18 +157,20 @@
 
             var message = context.Message;
 
-
-            Assert.That(message.BoolValue, Is.EqualTo(_boolValue));
-            Assert.That(message.ByteValue, Is.EqualTo(_byteValue));
-            Assert.That(message.ShortValue, Is.EqualTo(_shortValue));
-            Assert.That(message.IntValue, Is.EqualTo(_intValue));
-            Assert.That(message.LongValue, Is.EqualTo(_longValue));
-            Assert.That(message.DoubleValue, Is.EqualTo(_doubleValue));
-            Assert.That(message.DecimalValue, Is.EqualTo(_decimalValue));
-            Assert.That(message.DateTimeValue, Is.EqualTo(_dateTimeValue));
-            Assert.That(message.DateTimeOffsetValue, Is.EqualTo(_dateTimeOffsetValue));
-            Assert.That(message.TimeSpanValue, Is.EqualTo(_timeSpanValue));
-            Assert.That(message.DayValue, Is.EqualTo(_dayValue));
+            Assert.Multiple(() =>
+            {
+                Assert.That(message.BoolValue, Is.EqualTo(_boolValue));
+                Assert.That(message.ByteValue, Is.EqualTo(_byteValue));
+                Assert.That(message.ShortValue, Is.EqualTo(_shortValue));
+                Assert.That(message.IntValue, Is.EqualTo(_intValue));
+                Assert.That(message.LongValue, Is.EqualTo(_longValue));
+                Assert.That(message.DoubleValue, Is.EqualTo(_doubleValue));
+                Assert.That(message.DecimalValue, Is.EqualTo(_decimalValue));
+                Assert.That(message.DateTimeValue, Is.EqualTo(_dateTimeValue));
+                Assert.That(message.DateTimeOffsetValue, Is.EqualTo(_dateTimeOffsetValue));
+                Assert.That(message.TimeSpanValue, Is.EqualTo(_timeSpanValue));
+                Assert.That(message.DayValue, Is.EqualTo(_dayValue));
+            });
         }
 
         readonly bool _boolValue = true;

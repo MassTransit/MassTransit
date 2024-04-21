@@ -30,16 +30,23 @@ namespace MassTransit.Tests.Initializers
 
             ConsumeContext<Ping> context = await _handled;
 
-            Assert.That(context.ResponseAddress, Is.EqualTo(new Uri(responseAddress)));
-            Assert.That(context.RequestId, Is.EqualTo(requestId));
-            Assert.That(context.ExpirationTime.HasValue, Is.True);
-            Assert.That(context.ExpirationTime.Value, Is.GreaterThanOrEqualTo(now + TimeSpan.FromSeconds(5)));
-
-            Assert.That(context.Headers.TryGetHeader("Custom-Header-Value", out var value), Is.True);
-            Assert.That(value, Is.EqualTo("Frankie Say Relax"));
-
-            Assert.That(context.Headers.TryGetHeader("Custom-Header-Value2", out value), Is.True);
-            Assert.That(value, Is.EqualTo(27));
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.ResponseAddress, Is.EqualTo(new Uri(responseAddress)));
+                Assert.That(context.RequestId, Is.EqualTo(requestId));
+                Assert.That(context.ExpirationTime.HasValue, Is.True);
+                Assert.That(context.ExpirationTime.Value, Is.GreaterThanOrEqualTo(now + TimeSpan.FromSeconds(5)));
+            });
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.Headers.TryGetHeader("Custom-Header-Value", out var value), Is.True);
+                Assert.That(value, Is.EqualTo("Frankie Say Relax"));
+            });
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.Headers.TryGetHeader("Custom-Header-Value2", out var value), Is.True);
+                Assert.That(value, Is.EqualTo(27));
+            });
         }
 
         Task<ConsumeContext<Ping>> _handled;

@@ -23,9 +23,12 @@ namespace MassTransit.Tests.ContainerTests.Scenarios
             Assert.That(last.Name, Is.EqualTo(name));
 
             var wasDisposed = await lastConsumer.Dependency.WasDisposed;
-            Assert.That(wasDisposed, Is.True, "Dependency was not disposed");
+            Assert.Multiple(() =>
+            {
+                Assert.That(wasDisposed, Is.True, "Dependency was not disposed");
 
-            Assert.That(lastConsumer.Dependency.SomethingDone, Is.True, "Dependency was disposed before consumer executed");
+                Assert.That(lastConsumer.Dependency.SomethingDone, Is.True, "Dependency was disposed before consumer executed");
+            });
         }
     }
 
@@ -48,9 +51,12 @@ namespace MassTransit.Tests.ContainerTests.Scenarios
             Assert.That(last.Name, Is.EqualTo(name));
 
             var wasDisposed = await lastConsumer.Dependency.WasDisposed;
-            Assert.That(wasDisposed, Is.True, "Dependency was not disposed");
+            Assert.Multiple(() =>
+            {
+                Assert.That(wasDisposed, Is.True, "Dependency was not disposed");
 
-            Assert.That(lastConsumer.Dependency.SomethingDone, Is.True, "Dependency was disposed before consumer executed");
+                Assert.That(lastConsumer.Dependency.SomethingDone, Is.True, "Dependency was disposed before consumer executed");
+            });
         }
     }
 }

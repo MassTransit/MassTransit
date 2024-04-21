@@ -56,12 +56,15 @@ namespace MassTransit.Tests
                 Job = new { Duration = TimeSpan.FromSeconds(10) }
             });
 
-            Assert.That(response.Message.JobId, Is.EqualTo(jobId));
+            await Assert.MultipleAsync(async () =>
+            {
+                Assert.That(response.Message.JobId, Is.EqualTo(jobId));
 
-            Assert.That(await harness.Published.Any<JobSubmitted>(), Is.True);
+                Assert.That(await harness.Published.Any<JobSubmitted>(), Is.True);
 
-            Assert.That(await harness.Published.Any<JobFaulted>(), Is.True);
-            Assert.That(await harness.Published.Any<Fault<OddJob>>(), Is.True);
+                Assert.That(await harness.Published.Any<JobFaulted>(), Is.True);
+                Assert.That(await harness.Published.Any<Fault<OddJob>>(), Is.True);
+            });
         }
 
         static ServiceProvider SetupServiceCollection()

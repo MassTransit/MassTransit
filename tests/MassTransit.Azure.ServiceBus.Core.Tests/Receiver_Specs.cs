@@ -35,7 +35,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
             IConsumerTestHarness<FaultyFunctionConsumer> consumerHarness = harness.GetConsumerHarness<FaultyFunctionConsumer>();
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await consumerHarness.Consumed.Any<FunctionMessage>(), Is.True);
 

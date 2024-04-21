@@ -35,8 +35,11 @@
 
             await pipe2.Send(new InitialContext()).ConfigureAwait(false);
 
-            Assert.That(count1, Is.EqualTo(1));
-            Assert.That(count2, Is.EqualTo(1));
+            Assert.Multiple(() =>
+            {
+                Assert.That(count1, Is.EqualTo(1));
+                Assert.That(count2, Is.EqualTo(1));
+            });
         }
 
         [Test]
@@ -67,8 +70,11 @@
 
             await pipe2.Send(new InitialContext()).ConfigureAwait(false);
 
-            Assert.That(count1, Is.EqualTo(1));
-            Assert.That(count2, Is.EqualTo(1));
+            Assert.Multiple(() =>
+            {
+                Assert.That(count1, Is.EqualTo(1));
+                Assert.That(count2, Is.EqualTo(1));
+            });
         }
 
 

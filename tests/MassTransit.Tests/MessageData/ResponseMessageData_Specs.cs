@@ -22,7 +22,7 @@ namespace MassTransit.Tests.MessageData
                 Key = "Hello"
             });
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(response.Message.Key, Is.EqualTo("Hello"));
 

@@ -25,10 +25,13 @@
             var value = await nodeValueFactory.CreateValue().ConfigureAwait(false);
 
             Assert.That(value, Is.Not.Null);
-            Assert.That(value.Id, Is.EqualTo(helloKey));
-            Assert.That(value.Value, Is.EqualTo("The key is Hello"));
+            await Assert.MultipleAsync(async () =>
+            {
+                Assert.That(value.Id, Is.EqualTo(helloKey));
+                Assert.That(value.Value, Is.EqualTo("The key is Hello"));
 
-            Assert.That(async () => await faultyValue.Value, Throws.TypeOf<TestException>());
+                Assert.That(async () => await faultyValue.Value, Throws.TypeOf<TestException>());
+            });
 
             var healthy = await healthyValue.Value;
         }
@@ -57,8 +60,11 @@
             var value = await SimpleValueFactory.Healthy("Hello");
 
             Assert.That(value, Is.Not.Null);
-            Assert.That(value.Id, Is.EqualTo("Hello"));
-            Assert.That(value.Value, Is.EqualTo("The key is Hello"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(value.Id, Is.EqualTo("Hello"));
+                Assert.That(value.Value, Is.EqualTo("The key is Hello"));
+            });
         }
 
         [Test]
@@ -73,8 +79,11 @@
             var value = await nodeValueFactory.CreateValue().ConfigureAwait(false);
 
             Assert.That(value, Is.Not.Null);
-            Assert.That(value.Id, Is.EqualTo(helloKey));
-            Assert.That(value.Value, Is.EqualTo("The key is Hello"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(value.Id, Is.EqualTo(helloKey));
+                Assert.That(value.Value, Is.EqualTo("The key is Hello"));
+            });
         }
     }
 }

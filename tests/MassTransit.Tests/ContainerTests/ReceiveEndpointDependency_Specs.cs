@@ -27,8 +27,11 @@ namespace MassTransit.Tests.ContainerTests
             await harness.Bus.Publish<DependentMessage>(new { });
 
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
-            Assert.That(await harness.Published.Any<DependentMessage>(cts.Token), Is.True);
-            Assert.That(await harness.Consumed.Any<DependentMessage>(cts.Token), Is.False);
+            await Assert.MultipleAsync(async () =>
+            {
+                Assert.That(await harness.Published.Any<DependentMessage>(cts.Token), Is.True);
+                Assert.That(await harness.Consumed.Any<DependentMessage>(cts.Token), Is.False);
+            });
 
             await healthChecks.WaitForHealthStatus(HealthStatus.Unhealthy);
 
@@ -36,8 +39,11 @@ namespace MassTransit.Tests.ContainerTests
 
             await healthChecks.WaitForHealthStatus(HealthStatus.Healthy);
 
-            Assert.That(await harness.Consumed.Any<DependencyReadyMessage>(cts.Token), Is.True);
-            Assert.That(await harness.Consumed.Any<DependentMessage>(cts.Token), Is.True);
+            await Assert.MultipleAsync(async () =>
+            {
+                Assert.That(await harness.Consumed.Any<DependencyReadyMessage>(cts.Token), Is.True);
+                Assert.That(await harness.Consumed.Any<DependentMessage>(cts.Token), Is.True);
+            });
         }
 
         static ServiceProvider SetupServiceCollection()

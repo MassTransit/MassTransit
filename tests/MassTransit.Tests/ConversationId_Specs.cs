@@ -139,11 +139,14 @@
 
             ConsumeContext<PingMessage> context = await _handled;
 
-            Assert.That(context.ConversationId.HasValue);
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.ConversationId.HasValue);
 
-            Assert.That(context.ConversationId.Value, Is.EqualTo(conversationId));
+                Assert.That(context.ConversationId.Value, Is.EqualTo(conversationId));
 
-            Assert.That(context.Headers.Get<Guid>(MessageHeaders.InitiatingConversationId), Is.Null);
+                Assert.That(context.Headers.Get<Guid>(MessageHeaders.InitiatingConversationId), Is.Null);
+            });
         }
 
         Task<ConsumeContext<PingMessage>> _handled;

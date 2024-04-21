@@ -36,8 +36,11 @@ namespace MassTransit.Tests.Middleware
 
             await Task.WhenAll(tasks);
 
-            Assert.That(callCount, Is.EqualTo(1));
-            Assert.That(totalCount, Is.EqualTo(50));
+            Assert.Multiple(() =>
+            {
+                Assert.That(callCount, Is.EqualTo(1));
+                Assert.That(totalCount, Is.EqualTo(50));
+            });
         }
 
 

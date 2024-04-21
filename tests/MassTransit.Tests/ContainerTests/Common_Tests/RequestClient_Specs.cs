@@ -11,6 +11,17 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
     public class Using_the_request_client_across_consumers :
         InMemoryContainerTestFixture
     {
+        Guid _correlationId;
+
+        public Using_the_request_client_across_consumers()
+        {
+            SubsequentQueueName = "subsequent_queue";
+            SubsequentQueueAddress = new Uri($"queue:{SubsequentQueueName}");
+        }
+
+        protected Uri SubsequentQueueAddress { get; }
+        string SubsequentQueueName { get; }
+
         [Test]
         public async Task Should_receive_the_response()
         {
@@ -24,22 +35,14 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
                 Value = "World"
             });
 
-            Assert.That(response.Message.Value, Is.EqualTo("Hello, World"));
-            Assert.That(response.ConversationId.Value, Is.EqualTo(response.Message.OriginalConversationId));
-            Assert.That(response.InitiatorId.Value, Is.EqualTo(_correlationId));
-            Assert.That(response.Message.OriginalInitiatorId, Is.EqualTo(_correlationId));
+            Assert.Multiple(() =>
+            {
+                Assert.That(response.Message.Value, Is.EqualTo("Hello, World"));
+                Assert.That(response.ConversationId.Value, Is.EqualTo(response.Message.OriginalConversationId));
+                Assert.That(response.InitiatorId.Value, Is.EqualTo(_correlationId));
+                Assert.That(response.Message.OriginalInitiatorId, Is.EqualTo(_correlationId));
+            });
         }
-
-        Guid _correlationId;
-
-        public Using_the_request_client_across_consumers()
-        {
-            SubsequentQueueName = "subsequent_queue";
-            SubsequentQueueAddress = new Uri($"queue:{SubsequentQueueName}");
-        }
-
-        protected Uri SubsequentQueueAddress { get; }
-        string SubsequentQueueName { get; }
 
         protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
         {
@@ -169,6 +172,8 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
     public class Using_the_scoped_client_factory_in_a_consumer :
         InMemoryContainerTestFixture
     {
+        Guid _correlationId;
+
         [Test]
         public async Task Should_receive_the_response()
         {
@@ -184,8 +189,6 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
 
             Assert.That(response.Message.Value, Is.EqualTo("Hello, World"));
         }
-
-        Guid _correlationId;
 
         protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
         {

@@ -30,7 +30,7 @@ namespace MassTransit.Tests.ContainerTests
 
             await harness.Bus.PublishBatch(new[] { new BatchItem(), new BatchItem() });
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Take(2).Count(), Is.EqualTo(2));
 
@@ -67,7 +67,7 @@ namespace MassTransit.Tests.ContainerTests
 
             await harness.Bus.PublishBatch(new[] { new BatchItem(), new BatchItem() });
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Take(2).Count(), Is.EqualTo(2));
 
@@ -100,7 +100,7 @@ namespace MassTransit.Tests.ContainerTests
 
             await harness.Bus.PublishBatch(new[] { new BatchItem(), new BatchItem() });
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Take(2).Count(), Is.EqualTo(2));
 
@@ -127,7 +127,7 @@ namespace MassTransit.Tests.ContainerTests
 
             await harness.Bus.PublishBatch(new[] { new BatchItem(), new BatchItem() });
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Take(2).Count(), Is.EqualTo(2));
 
@@ -206,7 +206,7 @@ namespace MassTransit.Tests.ContainerTests
 
             await harness.Bus.PublishBatch(new[] { new BatchItem(), new BatchItem(), new BatchItem(), new BatchItem(), new BatchItem(), new BatchItem() });
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Take(5).Count(), Is.EqualTo(5));
 
@@ -242,7 +242,7 @@ namespace MassTransit.Tests.ContainerTests
 
             await harness.Bus.PublishBatch(Enumerable.Range(0, 100).Select(_ => new BatchItem()));
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Take(100).Count(), Is.EqualTo(100));
 
@@ -275,7 +275,7 @@ namespace MassTransit.Tests.ContainerTests
 
             await harness.Bus.PublishBatch(new[] { new BatchItem(), new BatchItem(), new BatchItem(), new BatchItem(), new BatchItem(), new BatchItem() });
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Take(5).Count(), Is.EqualTo(5));
 
@@ -307,7 +307,7 @@ namespace MassTransit.Tests.ContainerTests
 
             await harness.Bus.PublishBatch(new[] { new BatchItem(), new BatchItem() });
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Take(2).Count(), Is.EqualTo(2));
 
@@ -340,7 +340,7 @@ namespace MassTransit.Tests.ContainerTests
 
             await harness.Bus.PublishBatch(new[] { new BatchItem(), new BatchItem() });
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Take(2).Count(), Is.EqualTo(2));
 
@@ -370,7 +370,7 @@ namespace MassTransit.Tests.ContainerTests
 
             await harness.Bus.PublishBatch(new[] { new BatchItem(), new BatchItem() });
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Take(2).Count(), Is.EqualTo(2));
 
@@ -402,7 +402,7 @@ namespace MassTransit.Tests.ContainerTests
 
             await harness.Bus.PublishBatch(new[] { new BatchItem(), new BatchItem() });
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Take(2).Count(), Is.EqualTo(2));
 
@@ -434,7 +434,7 @@ namespace MassTransit.Tests.ContainerTests
 
             await harness.Bus.PublishBatch(new[] { new BatchItem(), new BatchItem() });
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Take(2).Count(), Is.EqualTo(2));
 
@@ -473,7 +473,7 @@ namespace MassTransit.Tests.ContainerTests
 
             await harness.Bus.PublishBatch(new[] { new BatchItem(), new BatchItem() });
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Take(2).Count(), Is.EqualTo(2));
 
@@ -508,7 +508,7 @@ namespace MassTransit.Tests.ContainerTests
             await harness.Bus.Publish(new BatchItem(), context => context.MessageId = correlation1);
             await harness.Bus.Publish(new BatchItem(), context => context.MessageId = correlation1);
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Count(), Is.EqualTo(1));
 

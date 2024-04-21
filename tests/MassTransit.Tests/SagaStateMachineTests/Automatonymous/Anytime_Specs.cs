@@ -16,8 +16,11 @@
             await _machine.RaiseEvent(instance, x => x.Init);
             await _machine.RaiseEvent(instance, x => x.Hello);
 
-            Assert.That(instance.HelloCalled, Is.True);
-            Assert.That(instance.CurrentState, Is.EqualTo(_machine.Final));
+            Assert.Multiple(() =>
+            {
+                Assert.That(instance.HelloCalled, Is.True);
+                Assert.That(instance.CurrentState, Is.EqualTo(_machine.Final));
+            });
         }
 
         [Test]
@@ -28,8 +31,11 @@
             await _machine.RaiseEvent(instance, x => x.Init);
             await _machine.RaiseEvent(instance, x => x.EventA, new A { Value = "Test" });
 
-            Assert.That(instance.AValue, Is.EqualTo("Test"));
-            Assert.That(instance.CurrentState, Is.EqualTo(_machine.Final));
+            Assert.Multiple(() =>
+            {
+                Assert.That(instance.AValue, Is.EqualTo("Test"));
+                Assert.That(instance.CurrentState, Is.EqualTo(_machine.Final));
+            });
         }
 
         [Test]

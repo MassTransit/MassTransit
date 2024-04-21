@@ -52,7 +52,7 @@ public class When_routing_via_a_routing_key
         await harness.Bus.Publish(new CustomerUpdatedEvent(NewId.NextGuid(), "11223344"), x => x.SetRoutingKey("11223344"));
         await harness.Bus.Publish(new CustomerDeletedEvent(NewId.NextGuid(), "655321"), x => x.SetRoutingKey("655321"));
 
-        Assert.Multiple(async () =>
+        await Assert.MultipleAsync(async () =>
         {
             Assert.That(await harness.Consumed.Any<CustomerUpdatedEvent>(), Is.False);
             Assert.That(await harness.Consumed.Any<CustomerDeletedEvent>(), Is.True);
@@ -129,7 +129,7 @@ public class When_routing_using_a_pattern
         await harness.Bus.Publish(new ClientUpdatedEvent(NewId.NextGuid(), "11223344"), x => x.SetRoutingKey("11223344"));
         await harness.Bus.Publish(new ClientDeletedEvent(NewId.NextGuid(), "655321"), x => x.SetRoutingKey("655321"));
 
-        Assert.Multiple(async () =>
+        await Assert.MultipleAsync(async () =>
         {
             Assert.That(await harness.Consumed.Any<ClientUpdatedEvent>(), Is.False);
             Assert.That(await harness.Consumed.Any<ClientDeletedEvent>(), Is.True);

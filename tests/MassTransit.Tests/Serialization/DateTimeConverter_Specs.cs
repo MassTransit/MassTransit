@@ -15,11 +15,14 @@ public class DateTimeConverter_Specs
 
         var value = DateTime.MinValue;
 
-        Assert.That(converter.TryConvert(value, out string text));
+        Assert.Multiple(() =>
+        {
+            Assert.That(converter.TryConvert(value, out string text));
 
-        Assert.That(converter.TryConvert(text, out var result));
+            Assert.That(converter.TryConvert(text, out var result));
 
-        Assert.That(result, Is.EqualTo(value));
+            Assert.That(result, Is.EqualTo(value));
+        });
     }
 
     [Test]

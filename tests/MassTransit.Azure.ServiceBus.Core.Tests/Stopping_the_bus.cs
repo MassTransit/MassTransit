@@ -84,7 +84,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
             await harness.Stop();
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Consumed.Any<SloMessage>(), Is.True);
                 Assert.That(await harness.Published.Any<SloResult>(), Is.True);

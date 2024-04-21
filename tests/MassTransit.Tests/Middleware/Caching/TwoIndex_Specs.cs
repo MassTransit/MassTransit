@@ -62,9 +62,12 @@
 
             var result = await valueIndex.Get("The key is key27");
 
-            Assert.That(result.Id, Is.EqualTo("key27"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.Id, Is.EqualTo("key27"));
 
-            Assert.That(cache.Statistics.Hits, Is.EqualTo(1));
+                Assert.That(cache.Statistics.Hits, Is.EqualTo(1));
+            });
 
             cache.Clear();
 
@@ -135,8 +138,11 @@
             Assert.That(async () => await index.Get("key29"), Throws.TypeOf<KeyNotFoundException>());
 
             Assert.That(cache.Statistics.Count, Is.EqualTo(99));
-            Assert.That(cache.Statistics.Hits, Is.EqualTo(1));
-            Assert.That(cache.Statistics.Misses, Is.EqualTo(101));
+            Assert.Multiple(() =>
+            {
+                Assert.That(cache.Statistics.Hits, Is.EqualTo(1));
+                Assert.That(cache.Statistics.Misses, Is.EqualTo(101));
+            });
         }
     }
 }

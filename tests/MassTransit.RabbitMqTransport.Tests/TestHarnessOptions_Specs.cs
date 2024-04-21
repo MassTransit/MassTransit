@@ -42,7 +42,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 OrderNumber = "123"
             });
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Sent.Any<OrderSubmitted>(), Is.True);
 

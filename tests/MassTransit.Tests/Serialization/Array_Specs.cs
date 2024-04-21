@@ -43,8 +43,11 @@
 
                 var result = SerializeAndReturn(someArray);
 
-                Assert.That(someArray.Elements, Is.Null);
-                Assert.That(result.Elements, Is.Null);
+                Assert.Multiple(() =>
+                {
+                    Assert.That(someArray.Elements, Is.Null);
+                    Assert.That(result.Elements, Is.Null);
+                });
             }
 
             [Test]

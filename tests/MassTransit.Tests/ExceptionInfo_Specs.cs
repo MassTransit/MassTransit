@@ -26,10 +26,13 @@ namespace MassTransit.Tests
 
             var exceptionInfo = fault.Message.Exceptions.Single();
 
-            Assert.That(exceptionInfo.ExceptionType, Is.EqualTo(TypeCache<IntentionalTestException>.ShortName));
+            Assert.Multiple(() =>
+            {
+                Assert.That(exceptionInfo.ExceptionType, Is.EqualTo(TypeCache<IntentionalTestException>.ShortName));
 
-            Assert.That(exceptionInfo.Data.TryGetValue("Username", out string username) ? username : "", Is.EqualTo("Frank"));
-            Assert.That(exceptionInfo.Data.TryGetValue("CustomerId", out long? customerId) ? customerId : 0, Is.EqualTo(27));
+                Assert.That(exceptionInfo.Data.TryGetValue("Username", out string username) ? username : "", Is.EqualTo("Frank"));
+                Assert.That(exceptionInfo.Data.TryGetValue("CustomerId", out long? customerId) ? customerId : 0, Is.EqualTo(27));
+            });
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

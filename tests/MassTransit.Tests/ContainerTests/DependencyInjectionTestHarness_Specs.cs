@@ -96,23 +96,32 @@ namespace MassTransit.Tests.ContainerTests
                 Value = _testValueA
             });
 
-            Assert.That(await harness.Published.Any<A>());
+            await Assert.MultipleAsync(async () =>
+            {
+                Assert.That(await harness.Published.Any<A>());
 
-            Assert.That(await harness.Consumed.Any<A>());
+                Assert.That(await harness.Consumed.Any<A>());
+            });
 
             var sagaHarness = provider.GetRequiredService<ISagaTestHarness<TestSaga>>();
 
-            Assert.That(await sagaHarness.Consumed.Any<A>());
+            await Assert.MultipleAsync(async () =>
+            {
+                Assert.That(await sagaHarness.Consumed.Any<A>());
 
-            Assert.That(await sagaHarness.Created.Any(x => x.CorrelationId == _sagaId));
+                Assert.That(await sagaHarness.Created.Any(x => x.CorrelationId == _sagaId));
+            });
 
             var saga = sagaHarness.Created.Contains(_sagaId);
             Assert.That(saga, Is.Not.Null);
-            Assert.That(saga.ValueA, Is.EqualTo(_testValueA));
+            await Assert.MultipleAsync(async () =>
+            {
+                Assert.That(saga.ValueA, Is.EqualTo(_testValueA));
 
-            Assert.That(await harness.Published.Any<Aa>());
+                Assert.That(await harness.Published.Any<Aa>());
 
-            Assert.That(await harness.Published.Any<B>(), Is.False);
+                Assert.That(await harness.Published.Any<B>(), Is.False);
+            });
         }
 
         Guid _sagaId;
@@ -214,7 +223,7 @@ namespace MassTransit.Tests.ContainerTests
 
             ISagaStateMachineTestHarness<TestStateMachine, Instance> sagaHarness = harness.GetSagaStateMachineHarness<TestStateMachine, Instance>();
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await sagaHarness.Consumed.Any<Start>());
 
@@ -224,7 +233,7 @@ namespace MassTransit.Tests.ContainerTests
             var machine = provider.GetRequiredService<TestStateMachine>();
 
             var instance = sagaHarness.Created.ContainsInState(sagaId, sagaHarness.StateMachine, machine.Running);
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(instance, Is.Not.Null, "Saga instance not found");
 

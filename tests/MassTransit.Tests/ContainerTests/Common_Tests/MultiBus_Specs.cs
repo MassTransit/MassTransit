@@ -44,15 +44,21 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
         [Test]
         public void Should_resolve_bus_declaration()
         {
-            Assert.That(ServiceProvider.GetService<IBusOne>(), Is.Not.Null);
-            Assert.That(ServiceProvider.GetService<IBusTwo>(), Is.Not.Null);
+            Assert.Multiple(() =>
+            {
+                Assert.That(ServiceProvider.GetService<IBusOne>(), Is.Not.Null);
+                Assert.That(ServiceProvider.GetService<IBusTwo>(), Is.Not.Null);
+            });
         }
 
         [Test]
         public void Should_resolve_bus_instance()
         {
-            Assert.That(ServiceProvider.GetService<IBusInstance<IBusOne>>(), Is.Not.Null);
-            Assert.That(ServiceProvider.GetService<IBusInstance<IBusTwo>>(), Is.Not.Null);
+            Assert.Multiple(() =>
+            {
+                Assert.That(ServiceProvider.GetService<IBusInstance<IBusOne>>(), Is.Not.Null);
+                Assert.That(ServiceProvider.GetService<IBusInstance<IBusTwo>>(), Is.Not.Null);
+            });
         }
 
         [Test]

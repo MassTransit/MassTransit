@@ -70,7 +70,7 @@ namespace MassTransit.DbTransport.Tests
                 Job = new { Duration = TimeSpan.FromSeconds(10) }
             });
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(response.Message.JobId, Is.EqualTo(jobId));
 
@@ -107,7 +107,7 @@ namespace MassTransit.DbTransport.Tests
                 Job = new { Duration = TimeSpan.FromSeconds(10) }
             });
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(response.Message.JobId, Is.EqualTo(jobId));
 
@@ -125,7 +125,7 @@ namespace MassTransit.DbTransport.Tests
 
             await harness.Bus.Publish<CancelJob>(new { JobId = jobId });
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Published.Any<JobCanceled>(), Is.True);
                 Assert.That(await harness.Sent.Any<JobSlotReleased>(), Is.True);
@@ -158,7 +158,7 @@ namespace MassTransit.DbTransport.Tests
                 Job = new { Duration = TimeSpan.FromSeconds(10) }
             });
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(response.Message.JobId, Is.EqualTo(jobId));
 
@@ -170,7 +170,7 @@ namespace MassTransit.DbTransport.Tests
 
             await harness.Bus.Publish<CancelJob>(new { JobId = jobId });
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Published.Any<JobCanceled>(), Is.True);
                 Assert.That(await harness.Sent.Any<JobSlotReleased>(), Is.True);
@@ -179,7 +179,7 @@ namespace MassTransit.DbTransport.Tests
             await Task.Delay(500);
 
             await harness.Bus.Publish<RetryJob>(new { JobId = jobId });
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Published.Any<JobCompleted>(), Is.True);
                 Assert.That(await harness.Published.Any<JobCompleted<OddJob>>(), Is.True);
@@ -218,7 +218,7 @@ namespace MassTransit.DbTransport.Tests
                 Job = new { Duration = TimeSpan.FromSeconds(10) }
             });
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Published.Any<JobSubmitted>(x => x.Context.Message.JobId == jobId), Is.True);
 
@@ -257,7 +257,7 @@ namespace MassTransit.DbTransport.Tests
                 Job = new { Duration = TimeSpan.FromSeconds(1) }
             });
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(response.Message.JobId, Is.EqualTo(jobId));
 
@@ -285,7 +285,7 @@ namespace MassTransit.DbTransport.Tests
 
             await harness.Bus.Publish<OddJob>(new { Duration = TimeSpan.FromSeconds(1) });
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Published.Any<JobSubmitted>(), Is.True);
 
