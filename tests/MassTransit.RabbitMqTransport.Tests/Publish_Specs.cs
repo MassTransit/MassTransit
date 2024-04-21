@@ -8,7 +8,6 @@
         using NUnit.Framework;
         using RabbitMQ.Client;
         using Serialization;
-        using Shouldly;
         using TestFramework;
         using Testing;
 
@@ -306,10 +305,13 @@
 
                 ConsumeContext<GotA> consumeContext = await _receivedGotA;
 
-                consumeContext.SourceAddress.ShouldBe(new Uri("rabbitmq://localhost/test/input_queue"));
+                Assert.Multiple(() =>
+                {
+                    Assert.That(consumeContext.SourceAddress, Is.EqualTo(new Uri("rabbitmq://localhost/test/input_queue")));
 
-                Assert.That(consumeContext.ReceiveContext.TransportHeaders.Get(MessageHeaders.MessageId, "N/A"),
-                    Is.EqualTo(consumeContext.MessageId.ToString()));
+                    Assert.That(consumeContext.ReceiveContext.TransportHeaders.Get(MessageHeaders.MessageId, "N/A"),
+                        Is.EqualTo(consumeContext.MessageId.ToString()));
+                });
             }
 
             Task<ConsumeContext<A>> _receivedA;
@@ -353,7 +355,7 @@
 
                 await Bus.Publish(message);
 
-                _consumer.Received.Select<B>().Any().ShouldBe(true);
+                Assert.That(_consumer.Received.Select<B>(), Is.Not.Empty);
 
                 IReceivedMessage<B> receivedMessage = _consumer.Received.Select<B>().First();
 
@@ -407,7 +409,7 @@
 
                 await InputQueueSendEndpoint.Send(new B());
 
-                _consumer.Received.Select<B>().Any().ShouldBe(true);
+                Assert.That(_consumer.Received.Select<B>(), Is.Not.Empty);
             }
 
             MultiTestConsumer _consumer;

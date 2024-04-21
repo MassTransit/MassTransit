@@ -2,7 +2,6 @@
 {
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using Shouldly;
     using TestFramework.Messages;
 
 
@@ -50,8 +49,7 @@
             using RequestHandle<PingMessage> requestHandle = _requestClient.Create(new PingMessage());
 
             Response<PongMessage> response = await requestHandle.GetResponse<PongMessage>();
-
-            response.Message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
+            Assert.That(response.Message.CorrelationId, Is.EqualTo(_ping.Result.Message.CorrelationId));
         }
 
         Task<ConsumeContext<PingMessage>> _ping;

@@ -7,7 +7,6 @@
     using AzureTable;
     using Microsoft.Azure.Cosmos.Table;
     using NUnit.Framework;
-    using Shouldly;
 
 
     [TestFixture]
@@ -17,8 +16,8 @@
         [Test]
         public async Task Should_have_send_audit_records()
         {
-            IEnumerable<AuditRecord> sendRecords = GetRecords<AuditRecord>().Where(x => x.ContextType == "Send");
-            sendRecords.Count().ShouldBe(1);
+            List<AuditRecord> sendRecords = GetRecords<AuditRecord>().Where(x => x.ContextType == "Send").ToList();
+            Assert.That(sendRecords, Has.Count.EqualTo(1));
         }
 
         [OneTimeSetUp]

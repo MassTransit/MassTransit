@@ -6,7 +6,6 @@
     using MassTransit.Tests.Saga.Messages;
     using NHibernate;
     using NUnit.Framework;
-    using Shouldly;
     using TestFramework;
     using Testing;
 
@@ -26,7 +25,7 @@
 
             Guid? foundId = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
 
-            foundId.HasValue.ShouldBe(true);
+            Assert.That(foundId, Is.Not.Null);
 
             var nextMessage = new CompleteSimpleSaga { CorrelationId = sagaId };
 
@@ -34,7 +33,7 @@
 
             foundId = await _sagaRepository.Value.ShouldContainSaga(x => x.CorrelationId == sagaId && x.Completed, TestTimeout);
 
-            foundId.HasValue.ShouldBe(true);
+            Assert.That(foundId, Is.Not.Null);
         }
 
         [Test]
@@ -47,7 +46,7 @@
 
             Guid? foundId = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
 
-            foundId.HasValue.ShouldBe(true);
+            Assert.That(foundId, Is.Not.Null);
         }
 
         readonly Lazy<ISagaRepository<SimpleSaga>> _sagaRepository;

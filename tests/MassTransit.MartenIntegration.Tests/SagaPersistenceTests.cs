@@ -5,7 +5,6 @@
     using Marten;
     using NUnit.Framework;
     using Saga;
-    using Shouldly;
     using TestFramework;
     using Testing;
 
@@ -25,14 +24,14 @@
 
             Guid? found = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
 
-            found.ShouldBe(sagaId);
+            Assert.That(found, Is.EqualTo(sagaId));
 
             var nextMessage = new CompleteSimpleSaga { CorrelationId = sagaId };
 
             await InputQueueSendEndpoint.Send(nextMessage);
 
             found = await _sagaRepository.Value.ShouldContainSaga(x => x.CorrelationId == sagaId && x.Completed, TestTimeout);
-            found.ShouldBe(sagaId);
+            Assert.That(found, Is.EqualTo(sagaId));
         }
 
         [Test]
@@ -44,8 +43,7 @@
             await InputQueueSendEndpoint.Send(message);
 
             Guid? found = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
-
-            found.ShouldBe(sagaId);
+            Assert.That(found, Is.EqualTo(sagaId));
         }
 
         [Test]
@@ -58,14 +56,14 @@
 
             Guid? found = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
 
-            found.ShouldBe(sagaId);
+            Assert.That(found, Is.EqualTo(sagaId));
 
             var nextMessage = new ObservableSagaMessage { Name = "MySimpleSaga" };
 
             await InputQueueSendEndpoint.Send(nextMessage);
 
             found = await _sagaRepository.Value.ShouldContainSaga(x => x.CorrelationId == sagaId && x.Observed, TestTimeout);
-            found.ShouldBe(sagaId);
+            Assert.That(found, Is.EqualTo(sagaId));
         }
 
         readonly Lazy<ISagaRepository<SimpleSaga>> _sagaRepository;

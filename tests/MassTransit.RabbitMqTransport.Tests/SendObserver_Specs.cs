@@ -8,7 +8,6 @@
         using System.Threading.Tasks;
         using Internals;
         using NUnit.Framework;
-        using Shouldly;
         using TestFramework;
         using TestFramework.Messages;
 
@@ -67,7 +66,7 @@
 
                     await observer.SendFaulted;
 
-                    observer.PostSent.Status.ShouldBe(TaskStatus.WaitingForActivation);
+                    Assert.That(observer.PostSent.Status, Is.EqualTo(TaskStatus.WaitingForActivation));
                 }
             }
 
@@ -251,7 +250,7 @@
 
                     await observer.SendFaulted;
 
-                    observer.PostSent.Status.ShouldBe(TaskStatus.WaitingForActivation);
+                    Assert.That(observer.PostSent.Status, Is.EqualTo(TaskStatus.WaitingForActivation));
 
                     Assert.Multiple(() =>
                     {

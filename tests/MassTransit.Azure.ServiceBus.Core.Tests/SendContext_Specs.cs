@@ -4,7 +4,6 @@
     using System.Diagnostics;
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using Shouldly;
     using TestFramework.Messages;
 
 
@@ -24,7 +23,7 @@
 
             timer.Stop();
 
-            timer.Elapsed.ShouldBeGreaterThanOrEqualTo(TimeSpan.FromSeconds(10));
+            Assert.That(timer.Elapsed, Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(10)));
         }
 
         Task<ConsumeContext<PingMessage>> _handler;

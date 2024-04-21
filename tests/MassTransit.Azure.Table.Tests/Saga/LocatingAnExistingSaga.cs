@@ -4,7 +4,6 @@
     using System.Threading.Tasks;
     using AzureTable.Saga;
     using NUnit.Framework;
-    using Shouldly;
     using Testing;
 
 
@@ -23,19 +22,19 @@
 
             Guid? found = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
 
-            found.ShouldNotBeNull();
+            Assert.That(found, Is.Not.Null);
 
-            var nextMessage = new CompleteSimpleSaga {CorrelationId = sagaId};
+            var nextMessage = new CompleteSimpleSaga { CorrelationId = sagaId };
 
             await InputQueueSendEndpoint.Send(nextMessage);
 
             found = await _sagaRepository.Value.ShouldContainSaga(sagaId, x => x != null && x.Moved, TestTimeout);
-            found.ShouldNotBeNull();
+            Assert.That(found, Is.Not.Null);
 
             var retrieveRepository = _sagaRepository.Value as ILoadSagaRepository<SimpleSaga>;
             var retrieved = await retrieveRepository.Load(sagaId);
-            retrieved.ShouldNotBeNull();
-            retrieved.Moved.ShouldBeTrue();
+            Assert.That(retrieved, Is.Not.Null);
+            Assert.That(retrieved.Moved, Is.True);
         }
 
         [Test]
@@ -48,7 +47,7 @@
 
             Guid? found = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
 
-            found.ShouldNotBeNull();
+            Assert.That(found, Is.Not.Null);
         }
 
         readonly Lazy<ISagaRepository<SimpleSaga>> _sagaRepository;

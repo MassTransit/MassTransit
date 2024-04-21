@@ -4,7 +4,6 @@
     using System.Runtime.Serialization;
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using Shouldly;
     using TestFramework.Messages;
 
 
@@ -17,55 +16,49 @@
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
 
-            context.CorrelationId.ShouldBe(_correlationId);
+            Assert.That(context.CorrelationId, Is.EqualTo(_correlationId));
         }
 
         [Test]
         public async Task Should_have_the_exception()
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
-
-            context.ReceiveContext.TransportHeaders.Get("MT-Fault-Message", (string)null).ShouldBe("This is fine, forcing death");
+            Assert.That(context.ReceiveContext.TransportHeaders.Get("MT-Fault-Message", (string)null), Is.EqualTo("This is fine, forcing death"));
         }
 
         [Test]
         public async Task Should_have_the_original_destination_address()
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
-
-            context.DestinationAddress.ShouldBe(InputQueueAddress);
+            Assert.That(context.DestinationAddress, Is.EqualTo(InputQueueAddress));
         }
 
         [Test]
         public async Task Should_have_the_original_fault_address()
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
-
-            context.FaultAddress.ShouldBe(BusAddress);
+            Assert.That(context.FaultAddress, Is.EqualTo(BusAddress));
         }
 
         [Test]
         public async Task Should_have_the_original_response_address()
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
-
-            context.ResponseAddress.ShouldBe(BusAddress);
+            Assert.That(context.ResponseAddress, Is.EqualTo(BusAddress));
         }
 
         [Test]
         public async Task Should_have_the_original_source_address()
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
-
-            context.SourceAddress.ShouldBe(BusAddress);
+            Assert.That(context.SourceAddress, Is.EqualTo(BusAddress));
         }
 
         [Test]
         public async Task Should_have_the_reason()
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
-
-            context.ReceiveContext.TransportHeaders.Get("MT-Reason", (string)null).ShouldBe("fault");
+            Assert.That(context.ReceiveContext.TransportHeaders.Get("MT-Reason", (string)null), Is.EqualTo("fault"));
         }
 
         [Test]

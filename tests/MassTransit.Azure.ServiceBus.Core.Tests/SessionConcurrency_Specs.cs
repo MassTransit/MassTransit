@@ -7,7 +7,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
     using System.Threading;
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using Shouldly;
 
 
     [TestFixture]
@@ -18,14 +17,14 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         public async Task Should_have_seen_all_messages()
         {
             await _handler;
-            _seenMessages.ShouldBe(TotalMessages);
+            Assert.That(_seenMessages, Is.EqualTo(TotalMessages));
         }
 
         [Test]
         public async Task Should_have_seen_all_sessions()
         {
             await _handler;
-            _result.Count.ShouldBe(SessionCount);
+            Assert.That(_result, Has.Count.EqualTo(SessionCount));
         }
 
         [Test]
@@ -33,7 +32,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         {
             await _handler;
             var outOfOrderSessions = _result.Values.Count(mr => mr.ReceivedSeqNumber != mr.SentSeqNumber);
-            outOfOrderSessions.ShouldBe(0);
+            Assert.That(outOfOrderSessions, Is.EqualTo(0));
         }
 
         public Sending_multiple_messages_to_a_session()

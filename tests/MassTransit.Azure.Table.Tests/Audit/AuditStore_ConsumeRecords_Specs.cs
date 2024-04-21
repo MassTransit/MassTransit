@@ -5,7 +5,6 @@
     using System.Threading.Tasks;
     using AzureTable;
     using NUnit.Framework;
-    using Shouldly;
 
 
     [TestFixture]
@@ -15,8 +14,8 @@
         [Test]
         public async Task Should_have_consume_audit_records()
         {
-            IEnumerable<AuditRecord> consumeRecords = GetRecords<AuditRecord>().Where(x => x.ContextType == "Consume");
-            consumeRecords.Count().ShouldBe(2);
+            List<AuditRecord> consumeRecords = GetRecords<AuditRecord>().Where(x => x.ContextType == "Consume").ToList();
+            Assert.That(consumeRecords, Has.Count.EqualTo(2));
         }
 
         Task<ConsumeContext<A>> _handledA;
