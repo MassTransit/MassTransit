@@ -50,11 +50,13 @@ namespace MassTransit.MongoDbIntegration
             {
                 try
                 {
-                    await _notification.WaitForDelivery(stoppingToken).ConfigureAwait(false);
-
                     await _busControl.WaitForHealthStatus(BusHealthStatus.Healthy, stoppingToken).ConfigureAwait(false);
 
-                    await algorithm.Run(GetOutboxes, DeliverOutbox, stoppingToken).ConfigureAwait(false);
+                    var count = await algorithm.Run(GetOutboxes, DeliverOutbox, stoppingToken).ConfigureAwait(false);
+                    if (count > 0)
+                        continue;
+
+                    await _notification.WaitForDelivery(stoppingToken).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException)
                 {
