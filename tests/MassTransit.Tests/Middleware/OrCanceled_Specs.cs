@@ -48,8 +48,11 @@ namespace MassTransit.Tests.Middleware
             GC.WaitForPendingFinalizers();
             GC.Collect();
 
-            Assert.That(unhandledExceptions, Is.Empty);
-            Assert.That(unobservedTaskExceptions, Is.Empty);
+            Assert.Multiple(() =>
+            {
+                Assert.That(unhandledExceptions, Is.Empty);
+                Assert.That(unobservedTaskExceptions, Is.Empty);
+            });
         }
     }
 }

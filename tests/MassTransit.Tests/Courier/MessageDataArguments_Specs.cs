@@ -20,9 +20,12 @@ namespace MassTransit.Tests.Courier
         {
             ConsumeContext<RoutingSlipCompleted> context = await _completed;
 
-            Assert.That(context.Message.TrackingNumber, Is.EqualTo(_trackingNumber));
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.Message.TrackingNumber, Is.EqualTo(_trackingNumber));
 
-            Assert.That(context.GetVariable<string>("Name"), Is.EqualTo("Frank"));
+                Assert.That(context.GetVariable<string>("Name"), Is.EqualTo("Frank"));
+            });
         }
 
         [Test]

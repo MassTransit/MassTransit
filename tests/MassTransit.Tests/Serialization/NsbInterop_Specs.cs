@@ -37,7 +37,7 @@ namespace MassTransit.Tests.Serialization
 
             await harness.Bus.Publish(new PlaceOrder { OrderId = NewId.NextGuid() });
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.GetConsumerHarness<PlaceOrderConsumer>().Consumed.Any<PlaceOrder>(), Is.True);
                 Assert.That(await harness.GetConsumerHarness<TerminateProcessConsumer>().Consumed.Any<TerminateProcess>(), Is.False);

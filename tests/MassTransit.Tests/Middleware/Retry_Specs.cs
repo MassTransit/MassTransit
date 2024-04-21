@@ -43,8 +43,11 @@
 
             await observer.PostFault;
 
-            Assert.That(observer.PostFaultCount, Is.EqualTo(4));
-            Assert.That(observer.RetryFaultCount, Is.EqualTo(1));
+            Assert.Multiple(() =>
+            {
+                Assert.That(observer.PostFaultCount, Is.EqualTo(4));
+                Assert.That(observer.RetryFaultCount, Is.EqualTo(1));
+            });
 
             var retryFault = await observer.RetryFault;
 
@@ -285,10 +288,13 @@
 
             await pipe.Send(context);
 
-            Assert.That(count, Is.EqualTo(2));
+            Assert.Multiple(() =>
+            {
+                Assert.That(count, Is.EqualTo(2));
 
-            Assert.That(observer.PostFault.IsCompleted);
-            Assert.That(observer.RetryComplete.IsCompleted);
+                Assert.That(observer.PostFault.IsCompleted);
+                Assert.That(observer.RetryComplete.IsCompleted);
+            });
         }
 
         [Test]

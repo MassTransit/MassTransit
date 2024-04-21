@@ -26,8 +26,11 @@ namespace MassTransit.Tests.Initializers
 
             Assert.That(context.Message.Fault, Is.Not.Null);
             Assert.That(context.Message.Fault.Host, Is.Not.Null);
-            Assert.That(context.Message.Fault.Host.MachineName, Is.EqualTo(HostMetadataCache.Host.MachineName));
-            Assert.That(context.Message.Fault.Message, Is.Not.Null);
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.Message.Fault.Host.MachineName, Is.EqualTo(HostMetadataCache.Host.MachineName));
+                Assert.That(context.Message.Fault.Message, Is.Not.Null);
+            });
             Assert.That(context.Message.Fault.Message.Text, Is.EqualTo("Hello"));
         }
 
@@ -45,11 +48,17 @@ namespace MassTransit.Tests.Initializers
             });
 
             Assert.That(context.Message, Is.Not.Null);
-            Assert.That(context.Message.Name, Is.EqualTo("Frank"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.Message.Name, Is.EqualTo("Frank"));
 
-            Assert.That(context.Message.Address, Is.Not.Null);
-            Assert.That(context.Message.Address.Street, Is.EqualTo("123 American Way"));
-            Assert.That(context.Message.Address.City, Is.EqualTo("Dallas"));
+                Assert.That(context.Message.Address, Is.Not.Null);
+            });
+            Assert.Multiple(() =>
+            {
+                Assert.That(context.Message.Address.Street, Is.EqualTo("123 American Way"));
+                Assert.That(context.Message.Address.City, Is.EqualTo("Dallas"));
+            });
         }
 
         [Test]
@@ -61,19 +70,19 @@ namespace MassTransit.Tests.Initializers
         }
 
         [Test]
-        public async Task Should_initialize_object_with_readonly_property()
-        {
-            var model1 = new { ReadWrite = "Some Property Value" };
-
-            await MessageInitializerCache<ReadWriteReadOnly>.Initialize(model1);
-        }
-
-        [Test]
         public async Task Should_initialize_interface_with_readonly_property_from_subclass()
         {
             var model2 = new ReadWriteReadOnly { ReadWrite = "Some Property Value" };
 
             await MessageInitializerCache<IReadWriteReadOnly>.Initialize(model2);
+        }
+
+        [Test]
+        public async Task Should_initialize_object_with_readonly_property()
+        {
+            var model1 = new { ReadWrite = "Some Property Value" };
+
+            await MessageInitializerCache<ReadWriteReadOnly>.Initialize(model1);
         }
 
         [Test]

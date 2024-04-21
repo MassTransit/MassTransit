@@ -40,14 +40,20 @@ namespace MassTransit.Tests.ContainerTests
 
             await harness.Bus.Publish<InitiateEvent>(new { InVar.CorrelationId });
 
-            Assert.That(await harness.Consumed.Any<InitiateEvent>(), Is.True);
-            Assert.That(await harness.Sent.Any<OutgoingEvent>(), Is.True);
+            await Assert.MultipleAsync(async () =>
+            {
+                Assert.That(await harness.Consumed.Any<InitiateEvent>(), Is.True);
+                Assert.That(await harness.Sent.Any<OutgoingEvent>(), Is.True);
+            });
 
             ISentMessage<ExpiredEvent> message = await harness.Sent.SelectAsync<ExpiredEvent>().FirstOrDefault();
             Assert.That(message, Is.Not.Null);
 
-            Assert.That(message.Context.Headers.TryGetHeader("Scoped-Value", out var value), Is.True);
-            Assert.That(value, Is.EqualTo("Correct scoped value"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(message.Context.Headers.TryGetHeader("Scoped-Value", out var value), Is.True);
+                Assert.That(value, Is.EqualTo("Correct scoped value"));
+            });
         }
 
 

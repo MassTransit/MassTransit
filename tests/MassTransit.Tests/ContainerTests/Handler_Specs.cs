@@ -75,8 +75,11 @@ namespace MassTransit.Tests.ContainerTests
                 {
                     x.AddHandler(async (MyMessage message, IService service) =>
                     {
-                        Assert.That(message, Is.Not.Null);
-                        Assert.That(service, Is.Not.Null);
+                        Assert.Multiple(() =>
+                        {
+                            Assert.That(message, Is.Not.Null);
+                            Assert.That(service, Is.Not.Null);
+                        });
                     });
                 })
                 .BuildServiceProvider(true);
@@ -99,8 +102,11 @@ namespace MassTransit.Tests.ContainerTests
                 {
                     x.AddHandler(async (ConsumeContext<MyMessage> context, IService service) =>
                     {
-                        Assert.That(context, Is.Not.Null);
-                        Assert.That(service, Is.Not.Null);
+                        Assert.Multiple(() =>
+                        {
+                            Assert.That(context, Is.Not.Null);
+                            Assert.That(service, Is.Not.Null);
+                        });
                     });
                 })
                 .BuildServiceProvider(true);
@@ -124,8 +130,11 @@ namespace MassTransit.Tests.ContainerTests
                 {
                     x.AddHandler(async (MyMessage message, IService service, IService2 service2) =>
                     {
-                        Assert.That(message, Is.Not.Null);
-                        Assert.That(service, Is.Not.Null);
+                        Assert.Multiple(() =>
+                        {
+                            Assert.That(message, Is.Not.Null);
+                            Assert.That(service, Is.Not.Null);
+                        });
                     });
                 })
                 .BuildServiceProvider(true);
@@ -149,8 +158,11 @@ namespace MassTransit.Tests.ContainerTests
                 {
                     x.AddHandler(async (ConsumeContext<MyMessage> context, IService service, IService2 service2) =>
                     {
-                        Assert.That(context, Is.Not.Null);
-                        Assert.That(service, Is.Not.Null);
+                        Assert.Multiple(() =>
+                        {
+                            Assert.That(context, Is.Not.Null);
+                            Assert.That(service, Is.Not.Null);
+                        });
                     });
                 })
                 .BuildServiceProvider(true);
@@ -175,8 +187,11 @@ namespace MassTransit.Tests.ContainerTests
                 {
                     x.AddHandler(async (MyMessage message, IService service, IService2 service2, IService3 service3) =>
                     {
-                        Assert.That(message, Is.Not.Null);
-                        Assert.That(service, Is.Not.Null);
+                        Assert.Multiple(() =>
+                        {
+                            Assert.That(message, Is.Not.Null);
+                            Assert.That(service, Is.Not.Null);
+                        });
                     });
                 })
                 .BuildServiceProvider(true);
@@ -201,8 +216,11 @@ namespace MassTransit.Tests.ContainerTests
                 {
                     x.AddHandler(async (ConsumeContext<MyMessage> context, IService service, IService2 service2, IService3 service3) =>
                     {
-                        Assert.That(context, Is.Not.Null);
-                        Assert.That(service, Is.Not.Null);
+                        Assert.Multiple(() =>
+                        {
+                            Assert.That(context, Is.Not.Null);
+                            Assert.That(service, Is.Not.Null);
+                        });
                     });
                 })
                 .BuildServiceProvider(true);

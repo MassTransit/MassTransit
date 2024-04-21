@@ -67,7 +67,7 @@ namespace MassTransit.KafkaIntegration.Tests
 
             var result = await provider.GetTask<ConsumeContext<KafkaMessage>>();
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(result.Message.Text, Is.EqualTo(message.Value.Text));
                 Assert.That(result.MessageId, Is.EqualTo(sendContext.MessageId));

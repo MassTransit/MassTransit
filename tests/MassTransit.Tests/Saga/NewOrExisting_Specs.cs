@@ -21,7 +21,7 @@ namespace MassTransit.Tests.Saga
             await InputQueueSendEndpoint.Send(message);
 
             var saga = _sagaHarness.Sagas.Contains(sagaId);
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(saga, Is.Not.Null);
 
@@ -39,7 +39,7 @@ namespace MassTransit.Tests.Saga
             await InputQueueSendEndpoint.Send(message);
 
             var saga = _sagaHarness.Sagas.Contains(sagaId);
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(saga, Is.Not.Null);
 

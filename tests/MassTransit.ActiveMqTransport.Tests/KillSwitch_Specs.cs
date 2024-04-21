@@ -20,7 +20,7 @@ namespace MassTransit.ActiveMqTransport.Tests
 
             await Task.WhenAll(Enumerable.Range(0, 11).Select(x => Bus.Publish(new BadMessage())));
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await BusControl.WaitForHealthStatus(BusHealthStatus.Degraded, TimeSpan.FromSeconds(15)), Is.EqualTo(BusHealthStatus.Degraded));
 

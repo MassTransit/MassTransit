@@ -29,9 +29,12 @@
             Assert.That(last.Name, Is.EqualTo(name));
 
             var wasDisposed = await lastConsumer.Dependency.WasDisposed;
-            Assert.That(wasDisposed, Is.True, "Dependency was not disposed");
+            Assert.Multiple(() =>
+            {
+                Assert.That(wasDisposed, Is.True, "Dependency was not disposed");
 
-            Assert.That(lastConsumer.Dependency.SomethingDone, Is.True, "Dependency was disposed before consumer executed");
+                Assert.That(lastConsumer.Dependency.SomethingDone, Is.True, "Dependency was disposed before consumer executed");
+            });
         }
 
         protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
@@ -71,9 +74,12 @@
             Assert.That(last.Name, Is.EqualTo(name));
 
             var wasDisposed = await lastConsumer.Dependency.WasDisposed;
-            Assert.That(wasDisposed, Is.True, "Dependency was not disposed");
+            Assert.Multiple(() =>
+            {
+                Assert.That(wasDisposed, Is.True, "Dependency was not disposed");
 
-            Assert.That(lastConsumer.Dependency.SomethingDone, Is.True, "Dependency was disposed before consumer executed");
+                Assert.That(lastConsumer.Dependency.SomethingDone, Is.True, "Dependency was disposed before consumer executed");
+            });
 
             var lasterConsumer = await SimplerConsumer.LastConsumer.OrCanceled(InMemoryTestHarness.TestCancellationToken);
             Assert.That(lasterConsumer, Is.Not.Null);
@@ -122,9 +128,12 @@
             Assert.That(last.Name, Is.EqualTo(name));
 
             var wasDisposed = await lastConsumer.Dependency.WasDisposed;
-            Assert.That(wasDisposed, Is.True, "Dependency was not disposed");
+            Assert.Multiple(() =>
+            {
+                Assert.That(wasDisposed, Is.True, "Dependency was not disposed");
 
-            Assert.That(lastConsumer.Dependency.SomethingDone, Is.True, "Dependency was disposed before consumer executed");
+                Assert.That(lastConsumer.Dependency.SomethingDone, Is.True, "Dependency was disposed before consumer executed");
+            });
         }
 
         protected override IServiceCollection ConfigureServices(IServiceCollection collection)

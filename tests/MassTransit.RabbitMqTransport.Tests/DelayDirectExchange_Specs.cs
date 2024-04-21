@@ -96,7 +96,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 Priority = "Low"
             });
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Consumed.Any<TextMessage>(x => x.Context.Message.Text == "High Priority"), Is.True, "High");
                 Assert.That(await harness.Consumed.Any<TextMessage>(x => x.Context.Message.Text == "Low Priority 1"), Is.True, "Low 1");

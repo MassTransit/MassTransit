@@ -76,9 +76,12 @@ namespace MassTransit.Tests.MessageData
 
                 byte[] bodyValue = await context.Message.Bodies[0].Body.Value;
                 Assert.That(bodyValue, Is.Not.Null);
-                Assert.That(bodyValue, Has.Length.EqualTo(10000));
+                Assert.Multiple(() =>
+                {
+                    Assert.That(bodyValue, Has.Length.EqualTo(10000));
 
-                Assert.That(context.Message.Bodies[0].FileName, Is.Not.Null);
+                    Assert.That(context.Message.Bodies[0].FileName, Is.Not.Null);
+                });
                 Assert.That(context.Message.Bodies[0].FileName, Is.EqualTo("first.txt"));
 
                 _handled.SetResult(context);

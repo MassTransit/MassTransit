@@ -57,9 +57,12 @@
 
             await _thePipe.Send(request).ConfigureAwait(false);
 
-            Assert.That(protectedBusinessAction, Is.True);
-            Assert.That(cleanUp, Is.True);
-            Assert.That(rejected, Is.False);
+            Assert.Multiple(() =>
+            {
+                Assert.That(protectedBusinessAction, Is.True);
+                Assert.That(cleanUp, Is.True);
+                Assert.That(rejected, Is.False);
+            });
         }
 
         [Test]

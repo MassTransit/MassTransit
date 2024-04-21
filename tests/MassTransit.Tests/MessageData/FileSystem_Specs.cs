@@ -16,10 +16,13 @@
             MessageData<string> property = await _repository.PutString(new string('8', 10000));
 
             MessageData<string> loaded = await _repository.GetString(property.Address);
-            Assert.That(property.Address, Is.Not.Null);
+            await Assert.MultipleAsync(async () =>
+            {
+                Assert.That(property.Address, Is.Not.Null);
 
 
-            Assert.That(await loaded.Value, Is.Not.Null);
+                Assert.That(await loaded.Value, Is.Not.Null);
+            });
         }
 
         [Test]

@@ -63,7 +63,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             activity?.Stop();
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Sent.Any<OrderSubmitted>(), Is.True);
 
@@ -112,7 +112,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             activity?.Stop();
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Sent.Any<OrderSubmitted>(), Is.True);
 
@@ -269,7 +269,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             var sagaHarness = provider.GetRequiredService<ISagaStateMachineTestHarness<TestStateMachine, Instance>>();
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await sagaHarness.Consumed.Any<Start>());
 
@@ -279,7 +279,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             var machine = provider.GetRequiredService<TestStateMachine>();
 
             var instance = sagaHarness.Created.ContainsInState(sagaId, machine, machine.Running);
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(instance, Is.Not.Null, "Saga instance not found");
 

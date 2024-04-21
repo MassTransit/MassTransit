@@ -19,8 +19,11 @@ namespace MassTransit.Tests
 
             var returnedLocation = new FutureLocation(location);
 
-            Assert.That(returnedLocation.Id, Is.EqualTo(id));
-            Assert.That(returnedLocation.Address, Is.EqualTo(new Uri("queue:input-queue")));
+            Assert.Multiple(() =>
+            {
+                Assert.That(returnedLocation.Id, Is.EqualTo(id));
+                Assert.That(returnedLocation.Address, Is.EqualTo(new Uri("queue:input-queue")));
+            });
         }
     }
 }

@@ -45,8 +45,11 @@
         {
             await _router.Send(new Vendor<VendorARecord>("A"));
 
-            Assert.That(_aWasCalled, Is.True);
-            Assert.That(_bWasCalled, Is.False);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_aWasCalled, Is.True);
+                Assert.That(_bWasCalled, Is.False);
+            });
         }
 
         [Test]
@@ -54,8 +57,11 @@
         {
             await _router.Send(new Vendor<VendorBRecord>("B"));
 
-            Assert.That(_aWasCalled, Is.False);
-            Assert.That(_bWasCalled, Is.True);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_aWasCalled, Is.False);
+                Assert.That(_bWasCalled, Is.True);
+            });
         }
 
 

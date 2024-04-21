@@ -95,7 +95,7 @@ namespace MassTransit.MongoDbIntegration.Tests
                     Job = new { Duration = TimeSpan.FromSeconds(1) }
                 });
 
-                Assert.Multiple(async () =>
+                await Assert.MultipleAsync(async () =>
                 {
                     Assert.That(response.Message.JobId, Is.EqualTo(jobId));
 

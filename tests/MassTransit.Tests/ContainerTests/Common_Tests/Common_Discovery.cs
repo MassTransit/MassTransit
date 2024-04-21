@@ -246,6 +246,8 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
     public class Common_Discovery :
         InMemoryContainerTestFixture
     {
+        ReceiveEndpointConfigurationObserver _endpointObserver;
+
         [Test]
         public async Task Should_complete_the_routing_slip()
         {
@@ -265,11 +267,14 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
         [Test]
         public void Should_have_properly_configured_every_endpoint()
         {
-            Assert.That(_endpointObserver.WasConfigured("ping-queue"));
-            Assert.That(_endpointObserver.WasConfigured("discovery-ping-state"));
-            Assert.That(_endpointObserver.WasConfigured("Ping_execute"));
-            Assert.That(_endpointObserver.WasConfigured("Ping_compensate"));
-            Assert.That(_endpointObserver.WasConfigured("DiscoveryPing"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(_endpointObserver.WasConfigured("ping-queue"));
+                Assert.That(_endpointObserver.WasConfigured("discovery-ping-state"));
+                Assert.That(_endpointObserver.WasConfigured("Ping_execute"));
+                Assert.That(_endpointObserver.WasConfigured("Ping_compensate"));
+                Assert.That(_endpointObserver.WasConfigured("DiscoveryPing"));
+            });
 
             // TODO, verify but the harness configures them anyway so
             // Assert.That(_endpointObserver.WasConfigured("DiscoveryPong"), Is.False);
@@ -295,8 +300,6 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
             ConsumeContext<PingCompleted> pingCompleted = await completed;
             Assert.That(pingCompleted.Message.CorrelationId, Is.EqualTo(pingMessage.CorrelationId));
         }
-
-        ReceiveEndpointConfigurationObserver _endpointObserver;
 
         protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
         {

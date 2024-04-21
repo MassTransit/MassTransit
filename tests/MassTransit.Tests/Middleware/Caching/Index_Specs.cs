@@ -34,8 +34,11 @@
             var value = await index.Get(helloKey, SimpleValueFactory.Healthy);
 
             Assert.That(value, Is.Not.Null);
-            Assert.That(value.Id, Is.EqualTo(helloKey));
-            Assert.That(value.Value, Is.EqualTo("The key is Hello"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(value.Id, Is.EqualTo(helloKey));
+                Assert.That(value.Value, Is.EqualTo("The key is Hello"));
+            });
         }
 
         [Test]
@@ -50,14 +53,20 @@
             Task<SimpleValue> readValueTask = index.Get(helloKey);
 
             Assert.That(value, Is.Not.Null);
-            Assert.That(value.Id, Is.EqualTo(helloKey));
-            Assert.That(value.Value, Is.EqualTo("The key is Hello"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(value.Id, Is.EqualTo(helloKey));
+                Assert.That(value.Value, Is.EqualTo("The key is Hello"));
+            });
 
             var readValue = await readValueTask;
 
             Assert.That(readValue, Is.Not.Null);
-            Assert.That(readValue.Id, Is.EqualTo(helloKey));
-            Assert.That(readValue.Value, Is.EqualTo("The key is Hello"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(readValue.Id, Is.EqualTo(helloKey));
+                Assert.That(readValue.Value, Is.EqualTo("The key is Hello"));
+            });
         }
 
         [Test]
@@ -78,14 +87,20 @@
             var value = await goodValueTask;
 
             Assert.That(value, Is.Not.Null);
-            Assert.That(value.Id, Is.EqualTo(helloKey));
-            Assert.That(value.Value, Is.EqualTo("The key is Hello"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(value.Id, Is.EqualTo(helloKey));
+                Assert.That(value.Value, Is.EqualTo("The key is Hello"));
+            });
 
             var readValue = await readValueTask;
 
             Assert.That(readValue, Is.Not.Null);
-            Assert.That(readValue.Id, Is.EqualTo(helloKey));
-            Assert.That(readValue.Value, Is.EqualTo("The key is Hello"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(readValue.Id, Is.EqualTo(helloKey));
+                Assert.That(readValue.Value, Is.EqualTo("The key is Hello"));
+            });
         }
     }
 }

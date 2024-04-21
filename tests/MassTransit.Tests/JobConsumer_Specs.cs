@@ -91,15 +91,18 @@ namespace MassTransit.Tests
                     Job = new { Duration = TimeSpan.FromSeconds(1) }
                 });
 
-                Assert.That(response.Message.JobId, Is.EqualTo(jobId));
+                await Assert.MultipleAsync(async () =>
+                {
+                    Assert.That(response.Message.JobId, Is.EqualTo(jobId));
 
-                Assert.That(await harness.Published.Any<JobSubmitted>(), Is.True);
+                    Assert.That(await harness.Published.Any<JobSubmitted>(), Is.True);
 
-                Assert.That(await harness.Published.Any<JobStarted>(), Is.True);
-                Assert.That(await harness.Published.Any<JobStarted<OddJob>>(), Is.True);
+                    Assert.That(await harness.Published.Any<JobStarted>(), Is.True);
+                    Assert.That(await harness.Published.Any<JobStarted<OddJob>>(), Is.True);
 
-                Assert.That(await harness.Published.Any<JobCompleted>(), Is.True);
-                Assert.That(await harness.Published.Any<JobCompleted<OddJob>>(), Is.True);
+                    Assert.That(await harness.Published.Any<JobCompleted>(), Is.True);
+                    Assert.That(await harness.Published.Any<JobCompleted<OddJob>>(), Is.True);
+                });
             }
             finally
             {
@@ -162,15 +165,18 @@ namespace MassTransit.Tests
                     Job = new { Duration = TimeSpan.FromSeconds(1) }
                 });
 
-                Assert.That(response.Message.JobId, Is.EqualTo(jobId));
+                await Assert.MultipleAsync(async () =>
+                {
+                    Assert.That(response.Message.JobId, Is.EqualTo(jobId));
 
-                Assert.That(await harness.Published.Any<JobSubmitted>(), Is.True);
+                    Assert.That(await harness.Published.Any<JobSubmitted>(), Is.True);
 
-                Assert.That(await harness.Published.Any<JobStarted>(), Is.True);
-                Assert.That(await harness.Published.Any<JobStarted<OddJob>>(), Is.True);
+                    Assert.That(await harness.Published.Any<JobStarted>(), Is.True);
+                    Assert.That(await harness.Published.Any<JobStarted<OddJob>>(), Is.True);
 
-                Assert.That(await harness.Published.Any<JobCompleted>(), Is.True);
-                Assert.That(await harness.Published.Any<JobCompleted<OddJob>>(), Is.True);
+                    Assert.That(await harness.Published.Any<JobCompleted>(), Is.True);
+                    Assert.That(await harness.Published.Any<JobCompleted<OddJob>>(), Is.True);
+                });
             }
             finally
             {
@@ -217,12 +223,15 @@ namespace MassTransit.Tests
                 Job = new { Duration = TimeSpan.FromSeconds(10) }
             });
 
-            Assert.That(response.Message.JobId, Is.EqualTo(jobId));
+            await Assert.MultipleAsync(async () =>
+            {
+                Assert.That(response.Message.JobId, Is.EqualTo(jobId));
 
-            Assert.That(await harness.Published.Any<JobSubmitted>(), Is.True);
+                Assert.That(await harness.Published.Any<JobSubmitted>(), Is.True);
 
-            Assert.That(await harness.Published.Any<JobStarted>(), Is.True);
-            Assert.That(await harness.Published.Any<JobStarted<OddJob>>(), Is.True);
+                Assert.That(await harness.Published.Any<JobStarted>(), Is.True);
+                Assert.That(await harness.Published.Any<JobStarted<OddJob>>(), Is.True);
+            });
 
             await harness.Bus.Publish<CancelJob>(new { JobId = jobId });
 
@@ -251,12 +260,15 @@ namespace MassTransit.Tests
                 Job = new { Duration = TimeSpan.FromSeconds(10) }
             });
 
-            Assert.That(response.Message.JobId, Is.EqualTo(jobId));
+            await Assert.MultipleAsync(async () =>
+            {
+                Assert.That(response.Message.JobId, Is.EqualTo(jobId));
 
-            Assert.That(await harness.Published.Any<JobSubmitted>(), Is.True);
+                Assert.That(await harness.Published.Any<JobSubmitted>(), Is.True);
 
-            Assert.That(await harness.Published.Any<JobStarted>(), Is.True);
-            Assert.That(await harness.Published.Any<JobStarted<OddJob>>(), Is.True);
+                Assert.That(await harness.Published.Any<JobStarted>(), Is.True);
+                Assert.That(await harness.Published.Any<JobStarted<OddJob>>(), Is.True);
+            });
 
             IRequestClient<GetJobState> stateClient = harness.GetRequestClient<GetJobState>();
 
@@ -266,8 +278,11 @@ namespace MassTransit.Tests
 
             await harness.Bus.Publish<CancelJob>(new { JobId = jobId });
 
-            Assert.That(await harness.Published.Any<JobCanceled>(), Is.True);
-            Assert.That(await harness.Sent.Any<JobSlotReleased>(), Is.True);
+            await Assert.MultipleAsync(async () =>
+            {
+                Assert.That(await harness.Published.Any<JobCanceled>(), Is.True);
+                Assert.That(await harness.Sent.Any<JobSlotReleased>(), Is.True);
+            });
 
             jobState = await stateClient.GetResponse<JobState>(new { JobId = jobId });
 
@@ -296,21 +311,30 @@ namespace MassTransit.Tests
                 Job = new { Duration = TimeSpan.FromSeconds(10) }
             });
 
-            Assert.That(response.Message.JobId, Is.EqualTo(jobId));
+            await Assert.MultipleAsync(async () =>
+            {
+                Assert.That(response.Message.JobId, Is.EqualTo(jobId));
 
-            Assert.That(await harness.Published.Any<JobSubmitted>(), Is.True);
+                Assert.That(await harness.Published.Any<JobSubmitted>(), Is.True);
 
-            Assert.That(await harness.Published.Any<JobStarted>(), Is.True);
-            Assert.That(await harness.Published.Any<JobStarted<OddJob>>(), Is.True);
+                Assert.That(await harness.Published.Any<JobStarted>(), Is.True);
+                Assert.That(await harness.Published.Any<JobStarted<OddJob>>(), Is.True);
+            });
 
             await harness.Bus.Publish<CancelJob>(new { JobId = jobId });
 
-            Assert.That(await harness.Published.Any<JobCanceled>(), Is.True);
-            Assert.That(await harness.Sent.Any<JobSlotReleased>(), Is.True);
+            await Assert.MultipleAsync(async () =>
+            {
+                Assert.That(await harness.Published.Any<JobCanceled>(), Is.True);
+                Assert.That(await harness.Sent.Any<JobSlotReleased>(), Is.True);
+            });
 
             await harness.Bus.Publish<RetryJob>(new { JobId = jobId });
-            Assert.That(await harness.Published.Any<JobCompleted>(), Is.True);
-            Assert.That(await harness.Published.Any<JobCompleted<OddJob>>(), Is.True);
+            await Assert.MultipleAsync(async () =>
+            {
+                Assert.That(await harness.Published.Any<JobCompleted>(), Is.True);
+                Assert.That(await harness.Published.Any<JobCompleted<OddJob>>(), Is.True);
+            });
 
             await harness.Stop();
         }
@@ -345,11 +369,14 @@ namespace MassTransit.Tests
                 Job = new { Duration = TimeSpan.FromSeconds(10) }
             });
 
-            Assert.That(await harness.Published.Any<JobSubmitted>(x => x.Context.Message.JobId == jobId), Is.True);
+            await Assert.MultipleAsync(async () =>
+            {
+                Assert.That(await harness.Published.Any<JobSubmitted>(x => x.Context.Message.JobId == jobId), Is.True);
 
-            Assert.That(response.Message.JobId, Is.EqualTo(jobId));
+                Assert.That(response.Message.JobId, Is.EqualTo(jobId));
 
-            Assert.That(await harness.Sent.Any<JobSlotWaitElapsed>(x => x.Context.Message.JobId == jobId), Is.True);
+                Assert.That(await harness.Sent.Any<JobSlotWaitElapsed>(x => x.Context.Message.JobId == jobId), Is.True);
+            });
 
             await harness.Bus.Publish<CancelJob>(new { JobId = jobId });
 
@@ -381,15 +408,18 @@ namespace MassTransit.Tests
                 Job = new { Duration = TimeSpan.FromSeconds(1) }
             });
 
-            Assert.That(response.Message.JobId, Is.EqualTo(jobId));
+            await Assert.MultipleAsync(async () =>
+            {
+                Assert.That(response.Message.JobId, Is.EqualTo(jobId));
 
-            Assert.That(await harness.Published.Any<JobSubmitted>(), Is.True);
+                Assert.That(await harness.Published.Any<JobSubmitted>(), Is.True);
 
-            Assert.That(await harness.Published.Any<JobStarted>(), Is.True);
-            Assert.That(await harness.Published.Any<JobStarted<OddJob>>(), Is.True);
+                Assert.That(await harness.Published.Any<JobStarted>(), Is.True);
+                Assert.That(await harness.Published.Any<JobStarted<OddJob>>(), Is.True);
 
-            Assert.That(await harness.Published.Any<JobCompleted>(), Is.True);
-            Assert.That(await harness.Published.Any<JobCompleted<OddJob>>(), Is.True);
+                Assert.That(await harness.Published.Any<JobCompleted>(), Is.True);
+                Assert.That(await harness.Published.Any<JobCompleted<OddJob>>(), Is.True);
+            });
 
             await harness.Stop();
         }
@@ -406,13 +436,16 @@ namespace MassTransit.Tests
 
             await harness.Bus.Publish<OddJob>(new { Duration = TimeSpan.FromSeconds(1) });
 
-            Assert.That(await harness.Published.Any<JobSubmitted>(), Is.True);
+            await Assert.MultipleAsync(async () =>
+            {
+                Assert.That(await harness.Published.Any<JobSubmitted>(), Is.True);
 
-            Assert.That(await harness.Published.Any<JobStarted>(), Is.True);
-            Assert.That(await harness.Published.Any<JobStarted<OddJob>>(), Is.True);
+                Assert.That(await harness.Published.Any<JobStarted>(), Is.True);
+                Assert.That(await harness.Published.Any<JobStarted<OddJob>>(), Is.True);
 
-            Assert.That(await harness.Published.Any<JobCompleted>(), Is.True);
-            Assert.That(await harness.Published.Any<JobCompleted<OddJob>>(), Is.True);
+                Assert.That(await harness.Published.Any<JobCompleted>(), Is.True);
+                Assert.That(await harness.Published.Any<JobCompleted<OddJob>>(), Is.True);
+            });
 
             IPublishedMessage<JobCompleted> publishedMessage = await harness.Published.SelectAsync<JobCompleted>().First();
             Assert.That(publishedMessage.Context.Message.JobId, Is.Not.EqualTo(Guid.Empty));

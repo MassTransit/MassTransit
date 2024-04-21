@@ -99,7 +99,7 @@
 
             ConsumeContext<ServiceFaulted> context = await serviceFaulted;
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(context.CorrelationId, Is.EqualTo(message.CorrelationId));
 
@@ -179,7 +179,7 @@
 
             ConsumeContext<ServiceFaulted> context = await serviceFaulted;
 
-            Assert.Multiple(async () =>
+            await Assert.MultipleAsync(async () =>
             {
                 Assert.That(context.CorrelationId, Is.EqualTo(message.CorrelationId));
 

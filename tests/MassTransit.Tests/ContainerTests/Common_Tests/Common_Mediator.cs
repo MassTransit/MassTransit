@@ -122,10 +122,13 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
                 Value = "World"
             });
 
-            Assert.That(response.Message.Value, Is.EqualTo("Hello, World"));
-            Assert.That(response.ConversationId.Value, Is.EqualTo(response.Message.OriginalConversationId));
-            Assert.That(response.InitiatorId.Value, Is.EqualTo(_correlationId));
-            Assert.That(response.Message.OriginalInitiatorId, Is.EqualTo(_correlationId));
+            Assert.Multiple(() =>
+            {
+                Assert.That(response.Message.Value, Is.EqualTo("Hello, World"));
+                Assert.That(response.ConversationId.Value, Is.EqualTo(response.Message.OriginalConversationId));
+                Assert.That(response.InitiatorId.Value, Is.EqualTo(_correlationId));
+                Assert.That(response.Message.OriginalInitiatorId, Is.EqualTo(_correlationId));
+            });
         }
 
         protected override IServiceCollection ConfigureServices(IServiceCollection collection)

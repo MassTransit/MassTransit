@@ -109,7 +109,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
                 ISagaStateMachineTestHarness<ReliableStateMachine, ReliableState>? sagaHarness =
                     harness.GetSagaStateMachineHarness<ReliableStateMachine, ReliableState>();
 
-                Assert.Multiple(async () =>
+                await Assert.MultipleAsync(async () =>
                 {
                     Assert.That(await sagaHarness.Consumed.Any<CreateState>(), Is.True);
 
@@ -148,7 +148,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
                 ISagaStateMachineTestHarness<ReliableStateMachine, ReliableState>? sagaHarness =
                     harness.GetSagaStateMachineHarness<ReliableStateMachine, ReliableState>();
 
-                Assert.Multiple(async () =>
+                await Assert.MultipleAsync(async () =>
                 {
                     Assert.That(await sagaHarness.Consumed.Any<CreateState>(), Is.True);
 
@@ -187,7 +187,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
                 ISagaStateMachineTestHarness<ReliableStateMachine, ReliableState>? sagaHarness =
                     harness.GetSagaStateMachineHarness<ReliableStateMachine, ReliableState>();
 
-                Assert.Multiple(async () =>
+                await Assert.MultipleAsync(async () =>
                 {
                     Assert.That(await sagaHarness.Consumed.Any<CreateState>(), Is.True);
 

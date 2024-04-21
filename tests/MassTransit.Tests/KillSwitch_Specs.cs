@@ -20,15 +20,21 @@ namespace MassTransit.Tests
 
             await Task.WhenAll(Enumerable.Range(0, 20).Select(x => Bus.Publish(new BadMessage())));
 
-            Assert.That(await BusControl.WaitForHealthStatus(BusHealthStatus.Degraded, TimeSpan.FromSeconds(15)), Is.EqualTo(BusHealthStatus.Degraded));
+            await Assert.MultipleAsync(async () =>
+            {
+                Assert.That(await BusControl.WaitForHealthStatus(BusHealthStatus.Degraded, TimeSpan.FromSeconds(15)), Is.EqualTo(BusHealthStatus.Degraded));
 
-            Assert.That(await BusControl.WaitForHealthStatus(BusHealthStatus.Healthy, TimeSpan.FromSeconds(10)), Is.EqualTo(BusHealthStatus.Healthy));
+                Assert.That(await BusControl.WaitForHealthStatus(BusHealthStatus.Healthy, TimeSpan.FromSeconds(10)), Is.EqualTo(BusHealthStatus.Healthy));
+            });
 
             await Task.WhenAll(Enumerable.Range(0, 20).Select(x => Bus.Publish(new GoodMessage())));
 
-            Assert.That(await InMemoryTestHarness.Consumed.SelectAsync<BadMessage>().Take(20).Count(), Is.EqualTo(20));
+            await Assert.MultipleAsync(async () =>
+            {
+                Assert.That(await InMemoryTestHarness.Consumed.SelectAsync<BadMessage>().Take(20).Count(), Is.EqualTo(20));
 
-            Assert.That(await InMemoryTestHarness.Consumed.SelectAsync<GoodMessage>().Take(20).Count(), Is.EqualTo(20));
+                Assert.That(await InMemoryTestHarness.Consumed.SelectAsync<GoodMessage>().Take(20).Count(), Is.EqualTo(20));
+            });
         }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)

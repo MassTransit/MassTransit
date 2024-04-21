@@ -21,10 +21,13 @@ namespace MassTransit.Tests.Initializers
 
             ConsumeContext<StateUpdated> stateUpdated = await handler;
 
-            Assert.That(stateUpdated.Message.CurrentState, Is.EqualTo(_machine.Running.Name));
+            Assert.Multiple(() =>
+            {
+                Assert.That(stateUpdated.Message.CurrentState, Is.EqualTo(_machine.Running.Name));
 
-            Assert.That(stateUpdated.Headers.TryGetHeader("Custom-Header-Value", out var value), Is.True);
-            Assert.That(value, Is.EqualTo("Frankie Say Relax"));
+                Assert.That(stateUpdated.Headers.TryGetHeader("Custom-Header-Value", out var value), Is.True);
+                Assert.That(value, Is.EqualTo("Frankie Say Relax"));
+            });
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
