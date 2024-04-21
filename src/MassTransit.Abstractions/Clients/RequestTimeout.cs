@@ -6,9 +6,10 @@ namespace MassTransit
     /// <summary>
     /// A timeout, which can be a default (none) or a valid TimeSpan > 0, includes factory methods to make it "cute"
     /// </summary>
-    public struct RequestTimeout
+    public readonly struct RequestTimeout :
+        IEquatable<RequestTimeout>
     {
-        TimeSpan? _timeout;
+        readonly TimeSpan? _timeout;
 
         RequestTimeout(TimeSpan timeout)
         {
@@ -27,6 +28,31 @@ namespace MassTransit
 
         public static RequestTimeout None { get; } = new RequestTimeout();
         public static RequestTimeout Default { get; } = new RequestTimeout(TimeSpan.FromSeconds(30));
+
+        public bool Equals(RequestTimeout other)
+        {
+            return Nullable.Equals(_timeout, other._timeout);
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is RequestTimeout other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return _timeout.GetHashCode();
+        }
+
+        public static bool operator ==(RequestTimeout left, RequestTimeout right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(RequestTimeout left, RequestTimeout right)
+        {
+            return !left.Equals(right);
+        }
 
         public static implicit operator RequestTimeout(TimeSpan timeout)
         {

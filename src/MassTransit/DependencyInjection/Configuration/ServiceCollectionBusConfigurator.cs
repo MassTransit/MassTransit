@@ -48,7 +48,7 @@ namespace MassTransit.Configuration
                 return new ReceiveEndpointDispatcherFactory(context, busInstance);
             });
 
-            collection.TryAddSingleton(provider => Bind<IBus>.Create(provider.GetRequiredService<IBus>().CreateClientFactory()));
+            collection.TryAddSingleton(provider => Bind<IBus>.Create(provider.GetRequiredService<IBus>().CreateClientFactory(DefaultRequestTimeout)));
             collection.TryAddSingleton(provider => provider.GetRequiredService<Bind<IBus, IClientFactory>>().Value);
 
             collection.TryAddScoped<IScopedBusContextProvider<IBus>, ScopedBusContextProvider<IBus>>();
@@ -162,7 +162,7 @@ namespace MassTransit.Configuration
             collection.AddSingleton(_ =>
                 Bind<TBus>.Create((ISetScopedConsumeContext)new SetScopedConsumeContext(provider =>
                     provider.GetRequiredService<Bind<TBus, IScopedConsumeContextProvider>>().Value)));
-            collection.TryAddSingleton(provider => Bind<TBus>.Create(provider.GetRequiredService<TBus>().CreateClientFactory()));
+            collection.TryAddSingleton(provider => Bind<TBus>.Create(provider.GetRequiredService<TBus>().CreateClientFactory(DefaultRequestTimeout)));
             collection.TryAddScoped<IScopedBusContextProvider<TBus>, ScopedBusContextProvider<TBus>>();
             collection.TryAddScoped(provider => Bind<TBus>.Create(provider.GetRequiredService<IScopedBusContextProvider<TBus>>().Context.SendEndpointProvider));
             collection.TryAddScoped(provider => Bind<TBus>.Create(provider.GetRequiredService<IScopedBusContextProvider<TBus>>().Context.PublishEndpoint));

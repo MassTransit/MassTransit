@@ -174,6 +174,22 @@ namespace MassTransit
         void AddRequestClient(Type requestType, Uri destinationAddress, RequestTimeout timeout = default);
 
         /// <summary>
+        /// Sets the default request timeout for this bus instance, used by the client factory to create request clients
+        /// </summary>
+        /// <param name="timeout"></param>
+        void SetDefaultRequestTimeout(RequestTimeout timeout);
+
+        /// <summary>
+        /// Sets the default request timeout for this bus instance, used by the client factory to create request clients
+        /// </summary>
+        /// <param name="d">days</param>
+        /// <param name="h">hours</param>
+        /// <param name="m">minutes</param>
+        /// <param name="s">seconds</param>
+        /// <param name="ms">milliseconds</param>
+        void SetDefaultRequestTimeout(int? d = null, int? h = null, int? m = null, int? s = null, int? ms = null);
+
+        /// <summary>
         /// Set the default endpoint name formatter used for endpoint names
         /// </summary>
         /// <param name="endpointNameFormatter"></param>
