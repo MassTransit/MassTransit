@@ -5,7 +5,6 @@
     using System.Threading.Tasks;
     using AzureTable;
     using NUnit.Framework;
-    using Shouldly;
 
 
     [TestFixture]
@@ -16,14 +15,14 @@
         public async Task Should_Have_Audit_Records()
         {
             _records = GetRecords<AuditRecord>();
-            _records.ShouldNotBeEmpty();
+            Assert.That(_records, Is.Not.Empty);
         }
 
         [Test]
         public async Task Should_have_send_audit_record()
         {
-            IEnumerable<AuditRecord> sendRecords = _records.Where(x => x.ContextType == "Send");
-            sendRecords.Count().ShouldBe(2);
+            List<AuditRecord> sendRecords = _records.Where(x => x.ContextType == "Send").ToList();
+            Assert.That(sendRecords, Has.Count.EqualTo(2));
         }
 
         IEnumerable<AuditRecord> _records;

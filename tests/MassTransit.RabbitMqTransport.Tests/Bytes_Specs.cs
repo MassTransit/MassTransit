@@ -4,7 +4,6 @@
     using System.Linq;
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using Shouldly;
 
 
     [TestFixture]
@@ -24,7 +23,7 @@
 
             ConsumeContext<A> context = await _received;
 
-            context.Message.ShouldBe(sent);
+            Assert.That(context.Message, Is.EqualTo(sent));
         }
 
         Task<ConsumeContext<A>> _received;

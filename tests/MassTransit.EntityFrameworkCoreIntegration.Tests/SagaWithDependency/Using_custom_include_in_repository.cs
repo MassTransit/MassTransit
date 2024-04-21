@@ -8,7 +8,6 @@
     using Microsoft.EntityFrameworkCore;
     using NUnit.Framework;
     using Shared;
-    using Shouldly;
     using Testing;
 
 
@@ -29,7 +28,7 @@
 
             Guid? foundId = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
 
-            foundId.HasValue.ShouldBe(true);
+            Assert.That(foundId, Is.Not.Null);
 
             var propertyValue = "expected saga property value";
             var updateInnerProperty = new UpdateSagaDependency(sagaId, propertyValue);
@@ -39,7 +38,7 @@
             foundId = await _sagaRepository.Value.ShouldContainSaga(
                 x => x.CorrelationId == sagaId && x.Completed && x.Dependency.SagaInnerDependency.Name == propertyValue, TestTimeout);
 
-            foundId.HasValue.ShouldBe(true);
+            Assert.That(foundId, Is.Not.Null);
         }
 
         [Test]
@@ -53,7 +52,7 @@
 
             Guid? foundId = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout).ConfigureAwait(false);
 
-            foundId.HasValue.ShouldBe(true);
+            Assert.That(foundId, Is.Not.Null);
         }
 
         readonly Lazy<ISagaRepository<SagaWithDependency>> _sagaRepository;

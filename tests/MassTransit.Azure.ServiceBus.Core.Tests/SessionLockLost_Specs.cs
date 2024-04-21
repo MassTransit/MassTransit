@@ -5,7 +5,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
     using System.Threading;
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using Shouldly;
 
 
     [TestFixture]
@@ -30,7 +29,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
             await _seenAll;
 
             await _handler;
-            _seenMessages.ShouldBe(TotalMessages);
+            Assert.That(_seenMessages, Is.EqualTo(TotalMessages));
         }
 
         public When_message_process_exceeds_maxAutoRenewDuration()

@@ -5,8 +5,6 @@
     using System.Security.Authentication;
     using NUnit.Framework;
     using RabbitMqTransport.Configuration;
-    using Shouldly;
-    using Shouldly.ShouldlyExtensionMethods;
 
 
     [TestFixture]
@@ -22,7 +20,7 @@
             {
             });
 
-            configurator.Settings.AcceptablePolicyErrors.ShouldHaveFlag(SslPolicyErrors.RemoteCertificateChainErrors);
+            Assert.That(configurator.Settings.AcceptablePolicyErrors.HasFlag(SslPolicyErrors.RemoteCertificateChainErrors), Is.True);
         }
 
         [Test]
@@ -35,8 +33,7 @@
             {
                 sslConfigurator.EnforcePolicyErrors(SslPolicyErrors.RemoteCertificateChainErrors);
             });
-
-            configurator.Settings.AcceptablePolicyErrors.ShouldNotHaveFlag(SslPolicyErrors.RemoteCertificateChainErrors);
+            Assert.That(configurator.Settings.AcceptablePolicyErrors.HasFlag(SslPolicyErrors.RemoteCertificateChainErrors), Is.False);
         }
 
         [Test]
@@ -45,7 +42,7 @@
         {
             var configurator = new RabbitMqHostConfigurator(new Uri("rabbitmq://localhost/%2fv%2fhost"));
 
-            configurator.Settings.VirtualHost.ShouldBe("/v/host");
+            Assert.That(configurator.Settings.VirtualHost, Is.EqualTo("/v/host"));
         }
 
         [Test]
@@ -58,7 +55,7 @@
                 sslConfigurator.Protocol = SslProtocols.Tls12;
             });
 
-            configurator.Settings.SslProtocol.ShouldBe(SslProtocols.Tls12);
+            Assert.That(configurator.Settings.SslProtocol, Is.EqualTo(SslProtocols.Tls12));
         }
 
         [Test]
@@ -71,7 +68,7 @@
             {
             });
 
-            configurator.Settings.UseClientCertificateAsAuthenticationIdentity.ShouldBeFalse();
+            Assert.That(configurator.Settings.UseClientCertificateAsAuthenticationIdentity, Is.False);
         }
 
         [Test]
@@ -84,7 +81,7 @@
             {
             });
 
-            configurator.Settings.SslProtocol.ShouldBe(SslProtocols.Tls12);
+            Assert.That(configurator.Settings.SslProtocol, Is.EqualTo(SslProtocols.Tls12));
         }
 
         [Test]
@@ -101,7 +98,7 @@
                 sslConfigurator.CertificateSelectionCallback = customSelector;
             });
 
-            configurator.Settings.CertificateSelectionCallback.ShouldBeSameAs(customSelector);
+            Assert.That(configurator.Settings.CertificateSelectionCallback, Is.EqualTo(customSelector));
         }
 
         [Test]
@@ -118,7 +115,7 @@
                 sslConfigurator.CertificateValidationCallback = customValidator;
             });
 
-            configurator.Settings.CertificateValidationCallback.ShouldBeSameAs(customValidator);
+            Assert.That(configurator.Settings.CertificateValidationCallback, Is.EqualTo(customValidator));
         }
 
         [TestCase(true)]
@@ -133,7 +130,7 @@
                 sslConfigurator.UseCertificateAsAuthenticationIdentity = valueToSet;
             });
 
-            configurator.Settings.UseClientCertificateAsAuthenticationIdentity.ShouldBe(valueToSet);
+            Assert.That(configurator.Settings.UseClientCertificateAsAuthenticationIdentity, Is.EqualTo(valueToSet));
         }
     }
 }

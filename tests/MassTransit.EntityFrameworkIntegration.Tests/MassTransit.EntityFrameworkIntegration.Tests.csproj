@@ -14,7 +14,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="NUnit3TestAdapter" />
-    <PackageReference Include="Shouldly" />
     <ProjectReference Include="..\..\src\Persistence\MassTransit.EntityFrameworkIntegration\MassTransit.EntityFrameworkIntegration.csproj" />
     <ProjectReference Include="..\..\src\MassTransit.TestFramework\MassTransit.TestFramework.csproj" />
     <ProjectReference Include="..\MassTransit.Tests\MassTransit.Tests.csproj" />

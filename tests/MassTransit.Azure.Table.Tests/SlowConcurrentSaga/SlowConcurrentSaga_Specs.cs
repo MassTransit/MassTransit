@@ -7,7 +7,6 @@ namespace MassTransit.Azure.Table.Tests.SlowConcurrentSaga
     using DataAccess;
     using Events;
     using NUnit.Framework;
-    using Shouldly;
     using Testing;
 
 
@@ -34,7 +33,7 @@ namespace MassTransit.Azure.Table.Tests.SlowConcurrentSaga
 
             Guid? foundId = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
 
-            foundId.HasValue.ShouldBe(true);
+            Assert.That(foundId, Is.Not.Null);
 
             var slowMessage = new IncrementCounterSlowly { CorrelationId = sagaId };
             await Task.WhenAll(

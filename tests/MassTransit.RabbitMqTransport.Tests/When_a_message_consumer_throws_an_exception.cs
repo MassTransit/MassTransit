@@ -2,7 +2,6 @@
 {
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using Shouldly;
     using TestFramework;
 
 
@@ -24,7 +23,7 @@
 
             ConsumeContext<Fault<A>> fault = await faultHandled;
 
-            fault.Message.Message.StringA.ShouldBe("ValueA");
+            Assert.That(fault.Message.Message.StringA, Is.EqualTo("ValueA"));
         }
 
         A _message;

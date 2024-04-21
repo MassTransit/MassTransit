@@ -4,7 +4,6 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System.Linq;
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using Shouldly;
     using TestFramework.Messages;
 
 
@@ -26,8 +25,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             ConsumeContext<PingMessage> context = await _handled;
 
             ConsumeContext<PongMessage> responseContext = await responseHandled;
-
-            responseContext.SourceAddress.ShouldBe(InputQueueAddress);
+            Assert.That(responseContext.SourceAddress, Is.EqualTo(InputQueueAddress));
         }
 
         Task<ConsumeContext<PingMessage>> _handled;

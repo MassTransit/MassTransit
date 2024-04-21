@@ -3,7 +3,6 @@
     using System;
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using Shouldly;
     using TestFramework;
     using TestFramework.Messages;
 
@@ -29,7 +28,7 @@
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
 
-            context.SourceAddress.ShouldBe(BusAddress);
+            Assert.That(context.SourceAddress, Is.EqualTo(BusAddress));
         }
 
         [Test]

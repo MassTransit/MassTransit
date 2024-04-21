@@ -3,7 +3,6 @@
     using System;
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using Shouldly;
     using TestFramework.Messages;
 
 
@@ -20,7 +19,7 @@
 
             Response<PongMessage> response = await requestHandle.GetResponse<PongMessage>();
 
-            response.Message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
+            Assert.That(response.Message.CorrelationId, Is.EqualTo(_ping.Result.Message.CorrelationId));
         }
 
         public Sending_a_request_using_the_request_client()
@@ -62,7 +61,7 @@
 
             Response<PongMessage> response = await requestHandle.GetResponse<PongMessage>();
 
-            response.Message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
+            Assert.That(response.Message.CorrelationId, Is.EqualTo(_ping.Result.Message.CorrelationId));
         }
 
         Task<ConsumeContext<PingMessage>> _ping;
@@ -105,7 +104,7 @@
 
             Response<PongMessage> response = await requestHandle.GetResponse<PongMessage>();
 
-            response.Message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
+            Assert.That(response.Message.CorrelationId, Is.EqualTo(_ping.Result.Message.CorrelationId));
         }
 
         public Sending_a_request_with_a_different_host_name()
@@ -143,7 +142,8 @@
         {
             Response<PongMessage> message = await _response;
 
-            message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
+            Assert.That(message.CorrelationId, Is.EqualTo(_ping.Result.Message.CorrelationId));
+            Assert.That(message.CorrelationId, Is.EqualTo(_ping.Result.Message.CorrelationId));
         }
 
         public Sending_a_request_using_the_new_request_client()
@@ -184,7 +184,7 @@
         {
             Response<PongMessage> message = await _response;
 
-            message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
+            Assert.That(message.CorrelationId, Is.EqualTo(_ping.Result.Message.CorrelationId));
         }
 
         Task<ConsumeContext<PingMessage>> _ping;
@@ -224,7 +224,7 @@
             ConsumeContext<PingMessage> ping = await _ping;
             ConsumeContext<A> a = await _a;
 
-            ping.ConversationId.ShouldBe(a.ConversationId);
+            Assert.That(ping.ConversationId, Is.EqualTo(a.ConversationId));
         }
 
         [Test]
@@ -233,7 +233,7 @@
         {
             Response<PongMessage> message = await _response;
 
-            message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
+            Assert.That(message.CorrelationId, Is.EqualTo(_ping.Result.Message.CorrelationId));
         }
 
         Task<ConsumeContext<PingMessage>> _ping;
@@ -295,7 +295,7 @@
             ConsumeContext<PingMessage> ping = await _ping;
             ConsumeContext<A> a = await _a;
 
-            ping.ConversationId.ShouldBe(a.ConversationId);
+            Assert.That(ping.ConversationId, Is.EqualTo(a.ConversationId));
         }
 
         [Test]
@@ -303,7 +303,7 @@
         {
             Response<PongMessage> message = await _response;
 
-            message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
+            Assert.That(message.CorrelationId, Is.EqualTo(_ping.Result.Message.CorrelationId));
         }
 
         Task<ConsumeContext<PingMessage>> _ping;
@@ -364,7 +364,7 @@
         {
             Response<PongMessage> response = await _requestClient.GetResponse<PongMessage>(new PingMessage());
 
-            response.Message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
+            Assert.That(response.Message.CorrelationId, Is.EqualTo(_ping.Result.Message.CorrelationId));
         }
 
         Task<ConsumeContext<PingMessage>> _ping;

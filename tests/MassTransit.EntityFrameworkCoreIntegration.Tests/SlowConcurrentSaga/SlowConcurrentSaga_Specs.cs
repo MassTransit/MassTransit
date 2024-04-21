@@ -8,7 +8,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SlowConcurrentSaga
     using Events;
     using NUnit.Framework;
     using Shared;
-    using Shouldly;
     using Testing;
 
 
@@ -29,7 +28,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SlowConcurrentSaga
 
             Guid? foundId = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
 
-            foundId.HasValue.ShouldBe(true);
+            Assert.That(foundId, Is.Not.Null);
 
             var slowMessage = new IncrementCounterSlowly { CorrelationId = sagaId };
             await Task.WhenAll(

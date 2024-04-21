@@ -7,7 +7,6 @@
     using Microsoft.EntityFrameworkCore;
     using NUnit.Framework;
     using Shared;
-    using Shouldly;
     using Testing;
 
 
@@ -23,7 +22,7 @@
         {
             var consumed = InMemoryTestHarness.Consumed;
             await Task.Delay(2000);
-            (await GetAuditRecords("Consume", consumed.Count(), TimeSpan.FromSeconds(10))).ShouldBe(consumed.Count());
+            Assert.That(await GetAuditRecords("Consume", consumed.Count(), TimeSpan.FromSeconds(10)), Is.EqualTo(consumed.Count()));
         }
 
         [Test]
@@ -31,7 +30,7 @@
         {
             var sent = InMemoryTestHarness.Sent;
             await Task.Delay(2000);
-            (await GetAuditRecords("Send", sent.Count(), TimeSpan.FromSeconds(10))).ShouldBe(sent.Count());
+            Assert.That(await GetAuditRecords("Send", sent.Count(), TimeSpan.FromSeconds(10)), Is.EqualTo(sent.Count()));
         }
 
         [SetUp]

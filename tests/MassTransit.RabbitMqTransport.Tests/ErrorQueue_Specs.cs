@@ -8,7 +8,6 @@
     using Metadata;
     using NUnit.Framework;
     using RabbitMQ.Client;
-    using Shouldly;
     using TestFramework.Messages;
 
 
@@ -20,64 +19,7 @@
         public async Task Should_have_the_correlation_id()
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
-
-            context.CorrelationId.ShouldBe(_correlationId);
-        }
-
-        [Test]
-        public async Task Should_have_the_exception()
-        {
-            ConsumeContext<PingMessage> context = await _errorHandler;
-
-            context.ReceiveContext.TransportHeaders.Get("MT-Fault-Message", (string)null).ShouldBe("This is fine, forcing death");
-        }
-
-        [Test]
-        public async Task Should_have_the_host_machine_name()
-        {
-            ConsumeContext<PingMessage> context = await _errorHandler;
-
-            context.ReceiveContext.TransportHeaders.Get("MT-Host-MachineName", (string)null).ShouldBe(HostMetadataCache.Host.MachineName);
-        }
-
-        [Test]
-        public async Task Should_have_the_original_destination_address()
-        {
-            ConsumeContext<PingMessage> context = await _errorHandler;
-
-            context.DestinationAddress.ShouldBe(InputQueueAddress);
-        }
-
-        [Test]
-        public async Task Should_have_the_original_fault_address()
-        {
-            ConsumeContext<PingMessage> context = await _errorHandler;
-
-            context.FaultAddress.ShouldBe(BusAddress);
-        }
-
-        [Test]
-        public async Task Should_have_the_original_response_address()
-        {
-            ConsumeContext<PingMessage> context = await _errorHandler;
-
-            context.ResponseAddress.ShouldBe(BusAddress);
-        }
-
-        [Test]
-        public async Task Should_have_the_original_source_address()
-        {
-            ConsumeContext<PingMessage> context = await _errorHandler;
-
-            context.SourceAddress.ShouldBe(BusAddress);
-        }
-
-        [Test]
-        public async Task Should_have_the_reason()
-        {
-            ConsumeContext<PingMessage> context = await _errorHandler;
-
-            context.ReceiveContext.TransportHeaders.Get(MessageHeaders.Reason, (string)null).ShouldBe("fault");
+            Assert.That(context.CorrelationId, Is.EqualTo(_correlationId));
         }
 
         [Test]
@@ -85,7 +27,63 @@
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
 
-            context.ReceiveContext.TransportHeaders.Get(MessageHeaders.FaultInputAddress, (Uri)null).ShouldBe(InputQueueAddress);
+            Assert.That(context.ReceiveContext.TransportHeaders.Get(MessageHeaders.FaultInputAddress, (Uri)null), Is.EqualTo(InputQueueAddress));
+        }
+
+        [Test]
+        public async Task Should_have_the_exception()
+        {
+            ConsumeContext<PingMessage> context = await _errorHandler;
+
+            Assert.That(context.ReceiveContext.TransportHeaders.Get("MT-Fault-Message", (string)null), Is.EqualTo("This is fine, forcing death"));
+        }
+
+        [Test]
+        public async Task Should_have_the_host_machine_name()
+        {
+            ConsumeContext<PingMessage> context = await _errorHandler;
+
+            Assert.That(context.ReceiveContext.TransportHeaders.Get("MT-Host-MachineName", (string)null), Is.EqualTo(HostMetadataCache.Host.MachineName));
+        }
+
+        [Test]
+        public async Task Should_have_the_original_destination_address()
+        {
+            ConsumeContext<PingMessage> context = await _errorHandler;
+
+            Assert.That(context.DestinationAddress, Is.EqualTo(InputQueueAddress));
+        }
+
+        [Test]
+        public async Task Should_have_the_original_fault_address()
+        {
+            ConsumeContext<PingMessage> context = await _errorHandler;
+
+            Assert.That(context.FaultAddress, Is.EqualTo(BusAddress));
+        }
+
+        [Test]
+        public async Task Should_have_the_original_response_address()
+        {
+            ConsumeContext<PingMessage> context = await _errorHandler;
+
+            Assert.That(context.ResponseAddress, Is.EqualTo(BusAddress));
+        }
+
+        [Test]
+        public async Task Should_have_the_original_source_address()
+        {
+            ConsumeContext<PingMessage> context = await _errorHandler;
+
+            Assert.That(context.SourceAddress, Is.EqualTo(BusAddress));
+        }
+
+        [Test]
+        public async Task Should_have_the_reason()
+        {
+            ConsumeContext<PingMessage> context = await _errorHandler;
+
+            Assert.That(context.ReceiveContext.TransportHeaders.Get(MessageHeaders.Reason, (string)null), Is.EqualTo("fault"));
         }
 
         [Test]
@@ -134,13 +132,13 @@
         public async Task Should_have_the_host_machine_name()
         {
             var header = Encoding.UTF8.GetString((byte[])_basicGetResult.BasicProperties.Headers["MT-Host-MachineName"]);
-            header.ShouldBe(HostMetadataCache.Host.MachineName);
+            Assert.That(header, Is.EqualTo(HostMetadataCache.Host.MachineName));
         }
 
         [Test]
         public void Should_have_the_invalid_body()
         {
-            _body.ShouldBe("[]");
+            Assert.That(_body, Is.EqualTo("[]"));
         }
 
         [Test]
@@ -148,7 +146,7 @@
         {
             var header = Encoding.UTF8.GetString((byte[])_basicGetResult.BasicProperties.Headers["MT-Reason"]);
 
-            header.ShouldBe("fault");
+            Assert.That(header, Is.EqualTo("fault"));
         }
 
         string _body;
@@ -191,13 +189,13 @@
         public async Task Should_have_the_host_machine_name()
         {
             var header = Encoding.UTF8.GetString((byte[])_basicGetResult.BasicProperties.Headers["MT-Host-MachineName"]);
-            header.ShouldBe(HostMetadataCache.Host.MachineName);
+            Assert.That(header, Is.EqualTo(HostMetadataCache.Host.MachineName));
         }
 
         [Test]
         public void Should_have_the_invalid_body()
         {
-            _body.ShouldBe("");
+            Assert.That(_body, Is.EqualTo(""));
         }
 
         [Test]
@@ -205,7 +203,7 @@
         {
             var header = Encoding.UTF8.GetString((byte[])_basicGetResult.BasicProperties.Headers["MT-Reason"]);
 
-            header.ShouldBe("fault");
+            Assert.That(header, Is.EqualTo("fault"));
         }
 
         string _body;
