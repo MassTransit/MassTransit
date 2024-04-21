@@ -73,8 +73,8 @@
     <PackageVersion Include="NHibernate" Version="5.5.1" />
     <PackageVersion Include="Npgsql" Version="8.0.0" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.0" />
-    <PackageVersion Include="NUnit" Version="3.14.0" />
-    <PackageVersion Include="NUnit.Analyzers" Version="3.10.0">
+    <PackageVersion Include="NUnit" Version="4.1.0"/>
+    <PackageVersion Include="NUnit.Analyzers" Version="4.1.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>
