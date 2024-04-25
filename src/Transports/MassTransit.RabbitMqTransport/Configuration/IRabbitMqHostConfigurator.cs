@@ -1,11 +1,8 @@
-﻿namespace MassTransit
+﻿#nullable enable
+namespace MassTransit
 {
     using System;
-    using System.Threading.Tasks;
     using RabbitMQ.Client;
-
-
-    public delegate Task RefreshConnectionFactoryCallback(ConnectionFactory connectionFactory);
 
 
     public interface IRabbitMqHostConfigurator
@@ -19,10 +16,20 @@
         RefreshConnectionFactoryCallback OnRefreshConnectionFactory { set; }
 
         /// <summary>
+        /// Sets the credential provider, overriding the default username/password credentials
+        /// </summary>
+        ICredentialsProvider CredentialsProvider { set; }
+
+        /// <summary>
+        /// Sets the credentials refresher, allowing access token based credentials to be refreshed
+        /// </summary>
+        ICredentialsRefresher CredentialsRefresher { set; }
+
+        /// <summary>
         /// Configure the use of SSL to connection to RabbitMQ
         /// </summary>
-        /// <param name="configureSsl"></param>
-        void UseSsl(Action<IRabbitMqSslConfigurator> configureSsl);
+        /// <param name="configure"></param>
+        void UseSsl(Action<IRabbitMqSslConfigurator>? configure = null);
 
         /// <summary>
         /// Specifies the heartbeat interval, in seconds, used to maintain the connection to RabbitMQ.
@@ -94,6 +101,6 @@
         /// <summary>
         /// Sets the connection name for the connection to RabbitMQ
         /// </summary>
-        void ConnectionName(string connectionName);
+        void ConnectionName(string? connectionName);
     }
 }

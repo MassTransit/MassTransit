@@ -1,3 +1,4 @@
+#nullable enable
 namespace MassTransit.RabbitMqTransport.Configuration
 {
     using System;
@@ -55,7 +56,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         public LocalCertificateSelectionCallback CertificateSelectionCallback { get; set; }
         public RemoteCertificateValidationCallback CertificateValidationCallback { get; set; }
         public IRabbitMqEndpointResolver EndpointResolver { get; set; }
-        public string ClientProvidedName { get; set; }
+        public string? ClientProvidedName { get; set; }
         public bool PublisherConfirmation { get; set; }
         public Uri HostAddress => _hostAddress.Value;
         public ushort RequestedChannelMax { get; set; }
@@ -64,6 +65,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
         public BatchSettings BatchSettings => _batchSettings;
         public TimeSpan ContinuationTimeout { get; set; }
         public uint? MaxMessageSize { get; set; }
+
+        public ICredentialsProvider? CredentialsProvider { get; set; }
+        public ICredentialsRefresher? CredentialsRefresher { get; set; }
 
         public Task Refresh(ConnectionFactory connectionFactory)
         {

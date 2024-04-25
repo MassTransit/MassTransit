@@ -149,6 +149,16 @@
         uint? MaxMessageSize { get; }
 
         /// <summary>
+        /// The credential provider, overriding the default username/password credentials
+        /// </summary>
+        ICredentialsProvider CredentialsProvider { get; }
+
+        /// <summary>
+        /// The credentials refresher, allowing access token based credentials to be refreshed
+        /// </summary>
+        ICredentialsRefresher CredentialsRefresher { get; }
+
+        /// <summary>
         /// Called prior to the connection factory being used to connect, so that any settings can be updated.
         /// Typically this would be the username/password in response to an expired token, etc.
         /// </summary>

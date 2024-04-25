@@ -65,6 +65,8 @@ namespace MassTransit.RabbitMqTransport
                 factory.UserName = "";
                 factory.Password = "";
             }
+            else if (settings.CredentialsProvider != null)
+                factory.CredentialsProvider = settings.CredentialsProvider;
             else
             {
                 if (!string.IsNullOrWhiteSpace(settings.Username))
@@ -73,6 +75,8 @@ namespace MassTransit.RabbitMqTransport
                 if (!string.IsNullOrWhiteSpace(settings.Password))
                     factory.Password = settings.Password;
             }
+
+            factory.CredentialsRefresher = settings.CredentialsRefresher;
 
             ApplySslOptions(settings, factory.Ssl);
 
