@@ -1,7 +1,6 @@
-namespace MassTransit.AzureServiceBusTransport.Configuration
+namespace MassTransit.Configuration
 {
-    using MassTransit.Configuration;
-    using Topology;
+    using Transports;
 
 
     public class PartitionKeyMessageSendTopologyConvention<TMessage> :

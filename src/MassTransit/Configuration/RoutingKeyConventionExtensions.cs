@@ -10,13 +10,12 @@ namespace MassTransit
         public static void UseRoutingKeyFormatter<T>(this IMessageSendTopologyConfigurator<T> configurator, IMessageRoutingKeyFormatter<T> formatter)
             where T : class
         {
-            configurator.UpdateConvention<IRoutingKeyMessageSendTopologyConvention<T>>(
-                update =>
-                {
-                    update.SetFormatter(formatter);
+            configurator.UpdateConvention<IRoutingKeyMessageSendTopologyConvention<T>>(update =>
+            {
+                update.SetFormatter(formatter);
 
-                    return update;
-                });
+                return update;
+            });
         }
 
         /// <summary>

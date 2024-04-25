@@ -1,6 +1,6 @@
-﻿namespace MassTransit.AzureServiceBusTransport.Configuration
+namespace MassTransit.Configuration
 {
-    using MassTransit.Configuration;
+    using Transports;
 
 
     public interface IPartitionKeyMessageSendTopologyConvention<TMessage> :

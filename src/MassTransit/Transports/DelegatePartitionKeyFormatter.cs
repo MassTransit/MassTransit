@@ -1,4 +1,4 @@
-namespace MassTransit.AzureServiceBusTransport
+namespace MassTransit.Transports
 {
     using System;
 
