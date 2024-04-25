@@ -83,6 +83,10 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                 catch (DbUpdateConcurrencyException)
                 {
                 }
+                catch (InvalidOperationException exception) when (exception.InnerException != null
+                                                                  && exception.InnerException.Message.Contains("concurrent update"))
+                {
+                }
                 catch (Exception exception)
                 {
                     _logger.LogError(exception, "ProcessMessageBatch faulted");
@@ -140,6 +144,11 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                         return continueProcessing;
                     }
                     catch (OperationCanceledException)
+                    {
+                        throw;
+                    }
+                    catch (InvalidOperationException exception) when (exception.InnerException != null
+                                                                      && exception.InnerException.Message.Contains("concurrent update"))
                     {
                         throw;
                     }
