@@ -2,7 +2,6 @@
 
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
-        <LangVersion>11</LangVersion>
         <RootNamespace>MassTransit.DbTransport.Tests</RootNamespace>
     </PropertyGroup>
 
