@@ -1,6 +1,7 @@
 namespace MassTransit.AzureServiceBusTransport.Configuration
 {
     using MassTransit.Configuration;
+    using Topology;
 
 
     public class SessionIdMessageSendTopologyConvention<TMessage> :
