@@ -83,7 +83,7 @@ namespace MassTransit.SqlTransport.SqlServer
         {
             var builder = _builder ??= new SqlConnectionStringBuilder
             {
-                DataSource = Host,
+                DataSource = Port.HasValue ? $"{Host},{Port}" : Host,
                 UserID = Username,
                 Password = Password,
                 InitialCatalog = Database,
