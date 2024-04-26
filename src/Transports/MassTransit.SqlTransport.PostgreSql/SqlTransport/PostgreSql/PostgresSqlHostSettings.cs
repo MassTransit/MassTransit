@@ -22,20 +22,20 @@ namespace MassTransit.SqlTransport.PostgreSql
 
         public PostgresSqlHostSettings(SqlTransportOptions options)
         {
-            Host = options.Host;
-            Database = options.Database;
-            Username = options.Username;
-            Password = options.Password;
+            var builder = PostgresSqlTransportConnection.CreateBuilder(options);
+
+            Host = builder.Host;
+            if (builder.Port > 0 && builder.Port != NpgsqlConnection.DefaultPort)
+                Port = options.Port;
+
+            Database = builder.Database;
             Schema = options.Schema;
 
-            if (options.Port.HasValue)
-                Port = options.Port.Value;
+            Username = builder.Username;
+            Password = builder.Password;
+
+            _builder = builder;
         }
-
-        public string? Role { get; set; }
-
-        public string? AdminUsername { get; set; }
-        public string? AdminPassword { get; set; }
 
         public string? ConnectionString
         {
@@ -44,13 +44,13 @@ namespace MassTransit.SqlTransport.PostgreSql
                 var builder = new NpgsqlConnectionStringBuilder(value);
 
                 Host = builder.Host;
-                if (builder.Port > 0)
+                if (builder.Port > 0 && builder.Port != NpgsqlConnection.DefaultPort)
                     Port = builder.Port;
+
+                Database = builder.Database;
 
                 Username = builder.Username;
                 Password = builder.Password;
-
-                Database = builder.Database;
 
                 _builder = builder;
             }

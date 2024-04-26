@@ -27,15 +27,17 @@ namespace MassTransit.SqlTransport.SqlServer
 
         public SqlServerSqlHostSettings(SqlTransportOptions options)
         {
-            ParseHost(options.Host);
+            var builder = SqlServerSqlTransportConnection.CreateBuilder(options);
 
-            Database = options.Database;
-            Username = options.Username;
-            Password = options.Password;
+            ParseDataSource(builder.DataSource);
+
+            Database = builder.InitialCatalog;
             Schema = options.Schema;
 
-            if (options.Port.HasValue)
-                Port = options.Port.Value;
+            Username = builder.UserID;
+            Password = builder.Password;
+
+            _builder = builder;
         }
 
         public string? ConnectionString

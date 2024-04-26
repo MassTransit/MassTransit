@@ -13,4 +13,9 @@ public class SqlTransportOptions
 
     public string? AdminUsername { get; set; }
     public string? AdminPassword { get; set; }
+
+    /// <summary>
+    /// Optional, if specified, will be parsed to capture additional properties on the connection.
+    /// </summary>
+    public string? ConnectionString { get; set; }
 }

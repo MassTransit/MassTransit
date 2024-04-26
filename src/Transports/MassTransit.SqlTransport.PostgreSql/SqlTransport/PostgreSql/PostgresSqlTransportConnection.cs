@@ -44,50 +44,51 @@ namespace MassTransit.SqlTransport.PostgreSql
 
         public static PostgresSqlTransportConnection GetSystemDatabaseConnection(SqlTransportOptions options)
         {
-            var builder = new NpgsqlConnectionStringBuilder
-            {
-                Host = options.Host,
-                Database = "postgres",
-                Username = options.AdminUsername ?? options.Username,
-                Password = options.AdminPassword ?? options.Password
-            };
+            var builder = CreateBuilder(options);
 
-            if (options.Port.HasValue)
-                builder.Port = options.Port.Value;
+            builder.Database = "postgres";
+
+            if (!string.IsNullOrWhiteSpace(options.AdminUsername))
+                builder.Username = options.AdminUsername;
+            if (!string.IsNullOrWhiteSpace(options.AdminPassword))
+                builder.Password = options.AdminPassword;
 
             return new PostgresSqlTransportConnection(builder.ToString());
         }
 
         public static PostgresSqlTransportConnection GetDatabaseAdminConnection(SqlTransportOptions options)
         {
-            var builder = new NpgsqlConnectionStringBuilder
-            {
-                Host = options.Host,
-                Database = options.Database,
-                Username = options.AdminUsername ?? options.Username,
-                Password = options.AdminPassword ?? options.Password
-            };
+            var builder = CreateBuilder(options);
 
-            if (options.Port.HasValue)
-                builder.Port = options.Port.Value;
+            if (!string.IsNullOrWhiteSpace(options.AdminUsername))
+                builder.Username = options.AdminUsername;
+            if (!string.IsNullOrWhiteSpace(options.AdminPassword))
+                builder.Password = options.AdminPassword;
 
             return new PostgresSqlTransportConnection(builder.ToString());
         }
 
         public static PostgresSqlTransportConnection GetDatabaseConnection(SqlTransportOptions options)
         {
-            var builder = new NpgsqlConnectionStringBuilder
-            {
-                Host = options.Host,
-                Database = options.Database,
-                Username = options.Username,
-                Password = options.Password
-            };
+            return new PostgresSqlTransportConnection(CreateBuilder(options).ToString());
+        }
 
+        public static NpgsqlConnectionStringBuilder CreateBuilder(SqlTransportOptions options)
+        {
+            var builder = new NpgsqlConnectionStringBuilder(options.ConnectionString);
+
+            if (!string.IsNullOrWhiteSpace(options.Host))
+                builder.Host = options.Host;
+            if (!string.IsNullOrWhiteSpace(options.Database))
+                builder.Database = options.Database;
+            if (!string.IsNullOrWhiteSpace(options.Username))
+                builder.Username = options.Username;
+            if (!string.IsNullOrWhiteSpace(options.Password))
+                builder.Password = options.Password;
             if (options.Port.HasValue)
                 builder.Port = options.Port.Value;
 
-            return new PostgresSqlTransportConnection(builder.ToString());
+            return builder;
         }
 
         public static string? GetAdminMigrationPrincipal(SqlTransportOptions options)
