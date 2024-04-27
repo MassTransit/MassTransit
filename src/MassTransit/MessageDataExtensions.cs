@@ -118,6 +118,32 @@
             return new StoredMessageData<Stream>(address, stream);
         }
 
+        public static Task<MessageData<BinaryData>> PutBinaryData(this IMessageDataRepository repository, BinaryData binaryData, CancellationToken cancellationToken = default)
+        {
+            return PutBinaryData(repository, binaryData, default, cancellationToken);
+        }
+
+        public static async Task<MessageData<BinaryData>> PutBinaryData(this IMessageDataRepository repository, BinaryData binaryData, TimeSpan? timeToLive,
+            CancellationToken cancellationToken = default)
+        {
+            if (repository == null)
+                throw new ArgumentNullException(nameof(repository));
+            if (binaryData == null || binaryData == BinaryData.Empty)
+                return EmptyMessageData<BinaryData>.Instance;
+
+            if (binaryData.ToMemory().Length < MessageDataDefaults.Threshold && !MessageDataDefaults.AlwaysWriteToRepository)
+                return new BinaryDataInlineMessageData(binaryData);
+
+            using var stream = binaryData.ToStream();
+
+            var address = await repository.Put(stream, timeToLive, cancellationToken).ConfigureAwait(false);
+
+            if (binaryData.ToMemory().Length < MessageDataDefaults.Threshold)
+                return new BinaryDataInlineMessageData(binaryData, address);
+
+            return new StoredMessageData<BinaryData>(address, binaryData);
+        }
+
         public static async Task<MessageData<string>> GetString(this IMessageDataRepository repository, Uri address,
             CancellationToken cancellationToken = default)
         {
@@ -146,6 +172,19 @@
             await stream.CopyToAsync(ms, 4096, cancellationToken).ConfigureAwait(false);
 
             return new StoredMessageData<byte[]>(address, ms.ToArray());
+        }
+
+        public static async Task<MessageData<BinaryData>> GetBinaryData(this IMessageDataRepository repository, Uri address,
+            CancellationToken cancellationToken = default)
+        {
+            if (repository == null)
+                throw new ArgumentNullException(nameof(repository));
+
+            using var stream = await repository.Get(address, cancellationToken).ConfigureAwait(false);
+
+            var binaryData = await BinaryData.FromStreamAsync(stream, cancellationToken).ConfigureAwait(false);
+
+            return new StoredMessageData<BinaryData>(address, binaryData);
         }
     }
 }

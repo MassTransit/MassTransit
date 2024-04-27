@@ -1,5 +1,6 @@
 ﻿namespace MassTransit.MessageData.PropertyProviders
 {
+    using System;
     using System.IO;
     using Metadata;
 
@@ -16,6 +17,9 @@
 
             if (typeof(T) == typeof(Stream))
                 return new StreamMessageDataReader<T>();
+
+            if (typeof(T) == typeof(BinaryData))
+                return new BinaryDataMessageDataReader<T>();
 
             if (TypeMetadataCache.IsValidMessageDataType(typeof(T)))
                 return new ObjectMessageDataReader<T>();
