@@ -13,16 +13,22 @@
         AmazonSqsMessageContext,
         TransportReceiveContext
     {
+        readonly AmazonSqsHeaderProvider _headerProvider;
+
         public AmazonSqsReceiveContext(Message message, bool redelivered, SqsReceiveEndpointContext context, ClientContext clientContext,
             ReceiveSettings settings, ConnectionContext connectionContext)
             : base(redelivered, context, settings, clientContext, connectionContext)
         {
             TransportMessage = message;
 
-            Body = new StringMessageBody(message?.Body);
+            var messageBody = new SqsMessageBody(message);
+
+            Body = messageBody;
+
+            _headerProvider = new AmazonSqsHeaderProvider(TransportMessage, messageBody);
         }
 
-        protected override IHeaderProvider HeaderProvider => new AmazonSqsHeaderProvider(TransportMessage);
+        protected override IHeaderProvider HeaderProvider => _headerProvider;
 
         public override MessageBody Body { get; }
 
