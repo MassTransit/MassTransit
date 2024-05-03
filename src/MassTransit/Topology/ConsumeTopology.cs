@@ -7,6 +7,7 @@ namespace MassTransit
     using System.Security.Cryptography;
     using System.Text;
     using Configuration;
+    using Metadata;
     using NewIdFormatters;
 
 
@@ -15,19 +16,22 @@ namespace MassTransit
         IConsumeTopologyConfigurationObserver
     {
         readonly List<IMessageConsumeTopologyConvention> _conventions;
-        readonly object _lock = new object();
+        readonly object _lock = new();
         readonly int _maxQueueNameLength;
         readonly ConcurrentDictionary<Type, Lazy<IMessageConsumeTopologyConfigurator>> _messageTypes;
+        readonly ConcurrentDictionary<Type, IMessageTypeSelector> _messageTypeSelectorCache;
         readonly ConsumeTopologyConfigurationObservable _observers;
 
         protected ConsumeTopology(int maxQueueNameLength = 1024)
         {
             _maxQueueNameLength = maxQueueNameLength;
-            _messageTypes = new ConcurrentDictionary<Type, Lazy<IMessageConsumeTopologyConfigurator>>();
 
-            _observers = new ConsumeTopologyConfigurationObservable();
+            _messageTypes = new ConcurrentDictionary<Type, Lazy<IMessageConsumeTopologyConfigurator>>();
+            _messageTypeSelectorCache = new ConcurrentDictionary<Type, IMessageTypeSelector>();
 
             _conventions = new List<IMessageConsumeTopologyConvention>(8);
+
+            _observers = new ConsumeTopologyConfigurationObservable();
             _observers.Connect(this);
         }
 
@@ -41,14 +45,20 @@ namespace MassTransit
             return GetMessageTopology<T>();
         }
 
-        public virtual string CreateTemporaryQueueName(string tag)
-        {
-            return ShrinkToFit(DefaultEndpointNameFormatter.GetTemporaryQueueName(tag), _maxQueueNameLength);
-        }
-
         IMessageConsumeTopologyConfigurator<T> IConsumeTopologyConfigurator.GetMessageTopology<T>()
         {
             return GetMessageTopology<T>();
+        }
+
+        public IMessageConsumeTopologyConfigurator GetMessageTopology(Type messageType)
+        {
+            return _messageTypeSelectorCache.GetOrAdd(messageType, _ => Activation.Activate(messageType, new MessageTypeSelectorFactory(), this))
+                .GetMessageTopology();
+        }
+
+        public virtual string CreateTemporaryQueueName(string tag)
+        {
+            return ShrinkToFit(DefaultEndpointNameFormatter.GetTemporaryQueueName(tag), _maxQueueNameLength);
         }
 
         public ConnectHandle ConnectConsumeTopologyConfigurationObserver(IConsumeTopologyConfigurationObserver observer)
@@ -58,10 +68,10 @@ namespace MassTransit
 
         public bool TryAddConvention(IConsumeTopologyConvention convention)
         {
+            var conventionType = convention.GetType();
+
             lock (_lock)
             {
-                var conventionType = convention.GetType();
-
                 for (var i = 0; i < _conventions.Count; i++)
                 {
                     if (_conventions[i].GetType() == conventionType)
@@ -69,24 +79,17 @@ namespace MassTransit
                 }
 
                 _conventions.Add(convention);
-
-                foreach (Lazy<IMessageConsumeTopologyConfigurator> messageConsumeTopologyConfigurator in _messageTypes.Values)
-                    messageConsumeTopologyConfigurator.Value.TryAddConvention(convention);
-
-                return true;
             }
+
+            foreach (Lazy<IMessageConsumeTopologyConfigurator> messageConsumeTopologyConfigurator in _messageTypes.Values)
+                messageConsumeTopologyConfigurator.Value.TryAddConvention(convention);
+
+            return true;
         }
 
         public virtual IEnumerable<ValidationResult> Validate()
         {
             return _messageTypes.Values.SelectMany(x => x.Value.Validate());
-        }
-
-        void IConsumeTopologyConfigurator.AddMessageConsumeTopology<T>(IMessageConsumeTopology<T> topology)
-        {
-            IMessageConsumeTopologyConfigurator<T> messageConfiguration = GetMessageTopology<T>();
-
-            messageConfiguration.Add(topology);
         }
 
         static string ShrinkToFit(string inputName, int maxLength)
@@ -117,7 +120,7 @@ namespace MassTransit
                 throw new ArgumentException(MessageTypeCache<T>.InvalidMessageTypeReason, nameof(T));
 
             Lazy<IMessageConsumeTopologyConfigurator> specification = _messageTypes.GetOrAdd(typeof(T),
-                type => new Lazy<IMessageConsumeTopologyConfigurator>(() => CreateMessageTopology<T>(type)));
+                _ => new Lazy<IMessageConsumeTopologyConfigurator>(() => CreateMessageTopology<T>()));
 
             return specification.Value as IMessageConsumeTopologyConfigurator<T>;
         }
@@ -175,7 +178,7 @@ namespace MassTransit
             }
         }
 
-        protected virtual IMessageConsumeTopologyConfigurator CreateMessageTopology<T>(Type type)
+        protected virtual IMessageConsumeTopologyConfigurator CreateMessageTopology<T>()
             where T : class
         {
             var messageTopology = new MessageConsumeTopology<T>();
@@ -201,6 +204,41 @@ namespace MassTransit
             {
                 if (convention.TryGetMessageConsumeTopologyConvention(out IMessageConsumeTopologyConvention<T> messageConsumeTopologyConvention))
                     messageTopology.TryAddConvention(messageConsumeTopologyConvention);
+            }
+        }
+
+
+        readonly struct MessageTypeSelectorFactory :
+            IActivationType<IMessageTypeSelector, ConsumeTopology>
+        {
+            public IMessageTypeSelector ActivateType<T>(ConsumeTopology consumeTopology)
+                where T : class
+            {
+                return new MessageTypeSelector<T>(consumeTopology);
+            }
+        }
+
+
+        interface IMessageTypeSelector
+        {
+            IMessageConsumeTopologyConfigurator GetMessageTopology();
+        }
+
+
+        class MessageTypeSelector<T> :
+            IMessageTypeSelector
+            where T : class
+        {
+            readonly ConsumeTopology _consumeTopology;
+
+            public MessageTypeSelector(ConsumeTopology consumeTopology)
+            {
+                _consumeTopology = consumeTopology;
+            }
+
+            public IMessageConsumeTopologyConfigurator GetMessageTopology()
+            {
+                return _consumeTopology.GetMessageTopology<T>();
             }
         }
     }

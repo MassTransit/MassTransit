@@ -54,6 +54,10 @@ namespace MassTransit.Configuration
         {
         }
 
+        public void ConfigureMessageTopology(Type messageType, bool enabled = true)
+        {
+        }
+
         public void AddEndpointSpecification(IReceiveEndpointSpecification specification)
         {
             Specifications.Add(specification);

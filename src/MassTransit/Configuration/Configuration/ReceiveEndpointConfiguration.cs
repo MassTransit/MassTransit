@@ -105,6 +105,11 @@
             Topology.Consume.GetMessageTopology<T>().ConfigureConsumeTopology = enabled;
         }
 
+        public void ConfigureMessageTopology(Type messageType, bool enabled = true)
+        {
+            Topology.Consume.GetMessageTopology(messageType).ConfigureConsumeTopology = enabled;
+        }
+
         public void AddDependency(IReceiveEndpointDependency dependency)
         {
             _dependencies.Add(dependency);

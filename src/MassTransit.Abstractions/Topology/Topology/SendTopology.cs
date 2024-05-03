@@ -57,10 +57,10 @@
 
         public bool TryAddConvention(ISendTopologyConvention convention)
         {
+            var conventionType = convention.GetType();
+
             lock (_lock)
             {
-                var conventionType = convention.GetType();
-
                 for (var i = 0; i < _conventions.Count; i++)
                 {
                     if (_conventions[i].GetType() == conventionType)
@@ -68,8 +68,12 @@
                 }
 
                 _conventions.Add(convention);
-                return true;
             }
+
+            foreach (Lazy<IMessageSendTopologyConfigurator> messageSendTopologyConfigurator in _messageTypes.Values)
+                messageSendTopologyConfigurator.Value.TryAddConvention(convention);
+
+            return true;
         }
 
         void ISendTopologyConfigurator.AddMessageSendTopology<T>(IMessageSendTopology<T> topology)

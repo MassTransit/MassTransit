@@ -77,6 +77,12 @@ namespace MassTransit.Topology
             return true;
         }
 
+        public bool TryAddConvention(ISendTopologyConvention convention)
+        {
+            return convention.TryGetMessageSendTopologyConvention(out IMessageSendTopologyConvention<TMessage> messageSendTopologyConvention)
+                && TryAddConvention(messageSendTopologyConvention);
+        }
+
         public void UpdateConvention<TConvention>(Func<TConvention, TConvention> update)
             where TConvention : class, IMessageSendTopologyConvention<TMessage>
         {
