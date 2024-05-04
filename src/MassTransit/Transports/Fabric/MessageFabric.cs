@@ -33,7 +33,7 @@
         public void ExchangeBind(TContext context, string source, string destination, string routingKey)
         {
             if (source.Equals(destination))
-                throw new ArgumentException("The source and destination exchange cannot be the same");
+                throw new ArgumentException("The source and destination exchange cannot be the same: " + source);
 
             IMessageExchange<T> sourceExchange = GetOrAddExchange(context, source, ExchangeType.FanOut);
 
