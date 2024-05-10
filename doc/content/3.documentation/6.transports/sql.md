@@ -132,23 +132,38 @@ services.AddOptions<SqlTransportOptions>().Configure(options =>
     options.AdminUsername = builder.Username; // the admin credentials to create the tables, etc.
     options.AdminPassword = builder.Password;
 });
+services.AddMassTransit(x =>
+{
+    x.UsingPostgres((context, cfg) =>
+    {
+        // ...elided
+    });
+});
 ```
+
+## Migrations
+
 
 To automatically create the tables, roles, functions, and other related database elements, a hosted service is available. 
 
 ```csharp
+// NOTE: It must be added before MassTransit to ensure the hosted service
+//       runs before MassTransit
 services.AddPostgresMigrationHostedService(create: true, delete: false);
+services.AddMassTransit(x =>
+{
+    x.UsingPostgres((context, cfg) =>
+    {
+        // ...elided
+    });
+});
 ```
 
 ::alert{type="danger"}
 Specifying `delete: true` is only recommended for unit tests!
 ::
 
-## Sample 
-
-:sample{sample="sql-transport"}
-
-## Example of Manually Running Migrations
+### Manually Run Migrations
 
 ```csharp
 // Program.cs
@@ -168,3 +183,7 @@ if (args.Any(arg => arg == "migrate") > 0)
 // run normal mode
 await host.RunAsync();
 ```
+
+## Sample 
+
+:sample{sample="sql-transport"}
