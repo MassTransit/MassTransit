@@ -147,3 +147,24 @@ Specifying `delete: true` is only recommended for unit tests!
 ## Sample 
 
 :sample{sample="sql-transport"}
+
+## Example of Manually Running Migrations
+
+```csharp
+// Program.cs
+var host = CreateHostBuilder(args).Build();
+
+if (args.Any(arg => arg == "migrate") > 0)
+{
+    var cts = new CancellationTokenSource();
+    var migrator = host.Services.GetRequiredService<ISqlTransportDatabaseMigrator>();
+
+    var options = host.Services.GetRequiredService<IOptions<SqlTransportOptions>>();
+    await migrator.CreateDatabase(options.Value, cts.Token);
+    await migrator.CreateInfrastructure(options.Value, cts.Token);
+    return;
+}
+
+// run normal mode
+await host.RunAsync();
+```
