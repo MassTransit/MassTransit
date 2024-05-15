@@ -154,7 +154,7 @@ namespace MassTransit.SqlTransport.SqlServer
             IEnumerable<KeyValuePair<string, object>> headers = context.Headers.GetAll().ToList();
             var headersAsJson = headers.Any() ? JsonSerializer.Serialize(headers, SystemTextJsonMessageSerializer.Options) : null;
 
-            context.Headers.TryGetHeader(MessageHeaders.SchedulingTokenId, out var schedulingTokenId);
+            Guid? schedulingTokenId = context.Headers.Get<Guid>(MessageHeaders.SchedulingTokenId);
 
             return Execute<long>(_sendSql, new
             {
@@ -189,7 +189,7 @@ namespace MassTransit.SqlTransport.SqlServer
             IEnumerable<KeyValuePair<string, object>> headers = context.Headers.GetAll().ToList();
             var headersAsJson = headers.Any() ? JsonSerializer.Serialize(headers, SystemTextJsonMessageSerializer.Options) : null;
 
-            context.Headers.TryGetHeader(MessageHeaders.SchedulingTokenId, out var schedulingTokenId);
+            Guid? schedulingTokenId = context.Headers.Get<Guid>(MessageHeaders.SchedulingTokenId);
 
             return Execute<long>(_publishSql, new
             {
