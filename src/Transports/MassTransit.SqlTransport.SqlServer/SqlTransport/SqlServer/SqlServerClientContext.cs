@@ -278,7 +278,7 @@ namespace MassTransit.SqlTransport.SqlServer
             {
                 messageDeliveryId,
                 lockId,
-                duration = (int)delay.TotalSeconds,
+                delay = delay > TimeSpan.Zero ? Math.Max((int)delay.TotalSeconds, 1) : 0,
                 headers = headersAsJson
             }).ConfigureAwait(false);
 
