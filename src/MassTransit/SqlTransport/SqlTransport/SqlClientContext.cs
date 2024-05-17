@@ -39,7 +39,7 @@ namespace MassTransit.SqlTransport
             TimeSpan lockDuration);
 
         public abstract Task<bool> DeleteMessage(Guid lockId, long messageDeliveryId);
-        public abstract Task<bool> DeleteScheduledMessage(Guid tokenId);
+        public abstract Task<bool> DeleteScheduledMessage(Guid tokenId, CancellationToken cancellationToken);
         public abstract Task<bool> MoveMessage(Guid lockId, long messageDeliveryId, string queueName, SqlQueueType queueType, SendHeaders sendHeaders);
         public abstract Task<bool> RenewLock(Guid lockId, long messageDeliveryId, TimeSpan duration);
         public abstract Task<bool> Unlock(Guid lockId, long messageDeliveryId, TimeSpan delay, SendHeaders sendHeaders);

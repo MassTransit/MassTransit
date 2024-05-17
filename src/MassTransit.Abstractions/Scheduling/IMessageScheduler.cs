@@ -151,7 +151,8 @@
         /// </summary>
         /// <param name="destinationAddress">The destination address of the scheduled message</param>
         /// <param name="tokenId">The tokenId of the scheduled message</param>
-        Task CancelScheduledSend(Uri destinationAddress, Guid tokenId);
+        /// <param name="cancellationToken"></param>
+        Task CancelScheduledSend(Uri destinationAddress, Guid tokenId, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Send a message
@@ -278,7 +279,8 @@
         /// the destinationAddress.
         /// </summary>
         /// <param name="tokenId">The tokenId of the scheduled message</param>
-        Task CancelScheduledPublish<T>(Guid tokenId)
+        /// <param name="cancellationToken"></param>
+        Task CancelScheduledPublish<T>(Guid tokenId, CancellationToken cancellationToken = default)
             where T : class;
 
         /// <summary>
@@ -287,6 +289,7 @@
         /// </summary>
         /// <param name="messageType"></param>
         /// <param name="tokenId">The tokenId of the scheduled message</param>
-        Task CancelScheduledPublish(Type messageType, Guid tokenId);
+        /// <param name="cancellationToken"></param>
+        Task CancelScheduledPublish(Type messageType, Guid tokenId, CancellationToken cancellationToken = default);
     }
 }

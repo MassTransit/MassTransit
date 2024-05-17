@@ -1,5 +1,6 @@
 namespace MassTransit
 {
+    using DependencyInjection;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Scheduling;
@@ -35,7 +36,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Add a <see cref="IMessageScheduler" /> to the container that uses the Azure message enqueue time to schedule messages.
+        /// Add an <see cref="IMessageScheduler" /> to the container that uses the Azure message enqueue time to schedule messages.
         /// </summary>
         /// <param name="configurator"></param>
         public static void AddServiceBusMessageScheduler(this IRegistrationConfigurator configurator)
@@ -45,6 +46,21 @@ namespace MassTransit
                 var bus = provider.GetRequiredService<IBus>();
                 var sendEndpointProvider = provider.GetRequiredService<ISendEndpointProvider>();
                 return sendEndpointProvider.CreateServiceBusMessageScheduler(bus.Topology);
+            });
+        }
+
+        /// <summary>
+        /// Add an <see cref="IMessageScheduler" /> to the container that uses the Azure message enqueue time to schedule messages.
+        /// </summary>
+        /// <param name="configurator"></param>
+        public static void AddServiceBusMessageScheduler<TBus>(this IBusRegistrationConfigurator<TBus> configurator)
+            where TBus : class, IBus
+        {
+            configurator.TryAddScoped(provider =>
+            {
+                var bus = provider.GetRequiredService<TBus>();
+                var sendEndpointProvider = provider.GetRequiredService<ISendEndpointProvider>();
+                return Bind<TBus>.Create(sendEndpointProvider.CreateServiceBusMessageScheduler(bus.Topology));
             });
         }
     }

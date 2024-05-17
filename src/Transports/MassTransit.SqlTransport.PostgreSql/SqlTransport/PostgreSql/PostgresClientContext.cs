@@ -221,12 +221,12 @@ namespace MassTransit.SqlTransport.PostgreSql
             return result == messageDeliveryId;
         }
 
-        public override async Task<bool> DeleteScheduledMessage(Guid tokenId)
+        public override async Task<bool> DeleteScheduledMessage(Guid tokenId, CancellationToken cancellationToken)
         {
             IEnumerable<SqlTransportMessage>? result = await _context.Query((x, t) => x.QueryAsync<SqlTransportMessage>(_deleteScheduledMessageSql, new
             {
                 token_id = tokenId,
-            }), CancellationToken);
+            }), cancellationToken);
 
             return result.Any();
         }

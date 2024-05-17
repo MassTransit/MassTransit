@@ -230,12 +230,12 @@ namespace MassTransit.SqlTransport.SqlServer
             return result == messageDeliveryId;
         }
 
-        public override async Task<bool> DeleteScheduledMessage(Guid tokenId)
+        public override async Task<bool> DeleteScheduledMessage(Guid tokenId, CancellationToken cancellationToken)
         {
             IEnumerable<SqlTransportMessage> result = await Query<SqlTransportMessage>(_deleteScheduledMessageSql, new
             {
                 tokenId,
-            }).ConfigureAwait(false);
+            }, cancellationToken).ConfigureAwait(false);
 
             return result.Any();
         }
@@ -304,6 +304,13 @@ namespace MassTransit.SqlTransport.SqlServer
         {
             return _context.Query((connection, transaction) => connection
                 .QueryAsync<T>(functionName, values, transaction, commandType: CommandType.StoredProcedure), CancellationToken);
+        }
+
+        Task<IEnumerable<T>> Query<T>(string functionName, object values, CancellationToken cancellationToken)
+            where T : class
+        {
+            return _context.Query((connection, transaction) => connection
+                .QueryAsync<T>(functionName, values, transaction, commandType: CommandType.StoredProcedure), cancellationToken);
         }
     }
 }
