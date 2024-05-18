@@ -20,7 +20,7 @@
 
         static InMemoryReceiveEndpointContext Build()
         {
-            var topologyConfiguration = new InMemoryTopologyConfiguration(InMemoryBus.MessageTopology);
+            var topologyConfiguration = new InMemoryTopologyConfiguration(InMemoryBus.CreateMessageTopology());
             IInMemoryBusConfiguration busConfiguration = new InMemoryBusConfiguration(topologyConfiguration, null);
 
             var receiveEndpointConfiguration = busConfiguration.HostConfiguration.CreateReceiveEndpointConfiguration("input-queue");

@@ -17,7 +17,7 @@ namespace MassTransit.RabbitMqTransport
             var hostAddress = new RabbitMqHostAddress(address);
             var endpointAddress = new RabbitMqEndpointAddress(hostAddress, address);
 
-            var topologyConfiguration = new RabbitMqTopologyConfiguration(RabbitMqBusFactory.MessageTopology);
+            var topologyConfiguration = new RabbitMqTopologyConfiguration(RabbitMqBusFactory.CreateMessageTopology());
             var endpointConfiguration = new RabbitMqEndpointConfiguration(topologyConfiguration);
             var settings = new RabbitMqReceiveSettings(endpointConfiguration, endpointAddress.Name, endpointAddress.ExchangeType,
                 endpointAddress.Durable, endpointAddress.AutoDelete)

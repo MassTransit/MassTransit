@@ -13,7 +13,7 @@ namespace MassTransit.InMemoryTransport.Configuration
         readonly Action<IBusRegistrationContext, IInMemoryBusFactoryConfigurator> _configure;
 
         public InMemoryRegistrationBusFactory(Uri baseAddress, Action<IBusRegistrationContext, IInMemoryBusFactoryConfigurator> configure)
-            : this(new InMemoryBusConfiguration(new InMemoryTopologyConfiguration(InMemoryBus.MessageTopology), baseAddress), configure)
+            : this(new InMemoryBusConfiguration(new InMemoryTopologyConfiguration(InMemoryBus.CreateMessageTopology()), baseAddress), configure)
         {
         }
 
