@@ -35,12 +35,12 @@ namespace MassTransit.Scheduling
             return new ScheduledMessageHandle<T>(scheduleMessagePipe.ScheduledMessageId ?? NewId.NextGuid(), scheduledTime, destinationAddress, message);
         }
 
-        public Task CancelScheduledSend(Guid tokenId)
+        public Task CancelScheduledSend(Guid tokenId, CancellationToken cancellationToken)
         {
             return Task.CompletedTask;
         }
 
-        public Task CancelScheduledSend(Uri destinationAddress, Guid tokenId)
+        public Task CancelScheduledSend(Uri destinationAddress, Guid tokenId, CancellationToken cancellationToken)
         {
             return Task.CompletedTask;
         }

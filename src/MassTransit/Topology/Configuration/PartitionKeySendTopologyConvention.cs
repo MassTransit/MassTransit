@@ -1,8 +1,5 @@
-namespace MassTransit.AzureServiceBusTransport.Configuration
+namespace MassTransit.Configuration
 {
-    using MassTransit.Configuration;
-
-
     public class PartitionKeySendTopologyConvention :
         IPartitionKeySendTopologyConvention
     {
@@ -10,8 +7,6 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
         public PartitionKeySendTopologyConvention()
         {
-            DefaultFormatter = new EmptyPartitionKeyFormatter();
-
             _cache = new TopologyConventionCache<IMessageSendTopologyConvention>(typeof(IPartitionKeyMessageSendTopologyConvention<>), new Factory());
         }
 
@@ -19,8 +14,6 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
         {
             return _cache.GetOrAdd<T, IMessageSendTopologyConvention<T>>().TryGetMessageSendTopologyConvention(out convention);
         }
-
-        public IPartitionKeyFormatter DefaultFormatter { get; set; }
 
 
         class Factory :

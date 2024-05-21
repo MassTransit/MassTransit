@@ -16,13 +16,13 @@ namespace MassTransit.SqlTransport.PostgreSql
         public const string DbEnqueueSql = """
                                            SELECT * FROM "{0}".send_message(@entity_name,@priority,@transport_message_id,@body,@binary_body,@content_type,
                                            @message_type,@message_id,@correlation_id,@conversation_id,@request_id,@initiator_id,@source_address,@destination_address,@response_address,@fault_address,
-                                           @sent_time,@headers,@host,@partition_key,@routing_key,@delay)
+                                           @sent_time,@headers,@host,@partition_key,@routing_key,@delay,@scheduling_token_id)
                                            """;
 
         public const string DbPublishSql = """
                                            SELECT * FROM "{0}".publish_message(@entity_name,@priority,@transport_message_id,@body,@binary_body,@content_type,
                                            @message_type,@message_id,@correlation_id,@conversation_id,@request_id,@initiator_id,@source_address,@destination_address,@response_address,@fault_address,
-                                           @sent_time,@headers,@host,@partition_key,@routing_key,@delay)
+                                           @sent_time,@headers,@host,@partition_key,@routing_key,@delay,@scheduling_token_id)
                                            """;
 
         public const string DbProcessMetricsSql = """SELECT * FROM "{0}".process_metrics(@row_limit)""";

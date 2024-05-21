@@ -21,7 +21,7 @@ namespace MassTransit
             if (configure == null)
                 throw new ArgumentNullException(nameof(configure));
 
-            var topologyConfiguration = new InMemoryTopologyConfiguration(InMemoryBus.MessageTopology);
+            var topologyConfiguration = new InMemoryTopologyConfiguration(InMemoryBus.CreateMessageTopology());
             var busConfiguration = new InMemoryBusConfiguration(topologyConfiguration, new Uri("loopback://localhost"));
 
             if (LogContext.Current != null)

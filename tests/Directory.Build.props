@@ -3,7 +3,6 @@
   <Import Project="..\Directory.Build.props"/>
 
   <PropertyGroup>
-    <LangVersion>8</LangVersion>
     <WarningLevel>4</WarningLevel>
     <NoWarn>$(NoWarn),CS0618</NoWarn>
     <IsTestProject>true</IsTestProject>

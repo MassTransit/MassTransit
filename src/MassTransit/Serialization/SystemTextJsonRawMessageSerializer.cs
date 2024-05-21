@@ -39,18 +39,25 @@ namespace MassTransit.Serialization
         {
             try
             {
-                var bytes = body.GetBytes();
+                JsonElement? bodyElement;
+                if (body is JsonMessageBody jsonMessageBody)
+                    bodyElement = jsonMessageBody.GetJsonElement(SystemTextJsonMessageSerializer.Options);
+                else
+                {
+                    var bytes = body.GetBytes();
+                    bodyElement = bytes.Length > 0
+                        ? JsonSerializer.Deserialize<JsonElement>(bytes, SystemTextJsonMessageSerializer.Options)
+                        : null;
+                }
 
-                var jsonElement = bytes.Length > 0
-                    ? JsonSerializer.Deserialize<JsonElement>(bytes, SystemTextJsonMessageSerializer.Options)
-                    : JsonDocument.Parse("{}").RootElement;
+                bodyElement ??= JsonDocument.Parse("{}").RootElement;
 
                 var messageTypes = headers.GetMessageTypes();
 
                 var messageContext = new RawMessageContext(headers, destinationAddress, _options);
 
                 var serializerContext = new SystemTextJsonRawSerializerContext(SystemTextJsonMessageSerializer.Instance,
-                    SystemTextJsonMessageSerializer.Options, ContentType, messageContext, messageTypes, _options, jsonElement);
+                    SystemTextJsonMessageSerializer.Options, ContentType, messageContext, messageTypes, _options, bodyElement.Value);
 
                 return serializerContext;
             }

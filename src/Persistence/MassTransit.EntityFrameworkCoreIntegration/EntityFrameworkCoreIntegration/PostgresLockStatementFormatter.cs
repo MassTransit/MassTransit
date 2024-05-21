@@ -8,7 +8,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
     {
         public void Create(StringBuilder sb, string schema, string table)
         {
-            sb.AppendFormat("SELECT * FROM {0} WHERE ", FormatTableName(schema, table));
+            sb.AppendFormat("SELECT *, xmin FROM {0} WHERE ", FormatTableName(schema, table));
         }
 
         public void AppendColumn(StringBuilder sb, int index, string columnName)
@@ -26,7 +26,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
         public void CreateOutboxStatement(StringBuilder sb, string schema, string table, string columnName)
         {
-            sb.AppendFormat(@"SELECT * FROM {0} ORDER BY ""{1}"" LIMIT 1 FOR UPDATE SKIP LOCKED", FormatTableName(schema, table), columnName);
+            sb.AppendFormat(@"SELECT *, xmin FROM {0} ORDER BY ""{1}"" LIMIT 1 FOR UPDATE SKIP LOCKED", FormatTableName(schema, table), columnName);
         }
 
         static string FormatTableName(string schema, string table)

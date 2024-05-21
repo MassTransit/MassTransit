@@ -167,7 +167,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         {
             _nameFormatter = new ServiceBusMessageNameFormatter();
             _entityNameFormatter = new MessageNameFormatterEntityNameFormatter(_nameFormatter);
-            _consumeTopology = new ServiceBusConsumeTopology(AzureBusFactory.MessageTopology, new ServiceBusPublishTopology(AzureBusFactory.MessageTopology));
+            _consumeTopology = new ServiceBusConsumeTopology(AzureBusFactory.CreateMessageTopology(), new ServiceBusPublishTopology(AzureBusFactory.CreateMessageTopology()));
 
             _builder = new ReceiveEndpointBrokerTopologyBuilder();
 
@@ -236,7 +236,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         {
             _nameFormatter = new ServiceBusMessageNameFormatter();
             _entityNameFormatter = new MessageNameFormatterEntityNameFormatter(_nameFormatter);
-            _publishTopology = new ServiceBusPublishTopology(AzureBusFactory.MessageTopology);
+            _publishTopology = new ServiceBusPublishTopology(AzureBusFactory.CreateMessageTopology());
 
             _builder = new PublishEndpointBrokerTopologyBuilder(_publishTopology);
         }
@@ -338,7 +338,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         {
             _nameFormatter = new ServiceBusMessageNameFormatter();
             _entityNameFormatter = new MessageNameFormatterEntityNameFormatter(_nameFormatter);
-            _publishTopology = new ServiceBusPublishTopology(AzureBusFactory.MessageTopology);
+            _publishTopology = new ServiceBusPublishTopology(AzureBusFactory.CreateMessageTopology());
 
             _builder = new PublishEndpointBrokerTopologyBuilder(_publishTopology);
         }

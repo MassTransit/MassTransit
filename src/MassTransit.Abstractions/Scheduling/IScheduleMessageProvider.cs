@@ -25,13 +25,15 @@ namespace MassTransit
         /// Cancel a scheduled message by TokenId
         /// </summary>
         /// <param name="tokenId">The tokenId of the scheduled message</param>
-        Task CancelScheduledSend(Guid tokenId);
+        /// <param name="cancellationToken"></param>
+        Task CancelScheduledSend(Guid tokenId, CancellationToken cancellationToken);
 
         /// <summary>
         /// Cancel a scheduled message by TokenId
         /// </summary>
         /// <param name="destinationAddress">The destination address of the scheduled message</param>
         /// <param name="tokenId">The tokenId of the scheduled message</param>
-        Task CancelScheduledSend(Uri destinationAddress, Guid tokenId);
+        /// <param name="cancellationToken"></param>
+        Task CancelScheduledSend(Uri destinationAddress, Guid tokenId, CancellationToken cancellationToken);
     }
 }

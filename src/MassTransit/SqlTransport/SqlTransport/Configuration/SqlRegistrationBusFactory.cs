@@ -14,7 +14,7 @@ namespace MassTransit.SqlTransport.Configuration
         readonly Action<IBusRegistrationContext, ISqlBusFactoryConfigurator>? _configure;
 
         public SqlRegistrationBusFactory(Action<IBusRegistrationContext, ISqlBusFactoryConfigurator>? configure)
-            : this(new SqlBusConfiguration(new SqlTopologyConfiguration(SqlBusFactory.MessageTopology)), configure)
+            : this(new SqlBusConfiguration(new SqlTopologyConfiguration(SqlBusFactory.CreateMessageTopology())), configure)
         {
         }
 

@@ -17,7 +17,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration
         readonly Action<IBusRegistrationContext, IAmazonSqsBusFactoryConfigurator> _configure;
 
         public AmazonSqsRegistrationBusFactory(Action<IBusRegistrationContext, IAmazonSqsBusFactoryConfigurator> configure)
-            : this(new AmazonSqsBusConfiguration(new AmazonSqsTopologyConfiguration(AmazonSqsBusFactory.MessageTopology)), configure)
+            : this(new AmazonSqsBusConfiguration(new AmazonSqsTopologyConfiguration(AmazonSqsBusFactory.CreateMessageTopology())), configure)
         {
         }
 

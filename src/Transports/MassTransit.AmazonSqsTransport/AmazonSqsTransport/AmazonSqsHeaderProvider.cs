@@ -12,11 +12,13 @@
     public class AmazonSqsHeaderProvider :
         IHeaderProvider
     {
+        readonly SqsMessageBody _body;
         readonly Message _message;
 
-        public AmazonSqsHeaderProvider(Message message)
+        public AmazonSqsHeaderProvider(Message message, SqsMessageBody body)
         {
             _message = message;
+            _body = body;
         }
 
         public bool TryGetHeader(string key, out object value)
@@ -31,6 +33,12 @@
             {
                 value = _message.MessageId;
                 return true;
+            }
+
+            if ("TopicArn".Equals(key, StringComparison.OrdinalIgnoreCase))
+            {
+                value = _body.TopicArn;
+                return value != null;
             }
 
             if (MessageHeaders.TransportSentTime.Equals(key, StringComparison.OrdinalIgnoreCase))

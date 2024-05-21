@@ -1,22 +1,21 @@
-﻿namespace MassTransit
+namespace MassTransit
 {
     using System;
-    using AzureServiceBusTransport;
-    using AzureServiceBusTransport.Configuration;
+    using Configuration;
+    using Transports;
 
 
-    public static class ServiceBusPartitionKeyConventionExtensions
+    public static class PartitionKeyConventionExtensions
     {
         public static void UsePartitionKeyFormatter<T>(this IMessageSendTopologyConfigurator<T> configurator, IMessagePartitionKeyFormatter<T> formatter)
             where T : class
         {
-            configurator.UpdateConvention<IPartitionKeyMessageSendTopologyConvention<T>>(
-                update =>
-                {
-                    update.SetFormatter(formatter);
+            configurator.UpdateConvention<IPartitionKeyMessageSendTopologyConvention<T>>(update =>
+            {
+                update.SetFormatter(formatter);
 
-                    return update;
-                });
+                return update;
+            });
         }
 
         /// <summary>

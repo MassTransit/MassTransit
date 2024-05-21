@@ -29,19 +29,19 @@ namespace MassTransit.Scheduling
                 command.Destination, message);
         }
 
-        public Task CancelScheduledSend(Guid tokenId)
+        public Task CancelScheduledSend(Guid tokenId, CancellationToken cancellationToken)
         {
-            return CancelScheduledSend(tokenId, null);
+            return CancelScheduledSend(tokenId, null, cancellationToken);
         }
 
-        public Task CancelScheduledSend(Uri destinationAddress, Guid tokenId)
+        public Task CancelScheduledSend(Uri destinationAddress, Guid tokenId, CancellationToken cancellationToken)
         {
-            return CancelScheduledSend(tokenId, destinationAddress);
+            return CancelScheduledSend(tokenId, destinationAddress, cancellationToken);
         }
 
         protected abstract Task ScheduleSend(ScheduleMessage message, IPipe<SendContext<ScheduleMessage>> pipe, CancellationToken cancellationToken);
 
-        protected abstract Task CancelScheduledSend(Guid tokenId, Uri destinationAddress);
+        protected abstract Task CancelScheduledSend(Guid tokenId, Uri destinationAddress, CancellationToken cancellationToken);
     }
 
 

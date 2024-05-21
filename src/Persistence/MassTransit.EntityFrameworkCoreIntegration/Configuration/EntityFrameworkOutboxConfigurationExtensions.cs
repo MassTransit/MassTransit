@@ -88,6 +88,19 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Configure the outbox for use with SQL Server
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="enableSchemaCaching">Set to false when using multiple DbContexts</param>
+        /// <returns></returns>
+        public static IEntityFrameworkOutboxConfigurator UseSqlServer(this IEntityFrameworkOutboxConfigurator configurator, bool enableSchemaCaching)
+        {
+            configurator.LockStatementProvider = new SqlServerLockStatementProvider(enableSchemaCaching);
+
+            return configurator;
+        }
+
+        /// <summary>
         /// Configure the outbox for use with Postgres
         /// </summary>
         /// <param name="configurator"></param>
@@ -95,6 +108,19 @@ namespace MassTransit
         public static IEntityFrameworkOutboxConfigurator UsePostgres(this IEntityFrameworkOutboxConfigurator configurator)
         {
             configurator.LockStatementProvider = new PostgresLockStatementProvider();
+
+            return configurator;
+        }
+
+        /// <summary>
+        /// Configure the outbox for use with Postgres
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="enableSchemaCaching">Set to false when using multiple DbContexts</param>
+        /// <returns></returns>
+        public static IEntityFrameworkOutboxConfigurator UsePostgres(this IEntityFrameworkOutboxConfigurator configurator, bool enableSchemaCaching)
+        {
+            configurator.LockStatementProvider = new PostgresLockStatementProvider(enableSchemaCaching);
 
             return configurator;
         }
@@ -112,6 +138,19 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Configure the outbox for use with MySQL
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="enableSchemaCaching">Set to false when using multiple DbContexts</param>
+        /// <returns></returns>
+        public static IEntityFrameworkOutboxConfigurator UseMySql(this IEntityFrameworkOutboxConfigurator configurator, bool enableSchemaCaching)
+        {
+            configurator.LockStatementProvider = new MySqlLockStatementProvider(enableSchemaCaching);
+
+            return configurator;
+        }
+
+        /// <summary>
         /// Configure the outbox for use with SQLite
         /// </summary>
         /// <param name="configurator"></param>
@@ -119,6 +158,19 @@ namespace MassTransit
         public static IEntityFrameworkOutboxConfigurator UseSqlite(this IEntityFrameworkOutboxConfigurator configurator)
         {
             configurator.LockStatementProvider = new SqliteLockStatementProvider();
+
+            return configurator;
+        }
+
+        /// <summary>
+        /// Configure the outbox for use with SQLite
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="enableSchemaCaching">Set to false when using multiple DbContexts</param>
+        /// <returns></returns>
+        public static IEntityFrameworkOutboxConfigurator UseSqlite(this IEntityFrameworkOutboxConfigurator configurator, bool enableSchemaCaching)
+        {
+            configurator.LockStatementProvider = new SqliteLockStatementProvider(enableSchemaCaching);
 
             return configurator;
         }

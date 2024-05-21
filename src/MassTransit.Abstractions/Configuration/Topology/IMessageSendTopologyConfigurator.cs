@@ -64,5 +64,6 @@ namespace MassTransit
     public interface IMessageSendTopologyConfigurator :
         ISpecification
     {
+        bool TryAddConvention(ISendTopologyConvention convention);
     }
 }

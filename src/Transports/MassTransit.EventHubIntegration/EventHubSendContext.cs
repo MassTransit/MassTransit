@@ -1,10 +1,10 @@
 namespace MassTransit
 {
     public interface EventHubSendContext :
-        SendContext
+        SendContext,
+        PartitionKeySendContext
     {
         string PartitionId { get; set; }
-        string PartitionKey { get; set; }
     }
 
 

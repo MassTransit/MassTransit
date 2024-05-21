@@ -1,4 +1,4 @@
-﻿namespace MassTransit.AzureServiceBusTransport
+namespace MassTransit.Transports
 {
     public class MessagePartitionKeyFormatter<TMessage> :
         IMessagePartitionKeyFormatter<TMessage>

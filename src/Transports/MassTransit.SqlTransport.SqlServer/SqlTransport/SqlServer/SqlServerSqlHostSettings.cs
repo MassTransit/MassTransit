@@ -1,6 +1,7 @@
 namespace MassTransit.SqlTransport.SqlServer
 {
     using System;
+    using System.Text;
     using Configuration;
     using Microsoft.Data.SqlClient;
 
@@ -26,28 +27,18 @@ namespace MassTransit.SqlTransport.SqlServer
 
         public SqlServerSqlHostSettings(SqlTransportOptions options)
         {
-            var hostSegments = options.Host?.Split('\\');
-            if (hostSegments?.Length == 2)
-            {
-                Host = hostSegments[0].Trim();
-                InstanceName = hostSegments[1].Trim();
-            }
-            else
-                Host = options.Host;
+            var builder = SqlServerSqlTransportConnection.CreateBuilder(options);
 
-            Database = options.Database;
-            Username = options.Username;
-            Password = options.Password;
+            ParseDataSource(builder.DataSource);
+
+            Database = builder.InitialCatalog;
             Schema = options.Schema;
 
-            if (options.Port.HasValue)
-                Port = options.Port.Value;
+            Username = builder.UserID;
+            Password = builder.Password;
+
+            _builder = builder;
         }
-
-        public string? Role { get; set; }
-
-        public string? AdminUsername { get; set; }
-        public string? AdminPassword { get; set; }
 
         public string? ConnectionString
         {
@@ -55,15 +46,7 @@ namespace MassTransit.SqlTransport.SqlServer
             {
                 var builder = new SqlConnectionStringBuilder(value);
 
-                var split = builder.DataSource.Split(',');
-                if (split.Length == 2)
-                {
-                    Host = split[0].Trim();
-                    if (int.TryParse(split[1].Trim(), out var port))
-                        Port = port;
-                }
-                else
-                    Host = builder.DataSource;
+                ParseDataSource(builder.DataSource);
 
                 Username = builder.UserID;
                 Password = builder.Password;
@@ -83,7 +66,7 @@ namespace MassTransit.SqlTransport.SqlServer
         {
             var builder = _builder ??= new SqlConnectionStringBuilder
             {
-                DataSource = Host,
+                DataSource = FormatDataSource(),
                 UserID = Username,
                 Password = Password,
                 InitialCatalog = Database,
@@ -91,6 +74,47 @@ namespace MassTransit.SqlTransport.SqlServer
             };
 
             return builder.ToString();
+        }
+
+        void ParseDataSource(string? source)
+        {
+            var split = source?.Split(',');
+            if (split?.Length == 2)
+            {
+                ParseHost(split[0].Trim());
+                if (int.TryParse(split[1].Trim(), out var port))
+                    Port = port;
+            }
+            else
+                ParseHost(source);
+        }
+
+        void ParseHost(string? host)
+        {
+            var hostSegments = host?.Split('\\');
+            if (hostSegments?.Length == 2)
+            {
+                Host = hostSegments[0].Trim();
+                InstanceName = hostSegments[1].Trim();
+            }
+            else
+                Host = host;
+        }
+
+        string? FormatDataSource()
+        {
+            if (string.IsNullOrWhiteSpace(Host))
+                return null;
+
+            var sb = new StringBuilder();
+            sb.Append(Host);
+            if (!string.IsNullOrWhiteSpace(InstanceName))
+                sb.Append('\\').Append(InstanceName);
+
+            if (Port.HasValue)
+                sb.Append(',').Append(Port.Value);
+
+            return sb.ToString();
         }
     }
 }

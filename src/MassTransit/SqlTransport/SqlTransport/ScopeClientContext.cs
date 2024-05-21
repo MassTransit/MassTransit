@@ -83,9 +83,9 @@ namespace MassTransit.SqlTransport
             return _context.DeleteMessage(lockId, messageDeliveryId);
         }
 
-        public Task<bool> DeleteScheduledMessage(Guid tokenId)
+        public Task<bool> DeleteScheduledMessage(Guid tokenId, CancellationToken cancellationToken)
         {
-            return _context.DeleteScheduledMessage(tokenId);
+            return _context.DeleteScheduledMessage(tokenId, cancellationToken);
         }
 
         public Task<bool> MoveMessage(Guid lockId, long messageDeliveryId, string queueName, SqlQueueType queueType, SendHeaders sendHeaders)

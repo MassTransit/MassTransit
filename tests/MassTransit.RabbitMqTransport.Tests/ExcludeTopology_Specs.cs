@@ -36,7 +36,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             using var model = connection.CreateModel();
 
-            var eventExchangeName = RabbitMqBusFactory.MessageTopology.EntityNameFormatter.FormatEntityName<IEvent>();
+            var eventExchangeName = RabbitMqBusFactory.CreateMessageTopology().EntityNameFormatter.FormatEntityName<IEvent>();
 
             var exception = Assert.Throws<OperationInterruptedException>(() => model.ExchangeDeclarePassive(eventExchangeName));
 
@@ -62,10 +62,10 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             base.OnCleanupVirtualHost(model);
 
-            var eventExchangeName = RabbitMqBusFactory.MessageTopology.EntityNameFormatter.FormatEntityName<IEvent>();
+            var eventExchangeName = RabbitMqBusFactory.CreateMessageTopology().EntityNameFormatter.FormatEntityName<IEvent>();
             model.ExchangeDelete(eventExchangeName);
 
-            var routedEventExchangeName = RabbitMqBusFactory.MessageTopology.EntityNameFormatter.FormatEntityName<TransactionEvent>();
+            var routedEventExchangeName = RabbitMqBusFactory.CreateMessageTopology().EntityNameFormatter.FormatEntityName<TransactionEvent>();
             model.ExchangeDelete(routedEventExchangeName);
         }
     }

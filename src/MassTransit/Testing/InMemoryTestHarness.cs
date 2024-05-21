@@ -27,7 +27,7 @@
                 BaseAddress = new Uri(BaseAddress, virtualHost.Trim('/') + '/');
 
             _inputQueueName = "input_queue";
-            _busConfiguration = new InMemoryBusConfiguration(new InMemoryTopologyConfiguration(InMemoryBus.MessageTopology), BaseAddress);
+            _busConfiguration = new InMemoryBusConfiguration(new InMemoryTopologyConfiguration(InMemoryBus.CreateMessageTopology()), BaseAddress);
             _specifications = specifications;
 
             InputQueueAddress = new Uri(BaseAddress, _inputQueueName);

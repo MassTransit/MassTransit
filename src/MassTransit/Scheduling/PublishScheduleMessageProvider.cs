@@ -20,14 +20,14 @@ namespace MassTransit.Scheduling
             return _publishEndpoint.Publish(message, pipe, cancellationToken);
         }
 
-        protected override Task CancelScheduledSend(Guid tokenId, Uri destinationAddress)
+        protected override Task CancelScheduledSend(Guid tokenId, Uri destinationAddress, CancellationToken cancellationToken)
         {
             return _publishEndpoint.Publish<CancelScheduledMessage>(new
             {
                 InVar.CorrelationId,
                 InVar.Timestamp,
                 TokenId = tokenId
-            });
+            }, cancellationToken);
         }
     }
 }

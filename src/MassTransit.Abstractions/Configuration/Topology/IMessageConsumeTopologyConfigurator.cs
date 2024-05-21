@@ -14,12 +14,6 @@ namespace MassTransit
         IMessageConsumeTopology<TMessage>
         where TMessage : class
     {
-        /// <summary>
-        /// Specify whether the broker topology should be configured for this message type
-        /// (defaults to true)
-        /// </summary>
-        bool ConfigureConsumeTopology { get; set; }
-
         void Add(IMessageConsumeTopology<TMessage> consumeTopology);
 
         /// <summary>
@@ -60,6 +54,12 @@ namespace MassTransit
     public interface IMessageConsumeTopologyConfigurator :
         ISpecification
     {
+        /// <summary>
+        /// Specify whether the broker topology should be configured for this message type
+        /// (defaults to true)
+        /// </summary>
+        bool ConfigureConsumeTopology { get; set; }
+
         bool TryAddConvention(IConsumeTopologyConvention convention);
     }
 }

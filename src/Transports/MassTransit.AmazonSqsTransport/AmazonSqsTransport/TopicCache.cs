@@ -106,7 +106,7 @@ namespace MassTransit.AmazonSqsTransport
 
             attributesResponse.EnsureSuccessfulResponse();
 
-            var missingTopic = new TopicInfo(topic.EntityName, createResponse.TopicArn, _client, _cancellationToken);
+            var missingTopic = new TopicInfo(topic.EntityName, createResponse.TopicArn, _client, _cancellationToken, false);
 
             if (topic.Durable && topic.AutoDelete == false)
             {
@@ -157,7 +157,7 @@ namespace MassTransit.AmazonSqsTransport
 
                     await _cache.GetOrAdd(topicName, async key =>
                     {
-                        var topicInfo = new TopicInfo(topicName, topic.TopicArn, _client, _cancellationToken);
+                        var topicInfo = new TopicInfo(topicName, topic.TopicArn, _client, _cancellationToken, true);
 
                         lock (_durableTopics)
                             _durableTopics[topicInfo.EntityName] = topicInfo;

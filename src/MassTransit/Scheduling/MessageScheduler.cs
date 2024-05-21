@@ -159,9 +159,9 @@ namespace MassTransit.Scheduling
             return await _provider.ScheduleSend(destinationAddress, scheduledTime, send.Message, send.Pipe, cancellationToken).ConfigureAwait(false);
         }
 
-        public Task CancelScheduledSend(Uri destinationAddress, Guid tokenId)
+        public Task CancelScheduledSend(Uri destinationAddress, Guid tokenId, CancellationToken cancellationToken)
         {
-            return _provider.CancelScheduledSend(destinationAddress, tokenId);
+            return _provider.CancelScheduledSend(destinationAddress, tokenId, cancellationToken);
         }
 
         public Task<ScheduledMessage<T>> SchedulePublish<T>(DateTime scheduledTime, T message, CancellationToken cancellationToken = default)
@@ -259,19 +259,19 @@ namespace MassTransit.Scheduling
             return ScheduleSend<T>(destinationAddress, scheduledTime, values, pipe, cancellationToken);
         }
 
-        public Task CancelScheduledPublish<T>(Guid tokenId)
+        public Task CancelScheduledPublish<T>(Guid tokenId, CancellationToken cancellationToken)
             where T : class
         {
             var destinationAddress = GetPublishAddress<T>();
 
-            return CancelScheduledSend(destinationAddress, tokenId);
+            return CancelScheduledSend(destinationAddress, tokenId, cancellationToken);
         }
 
-        public Task CancelScheduledPublish(Type messageType, Guid tokenId)
+        public Task CancelScheduledPublish(Type messageType, Guid tokenId, CancellationToken cancellationToken)
         {
             var destinationAddress = GetPublishAddress(messageType);
 
-            return CancelScheduledSend(destinationAddress, tokenId);
+            return CancelScheduledSend(destinationAddress, tokenId, cancellationToken);
         }
 
         Uri GetPublishAddress<T>()

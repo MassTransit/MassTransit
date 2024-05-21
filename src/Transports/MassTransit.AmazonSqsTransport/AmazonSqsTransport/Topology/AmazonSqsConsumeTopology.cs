@@ -63,7 +63,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
             return base.Validate().Concat(_specifications.SelectMany(x => x.Validate()));
         }
 
-        protected override IMessageConsumeTopologyConfigurator CreateMessageTopology<T>(Type type)
+        protected override IMessageConsumeTopologyConfigurator CreateMessageTopology<T>()
         {
             var messageTopology = new AmazonSqsMessageConsumeTopology<T>(_messageTopology.GetMessageTopology<T>(), _publishTopology);
 

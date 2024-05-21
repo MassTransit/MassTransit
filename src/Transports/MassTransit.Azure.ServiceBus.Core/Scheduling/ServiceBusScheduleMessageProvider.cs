@@ -39,12 +39,12 @@ namespace MassTransit.Scheduling
             return new ScheduledMessageHandle<T>(scheduleMessagePipe.ScheduledMessageId ?? NewId.NextGuid(), scheduledTime, destinationAddress, message);
         }
 
-        public Task CancelScheduledSend(Guid tokenId)
+        public Task CancelScheduledSend(Guid tokenId, CancellationToken cancellationToken)
         {
             return Task.CompletedTask;
         }
 
-        public async Task CancelScheduledSend(Uri destinationAddress, Guid tokenId)
+        public async Task CancelScheduledSend(Uri destinationAddress, Guid tokenId, CancellationToken cancellationToken)
         {
             var endpoint = await _sendEndpointProvider.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
@@ -53,7 +53,7 @@ namespace MassTransit.Scheduling
                 InVar.CorrelationId,
                 InVar.Timestamp,
                 TokenId = tokenId
-            }).ConfigureAwait(false);
+            }, cancellationToken).ConfigureAwait(false);
         }
     }
 }

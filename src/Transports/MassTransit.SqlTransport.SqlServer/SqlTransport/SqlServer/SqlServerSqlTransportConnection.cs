@@ -47,45 +47,50 @@ public class SqlServerSqlTransportConnection :
 
     public static SqlServerSqlTransportConnection GetSystemDatabaseConnection(SqlTransportOptions options)
     {
-        var builder = new SqlConnectionStringBuilder
-        {
-            DataSource = options.FormatDataSource(),
-            InitialCatalog = "master",
-            UserID = options.AdminUsername ?? options.Username,
-            Password = options.AdminPassword ?? options.Password,
-            TrustServerCertificate = true
-        };
+        var builder = CreateBuilder(options);
 
+        builder.InitialCatalog = "master";
+
+        if (!string.IsNullOrWhiteSpace(options.AdminUsername))
+            builder.UserID = options.AdminUsername;
+        if (!string.IsNullOrWhiteSpace(options.AdminPassword))
+            builder.Password = options.AdminPassword;
 
         return new SqlServerSqlTransportConnection(builder.ToString());
     }
 
     public static SqlServerSqlTransportConnection GetDatabaseAdminConnection(SqlTransportOptions options)
     {
-        var builder = new SqlConnectionStringBuilder
-        {
-            DataSource = options.FormatDataSource(),
-            InitialCatalog = options.Database,
-            UserID = options.AdminUsername ?? options.Username,
-            Password = options.AdminPassword ?? options.Password,
-            TrustServerCertificate = true
-        };
+        var builder = CreateBuilder(options);
 
+        if (!string.IsNullOrWhiteSpace(options.AdminUsername))
+            builder.UserID = options.AdminUsername;
+        if (!string.IsNullOrWhiteSpace(options.AdminPassword))
+            builder.Password = options.AdminPassword;
 
         return new SqlServerSqlTransportConnection(builder.ToString());
     }
 
     public static SqlServerSqlTransportConnection GetDatabaseConnection(SqlTransportOptions options)
     {
-        var builder = new SqlConnectionStringBuilder
-        {
-            DataSource = options.FormatDataSource(),
-            InitialCatalog = options.Database,
-            UserID = options.Username,
-            Password = options.Password,
-            TrustServerCertificate = true
-        };
+        var builder = CreateBuilder(options);
 
         return new SqlServerSqlTransportConnection(builder.ToString());
+    }
+
+    public static SqlConnectionStringBuilder CreateBuilder(SqlTransportOptions options)
+    {
+        var builder = new SqlConnectionStringBuilder(options.ConnectionString) { TrustServerCertificate = true };
+
+        if (!string.IsNullOrWhiteSpace(options.Host))
+            builder.DataSource = options.FormatDataSource();
+        if (!string.IsNullOrWhiteSpace(options.Database))
+            builder.InitialCatalog = options.Database;
+        if (!string.IsNullOrWhiteSpace(options.Username))
+            builder.UserID = options.Username;
+        if (!string.IsNullOrWhiteSpace(options.Password))
+            builder.Password = options.Password;
+
+        return builder;
     }
 }

@@ -151,9 +151,9 @@
             return _scheduler.Value.ScheduleSend<T>(_inputAddress, scheduledTime, values, pipe, cancellationToken);
         }
 
-        Task IMessageScheduler.CancelScheduledSend(Uri destinationAddress, Guid tokenId)
+        Task IMessageScheduler.CancelScheduledSend(Uri destinationAddress, Guid tokenId, CancellationToken cancellationToken)
         {
-            return _scheduler.Value.CancelScheduledSend(destinationAddress, tokenId);
+            return _scheduler.Value.CancelScheduledSend(destinationAddress, tokenId, cancellationToken);
         }
 
         public Task<ScheduledMessage<T>> SchedulePublish<T>(DateTime scheduledTime, T message, CancellationToken cancellationToken)
@@ -218,15 +218,15 @@
             return _scheduler.Value.SchedulePublish<T>(scheduledTime, values, pipe, cancellationToken);
         }
 
-        public Task CancelScheduledPublish<T>(Guid tokenId)
+        public Task CancelScheduledPublish<T>(Guid tokenId, CancellationToken cancellationToken)
             where T : class
         {
-            return _scheduler.Value.CancelScheduledPublish<T>(tokenId);
+            return _scheduler.Value.CancelScheduledPublish<T>(tokenId, cancellationToken);
         }
 
-        public Task CancelScheduledPublish(Type messageType, Guid tokenId)
+        public Task CancelScheduledPublish(Type messageType, Guid tokenId, CancellationToken cancellationToken)
         {
-            return _scheduler.Value.CancelScheduledPublish(messageType, tokenId);
+            return _scheduler.Value.CancelScheduledPublish(messageType, tokenId, cancellationToken);
         }
     }
 }

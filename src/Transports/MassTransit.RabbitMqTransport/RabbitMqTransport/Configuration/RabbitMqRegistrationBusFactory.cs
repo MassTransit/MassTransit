@@ -16,7 +16,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         readonly Action<IBusRegistrationContext, IRabbitMqBusFactoryConfigurator> _configure;
 
         public RabbitMqRegistrationBusFactory(Action<IBusRegistrationContext, IRabbitMqBusFactoryConfigurator> configure)
-            : this(new RabbitMqBusConfiguration(new RabbitMqTopologyConfiguration(RabbitMqBusFactory.MessageTopology)), configure)
+            : this(new RabbitMqBusConfiguration(new RabbitMqTopologyConfiguration(RabbitMqBusFactory.CreateMessageTopology())), configure)
         {
         }
 

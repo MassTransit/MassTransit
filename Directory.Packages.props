@@ -8,7 +8,7 @@
     <PackageVersion Include="AWSSDK.SimpleNotificationService" Version="3.7.301.8" />
     <PackageVersion Include="AWSSDK.S3" Version="3.7.307.1" />
     <PackageVersion Include="AWSSDK.SQS" Version="3.7.300.60" />
-    <PackageVersion Include="Azure.Identity" Version="1.11.0" />
+    <PackageVersion Include="Azure.Identity" Version="1.11.2" />
     <PackageVersion Include="Azure.Messaging.EventHubs.Processor" Version="5.11.2" />
     <PackageVersion Include="Azure.Messaging.ServiceBus" Version="7.17.5" />
     <PackageVersion Include="Azure.Storage.Blobs" Version="12.19.1" />
@@ -26,16 +26,16 @@
     <PackageVersion Include="Iesi.Collections" Version="4.1.1" />
     <PackageVersion Include="Ionic.Zlib.Core" Version="1.0.0" />
     <PackageVersion Include="Marten" Version="5.11.0" Condition="'$(TargetFramework)' != 'net6.0' AND '$(TargetFramework)' != 'net8.0'" />
-    <PackageVersion Include="Marten" Version="7.7.0" Condition="'$(TargetFramework)' == 'net6.0' OR '$(TargetFramework)' == 'net8.0'" />
+    <PackageVersion Include="Marten" Version="7.9.0" Condition="'$(TargetFramework)' == 'net6.0' OR '$(TargetFramework)' == 'net8.0'" />
     <PackageVersion Include="MathNet.Numerics" Version="5.0.0" />
     <PackageVersion Include="MediatR" Version="12.2.0" />
     <PackageVersion Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.22.0" />
     <PackageVersion Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
     <PackageVersion Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="7.0.13" />
-    <PackageVersion Include="Microsoft.Azure.Cosmos" Version="3.38.1" />
+    <PackageVersion Include="Microsoft.Azure.Cosmos" Version="3.39.1" />
     <PackageVersion Include="Microsoft.Azure.Cosmos.Table" Version="1.0.8" />
-    <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions.EventHubs" Version="6.3.0" />
-    <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="5.14.0" />
+    <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions.EventHubs" Version="6.3.1" />
+    <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="5.15.1" />
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.1.0" />
@@ -73,14 +73,14 @@
     <PackageVersion Include="NHibernate" Version="5.5.1" />
     <PackageVersion Include="Npgsql" Version="8.0.0" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.0" />
-    <PackageVersion Include="NUnit" Version="4.1.0"/>
-    <PackageVersion Include="NUnit.Analyzers" Version="4.1.0">
+    <PackageVersion Include="NUnit" Version="4.1.0" />
+    <PackageVersion Include="NUnit.Analyzers" Version="4.2.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>
     <PackageVersion Include="NUnit3TestAdapter" Version="4.5.0" />
     <PackageVersion Include="OpenTelemetry.Exporter.Jaeger" Version="1.5.1" />
-    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.8.0" />
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.8.1" />
     <PackageVersion Include="prometheus-net" Version="6.0.0" />
     <PackageVersion Include="Quartz" Version="3.8.1" />
     <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.8.1" />

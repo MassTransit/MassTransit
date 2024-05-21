@@ -42,6 +42,7 @@
         }
 
         public string ReplyToSessionId { get; set; }
+        public string ReplyTo { get; set; }
 
         public DateTime? ScheduledEnqueueTimeUtc { get; set; }
 
@@ -126,6 +127,10 @@
             if (!string.IsNullOrWhiteSpace(replyToSessionId))
                 ReplyToSessionId = replyToSessionId;
 
+            var replyTo = ReadString(properties, AzureServiceBusTransportPropertyNames.ReplyTo);
+            if (!string.IsNullOrWhiteSpace(replyTo))
+                ReplyTo = replyTo;
+
             var label = ReadString(properties, AzureServiceBusTransportPropertyNames.Label);
             if (!string.IsNullOrWhiteSpace(label))
                 Label = label;
@@ -141,6 +146,8 @@
                 properties[AzureServiceBusTransportPropertyNames.SessionId] = SessionId;
             if (!string.IsNullOrWhiteSpace(ReplyToSessionId))
                 properties[AzureServiceBusTransportPropertyNames.ReplyToSessionId] = ReplyToSessionId;
+            if (!string.IsNullOrWhiteSpace(ReplyTo))
+                properties[AzureServiceBusTransportPropertyNames.ReplyTo] = ReplyTo;
             if (!string.IsNullOrWhiteSpace(Label))
                 properties[AzureServiceBusTransportPropertyNames.Label] = Label;
         }
