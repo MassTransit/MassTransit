@@ -14,7 +14,6 @@ namespace MassTransit.MongoDbIntegration.Tests
     using Testing;
 
 
-    [Explicit]
     [TestFixture]
     public class Using_the_bus_outbox
     {
