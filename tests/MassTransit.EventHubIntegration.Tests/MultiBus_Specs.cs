@@ -13,6 +13,7 @@ namespace MassTransit.EventHubIntegration.Tests
     using TestFramework;
 
 
+    [Category("Flaky")]
     public class MultiBus_Specs :
         InMemoryTestFixture
     {
