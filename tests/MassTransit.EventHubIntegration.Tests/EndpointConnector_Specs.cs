@@ -70,7 +70,7 @@ namespace MassTransit.EventHubIntegration.Tests
                     }),
                     TestCancellationToken);
 
-                var connected = eventHubRider.ConnectEventHubEndpoint(Configuration.EventHubName, (context, configurator) =>
+                var connected = eventHubRider.ConnectEventHubEndpoint(Configuration.EventHubName, Configuration.ConsumerGroup, (context, configurator) =>
                 {
                     configurator.ConfigureConsumer<EventHubMessageConsumer>(context);
                 });
