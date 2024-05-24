@@ -196,7 +196,6 @@ jobs:
         working-directory: tests/MassTransit.AmazonSqsTransport.Tests
   test-azure-table:
     name: "Storage: Azure Table"
-    if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/v8') && github.repository == 'MassTransit/MassTransit'
     timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
@@ -208,10 +207,20 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
+      - name: Spin up test environment
+        run: |
+          docker compose -f docker-compose.yml up -d
+        working-directory: tests/MassTransit.Azure.Table.Tests
+
       - name: Test Azure Table
         env:
           MT_AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE }}
         run: dotnet test -c Release --logger:"console;verbosity=normal" --filter "Category!=Flaky&Category!=Integration"
+        working-directory: tests/MassTransit.Azure.Table.Tests
+
+      - name: Stop test environment
+        run: |
+          docker compose -f docker-compose.yml down
         working-directory: tests/MassTransit.Azure.Table.Tests
   test-cosmosdb:
     name: "Storage: CosmosDB"
