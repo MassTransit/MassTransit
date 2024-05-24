@@ -29,10 +29,11 @@ namespace MassTransit.EventHubIntegration.Tests
 
                         r.UsingEventHub((context, k) =>
                         {
-                            k.Host(Configuration.EventHubNamespace);
-                            k.Storage(Configuration.StorageAccount);
+                            k.Host(
+                                "Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;");
+                            k.Storage("UseDevelopmentStorage=true");
 
-                            k.ReceiveEndpoint(Configuration.EventHubName, c =>
+                            k.ReceiveEndpoint(Configuration.EventHubName, Configuration.ConsumerGroup, c =>
                             {
                                 c.UseMessageRetry(retry => retry.Immediate(3));
 

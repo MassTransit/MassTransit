@@ -16,7 +16,7 @@ namespace MassTransit.EventHubIntegration.Tests
     {
         public Recycled_Specs()
         {
-            TestTimeout = TimeSpan.FromMinutes(5);
+            TestTimeout = TimeSpan.FromMinutes(1);
         }
 
         [Test]
@@ -41,7 +41,7 @@ namespace MassTransit.EventHubIntegration.Tests
                         k.Host(Configuration.EventHubNamespace);
                         k.Storage(Configuration.StorageAccount);
 
-                        k.ReceiveEndpoint(Configuration.EventHubName, c =>
+                        k.ReceiveEndpoint(Configuration.EventHubName, Configuration.ConsumerGroup, c =>
                         {
                             c.ConfigureConsumer<EventHubMessageConsumer>(context);
                         });
@@ -94,7 +94,8 @@ namespace MassTransit.EventHubIntegration.Tests
                         k.Host(Configuration.EventHubNamespace);
                         k.Storage(Configuration.StorageAccount);
 
-                        k.ReceiveEndpoint(Configuration.EventHubName, c => c.Handler<BatchEventHubMessage>(_ => Task.CompletedTask));
+                        k.ReceiveEndpoint(Configuration.EventHubName, Configuration.ConsumerGroup,
+                            c => c.Handler<BatchEventHubMessage>(_ => Task.CompletedTask));
                     });
                 });
             });
