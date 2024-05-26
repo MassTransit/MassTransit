@@ -154,7 +154,7 @@ namespace MassTransit.AmazonSqsTransport
             {
                 MaxNumberOfMessages = messageLimit,
                 WaitTimeSeconds = waitTime,
-                AttributeNames = new List<string> { "All" },
+                MessageSystemAttributeNames = new List<string> { "All" },
                 MessageAttributeNames = new List<string> { "All" }
             };
 
