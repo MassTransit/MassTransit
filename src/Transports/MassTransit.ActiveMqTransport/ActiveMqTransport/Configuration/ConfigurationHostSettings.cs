@@ -9,6 +9,11 @@ namespace MassTransit.ActiveMqTransport.Configuration
     public class ConfigurationHostSettings :
         ActiveMqHostSettings
     {
+        // ActiveMQ Failover connection parameters https://activemq.apache.org/components/classic/documentation/failover-transport-reference
+        private static readonly List<string> FailoverArguments = [ "backup", "initialReconnectDelay", "maxCacheSize", "maxReconnectAttempts", "maxReconnectDelay", "randomize",
+        "reconnectDelayExponent", "reconnectSupported", "startupMaxReconnectAttempts", "timeout", "trackMessages", "updateURIsSupported", "updateURIsURL", "useExponentialBackOff",
+        "warnAfterReconnectAttempts", "ha", "reconnectAttempts", ];
+
         readonly Lazy<Uri> _brokerAddress;
         readonly Lazy<Uri> _hostAddress;
 
@@ -64,33 +69,37 @@ namespace MassTransit.ActiveMqTransport.Configuration
         Uri FormatBrokerAddress()
         {
             var scheme = UseSsl ? "ssl" : "tcp";
-            var queryPart = GetQueryString();
 
             // create broker URI: http://activemq.apache.org/nms/activemq-uri-configuration.html
             if (FailoverHosts?.Length > 0)
             {
+                //filter only parameters which are not failover parameters
+                var failoverServerPart = GetQueryString(kv => !FailoverArguments.Contains(kv.Key, StringComparer.OrdinalIgnoreCase));
                 var failoverPart = string.Join(",", FailoverHosts
                     .Select(failoverHost => new UriBuilder
                         {
                             Scheme = scheme,
                             Host = failoverHost,
-                            Port = Port
-                        }.Uri.ToString()
+                            Port = Port,
+                            Query = failoverServerPart
+                    }.Uri.ToString()
                     ));
-
-                return new Uri($"activemq:failover:({failoverPart}){queryPart}");
+                //filter failover parameters only
+                var failoverQueryPart = GetQueryString(kv => FailoverArguments.Contains(kv.Key, StringComparer.OrdinalIgnoreCase));
+                return new Uri($"activemq:failover:({failoverPart}){failoverQueryPart}");
             }
 
+            var queryPart = GetQueryString((_) => true);
             var uri = new Uri($"activemq:{scheme}://{Host}:{Port}{queryPart}");
             return uri;
         }
 
-        string GetQueryString()
+        string GetQueryString(Func<KeyValuePair<string, string>, bool> predicate)
         {
             if (TransportOptions.Count == 0)
                 return "";
 
-            var queryString = string.Join("&", TransportOptions.Select(pair => $"{pair.Key}={pair.Value}"));
+            var queryString = string.Join("&", TransportOptions.Where(predicate).Select(pair => $"{pair.Key}={pair.Value}"));
 
             return $"?{queryString}";
         }
