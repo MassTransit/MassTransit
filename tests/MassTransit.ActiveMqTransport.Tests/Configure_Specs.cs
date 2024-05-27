@@ -111,11 +111,12 @@ namespace MassTransit.ActiveMqTransport.Tests
             var settings = new ConfigurationHostSettings(new Uri("activemq://fake-host"))
             {
                 Port = 61616,
-                FailoverHosts = new[] { "failover1", "failover2" }
+                FailoverHosts = new[] { "failover1", "failover2" },
             };
+            settings.TransportOptions.Add("reconnectAttempts", "-1");
 
             Assert.That(settings.BrokerAddress, Is.EqualTo(new Uri(
-                "activemq:failover:(tcp://failover1:61616/,tcp://failover2:61616/)?wireFormat.tightEncodingEnabled=true")));
+                "activemq:failover:(tcp://failover1:61616/?wireFormat.tightEncodingEnabled=true,tcp://failover2:61616/?wireFormat.tightEncodingEnabled=true)?reconnectAttempts=-1")));
         }
 
         [Test]
