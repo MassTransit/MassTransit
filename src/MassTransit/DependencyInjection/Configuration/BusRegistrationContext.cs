@@ -6,7 +6,6 @@ namespace MassTransit.Configuration
     using System.Linq;
     using DependencyInjection.Registration;
     using Internals;
-    using Microsoft.Extensions.DependencyInjection;
 
 
     public class BusRegistrationContext :
@@ -20,7 +19,7 @@ namespace MassTransit.Configuration
         {
         }
 
-        public IEndpointNameFormatter EndpointNameFormatter => this.GetService<IEndpointNameFormatter>() ?? DefaultEndpointNameFormatter.Instance;
+        public IEndpointNameFormatter EndpointNameFormatter => Selector.GetEndpointNameFormatter(this);
 
         public void ConfigureEndpoints<T>(IReceiveConfigurator<T> configurator, IEndpointNameFormatter? endpointNameFormatter = null)
             where T : IReceiveEndpointConfigurator

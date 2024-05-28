@@ -7,7 +7,6 @@ namespace MassTransit.Configuration
     using DependencyInjection.Registration;
     using Internals;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.DependencyInjection.Extensions;
     using Saga;
 
 
@@ -192,7 +191,7 @@ namespace MassTransit.Configuration
 
         public void SetEndpointNameFormatter(IEndpointNameFormatter endpointNameFormatter)
         {
-            _collection.TryAddSingleton(endpointNameFormatter);
+            Registrar.RegisterEndpointNameFormatter(endpointNameFormatter);
         }
 
         public ISagaRegistrationConfigurator<T> AddSagaRepository<T>()

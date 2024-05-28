@@ -35,6 +35,11 @@ namespace MassTransit.Configuration
             Collection.TryAddScoped(provider => GetScopedBusContext(provider));
         }
 
+        public virtual void RegisterEndpointNameFormatter(IEndpointNameFormatter endpointNameFormatter)
+        {
+            Collection.TryAddSingleton(endpointNameFormatter);
+        }
+
         public T GetOrAdd<T>(Type type, Func<Type, T> missingRegistrationFactory = default)
             where T : class, IRegistration
         {
@@ -75,6 +80,11 @@ namespace MassTransit.Configuration
             IConfigureReceiveEndpoint[] globalConfigureReceiveEndpoints = provider.GetServices<IConfigureReceiveEndpoint>().ToArray();
 
             return new ConfigureReceiveEndpoint(globalConfigureReceiveEndpoints, GetBusConfigureReceiveEndpoints(provider));
+        }
+
+        public virtual IEndpointNameFormatter GetEndpointNameFormatter(IServiceProvider provider)
+        {
+            return provider.GetService<IEndpointNameFormatter>() ?? DefaultEndpointNameFormatter.Instance;
         }
 
         protected virtual IConfigureReceiveEndpoint[] GetBusConfigureReceiveEndpoints(IServiceProvider provider)
@@ -152,6 +162,11 @@ namespace MassTransit.Configuration
             Collection.Add(ServiceDescriptor.Singleton(Bind<TBus>.Create(value)));
         }
 
+        public override void RegisterEndpointNameFormatter(IEndpointNameFormatter endpointNameFormatter)
+        {
+            Collection.TryAddSingleton(Bind<TBus>.Create(endpointNameFormatter));
+        }
+
         protected override IScopedClientFactory GetScopedBusContext(IServiceProvider provider)
         {
             return provider.GetRequiredService<IScopedBusContextProvider<TBus>>().Context.ClientFactory;
@@ -160,6 +175,14 @@ namespace MassTransit.Configuration
         protected override IConfigureReceiveEndpoint[] GetBusConfigureReceiveEndpoints(IServiceProvider provider)
         {
             return provider.GetServices<Bind<TBus, IConfigureReceiveEndpoint>>().Select(x => x.Value).ToArray();
+        }
+
+        public override IEndpointNameFormatter GetEndpointNameFormatter(IServiceProvider provider)
+        {
+            var bind = provider.GetService<Bind<TBus, IEndpointNameFormatter>>();
+            return bind != null
+                ? bind.Value
+                : base.GetEndpointNameFormatter(provider);
         }
     }
 }
