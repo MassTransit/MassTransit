@@ -98,8 +98,7 @@
         }
 
         /// <summary>
-        /// Sends an object as a message, using the message type specified. If the object cannot be cast
-        /// to the specified message type, an exception will be thrown.
+        /// Sends an object as a message.
         /// </summary>
         /// <param name="context">The consume context</param>
         /// <param name="message">The message object</param>
@@ -284,8 +283,7 @@
         }
 
         /// <summary>
-        /// Sends an object as a message, using the message type specified. If the object cannot be cast
-        /// to the specified message type, an exception will be thrown.
+        /// Sends an object as a message.
         /// </summary>
         /// <param name="context">The consume context</param>
         /// <param name="message">The message object</param>
