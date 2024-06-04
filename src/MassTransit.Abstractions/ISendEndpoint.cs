@@ -59,8 +59,7 @@ namespace MassTransit
         Task Send(object message, Type messageType, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Sends an object as a message, using the message type specified. If the object cannot be cast
-        /// to the specified message type, an exception will be thrown.
+        /// Sends an object as a message.
         /// </summary>
         /// <param name="message">The message object</param>
         /// <param name="pipe"></param>

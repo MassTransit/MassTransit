@@ -54,16 +54,14 @@ namespace MassTransit
             where T : class;
 
         /// <summary>
-        /// Publishes an object as a message, using the message type specified. If the object cannot be cast
-        /// to the specified message type, an exception will be thrown.
+        /// Publishes an object as a message.
         /// </summary>
         /// <param name="message">The message object</param>
         /// <param name="cancellationToken"></param>
         Task Publish(object message, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Publishes an object as a message, using the message type specified. If the object cannot be cast
-        /// to the specified message type, an exception will be thrown.
+        /// Publishes an object as a message.
         /// </summary>
         /// <param name="message">The message object</param>
         /// <param name="publishPipe"></param>
