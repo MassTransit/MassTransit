@@ -109,6 +109,9 @@
 
         async Task OnMessage(ProcessMessageEventArgs messageReceiver, ServiceBusReceivedMessage message, CancellationToken cancellationToken)
         {
+            if (IsStopping)
+                return;
+
             MessageLockContext lockContext = new ServiceBusMessageLockContext(messageReceiver, message);
             var context = new ServiceBusReceiveContext(message, _context, lockContext, _clientContext);
 

@@ -152,7 +152,14 @@ namespace MassTransit.RabbitMqTransport
         public void HandleBasicDeliver(string consumerTag, ulong deliveryTag, bool redelivered, string exchange, string routingKey,
             IBasicProperties properties, ReadOnlyMemory<byte> body)
         {
-            _limit?.Wait();
+            try
+            {
+                _limit?.Wait(Stopping);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
 
             var bodyBytes = body.ToArray();
 
@@ -165,6 +172,9 @@ namespace MassTransit.RabbitMqTransport
 
                 try
                 {
+                    if (IsStopping)
+                        return;
+
                     await Dispatch(deliveryTag, context,
                             _receiveSettings.NoAck ? NoLockReceiveContext.Instance : new RabbitMqReceiveLockContext(_model, deliveryTag))
                         .ConfigureAwait(false);
