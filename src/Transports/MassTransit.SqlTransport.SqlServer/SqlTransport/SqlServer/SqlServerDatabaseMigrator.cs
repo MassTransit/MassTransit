@@ -96,8 +96,8 @@ BEGIN
         Id             bigint          not null primary key default next value for [{0}].[TopologySequence],
         Updated        datetime2       not null default GETUTCDATE(),
 
-        SourceId       bigint          not null references {0}.Topic (id),
-        DestinationId  bigint          not null references {0}.Topic (id),
+        SourceId       bigint          not null references {0}.Topic (Id),
+        DestinationId  bigint          not null references {0}.Topic (Id),
 
         SubType        tinyint         not null,
         RoutingKey     nvarchar(256)   not null,
@@ -147,8 +147,8 @@ BEGIN
         Id             bigint          not null primary key default next value for [{0}].[TopologySequence],
         Updated        datetime2       not null default GETUTCDATE(),
 
-        SourceId       bigint          not null references {0}.Topic (id) ON DELETE CASCADE,
-        DestinationId  bigint          not null references {0}.Queue (id) ON DELETE CASCADE,
+        SourceId       bigint          not null references {0}.Topic (Id) ON DELETE CASCADE,
+        DestinationId  bigint          not null references {0}.Queue (Id) ON DELETE CASCADE,
 
         SubType        tinyint         not null,
         RoutingKey     nvarchar(256)   not null,
