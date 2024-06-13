@@ -9,7 +9,7 @@ namespace MassTransit
     public static class JsonSerializerConfigurationExtensions
     {
         /// <summary>
-        /// Serialize messages using the raw JSON message serializer
+        /// Serialize and deserialize messages using the raw JSON message serializer
         /// </summary>
         /// <param name="configurator"></param>
         public static void UseJsonSerializer(this IBusFactoryConfigurator configurator)
@@ -21,7 +21,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Serialize messages using the raw JSON message serializer
+        /// Deserialize messages using the raw JSON message serializer
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="isDefault">If true, set the default content type to the content type of the deserializer</param>
@@ -33,7 +33,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Serialize messages using the raw JSON message serializer
+        /// Serialize and deserialize messages using the raw JSON message serializer
         /// </summary>
         /// <param name="configurator"></param>
         public static void UseJsonSerializer(this IReceiveEndpointConfigurator configurator)
@@ -45,7 +45,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Serialize messages using the raw JSON message serializer
+        /// Deserialize messages using the raw JSON message serializer
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="isDefault">If true, set the default content type to the content type of the deserializer</param>
