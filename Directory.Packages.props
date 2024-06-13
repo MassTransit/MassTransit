@@ -8,7 +8,7 @@
     <PackageVersion Include="AWSSDK.SimpleNotificationService" Version="3.7.301.8" />
     <PackageVersion Include="AWSSDK.S3" Version="3.7.307.1" />
     <PackageVersion Include="AWSSDK.SQS" Version="3.7.300.60" />
-    <PackageVersion Include="Azure.Identity" Version="1.11.3" />
+    <PackageVersion Include="Azure.Identity" Version="1.11.4" />
     <PackageVersion Include="Azure.Messaging.EventHubs.Processor" Version="5.11.3" />
     <PackageVersion Include="Azure.Messaging.ServiceBus" Version="7.17.5" />
     <PackageVersion Include="Azure.Storage.Blobs" Version="12.20.0" />
@@ -71,7 +71,7 @@
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="Newtonsoft.Json.Bson" Version="1.0.2" />
     <PackageVersion Include="NHibernate" Version="5.5.1" />
-    <PackageVersion Include="Npgsql" Version="8.0.0" />
+    <PackageVersion Include="Npgsql" Version="8.0.3" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.0" />
     <PackageVersion Include="NUnit" Version="4.1.0" />
     <PackageVersion Include="NUnit.Analyzers" Version="4.2.0">
