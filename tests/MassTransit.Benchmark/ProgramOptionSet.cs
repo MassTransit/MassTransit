@@ -25,7 +25,8 @@ namespace MassTransitBenchmark
             InMemory,
             AmazonSqs,
             ActiveMq,
-            Kafka
+            Kafka,
+            Sql
         }
 
 
@@ -46,6 +47,7 @@ namespace MassTransitBenchmark
             Add("sqs", "Use Amazon SQS", x => Transport = TransportOptions.AmazonSqs);
             Add("servicebus", "Use Azure Service Bus", x => Transport = TransportOptions.AzureServiceBus);
             Add("activemq", "Use ActiveMQ", x => Transport = TransportOptions.ActiveMq);
+            Add("sql", "Use SQL Transport", x => Transport = TransportOptions.Sql);
 
             Add<BenchmarkOptions>("run:", "Run benchmark (All, Latency, RPC)", value => Benchmark = value);
             Add("rpc", "Run the RPC benchmark", x => Benchmark = BenchmarkOptions.Rpc);
