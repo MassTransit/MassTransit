@@ -24,7 +24,7 @@ namespace MassTransit.Serialization
             where T : class
         {
             if (_options.HasFlag(RawSerializerOptions.AddTransportHeaders))
-                SetRawMessageHeaders<T>(context);
+                SetRawMessageHeaders(context);
 
             return new NewtonsoftRawJsonMessageBody<T>(context);
         }

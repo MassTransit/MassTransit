@@ -64,7 +64,7 @@ namespace MassTransit.Serialization
             if (_rawOptions.HasValue)
             {
                 if (_rawOptions.Value.HasFlag(RawSerializerOptions.AddTransportHeaders))
-                    SetRawMessageHeaders<T>(context);
+                    SetRawMessageHeaders(context);
 
                 return new SystemTextJsonRawMessageBody<T>(context, _options, _message);
             }
