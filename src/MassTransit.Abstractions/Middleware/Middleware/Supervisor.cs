@@ -17,8 +17,6 @@
     {
         readonly Dictionary<long, IAgent> _agents;
         long _nextId;
-        int _peakActiveCount;
-        long _totalCount;
 
         /// <summary>
         /// Creates a Supervisor
@@ -39,11 +37,11 @@
             {
                 _agents.Add(id, agent);
 
-                _totalCount++;
+                TotalCount++;
                 var currentActiveCount = _agents.Count;
 
-                if (currentActiveCount > _peakActiveCount)
-                    _peakActiveCount = currentActiveCount;
+                if (currentActiveCount > PeakActiveCount)
+                    PeakActiveCount = currentActiveCount;
 
                 SetReady();
             }
@@ -57,22 +55,22 @@
         }
 
         /// <inheritdoc />
-        public int PeakActiveCount => _peakActiveCount;
+        public int PeakActiveCount { get; private set; }
 
         /// <inheritdoc />
-        public long TotalCount => _totalCount;
+        public long TotalCount { get; private set; }
 
         /// <inheritdoc />
         public override void SetReady()
         {
-            if (!IsAlreadyReady)
+            if (IsAlreadyReady)
+                return;
+
+            lock (_agents)
             {
-                lock (_agents)
-                {
-                    SetReady(_agents.Count == 0
-                        ? Task.CompletedTask
-                        : Task.WhenAll(_agents.Values.Select(x => x.Ready).ToArray()));
-                }
+                SetReady(_agents.Count == 0
+                    ? Task.CompletedTask
+                    : Task.WhenAll(_agents.Values.Select(x => x.Ready).ToArray()));
             }
         }
 
@@ -92,28 +90,31 @@
 
         protected virtual async Task StopSupervisor(StopSupervisorContext context)
         {
-            if (context.Agents.Length == 0)
-                SetCompleted(Task.CompletedTask);
-
-            if (context.Agents.Length == 1)
+            switch (context.Agents.Length)
             {
-                SetCompleted(context.Agents[0].Completed);
+                case 0:
+                    SetCompleted(Task.CompletedTask);
+                    break;
+                case 1:
+                    SetCompleted(context.Agents[0].Completed);
 
-                await context.Agents[0].Stop(context).OrCanceled(context.CancellationToken).ConfigureAwait(false);
-            }
-            else if (context.Agents.Length > 1)
-            {
-                var completedTasks = new Task[context.Agents.Length];
-                for (var i = 0; i < context.Agents.Length; i++)
-                    completedTasks[i] = context.Agents[i].Completed;
+                    await context.Agents[0].Stop(context).OrCanceled(context.CancellationToken).ConfigureAwait(false);
+                    break;
+                case > 1:
+                {
+                    var completedTasks = new Task[context.Agents.Length];
+                    for (var i = 0; i < context.Agents.Length; i++)
+                        completedTasks[i] = context.Agents[i].Completed;
 
-                SetCompleted(Task.WhenAll(completedTasks));
+                    SetCompleted(Task.WhenAll(completedTasks));
 
-                var stopTasks = new Task[context.Agents.Length];
-                for (var i = 0; i < context.Agents.Length; i++)
-                    stopTasks[i] = context.Agents[i].Stop(context);
+                    var stopTasks = new Task[context.Agents.Length];
+                    for (var i = 0; i < context.Agents.Length; i++)
+                        stopTasks[i] = context.Agents[i].Stop(context);
 
-                await Task.WhenAll(stopTasks).OrCanceled(context.CancellationToken).ConfigureAwait(false);
+                    await Task.WhenAll(stopTasks).OrCanceled(context.CancellationToken).ConfigureAwait(false);
+                    break;
+                }
             }
 
             await Completed.OrCanceled(context.CancellationToken).ConfigureAwait(false);

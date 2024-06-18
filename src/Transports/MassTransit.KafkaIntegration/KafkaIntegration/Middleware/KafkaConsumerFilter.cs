@@ -71,6 +71,9 @@ namespace MassTransit.KafkaIntegration.Middleware
             {
                 foreach (IKafkaMessageConsumer<TKey, TValue> consumer in consumers)
                 {
+                    if (IsStopping)
+                        return;
+
                     consumer.Completed.ContinueWith(async _ =>
                     {
                         try

@@ -28,13 +28,6 @@ namespace MassTransit.ActiveMqTransport.Middleware
         {
         }
 
-        string GetReceiveEntityName(ReceiveSettings settings, string entityName = null)
-        {
-            return settings.AutoDelete
-                ? entityName ?? settings.EntityName
-                : $"{entityName ?? settings.EntityName}?consumer.prefetchSize={settings.PrefetchCount}";
-        }
-
         async Task IFilter<SessionContext>.Send(SessionContext context, IPipe<SessionContext> next)
         {
             var receiveSettings = context.GetPayload<ReceiveSettings>();
@@ -82,6 +75,13 @@ namespace MassTransit.ActiveMqTransport.Middleware
             }
         }
 
+        string GetReceiveEntityName(ReceiveSettings settings, string entityName = null)
+        {
+            return settings.AutoDelete
+                ? entityName ?? settings.EntityName
+                : $"{entityName ?? settings.EntityName}?consumer.prefetchSize={settings.PrefetchCount}";
+        }
+
         Supervisor CreateConsumerSupervisor(SessionContext context, ActiveMqConsumer[] actualConsumers)
         {
             var supervisor = new ConsumerSupervisor(actualConsumers);
@@ -123,6 +123,9 @@ namespace MassTransit.ActiveMqTransport.Middleware
             {
                 foreach (var consumer in consumers)
                 {
+                    if (IsStopping)
+                        return;
+
                     consumer.Completed.ContinueWith(async _ =>
                     {
                         try
