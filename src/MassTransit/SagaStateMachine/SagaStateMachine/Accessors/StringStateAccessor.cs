@@ -56,7 +56,7 @@ namespace MassTransit
                 _write.Set(context.Saga, state.Name);
 
                 State<TInstance> previousState = null;
-                if (previous != null)
+                if (!string.IsNullOrWhiteSpace(previous))
                     previousState = _machine.GetState(previous);
 
                 return _observer.StateChanged(context, state, previousState);
