@@ -13,6 +13,8 @@ namespace MassTransit.EventHubIntegration.Tests
     public class EndpointConnector_Specs :
         InMemoryTestFixture
     {
+        const string EventHubName = "default-eh";
+
         [Test]
         public async Task Should_produce()
         {
@@ -44,11 +46,11 @@ namespace MassTransit.EventHubIntegration.Tests
 
             await busControl.StartAsync(TestCancellationToken);
 
-            var serviceScope = provider.CreateScope();
+            var serviceScope = provider.CreateAsyncScope();
 
             var eventHubRider = provider.GetRequiredService<IEventHubRider>();
             var producerProvider = serviceScope.ServiceProvider.GetRequiredService<IEventHubProducerProvider>();
-            var producer = await producerProvider.GetProducer(Configuration.EventHubName);
+            var producer = await producerProvider.GetProducer(EventHubName);
 
             try
             {
@@ -70,7 +72,7 @@ namespace MassTransit.EventHubIntegration.Tests
                     }),
                     TestCancellationToken);
 
-                var connected = eventHubRider.ConnectEventHubEndpoint(Configuration.EventHubName, Configuration.ConsumerGroup, (context, configurator) =>
+                var connected = eventHubRider.ConnectEventHubEndpoint(EventHubName, Configuration.ConsumerGroup, (context, configurator) =>
                 {
                     configurator.ConfigureConsumer<EventHubMessageConsumer>(context);
                 });
@@ -83,7 +85,7 @@ namespace MassTransit.EventHubIntegration.Tests
                     Assert.That(result.Message.Text, Is.EqualTo("text"));
                     Assert.That(result.SourceAddress, Is.EqualTo(new Uri("loopback://localhost/")));
                     Assert.That(result.DestinationAddress,
-                        Is.EqualTo(new Uri($"loopback://localhost/{EventHubEndpointAddress.PathPrefix}/{Configuration.EventHubName}")));
+                        Is.EqualTo(new Uri($"loopback://localhost/{EventHubEndpointAddress.PathPrefix}/{EventHubName}")));
                     Assert.That(result.MessageId, Is.EqualTo(messageId));
                     Assert.That(result.CorrelationId, Is.EqualTo(correlationId));
                     Assert.That(result.InitiatorId, Is.EqualTo(initiatorId));
@@ -100,7 +102,7 @@ namespace MassTransit.EventHubIntegration.Tests
             }
             finally
             {
-                serviceScope.Dispose();
+                await serviceScope.DisposeAsync();
 
                 await busControl.StopAsync(TestCancellationToken);
 

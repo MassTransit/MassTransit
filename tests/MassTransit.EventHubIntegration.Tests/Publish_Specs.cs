@@ -17,6 +17,8 @@ namespace MassTransit.EventHubIntegration.Tests
     public class Publish_Specs :
         InMemoryTestFixture
     {
+        const string EventHubName = "publish-eh";
+
         [Test]
         public async Task Should_receive()
         {
@@ -43,7 +45,7 @@ namespace MassTransit.EventHubIntegration.Tests
                         k.Host(Configuration.EventHubNamespace);
                         k.Storage(Configuration.StorageAccount);
 
-                        k.ReceiveEndpoint(Configuration.EventHubName, Configuration.ConsumerGroup, c =>
+                        k.ReceiveEndpoint(EventHubName, Configuration.ConsumerGroup, c =>
                         {
                             c.ConfigureConsumer<EventHubMessageConsumer>(context);
                         });
@@ -59,7 +61,7 @@ namespace MassTransit.EventHubIntegration.Tests
 
             try
             {
-                await using var producer = new EventHubProducerClient(Configuration.EventHubNamespace, Configuration.EventHubName);
+                await using var producer = new EventHubProducerClient(Configuration.EventHubNamespace, EventHubName);
 
                 var message = new EventHubMessageClass("test");
                 var context = new MessageSendContext<EventHubMessage>(message)
@@ -81,7 +83,7 @@ namespace MassTransit.EventHubIntegration.Tests
                     Assert.That(ping.InitiatorId, Is.EqualTo(result.CorrelationId));
                     Assert.That(ping.SourceAddress,
                         Is.EqualTo(new Uri(
-                            $"loopback://localhost/{EventHubEndpointAddress.PathPrefix}/{Configuration.EventHubName}/{Configuration.ConsumerGroup}")));
+                            $"loopback://localhost/{EventHubEndpointAddress.PathPrefix}/{EventHubName}/{Configuration.ConsumerGroup}")));
                 });
             }
             finally

@@ -14,6 +14,8 @@ namespace MassTransit.EventHubIntegration.Tests
     public class Saga_Producer_Specs :
         InMemoryTestFixture
     {
+        const string EventHubName = "produce-eh";
+
         [Test]
         public async Task Should_produce()
         {
@@ -39,7 +41,7 @@ namespace MassTransit.EventHubIntegration.Tests
                         k.Host(Configuration.EventHubNamespace);
                         k.Storage(Configuration.StorageAccount);
 
-                        k.ReceiveEndpoint(Configuration.EventHubName, Configuration.ConsumerGroup, c =>
+                        k.ReceiveEndpoint(EventHubName, Configuration.ConsumerGroup, c =>
                         {
                             c.ConfigureConsumer<EventHubMessageConsumer>(context);
                         });
@@ -53,7 +55,7 @@ namespace MassTransit.EventHubIntegration.Tests
 
             await busControl.StartAsync(TestCancellationToken);
 
-            var serviceScope = provider.CreateScope();
+            var serviceScope = provider.CreateAsyncScope();
 
             var publishEndpoint = serviceScope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
 
@@ -77,7 +79,7 @@ namespace MassTransit.EventHubIntegration.Tests
             }
             finally
             {
-                serviceScope.Dispose();
+                await serviceScope.DisposeAsync();
 
                 await busControl.StopAsync(TestCancellationToken);
 
@@ -122,7 +124,7 @@ namespace MassTransit.EventHubIntegration.Tests
                 Initially(
                     When(Started)
                         .Then(context => context.Instance.Key = context.Data.TestKey)
-                        .Produce(x => Configuration.EventHubName, x => x.Init<EventHubMessage>(new { Text = $"Key: {x.Data.TestKey}" }))
+                        .Produce(x => EventHubName, x => x.Init<EventHubMessage>(new { Text = $"Key: {x.Data.TestKey}" }))
                         .TransitionTo(Active));
 
                 SetCompletedWhenFinalized();

@@ -17,6 +17,9 @@ namespace MassTransit.EventHubIntegration.Tests
     public class MultiBus_Specs :
         InMemoryTestFixture
     {
+        const string EventHubNameOne = "multibus-eh1";
+        const string EventHubNameTwo = "multibus-eh2";
+
         public MultiBus_Specs()
         {
             TestTimeout = TimeSpan.FromMinutes(1);
@@ -41,7 +44,7 @@ namespace MassTransit.EventHubIntegration.Tests
                             k.Host(Configuration.EventHubNamespace);
                             k.Storage(Configuration.StorageAccount);
 
-                            k.ReceiveEndpoint(Configuration.EventHubName, Configuration.ConsumerGroup, c =>
+                            k.ReceiveEndpoint(EventHubNameOne, Configuration.ConsumerGroup, c =>
                             {
                                 c.ConfigureConsumer<FirstBusMessageConsumer>(context);
                             });
@@ -61,7 +64,7 @@ namespace MassTransit.EventHubIntegration.Tests
                             k.Host(Configuration.EventHubNamespace);
                             k.Storage(Configuration.StorageAccount);
 
-                            k.ReceiveEndpoint(Configuration.EventHubName, Configuration.ConsumerGroup, c =>
+                            k.ReceiveEndpoint(EventHubNameTwo, Configuration.ConsumerGroup, c =>
                             {
                                 c.ConfigureConsumer<SecondBusMessageConsumer>(context);
                             });
@@ -76,10 +79,10 @@ namespace MassTransit.EventHubIntegration.Tests
 
             await Task.WhenAll(hostedServices.Select(x => x.StartAsync(TestCancellationToken)));
 
-            var serviceScope = provider.CreateScope();
+            var serviceScope = provider.CreateAsyncScope();
 
             var producerProvider = serviceScope.ServiceProvider.GetRequiredService<Bind<IFirstBus, IEventHubProducerProvider>>().Value;
-            var producer = await producerProvider.GetProducer(Configuration.EventHubName);
+            var producer = await producerProvider.GetProducer(EventHubNameOne);
 
             await producer.Produce(new FirstBusMessage(), TestCancellationToken);
 
@@ -87,7 +90,7 @@ namespace MassTransit.EventHubIntegration.Tests
 
             await provider.GetRequiredService<TaskCompletionSource<ConsumeContext<SecondBusMessage>>>().Task.OrCanceled(TestCancellationToken);
 
-            serviceScope.Dispose();
+            await serviceScope.DisposeAsync();
 
             await Task.WhenAll(hostedServices.Select(x => x.StopAsync(TestCancellationToken)));
         }
@@ -130,7 +133,7 @@ namespace MassTransit.EventHubIntegration.Tests
 
             public async Task Consume(ConsumeContext<FirstBusMessage> context)
             {
-                var producer = await _provider.GetProducer(Configuration.EventHubName);
+                var producer = await _provider.GetProducer(EventHubNameTwo);
                 await producer.Produce(new SecondBusMessage());
                 _taskCompletionSource.TrySetResult(context);
             }
