@@ -7,8 +7,6 @@
         public static string EventHubNamespace =>
             "Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;";
 
-        public static string EventHubName => "eh1";
-
         public static string StorageAccount => "UseDevelopmentStorage=true";
     }
 }

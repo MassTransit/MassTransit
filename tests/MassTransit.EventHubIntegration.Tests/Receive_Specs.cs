@@ -16,6 +16,8 @@ namespace MassTransit.EventHubIntegration.Tests
     public class Receive_Specs :
         InMemoryTestFixture
     {
+        const string EventHubName = "receive-eh";
+
         [Test]
         public async Task Should_receive()
         {
@@ -38,7 +40,7 @@ namespace MassTransit.EventHubIntegration.Tests
                         k.Host(Configuration.EventHubNamespace);
                         k.Storage(Configuration.StorageAccount);
 
-                        k.ReceiveEndpoint(Configuration.EventHubName, Configuration.ConsumerGroup, c =>
+                        k.ReceiveEndpoint(EventHubName, Configuration.ConsumerGroup, c =>
                         {
                             c.ConfigureConsumer<EventHubMessageConsumer>(context);
                         });
@@ -54,7 +56,7 @@ namespace MassTransit.EventHubIntegration.Tests
 
             try
             {
-                await using var producer = new EventHubProducerClient(Configuration.EventHubNamespace, Configuration.EventHubName);
+                await using var producer = new EventHubProducerClient(Configuration.EventHubNamespace, EventHubName);
 
                 var message = new EventHubMessageClass("test");
                 var context = new MessageSendContext<EventHubMessage>(message);
@@ -108,6 +110,8 @@ namespace MassTransit.EventHubIntegration.Tests
     public class ReceiveWithPayload_Specs :
         InMemoryTestFixture
     {
+        const string EventHubName = "receive-eh";
+
         [Test]
         public async Task Should_contains_payload()
         {
@@ -130,7 +134,7 @@ namespace MassTransit.EventHubIntegration.Tests
                         k.Host(Configuration.EventHubNamespace);
                         k.Storage(Configuration.StorageAccount);
 
-                        k.ReceiveEndpoint(Configuration.EventHubName, Configuration.ConsumerGroup, c =>
+                        k.ReceiveEndpoint(EventHubName, Configuration.ConsumerGroup, c =>
                         {
                             c.ConfigureConsumer<EventHubMessageConsumer>(context);
                         });
@@ -147,7 +151,7 @@ namespace MassTransit.EventHubIntegration.Tests
             try
             {
                 var producerProvider = provider.GetRequiredService<IEventHubProducerProvider>();
-                var producer = await producerProvider.GetProducer(Configuration.EventHubName);
+                var producer = await producerProvider.GetProducer(EventHubName);
 
                 await producer.Produce<EventHubMessage>(new { }, TestCancellationToken);
 

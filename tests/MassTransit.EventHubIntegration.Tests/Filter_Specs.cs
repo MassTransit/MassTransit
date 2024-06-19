@@ -11,6 +11,8 @@ namespace MassTransit.EventHubIntegration.Tests
 
     public class Using_a_consumer_filter
     {
+        const string EventHubName = "receive-eh";
+
         static int _attempts;
         static int _lastAttempt;
         static int _lastCount;
@@ -33,7 +35,7 @@ namespace MassTransit.EventHubIntegration.Tests
                                 "Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;");
                             k.Storage("UseDevelopmentStorage=true");
 
-                            k.ReceiveEndpoint(Configuration.EventHubName, Configuration.ConsumerGroup, c =>
+                            k.ReceiveEndpoint(EventHubName, Configuration.ConsumerGroup, c =>
                             {
                                 c.UseMessageRetry(retry => retry.Immediate(3));
 
@@ -48,7 +50,7 @@ namespace MassTransit.EventHubIntegration.Tests
 
             await harness.Start();
 
-            var producer = await harness.GetProducer(Configuration.EventHubName);
+            var producer = await harness.GetProducer(EventHubName);
 
             var messageId = NewId.NextGuid();
 
