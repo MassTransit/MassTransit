@@ -61,5 +61,18 @@
         /// </summary>
         /// <param name="consumerTag">The consumer tag to use for this receive endpoint.</param>
         void OverrideConsumerTag(string consumerTag);
+
+        /// <summary>
+        /// Configure receive endpoint to use a stream
+        /// </summary>
+        /// <param name="callback"></param>
+        void Stream(Action<IRabbitMqStreamConfigurator> callback = null);
+
+        /// <summary>
+        /// Configure receive endpoint to use a stream
+        /// </summary>
+        /// <param name="consumerTag">Overrides the default consumer tag with the specified name</param>
+        /// <param name="callback"></param>
+        void Stream(string consumerTag, Action<IRabbitMqStreamConfigurator> callback = null);
     }
 }
