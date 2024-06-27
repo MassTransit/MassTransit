@@ -9,6 +9,7 @@ public class RabbitMqStreamConfigurator :
     IRabbitMqStreamConfigurator
 {
     static readonly DateTimeTypeConverter _dateTimeConverter = new DateTimeTypeConverter();
+    static readonly TimeSpanTypeConverter _timeSpanConverter = new TimeSpanTypeConverter();
 
     readonly RabbitMqReceiveSettings _settings;
 
@@ -24,7 +25,20 @@ public class RabbitMqStreamConfigurator :
 
     public TimeSpan MaxAge
     {
-        set => _settings.QueueArguments["x-max-age"] = value;
+        set
+        {
+            string? text = null;
+            if (value.TotalDays >= 1)
+                text = $"{value.TotalDays:F0}D";
+            else if (value.TotalHours >= 1)
+                text = $"{value.TotalHours:F0}h";
+            else if (value.TotalMinutes >= 1)
+                text = $"{value.TotalMinutes:F0}m";
+            else if (value.TotalSeconds >= 1)
+                text = $"{value.TotalSeconds:F0}s";
+
+            _settings.QueueArguments["x-max-age"] = text;
+        }
     }
 
     public long MaxSegmentSize

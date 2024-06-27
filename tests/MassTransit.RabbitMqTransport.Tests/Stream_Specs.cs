@@ -73,8 +73,10 @@ public class Consuming_messages_from_a_stream
 
             if (endpointConfigurator is IRabbitMqReceiveEndpointConfigurator rmq)
             {
-                rmq.Stream("consumer-tag", s =>
+                rmq.Stream("main-consumer", s =>
                 {
+                    s.MaxAge = TimeSpan.FromDays(14);
+
                     s.FromFirst();
                 });
             }
