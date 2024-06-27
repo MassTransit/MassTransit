@@ -22,7 +22,7 @@ END";
 ALTER DATABASE [{0}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
 DROP DATABASE [{0}];";
 
-        const string RoleExistsSql = @"SELECT USER_ID('{0}')";
+        const string RoleExistsSql = @"SELECT DATABASE_PRINCIPAL_ID('{0}')";
         const string CreateRoleSql = @"CREATE ROLE {0} AUTHORIZATION [dbo]";
 
         const string GrantRoleSql = @"ALTER AUTHORIZATION ON SCHEMA::{1} TO [{0}];
@@ -1335,9 +1335,7 @@ END
 
         public async Task CreateDatabase(SqlTransportOptions options, CancellationToken cancellationToken)
         {
-            await CreateDatabaseIfNotExist(options, cancellationToken);
-
-            await CreateSchemaIfNotExist(options, cancellationToken);
+            await CreateDatabaseIfNotExist(options, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task DeleteDatabase(SqlTransportOptions options, CancellationToken cancellationToken)
@@ -1351,6 +1349,42 @@ END
                 await connection.Connection.ExecuteScalarAsync<int>(string.Format(DropSql, options.Database)).ConfigureAwait(false);
 
                 _logger.LogInformation("Database {Database} deleted", options.Database);
+            }
+        }
+
+        public async Task CreateInfrastructure(SqlTransportOptions options, CancellationToken cancellationToken)
+        {
+            await CreateSchemaIfNotExist(options, cancellationToken).ConfigureAwait(false);
+
+            await using var connection = SqlServerSqlTransportConnection.GetDatabaseConnection(options);
+            await connection.Open(cancellationToken).ConfigureAwait(false);
+
+            try
+            {
+                await connection.Connection.ExecuteScalarAsync<int>(string.Format(CreateInfrastructureSql, options.Schema)).ConfigureAwait(false);
+
+                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnCreateQueue, options.Schema)).ConfigureAwait(false);
+                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnCreateTopic, options.Schema)).ConfigureAwait(false);
+                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnCreateTopicSubscription, options.Schema)).ConfigureAwait(false);
+                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnCreateQueueSubscription, options.Schema)).ConfigureAwait(false);
+                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnPurgeQueue, options.Schema)).ConfigureAwait(false);
+                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnPublish, options.Schema)).ConfigureAwait(false);
+                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnSend, options.Schema)).ConfigureAwait(false);
+                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnFetchMessages, options.Schema)).ConfigureAwait(false);
+                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnFetchMessagesPartitioned, options.Schema)).ConfigureAwait(false);
+                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnDeleteMessage, options.Schema)).ConfigureAwait(false);
+                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnDeleteScheduledMessage, options.Schema)).ConfigureAwait(false);
+                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnRenewMessageLock, options.Schema)).ConfigureAwait(false);
+                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnUnlockMessage, options.Schema)).ConfigureAwait(false);
+                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnMoveMessage, options.Schema)).ConfigureAwait(false);
+                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnProcessMetrics, options.Schema)).ConfigureAwait(false);
+                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnPurgeTopology, options.Schema)).ConfigureAwait(false);
+
+                _logger.LogDebug("Transport infrastructure in schema {Schema} created (or updated)", options.Schema);
+            }
+            finally
+            {
+                await connection.Close().ConfigureAwait(false);
             }
         }
 
@@ -1380,7 +1414,7 @@ END
         async Task CreateSchemaIfNotExist(SqlTransportOptions options, CancellationToken cancellationToken)
         {
             await using var connection = SqlServerSqlTransportConnection.GetDatabaseAdminConnection(options);
-            await connection.Open(cancellationToken);
+            await connection.Open(cancellationToken).ConfigureAwait(false);
 
             try
             {
@@ -1388,45 +1422,11 @@ END
 
                 _logger.LogDebug("Schema {Schema} created", options.Schema);
 
-                await GrantAccess(connection, options);
+                await GrantAccess(connection, options).ConfigureAwait(false);
             }
             finally
             {
-                await connection.Close();
-            }
-        }
-
-        public async Task CreateInfrastructure(SqlTransportOptions options, CancellationToken cancellationToken)
-        {
-            await using var connection = SqlServerSqlTransportConnection.GetDatabaseConnection(options);
-            await connection.Open(cancellationToken);
-
-            try
-            {
-                await connection.Connection.ExecuteScalarAsync<int>(string.Format(CreateInfrastructureSql, options.Schema)).ConfigureAwait(false);
-
-                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnCreateQueue, options.Schema)).ConfigureAwait(false);
-                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnCreateTopic, options.Schema)).ConfigureAwait(false);
-                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnCreateTopicSubscription, options.Schema)).ConfigureAwait(false);
-                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnCreateQueueSubscription, options.Schema)).ConfigureAwait(false);
-                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnPurgeQueue, options.Schema)).ConfigureAwait(false);
-                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnPublish, options.Schema)).ConfigureAwait(false);
-                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnSend, options.Schema)).ConfigureAwait(false);
-                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnFetchMessages, options.Schema)).ConfigureAwait(false);
-                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnFetchMessagesPartitioned, options.Schema)).ConfigureAwait(false);
-                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnDeleteMessage, options.Schema)).ConfigureAwait(false);
-                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnDeleteScheduledMessage, options.Schema)).ConfigureAwait(false);
-                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnRenewMessageLock, options.Schema)).ConfigureAwait(false);
-                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnUnlockMessage, options.Schema)).ConfigureAwait(false);
-                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnMoveMessage, options.Schema)).ConfigureAwait(false);
-                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnProcessMetrics, options.Schema)).ConfigureAwait(false);
-                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnPurgeTopology, options.Schema)).ConfigureAwait(false);
-
-                _logger.LogDebug("Transport infrastructure in schema {Schema} created (or updated)", options.Schema);
-            }
-            finally
-            {
-                await connection.Close();
+                await connection.Close().ConfigureAwait(false);
             }
         }
 
