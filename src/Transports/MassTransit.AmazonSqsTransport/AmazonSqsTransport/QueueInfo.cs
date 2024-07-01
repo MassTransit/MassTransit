@@ -5,6 +5,7 @@ namespace MassTransit.AmazonSqsTransport
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using System.Xml.Schema;
     using Amazon.Auth.AccessControlPolicy;
     using Amazon.Auth.AccessControlPolicy.ActionIdentifiers;
     using Amazon.SQS;
@@ -88,25 +89,43 @@ namespace MassTransit.AmazonSqsTransport
                 if (QueueHasTopicPermission(policy, topicArn, sqsQueueArn))
                     return false;
 
-                var statement = policy.Statements.FirstOrDefault();
+                #pragma warning disable 618
+                var statement = policy.Statements.FirstOrDefault(x => x.Effect == Statement.StatementEffect.Allow
+                    && x.Actions.Any(a => a.ActionName.Equals(SQSActionIdentifiers.SendMessage.ActionName, StringComparison.Ordinal))
+                    && x.Resources.Any(a => a.Id.Equals(sqsQueueArn, StringComparison.OrdinalIgnoreCase))
+                    && x.Principals.Any(a => string.Equals(a.Provider, "Service", StringComparison.OrdinalIgnoreCase)
+                        && a.Id.Equals("sns.amazonaws.com", StringComparison.OrdinalIgnoreCase)));
+
                 if (statement is null)
                 {
                     statement = new Statement(Statement.StatementEffect.Allow);
-                    #pragma warning disable 618
                     statement.Actions.Add(SQSActionIdentifiers.SendMessage);
-                    #pragma warning restore 618
                     statement.Resources.Add(new Resource(sqsQueueArn));
                     statement.Conditions.Add(ConditionFactory.NewSourceArnCondition(topicArn));
                     statement.Principals.Add(new Principal("Service", "sns.amazonaws.com"));
                     policy.Statements.Add(statement);
                 }
+                #pragma warning restore 618
 
-                var condition = statement.Conditions.First();
-                condition.Values = condition
-                    .Values
-                    .Append(topicArn)
-                    .Distinct()
-                    .ToArray();
+                var condition = statement.Conditions.FirstOrDefault(x =>
+                    string.Equals(ConditionFactory.SOURCE_ARN_CONDITION_KEY, x.ConditionKey, StringComparison.Ordinal) &&
+                    x.Type.Equals(ConditionFactory.ArnComparisonType.ArnLike.ToString(), StringComparison.Ordinal));
+
+                if (condition is not null && condition.Values.Any(x => x.Equals(topicArn, StringComparison.OrdinalIgnoreCase)))
+                    return false;
+
+                if (condition is null)
+                {
+                    statement.Conditions.Add(ConditionFactory.NewSourceArnCondition(topicArn));
+                }
+                else
+                {
+                    condition.Values = condition
+                        .Values
+                        .Append(topicArn)
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .ToArray();
+                }
 
                 var jsonPolicy = policy.ToJson();
 
