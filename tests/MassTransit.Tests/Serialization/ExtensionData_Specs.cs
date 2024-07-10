@@ -109,6 +109,6 @@ public class ExtensionData_Specs
     public class ExtensiveMessage
     {
         [JsonExtensionData]
-        public Dictionary<string, object> Extra { get; init; }
+        public Dictionary<string, object> Extra { get; set; }
     }
 }

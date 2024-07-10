@@ -90,6 +90,8 @@ namespace MassTransit.RabbitMqTransport
 
             await pipe.Send(sendContext).ConfigureAwait(false);
 
+            CopyIncomingPropertiesIfPresent(sendContext);
+
             if (sendContext.Exchange.Equals(RabbitMqExchangeNames.ReplyTo) && string.IsNullOrWhiteSpace(sendContext.RoutingKey))
                 throw new TransportException(sendContext.DestinationAddress, "RoutingKey must be specified when sending to reply-to address");
 
@@ -248,6 +250,18 @@ namespace MassTransit.RabbitMqTransport
                             dictionary[header.Key] = formatValue.ToString();
                         break;
                 }
+            }
+        }
+
+        static void CopyIncomingPropertiesIfPresent<T>(RabbitMqSendContext<T> context)
+            where T : class
+        {
+            if (context.BasicProperties.IsPriorityPresent() == false
+                && context.TryGetPayload<ConsumeContext>(out var consumeContext)
+                && consumeContext.TryGetPayload<RabbitMqBasicConsumeContext>(out var basicConsumeContext))
+            {
+                if (basicConsumeContext.Properties.IsPriorityPresent())
+                    context.TrySetPriority(basicConsumeContext.Properties.Priority);
             }
         }
     }

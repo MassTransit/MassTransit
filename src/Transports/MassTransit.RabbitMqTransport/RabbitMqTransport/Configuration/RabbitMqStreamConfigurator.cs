@@ -1,3 +1,4 @@
+#nullable enable
 namespace MassTransit.RabbitMqTransport.Configuration;
 
 using System;
@@ -9,7 +10,6 @@ public class RabbitMqStreamConfigurator :
     IRabbitMqStreamConfigurator
 {
     static readonly DateTimeTypeConverter _dateTimeConverter = new DateTimeTypeConverter();
-    static readonly TimeSpanTypeConverter _timeSpanConverter = new TimeSpanTypeConverter();
 
     readonly RabbitMqReceiveSettings _settings;
 
