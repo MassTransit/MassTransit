@@ -151,7 +151,7 @@ namespace MassTransit.Transports
 
             await Riders.Stop(cancellationToken).ConfigureAwait(false);
 
-            await ReceiveEndpoints.Stop(cancellationToken).ConfigureAwait(false);
+            await ReceiveEndpoints.StopEndpoints(cancellationToken).ConfigureAwait(false);
 
             foreach (var agent in GetAgentHandles())
                 await agent.Stop("Bus stopped", cancellationToken).ConfigureAwait(false);

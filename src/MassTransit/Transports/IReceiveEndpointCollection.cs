@@ -2,12 +2,12 @@
 {
     using System.Collections.Generic;
     using System.Threading;
+    using System.Threading.Tasks;
 
 
     public interface IReceiveEndpointCollection :
         IReceiveEndpointObserverConnector,
         IConsumeMessageObserverConnector,
-        IAgent,
         IProbeSite
     {
         /// <summary>
@@ -32,6 +32,13 @@
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         HostReceiveEndpointHandle Start(string endpointName, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Stop all receive endpoints
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task StopEndpoints(CancellationToken cancellationToken);
 
         IEnumerable<EndpointHealthResult> CheckEndpointHealth();
     }
