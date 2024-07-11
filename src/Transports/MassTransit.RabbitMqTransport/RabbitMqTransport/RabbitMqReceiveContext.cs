@@ -99,7 +99,9 @@
             {
                 var endpoint = await _sendEndpointProvider.GetSendEndpoint(address).ConfigureAwait(false);
 
-                return new ReplyToSendEndpoint(endpoint, _replyTo);
+                return address.IsReplyToAddress()
+                    ? new ReplyToSendEndpoint(endpoint, _replyTo)
+                    : endpoint;
             }
         }
     }

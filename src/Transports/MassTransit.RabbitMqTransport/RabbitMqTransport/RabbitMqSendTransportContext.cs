@@ -74,6 +74,8 @@ namespace MassTransit.RabbitMqTransport
 
             await pipe.Send(sendContext).ConfigureAwait(false);
 
+            CopyIncomingPropertiesIfPresent(sendContext);
+
             if (sendContext.Exchange.Equals(RabbitMqExchangeNames.ReplyTo) && string.IsNullOrWhiteSpace(sendContext.RoutingKey))
                 throw new TransportException(sendContext.DestinationAddress, "RoutingKey must be specified when sending to reply-to address");
 
@@ -142,8 +144,8 @@ namespace MassTransit.RabbitMqTransport
                     .ToString("F0", CultureInfo.InvariantCulture);
             }
 
-            if (context.RequestId.HasValue && (context.ResponseAddress?.AbsolutePath?.EndsWith(RabbitMqExchangeNames.ReplyTo) ?? false))
-                context.BasicProperties.ReplyTo = RabbitMqExchangeNames.ReplyTo;
+            if (context.RequestId.HasValue && context.ResponseAddress.IsReplyToAddress())
+                context.BasicProperties.ReplyTo ??= RabbitMqExchangeNames.ReplyTo;
 
             var delay = context.Delay?.TotalMilliseconds;
             if (delay > 0 && exchange != "")
@@ -256,12 +258,17 @@ namespace MassTransit.RabbitMqTransport
         static void CopyIncomingPropertiesIfPresent<T>(RabbitMqSendContext<T> context)
             where T : class
         {
-            if (context.BasicProperties.IsPriorityPresent() == false
-                && context.TryGetPayload<ConsumeContext>(out var consumeContext)
+            if (context.TryGetPayload<ConsumeContext>(out var consumeContext)
                 && consumeContext.TryGetPayload<RabbitMqBasicConsumeContext>(out var basicConsumeContext))
             {
-                if (basicConsumeContext.Properties.IsPriorityPresent())
-                    context.TrySetPriority(basicConsumeContext.Properties.Priority);
+                if (context.BasicProperties.IsPriorityPresent() == false)
+                {
+                    if (basicConsumeContext.Properties.IsPriorityPresent())
+                        context.TrySetPriority(basicConsumeContext.Properties.Priority);
+                }
+
+                if (!string.IsNullOrWhiteSpace(basicConsumeContext.Properties.ReplyTo) && context.ResponseAddress.IsReplyToAddress())
+                    context.BasicProperties.ReplyTo = basicConsumeContext.Properties.ReplyTo;
             }
         }
     }

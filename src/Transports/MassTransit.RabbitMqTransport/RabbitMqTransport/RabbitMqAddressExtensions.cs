@@ -171,5 +171,10 @@ namespace MassTransit.RabbitMqTransport
         {
             return Uri.UnescapeDataString(uri.Replace("+", "%2B"));
         }
+
+        public static bool IsReplyToAddress(this Uri address)
+        {
+            return address?.AbsolutePath?.EndsWith(RabbitMqExchangeNames.ReplyTo) ?? false;
+        }
     }
 }
