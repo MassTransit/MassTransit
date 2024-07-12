@@ -17,7 +17,7 @@
         SessionContext,
         IAsyncDisposable
     {
-        readonly ChannelExecutor _executor;
+        readonly TaskExecutor _executor;
         readonly MessageProducerCache _messageProducerCache;
         readonly ISession _session;
 
@@ -28,7 +28,7 @@
             _session = session;
             CancellationToken = cancellationToken;
 
-            _executor = new ChannelExecutor(1);
+            _executor = new TaskExecutor();
 
             _messageProducerCache = new MessageProducerCache();
         }

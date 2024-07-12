@@ -12,7 +12,7 @@ namespace MassTransit.Util
     {
         readonly IHashGenerator _hashGenerator;
         readonly PartitionKeyProvider<T> _partitionKeyProvider;
-        readonly Lazy<ChannelExecutor>[] _partitions;
+        readonly Lazy<TaskExecutor>[] _partitions;
 
         public PartitionChannelExecutorPool(PartitionKeyProvider<T> partitionKeyProvider, IHashGenerator hashGenerator, int concurrencyLimit,
             int concurrentDeliveryLimit = 1)
@@ -20,13 +20,13 @@ namespace MassTransit.Util
             _partitionKeyProvider = partitionKeyProvider;
             _hashGenerator = hashGenerator;
             _partitions = Enumerable.Range(0, concurrencyLimit)
-                .Select(x => new Lazy<ChannelExecutor>(() => new ChannelExecutor(concurrentDeliveryLimit)))
+                .Select(_ => new Lazy<TaskExecutor>(() => new TaskExecutor(concurrentDeliveryLimit)))
                 .ToArray();
         }
 
         public async ValueTask DisposeAsync()
         {
-            foreach (Lazy<ChannelExecutor> partition in _partitions)
+            foreach (Lazy<TaskExecutor> partition in _partitions)
             {
                 if (partition.IsValueCreated)
                     await partition.Value.DisposeAsync().ConfigureAwait(false);
@@ -45,7 +45,7 @@ namespace MassTransit.Util
             return executor.Run(method, cancellationToken);
         }
 
-        ChannelExecutor GetChannelExecutor(T partition)
+        TaskExecutor GetChannelExecutor(T partition)
         {
             if (_partitions.Length == 1)
                 return _partitions[0].Value;

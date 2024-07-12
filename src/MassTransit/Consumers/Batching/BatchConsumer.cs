@@ -17,8 +17,8 @@
     {
         readonly TaskCompletionSource<DateTime> _completed;
         readonly IPipe<ConsumeContext<Batch<TMessage>>> _consumerPipe;
-        readonly ChannelExecutor _dispatcher;
-        readonly ChannelExecutor _executor;
+        readonly TaskExecutor _dispatcher;
+        readonly TaskExecutor _executor;
         readonly DateTime _firstMessage;
         readonly Dictionary<Guid, BatchEntry> _messages;
         readonly BatchOptions _options;
@@ -27,7 +27,7 @@
         DateTime _lastMessage;
         ILogContext _logContext;
 
-        public BatchConsumer(BatchOptions options, ChannelExecutor executor, ChannelExecutor dispatcher, IPipe<ConsumeContext<Batch<TMessage>>> consumerPipe)
+        public BatchConsumer(BatchOptions options, TaskExecutor executor, TaskExecutor dispatcher, IPipe<ConsumeContext<Batch<TMessage>>> consumerPipe)
         {
             _executor = executor;
             _consumerPipe = consumerPipe;

@@ -19,7 +19,7 @@ namespace MassTransit.ActiveMqTransport
         IAsyncDisposable
     {
         readonly IConnection _connection;
-        readonly ChannelExecutor _executor;
+        readonly TaskExecutor _executor;
         readonly ConcurrentDictionary<string, IDestination> _temporaryEntities;
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace MassTransit.ActiveMqTransport
 
             Topology = hostConfiguration.Topology;
 
-            _executor = new ChannelExecutor(1);
+            _executor = new TaskExecutor();
             _temporaryEntities = new ConcurrentDictionary<string, IDestination>();
 
             _virtualTopicConsumerPattern = new Regex(hostConfiguration.Topology.PublishTopology.VirtualTopicConsumerPattern, RegexOptions.Compiled);
@@ -65,12 +65,12 @@ namespace MassTransit.ActiveMqTransport
 
         public IQueue GetTemporaryQueue(ISession session, string topicName)
         {
-            return (IQueue)_temporaryEntities.GetOrAdd(topicName, x => (IQueue)SessionUtil.GetDestination(session, topicName, DestinationType.TemporaryQueue));
+            return (IQueue)_temporaryEntities.GetOrAdd(topicName, _ => (IQueue)SessionUtil.GetDestination(session, topicName, DestinationType.TemporaryQueue));
         }
 
         public ITopic GetTemporaryTopic(ISession session, string topicName)
         {
-            return (ITopic)_temporaryEntities.GetOrAdd(topicName, x => (ITopic)SessionUtil.GetDestination(session, topicName, DestinationType.TemporaryTopic));
+            return (ITopic)_temporaryEntities.GetOrAdd(topicName, _ => (ITopic)SessionUtil.GetDestination(session, topicName, DestinationType.TemporaryTopic));
         }
 
         public bool TryGetTemporaryEntity(string name, out IDestination destination)

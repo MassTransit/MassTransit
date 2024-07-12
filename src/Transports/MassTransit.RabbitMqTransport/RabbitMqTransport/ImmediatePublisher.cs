@@ -10,10 +10,10 @@ namespace MassTransit.RabbitMqTransport
         IPublisher
     {
         readonly PendingConfirmationCollection _confirmations;
-        readonly ChannelExecutor _executor;
+        readonly TaskExecutor _executor;
         readonly IModel _model;
 
-        public ImmediatePublisher(ChannelExecutor executor, IModel model, PendingConfirmationCollection confirmations)
+        public ImmediatePublisher(TaskExecutor executor, IModel model, PendingConfirmationCollection confirmations)
         {
             _executor = executor;
             _model = model;

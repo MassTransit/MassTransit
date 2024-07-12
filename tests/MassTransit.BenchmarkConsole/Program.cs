@@ -6,20 +6,13 @@
 
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             Console.WriteLine("MassTransit Benchmark");
             Console.WriteLine();
 
-            //  BenchmarkRunner.Run<SendBenchmark>();
-
-            //          BenchmarkRunner.Run<SupervisorBenchmark>();
-
-            //  BenchmarkRunner.Run<JsonSerializationBenchmark>();
-
-            //  BenchmarkRunner.Run<MediatorBenchmark>();
-
-            BenchmarkRunner.Run<NewIdBenchmarks>();
+            //BenchmarkRunner.Run<ChannelBenchmark>();
+            BenchmarkRunner.Run<ConcurrentChannelBenchmark>();
         }
     }
 }

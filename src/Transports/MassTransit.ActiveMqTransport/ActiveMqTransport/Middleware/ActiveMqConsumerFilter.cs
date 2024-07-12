@@ -95,7 +95,7 @@ namespace MassTransit.ActiveMqTransport.Middleware
 
             supervisor.SetReady();
 
-            supervisor.Completed.ContinueWith(task => context.ConnectionContext.Connection.ExceptionListener -= HandleException,
+            supervisor.Completed.ContinueWith(_ => context.ConnectionContext.Connection.ExceptionListener -= HandleException,
                 TaskContinuationOptions.ExecuteSynchronously);
 
             return supervisor;

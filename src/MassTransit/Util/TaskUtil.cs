@@ -247,13 +247,13 @@ namespace MassTransit.Util
             IDisposable
         {
             readonly CancellationToken _cancellationToken;
-            readonly ChannelExecutor _executor;
+            readonly TaskExecutor _executor;
             bool _completed;
 
             public SingleThreadSynchronizationContext(CancellationToken cancellationToken)
             {
                 _cancellationToken = cancellationToken;
-                _executor = new ChannelExecutor(1);
+                _executor = new TaskExecutor(1);
             }
 
             public void Dispose()
@@ -271,7 +271,7 @@ namespace MassTransit.Util
 
                 try
                 {
-                    _executor?.Push(async () => callback(state), _cancellationToken);
+                    _executor?.Run(() => callback(state), _cancellationToken);
                 }
                 catch (InvalidOperationException)
                 {
