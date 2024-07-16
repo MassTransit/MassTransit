@@ -21,7 +21,7 @@ namespace MassTransit.HangfireIntegration
         }
 
         [HashCleanup]
-        public async Task SendMessage(HangfireScheduledMessageData messageData, PerformContext performContext)
+        public async Task SendMessage(HashedHangfireScheduledMessageData messageData, PerformContext performContext)
         {
             try
             {
