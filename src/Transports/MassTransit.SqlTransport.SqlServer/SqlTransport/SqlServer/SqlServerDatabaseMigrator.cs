@@ -34,9 +34,34 @@ GRANT REFERENCES to {0};
         const string LoginExistsSql = @"SELECT 1 FROM sys.syslogins WHERE [name] = '{0}'";
         const string CreateLoginSql = @"CREATE LOGIN {0} WITH PASSWORD = '{1}';";
 
-        const string CreateUserSql = @"USE [{0}];
-CREATE USER {2} FOR LOGIN {2} WITH DEFAULT_SCHEMA = {1};
-EXEC sp_addrolemember '{3}', '{2}';";
+        const string CreateUserSql = @"
+IF ORIGINAL_LOGIN() != '{1}' OR CURRENT_USER = '{1}'
+BEGIN
+    CREATE USER {1} FOR LOGIN {1} WITH DEFAULT_SCHEMA = {0}
+END
+";
+
+        const string IsRoleMemberSql = @"
+IF ORIGINAL_LOGIN() = '{1}' AND CURRENT_USER = 'dbo'
+BEGIN
+    SELECT 1
+END
+ELSE
+BEGIN
+    SELECT IS_ROLEMEMBER('{0}', '{1}')
+END
+";
+
+        const string AddRoleMemberSql = @"USE [{0}];
+IF ORIGINAL_LOGIN() = '{1}' AND CURRENT_USER = 'dbo'
+BEGIN
+    EXEC sp_addrolemember '{2}', 'dbo';
+END
+ELSE
+BEGIN
+    EXEC sp_addrolemember '{2}', '{1}';
+END
+";
 
         const string CreateInfrastructureSql = @"
 IF OBJECT_ID('{0}.TopologySequence', 'SO') IS NULL
@@ -1404,6 +1429,15 @@ END
 
                     _logger.LogInformation("Database {Database} created", options.Database);
                 }
+
+                result = await connection.Connection.ExecuteScalarAsync<int?>(string.Format(LoginExistsSql, options.Username)).ConfigureAwait(false);
+                if (!result.HasValue)
+                {
+                    await connection.Connection.ExecuteScalarAsync<int>(string.Format(CreateLoginSql, options.Username, options.Password))
+                        .ConfigureAwait(false);
+
+                    _logger.LogDebug("Login {Username} created", options.Username);
+                }
             }
             finally
             {
@@ -1444,22 +1478,25 @@ END
 
             _logger.LogDebug("Role {Role} granted access to schema {Schema}", options.Role, options.Schema);
 
-            result = await connection.Connection.ExecuteScalarAsync<int?>(string.Format(LoginExistsSql, options.Username)).ConfigureAwait(false);
-            if (!result.HasValue)
-            {
-                await connection.Connection.ExecuteScalarAsync<int>(string.Format(CreateLoginSql, options.Username, options.Password)).ConfigureAwait(false);
-
-                _logger.LogDebug("Role {Role} created", options.Role);
-            }
-
             result = await connection.Connection.ExecuteScalarAsync<int?>(string.Format(RoleExistsSql, options.Username)).ConfigureAwait(false);
             if (!result.HasValue)
             {
-                await connection.Connection
-                    .ExecuteScalarAsync<int>(string.Format(CreateUserSql, options.Database, options.Schema, options.Username, options.Role))
+                result = await connection.Connection
+                    .ExecuteScalarAsync<int?>(string.Format(CreateUserSql, options.Schema, options.Username))
                     .ConfigureAwait(false);
 
-                _logger.LogDebug("User {Username} created", options.Username);
+                if (result is 1)
+                    _logger.LogDebug("User {Username} created", options.Username);
+            }
+
+            result = await connection.Connection.ExecuteScalarAsync<int?>(string.Format(IsRoleMemberSql, options.Role, options.Username)).ConfigureAwait(false);
+            if (result is null or 0)
+            {
+                await connection.Connection
+                    .ExecuteScalarAsync<int>(string.Format(AddRoleMemberSql, options.Database, options.Username, options.Role))
+                    .ConfigureAwait(false);
+
+                _logger.LogDebug("User {Username} added to role {Role}", options.Username, options.Role);
             }
         }
     }
