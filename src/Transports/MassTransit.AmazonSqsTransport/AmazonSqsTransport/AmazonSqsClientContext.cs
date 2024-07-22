@@ -154,8 +154,10 @@ namespace MassTransit.AmazonSqsTransport
             {
                 MaxNumberOfMessages = messageLimit,
                 WaitTimeSeconds = waitTime,
-                AttributeNames = new List<string> { "All" },
-                MessageAttributeNames = new List<string> { "All" }
+                #pragma warning disable CS0618 // Type or member is obsolete
+                AttributeNames = ["All"],
+                #pragma warning restore CS0618 // Type or member is obsolete
+                MessageAttributeNames = ["All"]
             };
 
             var response = await _sqsClient.ReceiveMessageAsync(request, cancellationToken).ConfigureAwait(false);
