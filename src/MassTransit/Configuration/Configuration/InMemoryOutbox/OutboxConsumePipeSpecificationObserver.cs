@@ -1,6 +1,7 @@
 namespace MassTransit.Configuration
 {
     using System;
+    using Courier.Contracts;
     using DependencyInjection;
     using JobService;
     using Metadata;
@@ -11,6 +12,7 @@ namespace MassTransit.Configuration
     public class OutboxConsumePipeSpecificationObserver<TContext> :
         IConsumerConfigurationObserver,
         ISagaConfigurationObserver,
+        IActivityConfigurationObserver,
         IOutboxOptionsConfigurator
         where TContext : class
     {
@@ -32,6 +34,27 @@ namespace MassTransit.Configuration
 
             MessageDeliveryLimit = 1;
             MessageDeliveryTimeout = TimeSpan.FromSeconds(30);
+        }
+
+        public void ActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator, Uri compensateAddress)
+            where TActivity : class, IExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            configurator.RoutingSlip(e => AddScopedFilter<TActivity, RoutingSlip>(e));
+        }
+
+        public void ExecuteActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator)
+            where TActivity : class, IExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            configurator.RoutingSlip(e => AddScopedFilter<TActivity, RoutingSlip>(e));
+        }
+
+        public void CompensateActivityConfigured<TActivity, TLog>(ICompensateActivityConfigurator<TActivity, TLog> configurator)
+            where TActivity : class, ICompensateActivity<TLog>
+            where TLog : class
+        {
+            configurator.RoutingSlip(e => AddScopedFilter<TActivity, RoutingSlip>(e));
         }
 
         public void ConsumerConfigured<TConsumer>(IConsumerConfigurator<TConsumer> configurator)
