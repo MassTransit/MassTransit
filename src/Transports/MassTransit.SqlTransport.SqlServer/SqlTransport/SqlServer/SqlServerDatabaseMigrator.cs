@@ -28,6 +28,7 @@ DROP DATABASE [{0}];";
         const string GrantRoleSql = @"ALTER AUTHORIZATION ON SCHEMA::{1} TO [{0}];
 GRANT CREATE TABLE to {0};
 GRANT CREATE PROCEDURE to {0};
+GRANT CREATE VIEW to {0};
 GRANT REFERENCES to {0};
 ";
 

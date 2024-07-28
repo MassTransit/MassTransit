@@ -62,6 +62,11 @@ public interface ISqlHostConfigurator
     IsolationLevel IsolationLevel { set; }
 
     /// <summary>
+    /// Sets the maximum number of connections used by the SQL transport concurrently.
+    /// </summary>
+    int ConnectionLimit { set; }
+
+    /// <summary>
     /// How often database maintenance should be performed (metrics consolidation, topology cleanup, etc.)
     /// </summary>
     TimeSpan MaintenanceInterval { set; }

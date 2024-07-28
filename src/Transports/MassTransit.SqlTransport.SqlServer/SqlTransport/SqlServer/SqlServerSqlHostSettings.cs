@@ -38,6 +38,9 @@ namespace MassTransit.SqlTransport.SqlServer
             Password = builder.Password;
 
             _builder = builder;
+
+            if (options.ConnectionLimit.HasValue)
+                ConnectionLimit = options.ConnectionLimit.Value;
         }
 
         public string? ConnectionString

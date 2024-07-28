@@ -11,6 +11,7 @@ namespace MassTransit.SqlTransport.SqlServer
     using Microsoft.Data.SqlClient;
     using RetryPolicies;
     using Transports;
+    using Util;
 
 
     public class SqlServerDbConnectionContext :
@@ -21,6 +22,7 @@ namespace MassTransit.SqlTransport.SqlServer
         readonly ISqlHostConfiguration _hostConfiguration;
         readonly SqlServerSqlHostSettings _hostSettings;
         readonly IRetryPolicy _retryPolicy;
+        readonly TaskExecutor _executor;
 
         static SqlServerDbConnectionContext()
         {
@@ -41,6 +43,8 @@ namespace MassTransit.SqlTransport.SqlServer
             Topology = hostConfiguration.Topology;
 
             supervisor.AddConsumeAgent(new MaintenanceAgent(this, hostConfiguration));
+
+            _executor = new TaskExecutor(hostConfiguration.Settings.ConnectionLimit);
         }
 
         public ISqlBusTopology Topology { get; }
@@ -61,29 +65,32 @@ namespace MassTransit.SqlTransport.SqlServer
             return await CreateConnection(cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task<T> Query<T>(Func<IDbConnection, IDbTransaction, Task<T>> callback, CancellationToken cancellationToken)
+        public Task<T> Query<T>(Func<IDbConnection, IDbTransaction, Task<T>> callback, CancellationToken cancellationToken)
         {
-            await using var connection = await CreateConnection(cancellationToken);
-
-            return await _retryPolicy.Retry(async () =>
+            return _executor.Run(async () =>
             {
-            #if NET6_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
+                await using var connection = await CreateConnection(cancellationToken);
+
+                return await _retryPolicy.Retry(async () =>
+                {
+                #if NET6_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
                 await using var transaction = await connection.Connection.BeginTransactionAsync(_hostSettings.IsolationLevel, cancellationToken);
-            #else
-                // ReSharper disable AccessToDisposedClosure
-                using var transaction = connection.Connection.BeginTransaction(_hostSettings.IsolationLevel);
-            #endif
+                #else
+                    // ReSharper disable AccessToDisposedClosure
+                    using var transaction = connection.Connection.BeginTransaction(_hostSettings.IsolationLevel);
+                #endif
 
-                var result = await callback(connection.Connection, transaction).ConfigureAwait(false);
+                    var result = await callback(connection.Connection, transaction).ConfigureAwait(false);
 
-            #if NET6_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
+                #if NET6_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
                 await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
-            #else
-                transaction.Commit();
-            #endif
+                #else
+                    transaction.Commit();
+                #endif
 
-                return result;
-            }, false, cancellationToken).ConfigureAwait(false);
+                    return result;
+                }, false, cancellationToken).ConfigureAwait(false);
+            }, cancellationToken);
         }
 
         public Task DelayUntilMessageReady(long queueId, TimeSpan timeout, CancellationToken cancellationToken)
@@ -99,6 +106,8 @@ namespace MassTransit.SqlTransport.SqlServer
 
         public async ValueTask DisposeAsync()
         {
+            await _executor.DisposeAsync().ConfigureAwait(false);
+
             TransportLogMessages.DisconnectedHost(_hostConfiguration.HostAddress.ToString());
         }
 

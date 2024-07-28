@@ -36,6 +36,9 @@ namespace MassTransit.SqlTransport.PostgreSql
             Password = builder.Password;
 
             _builder = builder;
+
+            if(options.ConnectionLimit.HasValue)
+                ConnectionLimit = options.ConnectionLimit.Value;
         }
 
         public string? MultipleHosts { get; set; }

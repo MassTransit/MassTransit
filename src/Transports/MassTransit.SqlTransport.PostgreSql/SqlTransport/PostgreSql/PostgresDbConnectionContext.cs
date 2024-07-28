@@ -13,6 +13,7 @@ namespace MassTransit.SqlTransport.PostgreSql
     using Npgsql;
     using RetryPolicies;
     using Transports;
+    using Util;
 
 
     public class PostgresDbConnectionContext :
@@ -21,6 +22,7 @@ namespace MassTransit.SqlTransport.PostgreSql
         IAsyncDisposable
     {
         readonly NotificationAgent _agent;
+        readonly TaskExecutor _executor;
         readonly ISqlHostConfiguration _hostConfiguration;
         readonly PostgresSqlHostSettings _hostSettings;
         readonly IRetryPolicy _retryPolicy;
@@ -47,6 +49,8 @@ namespace MassTransit.SqlTransport.PostgreSql
             supervisor.AddConsumeAgent(_agent);
 
             supervisor.AddConsumeAgent(new MaintenanceAgent(this, hostConfiguration));
+
+            _executor = new TaskExecutor(hostConfiguration.Settings.ConnectionLimit);
         }
 
         public ISqlBusTopology Topology { get; }
@@ -67,25 +71,28 @@ namespace MassTransit.SqlTransport.PostgreSql
             return await CreateConnection(cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task<T> Query<T>(Func<IDbConnection, IDbTransaction, Task<T>> callback, CancellationToken cancellationToken)
+        public Task<T> Query<T>(Func<IDbConnection, IDbTransaction, Task<T>> callback, CancellationToken cancellationToken)
         {
-            await using var connection = await CreateConnection(cancellationToken);
-
-            return await _retryPolicy.Retry(async () =>
+            return _executor.Run(async () =>
             {
-            #if NET6_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
-                await using var transaction = await connection.Connection.BeginTransactionAsync(_hostSettings.IsolationLevel, cancellationToken);
-            #else
+                await using var connection = await CreateConnection(cancellationToken);
+
+                return await _retryPolicy.Retry(async () =>
+                {
+                #if NET6_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
+                    await using var transaction = await connection.Connection.BeginTransactionAsync(_hostSettings.IsolationLevel, cancellationToken);
+                #else
                 // ReSharper disable AccessToDisposedClosure
                 await using var transaction = connection.Connection.BeginTransaction(_hostSettings.IsolationLevel);
-            #endif
+                #endif
 
-                var result = await callback(connection.Connection, transaction).ConfigureAwait(false);
+                    var result = await callback(connection.Connection, transaction).ConfigureAwait(false);
 
-                await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+                    await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
 
-                return result;
-            }, false, cancellationToken).ConfigureAwait(false);
+                    return result;
+                }, false, cancellationToken).ConfigureAwait(false);
+            }, cancellationToken);
         }
 
         public Task DelayUntilMessageReady(long queueId, TimeSpan timeout, CancellationToken cancellationToken)
