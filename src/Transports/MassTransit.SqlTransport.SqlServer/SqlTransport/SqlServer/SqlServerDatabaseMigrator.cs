@@ -1351,6 +1351,70 @@ BEGIN
 END
 ";
 
+        const string SqlFnQueuesView = """
+        CREATE OR ALTER VIEW {0}.Queues
+        AS
+        SELECT x.QueueName,
+               MAX(IIF(x.QueueAutoDelete = 1, 1, 0)) AS QueueAutoDelete,
+               SUM(x.MessageReady)                   AS Ready,
+               SUM(x.MessageScheduled)               AS Scheduled,
+               SUM(x.MessageError)                   AS Errored,
+               SUM(x.MessageDeadLetter)              AS DeadLettered,
+               SUM(x.MessageLocked)                  AS Locked,
+               ISNULL(MAX(x.ConsumeCount), 0)        AS ConsumeCount,
+               ISNULL(MAX(x.ErrorCount), 0)          AS ErrorCount,
+               ISNULL(MAX(x.DeadLetterCount), 0)     AS DeadLetterCount,
+               MAX(x.StartTime)                      AS CountStartTime,
+               ISNULL(MAX(x.Duration), 0)            AS CountDuration
+        FROM (SELECT q.Name                                              AS QueueName,
+                     IIF(q.AutoDelete = 1, 1, 0)                         AS QueueAutoDelete,
+                     qm.ConsumeCount,
+                     qm.ErrorCount,
+                     qm.DeadLetterCount,
+                     qm.StartTime,
+                     qm.Duration,
+
+                     IIF(q.Type = 1
+                             AND md.MessageDeliveryId IS NOT NULL
+                             AND md.EnqueueTime <= GETUTCDATE(), 1, 0)   AS MessageReady,
+                     IIF(q.Type = 1
+                             AND md.MessageDeliveryId IS NOT NULL
+                             AND md.LockId IS NULL
+                             AND md.EnqueueTime > GETUTCDATE(), 1, 0)    AS MessageScheduled,
+                     IIF(q.Type = 1
+                             AND md.MessageDeliveryId IS NOT NULL
+                             AND md.LockId IS NOT NULL
+                             AND md.DeliveryCount >= 1
+                             AND md.EnqueueTime > GETUTCDATE(), 1, 0)    AS MessageLocked,
+                     IIF(q.Type = 2
+                             AND md.MessageDeliveryId IS NOT NULL, 1, 0) AS MessageError,
+                     IIF(q.Type = 3
+                             AND md.MessageDeliveryId IS NOT NULL, 1, 0) AS MessageDeadLetter
+              FROM transport.Queue q
+                       LEFT JOIN transport.MessageDelivery md ON q.Id = md.QueueId
+                       LEFT JOIN (SELECT qm.QueueId,
+                                         qm.QueueName,
+                                         qm.ConsumeCount    AS ConsumeCount,
+                                         qm.ErrorCount      AS ErrorCount,
+                                         qm.DeadLetterCount AS DeadLetterCount,
+                                         qm.StartTime,
+                                         qm.Duration
+                                  FROM (SELECT qm.QueueId,
+                                               q2.Name                                                                as QueueName,
+                                               ROW_NUMBER() OVER (PARTITION BY qm.QueueId ORDER BY qm.StartTime DESC) AS RowNum,
+                                               qm.ConsumeCount,
+                                               qm.ErrorCount,
+                                               qm.DeadLetterCount,
+                                               qm.StartTime,
+                                               qm.Duration
+                                        FROM transport.QueueMetric qm
+                                                 INNER JOIN transport.Queue q2 ON qm.QueueId = q2.Id
+                                        WHERE q2.Type = 1
+                                          AND qm.StartTime >= DATEADD(MINUTE, -5, GETUTCDATE())) qm
+                                  WHERE qm.RowNum = 1) qm ON qm.QueueId = q.Id) x
+        GROUP BY x.QueueName;
+        """;
+
         readonly ILogger<SqlServerDatabaseMigrator> _logger;
 
         public SqlServerDatabaseMigrator(ILogger<SqlServerDatabaseMigrator> logger)
@@ -1404,6 +1468,7 @@ END
                 await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnMoveMessage, options.Schema)).ConfigureAwait(false);
                 await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnProcessMetrics, options.Schema)).ConfigureAwait(false);
                 await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnPurgeTopology, options.Schema)).ConfigureAwait(false);
+                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnQueuesView, options.Schema)).ConfigureAwait(false);
 
                 _logger.LogDebug("Transport infrastructure in schema {Schema} created (or updated)", options.Schema);
             }

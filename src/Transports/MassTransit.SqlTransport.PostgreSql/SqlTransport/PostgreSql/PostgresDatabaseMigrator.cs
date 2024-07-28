@@ -6,7 +6,8 @@ namespace MassTransit.SqlTransport.PostgreSql
     using Microsoft.Extensions.Logging;
 
 
-    public class PostgresDatabaseMigrator :
+    public class
+        PostgresDatabaseMigrator :
         ISqlTransportDatabaseMigrator
     {
         const string DbExistsSql = "SELECT COUNT(*) FROM pg_database WHERE datname = '{0}'";
@@ -965,6 +966,68 @@ namespace MassTransit.SqlTransport.PostgreSql
                 RETURN 0;
             END;
             $$;
+
+            CREATE OR REPLACE VIEW "{0}".queues
+            AS
+            SELECT x.queue_name,
+                   bool_or(x.queue_auto_delete)                  as queue_auto_delete,
+                   SUM(x.message_ready)                          as ready,
+                   SUM(x.message_scheduled)                      as scheduled,
+                   SUM(x.message_error)                          as errored,
+                   SUM(x.message_dead_letter)                    as dead_lettered,
+                   SUM(x.message_locked)                         as locked,
+                   COALESCE(SUM(x.consume_count), 0)::bigint     as consume_count,
+                   COALESCE(SUM(x.error_count), 0)::bigint       as error_count,
+                   COALESCE(SUM(x.dead_letter_count), 0)::bigint as dead_letter_count,
+                   COALESCE(MAX(x.duration), 0)::int             as count_duration
+
+            FROM (SELECT q.name                                               as queue_name,
+                         CASE WHEN q.auto_delete = 1 THEN true else false end as queue_auto_delete,
+                         qm.consume_count,
+                         qm.error_count,
+                         qm.dead_letter_count,
+                         qm.duration,
+
+                         CASE
+                             WHEN q.type = 1
+                                 AND md.message_delivery_id IS NOT NULL
+                                 AND md.enqueue_time <= (now() at time zone 'utc') THEN 1
+                             ELSE 0 END                                       as message_ready,
+                         CASE
+                             WHEN q.type = 1
+                                 AND md.message_delivery_id IS NOT NULL
+                                 AND md.lock_id IS NULL
+                                 AND md.enqueue_time > (now() at time zone 'utc') THEN 1
+                             ELSE 0 END                                       as message_scheduled,
+                         CASE
+                             WHEN q.type = 1
+                                 AND md.message_delivery_id IS NOT NULL
+                                 AND md.lock_id IS NOT NULL
+                                 AND md.delivery_count >= 1
+                                 AND md.enqueue_time > (now() at time zone 'utc') THEN 1
+                             ELSE 0 END                                       as message_locked,
+                         CASE
+                             WHEN q.type = 2
+                                 AND md.message_delivery_id IS NOT NULL THEN 1
+                             ELSE 0 END                                       as message_error,
+                         CASE
+                             WHEN q.type = 3
+                                 AND md.message_delivery_id IS NOT NULL THEN 1
+                             ELSE 0 END                                       as message_dead_letter
+                  FROM "{0}".queue q
+                           LEFT JOIN "{0}".message_delivery md ON q.id = md.queue_id
+                           LEFT JOIN (SELECT DISTINCT ON (qm.queue_id) qm.queue_id,
+                                                                       q2.name                         as queue_name,
+                                                                       qm.consume_count                as consume_count,
+                                                                       qm.error_count                  as error_count,
+                                                                       qm.dead_letter_count            as dead_letter_count,
+                                                                       EXTRACT(EPOCH FROM qm.duration) as duration
+                                      FROM "{0}".queue_metric qm
+                                               INNER JOIN "{0}".queue q2 on qm.queue_id = q2.id
+                                      WHERE q2.type = 1
+                                        AND qm.start_time >= (now() at time zone 'utc') - interval '1 minutes'
+                                      ORDER BY qm.queue_id, qm.start_time DESC) qm ON qm.queue_id = q.id) x
+            GROUP BY x.queue_name;
 
             SET ROLE none;
             """;
