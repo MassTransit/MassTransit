@@ -69,6 +69,8 @@ namespace MassTransit.Logging
                 { _options.EndpointLabel, GetEndpointLabel(context.InputAddress) }
             };
 
+            AddCustomTags(tagList, context);
+
             _receiveTotal.Add(1, tagList);
             _receiveInProgress.Add(1, tagList);
 
@@ -97,6 +99,8 @@ namespace MassTransit.Logging
                 { _options.MessageTypeLabel, messageTypeLabel },
                 { _options.ConsumerTypeLabel, GetConsumerTypeLabel<MessageHandler<TMessage>, TMessage>(messageTypeLabel) }
             };
+
+            AddCustomTags(tagList, context);
 
             _handlerTotal.Add(1, tagList);
             _handlerInProgress.Add(1, tagList);
@@ -127,6 +131,8 @@ namespace MassTransit.Logging
                 { _options.ConsumerTypeLabel, GetConsumerTypeLabel<TSaga, T>(messageTypeLabel) }
             };
 
+            AddCustomTags(tagList, context);
+
             _sagaTotal.Add(1, tagList);
             _sagaInProgress.Add(1, tagList);
 
@@ -156,6 +162,8 @@ namespace MassTransit.Logging
                 { _options.ConsumerTypeLabel, GetConsumerTypeLabel<TSaga, T>(messageTypeLabel) }
             };
 
+            AddCustomTags(tagList, context);
+
             _sagaTotal.Add(1, tagList);
             _sagaInProgress.Add(1, tagList);
 
@@ -183,6 +191,8 @@ namespace MassTransit.Logging
                 { _options.MessageTypeLabel, messageTypeLabel },
                 { _options.ConsumerTypeLabel, GetConsumerTypeLabel<TConsumer, T>(messageTypeLabel) }
             };
+
+            AddCustomTags(tagList, context);
 
             _consumeTotal.Add(1, tagList);
             _consumerInProgress.Add(1, tagList);
@@ -226,6 +236,8 @@ namespace MassTransit.Logging
                 { _options.ArgumentTypeLabel, GetArgumentTypeLabel<TArguments>() }
             };
 
+            AddCustomTags(tagList, context);
+
             _executeTotal.Add(1, tagList);
             _executeInProgress.Add(1, tagList);
 
@@ -255,6 +267,8 @@ namespace MassTransit.Logging
                 { _options.LogTypeLabel, GetLogTypeLabel<TLog>() }
             };
 
+            AddCustomTags(tagList, context);
+
             _compensateTotal.Add(1, tagList);
             _compensateInProgress.Add(1, tagList);
 
@@ -280,6 +294,9 @@ namespace MassTransit.Logging
                 { _options.ServiceNameLabel, _options.ServiceName },
                 { _options.MessageTypeLabel, GetMessageTypeLabel<T>() }
             };
+
+            AddCustomTags(tagList, context);
+
             _sendTotal.Add(1, tagList);
 
             return new StartedInstrument(exception =>
@@ -301,6 +318,8 @@ namespace MassTransit.Logging
                 { _options.MessageTypeLabel, GetMessageTypeLabel<T>() }
             };
 
+            AddCustomTags(tagList, context);
+
             _outboxSendTotal.Add(1, tagList);
 
             return new StartedInstrument(exception =>
@@ -320,6 +339,28 @@ namespace MassTransit.Logging
                 { _options.ServiceNameLabel, _options.ServiceName },
                 { _options.EndpointLabel, GetEndpointLabel(context.DestinationAddress) }
             };
+
+            _outboxDeliveryTotal.Add(1, tagList);
+
+            return new StartedInstrument(exception =>
+            {
+                tagList.Add(_options.ExceptionTypeLabel, exception.GetType().Name);
+                _outboxDeliveryFaultTotal.Add(1, tagList);
+            });
+        }
+
+        public static StartedInstrument? StartOutboxDeliveryInstrument(this ILogContext logContext, OutboxConsumeContext outboxConsumeContext, OutboxMessageContext context)
+        {
+            if (!_isConfigured || !_outboxDeliveryTotal.Enabled)
+                return null;
+
+            var tagList = new TagList
+            {
+                { _options.ServiceNameLabel, _options.ServiceName },
+                { _options.EndpointLabel, GetEndpointLabel(context.DestinationAddress) }
+            };
+
+            AddCustomTags(tagList, outboxConsumeContext);
 
             _outboxDeliveryTotal.Add(1, tagList);
 
@@ -503,6 +544,39 @@ namespace MassTransit.Logging
                 sb.Append(type.Name);
 
             return sb.ToString();
+        }
+
+        static void AddCustomTags(TagList tagList, ReceiveContext receiveContext)
+        {
+            if (receiveContext.TryGetPayload<IMetricsContext>(out var metricsTagsFeature))
+            {
+                AddCustomTags(tagList, metricsTagsFeature);
+            }
+        }
+
+        static void AddCustomTags(TagList tagList, ConsumeContext consumeContext)
+        {
+            if (consumeContext.TryGetPayload<IMetricsContext>(out var metricsTagsFeature))
+            {
+                AddCustomTags(tagList, metricsTagsFeature);
+            }
+        }
+
+        static void AddCustomTags(TagList tagList, SendContext sendContext)
+        {
+            if (sendContext.TryGetPayload<IMetricsContext>(out var metricsTagsFeature))
+            {
+                AddCustomTags(tagList, metricsTagsFeature);
+            }
+        }
+
+        static void AddCustomTags(TagList tagList, IMetricsContext metricsTagsFeature)
+        {
+            var customTags = metricsTagsFeature.Tags;
+            foreach (var tag in customTags)
+            {
+                tagList.Add(tag);
+            }
         }
     }
 }
