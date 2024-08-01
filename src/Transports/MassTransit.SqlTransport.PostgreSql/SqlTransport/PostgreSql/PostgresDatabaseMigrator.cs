@@ -3,6 +3,7 @@ namespace MassTransit.SqlTransport.PostgreSql
     using System.Threading;
     using System.Threading.Tasks;
     using Dapper;
+    using Helpers;
     using Microsoft.Extensions.Logging;
 
 
@@ -845,7 +846,7 @@ namespace MassTransit.SqlTransport.PostgreSql
                         'enqueue_time', to_char(NEW.enqueue_time, 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"')
                     );
 
-                    PERFORM pg_notify('{0}_msg_' || NEW.queue_id, v_payload::text);
+                    PERFORM pg_notify('{2}_msg_' || NEW.queue_id, v_payload::text);
                 END IF;
 
                 RETURN NEW;
@@ -1067,7 +1068,9 @@ namespace MassTransit.SqlTransport.PostgreSql
 
             try
             {
-                await connection.Connection.ExecuteScalarAsync<int>(string.Format(CreateInfrastructureSql, options.Schema, options.Role)).ConfigureAwait(false);
+                var sanitizedSchemaName = NotifyChannel.SanitizeSchemaName(options.Schema);
+
+                await connection.Connection.ExecuteScalarAsync<int>(string.Format(CreateInfrastructureSql, options.Schema, options.Role, sanitizedSchemaName)).ConfigureAwait(false);
 
                 _logger.LogDebug("Transport infrastructure in schema {Schema} created (or updated)", options.Schema);
             }

@@ -8,6 +8,7 @@ namespace MassTransit.SqlTransport.PostgreSql
     using System.Threading.Tasks;
     using Configuration;
     using Dapper;
+    using Helpers;
     using Logging;
     using MassTransit.Middleware;
     using Npgsql;
@@ -195,15 +196,16 @@ namespace MassTransit.SqlTransport.PostgreSql
                             await using var connection = await _context.CreateConnection(Stopping);
 
                             var queueIds = new HashSet<long>(_notificationTokens.Keys);
+                            var sanitizedSchemaName = NotifyChannel.SanitizeSchemaName(_context.Schema);
 
                             connection.Connection.Notification += OnConnectionOnNotification;
 
                             foreach (var queueId in queueIds)
                             {
-                                await connection.Connection.ExecuteScalarAsync<int>($"LISTEN {_context.Schema}_msg_{queueId}", Stopping)
+                                await connection.Connection.ExecuteScalarAsync<int>($"LISTEN \"{sanitizedSchemaName}_msg_{queueId}\"", Stopping)
                                     .ConfigureAwait(false);
 
-                                // LogContext.Debug?.Log("LISTEN {_context.Schema}_msg_{QueueId}", queueId);
+                                // LogContext.Debug?.Log("LISTEN \"{sanitizedSchemaName}_msg_{queueId}\"", queueId);
                             }
 
                             while (!Stopping.IsCancellationRequested)
@@ -226,10 +228,10 @@ namespace MassTransit.SqlTransport.PostgreSql
                                     if (queueIds.Contains(queueId))
                                         break;
 
-                                    await connection.Connection.ExecuteScalarAsync<int>($"LISTEN {_context.Schema}_msg_{queueId}", Stopping)
+                                    await connection.Connection.ExecuteScalarAsync<int>($"LISTEN \"{sanitizedSchemaName}_msg_{queueId}\"", Stopping)
                                         .ConfigureAwait(false);
 
-                                    // LogContext.Debug?.Log("LISTEN {_context.Schema}_msg_{QueueId}", queueId);
+                                    // LogContext.Debug?.Log("LISTEN \"{sanitizedSchemaName}_msg_{queueId}\"", queueId);
 
                                     queueIds.Add(queueId);
                                 }
