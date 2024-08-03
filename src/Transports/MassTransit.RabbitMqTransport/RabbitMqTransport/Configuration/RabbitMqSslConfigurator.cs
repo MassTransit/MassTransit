@@ -48,22 +48,5 @@ namespace MassTransit.RabbitMqTransport.Configuration
         public LocalCertificateSelectionCallback CertificateSelectionCallback { get; set; }
 
         public RemoteCertificateValidationCallback CertificateValidationCallback { get; set; }
-
-        /// <summary>
-        /// Configures the rabbit mq client connection for Sll properties.
-        /// </summary>
-        /// <param name="builder">Builder with appropriate properties set.</param>
-        /// <returns>A connection factory builder</returns>
-        /// <remarks>
-        /// SSL configuration in Rabbit MQ is a complex topic.  In order to ensure that rabbit can work without client presenting a client certificate
-        /// and working just like an SSL enabled web-site which does not require certificate you need to have the following settings in your rabbitmq.config
-        /// file.
-        ///      {ssl_options, [{cacertfile,"/path_to/cacert.pem"},
-        ///            {certfile,"/path_to/server/cert.pem"},
-        ///            {keyfile,"/path_to/server/key.pem"},
-        ///            {verify,verify_none},
-        ///            {fail_if_no_peer_cert,false}]}
-        /// The last 2 lines are the important ones.
-        /// </remarks>
     }
 }

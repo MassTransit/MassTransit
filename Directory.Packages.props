@@ -81,10 +81,8 @@
     <PackageVersion Include="OpenTelemetry.Exporter.Jaeger" Version="1.5.1" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.8.1" />
     <PackageVersion Include="prometheus-net" Version="6.0.0" />
-    <PackageVersion Include="Quartz" Version="3.11.0" />
-    <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.11.0" />
-    <PackageVersion Include="Quartz.Plugins.TimeZoneConverter" Version="3.11.0" />
-    <PackageVersion Include="Quartz.Serialization.Json" Version="3.11.0" />
+    <PackageVersion Include="Quartz" Version="3.12.0" />
+    <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.12.0" />
     <PackageVersion Include="QuikGraph" Version="2.5.0" />
     <PackageVersion Include="QuikGraph.Graphviz" Version="2.5.0" />
     <PackageVersion Include="RabbitMQ.Client" Version="6.8.1" />
