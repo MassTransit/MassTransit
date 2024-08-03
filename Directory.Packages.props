@@ -101,6 +101,7 @@
     <PackageVersion Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
   <ItemGroup>
+    <GlobalPackageReference Include="GitHubActionsTestLogger" Version="2.4.1" />
     <GlobalPackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
   </ItemGroup>
 </Project>
