@@ -17,9 +17,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
         public async Task Should_delay_message_scheduling_until_the_outbox_messages_are_delivered()
         {
             await using var provider = new ServiceCollection()
-                .AddQuartz(q =>
+                .AddQuartz(_ =>
                 {
-                    q.UseMicrosoftDependencyInjectionJobFactory();
                 })
                 .AddBusOutboxServices()
                 .AddMassTransitTestHarness(x =>
