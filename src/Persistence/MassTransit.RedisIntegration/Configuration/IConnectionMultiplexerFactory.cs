@@ -5,5 +5,5 @@ using StackExchange.Redis;
 
 public interface IConnectionMultiplexerFactory
 {
-    IConnectionMultiplexer GetConnectionMultiplexer(string configuration);
+    IConnectionMultiplexer GetConnectionMultiplexer(ConfigurationOptions configuration);
 }
