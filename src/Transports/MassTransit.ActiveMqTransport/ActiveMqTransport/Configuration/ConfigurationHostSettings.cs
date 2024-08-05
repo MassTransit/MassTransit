@@ -92,7 +92,7 @@ namespace MassTransit.ActiveMqTransport.Configuration
             if (FailoverHosts?.Length > 0)
             {
                 //filter only parameters which are not failover parameters
-                var failoverServerPart = GetQueryString(kv => !_failoverArguments.Contains(kv.Key));
+                var failoverServerPart = GetQueryString(kv => !IsFailoverArgument(kv.Key));
                 var failoverPart = string.Join(",", FailoverHosts
                     .Select(failoverHost => new UriBuilder
                         {
@@ -103,7 +103,7 @@ namespace MassTransit.ActiveMqTransport.Configuration
                         }.Uri.ToString()
                     ));
                 //filter failover parameters only
-                var failoverQueryPart = GetQueryString(kv => _failoverArguments.Contains(kv.Key));
+                var failoverQueryPart = GetQueryString(kv => IsFailoverArgument(kv.Key));
                 return new Uri($"activemq:failover:({failoverPart}){failoverQueryPart}");
             }
 
@@ -130,6 +130,11 @@ namespace MassTransit.ActiveMqTransport.Configuration
                 Host = Host,
                 Port = Port
             }.Uri.ToString();
+        }
+
+        static bool IsFailoverArgument(string key)
+        {
+            return key.StartsWith("nested.", StringComparison.OrdinalIgnoreCase) || _failoverArguments.Contains(key);
         }
     }
 }
