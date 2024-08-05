@@ -4,17 +4,17 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Apache.NMS.ActiveMQ" Version="2.1.0" />
-    <PackageVersion Include="AWSSDK.DynamoDBv2" Version="3.7.305.1" />
-    <PackageVersion Include="AWSSDK.SimpleNotificationService" Version="3.7.302.1" />
-    <PackageVersion Include="AWSSDK.S3" Version="3.7.310.7" />
-    <PackageVersion Include="AWSSDK.SQS" Version="3.7.301.33" />
+    <PackageVersion Include="AWSSDK.DynamoDBv2" Version="3.7.400.2" />
+    <PackageVersion Include="AWSSDK.SimpleNotificationService" Version="3.7.400.2" />
+    <PackageVersion Include="AWSSDK.S3" Version="3.7.400.2" />
+    <PackageVersion Include="AWSSDK.SQS" Version="3.7.400.2" />
     <PackageVersion Include="Azure.Identity" Version="1.12.0" />
     <PackageVersion Include="Azure.Messaging.EventHubs.Processor" Version="5.11.4" />
-    <PackageVersion Include="Azure.Messaging.ServiceBus" Version="7.18.0" />
-    <PackageVersion Include="Azure.Storage.Blobs" Version="12.21.0" />
+    <PackageVersion Include="Azure.Messaging.ServiceBus" Version="7.18.1" />
+    <PackageVersion Include="Azure.Storage.Blobs" Version="12.21.1" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.13.11" />
-    <PackageVersion Include="Confluent.Kafka" Version="2.5.0" />
-    <PackageVersion Include="Confluent.SchemaRegistry.Serdes.Avro" Version="2.5.0" />
+    <PackageVersion Include="Confluent.Kafka" Version="2.5.1" />
+    <PackageVersion Include="Confluent.SchemaRegistry.Serdes.Avro" Version="2.5.1" />
     <PackageVersion Include="coverlet.collector" Version="3.1.2" />
     <PackageVersion Include="Dapper" Version="2.1.35" />
     <PackageVersion Include="dapper.contrib" Version="2.0.78" />
@@ -25,20 +25,20 @@
     <PackageVersion Include="Hangfire.MemoryStorage" Version="1.8.1.1" />
     <PackageVersion Include="Iesi.Collections" Version="4.1.1" />
     <PackageVersion Include="Ionic.Zlib.Core" Version="1.0.0" />
-    <PackageVersion Include="Marten" Version="7.24.0" />
+    <PackageVersion Include="Marten" Version="7.26.1" />
     <PackageVersion Include="MathNet.Numerics" Version="5.0.0" />
     <PackageVersion Include="MediatR" Version="12.2.0" />
     <PackageVersion Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.22.0" />
     <PackageVersion Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
-    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="7.0.13" />
-    <PackageVersion Include="Microsoft.Azure.Cosmos" Version="3.41.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="8.0.7" />
+    <PackageVersion Include="Microsoft.Azure.Cosmos" Version="3.42.0" />
     <PackageVersion Include="Microsoft.Azure.Cosmos.Table" Version="1.0.8" />
-    <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions.EventHubs" Version="6.3.3" />
-    <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="5.16.1" />
+    <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions.EventHubs" Version="6.3.5" />
+    <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="5.16.3" />
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.1.0" />
-    <PackageVersion Include="Microsoft.Data.SqlClient" Version="2.1.7" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.6.0" />
+    <PackageVersion Include="Microsoft.Data.SqlClient" Version="5.2.1" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -65,8 +65,8 @@
     <PackageVersion Include="Microsoft.Extensions.Options" Version="6.0.0" Condition="'$(TargetFramework)' != 'net8.0'" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
-    <PackageVersion Include="MongoDB.Driver" Version="2.27.0" />
-    <PackageVersion Include="MongoDB.Driver.GridFS" Version="2.27.0" />
+    <PackageVersion Include="MongoDB.Driver" Version="2.28.0" />
+    <PackageVersion Include="MongoDB.Driver.GridFS" Version="2.28.0" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="Newtonsoft.Json.Bson" Version="1.0.2" />
     <PackageVersion Include="NHibernate" Version="5.5.2" />
@@ -77,9 +77,9 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>
-    <PackageVersion Include="NUnit3TestAdapter" Version="4.5.0" />
+    <PackageVersion Include="NUnit3TestAdapter" Version="4.6.0" />
     <PackageVersion Include="OpenTelemetry.Exporter.Jaeger" Version="1.5.1" />
-    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.8.1" />
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.9.0" />
     <PackageVersion Include="prometheus-net" Version="6.0.0" />
     <PackageVersion Include="Quartz" Version="3.12.0" />
     <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.12.0" />
