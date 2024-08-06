@@ -102,7 +102,7 @@ namespace MassTransit.Middleware
                         throw new ApplicationException("Simulated Delivery Failure Requested");
 
                     StartedActivity? activity = LogContext.Current?.StartOutboxDeliverActivity(message);
-                    StartedInstrument? instrument = LogContext.Current?.StartOutboxDeliveryInstrument(message);
+                    StartedInstrument? instrument = LogContext.Current?.StartOutboxDeliveryInstrument(context, message);
                     try
                     {
                         await endpoint.Send(new SerializedMessageBody(), pipe, token.Token).ConfigureAwait(false);
