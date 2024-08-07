@@ -41,11 +41,9 @@ namespace MassTransit.Configuration
 
         public void DatabaseConfiguration(ConfigurationOptions configurationOptions)
         {
-            var configurationString = configurationOptions.ToString(true);
-
             IConnectionMultiplexer Factory(IServiceProvider provider)
             {
-                return provider.GetRequiredService<IConnectionMultiplexerFactory>().GetConnectionMultiplexer(configurationString);
+                return provider.GetRequiredService<IConnectionMultiplexerFactory>().GetConnectionMultiplexer(configurationOptions);
             }
 
             _connectionFactory = Factory;

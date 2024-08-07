@@ -26,19 +26,19 @@ public class ConnectionMultiplexerFactory :
         }
     }
 
-    public IConnectionMultiplexer GetConnectionMultiplexer(string configuration)
+    public IConnectionMultiplexer GetConnectionMultiplexer(ConfigurationOptions configuration)
     {
-        IConnectionMultiplexer MultiplexerFactory(string configurationString)
+        IConnectionMultiplexer MultiplexerFactory(ConfigurationOptions configurationOptions)
         {
-            LogContext.Debug?.Log("Creating Redis Connection Multiplexer: {Options}", ConfigurationOptions.Parse(configurationString).ToString(false));
-            return ConnectionMultiplexer.Connect(configurationString);
+            LogContext.Debug?.Log("Creating Redis Connection Multiplexer: {Options}", configurationOptions.ToString(false));
+            return ConnectionMultiplexer.Connect(configurationOptions);
         }
 
-        Lazy<IConnectionMultiplexer> ValueFactory(string x)
+        Lazy<IConnectionMultiplexer> ValueFactory(ConfigurationOptions x)
         {
             return new Lazy<IConnectionMultiplexer>(() => MultiplexerFactory(x));
         }
 
-        return _connectionMultiplexers.GetOrAdd(configuration, ValueFactory).Value;
+        return _connectionMultiplexers.GetOrAdd(configuration.ToString(false), ValueFactory(configuration)).Value;
     }
 }

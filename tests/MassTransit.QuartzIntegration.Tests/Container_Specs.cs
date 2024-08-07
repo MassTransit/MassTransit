@@ -22,9 +22,7 @@ namespace MassTransit.QuartzIntegration.Tests
         public async Task Should_work_properly()
         {
             await using var provider = new ServiceCollection()
-                .AddQuartz(q =>
-                {
-                    q.UseMicrosoftDependencyInjectionJobFactory();
+                .AddQuartz(_ => {
                 })
                 .AddMassTransitTestHarness(x =>
                 {
@@ -70,9 +68,8 @@ namespace MassTransit.QuartzIntegration.Tests
         public async Task Should_work_properly_with_message_headers()
         {
             await using var provider = new ServiceCollection()
-                .AddQuartz(q =>
+                .AddQuartz(_ =>
                 {
-                    q.UseMicrosoftDependencyInjectionJobFactory();
                 })
                 .AddMassTransitTestHarness(x =>
                 {

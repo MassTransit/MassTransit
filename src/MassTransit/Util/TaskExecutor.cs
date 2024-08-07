@@ -35,6 +35,23 @@ public class TaskExecutor :
             : Task.WhenAll(Enumerable.Range(0, concurrencyLimit).Select(_ => Task.Run(() => MultipleReader())));
     }
 
+    public TaskExecutor(int prefetchCount, int concurrencyLimit = 1)
+    {
+        if (concurrencyLimit < 1)
+            throw new ArgumentOutOfRangeException(nameof(concurrencyLimit), concurrencyLimit, "Must be >= 1");
+
+        _taskChannel = Channel.CreateBounded<IFuture>(new BoundedChannelOptions(prefetchCount)
+        {
+            AllowSynchronousContinuations = true,
+            SingleReader = concurrencyLimit == 1,
+            SingleWriter = false
+        });
+
+        _readerTask = concurrencyLimit == 1
+            ? Task.Run(() => SingleReader())
+            : Task.WhenAll(Enumerable.Range(0, concurrencyLimit).Select(_ => Task.Run(() => MultipleReader())));
+    }
+
     public async ValueTask DisposeAsync()
     {
         if (_disposed)
