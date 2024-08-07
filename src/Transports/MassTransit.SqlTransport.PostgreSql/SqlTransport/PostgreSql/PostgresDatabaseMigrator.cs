@@ -54,7 +54,7 @@ namespace MassTransit.SqlTransport.PostgreSql
 
             CREATE TABLE IF NOT EXISTS "{0}".queue
             (
-                id          bigint          not null primary key default nextval('{0}.topology_seq'),
+                id          bigint          not null primary key default nextval('"{0}".topology_seq'),
                 updated     timestamptz     not null default (now() at time zone 'utc'),
 
                 name        text            not null,
@@ -69,7 +69,7 @@ namespace MassTransit.SqlTransport.PostgreSql
 
             CREATE TABLE IF NOT EXISTS "{0}".topic
             (
-                id          bigint      not null primary key default nextval('{0}.topology_seq'),
+                id          bigint      not null primary key default nextval('"{0}".topology_seq'),
                 updated     timestamptz not null default (now() at time zone 'utc'),
 
                 name        text        not null
@@ -80,7 +80,7 @@ namespace MassTransit.SqlTransport.PostgreSql
 
             CREATE TABLE IF NOT EXISTS "{0}".topic_subscription
             (
-                id              bigint       not null primary key default nextval('{0}.topology_seq'),
+                id              bigint       not null primary key default nextval('"{0}".topology_seq'),
                 updated         timestamptz  not null default (now() at time zone 'utc'),
 
                 source_id       bigint       not null references "{0}".topic (id) ON DELETE CASCADE,
@@ -100,7 +100,7 @@ namespace MassTransit.SqlTransport.PostgreSql
 
             CREATE TABLE IF NOT EXISTS "{0}".queue_subscription
             (
-                id              bigint       not null primary key default nextval('{0}.topology_seq'),
+                id              bigint       not null primary key default nextval('"{0}".topology_seq'),
                 updated         timestamptz  not null default (now() at time zone 'utc'),
 
                 source_id       bigint       not null references "{0}".topic (id) ON DELETE CASCADE,
