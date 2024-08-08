@@ -46,6 +46,16 @@ namespace MassTransit.AmazonSqsTransport
 
                 await _visibilityTask.ConfigureAwait(false);
             }
+            catch (MessageNotInflightException)
+            {
+                _locked = false;
+                throw;
+            }
+            catch (ReceiptHandleIsInvalidException)
+            {
+                _locked = false;
+                throw;
+            }
             finally
             {
                 _activeTokenSource.Dispose();
@@ -70,6 +80,16 @@ namespace MassTransit.AmazonSqsTransport
             }
             catch (OperationCanceledException)
             {
+            }
+            catch (MessageNotInflightException)
+            {
+                _locked = false;
+                throw;
+            }
+            catch (ReceiptHandleIsInvalidException)
+            {
+                _locked = false;
+                throw;
             }
             catch (Exception ex)
             {
@@ -103,7 +123,7 @@ namespace MassTransit.AmazonSqsTransport
 
             visibilityTimeout = Math.Min(60, visibilityTimeout);
 
-            while (!_activeTokenSource.IsCancellationRequested)
+            while (_locked && !_activeTokenSource.IsCancellationRequested)
             {
                 try
                 {
