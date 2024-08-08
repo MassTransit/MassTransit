@@ -21,8 +21,8 @@ namespace MassTransit.SqlTransport.PostgreSql
 
         const string GrantRoleSql = """
             GRANT USAGE ON SCHEMA "{1}" TO "{0}";
-            ALTER SCHEMA "{1}" OWNER TO "{0}";
             GRANT "{0}" TO "{2}";
+            ALTER SCHEMA "{1}" OWNER TO "{0}";
             GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA "{1}" TO "{0}";
             GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA "{1}" TO "{0}";
             ALTER DEFAULT PRIVILEGES IN SCHEMA "{1}" GRANT ALL PRIVILEGES ON TABLES TO "{0}";
