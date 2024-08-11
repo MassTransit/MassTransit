@@ -5,5 +5,5 @@ using System.Diagnostics;
 
 public interface MetricsContext
 {
-    void Populate(TagList tagList);
+    void Populate(ref TagList tagList);
 }

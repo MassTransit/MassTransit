@@ -6,11 +6,22 @@ using System.Diagnostics;
 
 public static class MetricsContextExtensions
 {
+    /// <summary>
+    /// Add custom tag to the metrics emitted by the library
+    /// </summary>
+    /// <param name="pipeContext"></param>
+    /// <param name="key"></param>
+    /// <param name="value"></param>
     public static void AddMetricTags(this PipeContext pipeContext, string key, object value)
     {
         pipeContext.AddOrUpdatePayload(() => new TagListMetricsContext(key, value), e => e.AddTag(key, value));
     }
 
+    /// <summary>
+    /// Set and override custom metric tags emitted by the library
+    /// </summary>
+    /// <param name="pipeContext"></param>
+    /// <param name="tagList"></param>
     public static void SetMetricTags(this PipeContext pipeContext, TagList tagList)
     {
         pipeContext.AddOrUpdatePayload(() => new TagListMetricsContext(tagList), _ => new TagListMetricsContext(tagList));
@@ -32,7 +43,7 @@ public static class MetricsContextExtensions
             _tagList = tagList;
         }
 
-        public void Populate(TagList tagList)
+        public void Populate(ref TagList tagList)
         {
             foreach (KeyValuePair<string, object> tag in _tagList)
                 tagList.Add(tag);
