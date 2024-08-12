@@ -42,11 +42,15 @@
 
         public bool IsCompleted { get; private set; }
 
-        async Task IConsumer<TMessage>.Consume(ConsumeContext<TMessage> context)
+        public async Task Consume(ConsumeContext<TMessage> context)
         {
             try
             {
                 await _completed.Task.ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (context.CancellationToken.IsCancellationRequested)
+            {
+                throw new OperationCanceledException(context.CancellationToken);
             }
             catch
             {
@@ -84,10 +88,13 @@
 
             var messageId = context.MessageId ?? NewId.NextGuid();
 
-            var batchEntry = new BatchEntry(context, context.SentTime ?? context.ReceiveContext.GetSentTime() ?? DateTime.UtcNow);
+            var batchEntry = new BatchEntry(context, context.SentTime ?? context.ReceiveContext.GetSentTime() ?? DateTime.UtcNow,
+                () => RemoveCanceledMessage(messageId));
 
             if (!_messages.ContainsKey(messageId))
                 _messages.Add(messageId, batchEntry);
+            else
+                batchEntry.Unregister();
 
             if (_options.TimeLimitStart == BatchTimeLimitStart.FromLast)
                 _timer.Change(_options.TimeLimit, TimeSpan.FromMilliseconds(-1));
@@ -100,10 +107,37 @@
 
                 List<ConsumeContext<TMessage>> messageList = GetMessageBatchInOrder();
 
-                return _dispatcher.Push(() => Deliver(context, messageList, BatchCompletionMode.Size));
+                return messageList.Count == 0
+                    ? Task.CompletedTask
+                    : _dispatcher.Push(() => Deliver(context, messageList, BatchCompletionMode.Size));
             }
 
             return Task.CompletedTask;
+        }
+
+        void RemoveCanceledMessage(Guid messageId)
+        {
+            Task.Run(() => _executor.Push(() =>
+            {
+                if (IsCompleted)
+                    return Task.CompletedTask;
+
+                if (_messages.TryGetValue(messageId, out var batchEntry))
+                {
+                    batchEntry.Unregister();
+
+                    _messages.Remove(messageId);
+
+                    if (_messages.Count == 0)
+                    {
+                        IsCompleted = true;
+
+                        _completed.TrySetCanceled();
+                    }
+                }
+
+                return Task.CompletedTask;
+            }));
         }
 
         bool IsReadyToDeliver(ConsumeContext context)
@@ -127,6 +161,9 @@
         async Task Deliver(ConsumeContext context, IReadOnlyList<ConsumeContext<TMessage>> messages, BatchCompletionMode batchCompletionMode)
         {
             _timer.Dispose();
+
+            foreach (var batchEntry in _messages.Values)
+                batchEntry.Unregister();
 
             LogContext.SetCurrentIfNull(_logContext);
 
@@ -168,11 +205,20 @@
         {
             public readonly ConsumeContext<TMessage> Context;
             public readonly DateTime Timestamp;
+            readonly CancellationTokenRegistration _registration;
 
-            public BatchEntry(ConsumeContext<TMessage> context, DateTime timestamp)
+            public BatchEntry(ConsumeContext<TMessage> context, DateTime timestamp, Action canceled)
             {
                 Context = context;
                 Timestamp = timestamp;
+
+                if (context.CancellationToken.CanBeCanceled)
+                    _registration = context.CancellationToken.Register(() => canceled());
+            }
+
+            public void Unregister()
+            {
+                _registration.Dispose();
             }
         }
     }
