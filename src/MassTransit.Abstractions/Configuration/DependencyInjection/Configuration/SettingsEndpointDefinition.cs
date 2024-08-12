@@ -34,6 +34,7 @@ namespace MassTransit.Configuration
         public void Configure<T>(T configurator)
             where T : IReceiveEndpointConfigurator
         {
+            _settings.ConfigureEndpoint(configurator);
         }
 
         protected abstract string FormatEndpointName(IEndpointNameFormatter formatter);

@@ -13,6 +13,8 @@ namespace MassTransit
 
         bool ConfigureConsumeTopology { get; }
 
-        string? InstanceId { get; set; }
+        string? InstanceId { get; }
+
+        void ConfigureEndpoint(IReceiveEndpointConfigurator configurator);
     }
 }

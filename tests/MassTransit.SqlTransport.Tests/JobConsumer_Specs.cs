@@ -343,6 +343,7 @@ namespace MassTransit.DbTransport.Tests
                         .Endpoint(e => e.ConcurrentMessageLimit = 1);
 
                     x.AddJobSagaStateMachines()
+                        .SetPartitionedReceiveMode()
                         .EntityFrameworkRepository(r =>
                         {
                             r.ExistingDbContext<JobServiceSagaDbContext>();
@@ -352,6 +353,7 @@ namespace MassTransit.DbTransport.Tests
                     _configuration.Configure(x, (context, cfg) =>
                     {
                         cfg.UseDbMessageScheduler();
+                        cfg.UseJobSagaPartitionKeyFormatters();
 
                         // js.OnConfigureEndpoint(endpointConfigurator =>
                         // {

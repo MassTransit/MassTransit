@@ -22,7 +22,7 @@ namespace MassTransit.Configuration
         protected override void ConfigureSaga(IReceiveEndpointConfigurator configurator, ISagaConfigurator<JobAttemptSaga> sagaConfigurator,
             IRegistrationContext context)
         {
-            configurator.UseMessageRetry(r => r.Intervals(100, 1000, 2000, 5000));
+            configurator.UseMessageRetry(r => r.Intervals(100, 500, 1000, 1000, 2000, 2000, 5000, 5000));
 
             configurator.UseInMemoryOutbox(context);
 
