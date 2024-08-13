@@ -1391,8 +1391,8 @@ END
                              AND md.MessageDeliveryId IS NOT NULL, 1, 0) AS MessageError,
                      IIF(q.Type = 3
                              AND md.MessageDeliveryId IS NOT NULL, 1, 0) AS MessageDeadLetter
-              FROM transport.Queue q
-                       LEFT JOIN transport.MessageDelivery md ON q.Id = md.QueueId
+              FROM {0}.Queue q
+                       LEFT JOIN {0}.MessageDelivery md ON q.Id = md.QueueId
                        LEFT JOIN (SELECT qm.QueueId,
                                          qm.QueueName,
                                          qm.ConsumeCount    AS ConsumeCount,
@@ -1408,8 +1408,8 @@ END
                                                qm.DeadLetterCount,
                                                qm.StartTime,
                                                qm.Duration
-                                        FROM transport.QueueMetric qm
-                                                 INNER JOIN transport.Queue q2 ON qm.QueueId = q2.Id
+                                        FROM {0}.QueueMetric qm
+                                                 INNER JOIN {0}.Queue q2 ON qm.QueueId = q2.Id
                                         WHERE q2.Type = 1
                                           AND qm.StartTime >= DATEADD(MINUTE, -5, GETUTCDATE())) qm
                                   WHERE qm.RowNum = 1) qm ON qm.QueueId = q.Id) x
