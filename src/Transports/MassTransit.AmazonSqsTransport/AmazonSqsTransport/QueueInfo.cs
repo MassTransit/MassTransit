@@ -101,7 +101,6 @@ namespace MassTransit.AmazonSqsTransport
                     statement = new Statement(Statement.StatementEffect.Allow);
                     statement.Actions.Add(SQSActionIdentifiers.SendMessage);
                     statement.Resources.Add(new Resource(sqsQueueArn));
-                    statement.Conditions.Add(ConditionFactory.NewSourceArnCondition(topicArn));
                     statement.Principals.Add(new Principal("Service", "sns.amazonaws.com"));
                     policy.Statements.Add(statement);
                 }
