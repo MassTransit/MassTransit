@@ -38,7 +38,7 @@ GRANT REFERENCES to {0};
         const string CreateUserSql = @"
 IF ORIGINAL_LOGIN() != '{1}' OR CURRENT_USER = '{1}'
 BEGIN
-    CREATE USER {1} FOR LOGIN {1} WITH DEFAULT_SCHEMA = {0}
+    CREATE USER [{1}] FOR LOGIN [{1}] WITH DEFAULT_SCHEMA = [{0}]
 END
 ";
 
