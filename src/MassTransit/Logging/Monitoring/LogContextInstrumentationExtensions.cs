@@ -96,6 +96,7 @@ namespace MassTransit.Logging
             var tagList = new TagList
             {
                 { _options.ServiceNameLabel, _options.ServiceName },
+                { _options.EndpointLabel, GetEndpointLabel(context.ReceiveContext.InputAddress) },
                 { _options.MessageTypeLabel, messageTypeLabel },
                 { _options.ConsumerTypeLabel, GetConsumerTypeLabel<MessageHandler<TMessage>, TMessage>(messageTypeLabel) }
             };
@@ -127,6 +128,7 @@ namespace MassTransit.Logging
             var tagList = new TagList
             {
                 { _options.ServiceNameLabel, _options.ServiceName },
+                { _options.EndpointLabel, GetEndpointLabel(context.ReceiveContext.InputAddress) },
                 { _options.MessageTypeLabel, messageTypeLabel },
                 { _options.ConsumerTypeLabel, GetConsumerTypeLabel<TSaga, T>(messageTypeLabel) }
             };
@@ -158,6 +160,7 @@ namespace MassTransit.Logging
             var tagList = new TagList
             {
                 { _options.ServiceNameLabel, _options.ServiceName },
+                { _options.EndpointLabel, GetEndpointLabel(context.ReceiveContext.InputAddress) },
                 { _options.MessageTypeLabel, messageTypeLabel },
                 { _options.ConsumerTypeLabel, GetConsumerTypeLabel<TSaga, T>(messageTypeLabel) }
             };
@@ -188,6 +191,7 @@ namespace MassTransit.Logging
             var tagList = new TagList
             {
                 { _options.ServiceNameLabel, _options.ServiceName },
+                { _options.EndpointLabel, GetEndpointLabel(context.ReceiveContext.InputAddress) },
                 { _options.MessageTypeLabel, messageTypeLabel },
                 { _options.ConsumerTypeLabel, GetConsumerTypeLabel<TConsumer, T>(messageTypeLabel) }
             };
@@ -232,6 +236,7 @@ namespace MassTransit.Logging
             var tagList = new TagList
             {
                 { _options.ServiceNameLabel, _options.ServiceName },
+                { _options.EndpointLabel, GetEndpointLabel(context.ReceiveContext.InputAddress) },
                 { _options.ActivityNameLabel, GetActivityTypeLabel<TActivity>() },
                 { _options.ArgumentTypeLabel, GetArgumentTypeLabel<TArguments>() }
             };
@@ -263,6 +268,7 @@ namespace MassTransit.Logging
             var tagList = new TagList
             {
                 { _options.ServiceNameLabel, _options.ServiceName },
+                { _options.EndpointLabel, GetEndpointLabel(context.ReceiveContext.InputAddress) },
                 { _options.ActivityNameLabel, GetActivityTypeLabel<TActivity>() },
                 { _options.LogTypeLabel, GetLogTypeLabel<TLog>() }
             };
@@ -292,6 +298,7 @@ namespace MassTransit.Logging
             var tagList = new TagList
             {
                 { _options.ServiceNameLabel, _options.ServiceName },
+                { _options.EndpointLabel, GetEndpointLabel(context.DestinationAddress) },
                 { _options.MessageTypeLabel, GetMessageTypeLabel<T>() }
             };
 
@@ -315,6 +322,7 @@ namespace MassTransit.Logging
             var tagList = new TagList
             {
                 { _options.ServiceNameLabel, _options.ServiceName },
+                { _options.EndpointLabel, GetEndpointLabel(context.DestinationAddress) },
                 { _options.MessageTypeLabel, GetMessageTypeLabel<T>() }
             };
 
