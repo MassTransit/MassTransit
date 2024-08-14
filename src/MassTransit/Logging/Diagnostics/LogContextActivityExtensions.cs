@@ -14,6 +14,12 @@ namespace MassTransit.Logging
 
     public static class LogContextActivityExtensions
     {
+        public delegate void InjectContextPropagationDelegate(SendContext context, System.Diagnostics.Activity activity, IList<KeyValuePair<string, string?>>? baggage);
+        public delegate ActivityContext GetParentActivityContextDelegate(Headers headers, bool isRemote = false);
+
+        public static InjectContextPropagationDelegate InjectContextPropagation { get; set; } = DefaultInjectContextPropagation;
+        public static GetParentActivityContextDelegate GetParentActivityContext { get; set; } = DefaultGetParentActivityContext;
+
         public static StartedActivity? StartSendActivity<T>(this ILogContext logContext, SendTransportContext transportContext, SendContext<T> context,
             params (string Key, object? Value)[] tags)
             where T : class
@@ -219,16 +225,21 @@ namespace MassTransit.Logging
                 baggage.Add(pair);
             }
 
+            InjectContextPropagation(context, activity, baggage);
+
+            return new StartedActivity(activity);
+        }
+
+        static void DefaultInjectContextPropagation(SendContext context, System.Diagnostics.Activity activity, IList<KeyValuePair<string, string?>>? baggage)
+        {
             if (activity.Id != null)
                 context.Headers.Set(DiagnosticHeaders.ActivityId, activity.Id);
 
             if (baggage != null)
                 context.Headers.Set(DiagnosticHeaders.ActivityCorrelationContext, baggage);
-
-            return new StartedActivity(activity);
         }
 
-        static ActivityContext GetParentActivityContext(Headers headers, bool isRemote = false)
+        static ActivityContext DefaultGetParentActivityContext(Headers headers, bool isRemote = false)
         {
             if (headers.TryGetHeader(DiagnosticHeaders.ActivityId, out var headerValue)
                 && headerValue is string activityId
