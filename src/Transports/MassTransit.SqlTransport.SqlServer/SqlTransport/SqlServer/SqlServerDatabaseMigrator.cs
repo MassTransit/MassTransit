@@ -32,7 +32,7 @@ GRANT CREATE VIEW to {0};
 GRANT REFERENCES to {0};
 ";
 
-        const string LoginExistsSql = @"SELECT 1 FROM sys.syslogins WHERE [name] = '{0}'";
+        const string LoginExistsSql = @"SELECT 1 FROM sys.sql_logins WHERE [name] = '{0}'";
         const string CreateLoginSql = @"CREATE LOGIN {0} WITH PASSWORD = '{1}';";
 
         const string CreateUserSql = @"
