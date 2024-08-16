@@ -55,6 +55,7 @@
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'" />
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="6.0.1" Condition="'$(TargetFramework)' != 'net8.0'" />
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'" />
+    <PackageVersion Include="Microsoft.Extensions.Diagnostics.Testing" Version="8.8.0" />
     <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0" Condition="'$(TargetFramework)' != 'net8.0'" />
     <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="6.0.0" Condition="'$(TargetFramework)' != 'net8.0'" />
@@ -99,6 +100,7 @@
     <PackageVersion Include="System.Threading.Channels" Version="6.0.0" />
     <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
     <PackageVersion Include="System.ValueTuple" Version="4.5.0" />
+    <PackageVersion Include="Verify.NUnit" Version="26.2.0" />
   </ItemGroup>
   <ItemGroup>
     <GlobalPackageReference Include="GitHubActionsTestLogger" Version="2.4.1" />

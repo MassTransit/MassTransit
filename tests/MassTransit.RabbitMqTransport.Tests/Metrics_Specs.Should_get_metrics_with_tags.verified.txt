@@ -1,0 +1,189 @@
+﻿[
+  {
+    Name: messaging.masstransit.receive,
+    LastMeasurement: {
+      Value: 1,
+      Tags: {
+        messaging.masstransit.destination: BUS ADDRESS,
+        messaging.masstransit.service: testhost
+      }
+    }
+  },
+  {
+    Name: messaging.masstransit.receive.errors
+  },
+  {
+    Name: messaging.masstransit.receive.active,
+    LastMeasurement: {
+      Value: -1,
+      Tags: {
+        messaging.masstransit.destination: BUS ADDRESS,
+        messaging.masstransit.service: testhost
+      }
+    }
+  },
+  {
+    Name: messaging.masstransit.consume,
+    LastMeasurement: {
+      Value: 1,
+      Tags: {
+        IReceiveObserver.PreReceive: test,
+        messaging.masstransit.consumer_type: MonitoredSubmitOrderConsumer,
+        messaging.masstransit.message_type: SubmitOrder,
+        messaging.masstransit.service: testhost
+      }
+    }
+  },
+  {
+    Name: messaging.masstransit.consume.errors
+  },
+  {
+    Name: messaging.masstransit.consume.retries
+  },
+  {
+    Name: messaging.masstransit.saga
+  },
+  {
+    Name: messaging.masstransit.saga.errors
+  },
+  {
+    Name: messaging.masstransit.handler,
+    LastMeasurement: {
+      Value: 1,
+      Tags: {
+        IReceiveObserver.PreReceive: test,
+        messaging.masstransit.consumer_type: Handler,
+        messaging.masstransit.message_type: OrderSubmitted,
+        messaging.masstransit.service: testhost
+      }
+    }
+  },
+  {
+    Name: messaging.masstransit.handler.errors
+  },
+  {
+    Name: messaging.masstransit.send,
+    LastMeasurement: {
+      Value: 1,
+      Tags: {
+        messaging.masstransit.message_type: OrderSubmitted,
+        messaging.masstransit.service: testhost
+      }
+    }
+  },
+  {
+    Name: messaging.masstransit.send.errors
+  },
+  {
+    Name: messaging.masstransit.execute
+  },
+  {
+    Name: messaging.masstransit.execute.errors
+  },
+  {
+    Name: messaging.masstransit.compensate
+  },
+  {
+    Name: messaging.masstransit.compensate.errors
+  },
+  {
+    Name: messaging.masstransit.consume.active,
+    LastMeasurement: {
+      Value: -1,
+      Tags: {
+        IReceiveObserver.PreReceive: test,
+        messaging.masstransit.consumer_type: MonitoredSubmitOrderConsumer,
+        messaging.masstransit.message_type: SubmitOrder,
+        messaging.masstransit.service: testhost
+      }
+    }
+  },
+  {
+    Name: messaging.masstransit.handler.active,
+    LastMeasurement: {
+      Value: -1,
+      Tags: {
+        IReceiveObserver.PreReceive: test,
+        messaging.masstransit.consumer_type: Handler,
+        messaging.masstransit.message_type: OrderSubmitted,
+        messaging.masstransit.service: testhost
+      }
+    }
+  },
+  {
+    Name: messaging.masstransit.saga.active
+  },
+  {
+    Name: messaging.masstransit.execute.active
+  },
+  {
+    Name: messaging.masstransit.compensate.active
+  },
+  {
+    Name: messaging.masstransit.outbox.send
+  },
+  {
+    Name: messaging.masstransit.outbox.send.errors
+  },
+  {
+    Name: messaging.masstransit.outbox.delivery
+  },
+  {
+    Name: messaging.masstransit.outbox.delivery.errors
+  },
+  {
+    Name: messaging.masstransit.receive.duration,
+    LastMeasurement: {
+      Value: SCRUBBED,
+      Tags: {
+        messaging.masstransit.destination: BUS ADDRESS,
+        messaging.masstransit.service: testhost
+      }
+    }
+  },
+  {
+    Name: messaging.masstransit.saga.duration
+  },
+  {
+    Name: messaging.masstransit.handler.duration,
+    LastMeasurement: {
+      Value: SCRUBBED,
+      Tags: {
+        IReceiveObserver.PreReceive: test,
+        messaging.masstransit.consumer_type: Handler,
+        messaging.masstransit.message_type: OrderSubmitted,
+        messaging.masstransit.service: testhost
+      }
+    }
+  },
+  {
+    Name: messaging.masstransit.execute.duration
+  },
+  {
+    Name: messaging.masstransit.compensate.duration
+  },
+  {
+    Name: messaging.masstransit.consume.duration,
+    LastMeasurement: {
+      Value: SCRUBBED,
+      Tags: {
+        IReceiveObserver.PreReceive: test,
+        messaging.masstransit.consumer_type: MonitoredSubmitOrderConsumer,
+        messaging.masstransit.message_type: SubmitOrder,
+        messaging.masstransit.service: testhost
+      }
+    }
+  },
+  {
+    Name: messaging.masstransit.delivery.duration,
+    LastMeasurement: {
+      Value: SCRUBBED,
+      Tags: {
+        IReceiveObserver.PreReceive: test,
+        messaging.masstransit.consumer_type: MonitoredSubmitOrderConsumer,
+        messaging.masstransit.message_type: SubmitOrder,
+        messaging.masstransit.service: testhost
+      }
+    }
+  }
+]
