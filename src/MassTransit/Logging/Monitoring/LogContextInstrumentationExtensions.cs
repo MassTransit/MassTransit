@@ -377,7 +377,20 @@ namespace MassTransit.Logging
             if (_isConfigured)
                 return;
 
-            TryConfigure(provider.GetRequiredService<IOptions<InstrumentationOptions>>().Value);
+            var instrumentationOptions = provider.GetRequiredService<IOptions<InstrumentationOptions>>().Value;
+        #if NET8_0_OR_GREATER
+            var meterFactory = provider.GetService<IMeterFactory>();
+            if (meterFactory == null)
+            {
+                TryConfigure(instrumentationOptions);
+                return;
+            }
+
+            var meter = meterFactory.Create(new MeterOptions(InstrumentationOptions.MeterName) { Version = HostMetadataCache.Host.MassTransitVersion });
+            Configure(meter, instrumentationOptions);
+        #else
+            TryConfigure(instrumentationOptions);
+        #endif
         }
 
         public static void TryConfigure(InstrumentationOptions options)
@@ -385,8 +398,14 @@ namespace MassTransit.Logging
             if (_isConfigured)
                 return;
 
+            // We have to dispose manually created meter to flush instruments, some day...
+            Configure(new Meter(InstrumentationOptions.MeterName, HostMetadataCache.Host.MassTransitVersion), options);
+        }
+
+        static void Configure(Meter meter, InstrumentationOptions options)
+        {
             _options = options;
-            _meter = new Meter(InstrumentationOptions.MeterName, HostMetadataCache.Host.MassTransitVersion);
+            _meter = meter;
 
             // Counters
 
