@@ -16,6 +16,18 @@ services:
       - '10255:10255'
       - '10256:10256'
       - '10350:10350'
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "-f",
+          "-k",
+          "https://localhost:8081/_explorer/emulator.pem",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     environment:
       - AZURE_COSMOS_EMULATOR_PARTITION_COUNT=3
       - AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE=false
