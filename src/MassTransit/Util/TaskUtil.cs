@@ -24,7 +24,7 @@ namespace MassTransit.Util
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static Task<T> Default<T>()
+        public static Task<T?> Default<T>()
         {
             return Cached<T>.DefaultValueTask;
         }
@@ -250,7 +250,7 @@ namespace MassTransit.Util
 
         static class Cached<T>
         {
-            public static readonly Task<T> DefaultValueTask = Task.FromResult<T>(default);
+            public static readonly Task<T?> DefaultValueTask = Task.FromResult<T?>(default);
             public static readonly Task<T> CanceledTask = GetCanceledTask();
 
             static Task<T> GetCanceledTask()
