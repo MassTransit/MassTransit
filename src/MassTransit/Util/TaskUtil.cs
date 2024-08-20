@@ -250,7 +250,9 @@ namespace MassTransit.Util
 
         static class Cached<T>
         {
+            #pragma warning disable CS8604 // Possible null reference argument.
             public static readonly Task<T> DefaultValueTask = Task.FromResult<T>(default);
+            #pragma warning restore CS8604 // Possible null reference argument.
             public static readonly Task<T> CanceledTask = GetCanceledTask();
 
             static Task<T> GetCanceledTask()
