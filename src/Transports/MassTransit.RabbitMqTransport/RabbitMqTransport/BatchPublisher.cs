@@ -61,7 +61,7 @@ namespace MassTransit.RabbitMqTransport
 
         public async ValueTask DisposeAsync()
         {
-            _publishChannel.Writer.Complete();
+            _publishChannel.Writer.TryComplete();
 
             await _publishTask.ConfigureAwait(false);
         }

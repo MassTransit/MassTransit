@@ -60,7 +60,7 @@ namespace MassTransit.Util
             if (_disposed)
                 return;
 
-            _channel.Writer.Complete();
+            _channel.Writer.TryComplete();
 
             await _readerTask.ConfigureAwait(false);
 
