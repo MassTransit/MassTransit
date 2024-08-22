@@ -103,7 +103,7 @@ namespace MassTransit.Testing.Implementations
             finally
             {
                 handle.Disconnect();
-                channel.Writer.Complete();
+                channel.Writer.TryComplete();
             }
         }
 

@@ -44,7 +44,7 @@ namespace MassTransit.AmazonSqsTransport
 
         public async ValueTask DisposeAsync()
         {
-            _channel.Writer.Complete();
+            _channel.Writer.TryComplete();
 
             await _batchTask.ConfigureAwait(false);
 
