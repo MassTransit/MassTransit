@@ -1,0 +1,33 @@
+services:
+  cosmosdb:
+    container_name: "azure-cosmosdb-emulator"
+    hostname: "azurecosmosemulator"
+    image: 'mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest'
+    ports:
+      - '8081:8081' # Data Explorer
+      - '8900:8900'
+      - '8901:8901'
+      - '8902:8902'
+      - '10250:10250'
+      - '10251:10251'
+      - '10252:10252'
+      - '10253:10253'
+      - '10254:10254'
+      - '10255:10255'
+      - '10256:10256'
+      - '10350:10350'
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "-f",
+          "-k",
+          "https://localhost:8081/_explorer/emulator.pem",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - AZURE_COSMOS_EMULATOR_PARTITION_COUNT=3
+      - AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE=false

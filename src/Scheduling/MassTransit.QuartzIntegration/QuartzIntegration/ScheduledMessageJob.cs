@@ -29,7 +29,10 @@ namespace MassTransit.QuartzIntegration
             var contentType = new ContentType(jobData.GetString("ContentType")!);
             var destinationAddress = new Uri(jobData.GetString("Destination")!);
             var body = jobData.GetString("Body") ?? string.Empty;
-            var supportedMessageTypes = jobData.GetString("MessageType")?.Split(';').ToArray() ?? Array.Empty<string>();
+
+            var supportedMessageTypes = (jobData.TryGetString("MessageType", out var text)
+                ? text?.Split(';').ToArray()
+                : default) ?? Array.Empty<string>();
 
             try
             {
@@ -87,7 +90,9 @@ namespace MassTransit.QuartzIntegration
                 context.SourceAddress = _messageContext.SourceAddress;
                 context.ResponseAddress = _messageContext.ResponseAddress;
                 context.FaultAddress = _messageContext.FaultAddress;
-                context.SupportedMessageTypes = _supportedMessageTypes;
+
+                if (_supportedMessageTypes.Any())
+                    context.SupportedMessageTypes = _supportedMessageTypes;
 
                 if (_messageContext.ExpirationTime.HasValue)
                     context.TimeToLive = _messageContext.ExpirationTime.Value.ToUniversalTime() - DateTime.UtcNow;

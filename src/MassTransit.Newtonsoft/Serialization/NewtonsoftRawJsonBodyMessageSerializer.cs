@@ -9,6 +9,7 @@ namespace MassTransit.Serialization
     /// Used to serialize an existing deserialized message when a message is forwarded, scheduled, etc.
     /// </summary>
     public class NewtonsoftRawJsonBodyMessageSerializer :
+        RawMessageSerializer,
         IMessageSerializer
     {
         readonly string[]? _messageTypes;
@@ -31,6 +32,9 @@ namespace MassTransit.Serialization
         {
             if (_messageTypes != null)
                 context.SupportedMessageTypes = _messageTypes;
+
+            if (_options.HasFlag(RawSerializerOptions.AddTransportHeaders))
+                SetRawMessageHeaders(context);
 
             return new NewtonsoftRawJsonMessageBody<T>(context, _message);
         }

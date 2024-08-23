@@ -1,5 +1,6 @@
 namespace MassTransit
 {
+    using System;
     using Courier.Contracts;
 
 
@@ -39,5 +40,11 @@ namespace MassTransit
         /// end of the endpoint name.
         /// </summary>
         string InstanceId { set; }
+
+        /// <summary>
+        /// Add an endpoint configuration callback to the registration
+        /// </summary>
+        /// <param name="callback"></param>
+        void AddConfigureEndpointCallback(Action<IReceiveEndpointConfigurator>? callback);
     }
 }

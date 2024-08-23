@@ -15,6 +15,8 @@ namespace MassTransit.EventHubIntegration.Tests
     public class HealthCheck_Specs :
         InMemoryTestFixture
     {
+        const string EventHubName = "default-eh";
+
         [Test]
         public async Task Should_be_healthy()
         {
@@ -33,7 +35,7 @@ namespace MassTransit.EventHubIntegration.Tests
                         k.Host(Configuration.EventHubNamespace);
                         k.Storage(Configuration.StorageAccount);
 
-                        k.ReceiveEndpoint(Configuration.EventHubName, c =>
+                        k.ReceiveEndpoint(EventHubName, Configuration.ConsumerGroup, c =>
                         {
                         });
                     });

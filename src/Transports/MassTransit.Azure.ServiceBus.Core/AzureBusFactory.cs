@@ -1,7 +1,6 @@
 ﻿namespace MassTransit
 {
     using System;
-    using System.Threading;
     using AzureServiceBusTransport;
     using AzureServiceBusTransport.Configuration;
     using Configuration;
@@ -10,8 +9,6 @@
 
     public static class AzureBusFactory
     {
-        public static IMessageTopologyConfigurator MessageTopology => Cached.MessageTopologyValue.Value;
-
         /// <summary>
         /// Configure and create a bus for Azure Service Bus (later, we'll use Event Hubs instead)
         /// </summary>
@@ -19,7 +16,7 @@
         /// <returns></returns>
         public static IBusControl CreateUsingServiceBus(Action<IServiceBusBusFactoryConfigurator> configure)
         {
-            var topologyConfiguration = new ServiceBusTopologyConfiguration(MessageTopology);
+            var topologyConfiguration = new ServiceBusTopologyConfiguration(CreateMessageTopology());
             var busConfiguration = new ServiceBusBusConfiguration(topologyConfiguration);
 
             var configurator = new ServiceBusBusFactoryConfigurator(busConfiguration);
@@ -29,17 +26,19 @@
             return configurator.Build(busConfiguration);
         }
 
+        public static IMessageTopologyConfigurator CreateMessageTopology()
+        {
+            return new MessageTopology(Cached.EntityNameFormatter);
+        }
+
 
         static class Cached
         {
-            internal static readonly Lazy<IMessageTopologyConfigurator> MessageTopologyValue =
-                new Lazy<IMessageTopologyConfigurator>(() => new MessageTopology(_entityNameFormatter), LazyThreadSafetyMode.PublicationOnly);
-
-            static readonly IEntityNameFormatter _entityNameFormatter;
+            internal static readonly IEntityNameFormatter EntityNameFormatter;
 
             static Cached()
             {
-                _entityNameFormatter = new MessageNameFormatterEntityNameFormatter(new ServiceBusMessageNameFormatter());
+                EntityNameFormatter = new MessageNameFormatterEntityNameFormatter(new ServiceBusMessageNameFormatter());
             }
         }
     }

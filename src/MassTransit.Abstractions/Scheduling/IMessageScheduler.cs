@@ -76,8 +76,7 @@
             CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Sends an object as a message, using the message type specified. If the object cannot be cast
-        /// to the specified message type, an exception will be thrown.
+        /// Sends an object as a message.
         /// </summary>
         /// <param name="destinationAddress">The destination address where the schedule message should be sent</param>
         /// <param name="scheduledTime">The time at which the message should be delivered to the queue</param>
@@ -151,7 +150,8 @@
         /// </summary>
         /// <param name="destinationAddress">The destination address of the scheduled message</param>
         /// <param name="tokenId">The tokenId of the scheduled message</param>
-        Task CancelScheduledSend(Uri destinationAddress, Guid tokenId);
+        /// <param name="cancellationToken"></param>
+        Task CancelScheduledSend(Uri destinationAddress, Guid tokenId, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Send a message
@@ -210,8 +210,7 @@
         Task<ScheduledMessage> SchedulePublish(DateTime scheduledTime, object message, Type messageType, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Sends an object as a message, using the message type specified. If the object cannot be cast
-        /// to the specified message type, an exception will be thrown.
+        /// Sends an object as a message.
         /// </summary>
         /// <param name="scheduledTime">The time at which the message should be delivered to the queue</param>
         /// <param name="message">The message object</param>
@@ -278,7 +277,8 @@
         /// the destinationAddress.
         /// </summary>
         /// <param name="tokenId">The tokenId of the scheduled message</param>
-        Task CancelScheduledPublish<T>(Guid tokenId)
+        /// <param name="cancellationToken"></param>
+        Task CancelScheduledPublish<T>(Guid tokenId, CancellationToken cancellationToken = default)
             where T : class;
 
         /// <summary>
@@ -287,6 +287,7 @@
         /// </summary>
         /// <param name="messageType"></param>
         /// <param name="tokenId">The tokenId of the scheduled message</param>
-        Task CancelScheduledPublish(Type messageType, Guid tokenId);
+        /// <param name="cancellationToken"></param>
+        Task CancelScheduledPublish(Type messageType, Guid tokenId, CancellationToken cancellationToken = default);
     }
 }

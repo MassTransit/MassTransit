@@ -17,9 +17,6 @@
         readonly Lazy<CancellationTokenSource> _stopped;
         readonly Lazy<CancellationTokenSource> _stopping;
 
-        bool _isStopped;
-        bool _isStopping;
-
         TaskCompletionSource<bool>? _setCompleted;
         CancellationTokenSource? _setCompletedCancel;
 
@@ -37,7 +34,7 @@
             _stopped = new Lazy<CancellationTokenSource>(() =>
             {
                 var source = new CancellationTokenSource();
-                if (_isStopped)
+                if (IsStopped)
                     source.Cancel();
 
                 return source;
@@ -45,7 +42,7 @@
             _stopping = new Lazy<CancellationTokenSource>(() =>
             {
                 var source = new CancellationTokenSource();
-                if (_isStopping)
+                if (IsStopping)
                     source.Cancel();
 
                 return source;
@@ -55,12 +52,12 @@
         /// <summary>
         /// True if the agent is in the process of stopping or is stopped
         /// </summary>
-        protected bool IsStopping => _isStopping;
+        protected bool IsStopping { get; private set; }
 
         /// <summary>
         /// True if the agent is stopped
         /// </summary>
-        protected bool IsStopped => _isStopped;
+        protected bool IsStopped { get; private set; }
 
         protected bool IsAlreadyReady => _ready.Task.IsCompleted;
 
@@ -81,13 +78,16 @@
         /// <inheritdoc />
         public async Task Stop(StopContext context)
         {
-            _isStopping = true;
+            if (IsStopping)
+                return;
+
+            IsStopping = true;
             if (_stopping.IsValueCreated)
                 _stopping.Value.Cancel();
 
             await StopAgent(context).ConfigureAwait(false);
 
-            _isStopped = true;
+            IsStopped = true;
             if (_stopped.IsValueCreated)
                 _stopped.Value.Cancel();
         }

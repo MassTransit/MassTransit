@@ -1,5 +1,8 @@
 namespace MassTransit.Configuration
 {
+    using System;
+
+
     public class EndpointRegistrationConfigurator<T> :
         IEndpointRegistrationConfigurator
         where T : class
@@ -41,6 +44,11 @@ namespace MassTransit.Configuration
         public string InstanceId
         {
             set => _settings.InstanceId = value;
+        }
+
+        public void AddConfigureEndpointCallback(Action<IReceiveEndpointConfigurator>? callback)
+        {
+            _settings.AddConfigureEndpointCallback(callback);
         }
     }
 }

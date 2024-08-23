@@ -38,6 +38,9 @@ namespace MassTransit.SqlTransport.SqlServer
             Password = builder.Password;
 
             _builder = builder;
+
+            if (options.ConnectionLimit.HasValue)
+                ConnectionLimit = options.ConnectionLimit.Value;
         }
 
         public string? ConnectionString
@@ -94,11 +97,20 @@ namespace MassTransit.SqlTransport.SqlServer
             var hostSegments = host?.Split('\\');
             if (hostSegments?.Length == 2)
             {
-                Host = hostSegments[0].Trim();
+                Host = TrimHost(hostSegments[0]);
                 InstanceName = hostSegments[1].Trim();
             }
             else
-                Host = host;
+                Host = TrimHost(host);
+        }
+
+        string? TrimHost(string? host)
+        {
+            if (host == null)
+                return null;
+
+            var hostSplit = host.Trim().Split(':');
+            return hostSplit.Length == 1 ? hostSplit[0] : hostSplit[1];
         }
 
         string? FormatDataSource()

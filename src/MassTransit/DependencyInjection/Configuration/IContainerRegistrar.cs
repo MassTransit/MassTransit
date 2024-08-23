@@ -15,6 +15,8 @@ namespace MassTransit.Configuration
 
         void RegisterScopedClientFactory();
 
+        void RegisterEndpointNameFormatter(IEndpointNameFormatter endpointNameFormatter);
+
         /// <summary>
         /// Gets or adds a registration from the service collection
         /// </summary>

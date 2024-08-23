@@ -12,6 +12,8 @@ namespace MassTransit.EventHubIntegration.Tests
     public class Publishing_a_message_to_the_bus_through_the_outbox :
         InMemoryTestFixture
     {
+        const string EventHubName = "publish-eh";
+
         [Test]
         public async Task Should_use_the_default_endpoint_serializer()
         {
@@ -34,7 +36,7 @@ namespace MassTransit.EventHubIntegration.Tests
                             k.Host(Configuration.EventHubNamespace);
                             k.Storage(Configuration.StorageAccount);
 
-                            k.ReceiveEndpoint(Configuration.EventHubName, c =>
+                            k.ReceiveEndpoint(EventHubName, Configuration.ConsumerGroup, c =>
                             {
                                 c.UseInMemoryInboxOutbox(context);
 
@@ -48,7 +50,7 @@ namespace MassTransit.EventHubIntegration.Tests
 
             await harness.Start();
 
-            var producer = await harness.GetProducer(Configuration.EventHubName);
+            var producer = await harness.GetProducer(EventHubName);
 
             var correlationId = NewId.NextGuid();
             var conversationId = NewId.NextGuid();

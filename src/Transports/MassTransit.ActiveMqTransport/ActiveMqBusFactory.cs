@@ -1,7 +1,6 @@
 ﻿namespace MassTransit
 {
     using System;
-    using System.Threading;
     using ActiveMqTransport;
     using ActiveMqTransport.Configuration;
     using Configuration;
@@ -10,8 +9,6 @@
 
     public static class ActiveMqBusFactory
     {
-        public static IMessageTopologyConfigurator MessageTopology => Cached.MessageTopologyValue.Value;
-
         /// <summary>
         /// Configure and create a bus for ActiveMQ
         /// </summary>
@@ -19,7 +16,7 @@
         /// <returns></returns>
         public static IBusControl Create(Action<IActiveMqBusFactoryConfigurator> configure)
         {
-            var topologyConfiguration = new ActiveMqTopologyConfiguration(MessageTopology);
+            var topologyConfiguration = new ActiveMqTopologyConfiguration(CreateMessageTopology());
             var busConfiguration = new ActiveMqBusConfiguration(topologyConfiguration);
 
             var configurator = new ActiveMqBusFactoryConfigurator(busConfiguration);
@@ -29,18 +26,19 @@
             return configurator.Build(busConfiguration);
         }
 
+        public static IMessageTopologyConfigurator CreateMessageTopology()
+        {
+            return new MessageTopology(Cached.EntityNameFormatter);
+        }
+
 
         static class Cached
         {
-            internal static readonly Lazy<IMessageTopologyConfigurator> MessageTopologyValue =
-                new Lazy<IMessageTopologyConfigurator>(() => new MessageTopology(_entityNameFormatter),
-                    LazyThreadSafetyMode.PublicationOnly);
-
-            static readonly IEntityNameFormatter _entityNameFormatter;
+            internal static readonly IEntityNameFormatter EntityNameFormatter;
 
             static Cached()
             {
-                _entityNameFormatter = new MessageNameFormatterEntityNameFormatter(new ActiveMqMessageNameFormatter());
+                EntityNameFormatter = new MessageNameFormatterEntityNameFormatter(new ActiveMqMessageNameFormatter());
             }
         }
     }

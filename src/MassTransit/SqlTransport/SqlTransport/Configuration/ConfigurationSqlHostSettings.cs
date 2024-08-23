@@ -40,6 +40,8 @@ namespace MassTransit.SqlTransport.Configuration
 
             IsolationLevel = IsolationLevel.RepeatableRead;
 
+            ConnectionLimit = 10;
+
             _hostAddress = new Lazy<Uri>(FormatHostAddress);
 
             MaintenanceInterval = TimeSpan.FromSeconds(5);
@@ -58,6 +60,8 @@ namespace MassTransit.SqlTransport.Configuration
         public string? LicenseFile { get; set; }
 
         public IsolationLevel IsolationLevel { get; set; }
+
+        public int ConnectionLimit { get; set; }
 
         public TimeSpan MaintenanceInterval { get; set; }
         public TimeSpan QueueCleanupInterval { get; set; }
@@ -87,6 +91,9 @@ namespace MassTransit.SqlTransport.Configuration
         {
             if (string.IsNullOrWhiteSpace(Host))
                 yield return this.Failure("Host", "Host must be specified");
+
+            if(ConnectionLimit < 1)
+                yield return this.Failure("ConnectionLimit", "must be >= 1");
         }
 
         static string UriDecode(string uri)

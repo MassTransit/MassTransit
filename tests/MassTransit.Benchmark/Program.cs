@@ -159,6 +159,15 @@
 
                 transport = new KafkaMessageLatencyTransport(kafkaOptionSet, settings);
             }
+            else if (optionSet.Transport == ProgramOptionSet.TransportOptions.Sql)
+            {
+                var options = new SqlOptionSet();
+                options.Parse(_remaining);
+
+                options.ShowOptions();
+
+                transport = new SqlMessageLatencyTransport(options, settings);
+            }
             else if (optionSet.Transport == ProgramOptionSet.TransportOptions.Mediator)
                 transport = new MediatorMessageLatencyTransport(settings);
             else

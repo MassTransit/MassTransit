@@ -1,6 +1,7 @@
 namespace MassTransit.SqlTransport.PostgreSql
 {
     using System;
+    using System.Linq;
     using Configuration;
     using Npgsql;
 
@@ -24,7 +25,7 @@ namespace MassTransit.SqlTransport.PostgreSql
         {
             var builder = PostgresSqlTransportConnection.CreateBuilder(options);
 
-            Host = builder.Host;
+            ParseHost(builder.Host);
             if (builder.Port > 0 && builder.Port != NpgsqlConnection.DefaultPort)
                 Port = options.Port;
 
@@ -35,7 +36,12 @@ namespace MassTransit.SqlTransport.PostgreSql
             Password = builder.Password;
 
             _builder = builder;
+
+            if(options.ConnectionLimit.HasValue)
+                ConnectionLimit = options.ConnectionLimit.Value;
         }
+
+        public string? MultipleHosts { get; set; }
 
         public string? ConnectionString
         {
@@ -43,7 +49,7 @@ namespace MassTransit.SqlTransport.PostgreSql
             {
                 var builder = new NpgsqlConnectionStringBuilder(value);
 
-                Host = builder.Host;
+                ParseHost(builder.Host);
                 if (builder.Port > 0 && builder.Port != NpgsqlConnection.DefaultPort)
                     Port = builder.Port;
 
@@ -65,16 +71,39 @@ namespace MassTransit.SqlTransport.PostgreSql
         {
             var builder = _builder ??= new NpgsqlConnectionStringBuilder
             {
-                Host = Host,
+                Host = MultipleHosts ?? Host,
                 Username = Username,
                 Password = Password,
                 Database = Database
             };
 
-            if (Port.HasValue)
+            if (Port.HasValue && Port.Value != NpgsqlConnection.DefaultPort)
                 builder.Port = Port.Value;
 
             return builder.ToString();
+        }
+
+        void ParseHost(string? host)
+        {
+            var hostSegments = host?.Split(',');
+            if (hostSegments?.Length > 1)
+            {
+                Host = hostSegments[0].Split(':').First().Trim();
+                MultipleHosts = host!.Trim();
+            }
+            else
+            {
+                var segments = host?.Split(':');
+                if (segments?.Length == 1)
+                    Host = segments[0].Trim();
+                else if (segments?.Length == 2)
+                {
+                    Host = segments[0].Trim();
+
+                    if (int.TryParse(segments[1], out var port) && port != 0 && port != NpgsqlConnection.DefaultPort)
+                        Port = port;
+                }
+            }
         }
     }
 }

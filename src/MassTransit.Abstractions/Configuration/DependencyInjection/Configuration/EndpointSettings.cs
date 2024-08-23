@@ -1,9 +1,15 @@
 namespace MassTransit.Configuration
 {
+    using System;
+    using System.Collections.Generic;
+
+
     public class EndpointSettings<T> :
         IEndpointSettings<T>
         where T : class
     {
+        List<Action<IReceiveEndpointConfigurator>>? _callbacks;
+
         public EndpointSettings()
         {
             ConfigureConsumeTopology = true;
@@ -20,5 +26,24 @@ namespace MassTransit.Configuration
         public bool ConfigureConsumeTopology { get; set; }
 
         public string? InstanceId { get; set; }
+
+        public void ConfigureEndpoint(IReceiveEndpointConfigurator configurator)
+        {
+            if (_callbacks != null)
+            {
+                foreach (Action<IReceiveEndpointConfigurator> callback in _callbacks)
+                    callback(configurator);
+            }
+        }
+
+        public void AddConfigureEndpointCallback(Action<IReceiveEndpointConfigurator>? callback)
+        {
+            if (callback == null)
+                return;
+
+            _callbacks ??= new List<Action<IReceiveEndpointConfigurator>>(1);
+
+            _callbacks.Add(callback);
+        }
     }
 }

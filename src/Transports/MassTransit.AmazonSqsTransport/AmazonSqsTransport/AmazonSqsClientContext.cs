@@ -1,12 +1,9 @@
 namespace MassTransit.AmazonSqsTransport
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Amazon.Auth.AccessControlPolicy;
-    using Amazon.Auth.AccessControlPolicy.ActionIdentifiers;
     using Amazon.SimpleNotificationService;
     using Amazon.SimpleNotificationService.Model;
     using Amazon.SQS;
@@ -23,12 +20,10 @@ namespace MassTransit.AmazonSqsTransport
         readonly IAmazonSimpleNotificationService _snsClient;
         readonly IAmazonSQS _sqsClient;
 
-        public AmazonSqsClientContext(
-            ConnectionContext connectionContext,
+        public AmazonSqsClientContext(ConnectionContext connectionContext,
             IAmazonSQS sqsClient,
             IAmazonSimpleNotificationService snsClient,
-            CancellationToken cancellationToken
-        )
+            CancellationToken cancellationToken)
             : base(connectionContext)
         {
             ConnectionContext = connectionContext;
@@ -52,7 +47,7 @@ namespace MassTransit.AmazonSqsTransport
             return ConnectionContext.GetQueue(queue);
         }
 
-        public async Task CreateQueueSubscription(Topology.Topic topic, Queue queue)
+        public async Task<bool> CreateQueueSubscription(Topology.Topic topic, Queue queue)
         {
             var topicInfo = await ConnectionContext.GetTopic(topic).ConfigureAwait(false);
             var queueInfo = await ConnectionContext.GetQueue(queue).ConfigureAwait(false);
@@ -78,38 +73,14 @@ namespace MassTransit.AmazonSqsTransport
             }
             catch (InvalidParameterException exception) when (exception.Message.Contains("exists"))
             {
-                return;
+                return false;
             }
 
             queueInfo.SubscriptionArns.Add(response.SubscriptionArn);
 
             var sqsQueueArn = queueInfo.Arn;
 
-            queueInfo.Attributes.TryGetValue(QueueAttributeName.Policy, out var policyValue);
-            var policy = string.IsNullOrEmpty(policyValue)
-                ? new Policy()
-                : Policy.FromJson(policyValue);
-
-            if (!QueueHasTopicPermission(policy, topicInfo.Arn, sqsQueueArn))
-            {
-                var statement = new Statement(Statement.StatementEffect.Allow);
-            #pragma warning disable 618
-                statement.Actions.Add(SQSActionIdentifiers.SendMessage);
-            #pragma warning restore 618
-                statement.Resources.Add(new Resource(sqsQueueArn));
-                statement.Conditions.Add(ConditionFactory.NewSourceArnCondition(topicInfo.Arn));
-                statement.Principals.Add(new Principal("Service","sns.amazonaws.com"));
-                policy.Statements.Add(statement);
-
-                var jsonPolicy = policy.ToJson();
-
-                var setAttributes = new Dictionary<string, string> { { QueueAttributeName.Policy, jsonPolicy } };
-                var setAttributesResponse = await _sqsClient.SetQueueAttributesAsync(queueInfo.Url, setAttributes, CancellationToken).ConfigureAwait(false);
-
-                setAttributesResponse.EnsureSuccessfulResponse();
-
-                queueInfo.Attributes[QueueAttributeName.Policy] = jsonPolicy;
-            }
+            return await queueInfo.UpdatePolicy(sqsQueueArn, topicInfo.Arn, CancellationToken).ConfigureAwait(false);
         }
 
         public async Task DeleteTopic(Topology.Topic topic)
@@ -183,8 +154,10 @@ namespace MassTransit.AmazonSqsTransport
             {
                 MaxNumberOfMessages = messageLimit,
                 WaitTimeSeconds = waitTime,
-                AttributeNames = new List<string> { "All" },
-                MessageAttributeNames = new List<string> { "All" }
+                #pragma warning disable CS0618 // Type or member is obsolete
+                AttributeNames = ["All"],
+                #pragma warning restore CS0618 // Type or member is obsolete
+                MessageAttributeNames = ["All"]
             };
 
             var response = await _sqsClient.ReceiveMessageAsync(request, cancellationToken).ConfigureAwait(false);
@@ -225,20 +198,6 @@ namespace MassTransit.AmazonSqsTransport
             var response = await _snsClient.UnsubscribeAsync(unsubscribeRequest, CancellationToken.None).ConfigureAwait(false);
 
             response.EnsureSuccessfulResponse();
-        }
-
-        static bool QueueHasTopicPermission(Policy policy, string topicArn, string sqsQueueArn)
-        {
-            var topicArnPattern = topicArn.Substring(0, topicArn.LastIndexOf(':') + 1) + "*";
-
-            IEnumerable<Condition> conditions = policy.Statements
-                .Where(s => s.Resources.Any(r => r.Id.Equals(sqsQueueArn)))
-                .SelectMany(s => s.Conditions);
-
-            return conditions.Any(c =>
-                string.Equals(c.Type, ConditionFactory.ArnComparisonType.ArnLike.ToString(), StringComparison.OrdinalIgnoreCase) &&
-                string.Equals(c.ConditionKey, ConditionFactory.SOURCE_ARN_CONDITION_KEY, StringComparison.OrdinalIgnoreCase) &&
-                c.Values.Any(v => v == topicArnPattern || v == topicArn));
         }
     }
 }

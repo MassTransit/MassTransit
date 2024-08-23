@@ -17,7 +17,7 @@ namespace MassTransit.RabbitMqTransport
             var hostAddress = new RabbitMqHostAddress(address);
             var endpointAddress = new RabbitMqEndpointAddress(hostAddress, address);
 
-            var topologyConfiguration = new RabbitMqTopologyConfiguration(RabbitMqBusFactory.MessageTopology);
+            var topologyConfiguration = new RabbitMqTopologyConfiguration(RabbitMqBusFactory.CreateMessageTopology());
             var endpointConfiguration = new RabbitMqEndpointConfiguration(topologyConfiguration);
             var settings = new RabbitMqReceiveSettings(endpointConfiguration, endpointAddress.Name, endpointAddress.ExchangeType,
                 endpointAddress.Durable, endpointAddress.AutoDelete)
@@ -170,6 +170,11 @@ namespace MassTransit.RabbitMqTransport
         static string UriDecode(string uri)
         {
             return Uri.UnescapeDataString(uri.Replace("+", "%2B"));
+        }
+
+        public static bool IsReplyToAddress(this Uri address)
+        {
+            return address?.AbsolutePath?.EndsWith(RabbitMqExchangeNames.ReplyTo) ?? false;
         }
     }
 }

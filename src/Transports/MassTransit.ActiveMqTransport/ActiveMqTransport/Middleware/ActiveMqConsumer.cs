@@ -48,6 +48,9 @@ namespace MassTransit.ActiveMqTransport.Middleware
         {
             _executor.PushWithWait(async () =>
             {
+                if (IsStopping)
+                    return;
+
                 LogContext.Current = _context.LogContext;
 
                 var context = new ActiveMqReceiveContext(message, _context, _receiveSettings, _session, _session.ConnectionContext);

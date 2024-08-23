@@ -12,13 +12,11 @@ namespace MassTransit.Transports
     public abstract class BaseReceiveContext :
         ScopePipeContext,
         ReceiveContext,
-        ReceiveLockContext,
         IDisposable
     {
         readonly CancellationTokenSource _cancellationTokenSource;
         readonly Lazy<ContentType> _contentType;
         readonly Lazy<Headers> _headers;
-        readonly PendingReceiveLockContext _pendingLockContexts;
         readonly Lazy<IPublishEndpointProvider> _publishEndpointProvider;
         readonly ReceiveEndpointContext _receiveEndpointContext;
         readonly PendingTaskCollection _receiveTasks;
@@ -40,7 +38,6 @@ namespace MassTransit.Transports
 
             _contentType = new Lazy<ContentType>(GetContentType);
             _receiveTasks = new PendingTaskCollection(4);
-            _pendingLockContexts = new PendingReceiveLockContext();
 
             _sendEndpointProvider = new Lazy<ISendEndpointProvider>(GetSendEndpointProvider);
             _publishEndpointProvider = new Lazy<IPublishEndpointProvider>(GetPublishEndpointProvider);
@@ -50,7 +47,6 @@ namespace MassTransit.Transports
 
         public virtual void Dispose()
         {
-            _pendingLockContexts.Dispose();
             _cancellationTokenSource.Dispose();
         }
 
@@ -119,21 +115,6 @@ namespace MassTransit.Transports
         public Uri InputAddress { get; protected set; }
         public ContentType ContentType => _contentType.Value;
 
-        Task ReceiveLockContext.Complete()
-        {
-            return _pendingLockContexts.Complete();
-        }
-
-        Task ReceiveLockContext.Faulted(Exception exception)
-        {
-            return _pendingLockContexts.Faulted(exception);
-        }
-
-        Task ReceiveLockContext.ValidateLockStatus()
-        {
-            return _pendingLockContexts.ValidateLockStatus();
-        }
-
         protected virtual ISendEndpointProvider GetSendEndpointProvider()
         {
             return _receiveEndpointContext.SendEndpointProvider;
@@ -173,14 +154,6 @@ namespace MassTransit.Transports
             {
                 return default;
             }
-        }
-
-        public void PushLockContext(ReceiveLockContext lockContext)
-        {
-            if (lockContext == null)
-                throw new ArgumentNullException(nameof(lockContext));
-
-            _pendingLockContexts.Enqueue(lockContext);
         }
 
 

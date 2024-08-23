@@ -365,20 +365,20 @@
             return scheduledMessage;
         }
 
-        public Task CancelScheduledPublish<T>(Guid tokenId)
+        public Task CancelScheduledPublish<T>(Guid tokenId, CancellationToken cancellationToken)
             where T : class
         {
-            return AddCancelMessage(() => _scheduler.Value.CancelScheduledPublish<T>(tokenId));
+            return AddCancelMessage(() => _scheduler.Value.CancelScheduledPublish<T>(tokenId, cancellationToken));
         }
 
-        public Task CancelScheduledPublish(Type messageType, Guid tokenId)
+        public Task CancelScheduledPublish(Type messageType, Guid tokenId, CancellationToken cancellationToken)
         {
-            return AddCancelMessage(() => _scheduler.Value.CancelScheduledPublish(messageType, tokenId));
+            return AddCancelMessage(() => _scheduler.Value.CancelScheduledPublish(messageType, tokenId, cancellationToken));
         }
 
-        public Task CancelScheduledSend(Uri destinationAddress, Guid tokenId)
+        public Task CancelScheduledSend(Uri destinationAddress, Guid tokenId, CancellationToken cancellationToken)
         {
-            return AddCancelMessage(() => _scheduler.Value.CancelScheduledSend(destinationAddress, tokenId));
+            return AddCancelMessage(() => _scheduler.Value.CancelScheduledSend(destinationAddress, tokenId, cancellationToken));
         }
 
         void AddScheduledMessage(ScheduledMessage scheduledMessage)

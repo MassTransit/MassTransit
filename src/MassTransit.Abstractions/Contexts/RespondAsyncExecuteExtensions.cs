@@ -46,7 +46,6 @@ namespace MassTransit
         /// <param name="context">The context to send the message</param>
         /// <param name="message">The message</param>
         /// <param name="callback">The callback for the send context</param>
-        // <param name="cancellationToken">To cancel the send from happening</param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task RespondAsync(this ConsumeContext context, object message, Action<SendContext> callback)
         {

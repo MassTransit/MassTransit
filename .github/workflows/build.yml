@@ -1,6 +1,6 @@
 name: MassTransit
 env:
-  MASSTRANSIT_VERSION: 8.2.2
+  MASSTRANSIT_VERSION: 8.2.5
 on:
   push:
     paths:
@@ -47,7 +47,7 @@ jobs:
         working-directory: ./
 
       - name: Test Analyzers
-        run: dotnet test -c Release --logger:"console;verbosity=normal" --no-build --filter Category!=Flaky
+        run: dotnet test -c Release --logger GitHubActions --no-build --filter Category!=Flaky
         working-directory: tests/MassTransit.Analyzers.Tests
 
   test-ubuntu:
@@ -64,11 +64,11 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Unit Tests
-        run: dotnet test -c Release -f net8.0 --logger:"console;verbosity=normal" --filter Category!=Flaky
+        run: dotnet test -c Release -f net8.0 --logger GitHubActions --filter Category!=Flaky
         working-directory: tests/MassTransit.Tests
 
       - name: Test Abstractions
-        run: dotnet test -c Release -f net8.0 --logger:"console;verbosity=normal" --filter Category!=Flaky
+        run: dotnet test -c Release -f net8.0 --logger GitHubActions --filter Category!=Flaky
         working-directory: tests/MassTransit.Abstractions.Tests
 
   test-activemq:
@@ -91,7 +91,7 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Test ActiveMQ
-        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
+        run: dotnet test -c Release --logger GitHubActions --filter Category!=Flaky
         working-directory: tests/MassTransit.ActiveMqTransport.Tests
 
   test-sql-transport:
@@ -125,7 +125,7 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Test Database Transport
-        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter "Category!=Flaky&Category!=Integration"
+        run: dotnet test -c Release --logger GitHubActions --filter "Category!=Flaky&Category!=Integration"
         working-directory: tests/MassTransit.SqlTransport.Tests
 
 
@@ -146,7 +146,7 @@ jobs:
         env:
           MT_ASB_KEYVALUE: ${{ secrets.AZURE_SERVICEBUS }}
           MT_AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE }}
-        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
+        run: dotnet test -c Release --logger GitHubActions --filter Category!=Flaky
         working-directory: tests/MassTransit.Azure.ServiceBus.Core.Tests
   test-rabbitmq:
     name: "Transports: RabbitMQ"
@@ -169,7 +169,7 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Test RabbitMQ
-        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
+        run: dotnet test -c Release --logger GitHubActions --filter Category!=Flaky
         working-directory: tests/MassTransit.RabbitMqTransport.Tests
   test-sqs:
     name: "Transports: SQS (+S3)"
@@ -192,11 +192,10 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Test SQS
-        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
+        run: dotnet test -c Release --logger GitHubActions --filter Category!=Flaky
         working-directory: tests/MassTransit.AmazonSqsTransport.Tests
   test-azure-table:
     name: "Storage: Azure Table"
-    if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/v8') && github.repository == 'MassTransit/MassTransit'
     timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
@@ -208,16 +207,25 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
+      - name: Spin up test environment
+        run: |
+          docker compose -f docker-compose.yml up -d
+        working-directory: tests/MassTransit.Azure.Table.Tests
+
       - name: Test Azure Table
         env:
           MT_AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE }}
-        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter "Category!=Flaky&Category!=Integration"
+        run: dotnet test -c Release --logger GitHubActions --filter "Category!=Flaky&Category!=Integration"
+        working-directory: tests/MassTransit.Azure.Table.Tests
+
+      - name: Stop test environment
+        run: |
+          docker compose -f docker-compose.yml down
         working-directory: tests/MassTransit.Azure.Table.Tests
   test-cosmosdb:
     name: "Storage: CosmosDB"
     timeout-minutes: 10
     runs-on: ubuntu-latest
-    if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/v8') && github.repository == 'MassTransit/MassTransit'
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -227,11 +235,27 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
+      - name: Spin up test environment
+        run: |
+          docker compose -f docker-compose.yml up -d
+          echo "Waiting for CosmosDB at localhost:8081..."
+
+          until [ "$(curl -k -s --connect-timeout 5 -o /dev/null -w "%{http_code}" https://localhost:8081/_explorer/emulator.pem)" == "200" ]; do
+            sleep 5;
+            echo "Waiting for CosmosDB at localhost:8081..."
+          done;
+
+          curl -k https://localhost:8081/_explorer/emulator.pem > ~/emulatorcert.crt
+          sudo cp ~/emulatorcert.crt /usr/local/share/ca-certificates/
+          sudo update-ca-certificates
+        working-directory: tests/MassTransit.Azure.Cosmos.Tests
+
       - name: Test CosmosDB
-        env:
-          MT_COSMOS_ENDPOINT: ${{ secrets.AZURE_COSMOSENDPOINT }}
-          MT_COSMOS_KEY: ${{ secrets.AZURE_COSMOSKEY }}
-        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter "Category!=Flaky&Category!=Integration"
+        run: dotnet test -c Release --logger GitHubActions --filter "Category!=Flaky&Category!=Integration"
+        working-directory: tests/MassTransit.Azure.Cosmos.Tests
+
+      - name: Stop test environment
+        run: docker compose -f docker-compose.yml down
         working-directory: tests/MassTransit.Azure.Cosmos.Tests
   test-dapper:
     name: "Storage: Dapper"
@@ -258,7 +282,7 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Test Dapper
-        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter "Category!=Flaky&Category!=Integration"
+        run: dotnet test -c Release --logger GitHubActions --filter "Category!=Flaky&Category!=Integration"
         working-directory: tests/MassTransit.DapperIntegration.Tests
   test-entity-framework:
     name: "Storage: EntityFramework"
@@ -292,11 +316,11 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Test EntityFrameworkCore
-        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter "Category!=Flaky&Category!=Integration"
+        run: dotnet test -c Release --logger GitHubActions --filter "Category!=Flaky&Category!=Integration"
         working-directory: tests/MassTransit.EntityFrameworkCoreIntegration.Tests
 
       - name: Test EntityFramework
-        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter "Category!=Flaky&Category!=Integration"
+        run: dotnet test -c Release --logger GitHubActions --filter "Category!=Flaky&Category!=Integration"
         working-directory: tests/MassTransit.EntityFrameworkIntegration.Tests
   test-marten:
     name: "Storage: Marten"
@@ -320,17 +344,12 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Test Marten
-        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
+        run: dotnet test -c Release --logger GitHubActions --filter Category!=Flaky
         working-directory: tests/MassTransit.MartenIntegration.Tests
   test-mongo:
     name: "Storage: MongoDB"
     timeout-minutes: 10
     runs-on: ubuntu-latest
-    services:
-      mongo:
-        image: mongo
-        ports:
-        - '27017-27019:27017-27019'
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -340,8 +359,18 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
+      - name: Spin up test environment
+        run: |
+          docker compose -f docker-compose.yml up -d
+        working-directory: tests/MassTransit.MongoDbIntegration.Tests
+
       - name: Test MongoDB
-        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
+        run: dotnet test -c Release --logger GitHubActions --filter Category!=Flaky
+        working-directory: tests/MassTransit.MongoDbIntegration.Tests
+
+      - name: Stop test environment
+        run: |
+          docker compose -f docker-compose.yml down
         working-directory: tests/MassTransit.MongoDbIntegration.Tests
   test-nhibernate:
     name: "Storage: NHibernate"
@@ -357,7 +386,7 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Test NHibernate
-        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
+        run: dotnet test -c Release --logger GitHubActions --filter Category!=Flaky
         working-directory: tests/MassTransit.NHibernateIntegration.Tests
   test-redis:
     name: "Storage: Redis"
@@ -379,7 +408,7 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Test Redis
-        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
+        run: dotnet test -c Release --logger GitHubActions --filter Category!=Flaky
         working-directory: tests/MassTransit.RedisIntegration.Tests
   test-hangfire:
     name: "Scheduler: Hangfire"
@@ -395,7 +424,7 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Test Hangfire
-        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
+        run: dotnet test -c Release --logger GitHubActions --filter Category!=Flaky
         working-directory: tests/MassTransit.HangfireIntegration.Tests
   test-quartz:
     name: "Scheduler: Quartz"
@@ -411,12 +440,11 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Test Quartz
-        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
+        run: dotnet test -c Release --logger GitHubActions --filter Category!=Flaky
         working-directory: tests/MassTransit.QuartzIntegration.Tests
   test-eventhub:
     name: "Rider: EventHub"
     runs-on: ubuntu-latest
-    if: false # turned off for flakey
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -426,57 +454,25 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
+      - name: Spin up test environment
+        run: |
+          docker compose -f docker-compose.yml up -d
+        working-directory: tests/MassTransit.EventHubIntegration.Tests
+
       - name: Test EventHub
-        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
+        run: dotnet test -c Release --logger GitHubActions --filter Category!=Flaky
         env:
           MT_EH_NAMESPACE: ${{ secrets.AZURE_EVENTHUB }}
           MT_AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE }}
         working-directory: tests/MassTransit.EventHubIntegration.Tests
+
+      - name: Stop test environment
+        run: |
+          docker compose -f docker-compose.yml down
+        working-directory: tests/MassTransit.EventHubIntegration.Tests
   test-kafka:
     name: "Rider: Kafka"
     runs-on: ubuntu-latest
-    if: true # turned off for flakey
-    services:
-      zookeeper:
-        image: confluentinc/cp-zookeeper:latest
-        ports:
-          - "2181:2181"
-        env:
-          ZOOKEEPER_CLIENT_PORT: 2181
-          ZOOKEEPER_TICK_TIME: 2000
-      broker:
-        image: confluentinc/cp-kafka:latest
-        ports:
-          - "29092:29092"
-          - "9092:9092"
-          - "9101:9101"
-        env:
-          KAFKA_BROKER_ID: 1
-          KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-          KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-          KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092
-          KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-          KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-          KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
-          KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 1
-          KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-          KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-          KAFKA_JMX_PORT: 9101
-          KAFKA_JMX_HOSTNAME: localhost
-          KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: http://schema-registry:8081
-          CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: broker:29092
-          CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
-          CONFLUENT_METRICS_ENABLE: 'false'
-        options: --health-cmd "nc -vz localhost 9092 || exit 1" --health-interval 10s --health-timeout 5s --health-retries 5
-      schema-registry:
-        image: confluentinc/cp-schema-registry:latest
-        ports:
-          - "8081:8081"
-        env:
-          SCHEMA_REGISTRY_HOST_NAME: schema-registry
-          SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'broker:29092'
-          SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
-        options: --health-cmd "curl --fail http://localhost:8081/subjects || exit 1" --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -486,8 +482,18 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
+      - name: Spin up test environment
+        run: |
+          docker compose -f docker-compose.yml up -d
+        working-directory: tests/MassTransit.KafkaIntegration.Tests
+
       - name: Test Kafka
-        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
+        run: dotnet test -c Release --logger GitHubActions --filter Category!=Flaky
+        working-directory: tests/MassTransit.KafkaIntegration.Tests
+
+      - name: Stop test environment
+        run: |
+          docker compose -f docker-compose.yml down
         working-directory: tests/MassTransit.KafkaIntegration.Tests
 
   test-signalr:
@@ -504,7 +510,7 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Test SignalR
-        run: dotnet test -c Release --logger:"console;verbosity=normal" --filter Category!=Flaky
+        run: dotnet test -c Release --logger GitHubActions --filter Category!=Flaky
         working-directory: tests/MassTransit.SignalR.Tests
 
   calc-version:

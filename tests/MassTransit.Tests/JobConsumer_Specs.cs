@@ -487,7 +487,7 @@ namespace MassTransit.Tests
                     x.AddConsumer<OddJobCompletedConsumer>()
                         .Endpoint(e => e.ConcurrentMessageLimit = 1);
 
-                    x.AddJobSagaStateMachines();
+                    x.AddJobSagaStateMachines(options => options.SlotWaitTime = TimeSpan.FromSeconds(10));
 
                     x.UsingInMemory((context, cfg) =>
                     {

@@ -15,7 +15,7 @@ namespace MassTransit.RabbitMqTransport
         ConnectionContext,
         IAsyncDisposable
     {
-        readonly ChannelExecutor _executor;
+        readonly TaskExecutor _executor;
 
         public RabbitMqConnectionContext(IConnection connection, IRabbitMqHostConfiguration hostConfiguration, string description,
             CancellationToken cancellationToken)
@@ -34,7 +34,7 @@ namespace MassTransit.RabbitMqTransport
 
             StopTimeout = TimeSpan.FromSeconds(30);
 
-            _executor = new ChannelExecutor(1);
+            _executor = new TaskExecutor();
 
             connection.ConnectionShutdown += OnConnectionShutdown;
         }

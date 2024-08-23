@@ -24,5 +24,12 @@ namespace MassTransit.Configuration
             where T : class, IRegistration;
 
         IConfigureReceiveEndpoint GetConfigureReceiveEndpoints(IServiceProvider provider);
+
+        /// <summary>
+        /// Returns the endpoint name formatter registered for the bus instance
+        /// </summary>
+        /// <param name="provider"></param>
+        /// <returns></returns>
+        IEndpointNameFormatter GetEndpointNameFormatter(IServiceProvider provider);
     }
 }

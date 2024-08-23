@@ -13,6 +13,8 @@ namespace MassTransit.EventHubIntegration.Tests
     public class Long_Receive_Specs :
         InMemoryTestFixture
     {
+        const string EventHubName = "receive-eh";
+
         [Test]
         public async Task Should_receive()
         {
@@ -35,7 +37,7 @@ namespace MassTransit.EventHubIntegration.Tests
                         k.Host(Configuration.EventHubNamespace);
                         k.Storage(Configuration.StorageAccount);
 
-                        k.ReceiveEndpoint(Configuration.EventHubName, c =>
+                        k.ReceiveEndpoint(EventHubName, Configuration.ConsumerGroup, c =>
                         {
                             c.ConcurrentMessageLimit = 1;
                             c.CheckpointMessageCount = 1;
@@ -50,12 +52,12 @@ namespace MassTransit.EventHubIntegration.Tests
 
             var busControl = provider.GetRequiredService<IBusControl>();
 
-            var scope = provider.CreateScope();
+            var scope = provider.CreateAsyncScope();
 
             await busControl.StartAsync(TestCancellationToken);
 
             var producerProvider = scope.ServiceProvider.GetRequiredService<IEventHubProducerProvider>();
-            var producer = await producerProvider.GetProducer(Configuration.EventHubName);
+            var producer = await producerProvider.GetProducer(EventHubName);
 
             try
             {

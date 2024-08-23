@@ -145,7 +145,7 @@ namespace MassTransit.SqlTransport.PostgreSql
             IEnumerable<KeyValuePair<string, object>> headers = context.Headers.GetAll().ToList();
             var headersAsJson = headers.Any() ? JsonSerializer.Serialize(headers, SystemTextJsonMessageSerializer.Options) : null;
 
-            context.Headers.TryGetHeader(MessageHeaders.SchedulingTokenId, out var schedulingTokenId);
+            Guid? schedulingTokenId = context.Headers.Get<Guid>(MessageHeaders.SchedulingTokenId);
 
             return _context.Query((x, t) => x.ExecuteScalarAsync<long?>(_sendSql, new
             {
@@ -180,7 +180,7 @@ namespace MassTransit.SqlTransport.PostgreSql
             IEnumerable<KeyValuePair<string, object>> headers = context.Headers.GetAll().ToList();
             var headersAsJson = headers.Any() ? JsonSerializer.Serialize(headers, SystemTextJsonMessageSerializer.Options) : null;
 
-            context.Headers.TryGetHeader(MessageHeaders.SchedulingTokenId, out var schedulingTokenId);
+            Guid? schedulingTokenId = context.Headers.Get<Guid>(MessageHeaders.SchedulingTokenId);
 
             return _context.Query((x, t) => x.ExecuteScalarAsync<long?>(_publishSql, new
             {
@@ -221,12 +221,12 @@ namespace MassTransit.SqlTransport.PostgreSql
             return result == messageDeliveryId;
         }
 
-        public override async Task<bool> DeleteScheduledMessage(Guid tokenId)
+        public override async Task<bool> DeleteScheduledMessage(Guid tokenId, CancellationToken cancellationToken)
         {
             IEnumerable<SqlTransportMessage>? result = await _context.Query((x, t) => x.QueryAsync<SqlTransportMessage>(_deleteScheduledMessageSql, new
             {
                 token_id = tokenId,
-            }), CancellationToken);
+            }), cancellationToken);
 
             return result.Any();
         }

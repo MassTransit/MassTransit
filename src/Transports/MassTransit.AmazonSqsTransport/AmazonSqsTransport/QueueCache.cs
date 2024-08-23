@@ -112,7 +112,7 @@ namespace MassTransit.AmazonSqsTransport
 
             attributesResponse.EnsureSuccessfulResponse();
 
-            var missingQueue = new QueueInfo(queue.EntityName, createResponse.QueueUrl, attributesResponse.Attributes, _client, _cancellationToken);
+            var missingQueue = new QueueInfo(queue.EntityName, createResponse.QueueUrl, attributesResponse.Attributes, _client, _cancellationToken, false);
 
             if (queue.Durable && queue.AutoDelete == false)
             {
@@ -133,7 +133,7 @@ namespace MassTransit.AmazonSqsTransport
 
             attributesResponse.EnsureSuccessfulResponse();
 
-            return new QueueInfo(queueName, urlResponse.QueueUrl, attributesResponse.Attributes, _client, _cancellationToken);
+            return new QueueInfo(queueName, urlResponse.QueueUrl, attributesResponse.Attributes, _client, _cancellationToken, true);
         }
     }
 }

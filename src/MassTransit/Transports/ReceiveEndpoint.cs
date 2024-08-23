@@ -60,6 +60,7 @@ namespace MassTransit.Transports
         public Uri InputAddress { get; set; }
 
         public Task<ReceiveEndpointReady> Started => _started.Task;
+        public ConnectHandle ObserverHandle { get; set; }
 
         public ReceiveEndpointHandle Start(CancellationToken cancellationToken)
         {

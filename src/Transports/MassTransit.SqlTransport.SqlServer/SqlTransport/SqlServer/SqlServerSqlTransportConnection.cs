@@ -84,13 +84,47 @@ public class SqlServerSqlTransportConnection :
 
         if (!string.IsNullOrWhiteSpace(options.Host))
             builder.DataSource = options.FormatDataSource();
+        else if (!string.IsNullOrWhiteSpace(builder.DataSource))
+        {
+            (options.Host, options.Port) = ParseDataSource(builder.DataSource);
+        }
+
         if (!string.IsNullOrWhiteSpace(options.Database))
             builder.InitialCatalog = options.Database;
+        else if(!string.IsNullOrWhiteSpace(builder.InitialCatalog))
+            options.Database = builder.InitialCatalog;
+
         if (!string.IsNullOrWhiteSpace(options.Username))
             builder.UserID = options.Username;
+        else if(!string.IsNullOrWhiteSpace(builder.UserID))
+            options.Username = builder.UserID;
         if (!string.IsNullOrWhiteSpace(options.Password))
             builder.Password = options.Password;
+        else if (!string.IsNullOrWhiteSpace(builder.Password))
+            options.Password = builder.Password;
+
+        if (string.IsNullOrWhiteSpace(options.Schema))
+            options.Schema = "transport";
+
+        if (string.IsNullOrWhiteSpace(options.Role))
+            options.Role = "transport";
 
         return builder;
+    }
+
+    static (string? host, int? port) ParseDataSource(string? source)
+    {
+        var split = source?.Split(',');
+        if (split?.Length == 2)
+        {
+            var host = split[0].Trim();
+
+            if (int.TryParse(split[1].Trim(), out var port))
+                return (host, port);
+
+            return (host, null);
+        }
+
+        return (source?.Trim(), null);
     }
 }

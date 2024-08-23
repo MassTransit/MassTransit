@@ -8,8 +8,6 @@ namespace MassTransit
 
     public static class InMemoryBus
     {
-        public static IMessageTopologyConfigurator MessageTopology => Cached.MessageTopologyValue.Value;
-
         /// <summary>
         /// Configure and create an in-memory bus
         /// </summary>
@@ -28,7 +26,7 @@ namespace MassTransit
         /// <returns></returns>
         public static IBusControl Create(Uri baseAddress, Action<IInMemoryBusFactoryConfigurator> configure)
         {
-            var topologyConfiguration = new InMemoryTopologyConfiguration(MessageTopology);
+            var topologyConfiguration = new InMemoryTopologyConfiguration(CreateMessageTopology());
             var busConfiguration = new InMemoryBusConfiguration(topologyConfiguration, baseAddress);
 
             var configurator = new InMemoryBusFactoryConfigurator(busConfiguration);
@@ -38,17 +36,19 @@ namespace MassTransit
             return configurator.Build(busConfiguration);
         }
 
+        public static IMessageTopologyConfigurator CreateMessageTopology()
+        {
+            return new MessageTopology(Cached.EntityNameFormatter);
+        }
+
 
         static class Cached
         {
-            internal static readonly Lazy<IMessageTopologyConfigurator> MessageTopologyValue =
-                new Lazy<IMessageTopologyConfigurator>(() => new MessageTopology(_entityNameFormatter));
-
-            static readonly IEntityNameFormatter _entityNameFormatter;
+            internal static readonly IEntityNameFormatter EntityNameFormatter;
 
             static Cached()
             {
-                _entityNameFormatter = new MessageUrnEntityNameFormatter();
+                EntityNameFormatter = new MessageUrnEntityNameFormatter();
             }
         }
     }

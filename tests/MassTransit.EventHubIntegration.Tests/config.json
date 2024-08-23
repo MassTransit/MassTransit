@@ -1,0 +1,78 @@
+{
+  "UserConfig": {
+    "NamespaceConfig": [
+      {
+        "Type": "EventHub",
+        "Name": "emulatorNs1",
+        "Entities": [
+          {
+            "Name": "default-eh",
+            "PartitionCount": "2",
+            "ConsumerGroups": [
+              {
+                "Name": "cg1"
+              }
+            ]
+          },
+          {
+            "Name": "batch-eh",
+            "PartitionCount": "2",
+            "ConsumerGroups": [
+              {
+                "Name": "cg1"
+              }
+            ]
+          },
+          {
+            "Name": "produce-eh",
+            "PartitionCount": "2",
+            "ConsumerGroups": [
+              {
+                "Name": "cg1"
+              }
+            ]
+          },
+          {
+            "Name": "publish-eh",
+            "PartitionCount": "2",
+            "ConsumerGroups": [
+              {
+                "Name": "cg1"
+              }
+            ]
+          },
+          {
+            "Name": "multibus-eh1",
+            "PartitionCount": "2",
+            "ConsumerGroups": [
+              {
+                "Name": "cg1"
+              }
+            ]
+          },
+          {
+            "Name": "multibus-eh2",
+            "PartitionCount": "2",
+            "ConsumerGroups": [
+              {
+                "Name": "cg1"
+              }
+            ]
+          },
+          {
+            "Name": "receive-eh",
+            "PartitionCount": "2",
+            "ConsumerGroups": [
+              {
+                "Name": "cg1"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "LoggingConfig": {
+      "Type": "File"
+    }
+  }
+}

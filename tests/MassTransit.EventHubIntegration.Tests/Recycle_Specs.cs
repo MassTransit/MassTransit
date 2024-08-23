@@ -14,9 +14,11 @@ namespace MassTransit.EventHubIntegration.Tests
     public class Recycled_Specs :
         InMemoryTestFixture
     {
+        const string EventHubName = "default-eh";
+
         public Recycled_Specs()
         {
-            TestTimeout = TimeSpan.FromMinutes(5);
+            TestTimeout = TimeSpan.FromMinutes(1);
         }
 
         [Test]
@@ -41,7 +43,7 @@ namespace MassTransit.EventHubIntegration.Tests
                         k.Host(Configuration.EventHubNamespace);
                         k.Storage(Configuration.StorageAccount);
 
-                        k.ReceiveEndpoint(Configuration.EventHubName, c =>
+                        k.ReceiveEndpoint(EventHubName, Configuration.ConsumerGroup, c =>
                         {
                             c.ConfigureConsumer<EventHubMessageConsumer>(context);
                         });
@@ -59,11 +61,11 @@ namespace MassTransit.EventHubIntegration.Tests
 
             await busControl.StartAsync(TestCancellationToken);
 
-            var serviceScope = provider.CreateScope();
+            var serviceScope = provider.CreateAsyncScope();
             try
             {
                 var producerProvider = serviceScope.ServiceProvider.GetRequiredService<IEventHubProducerProvider>();
-                var producer = await producerProvider.GetProducer(Configuration.EventHubName);
+                var producer = await producerProvider.GetProducer(EventHubName);
                 await producer.Produce<BatchEventHubMessage>(new { }, TestCancellationToken);
                 await taskCompletionSource.Task.OrCanceled(TestCancellationToken);
 
@@ -71,10 +73,34 @@ namespace MassTransit.EventHubIntegration.Tests
             }
             finally
             {
-                serviceScope.Dispose();
+                await serviceScope.DisposeAsync();
                 await provider.DisposeAsync();
             }
         }
+
+
+        class EventHubMessageConsumer :
+            IConsumer<BatchEventHubMessage>
+        {
+            readonly TaskCompletionSource<ConsumeContext<BatchEventHubMessage>> _taskCompletionSource;
+
+            public EventHubMessageConsumer(TaskCompletionSource<ConsumeContext<BatchEventHubMessage>> taskCompletionSource)
+            {
+                _taskCompletionSource = taskCompletionSource;
+            }
+
+            public async Task Consume(ConsumeContext<BatchEventHubMessage> context)
+            {
+                _taskCompletionSource.TrySetResult(context);
+            }
+        }
+    }
+
+
+    public class Recycled_Produce_Specs :
+        InMemoryTestFixture
+    {
+        const string EventHubName = "default-eh";
 
         [Test]
         public async Task Should_produce_after_recycle()
@@ -94,7 +120,8 @@ namespace MassTransit.EventHubIntegration.Tests
                         k.Host(Configuration.EventHubNamespace);
                         k.Storage(Configuration.StorageAccount);
 
-                        k.ReceiveEndpoint(Configuration.EventHubName, c => c.Handler<BatchEventHubMessage>(_ => Task.CompletedTask));
+                        k.ReceiveEndpoint(EventHubName, Configuration.ConsumerGroup,
+                            c => c.Handler<BatchEventHubMessage>(_ => Task.CompletedTask));
                     });
                 });
             });
@@ -105,10 +132,10 @@ namespace MassTransit.EventHubIntegration.Tests
             try
             {
                 await busControl.StartAsync(TestCancellationToken);
-                using (var scope = provider.CreateScope())
+                using (var scope = provider.CreateAsyncScope())
                 {
                     var producerProvider = scope.ServiceProvider.GetRequiredService<IEventHubProducerProvider>();
-                    var producer = await producerProvider.GetProducer(Configuration.EventHubName);
+                    var producer = await producerProvider.GetProducer(EventHubName);
                     await producer.Produce<BatchEventHubMessage>(new { }, TestCancellationToken);
                 }
 
@@ -118,10 +145,10 @@ namespace MassTransit.EventHubIntegration.Tests
 
                 await busControl.StartAsync(TestCancellationToken);
 
-                using (var scope = provider.CreateScope())
+                await using (var scope = provider.CreateAsyncScope())
                 {
                     var producerProvider = scope.ServiceProvider.GetRequiredService<IEventHubProducerProvider>();
-                    var producer = await producerProvider.GetProducer(Configuration.EventHubName);
+                    var producer = await producerProvider.GetProducer(EventHubName);
                     await producer.Produce<BatchEventHubMessage>(new { }, TestCancellationToken);
                 }
 
@@ -130,23 +157,6 @@ namespace MassTransit.EventHubIntegration.Tests
             finally
             {
                 await provider.DisposeAsync();
-            }
-        }
-
-
-        class EventHubMessageConsumer :
-            IConsumer<BatchEventHubMessage>
-        {
-            readonly TaskCompletionSource<ConsumeContext<BatchEventHubMessage>> _taskCompletionSource;
-
-            public EventHubMessageConsumer(TaskCompletionSource<ConsumeContext<BatchEventHubMessage>> taskCompletionSource)
-            {
-                _taskCompletionSource = taskCompletionSource;
-            }
-
-            public async Task Consume(ConsumeContext<BatchEventHubMessage> context)
-            {
-                _taskCompletionSource.TrySetResult(context);
             }
         }
     }

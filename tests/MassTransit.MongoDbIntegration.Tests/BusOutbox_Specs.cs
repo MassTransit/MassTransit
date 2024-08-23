@@ -14,7 +14,6 @@ namespace MassTransit.MongoDbIntegration.Tests
     using Testing;
 
 
-    [Explicit]
     [TestFixture]
     public class Using_the_bus_outbox
     {
@@ -126,8 +125,6 @@ namespace MassTransit.MongoDbIntegration.Tests
             {
                 using var dbContext = harness.Scope.ServiceProvider.GetRequiredService<MongoDbContext>();
 
-                //                await dbContext.BeginTransaction(harness.CancellationToken);
-
                 var publishEndpoint = harness.Scope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
 
                 await publishEndpoint.Publish(new PingMessage());
@@ -232,6 +229,8 @@ namespace MassTransit.MongoDbIntegration.Tests
 
             await ClearOutbox(provider, harness);
 
+            Guid scheduledId = NewId.NextGuid();
+
             IConsumerTestHarness<PingConsumer> consumerHarness = harness.GetConsumerHarness<PingConsumer>();
 
             {
@@ -241,7 +240,7 @@ namespace MassTransit.MongoDbIntegration.Tests
 
                 var scheduler = harness.Scope.ServiceProvider.GetRequiredService<IMessageScheduler>();
 
-                await scheduler.SchedulePublish(TimeSpan.FromSeconds(8), new PingMessage());
+                await scheduler.SchedulePublish(TimeSpan.FromSeconds(8), new PingMessage(scheduledId));
 
                 await dbContext.CommitTransaction(harness.CancellationToken);
             }
@@ -249,10 +248,10 @@ namespace MassTransit.MongoDbIntegration.Tests
             {
                 using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
-                Assert.That(await consumerHarness.Consumed.Any<PingMessage>(cts.Token), Is.False);
+                Assert.That(await consumerHarness.Consumed.Any<PingMessage>(x => x.Context.Message.CorrelationId == scheduledId, cts.Token), Is.False);
             }
 
-            Assert.That(await consumerHarness.Consumed.Any<PingMessage>(), Is.True);
+            Assert.That(await consumerHarness.Consumed.Any<PingMessage>(x => x.Context.Message.CorrelationId == scheduledId), Is.True);
         }
 
         [Test]
@@ -296,19 +295,22 @@ namespace MassTransit.MongoDbIntegration.Tests
 
                 var publishEndpoint = scope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
 
-                await publishEndpoint.Publish(new PingMessage());
+                var firstId = NewId.NextGuid();
+                await publishEndpoint.Publish(new PingMessage(firstId));
 
                 using var cts1 = new CancellationTokenSource(TimeSpan.FromSeconds(2));
 
-                Assert.That(await consumerHarness.Consumed.Any<PingMessage>(cts1.Token), Is.False);
+                Assert.That(await consumerHarness.Consumed.Any<PingMessage>(x => x.Context.Message.CorrelationId == firstId, cts1.Token), Is.False);
 
                 await dbContext.CommitTransaction(harness.CancellationToken);
 
-                await publishEndpoint.Publish(new PingMessage());
+                var secondId = NewId.NextGuid();
+
+                await publishEndpoint.Publish(new PingMessage(secondId));
 
                 using var cts2 = new CancellationTokenSource(TimeSpan.FromSeconds(2));
 
-                Assert.That(await consumerHarness.Consumed.Any<PingMessage>(cts2.Token), Is.True);
+                Assert.That(await consumerHarness.Consumed.Any<PingMessage>(x => x.Context.Message.CorrelationId == firstId, cts2.Token), Is.True);
 
                 await dbContext.CommitTransaction(harness.CancellationToken);
             }

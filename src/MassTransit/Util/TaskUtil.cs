@@ -1,9 +1,15 @@
+#nullable enable
 namespace MassTransit.Util
 {
     using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Reflection;
     using System.Runtime.CompilerServices;
     using System.Threading;
     using System.Threading.Tasks;
+    using Internals;
 
 
     public static class TaskUtil
@@ -18,7 +24,7 @@ namespace MassTransit.Util
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static Task<T> Default<T>()
+        public static Task<T?> Default<T>()
         {
             return Cached<T>.DefaultValueTask;
         }
@@ -89,7 +95,7 @@ namespace MassTransit.Util
             return cancellationToken.Register(SetCompleted, source);
         }
 
-        static void SetCompleted(object obj)
+        static void SetCompleted(object? obj)
         {
             if (obj is TaskCompletionSource<bool> source)
                 source.SetCompleted();
@@ -103,7 +109,7 @@ namespace MassTransit.Util
             return default;
         }
 
-        static void Cancel(object obj)
+        static void Cancel(object? obj)
         {
             if (obj is CancellationTokenSource source)
                 source.Cancel();
@@ -123,33 +129,23 @@ namespace MassTransit.Util
             if (taskFactory == null)
                 throw new ArgumentNullException(nameof(taskFactory));
 
-            var previousContext = SynchronizationContext.Current;
-            try
+            using (InitializeExecutionEnvironment())
             {
-                using var syncContext = new SingleThreadSynchronizationContext(cancellationToken);
-                SynchronizationContext.SetSynchronizationContext(syncContext);
-
-                var t = taskFactory();
-                if (t == null)
+                var task = taskFactory();
+                if (task == null)
                     throw new InvalidOperationException("The taskFactory must return a Task");
 
-                var awaiter = t.GetAwaiter();
+                if (cancellationToken.CanBeCanceled)
+                    task = task.OrCanceled(cancellationToken);
 
-                while (!awaiter.IsCompleted)
+                var awaiter = new TaskAwaitAdapter(task);
+                if (!awaiter.IsCompleted)
                 {
-                    if (cancellationToken.IsCancellationRequested)
-                        throw new OperationCanceledException("The task was not completed before being canceled");
-
-                    Thread.Sleep(3);
+                    var dispatch = SynchronizationDispatcher.FromCurrentSynchronizationContext();
+                    dispatch.WaitForCompletion(awaiter);
                 }
 
-                syncContext.SetComplete();
-
                 awaiter.GetResult();
-            }
-            finally
-            {
-                SynchronizationContext.SetSynchronizationContext(previousContext);
             }
         }
 
@@ -158,29 +154,20 @@ namespace MassTransit.Util
             if (task == null)
                 throw new ArgumentNullException(nameof(task));
 
-            var previousContext = SynchronizationContext.Current;
-            try
+            using (InitializeExecutionEnvironment())
             {
-                using var syncContext = new SingleThreadSynchronizationContext(cancellationToken);
-                SynchronizationContext.SetSynchronizationContext(syncContext);
+                if (cancellationToken.CanBeCanceled)
+                    task = task.OrCanceled(cancellationToken);
 
-                var awaiter = task.GetAwaiter();
+                var awaiter = new TaskAwaitAdapter(task);
 
-                while (!awaiter.IsCompleted)
+                if (!awaiter.IsCompleted)
                 {
-                    if (cancellationToken.IsCancellationRequested)
-                        throw new OperationCanceledException("The task was not completed before being canceled");
-
-                    Thread.Sleep(3);
+                    var waitStrategy = SynchronizationDispatcher.FromCurrentSynchronizationContext();
+                    waitStrategy.WaitForCompletion(awaiter);
                 }
 
-                syncContext.SetComplete();
-
                 awaiter.GetResult();
-            }
-            finally
-            {
-                SynchronizationContext.SetSynchronizationContext(previousContext);
             }
         }
 
@@ -189,34 +176,67 @@ namespace MassTransit.Util
             if (taskFactory == null)
                 throw new ArgumentNullException(nameof(taskFactory));
 
-            var previousContext = SynchronizationContext.Current;
-            try
+            using (InitializeExecutionEnvironment())
             {
-                using var syncContext = new SingleThreadSynchronizationContext(cancellationToken);
-                SynchronizationContext.SetSynchronizationContext(syncContext);
-
-                Task<T> t = taskFactory();
-                if (t == null)
+                Task<T>? task = taskFactory();
+                if (task == null)
                     throw new InvalidOperationException("The taskFactory must return a Task");
 
-                TaskAwaiter<T> awaiter = t.GetAwaiter();
+                if (cancellationToken.CanBeCanceled)
+                    task = task.OrCanceled(cancellationToken);
 
-                while (!awaiter.IsCompleted)
+                var awaiter = new TaskAwaitAdapter<T>(task);
+                if (!awaiter.IsCompleted)
                 {
-                    if (cancellationToken.IsCancellationRequested)
-                        throw new OperationCanceledException("The task was not completed before being canceled");
-
-                    Thread.Sleep(3);
+                    var dispatch = SynchronizationDispatcher.FromCurrentSynchronizationContext();
+                    dispatch.WaitForCompletion(awaiter);
                 }
 
-                syncContext.SetComplete();
+                return awaiter.GetResultOfT();
+            }
+        }
 
-                return awaiter.GetResult();
-            }
-            finally
+        static void ContinueOnSameSynchronizationContext(AwaitAdapter awaiter, Action continuation)
+        {
+            if (continuation is null)
+                throw new ArgumentNullException(nameof(continuation));
+
+            var context = SynchronizationContext.Current;
+
+            awaiter.OnCompleted(() =>
             {
-                SynchronizationContext.SetSynchronizationContext(previousContext);
+                if (context is null || SynchronizationContext.Current == context)
+                    continuation.Invoke();
+                else
+                    context.Post(_ => continuation.Invoke(), continuation);
+            });
+        }
+
+        static IDisposable? InitializeExecutionEnvironment()
+        {
+            if (Thread.CurrentThread.GetApartmentState() == ApartmentState.STA)
+            {
+                var context = SynchronizationContext.Current;
+                if (context is null || context.GetType() == typeof(SynchronizationContext))
+                {
+                    var singleThreadedContext = new SingleThreadedSynchronizationContext(TimeSpan.FromSeconds(10));
+
+                    SetSynchronizationContext(singleThreadedContext);
+
+                    return new DisposableAction(() =>
+                    {
+                        SetSynchronizationContext(context);
+                        singleThreadedContext.Dispose();
+                    });
+                }
             }
+
+            return null;
+        }
+
+        static void SetSynchronizationContext(SynchronizationContext? syncContext)
+        {
+            SynchronizationContext.SetSynchronizationContext(syncContext);
         }
 
 
@@ -230,7 +250,7 @@ namespace MassTransit.Util
 
         static class Cached<T>
         {
-            public static readonly Task<T> DefaultValueTask = Task.FromResult<T>(default);
+            public static readonly Task<T?> DefaultValueTask = Task.FromResult<T?>(default);
             public static readonly Task<T> CanceledTask = GetCanceledTask();
 
             static Task<T> GetCanceledTask()
@@ -242,50 +262,446 @@ namespace MassTransit.Util
         }
 
 
-        sealed class SingleThreadSynchronizationContext :
+        sealed class SingleThreadedSynchronizationContext :
             SynchronizationContext,
             IDisposable
         {
-            readonly CancellationToken _cancellationToken;
-            readonly ChannelExecutor _executor;
-            bool _completed;
+            const string ShutdownTimeoutMessage = "Work posted to the synchronization context did not complete within ten seconds.";
 
-            public SingleThreadSynchronizationContext(CancellationToken cancellationToken)
+            readonly Queue<ScheduledWork> _queue = new();
+
+            readonly TimeSpan _shutdownTimeout;
+            Status _status;
+            Stopwatch? _timeSinceShutdown;
+
+            public SingleThreadedSynchronizationContext(TimeSpan shutdownTimeout)
             {
-                _cancellationToken = cancellationToken;
-                _executor = new ChannelExecutor(1);
+                _shutdownTimeout = shutdownTimeout;
             }
 
             public void Dispose()
             {
-                _executor.DisposeAsync().GetAwaiter().GetResult();
+                ShutDown();
             }
 
-            public override void Post(SendOrPostCallback callback, object state)
+            public override void Post(SendOrPostCallback d, object? state)
             {
-                if (callback == null)
-                    throw new ArgumentNullException(nameof(callback));
+                if (d == null)
+                    throw new ArgumentNullException(nameof(d));
 
-                if (_completed)
-                    throw new TaskSchedulerException("The synchronization context was already completed");
+                AddWork(new ScheduledWork(d, state, null));
+            }
 
-                try
+            public override void Send(SendOrPostCallback d, object? state)
+            {
+                if (d == null)
+                    throw new ArgumentNullException(nameof(d));
+
+                if (Current == this)
+                    d.Invoke(state);
+                else
                 {
-                    _executor?.Push(async () => callback(state), _cancellationToken);
+                    using var finished = new ManualResetEventSlim();
+
+                    AddWork(new ScheduledWork(d, state, finished));
+                    finished.Wait();
                 }
-                catch (InvalidOperationException)
+            }
+
+            void AddWork(ScheduledWork work)
+            {
+                lock (_queue)
+                {
+                    switch (_status)
+                    {
+                        case Status.ShuttingDown:
+                            if (_timeSinceShutdown!.Elapsed < _shutdownTimeout)
+                                break;
+                            goto case Status.ShutDown;
+
+                        case Status.ShutDown:
+                            throw ErrorAndGetExceptionForShutdownTimeout();
+                    }
+
+                    _queue.Enqueue(work);
+                    Monitor.Pulse(_queue);
+                }
+            }
+
+            public void ShutDown()
+            {
+                lock (_queue)
+                {
+                    switch (_status)
+                    {
+                        case Status.ShuttingDown:
+                        case Status.ShutDown:
+                            return;
+                    }
+
+                    _timeSinceShutdown = Stopwatch.StartNew();
+                    _status = Status.ShuttingDown;
+                    Monitor.Pulse(_queue);
+                }
+            }
+
+            public void Run()
+            {
+                lock (_queue)
+                {
+                    switch (_status)
+                    {
+                        case Status.Running:
+                            throw new InvalidOperationException("SingleThreadedSynchronizationContext.Run may not be reentered.");
+
+                        case Status.ShuttingDown:
+                        case Status.ShutDown:
+                            throw new InvalidOperationException("This SingleThreadedSynchronizationContext has been shut down.");
+                    }
+
+                    _status = Status.Running;
+                }
+
+                while (TryTake(out var scheduledWork))
+                    scheduledWork.Execute();
+            }
+
+            bool TryTake(out ScheduledWork scheduledWork)
+            {
+                lock (_queue)
+                {
+                    while (_queue.Count == 0)
+                    {
+                        if (_status == Status.ShuttingDown)
+                        {
+                            _status = Status.ShutDown;
+                            scheduledWork = default;
+                            return false;
+                        }
+
+                        Monitor.Wait(_queue);
+                    }
+
+                    if (_status == Status.ShuttingDown && _timeSinceShutdown!.Elapsed > _shutdownTimeout)
+                    {
+                        _status = Status.ShutDown;
+                        throw ErrorAndGetExceptionForShutdownTimeout();
+                    }
+
+                    scheduledWork = _queue.Dequeue();
+                }
+
+                return true;
+            }
+
+            static Exception ErrorAndGetExceptionForShutdownTimeout()
+            {
+                return new InvalidOperationException(ShutdownTimeoutMessage);
+            }
+
+
+            struct ScheduledWork
+            {
+                readonly SendOrPostCallback _callback;
+                readonly object? _state;
+                readonly ManualResetEventSlim? _finished;
+
+                public ScheduledWork(SendOrPostCallback callback, object? state, ManualResetEventSlim? finished)
+                {
+                    _callback = callback;
+                    _state = state;
+                    _finished = finished;
+                }
+
+                public void Execute()
+                {
+                    _callback.Invoke(_state);
+                    _finished?.Set();
+                }
+            }
+
+
+            enum Status
+            {
+                NotStarted,
+                Running,
+                ShuttingDown,
+                ShutDown
+            }
+        }
+
+
+        abstract class AwaitAdapter
+        {
+            public abstract bool IsCompleted { get; }
+            public abstract void OnCompleted(Action action);
+            public abstract void GetResult();
+        }
+
+
+        sealed class TaskAwaitAdapter :
+            AwaitAdapter
+        {
+            readonly TaskAwaiter _awaiter;
+
+            public TaskAwaitAdapter(Task task)
+            {
+                _awaiter = task.GetAwaiter();
+            }
+
+            public override bool IsCompleted => _awaiter.IsCompleted;
+
+            public override void OnCompleted(Action action)
+            {
+                _awaiter.UnsafeOnCompleted(action);
+            }
+
+            public override void GetResult()
+            {
+                _awaiter.GetResult();
+            }
+        }
+
+
+        sealed class TaskAwaitAdapter<T> :
+            AwaitAdapter
+        {
+            readonly TaskAwaiter<T> _awaiter;
+
+            public TaskAwaitAdapter(Task<T> task)
+            {
+                _awaiter = task.GetAwaiter();
+            }
+
+            public override bool IsCompleted => _awaiter.IsCompleted;
+
+            public override void OnCompleted(Action action)
+            {
+                _awaiter.UnsafeOnCompleted(action);
+            }
+
+            public override void GetResult()
+            {
+                _awaiter.GetResult();
+            }
+
+            public T GetResultOfT()
+            {
+                return _awaiter.GetResult();
+            }
+        }
+
+
+        abstract class SynchronizationDispatcher
+        {
+            public abstract void WaitForCompletion(AwaitAdapter awaiter);
+
+            public static SynchronizationDispatcher FromCurrentSynchronizationContext()
+            {
+                var context = SynchronizationContext.Current;
+
+                if (context is SingleThreadedSynchronizationContext)
+                    return SingleThreadedSynchronizationDispatcher.Instance;
+
+                return WindowsFormsSynchronizationDispatcher.GetIfApplicable()
+                    ?? WpfSynchronizationDispatcher.GetIfApplicable()
+                    ?? NoSynchronizationDispatcher.Instance;
+            }
+
+
+            sealed class NoSynchronizationDispatcher :
+                SynchronizationDispatcher
+            {
+                public static readonly NoSynchronizationDispatcher Instance = new();
+
+                NoSynchronizationDispatcher()
                 {
                 }
+
+                public override void WaitForCompletion(AwaitAdapter awaiter)
+                {
+                    awaiter.GetResult();
+                }
             }
 
-            public override void Send(SendOrPostCallback d, object state)
+
+            sealed class WindowsFormsSynchronizationDispatcher :
+                SynchronizationDispatcher
             {
-                throw new NotSupportedException("Synchronously sending is not supported.");
+                static WindowsFormsSynchronizationDispatcher? _instance;
+                readonly Action _applicationExit;
+
+                readonly Action _applicationRun;
+
+                WindowsFormsSynchronizationDispatcher(Action applicationRun, Action applicationExit)
+                {
+                    _applicationRun = applicationRun;
+                    _applicationExit = applicationExit;
+                }
+
+                public static SynchronizationDispatcher? GetIfApplicable()
+                {
+                    if (!IsApplicable(SynchronizationContext.Current))
+                        return null;
+
+                    if (_instance is null)
+                    {
+                        var applicationType =
+                            SynchronizationContext.Current.GetType().Assembly.GetType("System.Windows.Forms.Application", true)!;
+
+                        var applicationRun = (Action)applicationType
+                            .GetMethod("Run", BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly, null, Type.EmptyTypes, null)!
+                            .CreateDelegate(typeof(Action));
+
+                        var applicationExit = (Action)applicationType
+                            .GetMethod("Exit", BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly, null, Type.EmptyTypes, null)!
+                            .CreateDelegate(typeof(Action));
+
+                        _instance = new WindowsFormsSynchronizationDispatcher(applicationRun, applicationExit);
+                    }
+
+                    return _instance;
+                }
+
+                static bool IsApplicable([NotNullWhen(true)] SynchronizationContext? context)
+                {
+                    return context?.GetType().FullName == "System.Windows.Forms.WindowsFormsSynchronizationContext";
+                }
+
+                public override void WaitForCompletion(AwaitAdapter awaiter)
+                {
+                    var context = SynchronizationContext.Current;
+
+                    if (!IsApplicable(context))
+                        throw new InvalidOperationException("This dispatch must only be used from a WindowsFormsSynchronizationContext.");
+
+                    if (awaiter.IsCompleted)
+                        return;
+
+                    context.Post(_ => ContinueOnSameSynchronizationContext(awaiter, _applicationExit), awaiter);
+
+                    try
+                    {
+                        _applicationRun.Invoke();
+                    }
+                    finally
+                    {
+                        SynchronizationContext.SetSynchronizationContext(context);
+                    }
+                }
             }
 
-            public void SetComplete()
+
+            sealed class WpfSynchronizationDispatcher :
+                SynchronizationDispatcher
             {
-                _completed = true;
+                static WpfSynchronizationDispatcher? _instance;
+                readonly MethodInfo _dispatcherFrameSetContinueProperty;
+                readonly Type _dispatcherFrameType;
+
+                readonly MethodInfo _dispatcherPushFrame;
+
+                WpfSynchronizationDispatcher(MethodInfo dispatcherPushFrame,
+                    MethodInfo dispatcherFrameSetContinueProperty,
+                    Type dispatcherFrameType)
+                {
+                    _dispatcherPushFrame = dispatcherPushFrame;
+                    _dispatcherFrameSetContinueProperty = dispatcherFrameSetContinueProperty;
+                    _dispatcherFrameType = dispatcherFrameType;
+                }
+
+                public static SynchronizationDispatcher? GetIfApplicable()
+                {
+                    var context = SynchronizationContext.Current;
+
+                    if (!IsApplicable(context))
+                        return null;
+
+                    if (_instance is null)
+                    {
+                        var assemblyType = context.GetType().Assembly;
+                        var dispatcherType = assemblyType.GetType("System.Windows.Threading.Dispatcher", true)!;
+                        var dispatcherFrameType = assemblyType.GetType("System.Windows.Threading.DispatcherFrame", true)!;
+
+                        var dispatcherPushFrame = dispatcherType
+                            .GetMethod("PushFrame", BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly, null, new[] { dispatcherFrameType },
+                                null)!;
+
+                        var dispatcherSetFrameContinue = dispatcherFrameType
+                            .GetProperty("Continue")?
+                            .GetSetMethod()!;
+
+                        _instance = new WpfSynchronizationDispatcher(
+                            dispatcherPushFrame,
+                            dispatcherSetFrameContinue,
+                            dispatcherFrameType);
+                    }
+
+                    return _instance;
+                }
+
+                static bool IsApplicable([NotNullWhen(true)] SynchronizationContext? context)
+                {
+                    return context?.GetType().FullName == "System.Windows.Threading.DispatcherSynchronizationContext";
+                }
+
+                public override void WaitForCompletion(AwaitAdapter awaiter)
+                {
+                    var context = SynchronizationContext.Current;
+
+                    if (!IsApplicable(context))
+                        throw new InvalidOperationException("This dispatch must only be used from a DispatcherSynchronizationContext.");
+
+                    if (awaiter.IsCompleted)
+                        return;
+
+                    var frame = Activator.CreateInstance(_dispatcherFrameType, true);
+
+                    context.Post(_ => ContinueOnSameSynchronizationContext(awaiter, () => _dispatcherFrameSetContinueProperty.Invoke(frame, [false])), awaiter);
+
+                    _dispatcherPushFrame.Invoke(null, [frame]);
+                }
+            }
+        }
+
+
+        sealed class SingleThreadedSynchronizationDispatcher :
+            SynchronizationDispatcher
+        {
+            public static readonly SingleThreadedSynchronizationDispatcher Instance = new();
+
+            SingleThreadedSynchronizationDispatcher()
+            {
+            }
+
+            public override void WaitForCompletion(AwaitAdapter awaiter)
+            {
+                var context = SynchronizationContext.Current as SingleThreadedSynchronizationContext
+                    ?? throw new InvalidOperationException("This dispatch must only be used from a SingleThreadedSynchronizationContext.");
+
+                if (awaiter.IsCompleted)
+                    return;
+
+                context.Post(_ => ContinueOnSameSynchronizationContext(awaiter, context.ShutDown), awaiter);
+
+                context.Run();
+            }
+        }
+
+
+        sealed class DisposableAction :
+            IDisposable
+        {
+            Action? _action;
+
+            public DisposableAction(Action action)
+            {
+                _action = action;
+            }
+
+            public void Dispose()
+            {
+                Interlocked.Exchange(ref _action, null)?.Invoke();
             }
         }
     }

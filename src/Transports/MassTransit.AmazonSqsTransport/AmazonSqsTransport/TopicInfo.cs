@@ -13,16 +13,18 @@ namespace MassTransit.AmazonSqsTransport
         readonly Lazy<IBatcher<PublishBatchRequestEntry>> _batchPublisher;
         bool _disposed;
 
-        public TopicInfo(string entityName, string arn, IAmazonSimpleNotificationService client, CancellationToken cancellationToken)
+        public TopicInfo(string entityName, string arn, IAmazonSimpleNotificationService client, CancellationToken cancellationToken, bool existing)
         {
             EntityName = entityName;
             Arn = arn;
+            Existing = existing;
 
             _batchPublisher = new Lazy<IBatcher<PublishBatchRequestEntry>>(() => new PublishBatcher(client, arn, cancellationToken));
         }
 
         public string EntityName { get; }
         public string Arn { get; }
+        public bool Existing { get; }
 
         public async ValueTask DisposeAsync()
         {

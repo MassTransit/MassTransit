@@ -10,9 +10,9 @@ namespace MassTransit.Batching
         IBatchCollector<TMessage>
         where TMessage : class
     {
-        readonly ChannelExecutor _collector;
+        readonly TaskExecutor _collector;
         readonly IPipe<ConsumeContext<Batch<TMessage>>> _consumerPipe;
-        readonly ChannelExecutor _dispatcher;
+        readonly TaskExecutor _dispatcher;
         readonly BatchOptions _options;
         BatchConsumer<TMessage> _currentConsumer;
 
@@ -21,8 +21,8 @@ namespace MassTransit.Batching
             _options = options;
             _consumerPipe = consumerPipe;
 
-            _collector = new ChannelExecutor(1);
-            _dispatcher = new ChannelExecutor(options.ConcurrencyLimit);
+            _collector = new TaskExecutor();
+            _dispatcher = new TaskExecutor(options.ConcurrencyLimit);
         }
 
         public ValueTask DisposeAsync()
@@ -79,10 +79,10 @@ namespace MassTransit.Batching
         IBatchCollector<TMessage>
         where TMessage : class
     {
-        readonly ChannelExecutor _collector;
+        readonly TaskExecutor _collector;
         readonly IDictionary<TKey, BatchConsumer<TMessage>> _collectors;
         readonly IPipe<ConsumeContext<Batch<TMessage>>> _consumerPipe;
-        readonly ChannelExecutor _dispatcher;
+        readonly TaskExecutor _dispatcher;
         readonly IGroupKeyProvider<TMessage, TKey> _keyProvider;
         readonly BatchOptions _options;
         BatchConsumer<TMessage> _currentConsumer;
@@ -93,8 +93,8 @@ namespace MassTransit.Batching
             _consumerPipe = consumerPipe;
             _keyProvider = keyProvider;
 
-            _collector = new ChannelExecutor(1);
-            _dispatcher = new ChannelExecutor(options.ConcurrencyLimit);
+            _collector = new TaskExecutor();
+            _dispatcher = new TaskExecutor(options.ConcurrencyLimit);
             _collectors = new Dictionary<TKey, BatchConsumer<TMessage>>();
         }
 

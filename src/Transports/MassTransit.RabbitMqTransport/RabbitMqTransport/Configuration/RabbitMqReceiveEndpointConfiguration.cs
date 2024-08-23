@@ -161,6 +161,25 @@ namespace MassTransit.RabbitMqTransport.Configuration
             set => _settings.ExclusiveConsumer = value;
         }
 
+        public void Stream(Action<IRabbitMqStreamConfigurator> callback = null)
+        {
+            _settings.QueueArguments[Headers.XQueueType] = "stream";
+
+            var configurator = new RabbitMqStreamConfigurator(_settings);
+
+            callback?.Invoke(configurator);
+        }
+
+        public void Stream(string consumerTag, Action<IRabbitMqStreamConfigurator> callback = null)
+        {
+            if (string.IsNullOrWhiteSpace(consumerTag))
+                throw new ArgumentNullException(nameof(consumerTag));
+
+            _settings.ConsumerTag = consumerTag;
+
+            Stream(callback);
+        }
+
         public bool Lazy
         {
             set => _settings.Lazy = value;

@@ -2,6 +2,7 @@ namespace MassTransit.MongoDbIntegration
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Logging;
@@ -15,7 +16,6 @@ namespace MassTransit.MongoDbIntegration
     using MongoDB.Driver;
     using Outbox;
     using Serialization;
-    using Util;
 
 
     public class BusOutboxDeliveryService :
@@ -40,19 +40,13 @@ namespace MassTransit.MongoDbIntegration
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            using var algorithm = new RequestRateAlgorithm(new RequestRateAlgorithmOptions
-            {
-                PrefetchCount = _options.QueryMessageLimit,
-                RequestResultLimit = _options.QueryMessageLimit
-            });
-
             while (!stoppingToken.IsCancellationRequested)
             {
                 try
                 {
                     await _busControl.WaitForHealthStatus(BusHealthStatus.Healthy, stoppingToken).ConfigureAwait(false);
 
-                    var count = await algorithm.Run(GetOutboxes, DeliverOutbox, stoppingToken).ConfigureAwait(false);
+                    var count = await ProcessOutboxes(stoppingToken).ConfigureAwait(false);
                     if (count > 0)
                         continue;
 
@@ -63,9 +57,18 @@ namespace MassTransit.MongoDbIntegration
                 }
                 catch (Exception exception)
                 {
-                    _logger.LogError(exception, "ProcessMessageBatch faulted");
+                    _logger.LogError(exception, "ProcessOutboxes faulted");
                 }
             }
+        }
+
+        async Task<int> ProcessOutboxes(CancellationToken cancellationToken)
+        {
+            List<Guid> outboxIds = (await GetOutboxes(_options.QueryMessageLimit, cancellationToken).ConfigureAwait(false)).ToList();
+
+            await Task.WhenAll(outboxIds.Select(outboxId => DeliverOutbox(outboxId, cancellationToken))).ConfigureAwait(false);
+
+            return outboxIds.Count;
         }
 
         async Task<IEnumerable<Guid>> GetOutboxes(int resultLimit, CancellationToken cancellationToken)
@@ -137,25 +140,26 @@ namespace MassTransit.MongoDbIntegration
                         }
                         else
                         {
-                            if (outboxState.Delivered != null)
+                            if (outboxState.Delivered.HasValue)
                             {
                                 await RemoveOutbox(messageCollection, stateCollection, outboxState, cancellationToken).ConfigureAwait(false);
 
                                 continueProcessing = false;
                             }
                             else
+                            {
                                 continueProcessing = await DeliverOutboxMessages(messageCollection, outboxState, cancellationToken).ConfigureAwait(false);
 
-                            outboxState.Version++;
+                                outboxState.Version++;
 
-                            FilterDefinition<OutboxState> updateFilter =
-                                builder.Eq(x => x.OutboxId, outboxId) & builder.Lt(x => x.Version, outboxState.Version);
+                                FilterDefinition<OutboxState> updateFilter =
+                                    builder.Eq(x => x.OutboxId, outboxId) & builder.Lt(x => x.Version, outboxState.Version);
 
-                            await stateCollection.FindOneAndReplace(updateFilter, outboxState, cancellationToken).ConfigureAwait(false);
+                                await stateCollection.FindOneAndReplace(updateFilter, outboxState, cancellationToken).ConfigureAwait(false);
+                            }
                         }
 
                         await dbContext.CommitTransaction(cancellationToken).ConfigureAwait(false);
-
 
                         return continueProcessing;
                     }
@@ -178,6 +182,13 @@ namespace MassTransit.MongoDbIntegration
                 var continueProcessing = true;
                 while (continueProcessing)
                     continueProcessing = await Execute().ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception ex)
+            {
+                LogContext.Warning?.Log(ex, "Outbox Delivery Fault: {OutboxId}", outboxId);
             }
             finally
             {

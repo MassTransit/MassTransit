@@ -91,7 +91,7 @@ namespace MassTransit.EventHubIntegration
 
             protected override async Task StopAgent(StopContext context)
             {
-                await _endpoints.Stop(context.CancellationToken).ConfigureAwait(false);
+                await _endpoints.StopEndpoints(context.CancellationToken).ConfigureAwait(false);
                 await _supervisor.Stop(context).ConfigureAwait(false);
                 await base.StopAgent(context).ConfigureAwait(false);
 

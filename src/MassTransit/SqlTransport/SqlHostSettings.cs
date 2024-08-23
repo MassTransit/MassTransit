@@ -23,6 +23,8 @@ namespace MassTransit
 
         IsolationLevel IsolationLevel { get; }
 
+        int ConnectionLimit { get; }
+
         TimeSpan MaintenanceInterval { get; }
         TimeSpan QueueCleanupInterval { get; }
         int MaintenanceBatchSize { get; }

@@ -14,14 +14,14 @@ namespace MassTransit.RabbitMqTransport
         IPublisher
     {
         readonly PendingConfirmationCollection _confirmations;
-        readonly ChannelExecutor _executor;
+        readonly TaskExecutor _executor;
         readonly IPublisher _immediatePublisher;
         readonly IModel _model;
         readonly Channel<BatchPublish> _publishChannel;
         readonly Task _publishTask;
         readonly BatchSettings _settings;
 
-        public BatchPublisher(ChannelExecutor executor, IModel model, BatchSettings settings, PendingConfirmationCollection confirmations)
+        public BatchPublisher(TaskExecutor executor, IModel model, BatchSettings settings, PendingConfirmationCollection confirmations)
         {
             _executor = executor;
             _model = model;
@@ -61,7 +61,7 @@ namespace MassTransit.RabbitMqTransport
 
         public async ValueTask DisposeAsync()
         {
-            _publishChannel.Writer.Complete();
+            _publishChannel.Writer.TryComplete();
 
             await _publishTask.ConfigureAwait(false);
         }

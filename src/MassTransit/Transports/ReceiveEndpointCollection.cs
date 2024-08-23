@@ -5,13 +5,11 @@
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Middleware;
     using Observables;
     using Util;
 
 
     public class ReceiveEndpointCollection :
-        Agent,
         IReceiveEndpointCollection
     {
         readonly SingleThreadedDictionary<string, ReceiveEndpoint> _endpoints;
@@ -36,9 +34,10 @@
                 ? EndpointHealthResult.Healthy(endpoint, "starting")
                 : EndpointHealthResult.Unhealthy(endpoint, "not ready", null);
 
-            var added = _endpoints.TryAdd(endpointName, key =>
+            var added = _endpoints.TryAdd(endpointName, _ =>
             {
                 endpoint.ConnectReceiveEndpointObserver(new HealthResultReceiveEndpointObserver(endpoint));
+                endpoint.ObserverHandle = endpoint.ConnectReceiveEndpointObserver(_receiveEndpointObservers);
 
                 return endpoint;
             });
@@ -99,30 +98,26 @@
             return _endpoints.Values.Select(x => x.HealthResult).ToList();
         }
 
-        protected override async Task StopAgent(StopContext context)
+        public async Task StopEndpoints(CancellationToken cancellationToken)
         {
             ReceiveEndpoint[] endpoints = _endpoints.Values.Where(x => x.IsStarted() && !x.IsBusEndpoint).ToArray();
 
-            await Task.WhenAll(endpoints.Select(x => x.Stop(context.CancellationToken))).ConfigureAwait(false);
+            await Task.WhenAll(endpoints.Select(x => x.Stop(cancellationToken))).ConfigureAwait(false);
 
             endpoints = _endpoints.Values.Where(x => x.IsStarted() && x.IsBusEndpoint).ToArray();
 
-            await Task.WhenAll(endpoints.Select(x => x.Stop(context.CancellationToken))).ConfigureAwait(false);
+            await Task.WhenAll(endpoints.Select(x => x.Stop(cancellationToken))).ConfigureAwait(false);
 
             _started = false;
-
-            await base.StopAgent(context).ConfigureAwait(false);
         }
 
         HostReceiveEndpointHandle StartEndpoint(string endpointName, ReceiveEndpoint endpoint, CancellationToken cancellationToken)
         {
             try
             {
-                var observerHandle = endpoint.ConnectReceiveEndpointObserver(_receiveEndpointObservers);
-
                 void RemoveEndpoint()
                 {
-                    observerHandle.Disconnect();
+                    endpoint.ObserverHandle.Disconnect();
                     Remove(endpointName);
                 }
 

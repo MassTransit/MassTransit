@@ -23,6 +23,11 @@
         string ReplyToSessionId { set; }
 
         /// <summary>
+        /// Sets the ReplyTo address of the message
+        /// </summary>
+        string ReplyTo { set; }
+
+        /// <summary>
         /// Set the application specific label of the message
         /// </summary>
         string Label { set; }

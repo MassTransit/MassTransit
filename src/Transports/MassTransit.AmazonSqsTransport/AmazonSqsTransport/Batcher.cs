@@ -13,7 +13,7 @@ namespace MassTransit.AmazonSqsTransport
     {
         readonly Task _batchTask;
         readonly Channel<BatchEntry<TEntry>> _channel;
-        readonly ChannelExecutor _executor;
+        readonly TaskExecutor _executor;
         readonly BatchSettings _settings;
 
         protected Batcher(BatchSettings settings = null)
@@ -29,7 +29,7 @@ namespace MassTransit.AmazonSqsTransport
             };
 
             _channel = Channel.CreateBounded<BatchEntry<TEntry>>(channelOptions);
-            _executor = new ChannelExecutor(2, _settings.BatchLimit);
+            _executor = new TaskExecutor(2, _settings.BatchLimit);
             _batchTask = Task.Run(WaitForBatch);
         }
 
@@ -44,7 +44,7 @@ namespace MassTransit.AmazonSqsTransport
 
         public async ValueTask DisposeAsync()
         {
-            _channel.Writer.Complete();
+            _channel.Writer.TryComplete();
 
             await _batchTask.ConfigureAwait(false);
 
@@ -90,7 +90,6 @@ namespace MassTransit.AmazonSqsTransport
                         {
                             break;
                         }
-
                     }
                 }
                 catch (OperationCanceledException exception) when (exception.CancellationToken == batchToken.Token && batch.Count > 0)

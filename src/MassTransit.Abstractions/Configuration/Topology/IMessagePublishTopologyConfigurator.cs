@@ -50,5 +50,7 @@ namespace MassTransit
         /// Exclude the message type from being created as a topic/exchange.
         /// </summary>
         new bool Exclude { set; }
+
+        bool TryAddConvention(IPublishTopologyConvention convention);
     }
 }

@@ -3,7 +3,6 @@ namespace MassTransit.Serialization
 {
     using System;
     using System.Net.Mime;
-    using System.Reflection;
     using System.Runtime.Serialization;
     using System.Text.Encodings.Web;
     using System.Text.Json;
@@ -77,7 +76,11 @@ namespace MassTransit.Serialization
         {
             try
             {
-                var envelope = JsonSerializer.Deserialize<MessageEnvelope>(body.GetBytes(), Options);
+                JsonElement? bodyElement = body is JsonMessageBody jsonMessageBody
+                    ? jsonMessageBody.GetJsonElement(Options)
+                    : JsonSerializer.Deserialize<JsonElement>(body.GetBytes(), Options);
+
+                var envelope = bodyElement?.Deserialize<MessageEnvelope>(Options);
                 if (envelope == null)
                     throw new SerializationException("Message envelope not found");
 
@@ -85,9 +88,7 @@ namespace MassTransit.Serialization
 
                 var messageTypes = envelope.MessageType ?? Array.Empty<string>();
 
-                var serializerContext = new SystemTextJsonSerializerContext(this, Options, ContentType, messageContext, messageTypes, envelope);
-
-                return serializerContext;
+                return new SystemTextJsonSerializerContext(this, Options, ContentType, messageContext, messageTypes, envelope);
             }
             catch (SerializationException)
             {

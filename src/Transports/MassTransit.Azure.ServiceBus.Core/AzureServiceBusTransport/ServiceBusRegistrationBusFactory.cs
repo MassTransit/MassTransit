@@ -16,7 +16,7 @@ namespace MassTransit.AzureServiceBusTransport
         readonly Action<IBusRegistrationContext, IServiceBusBusFactoryConfigurator> _configure;
 
         public ServiceBusRegistrationBusFactory(Action<IBusRegistrationContext, IServiceBusBusFactoryConfigurator> configure)
-            : this(new ServiceBusBusConfiguration(new ServiceBusTopologyConfiguration(AzureBusFactory.MessageTopology)), configure)
+            : this(new ServiceBusBusConfiguration(new ServiceBusTopologyConfiguration(AzureBusFactory.CreateMessageTopology())), configure)
         {
         }
 

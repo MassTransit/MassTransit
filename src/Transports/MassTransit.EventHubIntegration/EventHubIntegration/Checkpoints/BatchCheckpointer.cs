@@ -39,7 +39,7 @@ namespace MassTransit.EventHubIntegration.Checkpoints
 
         public async ValueTask DisposeAsync()
         {
-            _channel.Writer.Complete();
+            _channel.Writer.TryComplete();
 
             await _checkpointTask.ConfigureAwait(false);
         }

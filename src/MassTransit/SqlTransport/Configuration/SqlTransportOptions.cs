@@ -18,4 +18,9 @@ public class SqlTransportOptions
     /// Optional, if specified, will be parsed to capture additional properties on the connection.
     /// </summary>
     public string? ConnectionString { get; set; }
+
+    /// <summary>
+    /// If specified, changes the connection limit from the default value (10)
+    /// </summary>
+    public int? ConnectionLimit { get; set; }
 }

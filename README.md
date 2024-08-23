@@ -136,7 +136,6 @@ Logo Design by _The Agile Badger_
 [AmazonS3.nuget]: https://www.nuget.org/packages/MassTransit.AmazonS3
 [AmazonSQS.nuget]: https://www.nuget.org/packages/MassTransit.AmazonSQS
 [AzureSbCore.nuget]: https://www.nuget.org/packages/MassTransit.Azure.ServiceBus.Core
-[Grpc.nuget]: https://www.nuget.org/packages/MassTransit.Grpc
 [RabbitMQ.nuget]: https://www.nuget.org/packages/MassTransit.RabbitMQ
 [PostgreSQL.nuget]: https://nuget.org/packages/MassTransit.SqlTransport.PostgreSQL/
 [SqlServer.nuget]: https://nuget.org/packages/MassTransit.SqlTransport.SqlServer/

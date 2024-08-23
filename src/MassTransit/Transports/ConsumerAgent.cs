@@ -18,7 +18,7 @@ namespace MassTransit.Transports
         readonly TaskCompletionSource<bool> _deliveryComplete;
         readonly IReceivePipeDispatcher _dispatcher;
         readonly object _lock = new object();
-        readonly ConcurrentDictionary<TKey, BaseReceiveContext> _pending;
+        readonly ConcurrentDictionary<TKey, PendingReceiveLockContext> _pending;
         Task _consumeTask;
         TaskCompletionSource<bool> _consumeTaskSource;
 
@@ -27,7 +27,7 @@ namespace MassTransit.Transports
             _context = context;
             _deliveryComplete = TaskUtil.GetTask<bool>();
 
-            _pending = new ConcurrentDictionary<TKey, BaseReceiveContext>(equalityComparer ?? EqualityComparer<TKey>.Default);
+            _pending = new ConcurrentDictionary<TKey, PendingReceiveLockContext>(equalityComparer ?? EqualityComparer<TKey>.Default);
 
             _dispatcher = context.CreateReceivePipeDispatcher();
             _dispatcher.ZeroActivity += HandleDeliveryComplete;
@@ -214,13 +214,12 @@ namespace MassTransit.Transports
             {
                 lockContext = _pending.AddOrUpdate(key, _ =>
                 {
-                    added = true;
-                    context.PushLockContext(receiveLockContext);
-                    return context;
+                    var current = new PendingReceiveLockContext();
+                    added = current.Enqueue(context, receiveLockContext);
+                    return current;
                 }, (_, current) =>
                 {
-                    added = false;
-                    current.PushLockContext(receiveLockContext);
+                    added = current.Enqueue(context, receiveLockContext);
                     return current;
                 });
 
@@ -234,7 +233,16 @@ namespace MassTransit.Transports
             var dispatchTask = _dispatcher.Dispatch(context, lockContext);
 
             if (added)
-                dispatchTask.ContinueWith(_ => _pending.TryRemove(key, out var _), TaskContinuationOptions.ExecuteSynchronously);
+            {
+                dispatchTask.ContinueWith(_ =>
+                {
+                    if (_pending.TryGetValue(key, out var value))
+                    {
+                        if (value.IsEmpty)
+                            _pending.TryRemove(key, out var _);
+                    }
+                }, TaskContinuationOptions.ExecuteSynchronously);
+            }
 
             return dispatchTask;
         }

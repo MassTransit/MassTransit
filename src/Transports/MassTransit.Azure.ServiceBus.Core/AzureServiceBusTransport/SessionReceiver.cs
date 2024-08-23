@@ -28,6 +28,9 @@ namespace MassTransit.AzureServiceBusTransport
 
         async Task OnSession(ProcessSessionMessageEventArgs messageSession, ServiceBusReceivedMessage message, CancellationToken cancellationToken)
         {
+            if (IsStopping)
+                return;
+
             MessageLockContext lockContext = new ServiceBusSessionMessageLockContext(messageSession, message);
             MessageSessionContext sessionContext = new ServiceBusMessageSessionContext(messageSession);
             var context = new ServiceBusReceiveContext(message, _context, lockContext, _clientContext, sessionContext);

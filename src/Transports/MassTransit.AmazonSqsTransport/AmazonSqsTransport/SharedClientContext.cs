@@ -36,7 +36,7 @@
             return _context.CreateQueue(queue);
         }
 
-        public Task CreateQueueSubscription(Topology.Topic topic, Queue queue)
+        public Task<bool> CreateQueueSubscription(Topology.Topic topic, Queue queue)
         {
             return _context.CreateQueueSubscription(topic, queue);
         }

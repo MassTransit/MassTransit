@@ -9,17 +9,19 @@ namespace MassTransit.Transports
     public class PendingReceiveLockContext :
         ReceiveLockContext
     {
-        ReceiveLockContext _lockContext;
-        Queue<ReceiveLockContext> _pending;
+        Lock? _lockContext;
+        Queue<Lock> _pending;
+
+        public bool IsEmpty => _lockContext == null && (_pending == null || _pending.Count == 0);
 
         public Task Complete()
         {
-            return Execute(context => context.Complete());
+            return Execute(context => context.Complete(), true);
         }
 
         public Task Faulted(Exception exception)
         {
-            return Execute(context => context.Faulted(exception));
+            return Execute(context => context.Faulted(exception), true);
         }
 
         public Task ValidateLockStatus()
@@ -27,44 +29,52 @@ namespace MassTransit.Transports
             return Execute(context => context.ValidateLockStatus());
         }
 
-        public void Dispose()
+        public bool Enqueue(BaseReceiveContext receiveContext, ReceiveLockContext receiveLockContext)
         {
-            lock (this)
-            {
-                _lockContext = null;
-                _pending?.Clear();
-            }
-        }
+            var lockContext = new Lock(receiveContext, receiveLockContext);
 
-        public void Enqueue(ReceiveLockContext lockContext)
-        {
             lock (this)
             {
-                if (_lockContext == null)
+                if (_lockContext == null && (_pending == null || _pending.Count == 0))
+                {
                     _lockContext = lockContext;
-                else
-                    (_pending ??= new Queue<ReceiveLockContext>(1)).Enqueue(lockContext);
+                    return true;
+                }
+
+                (_pending ??= new Queue<Lock>(1)).Enqueue(lockContext);
+                return false;
             }
         }
 
-        async Task Execute(Func<ReceiveLockContext, Task> action)
+        async Task Execute(Func<ReceiveLockContext, Task> action, bool clearLockContext = false)
         {
             if (_lockContext == null)
             {
                 lock (this)
                 {
                     if (_lockContext == null)
-                        return;
+                    {
+                        if (_pending == null || _pending.Count == 0)
+                            return;
+
+                        _lockContext = _pending.Dequeue();
+                    }
                 }
             }
 
-            ExceptionDispatchInfo dispatchInfo = null;
+            ExceptionDispatchInfo dispatchInfo;
 
             do
             {
                 try
                 {
-                    await action(_lockContext).ConfigureAwait(false);
+                    var lockContext = _lockContext.Value;
+
+                    if (clearLockContext)
+                        _lockContext = null;
+
+                    await action(lockContext.ReceiveLockContext).ConfigureAwait(false);
+
                     return;
                 }
                 catch (Exception ex)
@@ -87,10 +97,39 @@ namespace MassTransit.Transports
             lock (this)
             {
                 if (_pending == null || _pending.Count == 0)
+                {
+                    _lockContext = null;
                     return false;
+                }
 
                 _lockContext = _pending.Dequeue();
                 return true;
+            }
+        }
+
+        public void Cancel()
+        {
+            lock (this)
+            {
+                _lockContext?.ReceiveContext.Cancel();
+                if (_pending != null)
+                {
+                    foreach (var pendingLock in _pending)
+                        pendingLock.ReceiveContext.Cancel();
+                }
+            }
+        }
+
+
+        readonly struct Lock
+        {
+            public readonly BaseReceiveContext ReceiveContext;
+            public readonly ReceiveLockContext ReceiveLockContext;
+
+            public Lock(BaseReceiveContext receiveContext, ReceiveLockContext receiveLockContext)
+            {
+                ReceiveContext = receiveContext;
+                ReceiveLockContext = receiveLockContext;
             }
         }
     }

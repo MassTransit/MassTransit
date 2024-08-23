@@ -45,7 +45,9 @@ namespace MassTransit.Configuration
             if (!_messageTypeFilter.Matches(typeof(T)))
                 return;
 
-            var filterType = _filterType.MakeGenericType(typeof(T));
+            var filterType = _filterType.HasInterface<IFilter<TContext>>()
+                ? _filterType
+                : _filterType.MakeGenericType(typeof(T));
 
             if (!filterType.HasInterface(typeof(IFilter<TContext>)))
                 throw new ConfigurationException($"The scoped filter must implement {TypeCache<IFilter<TContext>>.ShortName} ");

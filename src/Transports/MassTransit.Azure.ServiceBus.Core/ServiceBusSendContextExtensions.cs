@@ -44,6 +44,12 @@
                 sendContext.ReplyToSessionId = sessionId;
         }
 
+        public static void SetReplyTo(this SendContext context, string replyTo)
+        {
+            if (context.TryGetPayload(out ServiceBusSendContext sendContext))
+                sendContext.ReplyTo = replyTo;
+        }
+
         public static void SetLabel(this SendContext context, string label)
         {
             if (context.TryGetPayload(out ServiceBusSendContext sendContext))

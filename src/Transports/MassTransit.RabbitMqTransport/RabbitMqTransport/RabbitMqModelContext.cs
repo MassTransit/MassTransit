@@ -20,7 +20,7 @@
     {
         readonly PendingConfirmationCollection _confirmations;
         readonly ConnectionContext _connectionContext;
-        readonly ChannelExecutor _executor;
+        readonly TaskExecutor _executor;
         readonly IModel _model;
         readonly IPublisher _publisher;
 
@@ -39,7 +39,7 @@
 
             _model.ContinuationTimeout = _connectionContext.ContinuationTimeout;
 
-            _executor = new ChannelExecutor(1);
+            _executor = new TaskExecutor(1);
 
             _publisher = connectionContext.BatchSettings.Enabled
                 ? new BatchPublisher(_executor, model, connectionContext.BatchSettings, _confirmations)
@@ -163,9 +163,9 @@
             return RunRpc(() => _model.BasicConsume(consumer, queue, noAck, consumerTag, false, exclusive, arguments), CancellationToken);
         }
 
-        public Task BasicCancel(string consumerTag)
+        public async Task BasicCancel(string consumerTag)
         {
-            return _executor.Run(() => _model.BasicCancel(consumerTag), CancellationToken);
+            await _executor.Run(() => _model.BasicCancel(consumerTag), CancellationToken);
         }
 
         void OnBasicReturn(object model, BasicReturnEventArgs args)

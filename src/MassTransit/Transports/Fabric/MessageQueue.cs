@@ -80,7 +80,7 @@ namespace MassTransit.Transports.Fabric
 
         protected override async Task StopAgent(StopContext context)
         {
-            _channel.Writer.Complete();
+            _channel.Writer.TryComplete();
 
             await _channel.Reader.Completion.ConfigureAwait(false);
 

@@ -77,8 +77,7 @@
             CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Sends an object as a message, using the message type specified. If the object cannot be cast
-        /// to the specified message type, an exception will be thrown.
+        /// Sends an object as a message.
         /// </summary>
         /// <param name="destinationAddress">The destination address where the schedule message should be sent</param>
         /// <param name="schedule">The schedule for the message to be delivered</param>
@@ -208,8 +207,7 @@
             CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Publishes an object as a message, using the message type specified. If the object cannot be cast
-        /// to the specified message type, an exception will be thrown.
+        /// Publishes an object as a message.
         /// </summary>
         /// <param name="schedule">The schedule for the message to be delivered</param>
         /// <param name="message">The message object</param>

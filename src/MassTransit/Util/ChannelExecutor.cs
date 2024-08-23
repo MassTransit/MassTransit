@@ -60,7 +60,7 @@ namespace MassTransit.Util
             if (_disposed)
                 return;
 
-            _channel.Writer.Complete();
+            _channel.Writer.TryComplete();
 
             await _readerTask.ConfigureAwait(false);
 
@@ -121,7 +121,7 @@ namespace MassTransit.Util
 
         public async Task<T> Run<T>(Func<Task<T>> method, CancellationToken cancellationToken = default)
         {
-            var future = new Future<T>(method, cancellationToken);
+            var future = new RunFuture<T>(method, cancellationToken);
 
             await _channel.Writer.WriteAsync(future, cancellationToken).ConfigureAwait(false);
 
@@ -213,6 +213,51 @@ namespace MassTransit.Util
             readonly Func<Task<T>> _method;
 
             public Future(Func<Task<T>> method, CancellationToken cancellationToken)
+            {
+                _method = method;
+                _cancellationToken = cancellationToken;
+                _completion = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
+            }
+
+            /// <summary>
+            /// The post-execution result, which can be awaited
+            /// </summary>
+            public Task<T> Completed => _completion.Task;
+
+            public async Task Run()
+            {
+                if (_cancellationToken.IsCancellationRequested)
+                {
+                    _completion.TrySetCanceled(_cancellationToken);
+                    return;
+                }
+
+                try
+                {
+                    var result = await _method().ConfigureAwait(false);
+
+                    _completion.TrySetResult(result);
+                }
+                catch (OperationCanceledException exception) when (exception.CancellationToken == _cancellationToken)
+                {
+                    _completion.TrySetCanceled(exception.CancellationToken);
+                }
+                catch (Exception exception)
+                {
+                    _completion.TrySetException(exception);
+                }
+            }
+        }
+
+
+        readonly struct RunFuture<T> :
+            IFuture
+        {
+            readonly CancellationToken _cancellationToken;
+            readonly TaskCompletionSource<T> _completion;
+            readonly Func<Task<T>> _method;
+
+            public RunFuture(Func<Task<T>> method, CancellationToken cancellationToken)
             {
                 _method = method;
                 _cancellationToken = cancellationToken;

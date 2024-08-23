@@ -8,11 +8,13 @@ namespace MassTransit.SqlTransport.PostgreSql
     using System.Threading.Tasks;
     using Configuration;
     using Dapper;
+    using Helpers;
     using Logging;
     using MassTransit.Middleware;
     using Npgsql;
     using RetryPolicies;
     using Transports;
+    using Util;
 
 
     public class PostgresDbConnectionContext :
@@ -21,6 +23,7 @@ namespace MassTransit.SqlTransport.PostgreSql
         IAsyncDisposable
     {
         readonly NotificationAgent _agent;
+        readonly TaskExecutor _executor;
         readonly ISqlHostConfiguration _hostConfiguration;
         readonly PostgresSqlHostSettings _hostSettings;
         readonly IRetryPolicy _retryPolicy;
@@ -47,6 +50,8 @@ namespace MassTransit.SqlTransport.PostgreSql
             supervisor.AddConsumeAgent(_agent);
 
             supervisor.AddConsumeAgent(new MaintenanceAgent(this, hostConfiguration));
+
+            _executor = new TaskExecutor(hostConfiguration.Settings.ConnectionLimit);
         }
 
         public ISqlBusTopology Topology { get; }
@@ -67,25 +72,28 @@ namespace MassTransit.SqlTransport.PostgreSql
             return await CreateConnection(cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task<T> Query<T>(Func<IDbConnection, IDbTransaction, Task<T>> callback, CancellationToken cancellationToken)
+        public Task<T> Query<T>(Func<IDbConnection, IDbTransaction, Task<T>> callback, CancellationToken cancellationToken)
         {
-            await using var connection = await CreateConnection(cancellationToken);
-
-            return await _retryPolicy.Retry(async () =>
+            return _executor.Run(async () =>
             {
-            #if NET6_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
-                await using var transaction = await connection.Connection.BeginTransactionAsync(_hostSettings.IsolationLevel, cancellationToken);
-            #else
+                await using var connection = await CreateConnection(cancellationToken);
+
+                return await _retryPolicy.Retry(async () =>
+                {
+                #if NET6_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
+                    await using var transaction = await connection.Connection.BeginTransactionAsync(_hostSettings.IsolationLevel, cancellationToken);
+                #else
                 // ReSharper disable AccessToDisposedClosure
                 await using var transaction = connection.Connection.BeginTransaction(_hostSettings.IsolationLevel);
-            #endif
+                #endif
 
-                var result = await callback(connection.Connection, transaction).ConfigureAwait(false);
+                    var result = await callback(connection.Connection, transaction).ConfigureAwait(false);
 
-                await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+                    await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
 
-                return result;
-            }, false, cancellationToken).ConfigureAwait(false);
+                    return result;
+                }, false, cancellationToken).ConfigureAwait(false);
+            }, cancellationToken);
         }
 
         public Task DelayUntilMessageReady(long queueId, TimeSpan timeout, CancellationToken cancellationToken)
@@ -188,15 +196,16 @@ namespace MassTransit.SqlTransport.PostgreSql
                             await using var connection = await _context.CreateConnection(Stopping);
 
                             var queueIds = new HashSet<long>(_notificationTokens.Keys);
+                            var sanitizedSchemaName = NotifyChannel.SanitizeSchemaName(_context.Schema);
 
                             connection.Connection.Notification += OnConnectionOnNotification;
 
                             foreach (var queueId in queueIds)
                             {
-                                await connection.Connection.ExecuteScalarAsync<int>($"LISTEN transport_msg_{queueId}", Stopping)
+                                await connection.Connection.ExecuteScalarAsync<int>($"LISTEN \"{sanitizedSchemaName}_msg_{queueId}\"", Stopping)
                                     .ConfigureAwait(false);
 
-                                // LogContext.Debug?.Log("LISTEN transport_msg_{QueueId}", queueId);
+                                // LogContext.Debug?.Log("LISTEN \"{sanitizedSchemaName}_msg_{queueId}\"", queueId);
                             }
 
                             while (!Stopping.IsCancellationRequested)
@@ -219,10 +228,10 @@ namespace MassTransit.SqlTransport.PostgreSql
                                     if (queueIds.Contains(queueId))
                                         break;
 
-                                    await connection.Connection.ExecuteScalarAsync<int>($"LISTEN transport_msg_{queueId}", Stopping)
+                                    await connection.Connection.ExecuteScalarAsync<int>($"LISTEN \"{sanitizedSchemaName}_msg_{queueId}\"", Stopping)
                                         .ConfigureAwait(false);
 
-                                    // LogContext.Debug?.Log("LISTEN transport_msg_{QueueId}", queueId);
+                                    // LogContext.Debug?.Log("LISTEN \"{sanitizedSchemaName}_msg_{queueId}\"", queueId);
 
                                     queueIds.Add(queueId);
                                 }

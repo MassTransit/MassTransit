@@ -152,7 +152,7 @@
         public void Setup()
         {
             _nameFormatter = new RabbitMqMessageNameFormatter();
-            _consumeTopology = new RabbitMqConsumeTopology(RabbitMqBusFactory.MessageTopology, new RabbitMqPublishTopology(RabbitMqBusFactory.MessageTopology));
+            _consumeTopology = new RabbitMqConsumeTopology(RabbitMqBusFactory.CreateMessageTopology(), new RabbitMqPublishTopology(RabbitMqBusFactory.CreateMessageTopology()));
 
             _builder = new ReceiveEndpointBrokerTopologyBuilder();
 
@@ -222,7 +222,7 @@
         public void Setup()
         {
             _nameFormatter = new RabbitMqMessageNameFormatter();
-            _publishTopology = new RabbitMqPublishTopology(RabbitMqBusFactory.MessageTopology);
+            _publishTopology = new RabbitMqPublishTopology(RabbitMqBusFactory.CreateMessageTopology());
 
             _builder = new PublishEndpointBrokerTopologyBuilder();
         }
@@ -319,7 +319,7 @@
         public void Setup()
         {
             _nameFormatter = new RabbitMqMessageNameFormatter();
-            _publishTopology = new RabbitMqPublishTopology(RabbitMqBusFactory.MessageTopology);
+            _publishTopology = new RabbitMqPublishTopology(RabbitMqBusFactory.CreateMessageTopology());
 
             _builder = new PublishEndpointBrokerTopologyBuilder(PublishBrokerTopologyOptions.MaintainHierarchy);
         }
