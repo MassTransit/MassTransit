@@ -69,38 +69,6 @@ In the example above, the `AddMassTransitTestHarness` method is used to configur
 })
 ```
 
-#### Wait and Timeout
-
-In the example above, the `await harness.Consumed.Any<SubmitOrder>()` method call waits for the `SubmitOrder` message to be consumed within the time specified by the `TestTimeout` property of the Test Harness. The default timeout is 30 seconds, and 50 minutes while debugging, configured by the [`TestHarnessOptions`](https://github.com/MassTransit/MassTransit/blob/develop/src/MassTransit/Configuration/DependencyInjection/TestHarnessOptions.cs#L9), and can be set:
-
-```csharp
-harness.TestTimeout = TimeSpan.FromSeconds(10);
-```
-
-#### Reading the values of messages Sent/Published/Consumed
-
-To read the messages that were sent you can use the `Select` or `SelectAsync` methods:
-
-```csharp
-var messageSent = harness.Sent.Select<OrderSubmitted>()
-    .FirstOrDefault();
-
-Assert.AreEqual(orderId, messageSent.Context.Message.OrderId);
-```
-
-::callout{type="info"}
-#summary
-If you don't limit the number of messages to wait for, e.g. by using the `.FirstOrDefault()`, then the `Select` and `SelectAsync` methods **wait until the `TestTimeout`.** This means **50 minutes** by default while debugging, making the debugging experience unpleasant.
-#content
-For example, using Fluent Assertions the line below would be perfectly fine, but in this case it causes the test to block until the Test Timeout expires.
-
-```csharp
-// Waits for the full TestTimeout
-❌ harness.Sent.Select<OrderSubmitted>()
-      .Should().HaveCountGreaterThan(0);
-```
-::
-
 ### Transport Support
 
 MassTransit's test harness can be used with any supported transport, and can also be used write rider integration tests (there is no in-memory rider implementation for unit testing). For example, to create an integration test using RabbitMQ, the RabbitMQ transport can be configured as shown.
@@ -118,6 +86,49 @@ MassTransit's test harness can be used with any supported transport, and can als
 ```
 
 In this example, RabbitMQ is configured using the default settings (which specifies a broker running on `localhost` using the default username and password of `guest`).
+
+
+### SetTestTimeouts
+
+In the example above, the `await harness.Consumed.Any<SubmitOrder>()` method call waits for the `SubmitOrder` message to be consumed within the time specified by the `TestInactivityTimeout` property of the Test Harness. The default timeout is 30 seconds, and 50 minutes while debugging, configured by the [`TestHarnessOptions`](https://github.com/MassTransit/MassTransit/blob/develop/src/MassTransit/Configuration/DependencyInjection/TestHarnessOptions.cs#L9), and can be set:
+
+To set both the overall test timeout and the test inactivity timeout, call the `SetTestTimeouts` method:
+
+```csharp
+cfg.SetTestTimeouts(TimeSpan.FromSeconds(60), TimeSpan.FromSeconds(5)));
+```
+
+Either timeout value can be set individually using the appropriately named parameter:
+
+```csharp
+cfg.SetTestTimeouts(testTimeout: TimeSpan.FromSeconds(60));
+
+cfg.SetTestTimeouts(testInactivityTimeout: TimeSpan.FromSeconds(5));
+```
+
+### Message Assertions
+
+To read the messages that were sent you can use the `Select` or `SelectAsync` methods:
+
+```csharp
+var messageSent = await harness.Sent.SelectAsync<OrderSubmitted>()
+    .FirstOrDefault();
+
+Assert.AreEqual(orderId, messageSent?.Context.Message.OrderId);
+```
+
+::callout{type="info"}
+#summary
+If you don't limit the number of messages to wait for, e.g. by using the `.FirstOrDefault()`, then the `Select` and `SelectAsync` methods **wait until the `TestTimeout`.** This means **50 minutes** by default while debugging, making the debugging experience unpleasant.
+#content
+For example, using Fluent Assertions the line below would be perfectly fine, but in this case it causes the test to block until the Test Timeout expires.
+
+```csharp
+// Waits for the full TestTimeout
+❌ harness.Sent.Select<OrderSubmitted>()
+      .Should().HaveCountGreaterThan(0);
+```
+::
 
 
 ## Web Application Factory
