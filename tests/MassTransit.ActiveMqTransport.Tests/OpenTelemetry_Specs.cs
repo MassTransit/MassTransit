@@ -62,8 +62,7 @@ namespace MassTransit.ActiveMqTransport.Tests
                             ExporterTimeoutMilliseconds = 30000,
                             MaxExportBatchSize = 512
                         };
-                    })
-                    .Build());
+                    }));
 
             await using var provider = services
                 .AddMassTransitTestHarness(x =>

@@ -301,8 +301,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                             ExporterTimeoutMilliseconds = 30000,
                             MaxExportBatchSize = 512
                         };
-                    })
-                    .Build());
+                    }));
         }
 
 
