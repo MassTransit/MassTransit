@@ -226,6 +226,7 @@ jobs:
     name: "Storage: CosmosDB"
     timeout-minutes: 10
     runs-on: ubuntu-latest
+    if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/v8') && github.repository == 'MassTransit/MassTransit'
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -235,27 +236,11 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - name: Spin up test environment
-        run: |
-          docker compose -f docker-compose.yml up -d
-          echo "Waiting for CosmosDB at localhost:8081..."
-
-          until [ "$(curl -k -s --connect-timeout 5 -o /dev/null -w "%{http_code}" https://localhost:8081/_explorer/emulator.pem)" == "200" ]; do
-            sleep 5;
-            echo "Waiting for CosmosDB at localhost:8081..."
-          done;
-
-          curl -k https://localhost:8081/_explorer/emulator.pem > ~/emulatorcert.crt
-          sudo cp ~/emulatorcert.crt /usr/local/share/ca-certificates/
-          sudo update-ca-certificates
-        working-directory: tests/MassTransit.Azure.Cosmos.Tests
-
       - name: Test CosmosDB
+        env:
+          MT_COSMOS_ENDPOINT: ${{ secrets.AZURE_COSMOSENDPOINT }}
+          MT_COSMOS_KEY: ${{ secrets.AZURE_COSMOSKEY }}
         run: dotnet test -c Release --logger GitHubActions --filter "Category!=Flaky&Category!=Integration"
-        working-directory: tests/MassTransit.Azure.Cosmos.Tests
-
-      - name: Stop test environment
-        run: docker compose -f docker-compose.yml down
         working-directory: tests/MassTransit.Azure.Cosmos.Tests
   test-dapper:
     name: "Storage: Dapper"
