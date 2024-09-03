@@ -226,7 +226,7 @@ namespace MassTransit.SqlTransport.PostgreSql
                                 foreach (var queueId in _notificationTokens.Keys)
                                 {
                                     if (queueIds.Contains(queueId))
-                                        break;
+                                        continue;
 
                                     await connection.Connection.ExecuteScalarAsync<int>($"LISTEN \"{sanitizedSchemaName}_msg_{queueId}\"", Stopping)
                                         .ConfigureAwait(false);
