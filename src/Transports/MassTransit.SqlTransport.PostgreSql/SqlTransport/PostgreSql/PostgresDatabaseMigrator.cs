@@ -2,6 +2,9 @@ namespace MassTransit.SqlTransport.PostgreSql
 {
     using System.Threading;
     using System.Threading.Tasks;
+    using AccessToken;
+    using Amazon;
+    using Amazon.RDS.Util;
     using Dapper;
     using Helpers;
     using Microsoft.Extensions.Logging;
@@ -1146,7 +1149,7 @@ namespace MassTransit.SqlTransport.PostgreSql
             result = await connection.Connection.ExecuteScalarAsync<int>(string.Format(RoleExistsSql, options.Username)).ConfigureAwait(false);
             if (result != 1)
             {
-                await connection.Connection.ExecuteScalarAsync<int>(string.Format(CreateUserSql, options.Role, options.Username, options.Password))
+                await connection.Connection.ExecuteScalarAsync<int>(string.Format(CreateUserSql, options.Role, options.Username, SqlTransportPasswordRetriever.GetPassword(options)))
                     .ConfigureAwait(false);
 
                 _logger.LogDebug("User role {Username} created", options.Username);

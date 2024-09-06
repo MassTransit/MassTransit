@@ -3,6 +3,7 @@ namespace MassTransit.SqlTransport.SqlServer;
 using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
+using AccessToken;
 using Microsoft.Data.SqlClient;
 
 
@@ -98,8 +99,8 @@ public class SqlServerSqlTransportConnection :
             builder.UserID = options.Username;
         else if(!string.IsNullOrWhiteSpace(builder.UserID))
             options.Username = builder.UserID;
-        if (!string.IsNullOrWhiteSpace(options.Password))
-            builder.Password = options.Password;
+        if (!string.IsNullOrWhiteSpace(options.Password) || options.AuthenticationMode == AuthenticationMode.Token)
+            builder.Password = SqlTransportPasswordRetriever.GetPassword(options);
         else if (!string.IsNullOrWhiteSpace(builder.Password))
             options.Password = builder.Password;
 

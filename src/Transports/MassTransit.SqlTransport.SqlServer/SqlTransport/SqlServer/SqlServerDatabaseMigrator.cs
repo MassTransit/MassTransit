@@ -2,6 +2,7 @@ namespace MassTransit.SqlTransport.SqlServer
 {
     using System.Threading;
     using System.Threading.Tasks;
+    using AccessToken;
     using Dapper;
     using Microsoft.Extensions.Logging;
 
@@ -1499,7 +1500,7 @@ END
                 result = await connection.Connection.ExecuteScalarAsync<int?>(string.Format(LoginExistsSql, options.Username)).ConfigureAwait(false);
                 if (!result.HasValue)
                 {
-                    await connection.Connection.ExecuteScalarAsync<int>(string.Format(CreateLoginSql, options.Username, options.Password))
+                    await connection.Connection.ExecuteScalarAsync<int>(string.Format(CreateLoginSql, options.Username, SqlTransportPasswordRetriever.GetPassword(options)))
                         .ConfigureAwait(false);
 
                     _logger.LogDebug("Login {Username} created", options.Username);

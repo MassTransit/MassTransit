@@ -4,6 +4,7 @@ namespace MassTransit.SqlTransport.PostgreSql
     using System.Data;
     using System.Threading;
     using System.Threading.Tasks;
+    using AccessToken;
     using Npgsql;
 
 
@@ -92,8 +93,8 @@ namespace MassTransit.SqlTransport.PostgreSql
             else if (!string.IsNullOrWhiteSpace(builder.Username))
                 options.Username = builder.Username;
 
-            if (!string.IsNullOrWhiteSpace(options.Password))
-                builder.Password = options.Password;
+            if (!string.IsNullOrWhiteSpace(options.Password) || options.AuthenticationMode == AuthenticationMode.Token)
+                builder.Password = SqlTransportPasswordRetriever.GetPassword(options);
             else if (!string.IsNullOrWhiteSpace(builder.Password))
                 options.Password = builder.Password;
 

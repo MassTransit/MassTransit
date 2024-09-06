@@ -23,4 +23,28 @@ public class SqlTransportOptions
     /// If specified, changes the connection limit from the default value (10)
     /// </summary>
     public int? ConnectionLimit { get; set; }
+
+    public AuthenticationMode AuthenticationMode { get; set; }
+
+    public TokenIssuerOptions? TokenIssuerOptions { get; set; }
+}
+
+
+public class TokenIssuerOptions
+{
+    public TokenIssuer Issuer { get; set; }
+
+    public string? AwsRdsRegionSystemName { get; set; }
+}
+
+
+public enum TokenIssuer
+{
+    AwsRds
+}
+
+public enum AuthenticationMode
+{
+    Password,
+    Token
 }
