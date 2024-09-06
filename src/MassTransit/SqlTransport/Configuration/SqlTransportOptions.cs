@@ -24,7 +24,7 @@ public class SqlTransportOptions
     /// </summary>
     public int? ConnectionLimit { get; set; }
 
-    public AuthenticationMode AuthenticationMode { get; set; }
+    public AuthenticationMode AuthenticationMode { get; set; } = AuthenticationMode.Password;
 
     public TokenIssuerOptions? TokenIssuerOptions { get; set; }
 }
