@@ -57,11 +57,11 @@ namespace MassTransit.Tests.ContainerTests
                 using var scope = provider.CreateScope();
                 var publishEndpoint = scope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
 
-                await Task.WhenAll(Enumerable.Range(0, 20).Select(x => publishEndpoint.Publish(new BadMessage())));
+                await Task.WhenAll(Enumerable.Range(0, 30).Select(x => publishEndpoint.Publish(new BadMessage())));
 
                 await healthChecks.WaitForHealthStatus(HealthStatus.Degraded);
 
-                await Task.WhenAll(Enumerable.Range(0, 20).Select(x => publishEndpoint.Publish(new GoodMessage())));
+                await Task.WhenAll(Enumerable.Range(0, 30).Select(x => publishEndpoint.Publish(new GoodMessage())));
 
                 await healthChecks.WaitForHealthStatus(HealthStatus.Healthy);
             }
