@@ -67,7 +67,7 @@ namespace MassTransit.SqlTransport.PostgreSql
             }
         }
 
-        public NpgsqlDataSource? DataSource { get; set; }
+        public NpgsqlDataSource? DataSource { get; }
 
         public override ConnectionContextFactory CreateConnectionContextFactory(ISqlHostConfiguration hostConfiguration)
         {
