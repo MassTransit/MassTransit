@@ -52,6 +52,9 @@
         /// used with this overload
         /// </param>
         /// <param name="configure">The configuration callback for the bus factory</param>
+        /// <remarks>The dataSource is also only used for application level credentials when running
+        /// sqlTransport with MassTransit and not quite used to run migrations which require admin
+        /// level access on the operating database </remarks>
         public static void UsingPostgres(this IBusRegistrationConfigurator configurator, NpgsqlDataSource dataSource,
             Action<IBusRegistrationContext, ISqlBusFactoryConfigurator>? configure = null)
         {
