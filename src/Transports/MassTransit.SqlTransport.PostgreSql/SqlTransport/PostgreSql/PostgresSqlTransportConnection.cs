@@ -10,9 +10,9 @@ namespace MassTransit.SqlTransport.PostgreSql
     public class PostgresSqlTransportConnection :
         IPostgresSqlTransportConnection
     {
-        public PostgresSqlTransportConnection(string connectionString)
+        public PostgresSqlTransportConnection(NpgsqlConnection connection)
         {
-            Connection = new NpgsqlConnection(connectionString);
+            Connection = connection;
         }
 
         public ValueTask DisposeAsync()
@@ -53,7 +53,7 @@ namespace MassTransit.SqlTransport.PostgreSql
             if (!string.IsNullOrWhiteSpace(options.AdminPassword))
                 builder.Password = options.AdminPassword;
 
-            return new PostgresSqlTransportConnection(builder.ToString());
+            return new PostgresSqlTransportConnection(new NpgsqlConnection(builder.ToString()));
         }
 
         public static PostgresSqlTransportConnection GetDatabaseAdminConnection(SqlTransportOptions options)
@@ -65,12 +65,12 @@ namespace MassTransit.SqlTransport.PostgreSql
             if (!string.IsNullOrWhiteSpace(options.AdminPassword))
                 builder.Password = options.AdminPassword;
 
-            return new PostgresSqlTransportConnection(builder.ToString());
+            return new PostgresSqlTransportConnection(new NpgsqlConnection(builder.ToString()));
         }
 
         public static PostgresSqlTransportConnection GetDatabaseConnection(SqlTransportOptions options)
         {
-            return new PostgresSqlTransportConnection(CreateBuilder(options).ToString());
+            return new PostgresSqlTransportConnection(new NpgsqlConnection(CreateBuilder(options).ToString()));
         }
 
         public static NpgsqlConnectionStringBuilder CreateBuilder(SqlTransportOptions options)

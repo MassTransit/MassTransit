@@ -27,6 +27,7 @@ namespace MassTransit.SqlTransport.PostgreSql
         readonly ISqlHostConfiguration _hostConfiguration;
         readonly PostgresSqlHostSettings _hostSettings;
         readonly IRetryPolicy _retryPolicy;
+        readonly NpgsqlDataSource _dataSource;
 
         static PostgresDbConnectionContext()
         {
@@ -41,6 +42,8 @@ namespace MassTransit.SqlTransport.PostgreSql
 
             _hostSettings = hostConfiguration.Settings as PostgresSqlHostSettings
                 ?? throw new ConfigurationException("The host settings were not of the expected type");
+
+            _dataSource = _hostSettings.GetDataSource();
 
             _retryPolicy = Retry.CreatePolicy(x => x.Immediate(10).Handle<PostgresException>(ex => ex.IsTransient));
 
@@ -117,12 +120,15 @@ namespace MassTransit.SqlTransport.PostgreSql
 
         public async ValueTask DisposeAsync()
         {
+            if (_hostSettings.IsProvidedDataSource == false)
+                await _dataSource.DisposeAsync().ConfigureAwait(false);
+
             TransportLogMessages.DisconnectedHost(_hostConfiguration.HostAddress.ToString());
         }
 
-        public async Task<IPostgresSqlTransportConnection> CreateConnection(CancellationToken cancellationToken)
+        async Task<IPostgresSqlTransportConnection> CreateConnection(CancellationToken cancellationToken)
         {
-            var connection = new PostgresSqlTransportConnection(_hostSettings.GetConnectionString());
+            var connection = new PostgresSqlTransportConnection(_dataSource.CreateConnection());
 
             await connection.Open(cancellationToken).ConfigureAwait(false);
 
