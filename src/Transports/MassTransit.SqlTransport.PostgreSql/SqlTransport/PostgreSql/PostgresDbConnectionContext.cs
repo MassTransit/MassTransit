@@ -122,7 +122,7 @@ namespace MassTransit.SqlTransport.PostgreSql
 
         public async Task<IPostgresSqlTransportConnection> CreateConnection(CancellationToken cancellationToken)
         {
-            var connection = new PostgresSqlTransportConnection(_hostSettings.GetConnectionString());
+            var connection = _hostSettings.DataSource is not null ? new PostgresSqlTransportConnection(_hostSettings.DataSource) : new PostgresSqlTransportConnection(_hostSettings.GetConnectionString());
 
             await connection.Open(cancellationToken).ConfigureAwait(false);
 

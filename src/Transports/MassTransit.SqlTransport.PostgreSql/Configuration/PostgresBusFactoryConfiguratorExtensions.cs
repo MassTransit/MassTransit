@@ -1,6 +1,7 @@
 ﻿namespace MassTransit
 {
     using System;
+    using Npgsql;
     using SqlTransport.Configuration;
 
 
@@ -37,6 +38,26 @@
             configurator.SetBusFactory(new SqlRegistrationBusFactory((context, cfg) =>
             {
                 cfg.UsePostgres(connectionString);
+
+                configure?.Invoke(context, cfg);
+            }));
+        }
+
+        /// <summary>
+        /// Configure the bus to use the PostgreSQL database transport
+        /// </summary>
+        /// <param name="configurator">The registration configurator (configured via AddMassTransit)</param>
+        /// <param name="dataSource">
+        /// The dataSource used by the transport <see cref="SqlTransportOptions" /> are not
+        /// used with this overload
+        /// </param>
+        /// <param name="configure">The configuration callback for the bus factory</param>
+        public static void UsingPostgres(this IBusRegistrationConfigurator configurator, NpgsqlDataSource dataSource,
+            Action<IBusRegistrationContext, ISqlBusFactoryConfigurator>? configure = null)
+        {
+            configurator.SetBusFactory(new SqlRegistrationBusFactory((context, cfg) =>
+            {
+                cfg.UsePostgres(dataSource);
 
                 configure?.Invoke(context, cfg);
             }));

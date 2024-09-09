@@ -2,6 +2,7 @@ namespace MassTransit.SqlTransport.PostgreSql
 {
     using System;
     using Configuration;
+    using Npgsql;
 
 
     public class PostgresSqlHostConfigurator :
@@ -28,6 +29,11 @@ namespace MassTransit.SqlTransport.PostgreSql
 
         public PostgresSqlHostConfigurator(string connectionString)
             : this(new PostgresSqlHostSettings(connectionString))
+        {
+        }
+
+        public PostgresSqlHostConfigurator(NpgsqlDataSource dataSource)
+            : this(new PostgresSqlHostSettings(dataSource))
         {
         }
 

@@ -21,6 +21,11 @@ namespace MassTransit.SqlTransport.PostgreSql
             ConnectionString = connectionString;
         }
 
+        public PostgresSqlHostSettings(NpgsqlDataSource dataSource)
+        {
+            DataSource = dataSource;
+        }
+
         public PostgresSqlHostSettings(SqlTransportOptions options)
         {
             var builder = PostgresSqlTransportConnection.CreateBuilder(options);
@@ -61,6 +66,8 @@ namespace MassTransit.SqlTransport.PostgreSql
                 _builder = builder;
             }
         }
+
+        public NpgsqlDataSource? DataSource { get; set; }
 
         public override ConnectionContextFactory CreateConnectionContextFactory(ISqlHostConfiguration hostConfiguration)
         {

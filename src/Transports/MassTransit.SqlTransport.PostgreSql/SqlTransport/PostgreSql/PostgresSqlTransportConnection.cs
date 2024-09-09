@@ -15,6 +15,11 @@ namespace MassTransit.SqlTransport.PostgreSql
             Connection = new NpgsqlConnection(connectionString);
         }
 
+        public PostgresSqlTransportConnection(NpgsqlDataSource npgsqlDataSource)
+        {
+            Connection = npgsqlDataSource.CreateConnection();
+        }
+
         public ValueTask DisposeAsync()
         {
             return Connection.DisposeAsync();
