@@ -31,7 +31,7 @@ namespace MassTransit.SqlTransport.PostgreSql
 
             IsProvidedDataSource = true;
 
-            ConnectionString = _dataSource.ConnectionString;
+            ConnectionString = dataSource.ConnectionString;
         }
 
         public PostgresSqlHostSettings(SqlTransportOptions options)
