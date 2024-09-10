@@ -72,15 +72,14 @@ namespace MassTransit.Configuration
                 yield return this.Failure("LockTimeout", "Must be > TimeSpan.Zero");
         }
 
-        public void Register<T>(ISagaRepositoryRegistrationConfigurator<T> configurator)
-            where T : class, ISagaVersion
+        public void Register(ISagaRepositoryRegistrationConfigurator<TSaga> configurator)
         {
             configurator.TryAddSingleton<IConnectionMultiplexerFactory, ConnectionMultiplexerFactory>();
-            configurator.TryAddSingleton(new RedisSagaRepositoryOptions<T>(ConcurrencyMode, LockTimeout, LockSuffix, KeyPrefix, _connectionFactory,
+            configurator.TryAddSingleton(new RedisSagaRepositoryOptions<TSaga>(ConcurrencyMode, LockTimeout, LockSuffix, KeyPrefix, _connectionFactory,
                 _databaseSelector, Expiry, RetryPolicy));
-            configurator.RegisterLoadSagaRepository<T, RedisSagaRepositoryContextFactory<T>>();
-            configurator
-                .RegisterSagaRepository<T, DatabaseContext<T>, SagaConsumeContextFactory<DatabaseContext<T>, T>, RedisSagaRepositoryContextFactory<T>>();
+            configurator.RegisterLoadSagaRepository<TSaga, RedisSagaRepositoryContextFactory<TSaga>>();
+            configurator.RegisterSagaRepository<TSaga, DatabaseContext<TSaga>, SagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga>,
+                RedisSagaRepositoryContextFactory<TSaga>>();
         }
 
         static IDatabase SelectDefaultDatabase(IConnectionMultiplexer multiplexer)

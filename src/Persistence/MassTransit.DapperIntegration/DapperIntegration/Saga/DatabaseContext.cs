@@ -7,7 +7,8 @@ namespace MassTransit.DapperIntegration.Saga
     using System.Threading.Tasks;
 
 
-    public interface DatabaseContext<TSaga>
+    public interface DatabaseContext<TSaga> :
+        IAsyncDisposable
     {
         Task DeleteAsync<T>(T instance, CancellationToken cancellationToken)
             where T : class, ISaga;
@@ -23,5 +24,7 @@ namespace MassTransit.DapperIntegration.Saga
 
         Task UpdateAsync<T>(T instance, CancellationToken cancellationToken = default)
             where T : class, ISaga;
+
+        void Commit();
     }
 }
