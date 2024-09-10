@@ -1,6 +1,7 @@
 namespace MassTransit.SqlTransport.SqlServer
 {
     using System;
+    using System.Net;
     using System.Text;
     using Configuration;
     using Microsoft.Data.SqlClient;
@@ -108,6 +109,9 @@ namespace MassTransit.SqlTransport.SqlServer
         {
             if (host == null)
                 return null;
+
+            if (IPAddress.TryParse(host, out var endpoint))
+                return endpoint.ToString();
 
             var hostSplit = host.Trim().Split(':');
             return hostSplit.Length == 1 ? hostSplit[0] : hostSplit[1];

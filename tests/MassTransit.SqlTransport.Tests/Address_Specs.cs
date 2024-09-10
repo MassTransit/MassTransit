@@ -285,5 +285,21 @@ namespace MassTransit.DbTransport.Tests
             Assert.That(() => new SqlEndpointAddress(new SqlHostAddress(new Uri("db://localhost/customer-a.billing")),
                 new Uri("db://localhost/customer-a.billing/input-queue")), Throws.InstanceOf<SqlEndpointAddressException>());
         }
+
+        [Test]
+        public void Should_support_ipv6_address()
+        {
+            var address = new SqlEndpointAddress(new SqlHostAddress(new Uri("db://[::1]:1433/")), new Uri("queue:input-queue"));
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(address.Scheme, Is.EqualTo("db"));
+                Assert.That(address.Host, Is.EqualTo("[::1]"));
+                Assert.That(address.Port, Is.EqualTo(1433));
+                Assert.That(address.Name, Is.EqualTo("input-queue"));
+
+                Assert.That((Uri)address, Is.EqualTo(new Uri("db://[::1]:1433/input-queue")));
+            });
+        }
     }
 }
