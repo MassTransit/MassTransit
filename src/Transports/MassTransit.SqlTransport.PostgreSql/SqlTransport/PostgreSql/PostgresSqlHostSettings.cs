@@ -30,6 +30,8 @@ namespace MassTransit.SqlTransport.PostgreSql
             _dataSource = dataSource;
 
             IsProvidedDataSource = true;
+
+            ConnectionString = dataSource.ConnectionString;
         }
 
         public PostgresSqlHostSettings(SqlTransportOptions options)
