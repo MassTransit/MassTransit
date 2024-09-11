@@ -59,5 +59,22 @@
                 configure?.Invoke(context, cfg);
             }));
         }
+
+        /// <summary>
+        /// Configure the bus to use the PostgreSQL database transport
+        /// </summary>
+        /// <param name="configurator">The registration configurator (configured via AddMassTransit)</param>
+        /// <param name="dataSourceProvider">Resolve the data source from the container</param>
+        /// <param name="configure">The configuration callback for the bus factory</param>
+        public static void UsingPostgres(this IBusRegistrationConfigurator configurator, Func<IBusRegistrationContext, NpgsqlDataSource> dataSourceProvider,
+            Action<IBusRegistrationContext, ISqlBusFactoryConfigurator>? configure = null)
+        {
+            configurator.SetBusFactory(new SqlRegistrationBusFactory((context, cfg) =>
+            {
+                cfg.UsePostgres(dataSourceProvider(context));
+
+                configure?.Invoke(context, cfg);
+            }));
+        }
     }
 }

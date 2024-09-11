@@ -76,6 +76,8 @@ namespace MassTransit.SqlTransport.PostgreSql
                 Username = builder.Username;
                 Password = builder.Password;
 
+                Schema = builder.SearchPath ?? "transport";
+
                 _builder = builder;
             }
         }

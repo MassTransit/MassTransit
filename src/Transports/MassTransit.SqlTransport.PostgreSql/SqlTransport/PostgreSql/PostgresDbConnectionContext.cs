@@ -23,11 +23,11 @@ namespace MassTransit.SqlTransport.PostgreSql
         IAsyncDisposable
     {
         readonly NotificationAgent _agent;
+        readonly NpgsqlDataSource _dataSource;
         readonly TaskExecutor _executor;
         readonly ISqlHostConfiguration _hostConfiguration;
         readonly PostgresSqlHostSettings _hostSettings;
         readonly IRetryPolicy _retryPolicy;
-        readonly NpgsqlDataSource _dataSource;
 
         static PostgresDbConnectionContext()
         {
@@ -315,13 +315,26 @@ namespace MassTransit.SqlTransport.PostgreSql
                         }
                         catch (OperationCanceledException)
                         {
-                            await _context.Query((x, t) => x.ExecuteScalarAsync<long?>(processMetricsSql, new
-                            {
-                                row_limit = _hostConfiguration.Settings.MaintenanceBatchSize,
-                            }), CancellationToken.None);
+                            using var timeoutToken = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
-                            if (lastCleanup == null)
-                                await _context.Query((x, t) => x.ExecuteScalarAsync<long?>(purgeTopologySql), CancellationToken.None);
+                            try
+                            {
+                                await _context.Query(
+                                    (x, t) => x.ExecuteScalarAsync<long?>(processMetricsSql,
+                                        new { row_limit = _hostConfiguration.Settings.MaintenanceBatchSize }, t), timeoutToken.Token);
+
+                                if (lastCleanup == null)
+                                    await _context.Query((x, t) => x.ExecuteScalarAsync<long?>(purgeTopologySql, t), timeoutToken.Token);
+                            }
+                            catch (ObjectDisposedException)
+                            {
+                            }
+                            catch (OperationCanceledException)
+                            {
+                            }
+                            catch (TimeoutException)
+                            {
+                            }
                         }
 
                         await _hostConfiguration.Retry(async () =>
@@ -329,11 +342,11 @@ namespace MassTransit.SqlTransport.PostgreSql
                             await _context.Query((x, t) => x.ExecuteScalarAsync<long?>(processMetricsSql, new
                             {
                                 row_limit = _hostConfiguration.Settings.MaintenanceBatchSize,
-                            }), Stopping);
+                            }, t), Stopping);
 
                             if (lastCleanup == null || lastCleanup < DateTime.UtcNow - cleanupInterval)
                             {
-                                await _context.Query((x, t) => x.ExecuteScalarAsync<long?>(purgeTopologySql), Stopping);
+                                await _context.Query((x, t) => x.ExecuteScalarAsync<long?>(purgeTopologySql, t), Stopping);
 
                                 lastCleanup = DateTime.UtcNow;
                                 cleanupInterval = _hostConfiguration.Settings.QueueCleanupInterval
