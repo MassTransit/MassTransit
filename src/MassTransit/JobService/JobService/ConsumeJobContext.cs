@@ -7,6 +7,8 @@ namespace MassTransit.JobService
     using System.Threading.Tasks;
     using Context;
     using Contracts.JobService;
+    using Events;
+    using Messages;
 
 
     public class ConsumeJobContext<TJob> :
@@ -67,12 +69,12 @@ namespace MassTransit.JobService
         {
             LogContext.Debug?.Log("Job Canceled: {JobId} {AttemptId} ({RetryAttempt})", JobId, AttemptId, RetryAttempt);
 
-            return Notify<JobAttemptCanceled>(new
+            return Notify<JobAttemptCanceled>(new JobAttemptCanceledEvent
             {
-                JobId,
-                AttemptId,
-                RetryAttempt,
-                InVar.Timestamp
+                JobId = JobId,
+                AttemptId = AttemptId,
+                RetryAttempt = RetryAttempt,
+                Timestamp = DateTime.UtcNow,
             });
         }
 
@@ -80,12 +82,12 @@ namespace MassTransit.JobService
         {
             LogContext.Debug?.Log("Job Started: {JobId} {AttemptId} ({RetryAttempt})", JobId, AttemptId, RetryAttempt);
 
-            return Notify<JobAttemptStarted>(new
+            return Notify<JobAttemptStarted>(new JobAttemptStartedEvent
             {
-                JobId,
-                AttemptId,
-                RetryAttempt,
-                InVar.Timestamp,
+                JobId = JobId,
+                AttemptId = AttemptId,
+                RetryAttempt = RetryAttempt,
+                Timestamp = DateTime.UtcNow,
                 InstanceAddress = _instanceAddress
             });
         }
@@ -94,12 +96,12 @@ namespace MassTransit.JobService
         {
             LogContext.Debug?.Log("Job Completed: {JobId} {AttemptId} ({RetryAttempt})", JobId, AttemptId, RetryAttempt);
 
-            return Notify<JobAttemptCompleted>(new
+            return Notify<JobAttemptCompleted>(new JobAttemptCompletedEvent
             {
-                JobId,
-                AttemptId,
-                RetryAttempt,
-                InVar.Timestamp,
+                JobId = JobId,
+                AttemptId = AttemptId,
+                RetryAttempt = RetryAttempt,
+                Timestamp = DateTime.UtcNow,
                 Duration = ElapsedTime
             });
         }
@@ -108,23 +110,23 @@ namespace MassTransit.JobService
         {
             LogContext.Debug?.Log(exception, "Job Faulted: {JobId} {AttemptId} ({RetryAttempt})", JobId, AttemptId, RetryAttempt);
 
-            return Notify<JobAttemptFaulted>(new
+            return Notify<JobAttemptFaulted>(new JobAttemptFaultedEvent
             {
-                JobId,
-                AttemptId,
-                RetryAttempt,
+                JobId = JobId,
+                AttemptId = AttemptId,
+                RetryAttempt = RetryAttempt,
                 RetryDelay = delay,
-                InVar.Timestamp,
-                Exceptions = exception
+                Timestamp = DateTime.UtcNow,
+                Exceptions = new FaultExceptionInfo(exception)
             });
         }
 
-        async Task Notify<T>(object values)
+        async Task Notify<T>(T message)
             where T : class
         {
             var endpoint = await _context.ReceiveContext.PublishEndpointProvider.GetPublishSendEndpoint<T>().ConfigureAwait(false);
 
-            await endpoint.Send<T>(values, CancellationToken.None).ConfigureAwait(false);
+            await endpoint.Send(message, CancellationToken.None).ConfigureAwait(false);
         }
 
         public void Cancel()

@@ -9,6 +9,7 @@
     using Configuration;
     using Consumer;
     using Contracts.JobService;
+    using Messages;
 
 
     public class JobService :
@@ -109,7 +110,7 @@
             if (_jobTypes.ContainsKey(typeof(T)))
                 throw new ConfigurationException($"A job type can only be registered once per service instance: {TypeCache<T>.ShortName}");
 
-            _jobTypes.Add(typeof(T), new JobTypeRegistration<T>(configurator, options, jobTypeId, jobTypeName));
+            _jobTypes.Add(typeof(T), new JobTypeRegistration<T>(options, jobTypeId, jobTypeName));
         }
 
         public async Task BusStarted(IPublishEndpoint publishEndpoint)
@@ -177,12 +178,10 @@
             IJobTypeRegistration
             where T : class
         {
-            readonly IReceiveEndpointConfigurator _configurator;
             readonly JobOptions<T> _options;
 
-            public JobTypeRegistration(IReceiveEndpointConfigurator configurator, JobOptions<T> options, Guid jobTypeId, string jobTypeName)
+            public JobTypeRegistration(JobOptions<T> options, Guid jobTypeId, string jobTypeName)
             {
-                _configurator = configurator;
                 _options = options;
                 JobTypeId = jobTypeId;
                 JobTypeName = string.IsNullOrWhiteSpace(options.JobTypeName) ? jobTypeName : options.JobTypeName;
@@ -194,39 +193,36 @@
             {
                 LogContext.Debug?.Log("Job Service type: {JobType}", TypeCache<T>.ShortName);
 
-                return publishEndpoint.Publish<SetConcurrentJobLimit>(new
+                return publishEndpoint.Publish<SetConcurrentJobLimit>(new SetConcurrentJobLimitCommand
                 {
-                    JobTypeId,
-                    JobTypeName,
-                    instanceAddress,
-                    ServiceAddress = _configurator.InputAddress,
-                    _options.ConcurrentJobLimit,
+                    JobTypeId = JobTypeId,
+                    JobTypeName = JobTypeName,
+                    InstanceAddress = instanceAddress,
+                    ConcurrentJobLimit = _options.ConcurrentJobLimit,
                     Kind = ConcurrentLimitKind.Configured
                 });
             }
 
             public Task PublishHeartbeat(IPublishEndpoint publishEndpoint, Uri instanceAddress)
             {
-                return publishEndpoint.Publish<SetConcurrentJobLimit>(new
+                return publishEndpoint.Publish<SetConcurrentJobLimit>(new SetConcurrentJobLimitCommand
                 {
-                    JobTypeId,
-                    JobTypeName,
-                    instanceAddress,
-                    ServiceAddress = _configurator.InputAddress,
-                    _options.ConcurrentJobLimit,
+                    JobTypeId = JobTypeId,
+                    JobTypeName = JobTypeName,
+                    InstanceAddress = instanceAddress,
+                    ConcurrentJobLimit = _options.ConcurrentJobLimit,
                     Kind = ConcurrentLimitKind.Heartbeat
                 });
             }
 
             public Task PublishJobInstanceStopped(IPublishEndpoint publishEndpoint, Uri instanceAddress)
             {
-                return publishEndpoint.Publish<SetConcurrentJobLimit>(new
+                return publishEndpoint.Publish<SetConcurrentJobLimit>(new SetConcurrentJobLimitCommand
                 {
-                    JobTypeId,
-                    JobTypeName,
-                    instanceAddress,
-                    ServiceAddress = _configurator.InputAddress,
-                    _options.ConcurrentJobLimit,
+                    JobTypeId = JobTypeId,
+                    JobTypeName = JobTypeName,
+                    InstanceAddress = instanceAddress,
+                    ConcurrentJobLimit = _options.ConcurrentJobLimit,
                     Kind = ConcurrentLimitKind.Stopped
                 });
             }

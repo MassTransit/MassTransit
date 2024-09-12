@@ -18,6 +18,6 @@ namespace MassTransit.Contracts.JobService
         /// <summary>
         /// The reason for cancelling the job
         /// </summary>
-        string Reason { get; }
+        string? Reason { get; }
     }
 }

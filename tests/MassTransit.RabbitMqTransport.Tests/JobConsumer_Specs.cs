@@ -76,7 +76,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 Assert.That(await harness.Published.Any<JobStarted<OddJob>>(), Is.True);
             });
 
-            await harness.Bus.Publish<CancelJob>(new { JobId = jobId });
+            await harness.Bus.CancelJob(jobId);
 
             Assert.That(await harness.Published.Any<JobCanceled>(), Is.True);
 
@@ -119,7 +119,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             Assert.That(jobState.Message.CurrentState, Is.EqualTo("Started"));
 
-            await harness.Bus.Publish<CancelJob>(new { JobId = jobId });
+            await harness.Bus.CancelJob(jobId);
 
             await Assert.MultipleAsync(async () =>
             {
@@ -164,7 +164,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 Assert.That(await harness.Published.Any<JobStarted<OddJob>>(), Is.True);
             });
 
-            await harness.Bus.Publish<CancelJob>(new { JobId = jobId });
+            await harness.Bus.CancelJob(jobId);
 
             await Assert.MultipleAsync(async () =>
             {
@@ -221,11 +221,11 @@ namespace MassTransit.RabbitMqTransport.Tests
                 Assert.That(await harness.Sent.Any<JobSlotWaitElapsed>(x => x.Context.Message.JobId == jobId), Is.True);
             });
 
-            await harness.Bus.Publish<CancelJob>(new { JobId = jobId });
+            await harness.Bus.CancelJob(jobId);
 
             Assert.That(await harness.Published.Any<JobCanceled>(x => x.Context.Message.JobId == jobId), Is.True);
 
-            await harness.Bus.Publish<CancelJob>(new { JobId = previousJobId });
+            await harness.Bus.CancelJob(previousJobId);
             Assert.That(await harness.Published.Any<JobCanceled>(x => x.Context.Message.JobId == previousJobId), Is.True);
 
             await harness.Stop();

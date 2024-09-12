@@ -5,6 +5,7 @@ namespace MassTransit
     using System.Linq;
     using Configuration;
     using Contracts.JobService;
+    using JobService.Messages;
 
 
     public sealed class JobTypeStateMachine :
@@ -32,7 +33,8 @@ namespace MassTransit
                         allocate => allocate
                             .TransitionTo(Active),
                         unavailable => unavailable
-                            .RespondAsync(context => context.Init<JobSlotUnavailable>(new { context.Message.JobId }))));
+                            .Respond<JobTypeSaga, AllocateJobSlot, JobSlotUnavailable>(context =>
+                                new JobSlotUnavailableResponse { JobId = context.Message.JobId })));
 
             During(Active,
                 When(JobSlotReleased)
@@ -139,10 +141,10 @@ namespace MassTransit
             LogContext.Debug?.Log("Allocated Job Slot: {JobId} ({JobCount}): {InstanceAddress} ({InstanceCount})", jobId, context.Saga.ActiveJobCount,
                 nextInstance.InstanceAddress, nextInstance.InstanceCount + 1);
 
-            context.RespondAsync<JobSlotAllocated>(new
+            context.Respond<JobSlotAllocated>(new JobSlotAllocatedResponse
             {
-                jobId,
-                nextInstance.InstanceAddress,
+                JobId = jobId,
+                InstanceAddress = nextInstance.InstanceAddress,
             });
 
             return true;

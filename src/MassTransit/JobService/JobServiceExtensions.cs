@@ -1,9 +1,12 @@
+#nullable enable
 namespace MassTransit
 {
     using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Contracts.JobService;
+    using Initializers;
+    using JobService.Messages;
 
 
     public static class JobServiceExtensions
@@ -34,7 +37,7 @@ namespace MassTransit
         {
             var jobId = NewId.NextGuid();
 
-            await publishEndpoint.Publish<SubmitJob<T>>(new
+            await publishEndpoint.Publish<SubmitJob<T>>(new SubmitJobCommand<T>
             {
                 JobId = jobId,
                 Job = job
@@ -56,7 +59,7 @@ namespace MassTransit
         {
             var jobId = NewId.NextGuid();
 
-            Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new
+            Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new SubmitJobCommand<T>
             {
                 JobId = jobId,
                 Job = job
@@ -78,10 +81,12 @@ namespace MassTransit
         {
             var jobId = NewId.NextGuid();
 
-            Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new
+            InitializeContext<T> context = await MessageInitializerCache<T>.Initialize(job, cancellationToken).ConfigureAwait(false);
+
+            Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new SubmitJobCommand<T>
             {
                 JobId = jobId,
-                Job = job
+                Job = context.Message
             }, cancellationToken).ConfigureAwait(false);
 
             return response.Message.JobId;
@@ -99,7 +104,7 @@ namespace MassTransit
         public static async Task<Guid> SubmitJob<T>(this IRequestClient<SubmitJob<T>> client, Guid jobId, T job, CancellationToken cancellationToken = default)
             where T : class
         {
-            Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new
+            Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new SubmitJobCommand<T>
             {
                 JobId = jobId,
                 Job = job
@@ -121,10 +126,12 @@ namespace MassTransit
             CancellationToken cancellationToken = default)
             where T : class
         {
-            Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new
+            InitializeContext<T> context = await MessageInitializerCache<T>.Initialize(job, cancellationToken).ConfigureAwait(false);
+
+            Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new SubmitJobCommand<T>
             {
                 JobId = jobId,
-                Job = job
+                Job = context.Message
             }, cancellationToken).ConfigureAwait(false);
 
             return response.Message.JobId;
@@ -144,6 +151,38 @@ namespace MassTransit
             Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(job, cancellationToken).ConfigureAwait(false);
 
             return response.Message.JobId;
+        }
+
+        /// <summary>
+        /// Submits a job, returning the accepted jobId
+        /// </summary>
+        /// <param name="client"></param>
+        /// <param name="job"></param>
+        /// <param name="cancellationToken"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static async Task<Guid> SubmitJob<T>(this IRequestClient<T> client, object job, CancellationToken cancellationToken = default)
+            where T : class
+        {
+            Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(job, cancellationToken).ConfigureAwait(false);
+
+            return response.Message.JobId;
+        }
+
+        /// <summary>
+        /// Cancel a job if the job exists and is in a state that can be canceled.
+        /// </summary>
+        /// <param name="publishEndpoint"></param>
+        /// <param name="jobId"></param>
+        /// <param name="reason"></param>
+        /// <returns></returns>
+        public static Task CancelJob(this IPublishEndpoint publishEndpoint, Guid jobId, string? reason = null)
+        {
+            return publishEndpoint.Publish<CancelJob>(new CancelJobCommand
+            {
+                JobId = jobId,
+                Reason = reason ?? "Unspecified"
+            });
         }
     }
 }

@@ -49,6 +49,12 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
             entity.Property(x => x.JobSlotWaitToken);
             entity.Property(x => x.JobRetryDelayToken);
+
+            entity.Property(x => x.CronExpression);
+            entity.Property(x => x.TimeZoneId);
+            entity.Property(x => x.StartDate);
+            entity.Property(x => x.EndDate);
+            entity.Property(x => x.NextStartDate);
         }
     }
 }

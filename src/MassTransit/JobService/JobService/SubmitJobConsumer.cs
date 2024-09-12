@@ -1,8 +1,11 @@
+#nullable enable
 namespace MassTransit.JobService
 {
     using System;
     using System.Threading.Tasks;
     using Contracts.JobService;
+    using Messages;
+    using Scheduling;
 
 
     /// <summary>
@@ -25,29 +28,39 @@ namespace MassTransit.JobService
 
         public Task Consume(ConsumeContext<SubmitJob<TJob>> context)
         {
-            return PublishJobSubmitted(context, context.Message.JobId, context.Message.Job, context.SentTime ?? DateTime.UtcNow);
+            if (context.Message.Schedule != null)
+            {
+                if (string.IsNullOrWhiteSpace(context.Message.Schedule.CronExpression) && !context.Message.Schedule.Start.HasValue)
+                    throw new RecurringJobException("A valid cron expression or start date is required");
+
+                if (!string.IsNullOrWhiteSpace(context.Message.Schedule.CronExpression))
+                    CronExpression.ValidateExpression(context.Message.Schedule.CronExpression);
+            }
+
+            return PublishJobSubmitted(context, context.Message.JobId, context.Message.Job, context.SentTime ?? DateTime.UtcNow, context.Message.Schedule);
         }
 
         public Task Consume(ConsumeContext<TJob> context)
         {
             var jobId = context.RequestId ?? NewId.NextGuid();
 
-            return PublishJobSubmitted(context, jobId, context.Message, context.SentTime ?? DateTime.UtcNow);
+            return PublishJobSubmitted(context, jobId, context.Message, context.SentTime ?? DateTime.UtcNow, null);
         }
 
-        async Task PublishJobSubmitted(ConsumeContext context, Guid jobId, TJob job, DateTime timestamp)
+        async Task PublishJobSubmitted(ConsumeContext context, Guid jobId, TJob job, DateTime timestamp, RecurringJobSchedule? schedule)
         {
-            await context.Publish<JobSubmitted>(new
+            await context.Publish<JobSubmitted>(new JobSubmittedEvent
             {
                 JobId = jobId,
                 JobTypeId = _jobTypeId,
                 Timestamp = timestamp,
                 Job = context.ToDictionary(job),
-                _options.JobTimeout
+                JobTimeout = _options.JobTimeout,
+                Schedule = schedule
             });
 
             if (context.RequestId.HasValue && context.ResponseAddress != null)
-                await context.RespondAsync<JobSubmissionAccepted>(new { JobId = jobId });
+                await context.RespondAsync<JobSubmissionAccepted>(new JobSubmissionAcceptedResponse { JobId = jobId });
         }
     }
 }

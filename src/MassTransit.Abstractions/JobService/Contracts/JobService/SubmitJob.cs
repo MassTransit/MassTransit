@@ -9,5 +9,7 @@ namespace MassTransit.Contracts.JobService
         Guid JobId { get; }
 
         TJob Job { get; }
+
+        RecurringJobSchedule? Schedule { get; }
     }
 }
