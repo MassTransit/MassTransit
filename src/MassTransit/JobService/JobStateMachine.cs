@@ -281,10 +281,15 @@ namespace MassTransit
                         Submitted = context.Saga.Submitted,
                         Started = context.Saga.Started,
                         Completed = context.Saga.Completed,
+                        Duration = context.Saga.Duration,
                         Faulted = context.Saga.Faulted,
                         Reason = context.Saga.Reason,
                         LastRetryAttempt = context.Saga.RetryAttempt,
-                        CurrentState = (await Accessor.Get(context).ConfigureAwait(false)).Name
+                        CurrentState = (await Accessor.Get(context).ConfigureAwait(false)).Name,
+                        NextStartDate = context.Saga.NextStartDate?.UtcDateTime,
+                        IsRecurring = !string.IsNullOrWhiteSpace(context.Saga.CronExpression),
+                        StartDate = context.Saga.StartDate?.UtcDateTime,
+                        EndDate = context.Saga.EndDate?.UtcDateTime
                     })
             );
 
