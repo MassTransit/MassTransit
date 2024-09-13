@@ -90,8 +90,7 @@ namespace MassTransit
                     .InitializeJob()
                     .IfElse(context => context.IsScheduledJob(),
                         scheduled => scheduled
-                            .DetermineNextStartDate()
-                            .IfElse(context => context.Saga.NextStartDate.HasValue,
+                            .IfElse(context => context.CalculateNextStartDate(),
                                 start => start
                                     .WaitForNextScheduledTime(this),
                                 noStart => noStart
@@ -286,7 +285,22 @@ namespace MassTransit
                         Reason = context.Saga.Reason,
                         LastRetryAttempt = context.Saga.RetryAttempt,
                         CurrentState = (await Accessor.Get(context).ConfigureAwait(false)).Name
-                    }));
+                    })
+            );
+
+            DuringAny(
+                When(JobSubmitted)
+                    .If(context => context.IsScheduledJob(), x => x.UpdateRecurringJob())
+            );
+
+            During(WaitingForSlot, Canceled, Completed, Faulted,
+                When(JobSubmitted)
+                    .If(context => context.IsScheduledJob() && context.CalculateNextStartDate(),
+                        start => start
+                            .WaitForNextScheduledTime(this)
+                    )
+            );
+
 
             WhenEnter(Completed, x => x.SendJobSlotReleased(JobSlotDisposition.Completed));
             WhenEnter(Canceled, x => x.SendJobSlotReleased(JobSlotDisposition.Canceled));
@@ -353,6 +367,51 @@ namespace MassTransit
             return !string.IsNullOrWhiteSpace(context.Saga.CronExpression) || context.Saga.StartDate is not null;
         }
 
+        public static bool CalculateNextStartDate(this SagaConsumeContext<JobSaga> context)
+        {
+            if (string.IsNullOrWhiteSpace(context.Saga.CronExpression))
+            {
+                if (context.Saga.StartDate is not null)
+                {
+                    // if the start date hasn't changed, clear it and return false (no schedule change)
+                    if (context.Saga.StartDate == context.Saga.NextStartDate)
+                    {
+                        context.Saga.StartDate = null;
+                        return false;
+                    }
+
+                    context.Saga.NextStartDate = context.Saga.StartDate.Value;
+                    context.Saga.StartDate = null;
+                    return true;
+                }
+            }
+
+            var cronExpression = new CronExpression(context.Saga.CronExpression) { TimeZone = TimeZoneInfo.Utc };
+
+            var now = DateTimeOffset.UtcNow;
+
+            DateTimeOffset? nextStartDate = cronExpression.GetTimeAfter(context.Saga.StartDate.HasValue
+                ? context.Saga.StartDate.Value > now
+                    ? context.Saga.StartDate.Value
+                    : now
+                : now);
+
+            if (nextStartDate != null)
+            {
+                if (nextStartDate.Value > context.Saga.EndDate)
+                    nextStartDate = null;
+            }
+
+            // the next start date didn't change, so don't bother with it
+            if (nextStartDate == context.Saga.NextStartDate)
+            {
+                return false;
+            }
+
+            context.Saga.NextStartDate = nextStartDate;
+            return true;
+        }
+
         public static EventActivityBinder<JobSaga, JobSubmitted> InitializeJob(this EventActivityBinder<JobSaga, JobSubmitted> binder)
         {
             return binder.Then(context =>
@@ -373,6 +432,19 @@ namespace MassTransit
                 }
 
                 context.Saga.AttemptId = NewId.NextGuid();
+            });
+        }
+
+        public static EventActivityBinder<JobSaga, JobSubmitted> UpdateRecurringJob(this EventActivityBinder<JobSaga, JobSubmitted> binder)
+        {
+            return binder.Then(context =>
+            {
+                context.Saga.Job = context.Message.Job;
+
+                context.Saga.CronExpression = context.Message.Schedule.CronExpression;
+                context.Saga.TimeZoneId = context.Message.Schedule.TimeZoneId;
+                context.Saga.StartDate = context.Message.Schedule.Start;
+                context.Saga.EndDate = context.Message.Schedule.End;
             });
         }
 
@@ -428,30 +500,7 @@ namespace MassTransit
         {
             return binder.Then(context =>
             {
-                if (string.IsNullOrWhiteSpace(context.Saga.CronExpression))
-                {
-                    context.Saga.NextStartDate = context.Saga.StartDate.Value;
-                    context.Saga.StartDate = null;
-                    return;
-                }
-
-                var cronExpression = new CronExpression(context.Saga.CronExpression) { TimeZone = TimeZoneInfo.Utc };
-
-                var now = DateTimeOffset.UtcNow;
-
-                DateTimeOffset? nextStartDate = cronExpression.GetTimeAfter(context.Saga.StartDate.HasValue
-                    ? context.Saga.StartDate.Value > now
-                        ? context.Saga.StartDate.Value
-                        : now
-                    : now);
-
-                if (nextStartDate != null)
-                {
-                    if (nextStartDate.Value > context.Saga.EndDate)
-                        nextStartDate = null;
-                }
-
-                context.Saga.NextStartDate = nextStartDate;
+                context.CalculateNextStartDate();
             });
         }
 

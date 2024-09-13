@@ -41,6 +41,35 @@ public static class RecurringJobConsumerExtensions
     }
 
     /// <summary>
+    /// Add or update a recurring job
+    /// </summary>
+    /// <param name="publishEndpoint">An available publish endpoint instance</param>
+    /// <param name="jobName"></param>
+    /// <param name="job"></param>
+    /// <param name="cronExpression">The scheduler cron expression</param>
+    /// <param name="cancellationToken"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static async Task<Guid> AddOrUpdateRecurringJob<T>(this IPublishEndpoint publishEndpoint, string jobName, T job, string cronExpression,
+        CancellationToken cancellationToken = default)
+        where T : class
+    {
+        if (string.IsNullOrWhiteSpace(jobName))
+            throw new ArgumentNullException(nameof(jobName));
+
+        var jobId = JobMetadataCache<T>.GenerateRecurringJobId(jobName);
+
+        await publishEndpoint.Publish<SubmitJob<T>>(new
+        {
+            JobId = jobId,
+            Job = job,
+            Schedule = new { CronExpression = cronExpression }
+        }, cancellationToken).ConfigureAwait(false);
+
+        return jobId;
+    }
+
+    /// <summary>
     /// Submits a job, returning the generated jobId
     /// </summary>
     /// <param name="publishEndpoint"></param>
