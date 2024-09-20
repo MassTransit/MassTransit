@@ -1147,7 +1147,7 @@ BEGIN
     );
 
     UPDATE md
-    SET EnqueueTime = @enqueueTime, LockId = NULL, TransportHeaders = @headers
+    SET EnqueueTime = @enqueueTime, LockId = NULL, ConsumerId = NULL, TransportHeaders = @headers
     OUTPUT inserted.MessageDeliveryId, inserted.QueueId INTO @updatedMessages
     FROM {0}.MessageDelivery md
     WHERE md.MessageDeliveryId = @messageDeliveryId AND md.LockId = @lockId;
@@ -1191,7 +1191,7 @@ BEGIN
     );
 
     UPDATE md
-    SET EnqueueTime = SYSUTCDATETIME(), QueueId = @queueId, LockId = NULL, TransportHeaders = @headers
+    SET EnqueueTime = SYSUTCDATETIME(), QueueId = @queueId, LockId = NULL, ConsumerId = NULL, TransportHeaders = @headers
     OUTPUT inserted.MessageDeliveryId, inserted.QueueId INTO @updatedMessages
     FROM {0}.MessageDelivery md
     WHERE md.MessageDeliveryId = @messageDeliveryId AND md.LockId = @lockId;
@@ -1206,6 +1206,72 @@ BEGIN
     END;
 
     SELECT MessageDeliveryId FROM @updatedMessages;
+END";
+
+        const string SqlFnRequeueMessages = @"
+CREATE OR ALTER PROCEDURE {0}.RequeueMessages
+    @queueName nvarchar(256),
+    @sourceQueueType int,
+    @targetQueueType int,
+    @delay int = 0,
+    @redeliveryCount int = 10
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF NOT @sourceQueueType BETWEEN 1 AND 3
+    BEGIN
+        THROW 50000, 'Invalid source queue type', 1;
+    END;
+
+    IF NOT @targetQueueType BETWEEN 1 AND 3
+    BEGIN
+        THROW 50000, 'Invalid target queue type', 1;
+    END;
+
+    IF @sourceQueueType = @targetQueueType
+    BEGIN
+        THROW 50000, 'Source and target queue type must not be the same', 1;
+    END;
+
+    DECLARE @sourceQueueId bigint
+    SELECT @sourceQueueId = q.Id
+    FROM {0}.Queue q
+    WHERE q.Name = @queueName AND q.Type = @sourceQueueType;
+
+    IF @sourceQueueId IS NULL
+    BEGIN
+        THROW 50000, 'Source queue not found', 1;
+    END;
+
+    DECLARE @targetQueueId bigint
+    SELECT @targetQueueId = q.Id
+    FROM {0}.Queue q
+    WHERE q.Name = @queueName AND q.Type = @targetQueueType;
+
+    IF @targetQueueId IS NULL
+    BEGIN
+        THROW 50000, 'Target queue not found', 1;
+    END;
+
+    DECLARE @enqueueTime datetime2;
+    SET @enqueueTime = DATEADD(SECOND, @delay, SYSUTCDATETIME());
+
+    UPDATE {0}.MessageDelivery
+    SET EnqueueTime      = @enqueueTime,
+        QueueId          = @targetQueueId,
+        MaxDeliveryCount = MessageDelivery.DeliveryCount + @redeliveryCount
+    FROM (SELECT mdx.MessageDeliveryId
+          FROM {0}.MessageDelivery mdx WITH (ROWLOCK, UPDLOCK)
+          WHERE mdx.QueueId = @sourceQueueId
+            AND mdx.LockId IS NULL
+            AND mdx.ConsumerId IS NULL
+            AND (mdx.ExpirationTime IS NULL OR mdx.ExpirationTime > @enqueueTime)
+            ORDER BY mdx.TransportMessageId OFFSET 0 ROWS
+        FETCH NEXT @redeliveryCount ROWS ONLY) mdy
+    WHERE mdy.MessageDeliveryId = MessageDelivery.MessageDeliveryId;
+
+    RETURN @@ROWCOUNT
 END";
 
         const string SqlFnProcessMetrics = @"
@@ -1353,68 +1419,68 @@ END
 ";
 
         const string SqlFnQueuesView = """
-        CREATE OR ALTER VIEW {0}.Queues
-        AS
-        SELECT x.QueueName,
-               MAX(IIF(x.QueueAutoDelete = 1, 1, 0)) AS QueueAutoDelete,
-               SUM(x.MessageReady)                   AS Ready,
-               SUM(x.MessageScheduled)               AS Scheduled,
-               SUM(x.MessageError)                   AS Errored,
-               SUM(x.MessageDeadLetter)              AS DeadLettered,
-               SUM(x.MessageLocked)                  AS Locked,
-               ISNULL(MAX(x.ConsumeCount), 0)        AS ConsumeCount,
-               ISNULL(MAX(x.ErrorCount), 0)          AS ErrorCount,
-               ISNULL(MAX(x.DeadLetterCount), 0)     AS DeadLetterCount,
-               MAX(x.StartTime)                      AS CountStartTime,
-               ISNULL(MAX(x.Duration), 0)            AS CountDuration
-        FROM (SELECT q.Name                                              AS QueueName,
-                     IIF(q.AutoDelete = 1, 1, 0)                         AS QueueAutoDelete,
-                     qm.ConsumeCount,
-                     qm.ErrorCount,
-                     qm.DeadLetterCount,
-                     qm.StartTime,
-                     qm.Duration,
+            CREATE OR ALTER VIEW {0}.Queues
+            AS
+            SELECT x.QueueName,
+                   MAX(IIF(x.QueueAutoDelete = 1, 1, 0)) AS QueueAutoDelete,
+                   SUM(x.MessageReady)                   AS Ready,
+                   SUM(x.MessageScheduled)               AS Scheduled,
+                   SUM(x.MessageError)                   AS Errored,
+                   SUM(x.MessageDeadLetter)              AS DeadLettered,
+                   SUM(x.MessageLocked)                  AS Locked,
+                   ISNULL(MAX(x.ConsumeCount), 0)        AS ConsumeCount,
+                   ISNULL(MAX(x.ErrorCount), 0)          AS ErrorCount,
+                   ISNULL(MAX(x.DeadLetterCount), 0)     AS DeadLetterCount,
+                   MAX(x.StartTime)                      AS CountStartTime,
+                   ISNULL(MAX(x.Duration), 0)            AS CountDuration
+            FROM (SELECT q.Name                                              AS QueueName,
+                         IIF(q.AutoDelete = 1, 1, 0)                         AS QueueAutoDelete,
+                         qm.ConsumeCount,
+                         qm.ErrorCount,
+                         qm.DeadLetterCount,
+                         qm.StartTime,
+                         qm.Duration,
 
-                     IIF(q.Type = 1
-                             AND md.MessageDeliveryId IS NOT NULL
-                             AND md.EnqueueTime <= GETUTCDATE(), 1, 0)   AS MessageReady,
-                     IIF(q.Type = 1
-                             AND md.MessageDeliveryId IS NOT NULL
-                             AND md.LockId IS NULL
-                             AND md.EnqueueTime > GETUTCDATE(), 1, 0)    AS MessageScheduled,
-                     IIF(q.Type = 1
-                             AND md.MessageDeliveryId IS NOT NULL
-                             AND md.LockId IS NOT NULL
-                             AND md.DeliveryCount >= 1
-                             AND md.EnqueueTime > GETUTCDATE(), 1, 0)    AS MessageLocked,
-                     IIF(q.Type = 2
-                             AND md.MessageDeliveryId IS NOT NULL, 1, 0) AS MessageError,
-                     IIF(q.Type = 3
-                             AND md.MessageDeliveryId IS NOT NULL, 1, 0) AS MessageDeadLetter
-              FROM {0}.Queue q
-                       LEFT JOIN {0}.MessageDelivery md ON q.Id = md.QueueId
-                       LEFT JOIN (SELECT qm.QueueId,
-                                         qm.QueueName,
-                                         qm.ConsumeCount    AS ConsumeCount,
-                                         qm.ErrorCount      AS ErrorCount,
-                                         qm.DeadLetterCount AS DeadLetterCount,
-                                         qm.StartTime,
-                                         qm.Duration
-                                  FROM (SELECT qm.QueueId,
-                                               q2.Name                                                                as QueueName,
-                                               ROW_NUMBER() OVER (PARTITION BY qm.QueueId ORDER BY qm.StartTime DESC) AS RowNum,
-                                               qm.ConsumeCount,
-                                               qm.ErrorCount,
-                                               qm.DeadLetterCount,
-                                               qm.StartTime,
-                                               qm.Duration
-                                        FROM {0}.QueueMetric qm
-                                                 INNER JOIN {0}.Queue q2 ON qm.QueueId = q2.Id
-                                        WHERE q2.Type = 1
-                                          AND qm.StartTime >= DATEADD(MINUTE, -5, GETUTCDATE())) qm
-                                  WHERE qm.RowNum = 1) qm ON qm.QueueId = q.Id) x
-        GROUP BY x.QueueName;
-        """;
+                         IIF(q.Type = 1
+                                 AND md.MessageDeliveryId IS NOT NULL
+                                 AND md.EnqueueTime <= GETUTCDATE(), 1, 0)   AS MessageReady,
+                         IIF(q.Type = 1
+                                 AND md.MessageDeliveryId IS NOT NULL
+                                 AND md.LockId IS NULL
+                                 AND md.EnqueueTime > GETUTCDATE(), 1, 0)    AS MessageScheduled,
+                         IIF(q.Type = 1
+                                 AND md.MessageDeliveryId IS NOT NULL
+                                 AND md.LockId IS NOT NULL
+                                 AND md.DeliveryCount >= 1
+                                 AND md.EnqueueTime > GETUTCDATE(), 1, 0)    AS MessageLocked,
+                         IIF(q.Type = 2
+                                 AND md.MessageDeliveryId IS NOT NULL, 1, 0) AS MessageError,
+                         IIF(q.Type = 3
+                                 AND md.MessageDeliveryId IS NOT NULL, 1, 0) AS MessageDeadLetter
+                  FROM {0}.Queue q
+                           LEFT JOIN {0}.MessageDelivery md ON q.Id = md.QueueId
+                           LEFT JOIN (SELECT qm.QueueId,
+                                             qm.QueueName,
+                                             qm.ConsumeCount    AS ConsumeCount,
+                                             qm.ErrorCount      AS ErrorCount,
+                                             qm.DeadLetterCount AS DeadLetterCount,
+                                             qm.StartTime,
+                                             qm.Duration
+                                      FROM (SELECT qm.QueueId,
+                                                   q2.Name                                                                as QueueName,
+                                                   ROW_NUMBER() OVER (PARTITION BY qm.QueueId ORDER BY qm.StartTime DESC) AS RowNum,
+                                                   qm.ConsumeCount,
+                                                   qm.ErrorCount,
+                                                   qm.DeadLetterCount,
+                                                   qm.StartTime,
+                                                   qm.Duration
+                                            FROM {0}.QueueMetric qm
+                                                     INNER JOIN {0}.Queue q2 ON qm.QueueId = q2.Id
+                                            WHERE q2.Type = 1
+                                              AND qm.StartTime >= DATEADD(MINUTE, -5, GETUTCDATE())) qm
+                                      WHERE qm.RowNum = 1) qm ON qm.QueueId = q.Id) x
+            GROUP BY x.QueueName;
+            """;
 
         readonly ILogger<SqlServerDatabaseMigrator> _logger;
 
@@ -1467,6 +1533,7 @@ END
                 await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnRenewMessageLock, options.Schema)).ConfigureAwait(false);
                 await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnUnlockMessage, options.Schema)).ConfigureAwait(false);
                 await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnMoveMessage, options.Schema)).ConfigureAwait(false);
+                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnRequeueMessages, options.Schema)).ConfigureAwait(false);
                 await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnProcessMetrics, options.Schema)).ConfigureAwait(false);
                 await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnPurgeTopology, options.Schema)).ConfigureAwait(false);
                 await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnQueuesView, options.Schema)).ConfigureAwait(false);

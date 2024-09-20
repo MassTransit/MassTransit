@@ -71,6 +71,8 @@ namespace MassTransit.DbTransport.Tests
             });
 
             Assert.That(await harness.Consumed.Any<Fault<MemberUpdateCommand>>(), Is.True);
+
+            await harness.Stop();
         }
 
         [Test, Explicit]
