@@ -14,10 +14,10 @@ namespace MassTransit.BenchmarkConsole
         {
             // Run with intrinsics disabled
             AddJob(
-                Job.Default.WithEnvironmentVariable(new EnvironmentVariable("COMPlus_EnableSSE2", "0")).WithRuntime(CoreRuntime.Core60).AsDefault());
+                Job.Default.WithEnvironmentVariable(new EnvironmentVariable("DOTNET_EnableSSE2", "0")).WithRuntime(CoreRuntime.Core60).AsDefault());
 
             AddJob(
-                Job.Default.WithEnvironmentVariable(new EnvironmentVariable("COMPlus_EnableSSE2", "0")).WithRuntime(CoreRuntime.Core70));
+                Job.Default.WithEnvironmentVariable(new EnvironmentVariable("DOTNET_EnableSSE2", "0")).WithRuntime(CoreRuntime.Core70));
 
             // Run with intrinsics
             AddJob(
