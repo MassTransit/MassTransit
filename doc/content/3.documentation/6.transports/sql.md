@@ -22,7 +22,7 @@ The database transport:
 
 - Stores messages, queues, topics, and subscriptions using tables, indices, and functions
 - Requires no custom extensions or additional services
-- Uses pure SQL via DbConnection, DbCommand, and DbDataReader (no entity framework required)
+- Uses pure SQL via DbConnection, DbCommand, and DbDataReader (no Entity Framework required)
 - Behaves like a true message broker, similar to RabbitMQ, Azure Service Bus, or Amazon SQS
     - Messages are locked, locks are automatically renewed, and messages are acknowledged/removed once successfully consumed
     - Competing consumer (load balancing) to scale out service instances
@@ -44,6 +44,119 @@ The database transport supports:
 - All consumer types, including consumers, sagas, state machines, and routing slips
 - Transactional Outbox using Entity Framework Core
 
+## Sample 
+
+:sample{sample="sql-transport"}
+
+## Configuration
+
+The SQL transport is configured with `UsingPostgres` or `UsingSqlServer`.
+
+### PostgreSQL
+
+```csharp
+services.AddMassTransit(x =>
+{
+    x.AddSqlMessageScheduler();
+    
+    x.UsingPostgres((context, cfg) =>
+    {
+        cfg.UseSqlMessageScheduler();
+    
+        cfg.ConfigureEndpoints(context);
+    });
+});
+```
+
+### SQL Server
+
+```csharp
+services.AddMassTransit(x =>
+{
+    x.AddSqlMessageScheduler();
+    
+    x.UsingSqlServer((context, cfg) =>
+    {
+        cfg.UseSqlMessageScheduler();
+    
+        cfg.ConfigureEndpoints(context);
+    });
+});
+```
+
+## SqlTransportOptions
+
+To configure the database options, the standard .NET options pattern can be used. The individual options can be specified, as shown below.
+
+```csharp
+services.AddOptions<SqlTransportOptions>().Configure(options =>
+{
+    options.Host = "localhost";
+    options.Database = "sample";
+    options.Schema = "transport"; // the schema for the transport-related tables, etc. 
+    options.Role = "transport";   // the role to assign for all created tables, functions, etc.
+    options.Username = "masstransit";  // the application-level credentials to use
+    options.Password = "H4rd2Gu3ss!";
+    options.AdminUsername = builder.Username; // the admin credentials to create the tables, etc.
+    options.AdminPassword = builder.Password;
+});
+```
+
+:::alert{type="info"}
+If the `AdminUsername` and `AdminPassword` are not specified, the `Username` and `Password` are used instead and may need elevated permissions to
+allow creation of the database and/or infrastructure.
+:::
+
+### Connection String
+
+A standard connection string can be used to configure the SQL transport. In the example below, the configured connection string is retrieved and set 
+on the `SqlTrasnportOptions`.
+
+```csharp
+var connectionString = builder.Configuration.GetConnectionString("Db");
+
+builder.Services.AddOptions<SqlTransportOptions>()
+    .Configure(options =>
+    {
+        options.ConnectionString = connectionString;
+    });
+```
+
+In the `appsettings.json`, the connection string should be configured. For PostgreSQL this may be something like:
+
+```json
+{
+  "ConnectionStrings": {
+    "Db": "Server=localhost;Port=5432;user id=postgres;password=Password12!;database=my_app;",
+  },
+  "AllowedHosts": "*"
+}
+```
+
+To automatically create the database, tables, roles, functions, and other related database elements, a hosted service is available. 
+
+```csharp
+services.AddPostgresMigrationHostedService(create: true, delete: false);
+```
+
+::alert{type="danger"}
+Specifying `delete: true` is only recommended for unit tests!
+::
+
+To use an existing database (which may be the case with Azure SQL or Azure PostreSQL), you can skip database creation but still create all the tables and
+functions/stored procedure required.
+
+```csharp
+services.AddPostgresMigrationHostedService(x =>
+{
+    x.CreateDatabase = false;
+    x.CreateInfrastructure = true; // this is the default, but shown for completeness
+});
+```
+
+::alert{type="info"}
+For SQL Server, replace `AddPostgresMigrationHostedService` with `AddSqlServerMigrationHostedService`.
+::
 
 ## Subscription Types
 
@@ -99,51 +212,3 @@ Messages can then be published with a _RoutingKey_ so that they are properly rou
 await publishEndpoint.Publish(new CustomerUpdatedEvent(NewId.NextGuid()),
     x => x.SetRoutingKey("ABCDEFG"));
 ```
-
-## Scheduler
-
-The database transport message scheduler can be configured as shown below:
-
-```csharp
-services.AddMassTransit(x =>
-{
-    x.UsingPostgres((context, cfg) =>
-    {
-        cfg.UseDbMessageScheduler();
-    
-        cfg.ConfigureEndpoints(context);
-    });
-});
-```
-
-## Configuration
-
-To configure the database options, the standard .NET options pattern can be used.
-
-```csharp
-services.AddOptions<SqlTransportOptions>().Configure(options =>
-{
-    options.Host = "localhost";
-    options.Database = "sample";
-    options.Schema = "transport"; // the schema for the transport-related tables, etc. 
-    options.Role = "transport";   // the role to assign for all created tables, functions, etc.
-    options.Username = "masstransit";  // the application-level credentials to use
-    options.Password = "H4rd2Gu3ss!";
-    options.AdminUsername = builder.Username; // the admin credentials to create the tables, etc.
-    options.AdminPassword = builder.Password;
-});
-```
-
-To automatically create the tables, roles, functions, and other related database elements, a hosted service is available. 
-
-```csharp
-services.AddPostgresMigrationHostedService(create: true, delete: false);
-```
-
-::alert{type="danger"}
-Specifying `delete: true` is only recommended for unit tests!
-::
-
-## Sample 
-
-:sample{sample="sql-transport"}
