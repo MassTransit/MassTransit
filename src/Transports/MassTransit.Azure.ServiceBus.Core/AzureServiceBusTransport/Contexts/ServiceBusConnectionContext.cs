@@ -156,10 +156,20 @@
                 var targetForwardTo = NormalizeForwardTo(createSubscriptionOptions.ForwardTo);
                 var currentForwardTo = NormalizeForwardTo(subscriptionProperties.ForwardTo);
 
-                if (!targetForwardTo.Equals(currentForwardTo))
+                if (!targetForwardTo.Equals(currentForwardTo)
+                    || createSubscriptionOptions.LockDuration != subscriptionProperties.LockDuration
+                    || createSubscriptionOptions.MaxDeliveryCount != subscriptionProperties.MaxDeliveryCount
+                    || createSubscriptionOptions.EnableBatchedOperations != subscriptionProperties.EnableBatchedOperations
+                    || createSubscriptionOptions.DeadLetteringOnMessageExpiration != subscriptionProperties.DeadLetteringOnMessageExpiration)
                 {
                     LogContext.Debug?.Log("Updating subscription: {Subscription} ({Topic} -> {ForwardTo})", subscriptionProperties.SubscriptionName,
-                        subscriptionProperties.TopicName, subscriptionProperties.ForwardTo);
+                        createSubscriptionOptions.TopicName, createSubscriptionOptions.ForwardTo);
+
+                    subscriptionProperties.ForwardTo = createSubscriptionOptions.ForwardTo;
+                    subscriptionProperties.LockDuration = createSubscriptionOptions.LockDuration;
+                    subscriptionProperties.MaxDeliveryCount = createSubscriptionOptions.MaxDeliveryCount;
+                    subscriptionProperties.EnableBatchedOperations = createSubscriptionOptions.EnableBatchedOperations;
+                    subscriptionProperties.DeadLetteringOnMessageExpiration = createSubscriptionOptions.DeadLetteringOnMessageExpiration;
 
                     await UpdateSubscriptionAsync(subscriptionProperties).ConfigureAwait(false);
                 }
