@@ -365,6 +365,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
 
                 modelBuilder.AddInboxStateEntity();
                 modelBuilder.AddOutboxMessageEntity();
+                modelBuilder.AddOutboxStateEntity();
             }
         }
 
