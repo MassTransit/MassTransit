@@ -657,27 +657,5 @@
 
             return binder.Add(activity);
         }
-
-        /// <summary>
-        /// Clears the requestId on the state
-        /// </summary>
-        /// <typeparam name="TInstance"></typeparam>
-        /// <typeparam name="TData"></typeparam>
-        /// <typeparam name="TRequest"></typeparam>
-        /// <typeparam name="TResponse"></typeparam>
-        /// <param name="binder"></param>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        public static EventActivityBinder<TInstance, TData> ClearRequest<TInstance, TData, TRequest, TResponse>(
-            this EventActivityBinder<TInstance, TData> binder, Request<TInstance, TRequest, TResponse> request)
-            where TInstance : class, SagaStateMachineInstance
-            where TRequest : class
-            where TResponse : class
-            where TData : class
-        {
-            var activity = new ClearRequestActivity<TInstance, TData, TRequest, TResponse>(request);
-
-            return binder.Add(activity);
-        }
     }
 }

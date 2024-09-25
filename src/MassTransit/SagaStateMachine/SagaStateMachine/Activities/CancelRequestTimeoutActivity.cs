@@ -40,6 +40,8 @@ namespace MassTransit.SagaStateMachine
             }
 
             await next.Execute(context).ConfigureAwait(false);
+
+            _request.SetRequestId(context.Saga, default);
         }
 
         public Task Faulted<TException>(BehaviorExceptionContext<TSaga, TMessage, TException> context, IBehavior<TSaga, TMessage> next)
