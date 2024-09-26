@@ -1,3 +1,4 @@
+#nullable enable
 namespace MassTransit.Internals;
 
 using System;
@@ -21,7 +22,7 @@ static class StringExtensions
     /// </summary>
     /// <param name="s"></param>
     /// <returns></returns>
-    internal static string? TrimEmptyToNull(this string s)
+    internal static string? TrimEmptyToNull(this string? s)
     {
         if (s is null)
             return null;

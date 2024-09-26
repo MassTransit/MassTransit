@@ -1,3 +1,4 @@
+#nullable enable
 namespace MassTransit.JobService.Scheduling;
 
 using System;
@@ -42,7 +43,6 @@ public sealed class DateBuilder
         _minute = now.Minute;
         _second = now.Second;
     }
-
 
     /// <summary>
     /// Build the <see cref="System.DateTimeOffset" /> defined by this builder instance.
@@ -198,7 +198,7 @@ public sealed class DateBuilder
     }
 
     /// <summary>
-    /// Get a <see cref="DateTimeOffset" /> object that represents the given time, on today's date (equivalent to <see cref="DateOf(int,int,int,TimeProvider)" />).
+    /// Get a <see cref="DateTimeOffset" /> object that represents the given time, on today's date
     /// </summary>
     public static DateTimeOffset TodayAt(int hour, int minute, int second)
     {
@@ -234,7 +234,6 @@ public sealed class DateBuilder
     /// <param name="second">The value (0-59) to give the seconds field of the date</param>
     /// <param name="minute">The value (0-59) to give the minutes field of the date</param>
     /// <param name="hour">The value (0-23) to give the hours field of the date</param>
-    /// <param name="timeProvider">Time provider instance to use, defaults to <see cref="TimeProvider.System" /></param>
     /// <returns>the new date</returns>
     public static DateTimeOffset DateOf(int hour, int minute, int second)
     {
@@ -256,7 +255,6 @@ public sealed class DateBuilder
     /// <param name="hour">The value (0-23) to give the hours field of the date</param>
     /// <param name="dayOfMonth">The value (1-31) to give the day of month field of the date</param>
     /// <param name="month">The value (1-12) to give the month field of the date</param>
-    /// <param name="timeProvider">Time provider instance to use, defaults to <see cref="TimeProvider.System" /></param>
     /// <returns>the new date</returns>
     public static DateTimeOffset DateOf(int hour, int minute, int second, int dayOfMonth, int month)
     {
@@ -305,7 +303,6 @@ public sealed class DateBuilder
     /// with the time of 09:00:00. If the date's time is in the 23rd hour, the
     /// date's 'day' will be promoted, and the time will be set to 00:00:00.
     /// </remarks>
-    /// <param name="timeProvider">Time provider instance to use, defaults to <see cref="TimeProvider.System" /></param>
     /// <returns>the new rounded date</returns>
     public static DateTimeOffset EvenHourDateAfterNow()
     {
@@ -324,12 +321,11 @@ public sealed class DateBuilder
     /// the Date to round, if <see langword="null" /> the current time will
     /// be used
     /// </param>
-    /// <param name="timeProvider">Time provider instance to use, defaults to <see cref="TimeProvider.System" /></param>
     /// <returns>the new rounded date</returns>
     public static DateTimeOffset EvenHourDate(DateTimeOffset? date)
     {
-        if (!date.HasValue)
-            date = DateTimeOffset.Now;
+        date ??= DateTimeOffset.Now;
+
         var d = date.Value.AddHours(1);
         return new DateTimeOffset(d.Year, d.Month, d.Day, d.Hour, 0, 0, d.Offset);
     }
@@ -342,12 +338,11 @@ public sealed class DateBuilder
     /// with the time of 08:00:00.
     /// </remarks>
     /// <param name="date">the Date to round, if <see langword="null" /> the current time will be used</param>
-    /// <param name="timeProvider">Time provider instance to use, defaults to <see cref="TimeProvider.System" /></param>
     /// <returns>the new rounded date</returns>
     public static DateTimeOffset EvenHourDateBefore(DateTimeOffset? date)
     {
-        if (!date.HasValue)
-            date = DateTimeOffset.Now;
+        date ??= DateTimeOffset.Now;
+
         return new DateTimeOffset(date.Value.Year, date.Value.Month, date.Value.Day, date.Value.Hour, 0, 0, date.Value.Offset);
     }
 
@@ -361,7 +356,6 @@ public sealed class DateBuilder
     /// with the time of 08:14:00. If the date's time is in the 59th minute,
     /// then the hour (and possibly the day) will be promoted.
     /// </remarks>
-    /// <param name="timeProvider">Time provider instance to use, defaults to <see cref="TimeProvider.System" /></param>
     /// <returns>the new rounded date</returns>
     public static DateTimeOffset EvenMinuteDateAfterNow()
     {
@@ -377,12 +371,10 @@ public sealed class DateBuilder
     /// then the hour (and possibly the day) will be promoted.
     /// </remarks>
     /// <param name="date">The Date to round, if <see langword="null" /> the current time will  be used</param>
-    /// <param name="timeProvider">Time provider instance to use, defaults to <see cref="TimeProvider.System" /></param>
     /// <returns>The new rounded date</returns>
     public static DateTimeOffset EvenMinuteDate(DateTimeOffset? date)
     {
-        if (!date.HasValue)
-            date = DateTimeOffset.Now;
+        date ??= DateTimeOffset.Now;
 
         var d = date.Value;
         d = d.AddMinutes(1);
@@ -397,12 +389,10 @@ public sealed class DateBuilder
     /// with the time of 08:13:00.
     /// </remarks>
     /// <param name="date">the Date to round, if <see langword="null" /> the current time will be used</param>
-    /// <param name="timeProvider">Time provider instance to use, defaults to <see cref="TimeProvider.System" /></param>
     /// <returns>the new rounded date</returns>
     public static DateTimeOffset EvenMinuteDateBefore(DateTimeOffset? date)
     {
-        if (!date.HasValue)
-            date = DateTimeOffset.Now;
+        date ??= DateTimeOffset.Now;
 
         var d = date.Value;
         return new DateTimeOffset(d.Year, d.Month, d.Day, d.Hour, d.Minute, 0, d.Offset);
@@ -467,10 +457,10 @@ public sealed class DateBuilder
 
         var arItr = minute / minuteBase;
 
-        var nextMinuteOccurance = minuteBase * (arItr + 1);
+        var nextMinuteOccurence = minuteBase * (arItr + 1);
 
-        if (nextMinuteOccurance < 60)
-            return new DateTimeOffset(c.Year, c.Month, c.Day, c.Hour, nextMinuteOccurance, 0, 0, c.Offset);
+        if (nextMinuteOccurence < 60)
+            return new DateTimeOffset(c.Year, c.Month, c.Day, c.Hour, nextMinuteOccurence, 0, 0, c.Offset);
         return new DateTimeOffset(c.Year, c.Month, c.Day, c.Hour, 0, 0, 0, c.Offset).AddHours(1);
     }
 
@@ -488,10 +478,10 @@ public sealed class DateBuilder
 
         var arItr = second / secondBase;
 
-        var nextSecondOccurance = secondBase * (arItr + 1);
+        var nextSecondOccurence = secondBase * (arItr + 1);
 
-        if (nextSecondOccurance < 60)
-            return new DateTimeOffset(c.Year, c.Month, c.Day, c.Hour, c.Minute, nextSecondOccurance, 0, c.Offset);
+        if (nextSecondOccurence < 60)
+            return new DateTimeOffset(c.Year, c.Month, c.Day, c.Hour, c.Minute, nextSecondOccurence, 0, c.Offset);
         return new DateTimeOffset(c.Year, c.Month, c.Day, c.Hour, c.Minute, 0, 0, c.Offset).AddMinutes(1);
     }
 

@@ -39,7 +39,7 @@ namespace MassTransit.Contracts.JobService
         /// <summary>
         /// The fault reason, if it faulted
         /// </summary>
-        string Reason { get; }
+        string? Reason { get; }
 
         /// <summary>
         /// If the job has been retried, will be > 0
@@ -62,7 +62,7 @@ namespace MassTransit.Contracts.JobService
         long? ProgressLimit { get; }
 
         /// <summary>
-        /// The state of the job, as a dictionary. Use GetJobState<T>
+        /// The state of the job, as a dictionary. Use GetJobState{T} to get the job state
         /// </summary>
         Dictionary<string, object>? JobState { get; }
 

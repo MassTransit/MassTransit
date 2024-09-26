@@ -1,4 +1,5 @@
-namespace MassTransit;
+#nullable enable
+namespace MassTransit.JobService.Scheduling;
 
 using System;
 using System.Collections.Generic;
@@ -110,15 +111,11 @@ public static class TimeZoneUtil
                 }
             }
 
-            if (info is null)
-                info = CustomResolver(id);
-
+            info ??= CustomResolver?.Invoke(id);
             if (info is null)
             {
-                // we tried our best
                 throw new TimeZoneNotFoundException(
-                    $"Could not find time zone with id {id}, consider using Quartz.Plugins.TimeZoneConverter for resolving more time zones ids",
-                    ex);
+                    $"Could not find time zone with id {id}, consider using Quartz.Plugins.TimeZoneConverter for resolving more time zones ids", ex);
             }
         }
 

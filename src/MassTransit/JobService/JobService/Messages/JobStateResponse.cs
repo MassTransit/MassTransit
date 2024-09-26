@@ -47,7 +47,7 @@ public class JobStateResponse<T> :
     public DateTime? Completed => _jobState.Completed;
     public TimeSpan? Duration => _jobState.Duration;
     public DateTime? Faulted => _jobState.Faulted;
-    public string Reason => _jobState.Reason;
+    public string? Reason => _jobState.Reason;
     public int LastRetryAttempt => _jobState.LastRetryAttempt;
     public string CurrentState => _jobState.CurrentState;
     public long? ProgressValue => _jobState.ProgressValue;
