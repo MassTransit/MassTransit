@@ -1,6 +1,7 @@
 namespace MassTransit.Contracts.JobService
 {
     using System;
+    using System.Collections.Generic;
 
 
     public interface JobState
@@ -51,6 +52,21 @@ namespace MassTransit.Contracts.JobService
         string CurrentState { get; }
 
         /// <summary>
+        /// The last reported progress value, if it's actually reported
+        /// </summary>
+        long? ProgressValue { get; }
+
+        /// <summary>
+        /// The last reported progress limit, if it's actually reported
+        /// </summary>
+        long? ProgressLimit { get; }
+
+        /// <summary>
+        /// The state of the job, as a dictionary. Use GetJobState<T>
+        /// </summary>
+        Dictionary<string, object>? JobState { get; }
+
+        /// <summary>
         /// If present, the next scheduled time for the job to run
         /// </summary>
         DateTime? NextStartDate { get; }
@@ -69,5 +85,16 @@ namespace MassTransit.Contracts.JobService
         /// If specified, the end of the data range (for recurring jobs) when the job should no longer be run
         /// </summary>
         DateTime? EndDate { get; }
+    }
+
+
+    public interface JobState<out T> :
+        JobState
+        where T : class
+    {
+        /// <summary>
+        /// The job state, if available
+        /// </summary>
+        new T? JobState { get; }
     }
 }

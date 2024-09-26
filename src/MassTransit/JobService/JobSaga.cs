@@ -16,7 +16,7 @@ namespace MassTransit
         public DateTime? Submitted { get; set; }
         public Uri ServiceAddress { get; set; }
         public TimeSpan? JobTimeout { get; set; }
-        public IDictionary<string, object> Job { get; set; }
+        public Dictionary<string, object> Job { get; set; }
         public Guid JobTypeId { get; set; }
 
         public Guid AttemptId { get; set; }
@@ -32,6 +32,31 @@ namespace MassTransit
 
         public Guid? JobSlotWaitToken { get; set; }
         public Guid? JobRetryDelayToken { get; set; }
+
+        /// <summary>
+        /// If present, keeps track of any previously faulted attempts so that the faulted job attempt saga instances can be removed when finalized
+        /// </summary>
+        public List<Guid> IncompleteAttempts { get; set; }
+
+        /// <summary>
+        /// If present, the last reported progress value
+        /// </summary>
+        public long? LastProgressValue { get; set; }
+
+        /// <summary>
+        /// If present, the maximum value (can be used to show a percentage)
+        /// </summary>
+        public long? LastProgressLimit { get; set; }
+
+        /// <summary>
+        /// The last reported sequence number for the current job attempt
+        /// </summary>
+        public long? LastProgressSequenceNumber { get; set; }
+
+        /// <summary>
+        /// The job state, saved from a previous job attempt
+        /// </summary>
+        public Dictionary<string, object> JobState { get; set; }
 
         /// <summary>
         /// For recurring jobs, the cron expression used to determine the next start date after the job has completed.

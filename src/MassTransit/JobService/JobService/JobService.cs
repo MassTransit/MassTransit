@@ -57,8 +57,7 @@
             if (_jobs.ContainsKey(startJob.JobId))
                 throw new JobAlreadyExistsException(startJob.JobId);
 
-            var jobContext = new ConsumeJobContext<T>(context, InstanceAddress, startJob.JobId, startJob.AttemptId, startJob.RetryAttempt, job,
-                jobOptions.JobTimeout);
+            var jobContext = new ConsumeJobContext<T>(context, InstanceAddress, job, jobOptions.JobTimeout, jobOptions.ProgressBufferSettings);
 
             LogContext.Debug?.Log("Executing job: {JobType} {JobId} ({RetryAttempt})", TypeCache<T>.ShortName, startJob.JobId,
                 startJob.RetryAttempt);
@@ -84,21 +83,22 @@
 
             foreach (var jobHandle in pendingJobs)
             {
-                if (jobHandle.JobTask.IsCompleted)
-                    continue;
-
-                try
+                if (!jobHandle.JobTask.IsCompleted)
                 {
-                    LogContext.Debug?.Log("Canceling job: {JobId}", jobHandle.JobId);
+                    try
+                    {
+                        LogContext.Debug?.Log("Canceling job: {JobId}", jobHandle.JobId);
 
-                    await jobHandle.Cancel().ConfigureAwait(false);
+                        await jobHandle.Cancel().ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        LogContext.Error?.Log(ex, "Cancel job faulted: {JobId}", jobHandle.JobId);
+                    }
+                }
 
-                    TryRemoveJob(jobHandle.JobId, out _);
-                }
-                catch (Exception ex)
-                {
-                    LogContext.Error?.Log(ex, "Cancel job faulted: {JobId}", jobHandle.JobId);
-                }
+                if (TryRemoveJob(jobHandle.JobId, out _))
+                    await jobHandle.DisposeAsync().ConfigureAwait(false);
             }
 
             await Task.WhenAll(_jobTypes.Values.Select(x => x.PublishJobInstanceStopped(publishEndpoint, InstanceAddress))).ConfigureAwait(false);
@@ -158,9 +158,10 @@
             if (!_jobs.TryAdd(jobHandle.JobId, jobHandle))
                 throw new JobAlreadyExistsException(jobHandle.JobId);
 
-            jobHandle.JobTask.ContinueWith(innerTask =>
+            jobHandle.JobTask.ContinueWith(async innerTask =>
             {
-                TryRemoveJob(jobHandle.JobId, out _);
+                if (TryRemoveJob(jobHandle.JobId, out _))
+                    await jobHandle.DisposeAsync().ConfigureAwait(false);
             });
         }
 

@@ -29,6 +29,10 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                 entity.Ignore(x => x.RowVersion);
 
             entity.Property(x => x.JobId);
+            entity.HasOne<JobSaga>().WithMany()
+                .HasForeignKey(x => x.JobId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             entity.Property(x => x.RetryAttempt);
 
             entity.HasIndex(x => new

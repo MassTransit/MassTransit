@@ -52,6 +52,9 @@ namespace MassTransit
             Event(() => CancelJob, x => x.CorrelateById(m => m.Message.JobId));
             Event(() => RetryJob, x => x.CorrelateById(m => m.Message.JobId));
 
+            Event(() => SetJobProgress, x => x.CorrelateById(m => m.Message.JobId));
+            Event(() => SaveJobState, x => x.CorrelateById(m => m.Message.JobId));
+
             Event(() => GetJobState, x =>
             {
                 x.CorrelateById(m => m.Message.JobId);
@@ -133,6 +136,8 @@ namespace MassTransit
                 When(StartJobAttemptFaulted)
                     .Then(context =>
                     {
+                        context.AddIncompleteAttempt(context.Message.Message.AttemptId);
+
                         context.Saga.Reason = context.Message.Exceptions.FirstOrDefault()?.Message;
                     })
                     .NotifyJobFaulted()
@@ -175,6 +180,8 @@ namespace MassTransit
                 When(AttemptFaulted)
                     .Then(context =>
                     {
+                        context.AddIncompleteAttempt(context.Message.AttemptId);
+
                         context.Saga.Faulted = context.Message.Timestamp;
                         context.Saga.Reason = context.Message.Exceptions?.Message ?? "Job Attempt Faulted (unknown reason)";
                     })
@@ -262,11 +269,32 @@ namespace MassTransit
                 When(AttemptCanceled)
                     .Then(context =>
                     {
+                        context.AddIncompleteAttempt(context.Message.AttemptId);
+
                         context.Saga.Faulted = context.Message.Timestamp;
                         context.Saga.Reason = "Job Attempt Canceled";
                     })
                     .PublishJobCanceled()
                     .TransitionTo(Canceled));
+
+            During([StartingJobAttempt, WaitingToStart, Started, Completed, Faulted, Canceled, WaitingToRetry],
+                When(SetJobProgress)
+                    .Then(context =>
+                    {
+                        if (context.Saga.AttemptId == context.Message.AttemptId && context.Saga.LastProgressSequenceNumber < context.Message.SequenceNumber)
+                        {
+                            context.Saga.LastProgressValue = context.Message.Value;
+                            context.Saga.LastProgressLimit = context.Message.Limit;
+                        }
+                    }));
+
+            During([Started, Completed, Faulted, Canceled, WaitingToRetry],
+                When(SaveJobState)
+                    .Then(context =>
+                    {
+                        if (context.Saga.AttemptId == context.Message.AttemptId)
+                            context.Saga.JobState = context.Message.JobState;
+                    }));
 
             During(Canceled,
                 Ignore(CancelJob),
@@ -286,6 +314,9 @@ namespace MassTransit
                         Reason = context.Saga.Reason,
                         LastRetryAttempt = context.Saga.RetryAttempt,
                         CurrentState = (await Accessor.Get(context).ConfigureAwait(false)).Name,
+                        ProgressValue = context.Saga.LastProgressValue,
+                        ProgressLimit = context.Saga.LastProgressLimit,
+                        JobState = context.Saga.JobState,
                         NextStartDate = context.Saga.NextStartDate?.UtcDateTime,
                         IsRecurring = !string.IsNullOrWhiteSpace(context.Saga.CronExpression),
                         StartDate = context.Saga.StartDate?.UtcDateTime,
@@ -347,6 +378,9 @@ namespace MassTransit
         public Event<CancelJob> CancelJob { get; }
         public Event<RetryJob> RetryJob { get; }
 
+        public Event<SetJobProgress> SetJobProgress { get; }
+        public Event<SaveJobState> SaveJobState { get; }
+
         public Event<GetJobState> GetJobState { get; }
 
         public Schedule<JobSaga, JobSlotWaitElapsed> JobSlotWaitElapsed { get; }
@@ -367,9 +401,17 @@ namespace MassTransit
             return context.GetPayload<JobSagaSettings>().JobTypeSagaEndpointAddress;
         }
 
-        public static bool IsScheduledJob(this SagaConsumeContext<JobSaga> context)
+        internal static bool IsScheduledJob(this SagaConsumeContext<JobSaga> context)
         {
             return !string.IsNullOrWhiteSpace(context.Saga.CronExpression) || context.Saga.StartDate is not null;
+        }
+
+        internal static void AddIncompleteAttempt(this SagaConsumeContext<JobSaga> context, Guid attemptId)
+        {
+            context.Saga.IncompleteAttempts ??= [];
+
+            if (!context.Saga.IncompleteAttempts.Contains(attemptId))
+                context.Saga.IncompleteAttempts.Add(attemptId);
         }
 
         public static bool CalculateNextStartDate(this SagaConsumeContext<JobSaga> context)
@@ -409,9 +451,7 @@ namespace MassTransit
 
             // the next start date didn't change, so don't bother with it
             if (nextStartDate == context.Saga.NextStartDate)
-            {
                 return false;
-            }
 
             context.Saga.NextStartDate = nextStartDate;
             return true;
@@ -467,6 +507,19 @@ namespace MassTransit
                 .TransitionTo(machine.AllocatingJobSlot);
         }
 
+        public static EventActivityBinder<JobSaga, T> ClearJobState<T>(this EventActivityBinder<JobSaga, T> binder)
+            where T : class
+        {
+            return binder
+                .Then(context =>
+                {
+                    context.Saga.LastProgressValue = null;
+                    context.Saga.LastProgressLimit = null;
+                    context.Saga.LastProgressSequenceNumber = null;
+                    context.Saga.JobState = null;
+                });
+        }
+
         public static EventActivityBinder<JobSaga, JobSlotAllocated> RequestStartJob(this EventActivityBinder<JobSaga, JobSlotAllocated> binder,
             JobStateMachine machine)
         {
@@ -480,7 +533,10 @@ namespace MassTransit
                         InstanceAddress = context.Message.InstanceAddress,
                         RetryAttempt = context.Saga.RetryAttempt,
                         Job = context.Saga.Job,
-                        JobTypeId = context.Saga.JobTypeId
+                        JobTypeId = context.Saga.JobTypeId,
+                        LastProgressValue = context.Saga.LastProgressValue,
+                        LastProgressLimit = context.Saga.LastProgressLimit,
+                        JobState = context.Saga.JobState
                     }, (behaviorContext, context) => context.ResponseAddress = behaviorContext.ReceiveContext.InputAddress)
                 .TransitionTo(machine.StartingJobAttempt);
         }
@@ -495,7 +551,9 @@ namespace MassTransit
         public static EventActivityBinder<JobSaga, T> WaitForNextScheduledTime<T>(this EventActivityBinder<JobSaga, T> binder, JobStateMachine machine)
             where T : class
         {
-            return binder.Schedule(machine.JobSlotWaitElapsed, context => new JobSlotWaitElapsedEvent { JobId = context.Saga.CorrelationId },
+            return binder
+                .ClearJobState()
+                .Schedule(machine.JobSlotWaitElapsed, context => new JobSlotWaitElapsedEvent { JobId = context.Saga.CorrelationId },
                     context => context.Saga.NextStartDate.Value.DateTime)
                 .TransitionTo(machine.WaitingForSlot);
         }

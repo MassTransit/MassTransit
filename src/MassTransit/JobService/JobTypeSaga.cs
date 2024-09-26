@@ -16,7 +16,7 @@ namespace MassTransit
             ConcurrentJobLimit = 1;
 
             Instances = new Dictionary<Uri, JobTypeInstance>();
-            ActiveJobs = new List<ActiveJob>();
+            ActiveJobs = [];
         }
 
         public int CurrentState { get; set; }

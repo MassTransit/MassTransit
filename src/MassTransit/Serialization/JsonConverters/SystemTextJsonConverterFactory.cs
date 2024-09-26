@@ -63,6 +63,8 @@
                 .Add<CancelJob, CancelJobCommand>()
                 .Add<CompleteJob, CompleteJobCommand>()
                 .Add<FaultJob, FaultJobCommand>()
+                .Add<GetJobAttemptStatus, GetJobAttemptStatusCommand>()
+                .Add<GetJobState, GetJobStateRequest>()
                 .Add<JobAttemptCanceled, JobAttemptCanceledEvent>()
                 .Add<JobAttemptCompleted, JobAttemptCompletedEvent>()
                 .Add<JobAttemptFaulted, JobAttemptFaultedEvent>()
@@ -77,8 +79,12 @@
                 .Add<JobSlotWaitElapsed, JobSlotWaitElapsedEvent>()
                 .Add<JobStarted, JobStartedEvent>()
                 .Add<JobState, JobStateResponse>()
+                .Add<JobStatusCheckRequested, JobStatusCheckRequestedEvent>()
                 .Add<JobSubmissionAccepted, JobSubmissionAcceptedResponse>()
                 .Add<JobSubmitted, JobSubmittedEvent>()
+                .Add<SaveJobState, SaveJobStateCommand>()
+                .Add<SetJobProgress, SetJobProgressCommand>()
+                .Add<StartJob, StartJobCommand>()
                 .Add<StartJobAttempt, StartJobAttemptCommand>();
         }
 

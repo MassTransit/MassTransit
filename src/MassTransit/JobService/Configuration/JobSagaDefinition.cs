@@ -49,6 +49,9 @@ namespace MassTransit.Configuration
                 configurator.UsePartitioner<JobCompleted>(partition, p => p.Message.JobId);
                 configurator.UsePartitioner<CancelJob>(partition, p => p.Message.JobId);
 
+                configurator.UsePartitioner<SetJobProgress>(partition, p => p.Message.JobId);
+                configurator.UsePartitioner<SaveJobState>(partition, p => p.Message.JobId);
+
                 configurator.UsePartitioner<JobSlotWaitElapsed>(partition, p => p.Message.JobId);
                 configurator.UsePartitioner<JobRetryDelayElapsed>(partition, p => p.Message.JobId);
             }

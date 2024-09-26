@@ -12,8 +12,8 @@ public class JobCompletedEvent :
     public Guid JobId { get; set; }
     public DateTime Timestamp { get; set; }
     public TimeSpan Duration { get; set; }
-    public IDictionary<string, object> Job { get; set; } = null!;
-    public IDictionary<string, object> Result { get; set; } = null!;
+    public Dictionary<string, object> Job { get; set; } = null!;
+    public Dictionary<string, object> Result { get; set; } = null!;
 }
 
 
@@ -24,6 +24,6 @@ public class JobCompletedEvent<T> :
     public Guid JobId { get; set; }
     public DateTime Timestamp { get; set; }
     public TimeSpan Duration { get; set; }
-    public IDictionary<string, object> Job { get; set; } = null!;
-    public IDictionary<string, object> Result { get; set; } = null!;
+    public Dictionary<string, object> Job { get; set; } = null!;
+    public Dictionary<string, object> Result { get; set; } = null!;
 }

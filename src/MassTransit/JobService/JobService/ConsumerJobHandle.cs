@@ -37,5 +37,10 @@
             {
             }
         }
+
+        public ValueTask DisposeAsync()
+        {
+            return _context.DisposeAsync();
+        }
     }
 }

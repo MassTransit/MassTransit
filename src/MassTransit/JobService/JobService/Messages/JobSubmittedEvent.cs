@@ -13,6 +13,6 @@ public class JobSubmittedEvent :
     public Guid JobTypeId { get; set; }
     public DateTime Timestamp { get; set; }
     public TimeSpan JobTimeout { get; set; }
-    public IDictionary<string, object> Job { get; set; } = null!;
+    public Dictionary<string, object> Job { get; set; } = null!;
     public RecurringJobSchedule? Schedule { get; set; }
 }

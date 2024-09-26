@@ -23,6 +23,8 @@ namespace MassTransit
             JobCancellationTimeout = TimeSpan.FromSeconds(30);
 
             RetryPolicy = Retry.None;
+
+            ProgressBufferSettings = new ProgressBufferSettings();
         }
 
         /// <summary>
@@ -31,7 +33,8 @@ namespace MassTransit
         public TimeSpan JobTimeout { get; set; }
 
         /// <summary>
-        /// Set the allowed time for a job to stop execution after the cancellation. If the job cancellation timeout expires and the job has not yet completed, it will be fully canceled.
+        /// Set the allowed time for a job to stop execution after the cancellation. If the job cancellation timeout expires and the job has not yet completed, it will be
+        /// fully canceled.
         /// </summary>
         public TimeSpan JobCancellationTimeout { get; set; }
 
@@ -47,6 +50,11 @@ namespace MassTransit
         /// Override the default job name (optional, automatically generated from the job type otherwise) that is displayed in the <see cref="JobTypeSaga" />.
         /// </summary>
         public string? JobTypeName { get; set; }
+
+        /// <summary>
+        /// Configure the job progress buffer settings, if using job progress (optional)
+        /// </summary>
+        public ProgressBufferSettings ProgressBufferSettings { get; }
 
         IEnumerable<ValidationResult> ISpecification.Validate()
         {
@@ -71,7 +79,8 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Set the allowed time for a job to stop execution after the cancellation. If the job cancellation timeout expires and the job has not yet completed, it will be fully canceled.
+        /// Set the allowed time for a job to stop execution after the cancellation. If the job cancellation timeout expires and the job has not yet completed, it will be
+        /// fully canceled.
         /// </summary>
         /// <param name="timeout"></param>
         /// <returns></returns>

@@ -21,12 +21,12 @@ namespace MassTransit.Contracts.JobService
         /// <summary>
         /// The arguments used to start the job
         /// </summary>
-        IDictionary<string, object> Job { get; }
+        Dictionary<string, object> Job { get; }
 
         /// <summary>
         /// The result of the job
         /// </summary>
-        IDictionary<string, object> Result { get; }
+        Dictionary<string, object> Result { get; }
     }
 
 
@@ -45,11 +45,11 @@ namespace MassTransit.Contracts.JobService
         /// <summary>
         /// The arguments used to start the job
         /// </summary>
-        IDictionary<string, object> Job { get; }
+        Dictionary<string, object> Job { get; }
 
         /// <summary>
         /// The result of the job
         /// </summary>
-        IDictionary<string, object> Result { get; }
+        Dictionary<string, object> Result { get; }
     }
 }

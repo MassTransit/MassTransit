@@ -15,25 +15,32 @@ namespace MassTransit.JobService
         ConsumeContextProxy,
         ConsumeContext<TJob>,
         JobContext<TJob>,
-        IDisposable
+        INotifyJobContext,
+        IAsyncDisposable
         where TJob : class
     {
+        readonly ProgressBufferSettings _bufferSettings;
         readonly ConsumeContext<StartJob> _context;
         readonly Uri _instanceAddress;
         readonly CancellationTokenSource _source;
         readonly Stopwatch _stopwatch;
+        JobProgressBuffer? _updateBuffer;
 
-        public ConsumeJobContext(ConsumeContext<StartJob> context, Uri instanceAddress, Guid jobId, Guid attemptId, int retryAttempt, TJob job,
-            TimeSpan jobTimeout)
+        public ConsumeJobContext(ConsumeContext<StartJob> context, Uri instanceAddress, TJob job, TimeSpan jobTimeout, ProgressBufferSettings bufferSettings)
             : base(context)
         {
             _context = context;
             _instanceAddress = instanceAddress;
+            _bufferSettings = bufferSettings;
 
-            JobId = jobId;
+            JobId = context.Message.JobId;
+            AttemptId = context.Message.AttemptId;
+            RetryAttempt = context.Message.RetryAttempt;
+
             Job = job;
-            AttemptId = attemptId;
-            RetryAttempt = retryAttempt;
+
+            LastProgressValue = context.Message.LastProgressValue;
+            LastProgressLimit = context.Message.LastProgressLimit;
 
             _source = new CancellationTokenSource(jobTimeout);
             _stopwatch = Stopwatch.StartNew();
@@ -53,29 +60,28 @@ namespace MassTransit.JobService
             return _context.NotifyFaulted(_context, duration, consumerType, exception);
         }
 
-        public void Dispose()
+        public async ValueTask DisposeAsync()
         {
+            if (_updateBuffer != null)
+                await _updateBuffer.Flush().ConfigureAwait(false);
+
             _source.Dispose();
         }
 
-        public Guid JobId { get; }
-        public Guid AttemptId { get; }
-        public int RetryAttempt { get; }
-        public TJob Job { get; }
-
-        public TimeSpan ElapsedTime => _stopwatch.Elapsed;
-
-        public Task NotifyCanceled(string? reason = null)
+        public async Task NotifyCanceled(string? reason = null)
         {
             LogContext.Debug?.Log("Job Canceled: {JobId} {AttemptId} ({RetryAttempt})", JobId, AttemptId, RetryAttempt);
 
-            return Notify<JobAttemptCanceled>(new JobAttemptCanceledEvent
+            if (_updateBuffer != null)
+                await _updateBuffer.Flush().ConfigureAwait(false);
+
+            await Notify<JobAttemptCanceled>(new JobAttemptCanceledEvent
             {
                 JobId = JobId,
                 AttemptId = AttemptId,
                 RetryAttempt = RetryAttempt,
                 Timestamp = DateTime.UtcNow,
-            });
+            }).ConfigureAwait(false);
         }
 
         public Task NotifyStarted()
@@ -92,25 +98,36 @@ namespace MassTransit.JobService
             });
         }
 
-        public Task NotifyCompleted()
+        public async Task NotifyCompleted()
         {
             LogContext.Debug?.Log("Job Completed: {JobId} {AttemptId} ({RetryAttempt})", JobId, AttemptId, RetryAttempt);
 
-            return Notify<JobAttemptCompleted>(new JobAttemptCompletedEvent
+            if (_updateBuffer != null)
+                await _updateBuffer.Flush().ConfigureAwait(false);
+
+            await Notify<JobAttemptCompleted>(new JobAttemptCompletedEvent
             {
                 JobId = JobId,
                 AttemptId = AttemptId,
                 RetryAttempt = RetryAttempt,
                 Timestamp = DateTime.UtcNow,
                 Duration = ElapsedTime
-            });
+            }).ConfigureAwait(false);
         }
 
-        public Task NotifyFaulted(Exception exception, TimeSpan? delay)
+        public Task NotifyJobProgress(SetJobProgress progress)
+        {
+            return Notify(progress);
+        }
+
+        public async Task NotifyFaulted(Exception exception, TimeSpan? delay)
         {
             LogContext.Debug?.Log(exception, "Job Faulted: {JobId} {AttemptId} ({RetryAttempt})", JobId, AttemptId, RetryAttempt);
 
-            return Notify<JobAttemptFaulted>(new JobAttemptFaultedEvent
+            if (_updateBuffer != null)
+                await _updateBuffer.Flush().ConfigureAwait(false);
+
+            await Notify<JobAttemptFaulted>(new JobAttemptFaultedEvent
             {
                 JobId = JobId,
                 AttemptId = AttemptId,
@@ -118,7 +135,47 @@ namespace MassTransit.JobService
                 RetryDelay = delay,
                 Timestamp = DateTime.UtcNow,
                 Exceptions = new FaultExceptionInfo(exception)
+            }).ConfigureAwait(false);
+        }
+
+        public Guid JobId { get; }
+        public Guid AttemptId { get; }
+        public int RetryAttempt { get; }
+        public long? LastProgressValue { get; }
+        public long? LastProgressLimit { get; }
+        public TJob Job { get; }
+
+        public TimeSpan ElapsedTime => _stopwatch.Elapsed;
+
+        public Task SetJobProgress(long value, long? limit)
+        {
+            _updateBuffer ??= new JobProgressBuffer(this, _bufferSettings);
+
+            return _updateBuffer.Update(new JobProgressBuffer.ProgressUpdate(JobId, AttemptId, value, limit), CancellationToken.None);
+        }
+
+        public Task SaveJobState<T>(T? jobState)
+            where T : class
+        {
+            return Notify<SaveJobState>(new SaveJobStateCommand
+            {
+                JobId = JobId,
+                AttemptId = AttemptId,
+                JobState = jobState != null ? _context.ToDictionary(jobState) : null
             });
+        }
+
+        public bool TryGetJobState<T>(out T? jobState)
+            where T : class
+        {
+            if (_context.Message.JobState != null)
+            {
+                jobState = _context.SerializerContext.DeserializeObject<T>(_context.Message.JobState);
+                return jobState != null;
+            }
+
+            jobState = null;
+            return false;
         }
 
         async Task Notify<T>(T message)

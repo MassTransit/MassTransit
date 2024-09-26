@@ -4,6 +4,7 @@ namespace MassTransit
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Clients;
     using Contracts.JobService;
     using Initializers;
     using JobService.Messages;
@@ -19,9 +20,26 @@ namespace MassTransit
         /// <returns></returns>
         public static async Task<JobState> GetJobState(this IRequestClient<GetJobState> client, Guid jobId)
         {
-            Response<JobState> response = await client.GetResponse<JobState>(new { JobId = jobId });
+            Response<JobState> response = await client.GetResponse<JobState>(new GetJobStateRequest { JobId = jobId });
 
             return response.Message;
+        }
+
+        /// <summary>
+        /// Requests the job state for the specified <paramref name="jobId" /> using the request client
+        /// </summary>
+        /// <param name="client"></param>
+        /// <param name="jobId"></param>
+        /// <returns></returns>
+        public static async Task<JobState<T>> GetJobState<T>(this IRequestClient<GetJobState> client, Guid jobId)
+            where T : class
+        {
+            Response<JobState> response = await client.GetResponse<JobState>(new GetJobStateRequest { JobId = jobId });
+
+            if (response is MessageResponse<JobState> messageResponse)
+                return new JobStateResponse<T>(response.Message, messageResponse.DeserializeObject<T>(response.Message.JobState));
+
+            return new JobStateResponse<T>(response.Message);
         }
 
         /// <summary>

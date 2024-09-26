@@ -27,9 +27,35 @@ namespace MassTransit.Tests
         {
             public async Task Run(JobContext<OddJob> context)
             {
-                if (context.RetryAttempt == 0)
-                    await Task.Delay(context.Job.Duration, context.CancellationToken);
+                if (context.TryGetJobState<OddJobState>(out var previousState))
+                {
+                    LogContext.Debug?.Log("Previous AttemptId: {LastAttemptId}", previousState.LastAttemptId);
+                }
+
+                try
+                {
+                    await context.SetJobProgress(0, 100);
+
+                    if (context.RetryAttempt == 0)
+                        await Task.Delay(context.Job.Duration, context.CancellationToken);
+
+                    for (int i = 0; i < 100; i++)
+                    {
+                        await context.SetJobProgress(i, 100);
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    await context.SaveJobState(new OddJobState { LastAttemptId = context.AttemptId });
+                    throw;
+                }
             }
+        }
+
+
+        public class OddJobState
+        {
+            public Guid LastAttemptId { get; set; }
         }
 
 

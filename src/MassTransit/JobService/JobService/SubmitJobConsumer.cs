@@ -34,7 +34,7 @@ namespace MassTransit.JobService
                     throw new RecurringJobException("A valid cron expression or start date is required");
 
                 if (!string.IsNullOrWhiteSpace(context.Message.Schedule.CronExpression))
-                    CronExpression.ValidateExpression(context.Message.Schedule.CronExpression);
+                    CronExpression.ValidateExpression(context.Message.Schedule.CronExpression!);
             }
 
             return PublishJobSubmitted(context, context.Message.JobId, context.Message.Job, context.SentTime ?? DateTime.UtcNow, context.Message.Schedule);

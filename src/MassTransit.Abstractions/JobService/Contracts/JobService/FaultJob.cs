@@ -29,7 +29,7 @@ namespace MassTransit.Contracts.JobService
         /// <summary>
         /// The job, as an object dictionary
         /// </summary>
-        IDictionary<string, object> Job { get; }
+        Dictionary<string, object> Job { get; }
 
         /// <summary>
         /// The JobTypeId, to ensure the proper job type is started

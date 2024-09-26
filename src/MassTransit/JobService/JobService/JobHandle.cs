@@ -7,7 +7,8 @@ namespace MassTransit.JobService
     /// <summary>
     /// A JobHandle contains the JobContext, Task, and provides access to the job control
     /// </summary>
-    public interface JobHandle
+    public interface JobHandle :
+        IAsyncDisposable
     {
         Guid JobId { get; }
 

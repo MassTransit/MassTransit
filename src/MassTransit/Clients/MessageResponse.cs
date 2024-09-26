@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.Clients
 {
     using System;
+    using System.Collections.Generic;
 
 
     /// <summary>
@@ -11,11 +12,12 @@
         Response<TResult>
         where TResult : class
     {
-        readonly MessageContext _context;
+        readonly ConsumeContext<TResult> _context;
 
         public MessageResponse(ConsumeContext<TResult> context)
         {
             _context = context;
+
             Message = context.Message;
         }
 
@@ -35,5 +37,11 @@
 
         public TResult Message { get; }
         object Response.Message => Message;
+
+        public T DeserializeObject<T>(Dictionary<string, object> dictionary)
+            where T : class
+        {
+            return _context.SerializerContext.DeserializeObject<T>(dictionary);
+        }
     }
 }

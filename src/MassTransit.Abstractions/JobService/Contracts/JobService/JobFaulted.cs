@@ -15,7 +15,7 @@ namespace MassTransit.Contracts.JobService
 
         TimeSpan? Duration { get; }
 
-        IDictionary<string, object> Job { get; }
+        Dictionary<string, object> Job { get; }
 
         ExceptionInfo Exceptions { get; }
     }
