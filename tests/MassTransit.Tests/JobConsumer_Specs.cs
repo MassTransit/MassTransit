@@ -39,6 +39,11 @@ namespace MassTransit.Tests
                     if (context.RetryAttempt == 0)
                         await Task.Delay(context.Job.Duration, context.CancellationToken);
 
+                    if(context.RetryAttempt > 0 && context.LastProgressValue is null)
+                    {
+                        throw new InvalidOperationException("The progress was not stored");
+                    }
+
                     for (int i = 0; i < 100; i++)
                     {
                         await context.SetJobProgress(i, 100);

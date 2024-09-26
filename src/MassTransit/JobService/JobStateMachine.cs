@@ -281,7 +281,8 @@ namespace MassTransit
                 When(SetJobProgress)
                     .Then(context =>
                     {
-                        if (context.Saga.AttemptId == context.Message.AttemptId && context.Saga.LastProgressSequenceNumber < context.Message.SequenceNumber)
+                        if (context.Saga.AttemptId == context.Message.AttemptId
+                            && context.Message.SequenceNumber > (context.Saga.LastProgressSequenceNumber ?? 0))
                         {
                             context.Saga.LastProgressValue = context.Message.Value;
                             context.Saga.LastProgressLimit = context.Message.Limit;
