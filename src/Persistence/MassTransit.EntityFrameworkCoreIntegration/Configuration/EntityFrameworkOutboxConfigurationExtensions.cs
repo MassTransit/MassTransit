@@ -321,15 +321,16 @@ namespace MassTransit
                 p.InboxConsumerId,
                 p.SequenceNumber
             }).IsUnique();
-            outbox.HasOne<InboxState>().WithMany().IsRequired(false).HasForeignKey(p => new
-            {
-                p.InboxMessageId,
-                p.InboxConsumerId
-            }).HasPrincipalKey(p => new
-            {
-                p.MessageId,
-                p.ConsumerId
-            }).OnDelete(DeleteBehavior.ClientCascade);
+            outbox.HasOne<InboxState>().WithMany().IsRequired(false)
+                .HasForeignKey(p => new
+                {
+                    p.InboxMessageId,
+                    p.InboxConsumerId
+                }).HasPrincipalKey(p => new
+                {
+                    p.MessageId,
+                    p.ConsumerId
+                });
 
             outbox.Property(p => p.OutboxId).IsRequired(false);
             outbox.HasIndex(p => new
@@ -338,8 +339,7 @@ namespace MassTransit
                 p.SequenceNumber,
             }).IsUnique();
             outbox.HasOne<OutboxState>().WithMany().IsRequired(false)
-                .HasForeignKey(p => p.OutboxId)
-                .OnDelete(DeleteBehavior.ClientCascade);
+                .HasForeignKey(p => p.OutboxId);
 
             outbox.Property(p => p.Headers);
 
