@@ -27,14 +27,53 @@ public static class RecurringJobConsumerExtensions
     {
         if (string.IsNullOrWhiteSpace(jobName))
             throw new ArgumentNullException(nameof(jobName));
+        if (cronExpression == null)
+            throw new ArgumentNullException(nameof(cronExpression));
 
         var jobId = JobMetadataCache<T>.GenerateRecurringJobId(jobName);
 
-        Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new
+        var schedule = new RecurringJobScheduleInfo { CronExpression = cronExpression };
+        schedule.Validate().ThrowIfContainsFailure("The schedule configuration is invalid:");
+
+        Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new SubmitJobCommand<T>
         {
             JobId = jobId,
             Job = job,
-            Schedule = new { CronExpression = cronExpression }
+            Schedule = schedule
+        }, cancellationToken).ConfigureAwait(false);
+
+        return response.Message.JobId;
+    }
+
+    /// <summary>
+    /// Add or update a recurring job
+    /// </summary>
+    /// <param name="client">An existing request client</param>
+    /// <param name="jobName"></param>
+    /// <param name="job"></param>
+    /// <param name="configure">Configure the optional recurring job schedule parameters</param>
+    /// <param name="cancellationToken"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static async Task<Guid> AddOrUpdateRecurringJob<T>(this IRequestClient<SubmitJob<T>> client, string jobName, T job,
+        Action<IRecurringJobScheduleConfigurator> configure, CancellationToken cancellationToken = default)
+        where T : class
+    {
+        if (string.IsNullOrWhiteSpace(jobName))
+            throw new ArgumentNullException(nameof(jobName));
+
+        var jobId = JobMetadataCache<T>.GenerateRecurringJobId(jobName);
+
+        var schedule = new RecurringJobScheduleInfo();
+        configure?.Invoke(schedule);
+
+        schedule.Validate().ThrowIfContainsFailure("The schedule configuration is invalid:");
+
+        Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new SubmitJobCommand<T>
+        {
+            JobId = jobId,
+            Job = job,
+            Schedule = schedule
         }, cancellationToken).ConfigureAwait(false);
 
         return response.Message.JobId;
@@ -56,14 +95,53 @@ public static class RecurringJobConsumerExtensions
     {
         if (string.IsNullOrWhiteSpace(jobName))
             throw new ArgumentNullException(nameof(jobName));
+        if (cronExpression == null)
+            throw new ArgumentNullException(nameof(cronExpression));
 
         var jobId = JobMetadataCache<T>.GenerateRecurringJobId(jobName);
 
-        await publishEndpoint.Publish<SubmitJob<T>>(new
+        var schedule = new RecurringJobScheduleInfo { CronExpression = cronExpression };
+        schedule.Validate().ThrowIfContainsFailure("The schedule configuration is invalid:");
+
+        await publishEndpoint.Publish<SubmitJob<T>>(new SubmitJobCommand<T>
         {
             JobId = jobId,
             Job = job,
-            Schedule = new { CronExpression = cronExpression }
+            Schedule = schedule
+        }, cancellationToken).ConfigureAwait(false);
+
+        return jobId;
+    }
+
+    /// <summary>
+    /// Add or update a recurring job
+    /// </summary>
+    /// <param name="publishEndpoint">An available publish endpoint instance</param>
+    /// <param name="jobName"></param>
+    /// <param name="job"></param>
+    /// <param name="configure">Configure the optional recurring job schedule parameters</param>
+    /// <param name="cancellationToken"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static async Task<Guid> AddOrUpdateRecurringJob<T>(this IPublishEndpoint publishEndpoint, string jobName, T job,
+        Action<IRecurringJobScheduleConfigurator> configure, CancellationToken cancellationToken = default)
+        where T : class
+    {
+        if (string.IsNullOrWhiteSpace(jobName))
+            throw new ArgumentNullException(nameof(jobName));
+
+        var jobId = JobMetadataCache<T>.GenerateRecurringJobId(jobName);
+
+        var schedule = new RecurringJobScheduleInfo();
+        configure?.Invoke(schedule);
+
+        schedule.Validate().ThrowIfContainsFailure("The schedule configuration is invalid:");
+
+        await publishEndpoint.Publish<SubmitJob<T>>(new SubmitJobCommand<T>
+        {
+            JobId = jobId,
+            Job = job,
+            Schedule = schedule
         }, cancellationToken).ConfigureAwait(false);
 
         return jobId;
@@ -88,7 +166,7 @@ public static class RecurringJobConsumerExtensions
         {
             JobId = jobId,
             Job = job,
-            Schedule = new RecurringJobScheduleInfo { Start = start }
+            Schedule = new RecurringJobScheduleInfo { Start = start.ToUniversalTime() }
         }, cancellationToken).ConfigureAwait(false);
 
         return jobId;
@@ -113,7 +191,7 @@ public static class RecurringJobConsumerExtensions
         {
             JobId = jobId,
             Job = job,
-            Schedule = new RecurringJobScheduleInfo { Start = start }
+            Schedule = new RecurringJobScheduleInfo { Start = start.ToUniversalTime() }
         }, cancellationToken).ConfigureAwait(false);
 
         return response.Message.JobId;
@@ -140,7 +218,7 @@ public static class RecurringJobConsumerExtensions
         {
             JobId = jobId,
             Job = context.Message,
-            Schedule = new RecurringJobScheduleInfo { Start = start }
+            Schedule = new RecurringJobScheduleInfo { Start = start.ToUniversalTime() }
         }, cancellationToken).ConfigureAwait(false);
 
         return response.Message.JobId;
@@ -164,7 +242,7 @@ public static class RecurringJobConsumerExtensions
         {
             JobId = jobId,
             Job = job,
-            Schedule = new RecurringJobScheduleInfo { Start = start }
+            Schedule = new RecurringJobScheduleInfo { Start = start.ToUniversalTime() }
         }, cancellationToken).ConfigureAwait(false);
 
         return response.Message.JobId;
@@ -190,7 +268,7 @@ public static class RecurringJobConsumerExtensions
         {
             JobId = jobId,
             Job = context.Message,
-            Schedule = new RecurringJobScheduleInfo { Start = start }
+            Schedule = new RecurringJobScheduleInfo { Start = start.ToUniversalTime() }
         }, cancellationToken).ConfigureAwait(false);
 
         return response.Message.JobId;

@@ -38,7 +38,7 @@ public class Configuring_a_recurring_job_consumer
 
         var client = harness.GetRequestClient<SubmitJob<RecurringJobMessage>>();
 
-        var jobId = await client.AddOrUpdateRecurringJob(nameof(RecurringJobConsumer), new RecurringJobMessage(), "*/5 * * * * ?",
+        var jobId = await client.AddOrUpdateRecurringJob(nameof(RecurringJobConsumer), new RecurringJobMessage(), x => x.Every(seconds: 5),
             harness.CancellationToken);
 
         Assert.That(await harness.Published.SelectAsync<JobCompleted<RecurringJobMessage>>().Take(2).Count(), Is.EqualTo(2));
