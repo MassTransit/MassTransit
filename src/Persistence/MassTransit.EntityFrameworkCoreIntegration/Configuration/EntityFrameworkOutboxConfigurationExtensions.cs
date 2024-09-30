@@ -209,6 +209,8 @@ namespace MassTransit
         /// <param name="inbox">The model builder</param>
         public static void ConfigureInboxStateEntity(this EntityTypeBuilder<InboxState> inbox)
         {
+            inbox.OptOutOfEntityFrameworkConventions();
+
             inbox.Property(p => p.Id);
             inbox.HasKey(p => p.Id);
 
@@ -256,6 +258,8 @@ namespace MassTransit
         /// <param name="outbox">The model builder</param>
         public static void ConfigureOutboxStateEntity(this EntityTypeBuilder<OutboxState> outbox)
         {
+            outbox.OptOutOfEntityFrameworkConventions();
+
             outbox.Property(p => p.OutboxId);
             outbox.HasKey(p => p.OutboxId);
 
@@ -290,6 +294,8 @@ namespace MassTransit
         /// <param name="outbox">The model builder</param>
         public static void ConfigureOutboxMessageEntity(this EntityTypeBuilder<OutboxMessage> outbox)
         {
+            outbox.OptOutOfEntityFrameworkConventions();
+
             outbox.Property(p => p.SequenceNumber);
             outbox.HasKey(p => p.SequenceNumber);
 
@@ -350,6 +356,19 @@ namespace MassTransit
             outbox.Property(p => p.MessageType);
 
             outbox.Property(p => p.Body);
+        }
+
+        /// <summary>
+        /// Configures the entity type builder to opt out of Entity Framework conventions.
+        /// This method sets the maximum length of all properties to null, effectively removing any length constraints.
+        /// </summary>
+        /// <param name="builder">The EntityTypeBuilder instance to configure.</param>
+        static void OptOutOfEntityFrameworkConventions(this EntityTypeBuilder builder)
+        {
+            foreach (var properties in builder.Metadata.GetProperties())
+            {
+                properties.SetMaxLength(null);
+            }
         }
     }
 }
