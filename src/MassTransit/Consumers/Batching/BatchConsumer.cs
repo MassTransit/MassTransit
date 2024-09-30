@@ -88,7 +88,10 @@
 
             var messageId = context.MessageId ?? NewId.NextGuid();
 
-            var batchEntry = new BatchEntry(context, context.SentTime ?? context.ReceiveContext.GetSentTime() ?? DateTime.UtcNow,
+            long sentTimeAsSequenceFallback() => (context.SentTime ?? context.ReceiveContext.GetSentTime() ?? DateTime.UtcNow).Ticks;
+            var batchEntry = new BatchEntry(
+                context, 
+                context.ReceiveContext.GetSequenceNumber() ?? sentTimeAsSequenceFallback(),
                 () => RemoveCanceledMessage(messageId));
 
             if (!_messages.ContainsKey(messageId))
@@ -197,20 +200,20 @@
 
         List<ConsumeContext<TMessage>> GetMessageBatchInOrder()
         {
-            return _messages.Values.OrderBy(x => x.Timestamp).Select(x => x.Context).ToList();
+            return _messages.Values.OrderBy(x => x.Ordinal).Select(x => x.Context).ToList();
         }
 
 
         readonly struct BatchEntry
         {
             public readonly ConsumeContext<TMessage> Context;
-            public readonly DateTime Timestamp;
+            public readonly long Ordinal;
             readonly CancellationTokenRegistration _registration;
 
-            public BatchEntry(ConsumeContext<TMessage> context, DateTime timestamp, Action canceled)
+            public BatchEntry(ConsumeContext<TMessage> context, long ordinal, Action canceled)
             {
                 Context = context;
-                Timestamp = timestamp;
+                Ordinal = ordinal;
 
                 if (context.CancellationToken.CanBeCanceled)
                     _registration = context.CancellationToken.Register(() => canceled());
