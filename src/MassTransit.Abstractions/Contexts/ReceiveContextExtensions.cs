@@ -98,16 +98,6 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Returns the message sequence number from the transport (not message headers)
-        /// </summary>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        public static long? GetSequenceNumber(this ReceiveContext context)
-        {
-            return context.TransportHeaders.GetSequenceNumber(MessageHeaders.TransportSequenceNumber);
-        }
-
-        /// <summary>
         /// Returns the message sent timestamp from the transport (not message headers)
         /// </summary>
         /// <param name="context"></param>
@@ -267,21 +257,6 @@ namespace MassTransit
                     Guid guid => guid,
                     string text when Guid.TryParse(text, out var guid) => guid,
                     _ => default(Guid?)
-                };
-            }
-
-            return default;
-        }
-
-        static long? GetSequenceNumber(this Headers headers, string key)
-        {
-            if (headers.TryGetHeader(key, out var value))
-            {
-                return value switch
-                {
-                    long number => number,
-                    string text when long.TryParse(text, out var number) => number,
-                    _ => default(long?)
                 };
             }
 

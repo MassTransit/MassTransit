@@ -12,7 +12,8 @@
     public sealed class RabbitMqReceiveContext :
         BaseReceiveContext,
         RabbitMqBasicConsumeContext,
-        TransportReceiveContext
+        TransportReceiveContext,
+        ITransportSequenceNumber
     {
         public RabbitMqReceiveContext(string exchange, string routingKey, string consumerTag, ulong deliveryTag, byte[] body,
             bool redelivered, IBasicProperties properties, RabbitMqReceiveEndpointContext receiveEndpointContext, params object[] payloads)
@@ -36,6 +37,8 @@
         public string Exchange { get; }
         public string RoutingKey { get; }
         public IBasicProperties Properties { get; }
+
+        public ulong? SequenceNumber => DeliveryTag;
 
         public IDictionary<string, object> GetTransportProperties()
         {

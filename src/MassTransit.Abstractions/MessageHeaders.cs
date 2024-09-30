@@ -146,11 +146,6 @@ namespace MassTransit
         public const string TransportSentTime = "TransportSentTime";
 
         /// <summary>
-        /// The Transport sequence number (not supported by all, but hopefully enough)
-        /// </summary>
-        public const string TransportSequenceNumber = "TransportSequenceNumber";
-
-        /// <summary>
         /// When the message is redelivered or scheduled, and a new MessageId was generated, the original messageId
         /// </summary>
         public const string OriginalMessageId = "MT-OriginalMessageId";

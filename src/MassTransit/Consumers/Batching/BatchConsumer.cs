@@ -88,10 +88,12 @@
 
             var messageId = context.MessageId ?? NewId.NextGuid();
 
-            long sentTimeAsSequenceFallback() => (context.SentTime ?? context.ReceiveContext.GetSentTime() ?? DateTime.UtcNow).Ticks;
+            context.TryGetPayload<ITransportSequenceNumber>(out var payload);            
+            ulong sentTimeAsSequenceFallback() => (ulong)(context.SentTime ?? context.ReceiveContext.GetSentTime() ?? DateTime.UtcNow).Ticks;
+
             var batchEntry = new BatchEntry(
-                context, 
-                context.ReceiveContext.GetSequenceNumber() ?? sentTimeAsSequenceFallback(),
+                context,
+                payload.SequenceNumber ?? sentTimeAsSequenceFallback(),
                 () => RemoveCanceledMessage(messageId));
 
             if (!_messages.ContainsKey(messageId))
@@ -207,10 +209,10 @@
         readonly struct BatchEntry
         {
             public readonly ConsumeContext<TMessage> Context;
-            public readonly long Ordinal;
+            public readonly ulong Ordinal;
             readonly CancellationTokenRegistration _registration;
 
-            public BatchEntry(ConsumeContext<TMessage> context, long ordinal, Action canceled)
+            public BatchEntry(ConsumeContext<TMessage> context, ulong ordinal, Action canceled)
             {
                 Context = context;
                 Ordinal = ordinal;

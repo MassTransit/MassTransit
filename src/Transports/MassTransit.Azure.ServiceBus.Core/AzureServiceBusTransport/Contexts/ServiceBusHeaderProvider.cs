@@ -26,8 +26,6 @@
             if (!string.IsNullOrWhiteSpace(_message.ContentType))
                 yield return new KeyValuePair<string, object>(MessageHeaders.ContentType, _message.ContentType);
 
-            yield return new KeyValuePair<string, object>(MessageHeaders.TransportSequenceNumber, _message.SequenceNumber);
-
             if (_message.ApplicationProperties != null)
             {
                 foreach (KeyValuePair<string, object> header in _message.ApplicationProperties)
@@ -62,12 +60,6 @@
             if (MessageHeaders.TransportSentTime.Equals(key, StringComparison.OrdinalIgnoreCase))
             {
                 value = _message.EnqueuedTime.UtcDateTime;
-                return true;
-            }
-
-            if (MessageHeaders.TransportSequenceNumber.Equals(key, StringComparison.OrdinalIgnoreCase))
-            {
-                value = _message.SequenceNumber;
                 return true;
             }
 
