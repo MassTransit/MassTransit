@@ -202,20 +202,20 @@
 
         List<ConsumeContext<TMessage>> GetMessageBatchInOrder()
         {
-            return _messages.Values.OrderBy(x => x.Ordinal).Select(x => x.Context).ToList();
+            return _messages.Values.OrderBy(x => x.Index).Select(x => x.Context).ToList();
         }
 
 
         readonly struct BatchEntry
         {
             public readonly ConsumeContext<TMessage> Context;
-            public readonly ulong Ordinal;
+            public readonly ulong Index;
             readonly CancellationTokenRegistration _registration;
 
-            public BatchEntry(ConsumeContext<TMessage> context, ulong ordinal, Action canceled)
+            public BatchEntry(ConsumeContext<TMessage> context, ulong index, Action canceled)
             {
                 Context = context;
-                Ordinal = ordinal;
+                Index = index;
 
                 if (context.CancellationToken.CanBeCanceled)
                     _registration = context.CancellationToken.Register(() => canceled());
