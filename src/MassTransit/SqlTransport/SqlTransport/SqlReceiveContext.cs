@@ -10,7 +10,8 @@ namespace MassTransit.SqlTransport
     public sealed class SqlReceiveContext :
         BaseReceiveContext,
         SqlMessageContext,
-        TransportReceiveContext
+        TransportReceiveContext,
+        ITransportSequenceNumber
     {
         IHeaderProvider? _headerProvider;
 
@@ -42,6 +43,8 @@ namespace MassTransit.SqlTransport
         public long DeliveryMessageId => TransportMessage.MessageDeliveryId;
         public DateTime EnqueueTime => TransportMessage.EnqueueTime;
         public int DeliveryCount => TransportMessage.DeliveryCount;
+
+        public ulong? SequenceNumber => (ulong)DeliveryMessageId;
 
         public string? PartitionKey => TransportMessage.PartitionKey;
 
