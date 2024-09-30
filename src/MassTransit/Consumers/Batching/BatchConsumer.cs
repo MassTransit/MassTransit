@@ -88,7 +88,12 @@
 
             var messageId = context.MessageId ?? NewId.NextGuid();
 
-            var batchEntry = new BatchEntry(context, context.SentTime ?? context.ReceiveContext.GetSentTime() ?? DateTime.UtcNow,
+            ulong? sequenceNumber = context.ReceiveContext.TryGetPayload<ITransportSequenceNumber>(out var payload) ? payload.SequenceNumber : null;            
+            ulong sentTimeAsSequenceFallback() => (ulong)(context.SentTime ?? context.ReceiveContext.GetSentTime() ?? DateTime.UtcNow).Ticks;
+
+            var batchEntry = new BatchEntry(
+                context,
+                sequenceNumber ?? sentTimeAsSequenceFallback(),
                 () => RemoveCanceledMessage(messageId));
 
             if (!_messages.ContainsKey(messageId))
@@ -197,20 +202,20 @@
 
         List<ConsumeContext<TMessage>> GetMessageBatchInOrder()
         {
-            return _messages.Values.OrderBy(x => x.Timestamp).Select(x => x.Context).ToList();
+            return _messages.Values.OrderBy(x => x.Index).Select(x => x.Context).ToList();
         }
 
 
         readonly struct BatchEntry
         {
             public readonly ConsumeContext<TMessage> Context;
-            public readonly DateTime Timestamp;
+            public readonly ulong Index;
             readonly CancellationTokenRegistration _registration;
 
-            public BatchEntry(ConsumeContext<TMessage> context, DateTime timestamp, Action canceled)
+            public BatchEntry(ConsumeContext<TMessage> context, ulong index, Action canceled)
             {
                 Context = context;
-                Timestamp = timestamp;
+                Index = index;
 
                 if (context.CancellationToken.CanBeCanceled)
                     _registration = context.CancellationToken.Register(() => canceled());
