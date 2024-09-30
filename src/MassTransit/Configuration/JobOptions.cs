@@ -24,7 +24,7 @@ namespace MassTransit
 
             RetryPolicy = Retry.None;
 
-            ProgressBufferSettings = new ProgressBufferSettings();
+            ProgressBuffer = new ProgressBufferSettings();
         }
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace MassTransit
         /// <summary>
         /// Configure the job progress buffer settings, if using job progress (optional)
         /// </summary>
-        public ProgressBufferSettings ProgressBufferSettings { get; }
+        public ProgressBufferSettings ProgressBuffer { get; }
 
         IEnumerable<ValidationResult> ISpecification.Validate()
         {
@@ -130,6 +130,22 @@ namespace MassTransit
             specification.Validate().ThrowIfContainsFailure($"The retry policy was not properly configured: JobOptions<{TypeCache<TJob>.ShortName}");
 
             RetryPolicy = specification.Build();
+
+            return this;
+        }
+
+        /// <summary>
+        /// Set the job progress buffer settings, either value can be set and will update the settings
+        /// </summary>
+        /// <param name="updateLimit">The number of updates to buffer before sending the most recent update to the job saga</param>
+        /// <param name="timeLimit">The time since the first update after the last update sent to the job saga before an update must be sent</param>
+        /// <returns></returns>
+        public JobOptions<TJob> SetProgressBuffer(int? updateLimit = default, TimeSpan? timeLimit = default)
+        {
+            if (updateLimit.HasValue)
+                ProgressBuffer.UpdateLimit = updateLimit.Value;
+            if (timeLimit.HasValue)
+                ProgressBuffer.TimeLimit = timeLimit.Value;
 
             return this;
         }

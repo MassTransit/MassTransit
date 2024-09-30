@@ -57,7 +57,7 @@
             if (_jobs.ContainsKey(startJob.JobId))
                 throw new JobAlreadyExistsException(startJob.JobId);
 
-            var jobContext = new ConsumeJobContext<T>(context, InstanceAddress, job, jobOptions.JobTimeout, jobOptions.ProgressBufferSettings);
+            var jobContext = new ConsumeJobContext<T>(context, InstanceAddress, job, jobOptions.JobTimeout, jobOptions.ProgressBuffer);
 
             LogContext.Debug?.Log("Executing job: {JobType} {JobId} ({RetryAttempt})", TypeCache<T>.ShortName, startJob.JobId,
                 startJob.RetryAttempt);
