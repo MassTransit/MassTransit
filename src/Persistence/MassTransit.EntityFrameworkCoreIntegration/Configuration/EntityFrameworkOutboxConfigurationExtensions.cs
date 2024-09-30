@@ -353,7 +353,6 @@ namespace MassTransit
 
             outbox.Property(p => p.ContentType)
                 .HasMaxLength(256);
-            outbox.Property(p => p.MessageType);
 
             outbox.Property(p => p.Body);
         }
