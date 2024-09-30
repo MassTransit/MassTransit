@@ -88,7 +88,7 @@
 
             var messageId = context.MessageId ?? NewId.NextGuid();
 
-            ulong? sequenceNumber = context.TryGetPayload<ITransportSequenceNumber>(out var payload) ? payload.SequenceNumber : null;            
+            ulong? sequenceNumber = context.ReceiveContext.TryGetPayload<ITransportSequenceNumber>(out var payload) ? payload.SequenceNumber : null;            
             ulong sentTimeAsSequenceFallback() => (ulong)(context.SentTime ?? context.ReceiveContext.GetSentTime() ?? DateTime.UtcNow).Ticks;
 
             var batchEntry = new BatchEntry(
