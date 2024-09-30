@@ -88,12 +88,12 @@
 
             var messageId = context.MessageId ?? NewId.NextGuid();
 
-            context.TryGetPayload<ITransportSequenceNumber>(out var payload);            
+            ulong? sequenceNumber = context.TryGetPayload<ITransportSequenceNumber>(out var payload) ? payload.SequenceNumber : null;            
             ulong sentTimeAsSequenceFallback() => (ulong)(context.SentTime ?? context.ReceiveContext.GetSentTime() ?? DateTime.UtcNow).Ticks;
 
             var batchEntry = new BatchEntry(
                 context,
-                payload.SequenceNumber ?? sentTimeAsSequenceFallback(),
+                sequenceNumber ?? sentTimeAsSequenceFallback(),
                 () => RemoveCanceledMessage(messageId));
 
             if (!_messages.ContainsKey(messageId))
