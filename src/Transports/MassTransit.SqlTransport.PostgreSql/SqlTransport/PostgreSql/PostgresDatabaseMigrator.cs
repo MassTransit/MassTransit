@@ -1047,7 +1047,7 @@ namespace MassTransit.SqlTransport.PostgreSql
             CREATE OR REPLACE VIEW "{0}".queues
             AS
             SELECT x.queue_name,
-                   bool_or(x.queue_auto_delete)                  as queue_auto_delete,
+                   MAX(x.queue_auto_delete)                      as queue_auto_delete,
                    SUM(x.message_ready)                          as ready,
                    SUM(x.message_scheduled)                      as scheduled,
                    SUM(x.message_error)                          as errored,
@@ -1059,7 +1059,7 @@ namespace MassTransit.SqlTransport.PostgreSql
                    COALESCE(MAX(x.duration), 0)::int             as count_duration
 
             FROM (SELECT q.name                                               as queue_name,
-                         CASE WHEN q.auto_delete = 1 THEN true else false end as queue_auto_delete,
+                         q.auto_delete                                        as queue_auto_delete,
                          qm.consume_count,
                          qm.error_count,
                          qm.dead_letter_count,
@@ -1108,12 +1108,12 @@ namespace MassTransit.SqlTransport.PostgreSql
 
             CREATE OR REPLACE VIEW "{0}".subscriptions
             AS
-                SELECT 'topic' as entity, t.name as topic_name, t2.name as destination_name, ts.sub_type as subscription_type, ts.routing_key
+                SELECT t.name as topic_name, 'topic' as destination_type, t2.name as destination_name, ts.sub_type as subscription_type, ts.routing_key
                 FROM "{0}".topic t
                          JOIN "{0}".topic_subscription ts ON t.id = ts.source_id
                          JOIN "{0}".topic t2 on t2.id = ts.destination_id
                 UNION
-                SELECT 'queue' as entity, t.name as topic_name, q.name as destination_name, qs.sub_type as subscription_type, qs.routing_key
+                SELECT t.name as topic_name, 'queue' as destination_type, q.name as destination_name, qs.sub_type as subscription_type, qs.routing_key
                 FROM "{0}".queue_subscription qs
                          LEFT JOIN "{0}".queue q on qs.destination_id = q.id
                          LEFT JOIN "{0}".topic t on qs.source_id = t.id;

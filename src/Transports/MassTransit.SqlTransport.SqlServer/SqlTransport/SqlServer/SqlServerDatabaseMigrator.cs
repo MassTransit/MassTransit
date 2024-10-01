@@ -1444,7 +1444,7 @@ END
             CREATE OR ALTER VIEW {0}.Queues
             AS
             SELECT x.QueueName,
-                   MAX(IIF(x.QueueAutoDelete = 1, 1, 0)) AS QueueAutoDelete,
+                   MAX(x.QueueAutoDelete)                AS QueueAutoDelete,
                    SUM(x.MessageReady)                   AS Ready,
                    SUM(x.MessageScheduled)               AS Scheduled,
                    SUM(x.MessageError)                   AS Errored,
@@ -1456,7 +1456,7 @@ END
                    MAX(x.StartTime)                      AS CountStartTime,
                    ISNULL(MAX(x.Duration), 0)            AS CountDuration
             FROM (SELECT q.Name                                              AS QueueName,
-                         IIF(q.AutoDelete = 1, 1, 0)                         AS QueueAutoDelete,
+                         q.AutoDelete                                        AS QueueAutoDelete,
                          qm.ConsumeCount,
                          qm.ErrorCount,
                          qm.DeadLetterCount,
@@ -1507,12 +1507,12 @@ END
         const string SqlFnSubscriptionsView = """
             CREATE OR ALTER VIEW {0}.Subscriptions
             AS
-                SELECT 'topic' as Entity, t.name as TopicName, t2.name as DestinationName, ts.SubType as SubscriptionType, ts.RoutingKey
+                SELECT t.name as TopicName, 'topic' as DestinationType,  t2.name as DestinationName, ts.SubType as SubscriptionType, ts.RoutingKey
                 FROM {0}.topic t
                          JOIN {0}.TopicSubscription ts ON t.id = ts.sourceid
                          JOIN {0}.topic t2 on t2.id = ts.destinationid
                 UNION
-                SELECT 'queue' as Entity, t.name as TopicName, q.name as DestinationName, qs.SubType as SubscriptionType, qs.RoutingKey
+                SELECT t.name as TopicName, 'queue' as DestinationType, q.name as DestinationName, qs.SubType as SubscriptionType, qs.RoutingKey
                 FROM {0}.queuesubscription qs
                          LEFT JOIN {0}.queue q on qs.destinationid = q.id
                          LEFT JOIN {0}.topic t on qs.sourceid = t.id;
