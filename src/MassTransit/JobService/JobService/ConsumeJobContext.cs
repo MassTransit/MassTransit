@@ -3,6 +3,7 @@ namespace MassTransit.JobService
 {
     using System;
     using System.Diagnostics;
+    using System.Diagnostics.CodeAnalysis;
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
@@ -178,7 +179,7 @@ namespace MassTransit.JobService
             });
         }
 
-        public bool TryGetJobState<T>(out T? jobState)
+        public bool TryGetJobState<T>([NotNullWhen(true)] out T? jobState)
             where T : class
         {
             if (_context.Message.JobState != null)

@@ -1,6 +1,7 @@
 namespace MassTransit
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
     using System.Threading.Tasks;
 
 
@@ -50,7 +51,7 @@ namespace MassTransit
         Task SaveJobState<T>(T? jobState)
             where T : class;
 
-        bool TryGetJobState<T>(out T? jobState)
+        bool TryGetJobState<T>([NotNullWhen(true)] out T? jobState)
             where T : class;
     }
 
