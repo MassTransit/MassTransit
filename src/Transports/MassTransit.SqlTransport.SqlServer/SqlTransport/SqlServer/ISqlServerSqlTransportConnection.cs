@@ -1,14 +1,10 @@
-namespace MassTransit.SqlTransport.SqlServer
+namespace MassTransit.SqlTransport.SqlServer;
+
+using Microsoft.Data.SqlClient;
+
+
+public interface ISqlServerSqlTransportConnection :
+    ISqlTransportConnection
 {
-    using MassTransit.SqlTransport;
-    using Microsoft.Data.SqlClient;
-
-
-    public interface ISqlServerSqlTransportConnection :
-        ISqlTransportConnection
-    {
-        new SqlConnection Connection { get; }
-
-        SqlCommand CreateCommand(string commandText);
-    }
+    SqlConnection Connection { get; }
 }

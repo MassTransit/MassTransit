@@ -31,6 +31,7 @@ namespace MassTransit.SqlTransport.PostgreSql
         readonly string _receiveSql;
         readonly string _renewLockSql;
         readonly string _sendSql;
+        readonly string _touchQueueSql;
         readonly string _unlockSql;
 
         public PostgresClientContext(PostgresDbConnectionContext context, CancellationToken cancellationToken)
@@ -53,6 +54,7 @@ namespace MassTransit.SqlTransport.PostgreSql
             _deleteScheduledMessageSql = string.Format(SqlStatements.DbDeleteScheduledMessageSql, _context.Schema);
             _moveMessageTypeSql = string.Format(SqlStatements.DbMoveMessageSql, _context.Schema);
             _renewLockSql = string.Format(SqlStatements.DbRenewLockSql, _context.Schema);
+            _touchQueueSql = string.Format(SqlStatements.DbTouchQueueSql, _context.Schema);
             _unlockSql = string.Format(SqlStatements.DbUnlockSql, _context.Schema);
         }
 
@@ -138,6 +140,11 @@ namespace MassTransit.SqlTransport.PostgreSql
             {
                 return Array.Empty<SqlTransportMessage>();
             }
+        }
+
+        public override Task TouchQueue(string queueName)
+        {
+            return _context.Query((x, t) => x.QueryAsync<SqlTransportMessage>(_touchQueueSql, new { queue_name = queueName }), CancellationToken);
         }
 
         public override Task Send<T>(string queueName, SqlMessageSendContext<T> context)

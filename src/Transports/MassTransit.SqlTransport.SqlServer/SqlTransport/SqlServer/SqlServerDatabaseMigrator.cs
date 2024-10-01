@@ -1042,6 +1042,28 @@ BEGIN
     RETURN @outMessageDeliveryId;
 END";
 
+        const string SqlFnTouchQueue = @"
+CREATE OR ALTER PROCEDURE {0}.TouchQueue
+    @queueName varchar(256)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @queueId bigint
+    SELECT @queueId = q.Id
+    FROM {0}.Queue q
+    WHERE q.Name = @queueName AND q.Type = 1;
+
+    IF @queueId IS NULL
+    BEGIN
+        THROW 50000, 'Queue not found', 1;
+    END;
+
+    INSERT INTO {0}.QueueMetricCapture (Captured, QueueId, ConsumeCount, ErrorCount, DeadLetterCount)
+        VALUES (GETUTCDATE(), @queueId, 0, 0, 0);
+
+END";
+
         const string SqlFnPurgeQueue = @"
 CREATE OR ALTER PROCEDURE {0}.PurgeQueue
     @queueName varchar(256)
@@ -1058,7 +1080,7 @@ BEGIN
         INTO @DeletedMessages
         FROM {0}.MessageDelivery mdx
             INNER JOIN {0}.queue q on mdx.queueid = q.Id
-        WHERE q.name = 'input-queue'
+        WHERE q.name = @queueName
 
     DELETE FROM {0}.Message
         FROM {0}.Message m
@@ -1404,15 +1426,15 @@ AS
 BEGIN
     WITH expired AS (SELECT q.Id, q.name, DATEADD(second, -q.autodelete, GETUTCDATE()) as expires_at
                      FROM {0}.Queue q
-                     WHERE q.autodelete IS NOT NULL AND DATEADD(second, -q.autodelete, GETUTCDATE()) > updated),
+                     WHERE q.Type = 1 AND  q.AutoDelete IS NOT NULL AND DATEADD(second, -q.AutoDelete, GETUTCDATE()) > Updated),
          metrics AS (SELECT qm.queueid, MAX(starttime) as start_time
                      FROM {0}.queuemetric qm
-                              INNER JOIN expired q2 on q2.id = qm.queueid
+                              INNER JOIN expired q2 on q2.Id = qm.QueueId
                      WHERE DATEADD(second, duration, starttime) > q2.expires_at
                      GROUP BY qm.queueid)
     DELETE FROM {0}.Queue
     FROM {0}.Queue qd
-    INNER JOIN expired qdx ON qdx.Id = qd.Id
+    INNER JOIN expired qdx ON qdx.Name = qd.Name
         WHERE qdx.Id NOT IN (SELECT QueueId FROM metrics);
 
 END
@@ -1550,6 +1572,7 @@ END
                 await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnRequeueMessages, options.Schema)).ConfigureAwait(false);
                 await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnProcessMetrics, options.Schema)).ConfigureAwait(false);
                 await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnPurgeTopology, options.Schema)).ConfigureAwait(false);
+                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnTouchQueue, options.Schema)).ConfigureAwait(false);
                 await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnQueuesView, options.Schema)).ConfigureAwait(false);
                 await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnSubscriptionsView, options.Schema)).ConfigureAwait(false);
 

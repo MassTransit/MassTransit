@@ -77,17 +77,17 @@ namespace MassTransit.SqlTransport.PostgreSql
 
         public Task<T> Query<T>(Func<IDbConnection, IDbTransaction, Task<T>> callback, CancellationToken cancellationToken)
         {
-            return _executor.Run(async () =>
+            return _executor.Run(() =>
             {
-                await using var connection = await CreateConnection(cancellationToken);
-
-                return await _retryPolicy.Retry(async () =>
+                return _retryPolicy.Retry(async () =>
                 {
+                    await using var connection = await CreateConnection(cancellationToken).ConfigureAwait(false);
+
                 #if NET6_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
-                    await using var transaction = await connection.Connection.BeginTransactionAsync(_hostSettings.IsolationLevel, cancellationToken);
+                    await using var transaction = await connection.Connection.BeginTransactionAsync(_hostSettings.IsolationLevel, cancellationToken)
+                        .ConfigureAwait(false);
                 #else
-                // ReSharper disable AccessToDisposedClosure
-                await using var transaction = connection.Connection.BeginTransaction(_hostSettings.IsolationLevel);
+                    await using var transaction = connection.Connection.BeginTransaction(_hostSettings.IsolationLevel);
                 #endif
 
                     var result = await callback(connection.Connection, transaction).ConfigureAwait(false);
@@ -95,7 +95,7 @@ namespace MassTransit.SqlTransport.PostgreSql
                     await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
 
                     return result;
-                }, false, cancellationToken).ConfigureAwait(false);
+                }, false, cancellationToken);
             }, cancellationToken);
         }
 

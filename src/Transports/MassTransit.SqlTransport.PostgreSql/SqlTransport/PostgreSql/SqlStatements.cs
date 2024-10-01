@@ -36,6 +36,7 @@ namespace MassTransit.SqlTransport.PostgreSql
         public const string DbDeleteMessageSql = """SELECT * FROM "{0}".delete_message(@message_delivery_id,@lock_id)""";
         public const string DbDeleteScheduledMessageSql = """SELECT * FROM "{0}".delete_scheduled_message(@token_id)""";
         public const string DbRenewLockSql = """SELECT * FROM "{0}".renew_message_lock(@message_delivery_id,@lock_id,@duration)""";
+        public const string DbTouchQueueSql = """SELECT * FROM "{0}".touch_queue(@queue_name)""";
         public const string DbUnlockSql = """SELECT * FROM "{0}".unlock_message(@message_delivery_id,@lock_id,@delay,@headers)""";
     }
 }

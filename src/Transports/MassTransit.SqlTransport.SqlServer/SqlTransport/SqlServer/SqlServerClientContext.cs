@@ -31,6 +31,7 @@ namespace MassTransit.SqlTransport.SqlServer
         readonly string _receiveSql;
         readonly string _renewMessageLockSql;
         readonly string _sendSql;
+        readonly string _touchQueueSql;
         readonly string _unlockSql;
 
         public SqlServerClientContext(SqlServerDbConnectionContext context, CancellationToken cancellationToken)
@@ -50,6 +51,7 @@ namespace MassTransit.SqlTransport.SqlServer
             _receivePartitionedSql = $"{_context.Schema}.FetchMessagesPartitioned";
             _deleteMessageSql = $"{_context.Schema}.DeleteMessage";
             _renewMessageLockSql = $"{_context.Schema}.RenewMessageLock";
+            _touchQueueSql = $"{_context.Schema}.TouchQueue";
             _unlockSql = $"{_context.Schema}.UnlockMessage";
             _moveMessageTypeSql = $"{_context.Schema}.MoveMessage";
             _deleteScheduledMessageSql = $"{_context.Schema}.DeleteScheduledMessage";
@@ -147,6 +149,11 @@ namespace MassTransit.SqlTransport.SqlServer
             {
                 return Array.Empty<SqlTransportMessage>();
             }
+        }
+
+        public override Task TouchQueue(string queueName)
+        {
+            return Query<SqlTransportMessage>(_touchQueueSql, new { queueName });
         }
 
         public override Task Send<T>(string queueName, SqlMessageSendContext<T> context)

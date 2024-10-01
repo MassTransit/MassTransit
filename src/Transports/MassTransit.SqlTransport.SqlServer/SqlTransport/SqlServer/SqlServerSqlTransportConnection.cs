@@ -1,6 +1,5 @@
 namespace MassTransit.SqlTransport.SqlServer;
 
-using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
@@ -23,8 +22,6 @@ public class SqlServerSqlTransportConnection :
         return default;
     }
 
-    IDbConnection ISqlTransportConnection.Connection => Connection;
-
     public Task Open(CancellationToken cancellationToken = default)
     {
         return Connection.OpenAsync(cancellationToken);
@@ -35,14 +32,6 @@ public class SqlServerSqlTransportConnection :
         Connection.Close();
 
         return Task.CompletedTask;
-    }
-
-    public SqlCommand CreateCommand(string commandText)
-    {
-        var command = new SqlCommand(commandText);
-        command.Connection = Connection;
-
-        return command;
     }
 
     public static SqlServerSqlTransportConnection GetSystemDatabaseConnection(SqlTransportOptions options)
@@ -85,18 +74,16 @@ public class SqlServerSqlTransportConnection :
         if (!string.IsNullOrWhiteSpace(options.Host))
             builder.DataSource = options.FormatDataSource();
         else if (!string.IsNullOrWhiteSpace(builder.DataSource))
-        {
             (options.Host, options.Port) = ParseDataSource(builder.DataSource);
-        }
 
         if (!string.IsNullOrWhiteSpace(options.Database))
             builder.InitialCatalog = options.Database;
-        else if(!string.IsNullOrWhiteSpace(builder.InitialCatalog))
+        else if (!string.IsNullOrWhiteSpace(builder.InitialCatalog))
             options.Database = builder.InitialCatalog;
 
         if (!string.IsNullOrWhiteSpace(options.Username))
             builder.UserID = options.Username;
-        else if(!string.IsNullOrWhiteSpace(builder.UserID))
+        else if (!string.IsNullOrWhiteSpace(builder.UserID))
             options.Username = builder.UserID;
         if (!string.IsNullOrWhiteSpace(options.Password))
             builder.Password = options.Password;

@@ -19,8 +19,10 @@ namespace MassTransit.SqlTransport.Middleware
     {
         readonly ClientContext _client;
         readonly SqlReceiveEndpointContext _context;
-        readonly IChannelExecutorPool<SqlTransportMessage> _executorPool;
+        readonly OrderedChannelExecutorPool _executorPool;
         readonly ReceiveSettings _receiveSettings;
+
+        DateTime? _lastMetricUpdate;
 
         /// <summary>
         /// The basic consumer receives messages pushed from the broker.
@@ -112,6 +114,17 @@ namespace MassTransit.SqlTransport.Middleware
                 if (messages.Count > 0)
                     return messages;
 
+                if (_receiveSettings.AutoDeleteOnIdle.HasValue)
+                {
+                    if (_lastMetricUpdate.HasValue == false
+                        || _lastMetricUpdate.Value + new TimeSpan(_receiveSettings.AutoDeleteOnIdle.Value.Ticks / 2) > DateTime.UtcNow)
+                    {
+                        await _client.TouchQueue(_receiveSettings.EntityName).ConfigureAwait(false);
+
+                        _lastMetricUpdate = DateTime.UtcNow;
+                    }
+                }
+
                 try
                 {
                     var delayTask = _receiveSettings.QueueId.HasValue
@@ -164,7 +177,7 @@ namespace MassTransit.SqlTransport.Middleware
             static byte[] PartitionKeyProvider(SqlTransportMessage message)
             {
                 return string.IsNullOrEmpty(message.PartitionKey)
-                    ? Array.Empty<byte>()
+                    ? []
                     : Encoding.UTF8.GetBytes(message.PartitionKey);
             }
         }

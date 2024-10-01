@@ -1,13 +1,12 @@
-namespace MassTransit.SqlTransport.PostgreSql
+namespace MassTransit.SqlTransport.PostgreSql;
+
+using Npgsql;
+
+
+public interface IPostgresSqlTransportConnection :
+    ISqlTransportConnection
 {
-    using Npgsql;
+    NpgsqlConnection Connection { get; }
 
-
-    public interface IPostgresSqlTransportConnection :
-        ISqlTransportConnection
-    {
-        new NpgsqlConnection Connection { get; }
-
-        NpgsqlCommand CreateCommand(string commandText);
-    }
+    NpgsqlCommand CreateCommand(string commandText);
 }

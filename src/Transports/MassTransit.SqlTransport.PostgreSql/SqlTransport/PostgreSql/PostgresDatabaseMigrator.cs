@@ -572,6 +572,30 @@ namespace MassTransit.SqlTransport.PostgreSql
             END;
             $$;
 
+            CREATE OR REPLACE FUNCTION "{0}".touch_queue(queue_name text)
+                RETURNS bigint
+                LANGUAGE PLPGSQL
+            AS
+            $$
+            DECLARE
+                v_queue_id              bigint;
+            BEGIN
+                IF queue_name IS NULL OR LENGTH(queue_name) < 1 THEN
+                    RAISE EXCEPTION 'Queue name must not be null';
+                END IF;
+
+                SELECT INTO v_queue_id q.Id FROM "{0}".queue q WHERE q.name = queue_name AND q.type = 1;
+                IF v_queue_id IS NULL THEN
+                    RAISE EXCEPTION 'Queue not found: %', queue_name;
+                END IF;
+
+                INSERT INTO "{0}".queue_metric_capture (captured, queue_id, consume_count, error_count, dead_letter_count)
+                    VALUES (now() at time zone 'utc', v_queue_id, 0, 0, 0);
+
+                RETURN v_queue_id;
+            END;
+            $$;
+
             CREATE OR REPLACE FUNCTION "{0}".delete_scheduled_message(token_id uuid)
                 RETURNS TABLE (transport_message_id uuid)
                 LANGUAGE PLPGSQL
@@ -954,15 +978,15 @@ namespace MassTransit.SqlTransport.PostgreSql
             BEGIN
                 WITH expired AS (SELECT q.id, q.name, (now() at time zone 'utc') - make_interval(secs => q.auto_delete) as expires_at
                                  FROM "{0}".queue q
-                                 WHERE q.auto_delete IS NOT NULL AND (now() at time zone 'utc') - make_interval(secs => q.auto_delete) > updated),
+                                 WHERE q.type = 1 AND q.auto_delete IS NOT NULL AND (now() at time zone 'utc') - make_interval(secs => q.auto_delete) > updated),
                      metrics AS (SELECT qm.queue_id, MAX(start_time) as start_time
                                  FROM "{0}".queue_metric qm
                                           INNER JOIN expired q2 on q2.id = qm.queue_id
                                  WHERE start_time + duration > q2.expires_at
                                  GROUP BY qm.queue_id)
                 DELETE FROM "{0}".queue qd
-                       USING (SELECT qdx.id FROM expired qdx WHERE qdx.id NOT IN (SELECT queue_id FROM metrics)) exp
-                       WHERE qd.id = exp.id;
+                       USING (SELECT qdx.name FROM expired qdx WHERE qdx.id NOT IN (SELECT queue_id FROM metrics)) exp
+                       WHERE qd.name = exp.name;
 
                 RETURN 0;
             END;
