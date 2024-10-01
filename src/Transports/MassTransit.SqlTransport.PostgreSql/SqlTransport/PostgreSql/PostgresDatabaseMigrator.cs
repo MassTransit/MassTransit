@@ -1082,6 +1082,18 @@ namespace MassTransit.SqlTransport.PostgreSql
                                       ORDER BY qm.queue_id, qm.start_time DESC) qm ON qm.queue_id = q.id) x
             GROUP BY x.queue_name;
 
+            CREATE OR REPLACE VIEW "{0}".subscriptions
+            AS
+                SELECT 'topic' as entity, t.name as topic_name, t2.name as destination_name, ts.sub_type as subscription_type, ts.routing_key
+                FROM "{0}".topic t
+                         JOIN "{0}".topic_subscription ts ON t.id = ts.source_id
+                         JOIN "{0}".topic t2 on t2.id = ts.destination_id
+                UNION
+                SELECT 'queue' as entity, t.name as topic_name, q.name as destination_name, qs.sub_type as subscription_type, qs.routing_key
+                FROM "{0}".queue_subscription qs
+                         LEFT JOIN "{0}".queue q on qs.destination_id = q.id
+                         LEFT JOIN "{0}".topic t on qs.source_id = t.id;
+
             SET ROLE none;
             """;
 
