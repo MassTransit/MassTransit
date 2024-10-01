@@ -1,12 +1,21 @@
 namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
+    using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
+    using Internals;
     using JobConsumerTests;
+    using Logging;
     using MassTransit.Contracts.JobService;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.DependencyInjection.Extensions;
+    using Microsoft.Extensions.Hosting;
+    using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
     using NUnit.Framework;
     using Testing;
+    using Util;
 
 
     namespace JobConsumerTests
@@ -47,6 +56,87 @@ namespace MassTransit.RabbitMqTransport.Tests
     [TestFixture]
     public class JobConsumer_Specs
     {
+        [Test]
+        [Explicit]
+        public async Task Should_cancel_on_shutdown_and_then_restart_the_job()
+        {
+            await using var provider = new ServiceCollection()
+                .AddMassTransit(x =>
+                {
+                    x.AddOptions<TextWriterLoggerOptions>();
+                    x.TryAddSingleton<ILoggerFactory>(provider =>
+                        new TextWriterLoggerFactory(Console.Out, provider.GetRequiredService<IOptions<TextWriterLoggerOptions>>()));
+                    x.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
+
+                    x.AddOptions<RabbitMqTransportOptions>()
+                        .Configure(options => options.VHost = "test");
+
+                    x.SetKebabCaseEndpointNameFormatter();
+
+                    x.AddConsumer<OddJobConsumer>()
+                        .Endpoint(e => e.Name = "odd-job");
+
+                    x.AddConsumer<OddJobCompletedConsumer>()
+                        .Endpoint(e => e.ConcurrentMessageLimit = 1);
+
+                    x.SetInMemorySagaRepositoryProvider();
+
+                    x.AddJobSagaStateMachines(options =>
+                    {
+                        options.SlotWaitTime = TimeSpan.FromSeconds(1);
+                    });
+                    x.SetJobConsumerOptions(options => options.HeartbeatInterval = TimeSpan.FromSeconds(10))
+                        .Endpoint(e => e.PrefetchCount = 100);
+
+                    x.UsingRabbitMq((context, cfg) =>
+                    {
+                        cfg.UseDelayedMessageScheduler();
+
+                        cfg.ConfigureEndpoints(context);
+                    });
+                })
+                .BuildServiceProvider(true);
+
+            IHostedService[] services = provider.GetServices<IHostedService>().ToArray();
+
+            foreach (var service in services)
+                await service.StartAsync(CancellationToken.None).ConfigureAwait(false);
+
+            var jobId = NewId.NextGuid();
+
+            var connector = provider.GetRequiredService<IReceiveEndpointConnector>();
+
+            TaskCompletionSource<bool> started = TaskUtil.GetTask<bool>();
+            TaskCompletionSource<bool> completed = TaskUtil.GetTask<bool>();
+
+            var handle = connector.ConnectReceiveEndpoint("observers", (context, cfg) =>
+            {
+                cfg.Handler<JobStarted>(async e => started.TrySetResult(true));
+                cfg.Handler<JobCompleted>(async e => completed.TrySetResult(true));
+            });
+
+            await handle.Ready;
+
+            await using var scope = provider.CreateAsyncScope();
+
+            _ = await scope.ServiceProvider.GetRequiredService<IRequestClient<SubmitJob<OddJob>>>()
+                .SubmitJob(jobId, new { Duration = TimeSpan.FromSeconds(5) });
+
+            await started.Task.OrTimeout(TimeSpan.FromSeconds(10));
+
+            await Task.Delay(1000);
+
+            foreach (var service in services.Reverse())
+                await service.StopAsync(CancellationToken.None).ConfigureAwait(false);
+
+            await Task.Delay(1000);
+
+            foreach (var service in services)
+                await service.StartAsync(CancellationToken.None).ConfigureAwait(false);
+
+            await completed.Task.OrTimeout(TimeSpan.FromSeconds(10));
+        }
+
         [Test]
         public async Task Should_cancel_the_job()
         {
@@ -172,7 +262,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 Assert.That(await harness.Sent.Any<JobSlotReleased>(), Is.True);
             });
 
-            await harness.Bus.Publish<RetryJob>(new { JobId = jobId });
+            await harness.Bus.RetryJob(jobId);
             await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Published.Any<JobCompleted>(), Is.True);
@@ -198,7 +288,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             IRequestClient<SubmitJob<OddJob>> client = harness.GetRequestClient<SubmitJob<OddJob>>();
 
-            Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new
+            await client.GetResponse<JobSubmissionAccepted>(new
             {
                 JobId = previousJobId,
                 Job = new { Duration = TimeSpan.FromSeconds(10) }
@@ -206,7 +296,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             Assert.That(await harness.Published.Any<JobStarted>(x => x.Context.Message.JobId == previousJobId), Is.True);
 
-            response = await client.GetResponse<JobSubmissionAccepted>(new
+            Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new
             {
                 JobId = jobId,
                 Job = new { Duration = TimeSpan.FromSeconds(10) }
@@ -317,12 +407,12 @@ namespace MassTransit.RabbitMqTransport.Tests
             await harness.Stop();
         }
 
-        static ServiceProvider SetupServiceCollection()
+        static ServiceProvider SetupServiceCollection(bool cleanVirtualHost = true)
         {
             var provider = new ServiceCollection()
                 .ConfigureRabbitMqTestOptions(options =>
                 {
-                    options.CleanVirtualHost = true;
+                    options.CleanVirtualHost = cleanVirtualHost;
                     options.CreateVirtualHostIfNotExists = true;
                 })
                 .AddMassTransitTestHarness(x =>

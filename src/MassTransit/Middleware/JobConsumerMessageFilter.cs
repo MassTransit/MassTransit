@@ -21,13 +21,13 @@ namespace MassTransit.Middleware
             _retryPolicy = retryPolicy;
         }
 
-        void IProbeSite.Probe(ProbeContext context)
+        public void Probe(ProbeContext context)
         {
             var scope = context.CreateScope("consume");
             scope.Add("method", $"Consume(ConsumeContext<{TypeCache<TJob>.ShortName}> context)");
         }
 
-        Task IFilter<ConsumerConsumeContext<TConsumer, TJob>>.Send(ConsumerConsumeContext<TConsumer, TJob> context,
+        public Task Send(ConsumerConsumeContext<TConsumer, TJob> context,
             IPipe<ConsumerConsumeContext<TConsumer, TJob>> next)
         {
             if (context.Consumer is IJobConsumer<TJob> messageConsumer)
@@ -55,7 +55,7 @@ namespace MassTransit.Middleware
             }
             catch (OperationCanceledException exception) when (jobContext.CancellationToken == exception.CancellationToken)
             {
-                await notifyJobContext.NotifyCanceled("Operation canceled").ConfigureAwait(false);
+                await notifyJobContext.NotifyCanceled().ConfigureAwait(false);
             }
             catch (Exception exception)
             {

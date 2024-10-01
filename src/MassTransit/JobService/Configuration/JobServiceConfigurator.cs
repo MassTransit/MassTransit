@@ -129,9 +129,9 @@ namespace MassTransit.Configuration
 
         public IEnumerable<ValidationResult> Validate()
         {
-            ISpecification turnoutOptions = _options;
+            ISpecification options = _options;
 
-            return turnoutOptions.Validate();
+            return options.Validate();
         }
 
         public void OnConfigureEndpoint(Action<IReceiveEndpointConfigurator> callback)
@@ -172,7 +172,6 @@ namespace MassTransit.Configuration
                     e.UsePartitioner<JobSlotUnavailable>(partition, p => p.Message.JobId);
                     e.UsePartitioner<Fault<AllocateJobSlot>>(partition, p => p.Message.Message.JobId);
 
-                    e.UsePartitioner<JobAttemptCreated>(partition, p => p.Message.JobId);
                     e.UsePartitioner<Fault<StartJobAttempt>>(partition, p => p.Message.Message.JobId);
 
                     e.UsePartitioner<JobAttemptCanceled>(partition, p => p.Message.JobId);
@@ -180,8 +179,12 @@ namespace MassTransit.Configuration
                     e.UsePartitioner<JobAttemptFaulted>(partition, p => p.Message.JobId);
                     e.UsePartitioner<JobAttemptStarted>(partition, p => p.Message.JobId);
 
+                    e.UsePartitioner<GetJobState>(partition, p => p.Message.JobId);
+
                     e.UsePartitioner<JobCompleted>(partition, p => p.Message.JobId);
                     e.UsePartitioner<CancelJob>(partition, p => p.Message.JobId);
+                    e.UsePartitioner<RetryJob>(partition, p => p.Message.JobId);
+                    e.UsePartitioner<RunJob>(partition, p => p.Message.JobId);
 
                     e.UsePartitioner<SaveJobState>(partition, p => p.Message.JobId);
                     e.UsePartitioner<SetJobProgress>(partition, p => p.Message.JobId);
@@ -212,6 +215,8 @@ namespace MassTransit.Configuration
                     var partition = new Partitioner(_options.SagaPartitionCount.Value, new Murmur3UnsafeHashGenerator());
 
                     e.UsePartitioner<StartJobAttempt>(partition, p => p.Message.AttemptId);
+                    e.UsePartitioner<FinalizeJobAttempt>(partition, p => p.Message.AttemptId);
+                    e.UsePartitioner<CancelJobAttempt>(partition, p => p.Message.AttemptId);
                     e.UsePartitioner<Fault<StartJob>>(partition, p => p.Message.Message.AttemptId);
 
                     e.UsePartitioner<JobAttemptStarted>(partition, p => p.Message.AttemptId);

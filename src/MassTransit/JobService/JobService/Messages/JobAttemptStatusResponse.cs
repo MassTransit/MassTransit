@@ -5,11 +5,11 @@ using System;
 using Contracts.JobService;
 
 
-public class JobAttemptCanceledEvent :
-    JobAttemptCanceled
+public class JobAttemptStatusResponse :
+    JobAttemptStatus
 {
     public Guid JobId { get; set; }
     public Guid AttemptId { get; set; }
     public DateTime Timestamp { get; set; }
-    public string? Reason { get; set; }
+    public JobStatus Status { get; set; }
 }

@@ -26,14 +26,14 @@ namespace MassTransit.JobService
             if (context.Message.JobTypeId != _jobTypeId)
                 return Task.CompletedTask;
 
-            _ = context.GetJob<TJob>() ?? throw new SerializationException($"The job could not be deserialized: {TypeCache<TJob>.ShortName}");
+            var job = context.GetJob<TJob>() ?? throw new SerializationException($"The job could not be deserialized: {TypeCache<TJob>.ShortName}");
 
             return context.Publish<JobCompleted<TJob>>(new JobCompletedEvent<TJob>
             {
                 JobId = context.Message.JobId,
                 Timestamp = context.Message.Timestamp,
                 Duration = context.Message.Duration,
-                Job = context.Message.Job,
+                Job = job,
                 Result = context.Message.Result,
             });
         }

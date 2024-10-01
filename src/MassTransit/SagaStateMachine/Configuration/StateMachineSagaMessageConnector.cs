@@ -27,6 +27,9 @@
                 if (_messageFilter != null)
                     configurator.UseFilter(_messageFilter);
 
+                if (_sagaFilterFactory == null)
+                    throw new ConfigurationException($"The event was not properly correlated: {TypeCache<TInstance>.ShortName} - {TypeCache<TData>.ShortName}");
+
                 configurator.UseFilter(_sagaFilterFactory(repository, _policy, sagaPipe));
             }
         }

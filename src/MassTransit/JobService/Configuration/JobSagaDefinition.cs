@@ -38,7 +38,6 @@ namespace MassTransit.Configuration
                 configurator.UsePartitioner<JobSlotUnavailable>(partition, p => p.Message.JobId);
                 configurator.UsePartitioner<Fault<AllocateJobSlot>>(partition, p => p.Message.Message.JobId);
 
-                configurator.UsePartitioner<JobAttemptCreated>(partition, p => p.Message.JobId);
                 configurator.UsePartitioner<Fault<StartJobAttempt>>(partition, p => p.Message.Message.JobId);
 
                 configurator.UsePartitioner<JobAttemptCanceled>(partition, p => p.Message.JobId);
@@ -46,8 +45,12 @@ namespace MassTransit.Configuration
                 configurator.UsePartitioner<JobAttemptFaulted>(partition, p => p.Message.JobId);
                 configurator.UsePartitioner<JobAttemptStarted>(partition, p => p.Message.JobId);
 
+                configurator.UsePartitioner<GetJobState>(partition, p => p.Message.JobId);
+
                 configurator.UsePartitioner<JobCompleted>(partition, p => p.Message.JobId);
                 configurator.UsePartitioner<CancelJob>(partition, p => p.Message.JobId);
+                configurator.UsePartitioner<RetryJob>(partition, p => p.Message.JobId);
+                configurator.UsePartitioner<RunJob>(partition, p => p.Message.JobId);
 
                 configurator.UsePartitioner<SetJobProgress>(partition, p => p.Message.JobId);
                 configurator.UsePartitioner<SaveJobState>(partition, p => p.Message.JobId);

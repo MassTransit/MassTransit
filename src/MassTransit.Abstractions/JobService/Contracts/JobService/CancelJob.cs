@@ -11,11 +11,6 @@ namespace MassTransit.Contracts.JobService
         Guid JobId { get; }
 
         /// <summary>
-        /// The time the job was started
-        /// </summary>
-        DateTime Timestamp { get; }
-
-        /// <summary>
         /// The reason for cancelling the job
         /// </summary>
         string? Reason { get; }

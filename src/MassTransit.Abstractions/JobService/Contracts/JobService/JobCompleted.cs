@@ -33,7 +33,7 @@ namespace MassTransit.Contracts.JobService
     /// <summary>
     /// Published when a job completes (separately from <see cref="JobCompleted"/>)
     /// </summary>
-    public interface JobCompleted<T>
+    public interface JobCompleted<out T>
         where T : class
     {
         Guid JobId { get; }
@@ -42,10 +42,7 @@ namespace MassTransit.Contracts.JobService
 
         TimeSpan Duration { get; }
 
-        /// <summary>
-        /// The arguments used to start the job
-        /// </summary>
-        Dictionary<string, object> Job { get; }
+        T Job { get; }
 
         /// <summary>
         /// The result of the job

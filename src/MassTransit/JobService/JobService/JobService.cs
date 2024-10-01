@@ -10,6 +10,7 @@
     using Consumer;
     using Contracts.JobService;
     using Messages;
+    using Middleware;
 
 
     public class JobService :
@@ -89,7 +90,7 @@
                     {
                         LogContext.Debug?.Log("Canceling job: {JobId}", jobHandle.JobId);
 
-                        await jobHandle.Cancel().ConfigureAwait(false);
+                        await jobHandle.Cancel(JobCancellationReasons.Shutdown).ConfigureAwait(false);
                     }
                     catch (Exception ex)
                     {
@@ -146,6 +147,11 @@
 
         public void ConfigureSuperviseJobConsumer(IReceiveEndpointConfigurator configurator)
         {
+            var partition = new Middleware.Partitioner(16, new Murmur3UnsafeHashGenerator());
+
+            configurator.UsePartitioner<CancelJobAttempt>(partition, p => p.Message.JobId);
+            configurator.UsePartitioner<GetJobAttemptStatus>(partition, p => p.Message.JobId);
+
             var consumerFactory = new DelegateConsumerFactory<SuperviseJobConsumer>(() => new SuperviseJobConsumer(this));
 
             var consumerConfigurator = new ConsumerConfigurator<SuperviseJobConsumer>(consumerFactory, configurator);

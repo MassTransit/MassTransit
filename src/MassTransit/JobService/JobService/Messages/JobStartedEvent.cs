@@ -13,3 +13,14 @@ public class JobStartedEvent :
     public int RetryAttempt { get; set; }
     public DateTime Timestamp { get; set; }
 }
+
+
+public class JobStartedEvent<T> :
+    JobStarted<T>
+    where T : class
+{
+    public Guid JobId { get; set; }
+    public Guid AttemptId { get; set; }
+    public int RetryAttempt { get; set; }
+    public DateTime Timestamp { get; set; }
+}

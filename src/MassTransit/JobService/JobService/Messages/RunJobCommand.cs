@@ -5,9 +5,8 @@ using System;
 using Contracts.JobService;
 
 
-public class GetJobAttemptStatusCommand :
-    GetJobAttemptStatus
+public class RunJobCommand :
+    RunJob
 {
     public Guid JobId { get; set; }
-    public Guid AttemptId { get; set; }
 }

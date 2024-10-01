@@ -1,4 +1,5 @@
-﻿namespace MassTransit.JobService
+﻿#nullable enable
+namespace MassTransit.JobService
 {
     using System;
     using System.Threading.Tasks;
@@ -22,12 +23,12 @@
         public Guid JobId => _context.JobId;
         public Task JobTask { get; }
 
-        public async Task Cancel()
+        public async Task Cancel(string? reason)
         {
             if (_context.CancellationToken.IsCancellationRequested)
                 return;
 
-            _context.Cancel();
+            _context.Cancel(reason);
 
             try
             {

@@ -39,7 +39,7 @@ namespace MassTransit.Tests
                     if (context.RetryAttempt == 0)
                         await Task.Delay(context.Job.Duration, context.CancellationToken);
 
-                    if(context.RetryAttempt > 0 && context.LastProgressValue is null)
+                    if (context.RetryAttempt > 0 && context.LastProgressValue is null)
                     {
                         throw new InvalidOperationException("The progress was not stored");
                     }
@@ -340,7 +340,8 @@ namespace MassTransit.Tests
                 Assert.That(await harness.Sent.Any<JobSlotReleased>(), Is.True);
             });
 
-            await harness.Bus.Publish<RetryJob>(new { JobId = jobId });
+            await harness.Bus.RetryJob(jobId);
+
             await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Published.Any<JobCompleted>(), Is.True);

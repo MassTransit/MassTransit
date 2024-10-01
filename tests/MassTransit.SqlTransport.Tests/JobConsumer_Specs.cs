@@ -178,7 +178,8 @@ namespace MassTransit.DbTransport.Tests
 
             await Task.Delay(500);
 
-            await harness.Bus.Publish<RetryJob>(new { JobId = jobId });
+            await harness.Bus.RetryJob(jobId);
+
             await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Published.Any<JobCompleted>(), Is.True);

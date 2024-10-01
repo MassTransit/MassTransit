@@ -19,6 +19,12 @@ namespace MassTransit.Tests
         }
 
 
+        public class CustomDependency :
+            ICustomDependency
+        {
+        }
+
+
         public class OddJobFaultConsumer :
             IJobConsumer<OddJob>
         {
@@ -28,7 +34,10 @@ namespace MassTransit.Tests
 
             public async Task Run(JobContext<OddJob> context)
             {
-                await Task.Delay(context.Job.Duration, context.CancellationToken);
+                if (context.RetryAttempt > 0)
+                    await Task.Delay(context.Job.Duration, context.CancellationToken);
+                else
+                    throw new InvalidOperationException("Failing the first time, for fun");
             }
         }
     }
@@ -40,7 +49,7 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_detect_the_faulted_job()
         {
-            await using var provider = SetupServiceCollection();
+            await using var provider = SetupServiceCollection(x => x.AddConsumer<OddJobFaultConsumer>());
 
             var harness = provider.GetTestHarness();
 
@@ -67,16 +76,51 @@ namespace MassTransit.Tests
             });
         }
 
-        static ServiceProvider SetupServiceCollection()
+        [Test]
+        public async Task Should_retry_the_faulted_job_and_pass_the_second_time()
+        {
+            await using var provider = SetupServiceCollection(x =>
+            {
+                x.AddConsumer<OddJobFaultConsumer>(c => c.Options<JobOptions<OddJob>>(options => options.SetRetry(r => r.Immediate(2))));
+                x.AddScoped<ICustomDependency, CustomDependency>();
+            });
+
+            var harness = provider.GetTestHarness();
+
+            await harness.Start();
+
+            var jobId = NewId.NextGuid();
+
+            IRequestClient<SubmitJob<OddJob>> client = harness.GetRequestClient<SubmitJob<OddJob>>();
+
+            var duration = TimeSpan.FromSeconds(2);
+
+            var submittedJobId = await client.SubmitJob(jobId, new { Duration = duration });
+
+            await Assert.MultipleAsync(async () =>
+            {
+                Assert.That(submittedJobId, Is.EqualTo(jobId));
+
+                Assert.That(await harness.Published.Any<JobSubmitted>(), Is.True);
+
+                Assert.That(await harness.Published.Any<JobCompleted<OddJob>>(), Is.True);
+
+                IPublishedMessage<JobCompleted<OddJob>> completed = await harness.Published.SelectAsync<JobCompleted<OddJob>>().FirstOrDefault();
+
+                Assert.That(completed.Context.Message.Job.Duration, Is.EqualTo(duration));
+            });
+        }
+
+        static ServiceProvider SetupServiceCollection(Action<IBusRegistrationConfigurator> configure = null)
         {
             var provider = new ServiceCollection()
                 .AddMassTransitTestHarness(x =>
                 {
+                    configure?.Invoke(x);
+
                     x.SetTestTimeouts(testInactivityTimeout: TimeSpan.FromSeconds(10));
 
                     x.SetKebabCaseEndpointNameFormatter();
-
-                    x.AddConsumer<OddJobFaultConsumer>();
 
                     x.UsingInMemory((context, cfg) =>
                     {

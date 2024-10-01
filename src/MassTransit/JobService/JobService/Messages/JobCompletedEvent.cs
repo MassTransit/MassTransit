@@ -24,6 +24,6 @@ public class JobCompletedEvent<T> :
     public Guid JobId { get; set; }
     public DateTime Timestamp { get; set; }
     public TimeSpan Duration { get; set; }
-    public Dictionary<string, object> Job { get; set; } = null!;
+    public T Job { get; set; } = null!;
     public Dictionary<string, object> Result { get; set; } = null!;
 }

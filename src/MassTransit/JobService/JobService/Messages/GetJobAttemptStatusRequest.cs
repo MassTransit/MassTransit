@@ -5,9 +5,9 @@ using System;
 using Contracts.JobService;
 
 
-public class CancelJobCommand :
-    CancelJob
+public class GetJobAttemptStatusRequest :
+    GetJobAttemptStatus
 {
     public Guid JobId { get; set; }
-    public string? Reason { get; set; }
+    public Guid AttemptId { get; set; }
 }

@@ -172,7 +172,7 @@ namespace MassTransit.ActiveMqTransport.Tests
                 Assert.That(await harness.Sent.Any<JobSlotReleased>(), Is.True);
             });
 
-            await harness.Bus.Publish<RetryJob>(new { JobId = jobId });
+            await harness.Bus.RetryJob(jobId);
             await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Published.Any<JobCompleted>(), Is.True);

@@ -57,10 +57,21 @@ namespace MassTransit.Testing
         /// <param name="cancellationToken"></param>
         public static async Task Stop(this ITestHarness harness, CancellationToken cancellationToken = default)
         {
-            IHostedService[] services = harness.Scope.ServiceProvider.GetServices<IHostedService>().ToArray();
+            IHostedService[] services = harness.Provider.GetServices<IHostedService>().ToArray();
 
             foreach (var service in services.Reverse())
                 await service.StopAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        public static async Task RestartHostedServices(this ITestHarness harness, CancellationToken cancellationToken = default)
+        {
+            IHostedService[] services = harness.Provider.GetServices<IHostedService>().ToArray();
+
+            foreach (var service in services.Reverse())
+                await service.StopAsync(cancellationToken).ConfigureAwait(false);
+
+            foreach (var service in services)
+                await service.StartAsync(cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>

@@ -7,7 +7,7 @@ namespace MassTransit.Contracts.JobService
     {
         Guid JobId { get; }
         Guid AttemptId { get; }
-        int RetryAttempt { get; }
         DateTime Timestamp { get; }
+        string Reason { get; }
     }
 }

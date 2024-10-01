@@ -7,7 +7,7 @@ using Contracts.JobService;
 
 public interface INotifyJobContext
 {
-    Task NotifyCanceled(string? reason = null);
+    Task NotifyCanceled();
     Task NotifyStarted();
     Task NotifyCompleted();
     Task NotifyFaulted(Exception exception, TimeSpan? delay = default);

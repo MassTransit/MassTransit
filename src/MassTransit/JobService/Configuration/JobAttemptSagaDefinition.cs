@@ -33,6 +33,8 @@ namespace MassTransit.Configuration
                 var partition = new Partitioner(_options.ConcurrentMessageLimit.Value, new Murmur3UnsafeHashGenerator());
 
                 configurator.UsePartitioner<StartJobAttempt>(partition, p => p.Message.AttemptId);
+                configurator.UsePartitioner<FinalizeJobAttempt>(partition, p => p.Message.AttemptId);
+                configurator.UsePartitioner<CancelJobAttempt>(partition, p => p.Message.AttemptId);
                 configurator.UsePartitioner<Fault<StartJob>>(partition, p => p.Message.Message.AttemptId);
 
                 configurator.UsePartitioner<JobAttemptStarted>(partition, p => p.Message.AttemptId);
