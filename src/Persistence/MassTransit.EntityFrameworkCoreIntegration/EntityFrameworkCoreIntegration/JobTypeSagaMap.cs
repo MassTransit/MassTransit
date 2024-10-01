@@ -16,6 +16,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
         protected override void Configure(EntityTypeBuilder<JobTypeSaga> entity, ModelBuilder model)
         {
+            entity.OptOutOfEntityFrameworkConventions();
+
             entity.Property(x => x.CurrentState);
 
             entity.Ignore(x => x.Version);

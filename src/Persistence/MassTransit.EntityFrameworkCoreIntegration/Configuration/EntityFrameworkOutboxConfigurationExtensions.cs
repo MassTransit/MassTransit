@@ -363,7 +363,7 @@ namespace MassTransit
         /// This method sets the maximum length of all properties to null, effectively removing any length constraints.
         /// </summary>
         /// <param name="builder">The EntityTypeBuilder instance to configure.</param>
-        static void OptOutOfEntityFrameworkConventions(this EntityTypeBuilder builder)
+        internal static void OptOutOfEntityFrameworkConventions(this EntityTypeBuilder builder)
         {
             foreach (var properties in builder.Metadata.GetProperties())
             {
