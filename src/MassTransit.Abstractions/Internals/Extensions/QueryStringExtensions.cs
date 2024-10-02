@@ -106,6 +106,9 @@
                 hostPath = "/";
                 entityName = path.Substring(1);
             }
+
+            if (entityName.Contains('%'))
+                entityName = Uri.UnescapeDataString(entityName);
         }
 
         /// <summary>

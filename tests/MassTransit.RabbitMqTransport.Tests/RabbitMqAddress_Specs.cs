@@ -214,6 +214,14 @@ namespace MassTransit.RabbitMqTransport.Tests
     public class Given_a_valid_endpoint_address
     {
         [Test]
+        public void Should_be_valid_for_international_characters()
+        {
+            var hostAddress = new Uri("rabbitmq://localhost/test");
+
+            var address = new RabbitMqEndpointAddress(hostAddress, new Uri("rabbitmq://localhost/test/ßäöüÄÖÜ1234abc"));
+        }
+
+        [Test]
         public void Should_return_a_valid_address_for_a_full_address()
         {
             var hostAddress = new Uri("rabbitmq://localhost/test");
