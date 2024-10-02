@@ -113,25 +113,27 @@ namespace MassTransit
             _send.UseCorrelationId<JobSlotReleased>(x => x.JobTypeId);
             _send.UseCorrelationId<SetConcurrentJobLimit>(x => x.JobTypeId);
 
-            _send.UseCorrelationId<JobSubmitted>(x => x.JobId);
-            _send.UseCorrelationId<JobSlotAllocated>(x => x.JobId);
-            _send.UseCorrelationId<JobSlotUnavailable>(x => x.JobId);
+            _send.UseCorrelationId<CancelJob>(x => x.JobId);
             _send.UseCorrelationId<Fault<AllocateJobSlot>>(x => x.Message.JobId);
             _send.UseCorrelationId<Fault<StartJobAttempt>>(x => x.Message.JobId);
+            _send.UseCorrelationId<FinalizeJob>(x => x.JobId);
+            _send.UseCorrelationId<GetJobState>(x => x.JobId);
             _send.UseCorrelationId<JobAttemptCanceled>(x => x.JobId);
             _send.UseCorrelationId<JobAttemptCompleted>(x => x.JobId);
             _send.UseCorrelationId<JobAttemptFaulted>(x => x.JobId);
             _send.UseCorrelationId<JobAttemptStarted>(x => x.JobId);
+            _send.UseCorrelationId<JobCanceled>(x => x.JobId);
             _send.UseCorrelationId<JobCompleted>(x => x.JobId);
-            _send.UseCorrelationId<GetJobState>(x => x.JobId);
-            _send.UseCorrelationId<StartJob>(x => x.JobId);
-            _send.UseCorrelationId<CancelJob>(x => x.JobId);
+            _send.UseCorrelationId<JobRetryDelayElapsed>(x => x.JobId);
+            _send.UseCorrelationId<JobSlotAllocated>(x => x.JobId);
+            _send.UseCorrelationId<JobSlotUnavailable>(x => x.JobId);
+            _send.UseCorrelationId<JobSlotWaitElapsed>(x => x.JobId);
+            _send.UseCorrelationId<JobSubmitted>(x => x.JobId);
             _send.UseCorrelationId<RetryJob>(x => x.JobId);
             _send.UseCorrelationId<RunJob>(x => x.JobId);
             _send.UseCorrelationId<SaveJobState>(x => x.JobId);
             _send.UseCorrelationId<SetJobProgress>(x => x.JobId);
-            _send.UseCorrelationId<JobSlotWaitElapsed>(x => x.JobId);
-            _send.UseCorrelationId<JobRetryDelayElapsed>(x => x.JobId);
+            _send.UseCorrelationId<StartJob>(x => x.JobId);
 
             _send.UseCorrelationId<StartJobAttempt>(x => x.AttemptId);
             _send.UseCorrelationId<FinalizeJobAttempt>(x => x.AttemptId);

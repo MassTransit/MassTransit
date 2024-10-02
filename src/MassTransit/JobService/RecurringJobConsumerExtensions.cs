@@ -273,4 +273,21 @@ public static class RecurringJobConsumerExtensions
 
         return response.Message.JobId;
     }
+
+    /// <summary>
+    /// Run a recurring job if it's currently waiting/scheduled to run
+    /// </summary>
+    /// <param name="publishEndpoint"></param>
+    /// <param name="jobName"></param>
+    /// <returns></returns>
+    public static Task RunRecurringJob<T>(this IPublishEndpoint publishEndpoint, string jobName)
+        where T : class
+    {
+        if (string.IsNullOrWhiteSpace(jobName))
+            throw new ArgumentNullException(nameof(jobName));
+
+        var jobId = JobMetadataCache<T>.GenerateRecurringJobId(jobName);
+
+        return publishEndpoint.Publish<RunJob>(new RunJobCommand { JobId = jobId });
+    }
 }

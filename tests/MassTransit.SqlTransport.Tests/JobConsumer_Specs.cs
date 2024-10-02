@@ -205,7 +205,7 @@ namespace MassTransit.DbTransport.Tests
 
             IRequestClient<SubmitJob<OddJob>> client = harness.GetRequestClient<SubmitJob<OddJob>>();
 
-            Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new
+            await client.GetResponse<JobSubmissionAccepted>(new
             {
                 JobId = previousJobId,
                 Job = new { Duration = TimeSpan.FromSeconds(10) }
@@ -213,7 +213,7 @@ namespace MassTransit.DbTransport.Tests
 
             Assert.That(await harness.Published.Any<JobStarted>(x => x.Context.Message.JobId == previousJobId), Is.True);
 
-            response = await client.GetResponse<JobSubmissionAccepted>(new
+            Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new
             {
                 JobId = jobId,
                 Job = new { Duration = TimeSpan.FromSeconds(10) }
