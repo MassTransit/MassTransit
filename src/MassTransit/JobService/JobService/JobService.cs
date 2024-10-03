@@ -226,8 +226,8 @@
                     InstanceAddress = _instanceAddress,
                     ConcurrentJobLimit = _options.ConcurrentJobLimit,
                     Kind = kind,
-                    JobProperties = kind != ConcurrentLimitKind.Configured ? _options.JobProperties : null,
-                    InstanceProperties = kind == ConcurrentLimitKind.Stopped ? null : _options.InstanceProperties,
+                    JobProperties = _options.JobProperties,
+                    InstanceProperties = _options.InstanceProperties,
                     GlobalConcurrentJobLimit = _options.GlobalConcurrentJobLimit
                 });
             }

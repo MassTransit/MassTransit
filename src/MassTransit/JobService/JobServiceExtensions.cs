@@ -65,6 +65,30 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Submits a job, returning the generated jobId
+        /// </summary>
+        /// <param name="publishEndpoint"></param>
+        /// <param name="job"></param>
+        /// <param name="callback"></param>
+        /// <param name="cancellationToken"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static async Task<Guid> SubmitJob<T>(this IPublishEndpoint publishEndpoint, T job, Action<SendContext<SubmitJob<T>>> callback,
+            CancellationToken cancellationToken = default)
+            where T : class
+        {
+            var jobId = NewId.NextGuid();
+
+            await publishEndpoint.Publish(new SubmitJobCommand<T>
+            {
+                JobId = jobId,
+                Job = job
+            }, callback, cancellationToken).ConfigureAwait(false);
+
+            return jobId;
+        }
+
+        /// <summary>
         /// Submits a job, returning the accepted jobId
         /// </summary>
         /// <param name="client"></param>
@@ -91,6 +115,30 @@ namespace MassTransit
         /// </summary>
         /// <param name="client"></param>
         /// <param name="job"></param>
+        /// <param name="callback"></param>
+        /// <param name="cancellationToken"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static async Task<Guid> SubmitJob<T>(this IRequestClient<SubmitJob<T>> client, T job, Action<SendContext<SubmitJob<T>>> callback,
+            CancellationToken cancellationToken = default)
+            where T : class
+        {
+            var jobId = NewId.NextGuid();
+
+            Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new SubmitJobCommand<T>
+            {
+                JobId = jobId,
+                Job = job
+            }, x => x.UseExecute(sendContext => callback(sendContext)), cancellationToken).ConfigureAwait(false);
+
+            return response.Message.JobId;
+        }
+
+        /// <summary>
+        /// Submits a job, returning the accepted jobId
+        /// </summary>
+        /// <param name="client"></param>
+        /// <param name="job"></param>
         /// <param name="cancellationToken"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
@@ -106,6 +154,32 @@ namespace MassTransit
                 JobId = jobId,
                 Job = context.Message
             }, cancellationToken).ConfigureAwait(false);
+
+            return response.Message.JobId;
+        }
+
+        /// <summary>
+        /// Submits a job, returning the accepted jobId
+        /// </summary>
+        /// <param name="client"></param>
+        /// <param name="job"></param>
+        /// <param name="callback"></param>
+        /// <param name="cancellationToken"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static async Task<Guid> SubmitJob<T>(this IRequestClient<SubmitJob<T>> client, object job, Action<SendContext<SubmitJob<T>>> callback,
+            CancellationToken cancellationToken = default)
+            where T : class
+        {
+            var jobId = NewId.NextGuid();
+
+            InitializeContext<T> context = await MessageInitializerCache<T>.Initialize(job, cancellationToken).ConfigureAwait(false);
+
+            Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new SubmitJobCommand<T>
+            {
+                JobId = jobId,
+                Job = context.Message
+            }, x => x.UseExecute(sendContext => callback(sendContext)), cancellationToken).ConfigureAwait(false);
 
             return response.Message.JobId;
         }

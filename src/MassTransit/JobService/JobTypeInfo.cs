@@ -18,11 +18,6 @@ public interface JobTypeInfo
     int ConcurrentJobLimit { get; }
 
     /// <summary>
-    /// Optional, if specified, configures a global concurrent job limit across all job consumer instances
-    /// </summary>
-    int? GlobalConcurrentJobLimit { get; }
-
-    /// <summary>
     /// Job properties configured by <see cref="JobOptions{TJob}" />
     /// </summary>
     IReadOnlyDictionary<string, object> Properties { get; }

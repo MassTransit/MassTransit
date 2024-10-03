@@ -188,14 +188,18 @@ namespace MassTransit
                     {
                         if (context.Message.Kind != ConcurrentLimitKind.Stopped)
                         {
-                            var jobTypeInstance = new JobTypeInstance { Updated = instanceUpdated };
-                            if (context.Message.InstanceProperties is { Count: > 0 })
-                                jobTypeInstance.SetProperties(context.Message.InstanceProperties);
+                            instance = new JobTypeInstance { Updated = instanceUpdated };
 
-                            context.Saga.Instances.Add(instanceAddress, jobTypeInstance);
+                            context.Saga.Instances.Add(instanceAddress, instance);
 
                             LogContext.Debug?.Log("Job Service Instance Started: {InstanceAddress}", instanceAddress);
                         }
+                    }
+
+                    if (context.Message.Kind != ConcurrentLimitKind.Stopped)
+                    {
+                        if (context.Message.InstanceProperties is { Count: > 0 })
+                            instance.SetProperties(context.Message.InstanceProperties);
                     }
                 }
 
@@ -207,7 +211,7 @@ namespace MassTransit
 
                     if (context.Message.JobProperties is { Count: > 0 })
                     {
-                        context.Saga.Properties ??= new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+                        context.Saga.Properties ??= new Dictionary<string, object>(context.Message.JobProperties.Count, StringComparer.OrdinalIgnoreCase);
 
                         foreach (KeyValuePair<string, object> property in context.Message.JobProperties)
                         {

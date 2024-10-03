@@ -58,9 +58,9 @@ public class JobTypeSaga :
 
     public byte[] RowVersion { get; set; }
 
-    public int Version { get; set; }
-
     public int? GlobalConcurrentJobLimit { get; set; }
+
+    public int Version { get; set; }
 
     /// <summary>
     /// The name of the job type
@@ -70,7 +70,7 @@ public class JobTypeSaga :
     int JobTypeInfo.ConcurrentJobLimit => OverrideJobLimit ?? ConcurrentJobLimit;
     IReadOnlyList<ActiveJob> JobTypeInfo.ActiveJobs => ActiveJobs;
     IReadOnlyDictionary<Uri, JobTypeInstance> JobTypeInfo.Instances => Instances;
-    IReadOnlyDictionary<string, object> JobTypeInfo.Properties => Properties;
+    IReadOnlyDictionary<string, object> JobTypeInfo.Properties => Properties ?? [];
 
     /// <summary>
     /// The MD5 hash of the job type

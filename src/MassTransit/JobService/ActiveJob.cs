@@ -12,6 +12,7 @@ using System.Collections.Generic;
 public class ActiveJob :
     IEquatable<ActiveJob>
 {
+    Dictionary<string, object>? _properties;
     public Guid JobId { get; set; }
 
     /// <summary>
@@ -27,7 +28,11 @@ public class ActiveJob :
     /// <summary>
     /// Properties associated with the job, for use by job distribution strategies
     /// </summary>
-    public Dictionary<string, object>? Properties { get; set; }
+    public Dictionary<string, object> Properties
+    {
+        get => _properties ??= new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+        set => _properties = value;
+    }
 
     public bool Equals(ActiveJob? other)
     {
@@ -65,9 +70,9 @@ public class ActiveJob :
             throw new ArgumentNullException(nameof(key));
 
         if (value == null)
-            Properties?.Remove(key);
+            Properties.Remove(key);
         else
-            (Properties ??= new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase))[key] = value;
+            Properties[key] = value;
     }
 
     /// <summary>
@@ -85,12 +90,12 @@ public class ActiveJob :
         if (overwrite)
         {
             if (value == null)
-                Properties?.Remove(key);
+                Properties.Remove(key);
             else
-                (Properties ??= new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase))[key] = value;
+                Properties[key] = value;
         }
-        else if (value != null && (Properties is null || !Properties.ContainsKey(key)))
-            (Properties ??= new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)).Add(key, value);
+        else if (value != null && !Properties.ContainsKey(key))
+            Properties.Add(key, value);
     }
 
     public override bool Equals(object? obj)
