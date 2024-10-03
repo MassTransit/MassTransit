@@ -1,6 +1,7 @@
 namespace MassTransit.Contracts.JobService
 {
     using System;
+    using System.Collections.Generic;
 
 
     /// <summary>
@@ -25,5 +26,20 @@ namespace MassTransit.Contracts.JobService
         /// If present, the job type name
         /// </summary>
         string? JobTypeName { get; }
+
+        /// <summary>
+        /// Allows properties to be submitted by the job service instance that can be used by the job distribution strategy
+        /// </summary>
+        Dictionary<string, object>? JobProperties { get; }
+
+        /// <summary>
+        /// Allows properties to be submitted by the job service instance that can be used by the job distribution strategy
+        /// </summary>
+        Dictionary<string, object>? InstanceProperties { get; }
+
+        /// <summary>
+        /// If configured, specifies a global limit across all job consumer instances
+        /// </summary>
+        int? GlobalConcurrentJobLimit { get; }
     }
 }

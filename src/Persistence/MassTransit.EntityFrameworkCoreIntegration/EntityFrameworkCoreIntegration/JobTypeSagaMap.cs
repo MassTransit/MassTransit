@@ -32,6 +32,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
             entity.Property(x => x.ActiveJobCount);
             entity.Property(x => x.ConcurrentJobLimit);
+            entity.Property(x => x.GlobalConcurrentJobLimit);
             entity.Property(x => x.Name);
 
             entity.Property(x => x.OverrideJobLimit);
@@ -41,6 +42,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                 .HasJsonConversion();
 
             entity.Property(x => x.Instances)
+                .HasJsonConversion();
+
+            entity.Property(x => x.Properties)
                 .HasJsonConversion();
         }
     }

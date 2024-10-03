@@ -25,6 +25,9 @@ namespace MassTransit
             RetryPolicy = Retry.None;
 
             ProgressBuffer = new ProgressBufferSettings();
+
+            JobProperties = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+            InstanceProperties = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -56,6 +59,21 @@ namespace MassTransit
         /// </summary>
         public ProgressBufferSettings ProgressBuffer { get; }
 
+        /// <summary>
+        /// Properties that are specific to the job type, which can be used by the job distribution strategy
+        /// </summary>
+        public Dictionary<string, object> JobProperties { get; }
+
+        /// <summary>
+        /// Properties that are specific to this job consumer bus instance, such as region, data center, tenant, etc. also used by the job distribution strategy
+        /// </summary>
+        public Dictionary<string, object> InstanceProperties { get; }
+
+        /// <summary>
+        /// Optional, if specified, configures a global concurrent job limit across all job consumer instances
+        /// </summary>
+        public int? GlobalConcurrentJobLimit { get; set; }
+
         IEnumerable<ValidationResult> ISpecification.Validate()
         {
             if (ConcurrentJobLimit <= 0)
@@ -64,6 +82,128 @@ namespace MassTransit
                 yield return this.Failure("JobOptions", "JobTimeout", "Must be > TimeSpan.Zero");
             if (JobCancellationTimeout <= TimeSpan.Zero)
                 yield return this.Failure("JobOptions", "JobCancellationTimeout", "Must be > TimeSpan.Zero");
+        }
+
+        /// <summary>
+        /// Sets job properties that can be used by a custom job distribution strategy
+        /// </summary>
+        /// <param name="properties"></param>
+        /// <param name="overwrite"></param>
+        /// <returns></returns>
+        public JobOptions<TJob> SetJobProperties(IEnumerable<KeyValuePair<string, object?>>? properties, bool overwrite = true)
+        {
+            if (properties != null)
+            {
+                foreach (KeyValuePair<string, object?> property in properties)
+                    SetJobProperty(property.Key, property.Value, overwrite);
+            }
+
+            return this;
+        }
+
+        /// <summary>
+        /// Sets a job property that can be used by a custom job distribution strategy
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        public JobOptions<TJob> SetJobProperty(string key, string? value)
+        {
+            if (key == null)
+                throw new ArgumentNullException(nameof(key));
+
+            if (value == null)
+                JobProperties.Remove(key);
+            else
+                JobProperties[key] = value;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Sets a job property that can be used by a custom job distribution strategy
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <param name="overwrite"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        public JobOptions<TJob> SetJobProperty(string key, object? value, bool overwrite = true)
+        {
+            if (key == null)
+                throw new ArgumentNullException(nameof(key));
+
+            if (overwrite)
+            {
+                if (value == null)
+                    JobProperties.Remove(key);
+                else
+                    JobProperties[key] = value;
+            }
+            else if (!JobProperties.ContainsKey(key) && value != null)
+                JobProperties.Add(key, value);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Sets job properties that can be used by a custom job distribution strategy
+        /// </summary>
+        /// <param name="properties"></param>
+        /// <param name="overwrite"></param>
+        /// <returns></returns>
+        public JobOptions<TJob> SetInstanceProperties(IEnumerable<KeyValuePair<string, object?>>? properties, bool overwrite = true)
+        {
+            if (properties != null)
+            {
+                foreach (KeyValuePair<string, object?> property in properties)
+                    SetInstanceProperty(property.Key, property.Value, overwrite);
+            }
+
+            return this;
+        }
+
+        /// <summary>
+        /// Sets a job property that can be used by a custom job distribution strategy
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        public JobOptions<TJob> SetInstanceProperty(string key, string? value)
+        {
+            if (key == null)
+                throw new ArgumentNullException(nameof(key));
+
+            if (value == null)
+                InstanceProperties.Remove(key);
+            else
+                InstanceProperties[key] = value;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Sets a job property that can be used by a custom job distribution strategy
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <param name="overwrite"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        public JobOptions<TJob> SetInstanceProperty(string key, object? value, bool overwrite = true)
+        {
+            if (key == null)
+                throw new ArgumentNullException(nameof(key));
+
+            if (overwrite)
+            {
+                if (value == null)
+                    InstanceProperties.Remove(key);
+                else
+                    InstanceProperties[key] = value;
+            }
+            else if (!InstanceProperties.ContainsKey(key) && value != null)
+                InstanceProperties.Add(key, value);
+
+            return this;
         }
 
         /// <summary>
@@ -100,6 +240,19 @@ namespace MassTransit
         public JobOptions<TJob> SetConcurrentJobLimit(int limit)
         {
             ConcurrentJobLimit = limit;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Set the global concurrent job limit across all job consumer instances
+        /// Do not use ConcurrentMessageLimit with job consumers."/>
+        /// </summary>
+        /// <param name="limit"></param>
+        /// <returns></returns>
+        public JobOptions<TJob> SetGlobalConcurrentJobLimit(int? limit)
+        {
+            GlobalConcurrentJobLimit = limit;
 
             return this;
         }

@@ -3,9 +3,12 @@ namespace MassTransit
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
     using Configuration;
     using Contracts.JobService;
+    using JobService;
     using JobService.Messages;
+    using Microsoft.Extensions.DependencyInjection;
 
 
     public sealed class JobTypeStateMachine :
@@ -29,7 +32,7 @@ namespace MassTransit
 
             During(Initial, Active, Idle,
                 When(JobSlotRequested)
-                    .IfElse(context => context.IsSlotAvailable(context.GetPayload<JobSagaSettings>().HeartbeatTimeout),
+                    .IfElseAsync(context => context.IsSlotAvailable(context.GetPayload<JobSagaSettings>().HeartbeatTimeout),
                         allocate => allocate
                             .TransitionTo(Active),
                         unavailable => unavailable
@@ -89,7 +92,7 @@ namespace MassTransit
 
     static class JobTypeStateMachineBehaviorExtensions
     {
-        public static bool IsSlotAvailable(this BehaviorContext<JobTypeSaga, AllocateJobSlot> context, TimeSpan heartbeatTimeout)
+        public static async Task<bool> IsSlotAvailable(this BehaviorContext<JobTypeSaga, AllocateJobSlot> context, TimeSpan heartbeatTimeout)
         {
             if (context.Saga.OverrideLimitExpiration.HasValue)
             {
@@ -109,45 +112,55 @@ namespace MassTransit
 
             List<KeyValuePair<Uri, JobTypeInstance>> expiredInstances =
                 context.Saga.Instances.Where(x => timestamp - x.Value.Updated > heartbeatTimeout).ToList();
+
             foreach (KeyValuePair<Uri, JobTypeInstance> instance in expiredInstances)
                 context.Saga.Instances.Remove(instance.Key);
 
-            var concurrentJobLimit = context.Saga.OverrideJobLimit ?? context.Saga.ConcurrentJobLimit;
-
-            var instances = from i in context.Saga.Instances
-                join a in context.Saga.ActiveJobs on i.Key equals a.InstanceAddress into ai
-                where ai.Count() < concurrentJobLimit
-                orderby ai.Count(), i.Value.Used
-                select new
-                {
-                    InstanceAddress = i.Key,
-                    InstanceCount = ai.Count()
-                };
-
-            var nextInstance = instances.FirstOrDefault();
-            if (nextInstance == null)
+            if (context.Saga.GlobalConcurrentJobLimit.HasValue && context.Saga.ActiveJobCount >= context.Saga.GlobalConcurrentJobLimit)
                 return false;
 
-            context.Saga.ActiveJobCount++;
-            context.Saga.ActiveJobs.Add(new ActiveJob
-            {
-                JobId = jobId,
-                Deadline = timestamp + context.Message.JobTimeout,
-                InstanceAddress = nextInstance.InstanceAddress
-            });
+            var strategy = context.GetJobDistributionStrategyOrUseDefault();
 
-            context.Saga.Instances[nextInstance.InstanceAddress].Used = timestamp;
+            var activeJob = await strategy.IsJobSlotAvailable(context, context.Saga).ConfigureAwait(false);
+            if (activeJob == null)
+                return false;
+
+            var activeInstance = context.Saga.Instances.TryGetValue(activeJob.InstanceAddress, out var value) ? value : null;
+            if (activeInstance == null)
+            {
+                LogContext.Warning?.Log("Job Distribution Strategy returned unknown instance address: {InstanceAddress}", activeJob.InstanceAddress);
+                return false;
+            }
+
+            activeInstance.Used = timestamp;
+
+            activeJob.Deadline = timestamp + context.Message.JobTimeout;
+
+            context.Saga.ActiveJobCount++;
+            context.Saga.ActiveJobs.Add(activeJob);
 
             LogContext.Debug?.Log("Allocated Job Slot: {JobId} ({JobCount}): {InstanceAddress} ({InstanceCount})", jobId, context.Saga.ActiveJobCount,
-                nextInstance.InstanceAddress, nextInstance.InstanceCount + 1);
+                activeJob.InstanceAddress, context.Saga.ActiveJobs.Count(x => x.InstanceAddress == activeJob.InstanceAddress));
 
-            context.Respond<JobSlotAllocated>(new JobSlotAllocatedResponse
+            await context.RespondAsync<JobSlotAllocated>(new JobSlotAllocatedResponse
             {
                 JobId = jobId,
-                InstanceAddress = nextInstance.InstanceAddress,
+                InstanceAddress = activeJob.InstanceAddress,
             });
 
             return true;
+        }
+
+        static IJobDistributionStrategy GetJobDistributionStrategyOrUseDefault(this ConsumeContext context)
+        {
+            IJobDistributionStrategy strategy = null;
+
+            if (context.TryGetPayload(out IServiceScope serviceScope))
+                strategy = serviceScope.ServiceProvider.GetService<IJobDistributionStrategy>();
+            else if (context.TryGetPayload(out IServiceProvider serviceProvider))
+                strategy = serviceProvider.GetService<IJobDistributionStrategy>();
+
+            return strategy ?? DefaultJobDistributionStrategy.Instance;
         }
 
         public static EventActivityBinder<JobTypeSaga, SetConcurrentJobLimit> SetConcurrentLimit(
@@ -175,7 +188,11 @@ namespace MassTransit
                     {
                         if (context.Message.Kind != ConcurrentLimitKind.Stopped)
                         {
-                            context.Saga.Instances.Add(instanceAddress, new JobTypeInstance { Updated = instanceUpdated });
+                            var jobTypeInstance = new JobTypeInstance { Updated = instanceUpdated };
+                            if (context.Message.InstanceProperties is { Count: > 0 })
+                                jobTypeInstance.SetProperties(context.Message.InstanceProperties);
+
+                            context.Saga.Instances.Add(instanceAddress, jobTypeInstance);
 
                             LogContext.Debug?.Log("Job Service Instance Started: {InstanceAddress}", instanceAddress);
                         }
@@ -185,7 +202,21 @@ namespace MassTransit
                 if (context.Message.Kind == ConcurrentLimitKind.Configured)
                 {
                     context.Saga.ConcurrentJobLimit = context.Message.ConcurrentJobLimit;
+                    context.Saga.GlobalConcurrentJobLimit = context.Message.GlobalConcurrentJobLimit;
                     context.Saga.Name = context.Message.JobTypeName;
+
+                    if (context.Message.JobProperties is { Count: > 0 })
+                    {
+                        context.Saga.Properties ??= new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+
+                        foreach (KeyValuePair<string, object> property in context.Message.JobProperties)
+                        {
+                            if (property.Value != null)
+                                context.Saga.Properties[property.Key] = property.Value;
+                            else
+                                context.Saga.Properties.Remove(property.Key);
+                        }
+                    }
 
                     LogContext.Debug?.Log("Concurrent Job Limit: {ConcurrencyLimit} {JobTypeName}", context.Saga.ConcurrentJobLimit,
                         context.Message.JobTypeName);

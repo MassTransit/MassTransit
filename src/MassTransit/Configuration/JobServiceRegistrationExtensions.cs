@@ -4,6 +4,8 @@ namespace MassTransit
     using System;
     using Configuration;
     using DependencyInjection.Registration;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.DependencyInjection.Extensions;
 
 
     public static class JobServiceRegistrationExtensions
@@ -37,6 +39,20 @@ namespace MassTransit
             var registrationConfigurator = new JobSagaRegistrationConfigurator(configurator, configure);
 
             return registrationConfigurator;
+        }
+
+        /// <summary>
+        /// Register a custom job distribution strategy for the job saga state machines
+        /// </summary>
+        /// <param name="services"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static IServiceCollection TryAddJobDistributionStrategy<T>(this IServiceCollection services)
+            where T : class, IJobDistributionStrategy
+        {
+            services.TryAddScoped<IJobDistributionStrategy, T>();
+
+            return services;
         }
     }
 }
