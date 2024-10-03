@@ -26,6 +26,11 @@ namespace MassTransit.AzureServiceBusTransport
         TimeSpan SessionIdleTimeout { get; }
 
         /// <summary>
+        /// The maximum number of concurrent sessions
+        /// </summary>
+        int MaxConcurrentSessions { get; }
+
+        /// <summary>
         /// The maximum number of concurrent calls per session
         /// </summary>
         int MaxConcurrentCallsPerSession { get; }

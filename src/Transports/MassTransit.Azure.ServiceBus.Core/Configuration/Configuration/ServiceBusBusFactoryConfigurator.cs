@@ -189,6 +189,11 @@ namespace MassTransit.Configuration
             set => _queueConfigurator.RequiresSession = value;
         }
 
+        public int MaxConcurrentSessions
+        {
+            set => _queueConfigurator.MaxConcurrentSessions = value;
+        }
+
         public int MaxConcurrentCallsPerSession
         {
             set => _queueConfigurator.MaxConcurrentCallsPerSession = value;

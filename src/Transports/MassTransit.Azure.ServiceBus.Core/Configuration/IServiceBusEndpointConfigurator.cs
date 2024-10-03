@@ -52,6 +52,11 @@
         bool RequiresSession { set; }
 
         /// <summary>
+        /// If session is required, sets the maximum concurrent sessions (defaults to 1)
+        /// </summary>
+        int MaxConcurrentSessions { set; }
+
+        /// <summary>
         /// If session is required, sets the maximum concurrent calls per session (defaults to 1)
         /// </summary>
         int MaxConcurrentCallsPerSession { set; }

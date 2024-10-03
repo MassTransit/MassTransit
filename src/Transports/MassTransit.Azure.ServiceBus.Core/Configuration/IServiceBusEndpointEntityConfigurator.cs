@@ -22,6 +22,11 @@ namespace MassTransit
         bool? RequiresSession { set; }
 
         /// <summary>
+        /// Sets the maximum number of concurrent sessions
+        /// </summary>
+        int? MaxConcurrentSessions { set; }
+
+        /// <summary>
         /// Sets the maximum number of concurrent calls per session
         /// </summary>
         int? MaxConcurrentCallsPerSession { set; }

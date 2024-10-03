@@ -22,6 +22,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology
         public IServiceBusEndpointEntityConfigurator Configurator { get; }
 
         public abstract bool RequiresSession { get; }
+        public abstract int MaxConcurrentSessions { get; }
         public abstract int MaxConcurrentCallsPerSession { get; }
 
         public TimeSpan SessionIdleTimeout { get; set; }

@@ -32,6 +32,7 @@ namespace MassTransit.AzureServiceBusTransport.Configuration
 
         public bool? RequiresSession { get; set; }
 
+        public int? MaxConcurrentSessions { get; set; }
         public int? MaxConcurrentCallsPerSession { get; set; }
 
         public IEnumerable<ValidationResult> Validate()

@@ -20,6 +20,8 @@ namespace MassTransit
             MessageLimit = 10;
             TimeLimit = TimeSpan.FromSeconds(1);
             TimeLimitStart = BatchTimeLimitStart.FromFirst;
+
+            configureCallback = DefaultConfigure;
         }
 
         /// <summary>
@@ -47,7 +49,20 @@ namespace MassTransit
         /// </summary>
         public object? GroupKeyProvider { get; private set; }
 
+        private ConfigureCallback? configureCallback;
+        public BatchOptions OverrideConfigure(ConfigureCallback callback)
+        {
+            configureCallback = callback;
+            return this;
+        }
+        public delegate void ConfigureCallback(string name, IReceiveEndpointConfigurator configurator);
+
         public void Configure(string name, IReceiveEndpointConfigurator configurator)
+        {
+            configureCallback?.Invoke(name, configurator);            
+        }
+
+        private void DefaultConfigure(string name, IReceiveEndpointConfigurator configurator)
         {
             var messageCapacity = ConcurrencyLimit * MessageLimit;
 
