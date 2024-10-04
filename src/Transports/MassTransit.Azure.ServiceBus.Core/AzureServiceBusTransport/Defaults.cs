@@ -16,14 +16,7 @@
         public static TimeSpan TemporaryAutoDeleteOnIdle { get; set; } = TimeSpan.FromMinutes(5);
         public static TimeSpan MaxAutoRenewDuration { get; set; } = TimeSpan.FromMinutes(5);
 
-        [Obsolete("use SessionIdleTimeout instead")]
-        public static TimeSpan MessageWaitTimeout
-        {
-            get => SessionIdleTimeout;
-            set => SessionIdleTimeout = value;
-        }
-
-        public static TimeSpan SessionIdleTimeout { get; set; } = TimeSpan.FromSeconds(10);
+        public static TimeSpan? SessionIdleTimeout { get; set; } = null;  //SDK's default is undefined - explicitly defined here for clarity
         public static TimeSpan ShutdownTimeout { get; set; } = TimeSpan.FromMilliseconds(100);
 
         public static int MaxConcurrentSessions { get; set; } = 8;

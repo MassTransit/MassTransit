@@ -100,7 +100,7 @@
             set => _settings.SessionIdleTimeout = value;
         }
 
-        public TimeSpan SessionIdleTimeout
+        public TimeSpan? SessionIdleTimeout
         {
             set => _settings.SessionIdleTimeout = value;
         }

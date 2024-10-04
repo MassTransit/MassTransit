@@ -17,7 +17,7 @@ public class ServiceBusSessionBatchOptions
     /// <summary>
     /// The timeout before a message session is abandoned
     /// </summary>
-    public TimeSpan SessionIdleTimeout { get;  set; } = AzureServiceBusTransport.Defaults.SessionIdleTimeout;
+    public TimeSpan? SessionIdleTimeout { get;  set; } = AzureServiceBusTransport.Defaults.SessionIdleTimeout;
 
     /// <summary>
     /// The maximum time to wait before delivering a partial batch

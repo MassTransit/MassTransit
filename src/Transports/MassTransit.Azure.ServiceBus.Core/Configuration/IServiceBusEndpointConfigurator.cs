@@ -75,7 +75,7 @@
         /// <summary>
         /// Sets the message session idle timeout period
         /// </summary>
-        TimeSpan SessionIdleTimeout { set; }
+        TimeSpan? SessionIdleTimeout { set; }
 
         /// <summary>
         /// Sets the maximum time for locks/sessions to be automatically renewed

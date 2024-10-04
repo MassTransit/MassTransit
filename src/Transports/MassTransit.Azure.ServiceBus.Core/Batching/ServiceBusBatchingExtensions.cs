@@ -27,7 +27,7 @@ public static class ServiceBusBatchingExtensions
               .SetTimeLimitStart(sessionOptions.TimeLimitStart)
               .SetConfigureCallback((name, configurator) =>
               {
-                  if (configurator is not IServiceBusReceiveEndpointConfigurator sb) throw new ArgumentException("Expecting IServiceBusReceiveEndpointConfigurator", nameof(configure));
+                  if (configurator is not IServiceBusReceiveEndpointConfigurator sb) throw new ArgumentException("Expecting IServiceBusReceiveEndpointConfigurator", nameof(configurator));
 
                   sb.RequiresSession = true;
 
