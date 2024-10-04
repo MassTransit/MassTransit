@@ -20,7 +20,8 @@ namespace MassTransit.SqlTransport.Configuration
 
             _sendTopology = new SqlSendTopology();
             _sendTopology.ConnectSendTopologyConfigurationObserver(new DelegateSendTopologyConfigurationObserver(GlobalTopology.Send));
-            //_sendTopology.TryAddConvention(new RoutingKeySendTopologyConvention());
+            _sendTopology.TryAddConvention(new RoutingKeySendTopologyConvention());
+            _sendTopology.TryAddConvention(new PartitionKeySendTopologyConvention());
 
             _publishTopology = new SqlPublishTopology(messageTopology);
             _publishTopology.ConnectPublishTopologyConfigurationObserver(new DelegatePublishTopologyConfigurationObserver(GlobalTopology.Publish));
