@@ -26,6 +26,9 @@
         public static TimeSpan SessionIdleTimeout { get; set; } = TimeSpan.FromSeconds(10);
         public static TimeSpan ShutdownTimeout { get; set; } = TimeSpan.FromMilliseconds(100);
 
+        public static int MaxConcurrentSessions { get; set; } = 8;
+        public static int MaxConcurrentCallsPerSessions { get; set; } = 1;
+
         public static CreateQueueOptions GetCreateQueueOptions(string queueName)
         {
             return new CreateQueueOptions(queueName)

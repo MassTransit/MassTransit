@@ -2,7 +2,7 @@
 
 namespace MassTransit;
 
-public record SessionBatchOptions
+public class ServiceBusSessionBatchOptions
 {
     /// <summary>
     /// The maximum number of messages in a single batch
@@ -33,17 +33,17 @@ public record SessionBatchOptions
     /// Sets the maximum number of messages in a single batch
     /// </summary>
     /// <param name="limit">The message limit</param>
-    public SessionBatchOptions SetMessageLimitPerSession(int limit)
+    public ServiceBusSessionBatchOptions SetMessageLimitPerSession(int limit)
     {
         MessageLimitPerSession = limit;
         return this;
     }
 
     /// <summary>
-    /// Sets  maximum number of concurrent sessions
+    /// Sets the maximum number of concurrent sessions
     /// </summary>
     /// <param name="limit">The maximum number of concurrent sessions</param>
-    public SessionBatchOptions SetMaxConcurrentSessions(int limit)
+    public ServiceBusSessionBatchOptions SetMaxConcurrentSessions(int limit)
     {
         MaxConcurrentSessions = limit;
         return this;
@@ -53,7 +53,7 @@ public record SessionBatchOptions
     /// Sets the maximum time to wait for messages within a session before abandoning the session for another
     /// </summary>
     /// <param name="limit">The time limit</param>
-    public SessionBatchOptions SetSessionIdleTimeout(TimeSpan limit)
+    public ServiceBusSessionBatchOptions SetSessionIdleTimeout(TimeSpan limit)
     {
         SessionIdleTimeout = limit;
         return this;
@@ -63,7 +63,7 @@ public record SessionBatchOptions
     /// Sets the maximum time to wait before delivering a partial batch
     /// </summary>
     /// <param name="limit">The time limit</param>
-    public SessionBatchOptions SetTimeLimit(TimeSpan limit)
+    public ServiceBusSessionBatchOptions SetTimeLimit(TimeSpan limit)
     {
         TimeLimit = limit;
         return this;
@@ -73,7 +73,7 @@ public record SessionBatchOptions
     /// Sets the starting point for the <see cref="TimeLimit"/>
     /// </summary>
     /// <param name="timeLimitStart">The starting point</param>
-    public SessionBatchOptions SetTimeLimitStart(BatchTimeLimitStart timeLimitStart)
+    public ServiceBusSessionBatchOptions SetTimeLimitStart(BatchTimeLimitStart timeLimitStart)
     {
         TimeLimitStart = timeLimitStart;
         return this;

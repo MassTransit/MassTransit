@@ -50,7 +50,7 @@ namespace MassTransit
         public object? GroupKeyProvider { get; private set; }
 
         private ConfigureCallback? configureCallback;
-        public BatchOptions OverrideConfigure(ConfigureCallback callback)
+        public BatchOptions SetConfigureCallback(ConfigureCallback callback)
         {
             configureCallback = callback;
             return this;
