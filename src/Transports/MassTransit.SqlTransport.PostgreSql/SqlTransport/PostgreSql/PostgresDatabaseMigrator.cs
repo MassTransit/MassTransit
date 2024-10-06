@@ -484,12 +484,15 @@ namespace MassTransit.SqlTransport.PostgreSql
                     WHERE md.message_delivery_id IN (
                         WITH ready AS (
                             SELECT mdx.message_delivery_id, mdx.enqueue_time, mdx.lock_id, mdx.priority,
-                                    row_number() over ( partition by mdx.partition_key
-                                        order by mdx.priority, mdx.enqueue_time, mdx.message_delivery_id ) as row_normal,
-                                    row_number() over ( partition by mdx.partition_key
-                                        order by mdx.priority, mdx.message_delivery_id,mdx.enqueue_time )  as row_ordered,
+                                   row_number() over ( partition by mdx.partition_key
+                                       order by mdx.priority, mdx.enqueue_time, mdx.message_delivery_id ) as row_normal,
+                                   row_number() over ( partition by mdx.partition_key
+                                       order by mdx.priority, mdx.message_delivery_id,mdx.enqueue_time )  as row_ordered,
                                    first_value(CASE WHEN mdx.enqueue_time > v_now THEN mdx.consumer_id END) over (partition by mdx.partition_key
-                                       order by mdx.enqueue_time DESC, mdx.message_delivery_id DESC) as consumer_id
+                                       order by mdx.enqueue_time DESC, mdx.message_delivery_id DESC) as consumer_id,
+                                   sum(CASE WHEN mdx.enqueue_time > v_now AND mdx.consumer_id = fetch_consumer_id AND mdx.lock_id IS NOT NULL THEN 1 END)
+                                       over (partition by mdx.partition_key
+                                           order by mdx.enqueue_time DESC, mdx.message_delivery_id DESC) as active_count
                             FROM "{0}".message_delivery mdx
                             WHERE mdx.queue_id = v_queue_id
                                 AND mdx.delivery_count < mdx.max_delivery_count
@@ -499,6 +502,7 @@ namespace MassTransit.SqlTransport.PostgreSql
                             WHERE ( ( ordered = 0 AND ready.row_normal <= concurrent_count) OR ( ordered = 1 AND ready.row_ordered <= concurrent_count ) )
                             AND ready.enqueue_time <= v_now
                             AND (ready.consumer_id IS NULL OR ready.consumer_id = fetch_consumer_id)
+                            AND (active_count < concurrent_count OR active_count IS NULL)
                             ORDER BY ready.priority, ready.enqueue_time, ready.message_delivery_id
                         LIMIT fetch_count FOR UPDATE SKIP LOCKED)
                     FOR UPDATE OF md SKIP LOCKED)
@@ -1158,7 +1162,8 @@ namespace MassTransit.SqlTransport.PostgreSql
             {
                 var sanitizedSchemaName = NotifyChannel.SanitizeSchemaName(options.Schema);
 
-                await connection.Connection.ExecuteScalarAsync<int>(string.Format(CreateInfrastructureSql, options.Schema, options.Role, sanitizedSchemaName)).ConfigureAwait(false);
+                await connection.Connection.ExecuteScalarAsync<int>(string.Format(CreateInfrastructureSql, options.Schema, options.Role, sanitizedSchemaName))
+                    .ConfigureAwait(false);
 
                 _logger.LogDebug("Transport infrastructure in schema {Schema} created (or updated)", options.Schema);
             }

@@ -910,7 +910,10 @@ BEGIN
                           row_number() over (partition by mdx.PartitionKey order by mdx.Priority, mdx.EnqueueTime, mdx.MessageDeliveryId) as row_normal,
                           row_number() over (partition by mdx.PartitionKey order by mdx.Priority, mdx.MessageDeliveryId, mdx.EnqueueTime) as row_ordered,
                           first_value(CASE WHEN mdx.EnqueueTime > @now THEN mdx.ConsumerId END) over (partition by mdx.PartitionKey
-                           order by mdx.EnqueueTime DESC, mdx.MessageDeliveryId DESC) as ConsumerId
+                           order by mdx.EnqueueTime DESC, mdx.MessageDeliveryId DESC) as ConsumerId,
+                          sum(CASE WHEN mdx.EnqueueTime > @now AND mdx.ConsumerId = @consumerId AND mdx.LockId IS NOT NULL THEN 1 END)
+                           over (partition by mdx.PartitionKey
+                               order by mdx.EnqueueTime DESC, mdx.MessageDeliveryId DESC) as ActiveCount
                    FROM transport.MessageDelivery mdx WITH (ROWLOCK, READPAST, UPDLOCK)
                    WHERE mdx.QueueId = @queueId
                      AND mdx.DeliveryCount < mdx.MaxDeliveryCount),
@@ -918,6 +921,7 @@ BEGIN
                       FROM ready
                       WHERE ( ( @ordered = 0 AND ready.row_normal <= @concurrentCount) OR ( @ordered = 1 AND ready.row_ordered <= @concurrentCount ) )
                         AND (ready.ConsumerId IS NULL OR ready.ConsumerId = @consumerId)
+                        AND (ActiveCount < @concurrentCount OR ActiveCount IS NULL)
                         AND ready.EnqueueTime <= @now
                       ORDER BY ready.Priority, ready.EnqueueTime, ready.MessageDeliveryId
                       OFFSET 0 ROWS FETCH NEXT @fetchCount ROWS ONLY),

@@ -20,7 +20,9 @@ namespace MassTransit.SqlTransport.Middleware
         readonly ClientContext _client;
         readonly SqlReceiveEndpointContext _context;
         readonly OrderedChannelExecutorPool _executorPool;
+        readonly object _lock = new();
         readonly ReceiveSettings _receiveSettings;
+        CancellationTokenSource _cancellationTokenSource;
 
         DateTime? _lastMetricUpdate;
 
@@ -102,6 +104,8 @@ namespace MassTransit.SqlTransport.Middleware
             {
                 context.Dispose();
             }
+
+            MessageHandled();
         }
 
         async Task<IEnumerable<SqlTransportMessage>> ReceiveMessages(int messageLimit, CancellationToken cancellationToken)
@@ -112,7 +116,12 @@ namespace MassTransit.SqlTransport.Middleware
                     _receiveSettings.ConcurrentDeliveryLimit, _receiveSettings.LockDuration).ConfigureAwait(false)).ToList();
 
                 if (messages.Count > 0)
+                {
+                    LogContext.Info?.Log("Requested {0} messages, received {1}: {2}", messageLimit, messages.Count, string.Join(", ", messages.Select(x => x
+                        .PartitionKey)));
+
                     return messages;
+                }
 
                 if (_receiveSettings.AutoDeleteOnIdle.HasValue)
                 {
@@ -125,18 +134,7 @@ namespace MassTransit.SqlTransport.Middleware
                     }
                 }
 
-                try
-                {
-                    var delayTask = _receiveSettings.QueueId.HasValue
-                        ? _client.ConnectionContext.DelayUntilMessageReady(_receiveSettings.QueueId.Value, _receiveSettings.PollingInterval,
-                            cancellationToken)
-                        : Task.Delay(_receiveSettings.PollingInterval, cancellationToken);
-
-                    await delayTask.ConfigureAwait(false);
-                }
-                catch (OperationCanceledException)
-                {
-                }
+                await WaitForPollingIntervalOrMessageHandled(cancellationToken).ConfigureAwait(false);
 
                 return messages;
             }
@@ -144,6 +142,39 @@ namespace MassTransit.SqlTransport.Middleware
             {
                 return Array.Empty<SqlTransportMessage>();
             }
+        }
+
+        public async Task WaitForPollingIntervalOrMessageHandled(CancellationToken cancellationToken)
+        {
+            lock (_lock)
+                _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+
+            try
+            {
+                var delayTask = _receiveSettings.QueueId.HasValue
+                    ? _client.ConnectionContext.DelayUntilMessageReady(_receiveSettings.QueueId.Value, _receiveSettings.PollingInterval,
+                        _cancellationTokenSource.Token)
+                    : Task.Delay(_receiveSettings.PollingInterval, _cancellationTokenSource.Token);
+
+                await delayTask.ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            finally
+            {
+                lock (_lock)
+                {
+                    _cancellationTokenSource.Dispose();
+                    _cancellationTokenSource = null;
+                }
+            }
+        }
+
+        public void MessageHandled()
+        {
+            lock (_lock)
+                _cancellationTokenSource?.Cancel();
         }
 
 
