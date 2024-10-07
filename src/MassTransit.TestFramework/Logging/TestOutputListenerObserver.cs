@@ -24,14 +24,14 @@ namespace MassTransit.TestFramework.Logging
             {
                 var activity = Activity.Current;
 
-                TestContext.WriteLine($"{DateTime.Now:HH:mm:ss.fff}-A Start {activity.OperationName} {activity.Id} {activity.ParentId}");
+                TestContext.Out.WriteLine($"{DateTime.Now:HH:mm:ss.fff}-A Start {activity.OperationName} {activity.Id} {activity.ParentId}");
             }
 
             if (value.Key.EndsWith(".Stop", StringComparison.OrdinalIgnoreCase))
             {
                 var activity = Activity.Current;
 
-                TestContext.WriteLine(
+                TestContext.Out.WriteLine(
                     $"{DateTime.Now:HH:mm:ss.fff}-A Stop  {activity.OperationName} {activity.Id} {activity.ParentId ?? "--"} {activity.Duration.ToFriendlyString()}");
             }
         }
