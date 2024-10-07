@@ -6,6 +6,7 @@ namespace MassTransit
     using System.Threading.Tasks;
     using Configuration;
     using Contracts.JobService;
+    using Internals;
     using JobService;
     using JobService.Messages;
     using Microsoft.Extensions.DependencyInjection;
@@ -135,6 +136,7 @@ namespace MassTransit
             activeInstance.Used = timestamp;
 
             activeJob.Deadline = timestamp + context.Message.JobTimeout;
+            activeJob.Properties = context.Message.JobProperties;
 
             context.Saga.ActiveJobCount++;
             context.Saga.ActiveJobs.Add(activeJob);
@@ -199,7 +201,7 @@ namespace MassTransit
                     if (context.Message.Kind != ConcurrentLimitKind.Stopped)
                     {
                         if (context.Message.InstanceProperties is { Count: > 0 })
-                            instance.SetProperties(context.Message.InstanceProperties);
+                            instance.Properties.SetValues(context.Message.InstanceProperties);
                     }
                 }
 
@@ -209,17 +211,11 @@ namespace MassTransit
                     context.Saga.GlobalConcurrentJobLimit = context.Message.GlobalConcurrentJobLimit;
                     context.Saga.Name = context.Message.JobTypeName;
 
-                    if (context.Message.JobProperties is { Count: > 0 })
+                    if (context.Message.JobTypeProperties is { Count: > 0 })
                     {
-                        context.Saga.Properties ??= new Dictionary<string, object>(context.Message.JobProperties.Count, StringComparer.OrdinalIgnoreCase);
+                        context.Saga.Properties ??= new Dictionary<string, object>(context.Message.JobTypeProperties.Count, StringComparer.OrdinalIgnoreCase);
 
-                        foreach (KeyValuePair<string, object> property in context.Message.JobProperties)
-                        {
-                            if (property.Value != null)
-                                context.Saga.Properties[property.Key] = property.Value;
-                            else
-                                context.Saga.Properties.Remove(property.Key);
-                        }
+                        context.Saga.Properties.SetValues(context.Message.JobTypeProperties);
                     }
 
                     LogContext.Debug?.Log("Concurrent Job Limit: {ConcurrencyLimit} {JobTypeName}", context.Saga.ConcurrentJobLimit,

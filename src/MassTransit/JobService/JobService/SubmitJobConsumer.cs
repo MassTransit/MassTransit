@@ -2,6 +2,7 @@
 namespace MassTransit.JobService
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Contracts.JobService;
     using Messages;
@@ -37,17 +38,19 @@ namespace MassTransit.JobService
                     CronExpression.ValidateExpression(context.Message.Schedule.CronExpression!);
             }
 
-            return PublishJobSubmitted(context, context.Message.JobId, context.Message.Job, context.SentTime ?? DateTime.UtcNow, context.Message.Schedule);
+            return PublishJobSubmitted(context, context.Message.JobId, context.Message.Job, context.SentTime ?? DateTime.UtcNow, context.Message.Schedule,
+                context.Message.Properties);
         }
 
         public Task Consume(ConsumeContext<TJob> context)
         {
             var jobId = context.RequestId ?? NewId.NextGuid();
 
-            return PublishJobSubmitted(context, jobId, context.Message, context.SentTime ?? DateTime.UtcNow, null);
+            return PublishJobSubmitted(context, jobId, context.Message, context.SentTime ?? DateTime.UtcNow, null, null);
         }
 
-        async Task PublishJobSubmitted(ConsumeContext context, Guid jobId, TJob job, DateTime timestamp, RecurringJobSchedule? schedule)
+        async Task PublishJobSubmitted(ConsumeContext context, Guid jobId, TJob job, DateTime timestamp, RecurringJobSchedule? schedule,
+            Dictionary<string, object>? jobProperties)
         {
             await context.Publish<JobSubmitted>(new JobSubmittedEvent
             {
@@ -55,6 +58,7 @@ namespace MassTransit.JobService
                 JobTypeId = _jobTypeId,
                 Timestamp = timestamp,
                 Job = context.ToDictionary(job),
+                JobProperties = jobProperties,
                 JobTimeout = _options.JobTimeout,
                 Schedule = schedule
             });

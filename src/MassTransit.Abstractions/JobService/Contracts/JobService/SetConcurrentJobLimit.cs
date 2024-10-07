@@ -30,7 +30,7 @@ namespace MassTransit.Contracts.JobService
         /// <summary>
         /// Allows properties to be submitted by the job service instance that can be used by the job distribution strategy
         /// </summary>
-        Dictionary<string, object>? JobProperties { get; }
+        Dictionary<string, object>? JobTypeProperties { get; }
 
         /// <summary>
         /// Allows properties to be submitted by the job service instance that can be used by the job distribution strategy

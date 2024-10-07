@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   mongo1:
     container_name: mongo1

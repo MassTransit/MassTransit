@@ -19,4 +19,5 @@ public class StartJobAttemptCommand :
     public long? LastProgressValue { get; set; }
     public long? LastProgressLimit { get; set; }
     public Dictionary<string, object>? JobState { get; set; } = null!;
+    public Dictionary<string, object>? JobProperties { get; set; }
 }

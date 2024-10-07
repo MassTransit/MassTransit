@@ -29,6 +29,11 @@ namespace MassTransit.Contracts.JobService
         Dictionary<string, object> Job { get; }
 
         /// <summary>
+        /// The job properties
+        /// </summary>
+        Dictionary<string, object> JobProperties { get; }
+
+        /// <summary>
         /// If the job is a recurring job, the schedule for the job
         /// </summary>
         RecurringJobSchedule? Schedule { get; }

@@ -232,7 +232,8 @@ namespace MassTransit
                     JobTypeId = context.Message.JobTypeId,
                     LastProgressValue = context.Message.LastProgressValue,
                     LastProgressLimit = context.Message.LastProgressLimit,
-                    JobState = context.Message.JobState
+                    JobState = context.Message.JobState,
+                    JobProperties = context.Message.JobProperties
                 }, (behaviorContext, context) => context.FaultAddress = behaviorContext.GetJobAttemptSagaAddress());
         }
 

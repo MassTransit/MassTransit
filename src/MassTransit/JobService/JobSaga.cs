@@ -59,6 +59,11 @@ namespace MassTransit
         public Dictionary<string, object> JobState { get; set; }
 
         /// <summary>
+        /// The job properties, supplied by the submitted job
+        /// </summary>
+        public Dictionary<string, object> JobProperties { get; set; }
+
+        /// <summary>
         /// For recurring jobs, the cron expression used to determine the next start date after the job has completed.
         /// </summary>
         public string CronExpression { get; set; }

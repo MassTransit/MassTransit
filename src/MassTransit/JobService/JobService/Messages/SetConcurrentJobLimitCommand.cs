@@ -15,7 +15,7 @@ public class SetConcurrentJobLimitCommand :
     public ConcurrentLimitKind Kind { get; set; }
     public TimeSpan? Duration { get; set; }
     public string? JobTypeName { get; set; }
-    public Dictionary<string, object>? JobProperties { get; set; }
+    public Dictionary<string, object>? JobTypeProperties { get; set; }
     public Dictionary<string, object>? InstanceProperties { get; set; }
     public int? GlobalConcurrentJobLimit { get; set; }
 }

@@ -62,6 +62,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             entity.Property(x => x.JobState)
                 .HasJsonConversion();
 
+            entity.Property(x => x.JobProperties)
+                .HasJsonConversion();
+
             entity.Property(x => x.CronExpression);
             entity.Property(x => x.TimeZoneId);
             entity.Property(x => x.StartDate);

@@ -95,7 +95,7 @@ namespace MassTransit.Tests
 
             var duration = TimeSpan.FromSeconds(2);
 
-            var submittedJobId = await client.SubmitJob(jobId, new { Duration = duration });
+            var submittedJobId = await client.SubmitJob(jobId, new { Duration = duration }, properties => properties.Set("Variable", "Knife"));
 
             await Assert.MultipleAsync(async () =>
             {

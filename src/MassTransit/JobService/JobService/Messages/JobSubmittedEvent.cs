@@ -14,5 +14,6 @@ public class JobSubmittedEvent :
     public DateTime Timestamp { get; set; }
     public TimeSpan JobTimeout { get; set; }
     public Dictionary<string, object> Job { get; set; } = null!;
+    public Dictionary<string, object>? JobProperties { get; set; }
     public RecurringJobSchedule? Schedule { get; set; }
 }

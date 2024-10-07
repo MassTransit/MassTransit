@@ -46,5 +46,10 @@ namespace MassTransit.Contracts.JobService
         /// The job state, as an object dictionary
         /// </summary>
         Dictionary<string, object>? JobState { get; }
+
+        /// <summary>
+        /// The job properties, supplied when the job was submitted
+        /// </summary>
+        Dictionary<string, object>? JobProperties { get; }
     }
 }

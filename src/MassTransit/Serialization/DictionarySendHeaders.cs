@@ -11,7 +11,7 @@ namespace MassTransit.Serialization
     public class DictionarySendHeaders :
         SendHeaders
     {
-        readonly IDictionary<string, object> _headers;
+        readonly Dictionary<string, object> _headers;
 
         public DictionarySendHeaders()
         {
@@ -71,13 +71,13 @@ namespace MassTransit.Serialization
         public T? Get<T>(string key, T? defaultValue)
             where T : class
         {
-            return SystemTextJsonMessageSerializer.Instance.GetValue(_headers, key, defaultValue);
+            return SystemTextJsonMessageSerializer.Instance.GetValue((IReadOnlyDictionary<string, object>)_headers, key, defaultValue);
         }
 
         public T? Get<T>(string key, T? defaultValue)
             where T : struct
         {
-            return SystemTextJsonMessageSerializer.Instance.GetValue(_headers, key, defaultValue);
+            return SystemTextJsonMessageSerializer.Instance.GetValue((IReadOnlyDictionary<string, object>)_headers, key, defaultValue);
         }
 
         public IEnumerator<HeaderValue> GetEnumerator()

@@ -1,9 +1,11 @@
 namespace MassTransit
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using Configuration;
     using Contracts.JobService;
+    using Internals;
     using JobService.Messages;
     using JobService.Scheduling;
 
@@ -469,6 +471,8 @@ namespace MassTransit
                 context.Saga.JobTimeout = context.Message.JobTimeout;
                 context.Saga.JobTypeId = context.Message.JobTypeId;
 
+                SetJobProperties(context);
+
                 if (context.Message.Schedule != null)
                 {
                     context.Saga.CronExpression = context.Message.Schedule.CronExpression;
@@ -487,11 +491,25 @@ namespace MassTransit
             {
                 context.Saga.Job = context.Message.Job;
 
-                context.Saga.CronExpression = context.Message.Schedule.CronExpression;
-                context.Saga.TimeZoneId = context.Message.Schedule.TimeZoneId;
-                context.Saga.StartDate = context.Message.Schedule.Start;
-                context.Saga.EndDate = context.Message.Schedule.End;
+                if (context.Message.Schedule != null)
+                {
+                    context.Saga.CronExpression = context.Message.Schedule.CronExpression;
+                    context.Saga.TimeZoneId = context.Message.Schedule.TimeZoneId;
+                    context.Saga.StartDate = context.Message.Schedule.Start;
+                    context.Saga.EndDate = context.Message.Schedule.End;
+                }
+
+                SetJobProperties(context);
             });
+        }
+
+        static void SetJobProperties(BehaviorContext<JobSaga, JobSubmitted> context)
+        {
+            if (context.Message.JobProperties is { Count: > 0 })
+            {
+                context.Saga.JobProperties ??= new Dictionary<string, object>(context.Message.JobProperties.Count, StringComparer.OrdinalIgnoreCase);
+                context.Saga.JobProperties.SetValues(context.Message.JobProperties);
+            }
         }
 
         public static EventActivityBinder<JobSaga, T> RequestJobSlot<T>(this EventActivityBinder<JobSaga, T> binder, JobStateMachine machine)
@@ -503,7 +521,8 @@ namespace MassTransit
                     {
                         JobId = context.Saga.CorrelationId,
                         JobTypeId = context.Saga.JobTypeId,
-                        JobTimeout = context.Saga.JobTimeout ?? TimeSpan.Zero
+                        JobTimeout = context.Saga.JobTimeout ?? TimeSpan.Zero,
+                        JobProperties = context.Saga.JobProperties
                     }, (behaviorContext, context) => context.ResponseAddress = behaviorContext.ReceiveContext.InputAddress)
                 .TransitionTo(machine.AllocatingJobSlot);
         }
@@ -550,7 +569,8 @@ namespace MassTransit
                         JobTypeId = context.Saga.JobTypeId,
                         LastProgressValue = context.Saga.LastProgressValue,
                         LastProgressLimit = context.Saga.LastProgressLimit,
-                        JobState = context.Saga.JobState
+                        JobState = context.Saga.JobState,
+                        JobProperties = context.Saga.JobProperties
                     }, (behaviorContext, context) => context.ResponseAddress = behaviorContext.ReceiveContext.InputAddress)
                 .TransitionTo(machine.StartingJobAttempt);
         }
