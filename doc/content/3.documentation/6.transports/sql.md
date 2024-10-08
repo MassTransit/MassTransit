@@ -288,8 +288,10 @@ must be configured.
 There are a few notable aspects of these receive modes, including:
 
 - When using a partitioned receive mode, messages are partitioned across **ALL** scaled out consumer instances. This delivery mechanism is unique to the
-SQL transport and enables scaling across high node counts and prevents a single partition key from saturating multiple consumer instances.
-- Ordered receive modes are guaranteed to be in order, even when performing message redelivery or scheduling messages for future consumption. For example, if message 1 is scheduled for two minutes in the future, and message 2 and 3 with the same partition key are published any time after message 1, messages 2 and 3 will _only_ be consumed after message 1 has been consumed.
+  SQL transport and enables scaling across high node counts and prevents a single partition key from saturating multiple consumer instances.
+- Ordered receive modes are guaranteed to be in order, even when performing message redelivery or scheduling messages for future consumption. For example, if
+  message 1 is scheduled for two minutes in the future, and message 2 and 3 with the same partition key are published any time after message 1, messages 2 and 3
+  will _only_ be consumed after message 1 has been consumed.
 
 The receive mode can be set when configuring the receive endpoint, or it can be added to the consumer endpoint configuration as shown.
 
@@ -322,4 +324,35 @@ x.AddConsumer<BulkUpdateConsumer>(c => c.Options<BatchOptions>(o =>
 }));
 ```
 
+### Job Sagas
 
+When using the SQL transport with the job saga state machines, use the partitioned receive mode for the most reliable performance and concurrency. There are
+two convenience methods that ensure the transport and sagas are properly configured: `SetPartitionedReceiveMode` and `UseJobSagaPartitionKeyFormatters`.
+
+The method usage is shown below.
+
+```csharp
+services.AddMassTransit(x =>
+{
+    x.AddSqlMessageScheduler();
+
+    x.AddJobSagaStateMachines()
+        .SetPartitionedReceiveMode() // set job saga endpoints to partitioned
+        .EntityFrameworkRepository(r =>
+        {
+            r.ExistingDbContext<JobServiceSagaDbContext>();
+            r.UsePostgres();
+        });
+    
+    x.UsingPostgres((context, cfg) =>
+    {
+        cfg.UseSqlMessageScheduler();
+        cfg.UseJobSagaPartitionKeyFormatters(); // partition key conventions
+    
+        cfg.ConfigureEndpoints(context);
+    });
+});
+```
+
+`UseJobSagaPartitionKeyFormatters` configures the partition key conventions so that the `PartitionKey` property is automatically set for the messages used by
+the job saga state machines and consumers.
