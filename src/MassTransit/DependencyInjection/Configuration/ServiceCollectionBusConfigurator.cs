@@ -3,6 +3,7 @@ namespace MassTransit.Configuration
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Clients;
     using Context;
     using Courier;
     using DependencyInjection;
@@ -48,7 +49,7 @@ namespace MassTransit.Configuration
                 return new ReceiveEndpointDispatcherFactory(context, busInstance);
             });
 
-            collection.TryAddSingleton(provider => Bind<IBus>.Create(provider.GetRequiredService<IBus>().CreateClientFactory(DefaultRequestTimeout)));
+            collection.TryAddSingleton(provider => Bind<IBus>.Create(CreateClientFactory(provider.GetRequiredService<IBus>(), DefaultRequestTimeout)));
             collection.TryAddSingleton(provider => provider.GetRequiredService<Bind<IBus, IClientFactory>>().Value);
 
             collection.TryAddScoped<IScopedBusContextProvider<IBus>, ScopedBusContextProvider<IBus>>();
@@ -64,6 +65,8 @@ namespace MassTransit.Configuration
         {
             AddMassTransitComponents(collection);
         }
+
+        protected Func<IBus, RequestTimeout, IClientFactory> CreateClientFactory { get; private set; } = DefaultClientFactory;
 
         [Obsolete("Use 'Using[TransportName]' instead. Visit https://masstransit.io/obsolete for details.", true)]
         public virtual void AddBus(Func<IBusRegistrationContext, IBusControl> busFactory)
@@ -112,6 +115,14 @@ namespace MassTransit.Configuration
                 provider.GetRequiredService<Bind<IBus, IBusRegistrationContext>>().Value, callback)));
         }
 
+        public virtual void SetRequestClientFactory(Func<IBus, RequestTimeout, IClientFactory> clientFactory)
+        {
+            if (clientFactory == null)
+                throw new ArgumentNullException(nameof(clientFactory));
+
+            CreateClientFactory = clientFactory;
+        }
+
         static IBusInstance CreateBus<T>(T busFactory, IServiceProvider provider)
             where T : IRegistrationBusFactory
         {
@@ -132,6 +143,17 @@ namespace MassTransit.Configuration
             collection.TryAddScoped(provider => provider.GetRequiredService<IScopedConsumeContextProvider>().GetContext() ?? MissingConsumeContext.Instance);
 
             collection.TryAddScoped(typeof(IRequestClient<>), typeof(GenericRequestClient<>));
+        }
+
+        /// <summary>
+        /// This is the default client factory, which can be overridden by configuration
+        /// </summary>
+        /// <param name="bus"></param>
+        /// <param name="timeout"></param>
+        /// <returns></returns>
+        static IClientFactory DefaultClientFactory(IBus bus, RequestTimeout timeout = default)
+        {
+            return new ClientFactory(new BusClientFactoryContext(bus, timeout));
         }
     }
 
@@ -162,7 +184,7 @@ namespace MassTransit.Configuration
             collection.AddSingleton(_ =>
                 Bind<TBus>.Create((ISetScopedConsumeContext)new SetScopedConsumeContext(provider =>
                     provider.GetRequiredService<Bind<TBus, IScopedConsumeContextProvider>>().Value)));
-            collection.TryAddSingleton(provider => Bind<TBus>.Create(provider.GetRequiredService<TBus>().CreateClientFactory(DefaultRequestTimeout)));
+            collection.TryAddSingleton(provider => Bind<TBus>.Create(CreateClientFactory(provider.GetRequiredService<TBus>(), DefaultRequestTimeout)));
             collection.TryAddScoped<IScopedBusContextProvider<TBus>, ScopedBusContextProvider<TBus>>();
             collection.TryAddScoped(provider => Bind<TBus>.Create(provider.GetRequiredService<IScopedBusContextProvider<TBus>>().Context.SendEndpointProvider));
             collection.TryAddScoped(provider => Bind<TBus>.Create(provider.GetRequiredService<IScopedBusContextProvider<TBus>>().Context.PublishEndpoint));

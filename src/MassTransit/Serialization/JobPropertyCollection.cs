@@ -87,7 +87,7 @@ public class JobPropertyCollection :
         return _properties?.ContainsKey(key) ?? false;
     }
 
-    bool IReadOnlyDictionary<string, object>.TryGetValue(string key, out object value)
+    bool IReadOnlyDictionary<string, object>.TryGetValue(string key, [MaybeNullWhen(false)] out object value)
     {
         if (_properties != null)
             return _properties.TryGetValue(key, out value);

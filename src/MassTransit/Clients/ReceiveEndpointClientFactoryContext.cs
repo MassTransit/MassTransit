@@ -7,13 +7,16 @@ namespace MassTransit.Clients
     public class ReceiveEndpointClientFactoryContext :
         ClientFactoryContext
     {
+        readonly HostReceiveEndpointHandle _handle;
         readonly IReceiveEndpoint _receiveEndpoint;
 
-        public ReceiveEndpointClientFactoryContext(ReceiveEndpointReady receiveEndpointReady, RequestTimeout defaultTimeout = default)
+        public ReceiveEndpointClientFactoryContext(HostReceiveEndpointHandle handle, RequestTimeout defaultTimeout = default)
         {
-            _receiveEndpoint = receiveEndpointReady.ReceiveEndpoint;
+            _handle = handle;
+            _receiveEndpoint = handle.ReceiveEndpoint;
 
-            ResponseAddress = receiveEndpointReady.InputAddress;
+            ResponseAddress = _receiveEndpoint.InputAddress;
+
             DefaultTimeout = defaultTimeout.Or(RequestTimeout.Default);
         }
 
@@ -40,13 +43,13 @@ namespace MassTransit.Clients
         public IRequestSendEndpoint<T> GetRequestEndpoint<T>(ConsumeContext? consumeContext = default)
             where T : class
         {
-            return new PublishRequestSendEndpoint<T>(_receiveEndpoint, consumeContext);
+            return new ReceiveEndpointPublishRequestSendEndpoint<T>(_handle, consumeContext);
         }
 
         public IRequestSendEndpoint<T> GetRequestEndpoint<T>(Uri destinationAddress, ConsumeContext? consumeContext = default)
             where T : class
         {
-            return new SendRequestSendEndpoint<T>(_receiveEndpoint, destinationAddress, consumeContext);
+            return new ReceiveEndpointSendRequestSendEndpoint<T>(_handle, destinationAddress, consumeContext);
         }
 
         public RequestTimeout DefaultTimeout { get; }

@@ -245,6 +245,11 @@ namespace MassTransit.Configuration
             _configurator.AddConfigureEndpointsCallback(callback);
         }
 
+        public void SetRequestClientFactory(Func<IBus, RequestTimeout, IClientFactory> clientFactory)
+        {
+            _configurator.SetRequestClientFactory(clientFactory);
+        }
+
         public IContainerRegistrar Registrar => _configurator.Registrar;
 
         [Obsolete("Use 'Using[TransportName]' instead. Visit https://masstransit.io/obsolete for details.")]

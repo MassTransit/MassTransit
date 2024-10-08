@@ -11,7 +11,7 @@
         readonly InMemoryOptionSet _optionSet;
         IBusControl _busControl;
 
-        Task<IClientFactory> _clientFactory;
+        IClientFactory _clientFactory;
         IRequestResponseSettings _settings;
 
         Uri _targetEndpointAddress;
@@ -44,9 +44,7 @@
         public async Task<IRequestClient<T>> GetRequestClient<T>(TimeSpan settingsRequestTimeout)
             where T : class
         {
-            var clientFactory = await _clientFactory;
-
-            return clientFactory.CreateRequestClient<T>(_targetEndpointAddress, settingsRequestTimeout);
+            return _clientFactory.CreateRequestClient<T>(_targetEndpointAddress, settingsRequestTimeout);
         }
 
         public void Dispose()

@@ -245,7 +245,7 @@
         [OneTimeSetUp]
         public async Task Setup()
         {
-            _clientFactory = await Bus.CreateReplyToClientFactory();
+            _clientFactory = Bus.CreateReplyToClientFactory();
 
             _requestClient = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, TestTimeout);
         }
@@ -315,7 +315,7 @@
         [OneTimeSetUp]
         public async Task Setup()
         {
-            _clientFactory = await Bus.ConnectClientFactory(TestTimeout);
+            _clientFactory = Bus.ConnectClientFactory(TestTimeout);
 
             _requestClient = _clientFactory.CreateRequestClient<PingMessage>(InputQueueAddress, TestTimeout);
 
@@ -447,7 +447,7 @@
         [OneTimeSetUp]
         public async Task Setup()
         {
-            _clientFactory = await Bus.CreateReplyToClientFactory();
+            _clientFactory = Bus.CreateReplyToClientFactory();
 
             _requestClient = _clientFactory.CreateRequestClient<PingMessage>(InputQueueAddress, TestTimeout);
         }

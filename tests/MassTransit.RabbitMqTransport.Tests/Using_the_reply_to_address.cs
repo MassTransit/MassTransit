@@ -13,7 +13,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_deliver_the_response()
         {
-            var clientFactory = await Bus.CreateReplyToClientFactory();
+            var clientFactory = Bus.CreateReplyToClientFactory();
 
             IRequestClient<PingMessage> client = clientFactory.CreateRequestClient<PingMessage>(InputQueueAddress, TestTimeout);
 
@@ -36,7 +36,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_deliver_the_response()
         {
-            var clientFactory = await Bus.CreateReplyToClientFactory();
+            var clientFactory = Bus.CreateReplyToClientFactory();
 
             IRequestClient<PingMessage> client = clientFactory.CreateRequestClient<PingMessage>(InputQueueAddress, TestTimeout);
 

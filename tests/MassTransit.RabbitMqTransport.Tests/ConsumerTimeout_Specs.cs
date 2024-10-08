@@ -3,7 +3,6 @@ namespace MassTransit.RabbitMqTransport.Tests;
 using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using NUnit.Framework;
 using Testing;
 
@@ -44,9 +43,7 @@ public class When_the_consumer_timeout_is_reached_waiting_for_a_batch
                     .Endpoint(e => e.AddConfigureEndpointCallback(cfg =>
                     {
                         if (cfg is IRabbitMqReceiveEndpointConfigurator rmq)
-                        {
                             rmq.SetQueueArgument("x-consumer-timeout", 10000);
-                        }
                     }));
 
                 x.UsingRabbitMq((context, cfg) =>
