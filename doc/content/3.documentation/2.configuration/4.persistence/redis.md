@@ -8,6 +8,10 @@ Redis is a very popular key-value store, which is known for being very fast. To 
 Redis only supports event correlation by _CorrelationId_, it does not support queries. If a saga uses expression-based correlation, a _NotImplementedByDesignException_ will be thrown.
 ::
 
+::alert{type="info"}
+The Redis package also supports the recent fork of Redis called [Valkey](https://github.com/valkey-io/valkey)
+::
+
 Storing a saga in Redis requires an additional interface, _ISagaVersion_, which has a _Version_ property used for optimistic concurrency. An example saga is shown below.
 
 ```csharp
