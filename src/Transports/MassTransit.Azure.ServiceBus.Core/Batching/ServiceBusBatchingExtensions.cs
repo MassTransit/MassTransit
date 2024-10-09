@@ -34,6 +34,11 @@ public static class ServiceBusBatchingExtensions
                   sb.MaxConcurrentSessions = sessionOptions.MaxConcurrentSessions;
                   sb.MaxConcurrentCallsPerSession = sessionOptions.MessageLimitPerSession;
                   sb.SessionIdleTimeout = sessionOptions.SessionIdleTimeout;
+
+                  if (sb.PrefetchCount != 0 && sb.PrefetchCount < sessionOptions.MessageLimitPerSession)
+                  {
+                      sb.PrefetchCount = sessionOptions.MessageLimitPerSession;
+                  }
               });
         });
 
