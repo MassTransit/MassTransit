@@ -395,6 +395,28 @@ jobs:
       - name: Test Redis
         run: dotnet test -c Release --logger GitHubActions --filter Category!=Flaky
         working-directory: tests/MassTransit.RedisIntegration.Tests
+  test-valkey:
+    name: "Storage: Valkey"
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    services:
+      valkey:
+        image: valkey/valkey:8
+        ports:
+          - '6379:6379'
+        options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Test Valkey
+        run: dotnet test -c Release --logger GitHubActions --filter Category!=Flaky
+        working-directory: tests/MassTransit.RedisIntegration.Tests
   test-hangfire:
     name: "Scheduler: Hangfire"
     timeout-minutes: 10
@@ -517,6 +539,7 @@ jobs:
       - test-mongo
       - test-nhibernate
       - test-redis
+      - test-valkey
       - test-hangfire
       - test-quartz
       # - test-eventhub
