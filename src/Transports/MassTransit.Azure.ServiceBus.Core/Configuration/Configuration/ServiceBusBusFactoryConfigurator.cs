@@ -189,6 +189,11 @@ namespace MassTransit.Configuration
             set => _queueConfigurator.RequiresSession = value;
         }
 
+        public int MaxConcurrentSessions
+        {
+            set => _queueConfigurator.MaxConcurrentSessions = value;
+        }
+
         public int MaxConcurrentCallsPerSession
         {
             set => _queueConfigurator.MaxConcurrentCallsPerSession = value;
@@ -199,12 +204,7 @@ namespace MassTransit.Configuration
             set => _queueConfigurator.UserMetadata = value;
         }
 
-        public TimeSpan MessageWaitTimeout
-        {
-            set => _settings.SessionIdleTimeout = value;
-        }
-
-        public TimeSpan SessionIdleTimeout
+        public TimeSpan? SessionIdleTimeout
         {
             set => _settings.SessionIdleTimeout = value;
         }
