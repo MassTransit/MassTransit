@@ -37,6 +37,7 @@ namespace MassTransit.Tests.Serialization
 
     [TestFixture(typeof(NewtonsoftJsonMessageSerializer))]
     [TestFixture(typeof(SystemTextJsonMessageSerializer))]
+    [TestFixture(typeof(MessagePackMessageSerializer))]
     public class JobDeserialization_Specs :
         SerializationTest
     {

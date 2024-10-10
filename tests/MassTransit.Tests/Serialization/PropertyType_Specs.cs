@@ -11,6 +11,7 @@ namespace MassTransit.Tests.Serialization
     [TestFixture(typeof(NewtonsoftXmlMessageSerializer))]
     [TestFixture(typeof(EncryptedMessageSerializer))]
     [TestFixture(typeof(EncryptedMessageSerializerV2))]
+    [TestFixture(typeof(MessagePackMessageSerializer))]
     public class Serializing_a_property_of_type_char :
         SerializationTest
     {
