@@ -67,7 +67,18 @@ namespace MassTransit.Logging
         {
             var parentActivityContext = GetParentActivityContext(context.TransportHeaders, true);
 
-            var activity = Cached.Source.Value.CreateActivity(name, ActivityKind.Consumer, parentActivityContext);
+            var activity = context.TransportHeaders.TryGetHeader(DiagnosticHeaders.ActivityPropagation, out var linkTypeValue) switch
+            {
+                true => linkTypeValue switch
+                {
+                    "Link" => Cached.Source.Value.CreateActivity(name, ActivityKind.Consumer, (ActivityContext)default,
+                        links: [new ActivityLink(parentActivityContext)]),
+                    "New" => Cached.Source.Value.CreateActivity(name, ActivityKind.Consumer, (ActivityContext)default),
+                    _ => Cached.Source.Value.CreateActivity(name, ActivityKind.Consumer, parentActivityContext)
+                },
+                false => Cached.Source.Value.CreateActivity(name, ActivityKind.Consumer, parentActivityContext)
+            };
+
             if (activity == null)
                 return null;
 

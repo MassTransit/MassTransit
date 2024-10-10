@@ -8,6 +8,7 @@ namespace MassTransit.Logging
         public const string DiagnosticId = "Diagnostic-Id";
         public const string ActivityId = "MT-Activity-Id";
         public const string ActivityCorrelationContext = "MT-Activity-Correlation-Context";
+        public const string ActivityPropagation = "MT-Activity-Propagation";
 
         public const string MessageId = "messaging.masstransit.message_id";
         public const string CorrelationId = "messaging.masstransit.correlation_id";
