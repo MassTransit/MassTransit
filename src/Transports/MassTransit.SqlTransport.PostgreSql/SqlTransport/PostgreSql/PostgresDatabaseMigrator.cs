@@ -881,7 +881,9 @@ namespace MassTransit.SqlTransport.PostgreSql
             END;
             $$ LANGUAGE plpgsql VOLATILE;
 
-            CREATE OR REPLACE TRIGGER message_delivery_notify_trigger AFTER INSERT OR UPDATE ON "{0}".message_delivery
+            DROP TRIGGER IF EXISTS message_delivery_notify_trigger ON "{0}".message_delivery;
+            
+            CREATE TRIGGER message_delivery_notify_trigger AFTER INSERT OR UPDATE ON "{0}".message_delivery
                 FOR EACH ROW EXECUTE PROCEDURE "{0}".notify_msg();
 
             CREATE UNLOGGED TABLE IF NOT EXISTS "{0}".queue_metric_capture (
