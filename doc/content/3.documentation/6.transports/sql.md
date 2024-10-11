@@ -147,7 +147,7 @@ service should be added **BEFORE** `AddMassTransit` in the configuration to ensu
 ```csharp
 services.AddPostgresMigrationHostedService();
 // OR
-services.AddSqlServersMigrationHostedService();
+services.AddSqlServerMigrationHostedService();
 ```
 
 To use an existing database (which may be the case with Azure SQL or Azure PostreSQL), you can skip database creation but still create all the tables and
