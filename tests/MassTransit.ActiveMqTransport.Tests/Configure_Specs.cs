@@ -116,7 +116,7 @@ namespace MassTransit.ActiveMqTransport.Tests
             settings.TransportOptions.Add("reconnectAttempts", "-1");
 
             Assert.That(settings.BrokerAddress, Is.EqualTo(new Uri(
-                "activemq:failover:(tcp://failover1:61616/?wireFormat.tightEncodingEnabled=true,tcp://failover2:61616/?wireFormat.tightEncodingEnabled=true)?reconnectAttempts=-1")));
+                "activemq:failover:(tcp://failover1:61616/?wireFormat.tightEncodingEnabled=true,tcp://failover2:61616/?wireFormat.tightEncodingEnabled=true)?transport.reconnectAttempts=-1")));
         }
 
         [Test]
