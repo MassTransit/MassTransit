@@ -8,10 +8,10 @@
     <PackageVersion Include="AWSSDK.SimpleNotificationService" Version="3.7.400.30" />
     <PackageVersion Include="AWSSDK.S3" Version="3.7.404.2" />
     <PackageVersion Include="AWSSDK.SQS" Version="3.7.400.30" />
-    <PackageVersion Include="Azure.Identity" Version="1.12.0" />
+    <PackageVersion Include="Azure.Identity" Version="1.12.1" />
     <PackageVersion Include="Azure.Messaging.EventHubs.Processor" Version="5.11.5" />
-    <PackageVersion Include="Azure.Messaging.ServiceBus" Version="7.18.1" />
-    <PackageVersion Include="Azure.Storage.Blobs" Version="12.22.1" />
+    <PackageVersion Include="Azure.Messaging.ServiceBus" Version="7.18.2" />
+    <PackageVersion Include="Azure.Storage.Blobs" Version="12.22.2" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.13.11" />
     <PackageVersion Include="Confluent.Kafka" Version="2.5.3" />
     <PackageVersion Include="Confluent.SchemaRegistry.Serdes.Avro" Version="2.5.3" />
@@ -25,13 +25,13 @@
     <PackageVersion Include="Hangfire.MemoryStorage" Version="1.8.1.1" />
     <PackageVersion Include="Iesi.Collections" Version="4.1.1" />
     <PackageVersion Include="Ionic.Zlib.Core" Version="1.0.0" />
-    <PackageVersion Include="Marten" Version="7.29.0" />
+    <PackageVersion Include="Marten" Version="7.30.1" />
     <PackageVersion Include="MathNet.Numerics" Version="5.0.0" />
     <PackageVersion Include="MediatR" Version="12.2.0" />
     <PackageVersion Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.22.0" />
     <PackageVersion Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
     <PackageVersion Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="8.0.8" />
-    <PackageVersion Include="Microsoft.Azure.Cosmos" Version="3.43.1" />
+    <PackageVersion Include="Microsoft.Azure.Cosmos" Version="3.44.0" />
     <PackageVersion Include="Microsoft.Azure.Cosmos.Table" Version="1.0.8" />
     <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions.EventHubs" Version="6.3.5" />
     <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="5.16.4" />
@@ -51,22 +51,22 @@
     <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="6.0.1" Condition="'$(TargetFramework)' != 'net8.0'" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" Condition="'$(TargetFramework)' != 'net8.0'" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.1" Condition="'$(TargetFramework)' != 'net8.0'" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'" />
     <PackageVersion Include="Microsoft.Extensions.Diagnostics" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="6.0.1" Condition="'$(TargetFramework)' != 'net8.0'" />
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'" />
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.Testing" Version="8.8.0" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0" Condition="'$(TargetFramework)' != 'net8.0'" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.1" Condition="'$(TargetFramework)' != 'net8.0'" />
     <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="6.0.0" Condition="'$(TargetFramework)' != 'net8.0'" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'" />
     <PackageVersion Include="Microsoft.Extensions.Logging" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" Condition="'$(TargetFramework)' != 'net8.0'" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'" />
-    <PackageVersion Include="Microsoft.Extensions.Options" Version="6.0.0" Condition="'$(TargetFramework)' != 'net8.0'" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="6.0.1" Condition="'$(TargetFramework)' != 'net8.0'" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="8.0.0" Condition="'$(TargetFramework)' == 'net8.0'" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageVersion Include="MongoDB.Driver" Version="2.29.0" />
     <PackageVersion Include="MongoDB.Driver.GridFS" Version="2.29.0" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
@@ -97,7 +97,8 @@
     <PackageVersion Include="System.Net.Http" Version="4.3.4" />
     <PackageVersion Include="System.Reflection.Emit" Version="4.7.0" />
     <PackageVersion Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
-    <PackageVersion Include="System.Text.Json" Version="6.0.8" />
+    <PackageVersion Include="System.Text.Json" Version="6.0.10" Condition="'$(TargetFramework)' != 'net8.0'" />
+    <PackageVersion Include="System.Text.Json" Version="8.0.5" Condition="'$(TargetFramework)' == 'net8.0'" />
     <PackageVersion Include="System.Threading.Channels" Version="6.0.0" />
     <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
     <PackageVersion Include="System.ValueTuple" Version="4.5.0" />
