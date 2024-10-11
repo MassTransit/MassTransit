@@ -30,6 +30,8 @@ namespace MassTransit.ActiveMqTransport.Configuration
                 "warnAfterReconnectAttempts",
                 "ha",
                 "reconnectAttempts",
+                "priorityBackup",
+                "priorityURIs"
             };
 
         readonly Lazy<Uri> _brokerAddress;
@@ -102,8 +104,8 @@ namespace MassTransit.ActiveMqTransport.Configuration
                             Query = failoverServerPart
                         }.Uri.ToString()
                     ));
-                //filter failover parameters only
-                var failoverQueryPart = GetQueryString(kv => IsFailoverArgument(kv.Key));
+                //filter failover parameters only. Apache.NMS.ActiveMQ requires prefix "transport." for failover parameters
+                var failoverQueryPart = GetQueryString(kv => IsFailoverArgument(kv.Key), "transport.");
                 return new Uri($"activemq:failover:({failoverPart}){failoverQueryPart}");
             }
 
@@ -112,12 +114,12 @@ namespace MassTransit.ActiveMqTransport.Configuration
             return uri;
         }
 
-        string GetQueryString(Func<KeyValuePair<string, string>, bool> predicate)
+        string GetQueryString(Func<KeyValuePair<string, string>, bool> predicate, string prefix = "")
         {
             if (TransportOptions.Count == 0)
                 return "";
 
-            var queryString = string.Join("&", TransportOptions.Where(predicate).Select(pair => $"{pair.Key}={pair.Value}"));
+            var queryString = string.Join("&", TransportOptions.Where(predicate).Select(pair => $"{prefix}{pair.Key}={pair.Value}"));
 
             return $"?{queryString}";
         }
