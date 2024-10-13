@@ -3,6 +3,7 @@ namespace MassTransit.Tests.Serialization
     using System;
     using Context;
     using InMemoryTransport;
+    using Internals;
     using MassTransit.Serialization;
     using NUnit.Framework;
     using TestFramework;
@@ -99,6 +100,12 @@ namespace MassTransit.Tests.Serialization
 
                 Serializer = new EncryptedMessageSerializerV2(streamProvider);
                 Deserializer = new EncryptedMessageDeserializerV2(BsonMessageSerializer.Deserializer, streamProvider);
+            }
+            else if (_serializerType == typeof(MessagePackMessageSerializer))
+            {
+                var messagePackSerializer = new MessagePackMessageSerializer();
+                Serializer = messagePackSerializer;
+                Deserializer = messagePackSerializer;
             }
             else
                 throw new ArgumentException("The serializer type is unknown");

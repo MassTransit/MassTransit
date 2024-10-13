@@ -16,6 +16,7 @@ using TestFramework;
 [TestFixture(typeof(SystemTextJsonRawMessageSerializer))]
 [TestFixture(typeof(NewtonsoftJsonMessageSerializer))]
 [TestFixture(typeof(NewtonsoftRawJsonMessageSerializer))]
+[TestFixture(typeof(MessagePackMessageSerializer))]
 public class Redelivery_Specs
 {
     [Test]
