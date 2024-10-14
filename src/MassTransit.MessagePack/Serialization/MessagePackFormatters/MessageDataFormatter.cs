@@ -1,7 +1,7 @@
 ﻿namespace MassTransit.Serialization.MessagePackFormatters;
 
-using MessageData.Values;
 using JsonConverters;
+using MessageData.Values;
 using MessagePack;
 using MessagePack.Formatters;
 

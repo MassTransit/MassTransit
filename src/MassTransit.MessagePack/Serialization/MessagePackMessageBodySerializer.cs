@@ -3,8 +3,9 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Mime;
-using MassTransit.Internals.Json;
+using Internals;
 using MessagePack;
+
 
 class MessagePackMessageBodySerializer :
     IMessageSerializer
@@ -34,13 +35,28 @@ class MessagePackMessageBodySerializer :
     public void OverrideMessage<T>(T message)
         where T : class
     {
-        var currentMessage = MessagePackSerializer
-            .Deserialize<Dictionary<string, object>>((byte[])_envelope.Message);
+        Dictionary<string, object> currentMessage;
+
+        if (_envelope.Message is not null)
+        {
+            currentMessage = MessagePackSerializer
+                .Deserialize<Dictionary<string, object>>((byte[])_envelope.Message);
+        }
+        else
+        {
+            currentMessage = new Dictionary<string, object>(0);
+        }
 
         currentMessage = new Dictionary<string, object>(currentMessage, StringComparer.OrdinalIgnoreCase);
-
         var messageToMerge = message
             .Transform<Dictionary<string, object>>(SystemTextJsonMessageSerializer.Options);
+
+        if (messageToMerge is null)
+        {
+            // If we are unable to transform the message,
+            // we should not override the message.
+            return;
+        }
 
         foreach (var overlay in messageToMerge)
         {

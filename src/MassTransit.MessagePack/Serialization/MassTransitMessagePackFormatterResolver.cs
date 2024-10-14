@@ -102,7 +102,7 @@ class MassTransitMessagePackFormatterResolver :
         _cachedFormatters = new ConcurrentDictionary<Type, IMessagePackFormatter>();
     }
 
-    public IMessagePackFormatter<T> GetFormatter<T>()
+    public IMessagePackFormatter<T>? GetFormatter<T>()
     {
         var tType = typeof(T);
 
@@ -117,7 +117,14 @@ class MassTransitMessagePackFormatterResolver :
 
             EnsureFormatterTypeHasGenericParametersOfOriginalType(tType, ref formatterType);
 
-            var formatter = (IMessagePackFormatter)Activator.CreateInstance(formatterType);
+            var createdFormatterInstance = Activator.CreateInstance(formatterType);
+
+            if (createdFormatterInstance is null)
+            {
+                throw new InvalidOperationException($"Failed to create an instance of {formatterType}.");
+            }
+
+            var formatter = (IMessagePackFormatter)createdFormatterInstance;
             _cachedFormatters[tType] = formatter;
             return (IMessagePackFormatter<T>)formatter;
         }

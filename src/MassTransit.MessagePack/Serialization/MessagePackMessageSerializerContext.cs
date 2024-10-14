@@ -2,8 +2,9 @@
 
 using System;
 using System.Collections.Generic;
+using Internals;
 using MessagePack;
-using MassTransit.Internals.Json;
+
 
 public class MessagePackMessageSerializerContext :
     BaseSerializerContext
@@ -15,9 +16,14 @@ public class MessagePackMessageSerializerContext :
         : base(serializer, context, supportedMessageTypes)
     {
         _envelope = envelope;
+
+        if (_envelope.Message is null)
+        {
+            throw new ArgumentException("Message cannot be null.", nameof(envelope));
+        }
     }
 
-    public override bool TryGetMessage<T>(out T message)
+    public override bool TryGetMessage<T>(out T? message)
         where T : class
     {
         if (!TryGetMessage(typeof(T), out var outMessage))
@@ -26,11 +32,11 @@ public class MessagePackMessageSerializerContext :
             return false;
         }
 
-        message = (T)outMessage;
+        message = (T)outMessage!;
         return true;
     }
 
-    public override bool TryGetMessage(Type messageType, out object message)
+    public override bool TryGetMessage(Type messageType, out object? message)
     {
         try
         {
@@ -40,7 +46,7 @@ public class MessagePackMessageSerializerContext :
                 return false;
             }
 
-            var messagePackSerializedObjectBuffer = MessagePackMessageSerializer.EnsureObjectBufferFormatIsByteArray(_envelope.Message);
+            var messagePackSerializedObjectBuffer = MessagePackMessageSerializer.EnsureObjectBufferFormatIsByteArray(_envelope.Message!);
 
             if (_envelope.IsMessageNativeMessagePackSerialized)
             {
@@ -91,7 +97,7 @@ public class MessagePackMessageSerializerContext :
         return new MessagePackMessageBodySerializer(messagePackEnvelope);
     }
 
-    public override Dictionary<string, object> ToDictionary<T>(T message)
+    public override Dictionary<string, object> ToDictionary<T>(T? message)
         where T : class
     {
         if (message is null)

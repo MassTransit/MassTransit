@@ -4,10 +4,11 @@ using System;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using Internals;
 using MessagePack;
 using MessagePack.Formatters;
 using Metadata;
-using Internals;
+
 
 delegate void SerializeDelegate<in TConcrete>(ref MessagePackWriter writer, TConcrete value, MessagePackSerializerOptions options);
 
@@ -83,18 +84,21 @@ public class InterfaceMessagePackFormatter<TInterface> :
 
     static FormatterProxyInfo GetFormatterProxyInfoFromType(Type targetType)
     {
+        // The null-forgiving operator (!) is used because the methods are guaranteed to exist,
+        // during normal operation. In case it doesn't, we likely won't even get here.
+
         var getFormatterMethodInfo = typeof(IFormatterResolver)
-            .GetMethod(nameof(IFormatterResolver.GetFormatter))
+            .GetMethod(nameof(IFormatterResolver.GetFormatter))!
             .MakeGenericMethod(targetType);
 
         var formatterType = typeof(IMessagePackFormatter<>)
             .MakeGenericType(targetType);
 
         var serializeMethodInfo = formatterType
-            .GetMethod(nameof(IMessagePackFormatter<object>.Serialize));
+            .GetMethod(nameof(IMessagePackFormatter<object>.Serialize))!;
 
         var deserializeMethodInfo = formatterType
-            .GetMethod(nameof(IMessagePackFormatter<object>.Deserialize));
+            .GetMethod(nameof(IMessagePackFormatter<object>.Deserialize))!;
 
         return new FormatterProxyInfo
         {

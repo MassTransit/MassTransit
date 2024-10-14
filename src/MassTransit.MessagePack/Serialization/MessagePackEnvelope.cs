@@ -2,29 +2,29 @@
 
 using System;
 using System.Collections.Generic;
-using Metadata;
 using MessagePack;
+using Metadata;
 
 
 public class MessagePackEnvelope :
     MessageEnvelope
 {
-    public string MessageId { get; set; }
-    public string RequestId { get; set; }
-    public string CorrelationId { get; set; }
-    public string ConversationId { get; set; }
-    public string InitiatorId { get; set; }
-    public string SourceAddress { get; set; }
-    public string DestinationAddress { get; set; }
-    public string ResponseAddress { get; set; }
-    public string FaultAddress { get; set; }
-    public string[] MessageType { get; set; }
+    public string? MessageId { get; set; }
+    public string? RequestId { get; set; }
+    public string? CorrelationId { get; set; }
+    public string? ConversationId { get; set; }
+    public string? InitiatorId { get; set; }
+    public string? SourceAddress { get; set; }
+    public string? DestinationAddress { get; set; }
+    public string? ResponseAddress { get; set; }
+    public string? FaultAddress { get; set; }
+    public string[]? MessageType { get; set; }
     public bool IsMessageNativeMessagePackSerialized { get; set; }
-    public object Message { get; set; }
+    public object? Message { get; set; }
     public DateTime? ExpirationTime { get; set; }
     public DateTime? SentTime { get; set; }
-    public Dictionary<string, object> Headers { get; set; }
-    public HostInfo Host { get; set; }
+    public Dictionary<string, object?>? Headers { get; set; }
+    public HostInfo? Host { get; set; }
 
     public MessagePackEnvelope(SendContext context, object message)
     {
@@ -65,7 +65,7 @@ public class MessagePackEnvelope :
 
         SentTime = context.SentTime ?? DateTime.UtcNow;
 
-        Headers = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+        Headers = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
 
         foreach (KeyValuePair<string, object> header in context.Headers.GetAll())
             Headers[header.Key] = header.Value;
@@ -94,8 +94,8 @@ public class MessagePackEnvelope :
         SentTime = envelope.SentTime ?? DateTime.UtcNow;
 
         Headers = envelope.Headers != null
-            ? new Dictionary<string, object>(envelope.Headers, StringComparer.OrdinalIgnoreCase)
-            : new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+            ? new Dictionary<string, object?>(envelope.Headers, StringComparer.OrdinalIgnoreCase)
+            : new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
 
         Host = envelope.Host ?? HostMetadataCache.Host;
     }
@@ -137,7 +137,7 @@ public class MessagePackEnvelope :
 
         SentTime = context.SentTime ?? DateTime.UtcNow;
 
-        Headers = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+        Headers = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
 
         foreach (KeyValuePair<string, object> header in context.Headers.GetAll())
             Headers[header.Key] = header.Value;
@@ -182,6 +182,8 @@ public class MessagePackEnvelope :
 
         if (context.TimeToLive.HasValue)
             ExpirationTime = DateTime.UtcNow + (context.TimeToLive > TimeSpan.Zero ? context.TimeToLive : TimeSpan.FromSeconds(1));
+
+        Headers ??= new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
 
         foreach (KeyValuePair<string, object> header in context.Headers.GetAll())
             Headers[header.Key] = header.Value;

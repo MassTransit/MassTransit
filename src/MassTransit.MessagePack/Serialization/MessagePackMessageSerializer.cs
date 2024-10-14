@@ -3,8 +3,8 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Mime;
-using MassTransit.Initializers.TypeConverters;
-using MassTransit.Internals.Json;
+using Initializers.TypeConverters;
+using Internals;
 using MessagePack;
 
 
@@ -26,7 +26,7 @@ public class MessagePackMessageSerializer :
         return new BodyConsumeContext(receiveContext, serializerContext);
     }
 
-    public SerializerContext Deserialize(MessageBody body, Headers headers, Uri destinationAddress = null)
+    public SerializerContext Deserialize(MessageBody body, Headers headers, Uri? destinationAddress = null)
     {
         var messageBuffer = body.GetBytes();
         var envelope = DeserializeMessageBuffer<MessagePackEnvelope>(messageBuffer);
@@ -64,13 +64,13 @@ public class MessagePackMessageSerializer :
             _ => MessagePackSerializer.Serialize(serializedObjectAsUnknownFormat, InternalMessagePackResolver.Options)
         };
 
-    public T DeserializeObject<T>(object value, T defaultValue = default)
+    public T? DeserializeObject<T>(object? value, T? defaultValue = default)
         where T : class
     {
         if (value is Dictionary<string, object> objectByStringPairs)
         {
             // If the object is a Dictionary<string, object>, we deserialize internally using JSON.
-            // MessagePack is case sensitive, and would not be able to deserialize without correct casing.
+            // MessagePack is case-sensitive, and would not be able to deserialize without correct casing.
 
             return objectByStringPairs.Transform<T>(SystemTextJsonMessageSerializer.Options);
         }
@@ -78,13 +78,13 @@ public class MessagePackMessageSerializer :
         return InternalDeserializeObject(value, defaultValue);
     }
 
-    public T? DeserializeObject<T>(object value, T? defaultValue = null)
+    public T? DeserializeObject<T>(object? value, T? defaultValue = null)
         where T : struct
     {
         return InternalDeserializeObject(value, defaultValue);
     }
 
-    public MessageBody SerializeObject(object value)
+    public MessageBody SerializeObject(object? value)
     {
         if (value is null)
         {
@@ -94,7 +94,7 @@ public class MessagePackMessageSerializer :
         return new MessagePackMessageBody<object>(value);
     }
 
-    static T InternalDeserializeObject<T>(object value, T defaultValue)
+    static T InternalDeserializeObject<T>(object? value, T defaultValue)
     {
         if (value is null || Equals(value, defaultValue))
         {

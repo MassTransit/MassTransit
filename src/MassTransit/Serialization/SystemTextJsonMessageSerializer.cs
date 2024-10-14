@@ -11,7 +11,7 @@ namespace MassTransit.Serialization
     using Initializers.TypeConverters;
     using JsonConverters;
     using Metadata;
-    using MassTransit.Internals.Json;
+    using Internals;
 
 
     public class SystemTextJsonMessageSerializer :

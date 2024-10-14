@@ -4,7 +4,7 @@ using MassTransit.Metadata;
 using System;
 using System.Text.Json;
 
-namespace MassTransit.Internals.Json
+namespace MassTransit.Internals
 {
     public static class InternalJsonExtensions
     {
