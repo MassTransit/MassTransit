@@ -600,6 +600,14 @@ jobs:
           version: ${{ needs.calc-version.outputs.version }}
           tag-commit: false
           nuget-key: ${{secrets.NUGET_API_KEY}}
+      - name: Build and Publish MassTransit MessagePack
+        # was: brandedoutcast/publish-nuget@v2.5.5
+        uses: drusellers/publish-nuget@master
+        with:
+          project-file-path: src/MassTransit.MessagePack/MassTransit.MessagePack.csproj
+          version: ${{ needs.calc-version.outputs.version }}
+          tag-commit: false
+          nuget-key: ${{secrets.NUGET_API_KEY}}
       - name: Build and Publish MassTransit.Analyzers
         uses: drusellers/publish-nuget@master
         with:

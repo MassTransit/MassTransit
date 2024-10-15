@@ -54,6 +54,14 @@ The [MassTransit.Newtonsoft](https://nuget.org/packages/MassTransit.Newtonsoft) 
 | application/vnd.masstransit+aes    | Binary (w/envelope) | `UseEncryptedSerializer`         |
 | application/vnd.masstransit.v2+aes | Binary (w/envelope) | `UseEncryptedSerializerV2`       |
 
+### MessagePack
+
+The [MassTransit.MessagePack](https://nuget.org/packages/MassTransit.MessagePack) package adds the serialization formats listed below. 
+
+| Content Type                        | Format                   | Configuration Method       |
+|:------------------------------------|:-------------------------|:---------------------------|
+| application/vnd.masstransit+msgpack | MessagePack (w/envelope) | `UseMessagePackSerializer` |
+
 
 ## Message Types
 

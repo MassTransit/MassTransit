@@ -28,6 +28,7 @@ MassTransit NuGet Packages
 | [MassTransit][MassTransit.nuget]                                | 6.0, 8.0 |      2.0      |     4.7.2      |
 | [MassTransit.Abstractions][MassTransitAbstractions.nuget]       | 6.0, 8.0 |      2.0      |     4.7.2      |
 | [MassTransit.Newtonsoft][MassTransitNewtonsoft.nuget]           | 6.0, 8.0 |      2.0      |     4.7.2      |
+| [MassTransit.MessagePack][MassTransitMessagePack.nuget]         | 6.0, 8.0 |      2.0      |     4.7.2      |
 | **Other**                                                       |          |               |                |
 | [MassTransit.Analyzers][Analyzers.nuget]                        |          |      2.0      |                |
 | [MassTransit.Templates][Templates.nuget]                        |   6.0    |               |                |
@@ -109,6 +110,7 @@ Logo Design by _The Agile Badger_
 [MassTransit.nuget]: https://www.nuget.org/packages/MassTransit
 [MassTransitAbstractions.nuget]: https://www.nuget.org/packages/MassTransit.Abstractions
 [MassTransitNewtonsoft.nuget]: https://www.nuget.org/packages/MassTransit.Newtonsoft
+[MassTransitMessagePack.nuget]: https://www.nuget.org/packages/MassTransit.MessagePack
 [MassTransitNServiceBus.nuget]: https://www.nuget.org/packages/MassTransit.Interop.NServiceBus
 [Analyzers.nuget]: https://www.nuget.org/packages/MassTransit.Analyzers
 [Templates.nuget]: https://www.nuget.org/packages/MassTransit.Templates

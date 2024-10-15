@@ -55,6 +55,7 @@ The following NuGet packages are the currently supported.
 
 * [MassTransit.Interop.NServiceBus](https://nuget.org/packages/MassTransit.Interop.NServiceBus/)
 * [MassTransit.Newtonsoft](https://nuget.org/packages/MassTransit.Newtonsoft/)
+* [MassTransit.MessagePack](https://nuget.org/packages/MassTransit.MessagePack/)
 
 ### Other
 
