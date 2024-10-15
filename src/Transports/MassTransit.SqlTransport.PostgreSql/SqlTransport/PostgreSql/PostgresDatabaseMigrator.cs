@@ -1,5 +1,6 @@
 namespace MassTransit.SqlTransport.PostgreSql
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Dapper;
@@ -18,10 +19,10 @@ namespace MassTransit.SqlTransport.PostgreSql
         const string DropSql = """DROP DATABASE "{0}" WITH (force)""";
         const string RoleExistsSql = "SELECT COUNT(*) FROM pg_catalog.pg_roles WHERE rolname = '{0}'";
         const string CreateRoleSql = """CREATE ROLE "{0}" """;
+        const string GrantRoleToPrincipalSql = """GRANT "{0}" TO "{1}";""";
 
         const string GrantRoleSql = """
             GRANT USAGE ON SCHEMA "{1}" TO "{0}";
-            GRANT "{0}" TO "{2}";
             ALTER SCHEMA "{1}" OWNER TO "{0}";
             GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA "{1}" TO "{0}";
             GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA "{1}" TO "{0}";
@@ -1237,6 +1238,11 @@ namespace MassTransit.SqlTransport.PostgreSql
             }
 
             var principal = PostgresSqlTransportConnection.GetAdminMigrationPrincipal(options);
+            if (!string.Equals(options.Role, principal, StringComparison.Ordinal))
+            {
+                await connection.Connection.ExecuteScalarAsync<int>(string.Format(GrantRoleToPrincipalSql, options.Role, principal))
+                    .ConfigureAwait(false);
+            }
 
             await connection.Connection.ExecuteScalarAsync<int>(string.Format(GrantRoleSql, options.Role, options.Schema, principal))
                 .ConfigureAwait(false);
