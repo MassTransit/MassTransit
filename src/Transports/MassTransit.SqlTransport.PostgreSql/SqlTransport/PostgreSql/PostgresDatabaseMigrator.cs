@@ -1,5 +1,6 @@
 namespace MassTransit.SqlTransport.PostgreSql
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Dapper;
@@ -1237,7 +1238,7 @@ namespace MassTransit.SqlTransport.PostgreSql
             }
 
             var principal = PostgresSqlTransportConnection.GetAdminMigrationPrincipal(options);
-            if (options.Role != principal)
+            if (!string.Equals(options.Role, principal, StringComparison.Ordinal))
             {
                 await connection.Connection.ExecuteScalarAsync<int>(string.Format(GrantRoleToPrincipalSql, options.Role, principal))
                     .ConfigureAwait(false);
