@@ -201,7 +201,10 @@ namespace MassTransit
                     if (context.Message.Kind != ConcurrentLimitKind.Stopped)
                     {
                         if (context.Message.InstanceProperties is { Count: > 0 })
+                        {
+                            instance.Properties ??= new Dictionary<string, object>(context.Message.JobTypeProperties.Count, StringComparer.OrdinalIgnoreCase);
                             instance.Properties.SetValues(context.Message.InstanceProperties);
+                        }
                     }
                 }
 
