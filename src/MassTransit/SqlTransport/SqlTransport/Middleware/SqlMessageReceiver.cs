@@ -116,12 +116,7 @@ namespace MassTransit.SqlTransport.Middleware
                     _receiveSettings.ConcurrentDeliveryLimit, _receiveSettings.LockDuration).ConfigureAwait(false)).ToList();
 
                 if (messages.Count > 0)
-                {
-                    LogContext.Info?.Log("Requested {0} messages, received {1}: {2}", messageLimit, messages.Count, string.Join(", ", messages.Select(x => x
-                        .PartitionKey)));
-
                     return messages;
-                }
 
                 if (_receiveSettings.AutoDeleteOnIdle.HasValue)
                 {
