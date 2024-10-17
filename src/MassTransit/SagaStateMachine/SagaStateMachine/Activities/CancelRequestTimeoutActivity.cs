@@ -39,9 +39,9 @@ namespace MassTransit.SagaStateMachine
                     throw new ConfigurationException("A scheduler was not available to cancel the scheduled request timeout");
             }
 
-            await next.Execute(context).ConfigureAwait(false);
-
             _request.SetRequestId(context.Saga, default);
+
+            await next.Execute(context).ConfigureAwait(false);
         }
 
         public Task Faulted<TException>(BehaviorExceptionContext<TSaga, TMessage, TException> context, IBehavior<TSaga, TMessage> next)
