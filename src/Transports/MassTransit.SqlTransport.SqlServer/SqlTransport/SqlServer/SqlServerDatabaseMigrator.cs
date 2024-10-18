@@ -1300,6 +1300,74 @@ BEGIN
     RETURN @@ROWCOUNT
 END";
 
+        const string SqlFnRequeueMessage = @"
+CREATE OR ALTER PROCEDURE transport.RequeueMessage @messageDeliveryId bigint,
+                                                   @targetQueueType int,
+                                                   @delay int = 0,
+                                                   @redeliveryCount int = 10
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF NOT @targetQueueType BETWEEN 1 AND 3
+        BEGIN
+            THROW 50000, 'Invalid target queue type', 1;
+        END;
+
+    DECLARE @sourceQueueId bigint;
+    SELECT @sourceQueueId = md.QueueId
+    FROM transport.MessageDelivery md
+    WHERE md.MessageDeliveryId = @messageDeliveryId;
+
+    IF @sourceQueueId IS NULL
+        BEGIN
+            THROW 50000, 'Message delivery not found', 1;
+        END;
+
+    DECLARE @sourceQueueName nvarchar(256);
+    DECLARE @sourceQueueType int;
+    SELECT @sourceQueueName = q.Name, @sourceQueueType = q.Type
+    FROM transport.Queue q
+    WHERE q.Id = @sourceQueueId;
+
+    IF @sourceQueueName IS NULL
+        BEGIN
+            THROW 50000, 'Queue not found', 1;
+        END;
+
+    IF @sourceQueueType = @targetQueueType
+        BEGIN
+            THROW 50000, 'Source and target queue type must not be the same', 1;
+        END;
+
+    DECLARE @targetQueueId bigint;
+    SELECT @targetQueueId = q.Id
+    FROM transport.Queue q
+    WHERE q.Name = @sourceQueueName
+      AND q.Type = @targetQueueType;
+
+    IF @targetQueueId IS NULL
+        BEGIN
+            THROW 50000, 'Queue type not found', 1;
+        END;
+
+    DECLARE @enqueueTime datetime2;
+    SET @enqueueTime = DATEADD(SECOND, @delay, SYSUTCDATETIME());
+
+    UPDATE md
+    SET EnqueueTime      = @enqueueTime,
+        QueueId          = @targetQueueId,
+        MaxDeliveryCount = md.DeliveryCount + @redeliveryCount
+    FROM transport.MessageDelivery md
+    WHERE md.MessageDeliveryId = @messageDeliveryId
+      AND md.LockId IS NULL
+      AND md.ConsumerId IS NULL
+      AND (md.ExpirationTime IS NULL OR md.ExpirationTime > @enqueueTime);
+
+    RETURN @@ROWCOUNT;
+END
+";
+
         const string SqlFnProcessMetrics = @"
 CREATE OR ALTER PROCEDURE {0}.ProcessMetrics
     @rowLimit int
