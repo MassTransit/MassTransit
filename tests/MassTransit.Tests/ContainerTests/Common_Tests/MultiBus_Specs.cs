@@ -364,6 +364,50 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
             Assert.That(consumed.Context.SourceAddress, Is.EqualTo(new Uri("loopback://localhost/mediator")));
         }
 
+        [Test]
+        public async Task Should_receive_in_bus_through_mediator_and_publish_with_different_base_address()
+        {
+            var baseAddress = new Uri($"loopback://localhost/{Guid.NewGuid()}");
+            await using var provider = new ServiceCollection()
+                .AddMediator(baseAddress, cfg => cfg.AddConsumer<MediatorPublishConsumer>())
+                .AddMassTransitTestHarness(cfg => cfg.AddConsumer<BusConsumer>())
+                .BuildServiceProvider(true);
+
+            var harness = provider.GetTestHarness();
+            await harness.Start();
+
+            var mediator = harness.Scope.ServiceProvider.GetRequiredService<IScopedMediator>();
+            await mediator.Send(new Request());
+
+            Assert.That(await harness.Published.Any<OneRequest>(), Is.True);
+
+            IReceivedMessage<OneRequest> consumed = await harness.Consumed.SelectAsync<OneRequest>().FirstOrDefault();
+            Assert.That(consumed, Is.Not.Null);
+            Assert.That(consumed.Context.SourceAddress, Is.EqualTo(new Uri($"{baseAddress}/mediator")));
+        }
+
+        [Test]
+        public async Task Should_receive_in_bus_through_mediator_and_send_with_different_base_address()
+        {
+            var baseAddress = new Uri($"loopback://localhost/{Guid.NewGuid()}");
+            await using var provider = new ServiceCollection()
+                .AddMediator(baseAddress, cfg => cfg.AddConsumer<MediatorSendConsumer>())
+                .AddMassTransitTestHarness(cfg => cfg.AddConsumer<BusConsumer>().Endpoint(x => x.Name = "input-queue"))
+                .BuildServiceProvider(true);
+
+            var harness = provider.GetTestHarness();
+            await harness.Start();
+
+            var mediator = harness.Scope.ServiceProvider.GetRequiredService<IScopedMediator>();
+            await mediator.Send(new Request());
+
+            Assert.That(await harness.Sent.Any<OneRequest>(), Is.True);
+
+            IReceivedMessage<OneRequest> consumed = await harness.Consumed.SelectAsync<OneRequest>().FirstOrDefault();
+            Assert.That(consumed, Is.Not.Null);
+            Assert.That(consumed.Context.SourceAddress, Is.EqualTo(new Uri($"{baseAddress}/mediator")));
+        }
+
 
         class MediatorPublishConsumer :
             IConsumer<Request>
