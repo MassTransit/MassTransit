@@ -1060,6 +1060,70 @@ namespace MassTransit.SqlTransport.PostgreSql
             END;
             $$;
 
+            CREATE OR REPLACE FUNCTION "{0}".requeue_message(
+                message_delivery_id bigint,
+                target_queue_type int,
+                delay interval DEFAULT INTERVAL '0 seconds',
+                redelivery_count int DEFAULT 10)
+                RETURNS int
+                LANGUAGE PLPGSQL
+            AS
+            $$
+            DECLARE
+                v_source_queue_id   bigint;
+                v_source_queue_name text;
+                v_source_queue_type int;
+                v_target_queue_id   bigint;
+                v_requeue_count     int;
+                v_enqueue_time      timestamptz;
+            BEGIN
+                IF NOT target_queue_type BETWEEN 1 AND 3 THEN
+                    RAISE EXCEPTION 'Invalid target queue type: %', target_queue_type;
+                END IF;
+
+                SELECT INTO v_source_queue_id md.queue_id
+                FROM "{0}".message_delivery md
+                WHERE md.message_delivery_id = requeue_message.message_delivery_id;
+                IF v_source_queue_id IS NULL THEN
+                    RAISE EXCEPTION 'Message delivery not found: %', requeue_message.message_delivery_id;
+                END IF;
+
+                SELECT INTO v_source_queue_name, v_source_queue_type q.name, q.type
+                FROM "{0}".queue q
+                WHERE q.id = v_source_queue_id;
+                IF v_source_queue_name IS NULL THEN
+                    RAISE EXCEPTION 'Queue not found: %', v_source_queue_id;
+                END IF;
+
+                SELECT INTO v_target_queue_id q.Id
+                FROM "{0}".queue q
+                WHERE q.name = v_source_queue_name
+                  AND q.type = target_queue_type
+                  AND q.type != v_source_queue_type;
+                IF v_target_queue_id IS NULL THEN
+                    RAISE EXCEPTION 'Queue type not found: %', target_queue_type;
+                END IF;
+
+                v_enqueue_time := (now() at time zone 'utc') + delay;
+
+                UPDATE "{0}".message_delivery md
+                SET enqueue_time       = v_enqueue_time,
+                    queue_id           = v_target_queue_id,
+                    max_delivery_count = md.delivery_count + redelivery_count
+                FROM (SELECT mdx.message_delivery_id, queue_id
+                      FROM "{0}".message_delivery mdx
+                      WHERE mdx.queue_id = v_source_queue_id
+                        AND mdx.lock_id IS NULL
+                        AND mdx.consumer_id IS NULL
+                        AND (mdx.expiration_time IS NULL OR mdx.expiration_time > v_enqueue_time)
+                      ORDER BY mdx.transport_message_id FOR UPDATE) mdy
+                WHERE mdy.message_delivery_id = md.message_delivery_id;
+                GET DIAGNOSTICS v_requeue_count = ROW_COUNT;
+
+                RETURN v_requeue_count;
+            END;
+            $$;
+
             CREATE OR REPLACE VIEW "{0}".queues
             AS
             SELECT x.queue_name,
