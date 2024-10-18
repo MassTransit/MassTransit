@@ -51,12 +51,13 @@ namespace MassTransit
         /// </summary>
         /// <param name="collection"></param>
         /// <param name="configure"></param>
-        public static IServiceCollection AddMediator(this IServiceCollection collection, Action<IMediatorRegistrationConfigurator> configure = null)
+        /// <param name="baseAddress"></param>
+        public static IServiceCollection AddMediator(this IServiceCollection collection, Uri baseAddress, Action<IMediatorRegistrationConfigurator> configure = null)
         {
             if (collection.Any(d => d.ServiceType == typeof(IMediator)))
                 throw new ConfigurationException("AddMediator() was already called and may only be called once per container.");
 
-            var configurator = new ServiceCollectionMediatorConfigurator(collection);
+            var configurator = new ServiceCollectionMediatorConfigurator(collection, baseAddress);
 
             configure?.Invoke(configurator);
 
@@ -65,6 +66,17 @@ namespace MassTransit
             configurator.Complete();
 
             return collection;
+        }
+
+        /// <summary>
+        /// Adds the MassTransit Mediator to the <paramref name="collection" />, and allows consumers, sagas, and activities (which are not supported
+        /// by the Mediator) to be configured.
+        /// </summary>
+        /// <param name="collection"></param>
+        /// <param name="configure"></param>
+        public static IServiceCollection AddMediator(this IServiceCollection collection, Action<IMediatorRegistrationConfigurator> configure = null)
+        {
+            return AddMediator(collection, null, configure);
         }
 
         /// <summary>

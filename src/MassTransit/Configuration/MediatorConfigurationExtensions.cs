@@ -18,11 +18,26 @@ namespace MassTransit
         /// <exception cref="ArgumentNullException"></exception>
         public static IMediator CreateMediator(this IBusFactorySelector selector, Action<IMediatorConfigurator> configure)
         {
+            return CreateMediator(selector, null, configure);
+        }
+
+        /// <summary>
+        /// Create a mediator, which sends messages to consumers, handlers, and sagas. Messages are dispatched to the consumers asynchronously.
+        /// Consumers are not directly coupled to the sender. Can be used entirely in-memory without a broker.
+        /// </summary>
+        /// <param name="selector"></param>
+        /// <param name="configure"></param>
+        /// <param name="baseAddress"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static IMediator CreateMediator(this IBusFactorySelector selector, Uri baseAddress, Action<IMediatorConfigurator> configure)
+        {
             if (configure == null)
                 throw new ArgumentNullException(nameof(configure));
 
+            baseAddress ??= new Uri("loopback://localhost/");
             var topologyConfiguration = new InMemoryTopologyConfiguration(InMemoryBus.CreateMessageTopology());
-            var busConfiguration = new InMemoryBusConfiguration(topologyConfiguration, new Uri("loopback://localhost"));
+            var busConfiguration = new InMemoryBusConfiguration(topologyConfiguration, baseAddress);
 
             if (LogContext.Current != null)
                 busConfiguration.HostConfiguration.LogContext = LogContext.Current;
