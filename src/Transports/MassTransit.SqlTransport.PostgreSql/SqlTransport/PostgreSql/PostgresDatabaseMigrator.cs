@@ -666,10 +666,7 @@ namespace MassTransit.SqlTransport.PostgreSql
                 UPDATE "{0}".message_delivery md
                     SET enqueue_time = v_enqueue_time, queue_id = v_queue_id, lock_id = NULL, consumer_id = NULL, transport_headers = headers
                     FROM (SELECT mdx.message_delivery_id, queue_id, consumer_id FROM "{0}".message_delivery mdx
-                        WHERE mdx.message_delivery_id = move_message.message_delivery_id AND (
-                            (move_message.lock_id IS NULL AND mdx.lock_id IS NULL) OR
-                            (move_message.lock_id IS NOT NULL AND mdx.lock_id = move_message.lock_id)
-                        ) FOR UPDATE) mdy
+                        WHERE mdx.message_delivery_id = move_message.message_delivery_id AND mdx.lock_id = move_message.lock_id FOR UPDATE) mdy
                     WHERE mdy.message_delivery_id = md.message_delivery_id
                     RETURNING md.message_delivery_id, mdy.queue_id INTO v_message_delivery_id, v_source_queue_id;
 
