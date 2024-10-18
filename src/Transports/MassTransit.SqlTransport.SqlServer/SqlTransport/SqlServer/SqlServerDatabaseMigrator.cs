@@ -1301,7 +1301,7 @@ BEGIN
 END";
 
         const string SqlFnRequeueMessage = @"
-CREATE OR ALTER PROCEDURE transport.RequeueMessage @messageDeliveryId bigint,
+CREATE OR ALTER PROCEDURE {0}.RequeueMessage @messageDeliveryId bigint,
                                                    @targetQueueType int,
                                                    @delay int = 0,
                                                    @redeliveryCount int = 10
@@ -1316,7 +1316,7 @@ BEGIN
 
     DECLARE @sourceQueueId bigint;
     SELECT @sourceQueueId = md.QueueId
-    FROM transport.MessageDelivery md
+    FROM {0}.MessageDelivery md
     WHERE md.MessageDeliveryId = @messageDeliveryId;
 
     IF @sourceQueueId IS NULL
@@ -1327,7 +1327,7 @@ BEGIN
     DECLARE @sourceQueueName nvarchar(256);
     DECLARE @sourceQueueType int;
     SELECT @sourceQueueName = q.Name, @sourceQueueType = q.Type
-    FROM transport.Queue q
+    FROM {0}.Queue q
     WHERE q.Id = @sourceQueueId;
 
     IF @sourceQueueName IS NULL
@@ -1342,7 +1342,7 @@ BEGIN
 
     DECLARE @targetQueueId bigint;
     SELECT @targetQueueId = q.Id
-    FROM transport.Queue q
+    FROM {0}.Queue q
     WHERE q.Name = @sourceQueueName
       AND q.Type = @targetQueueType;
 
@@ -1358,7 +1358,7 @@ BEGIN
     SET EnqueueTime      = @enqueueTime,
         QueueId          = @targetQueueId,
         MaxDeliveryCount = md.DeliveryCount + @redeliveryCount
-    FROM transport.MessageDelivery md
+    FROM {0}.MessageDelivery md
     WHERE md.MessageDeliveryId = @messageDeliveryId
       AND md.LockId IS NULL
       AND md.ConsumerId IS NULL
