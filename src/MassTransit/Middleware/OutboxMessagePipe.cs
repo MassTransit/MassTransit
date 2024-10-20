@@ -38,7 +38,17 @@ namespace MassTransit.Middleware
 
                 await context.ConsumeCompleted.ConfigureAwait(false);
 
-                await context.SetConsumed().ConfigureAwait(false);
+                try
+                {
+                    await context.SetConsumed().ConfigureAwait(false);
+                }
+                catch (Exception exception)
+                {
+                    if (!context.ReceiveContext.IsFaulted)
+                        await context.NotifyFaulted(timer.Elapsed, TypeCache<TMessage>.ShortName, exception).ConfigureAwait(false);
+
+                    throw;
+                }
 
                 return;
             }
