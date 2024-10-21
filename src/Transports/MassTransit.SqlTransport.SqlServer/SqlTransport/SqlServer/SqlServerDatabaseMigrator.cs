@@ -1365,9 +1365,7 @@ BEGIN
             AND mdx.LockId IS NULL
             AND mdx.ConsumerId IS NULL
             AND (mdx.ExpirationTime IS NULL OR mdx.ExpirationTime > @enqueueTime)
-            AND mdx.MessageDeliveryId = @messageDeliveryId
-            ORDER BY mdx.MessageDeliveryId OFFSET 0 ROWS
-        FETCH NEXT 1 ROWS ONLY) mdy
+            AND mdx.MessageDeliveryId = @messageDeliveryId) mdy
     WHERE mdy.MessageDeliveryId = MessageDelivery.MessageDeliveryId;
 
     RETURN @@ROWCOUNT;
