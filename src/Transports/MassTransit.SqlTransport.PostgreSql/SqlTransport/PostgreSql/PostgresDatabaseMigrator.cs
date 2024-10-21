@@ -1116,7 +1116,7 @@ namespace MassTransit.SqlTransport.PostgreSql
                         AND mdx.lock_id IS NULL
                         AND mdx.consumer_id IS NULL
                         AND (mdx.expiration_time IS NULL OR mdx.expiration_time > v_enqueue_time)
-                      ORDER BY mdx.transport_message_id FOR UPDATE) mdy
+                        AND mdx.message_delivery_id = requeue_message.message_delivery_id FOR UPDATE) mdy
                 WHERE mdy.message_delivery_id = md.message_delivery_id;
                 GET DIAGNOSTICS v_requeue_count = ROW_COUNT;
 
