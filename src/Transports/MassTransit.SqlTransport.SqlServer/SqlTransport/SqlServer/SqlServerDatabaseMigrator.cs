@@ -1239,6 +1239,7 @@ CREATE OR ALTER PROCEDURE {0}.RequeueMessages
     @queueName nvarchar(256),
     @sourceQueueType int,
     @targetQueueType int,
+    @messageCount int,
     @delay int = 0,
     @redeliveryCount int = 10
 AS
@@ -1293,8 +1294,8 @@ BEGIN
             AND mdx.LockId IS NULL
             AND mdx.ConsumerId IS NULL
             AND (mdx.ExpirationTime IS NULL OR mdx.ExpirationTime > @enqueueTime)
-            ORDER BY mdx.TransportMessageId OFFSET 0 ROWS
-        FETCH NEXT @redeliveryCount ROWS ONLY) mdy
+            ORDER BY mdx.MessageDeliveryId OFFSET 0 ROWS
+        FETCH NEXT @messageCount ROWS ONLY) mdy
     WHERE mdy.MessageDeliveryId = MessageDelivery.MessageDeliveryId;
 
     RETURN @@ROWCOUNT
@@ -1354,15 +1355,18 @@ BEGIN
     DECLARE @enqueueTime datetime2;
     SET @enqueueTime = DATEADD(SECOND, @delay, SYSUTCDATETIME());
 
-    UPDATE md
+    UPDATE {0}.MessageDelivery
     SET EnqueueTime      = @enqueueTime,
         QueueId          = @targetQueueId,
-        MaxDeliveryCount = md.DeliveryCount + @redeliveryCount
-    FROM {0}.MessageDelivery md
-    WHERE md.MessageDeliveryId = @messageDeliveryId
-      AND md.LockId IS NULL
-      AND md.ConsumerId IS NULL
-      AND (md.ExpirationTime IS NULL OR md.ExpirationTime > @enqueueTime);
+        MaxDeliveryCount = MessageDelivery.DeliveryCount + @redeliveryCount
+    FROM (SELECT mdx.MessageDeliveryId
+          FROM {0}.MessageDelivery mdx WITH (ROWLOCK, UPDLOCK)
+          WHERE mdx.QueueId = @sourceQueueId
+            AND mdx.LockId IS NULL
+            AND mdx.ConsumerId IS NULL
+            AND (mdx.ExpirationTime IS NULL OR mdx.ExpirationTime > @enqueueTime)
+            AND mdx.MessageDeliveryId = @messageDeliveryId) mdy
+    WHERE mdy.MessageDeliveryId = MessageDelivery.MessageDeliveryId;
 
     RETURN @@ROWCOUNT;
 END
