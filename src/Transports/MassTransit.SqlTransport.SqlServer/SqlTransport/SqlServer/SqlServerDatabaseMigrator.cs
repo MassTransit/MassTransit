@@ -1239,6 +1239,7 @@ CREATE OR ALTER PROCEDURE {0}.RequeueMessages
     @queueName nvarchar(256),
     @sourceQueueType int,
     @targetQueueType int,
+    @messageCount int,
     @delay int = 0,
     @redeliveryCount int = 10
 AS
@@ -1294,7 +1295,7 @@ BEGIN
             AND mdx.ConsumerId IS NULL
             AND (mdx.ExpirationTime IS NULL OR mdx.ExpirationTime > @enqueueTime)
             ORDER BY mdx.TransportMessageId OFFSET 0 ROWS
-        FETCH NEXT @redeliveryCount ROWS ONLY) mdy
+        FETCH NEXT @messageCount ROWS ONLY) mdy
     WHERE mdy.MessageDeliveryId = MessageDelivery.MessageDeliveryId;
 
     RETURN @@ROWCOUNT
