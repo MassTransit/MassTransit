@@ -8,8 +8,7 @@ namespace MassTransit.SqlTransport.PostgreSql
     using Microsoft.Extensions.Logging;
 
 
-    public class
-        PostgresDatabaseMigrator :
+    public class PostgresDatabaseMigrator :
         ISqlTransportDatabaseMigrator
     {
         const string DbExistsSql = "SELECT COUNT(*) FROM pg_database WHERE datname = '{0}'";
