@@ -1294,7 +1294,7 @@ BEGIN
             AND mdx.LockId IS NULL
             AND mdx.ConsumerId IS NULL
             AND (mdx.ExpirationTime IS NULL OR mdx.ExpirationTime > @enqueueTime)
-            ORDER BY mdx.TransportMessageId OFFSET 0 ROWS
+            ORDER BY mdx.MessageDeliveryId OFFSET 0 ROWS
         FETCH NEXT @messageCount ROWS ONLY) mdy
     WHERE mdy.MessageDeliveryId = MessageDelivery.MessageDeliveryId;
 
