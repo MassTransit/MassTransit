@@ -9,7 +9,7 @@
 
 ### Interoperability
 
-- [MassTransit.Interop.NServiceBus](https://nuget.org/packages/MassTransit.Interop.NServiceBus/)
+This sample shows how to use the [MassTransit.Interop.NServiceBus](https://nuget.org/packages/MassTransit.Interop.NServiceBus/) package to send messages to an NServiceBus system. To see how to consume MassTransit messages by an NServiceBus system without using the interop package, see the [NServiceBus MassTransit Ingest Behavior docs](https://docs.particular.net/samples/pipeline/masstransit-messages/#nservicebus-subscriber-masstransit-ingest-behavior).
 
 ::alert{type="danger"}
 This package was built using a black box, clean room approach based on observed message formats within the message broker. As such, there may be edge cases and situations which are not handled by this package. Extensive testing is recommended to ensure all message properties are being properly interpreted.
