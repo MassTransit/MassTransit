@@ -3,7 +3,8 @@ namespace MassTransit.Azure.Table.Tests.SlowConcurrentSaga.DataAccess
     using System;
 
 
-    public class SlowConcurrentSaga : SagaStateMachineInstance
+    public class SlowConcurrentSaga :
+        SagaStateMachineInstance
     {
         public string CurrentState { get; set; }
 

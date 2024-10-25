@@ -3,7 +3,7 @@ namespace MassTransit.Azure.Table.Tests
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Microsoft.Azure.Cosmos.Table;
+    using global::Azure.Data.Tables;
     using NUnit.Framework;
     using TestFramework;
 
@@ -12,53 +12,51 @@ namespace MassTransit.Azure.Table.Tests
         InMemoryTestFixture
     {
         protected readonly string ConnectionString;
-        protected readonly CloudTable TestCloudTable;
+        protected readonly TableClient TestCloudTable;
         protected readonly string TestTableName;
 
         public AzureTableInMemoryTestFixture()
         {
             ConnectionString = Configuration.StorageAccount;
             TestTableName = "azuretabletests";
-            var storageAccount = CloudStorageAccount.Parse(ConnectionString);
-            var tableClient = storageAccount.CreateCloudTableClient();
-            TestCloudTable = tableClient.GetTableReference(TestTableName);
+
+            var tableServiceClient = new TableServiceClient(ConnectionString);
+            TestCloudTable = tableServiceClient.GetTableClient(TestTableName);
         }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.UseDelayedMessageScheduler();
-
             base.ConfigureInMemoryBus(configurator);
         }
 
         public IEnumerable<T> GetRecords<T>()
+            where T : class, ITableEntity, new()
         {
-            IEnumerable<DynamicTableEntity> entities = TestCloudTable.ExecuteQuery(new TableQuery());
-            return entities.Select(e => TableEntity.ConvertBack<T>(e.Properties, new OperationContext()));
+            return TestCloudTable.Query<T>().ToList();
         }
 
-        public IEnumerable<DynamicTableEntity> GetTableEntities()
+        public IEnumerable<TableEntity> GetTableEntities()
         {
-            return TestCloudTable.ExecuteQuery(new TableQuery());
+            return TestCloudTable.Query<TableEntity>();
         }
 
         [OneTimeSetUp]
         public async Task Bring_it_up()
         {
-            TestCloudTable.CreateIfNotExists();
+            await TestCloudTable.CreateIfNotExistsAsync();
 
-            IEnumerable<DynamicTableEntity> entities = GetTableEntities();
+            IEnumerable<TableEntity> entities = GetTableEntities();
+            IEnumerable<IGrouping<string, TableEntity>> groupedEntities = entities.GroupBy(e => e.PartitionKey);
 
-            foreach (IGrouping<string, DynamicTableEntity> key in entities.GroupBy(x => x.PartitionKey))
+            foreach (IGrouping<string, TableEntity> group in groupedEntities)
             {
-                // Create the batch operation.
-                var batchDeleteOperation = new TableBatchOperation();
+                List<TableTransactionAction> batchOperations = group
+                    .Select(entity => new TableTransactionAction(TableTransactionActionType.Delete, entity))
+                    .ToList();
 
-                foreach (var row in key)
-                    batchDeleteOperation.Delete(row);
-
-                // Execute the batch operation.
-                await TestCloudTable.ExecuteBatchAsync(batchDeleteOperation);
+                // Execute the batch transaction
+                await TestCloudTable.SubmitTransactionAsync(batchOperations);
             }
         }
     }

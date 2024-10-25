@@ -2,7 +2,7 @@
 
 [![alt NuGet](https://img.shields.io/nuget/v/MassTransit.Azure.Cosmos.Table.svg "NuGet")](https://nuget.org/packages/MassTransit.Azure.Cosmos.Table/)
 
-Azure Tables are exposed in two ways in Azure - via Storage accounts & via the premium offering within Cosmos DB APIs. This persistence supports both implementations and behind the curtains uses the Microsoft.Azure.Cosmos.Table library for communication.
+Azure Tables are exposed in two ways in Azure - via Storage accounts & via the premium offering within Cosmos DB APIs. This persistence supports both implementations and behind the curtains uses the Azure.Data.Tables library for communication.
 
 ::alert{type="success"}
 Azure Tables currently only supports Optimistic Concurrency. Mass Transit manages the ETag property in Payload Context and uses this property for state machine updates. Concurrency errors can be spotted in logs via standard "Precondition Failed" errors from Table Storage.
@@ -28,7 +28,7 @@ public class OrderState :
 To configure a Table as the saga repository for a saga, use the code shown below using the _AddMassTransit_ container extension.
 
 ```csharp
-CloudTable cloudTable;
+TableClient cloudTable;
 container.AddMassTransit(cfg =>
 {
     cfg.AddSagaStateMachine<OrderStateMachine, OrderState>()
@@ -44,7 +44,7 @@ The container extension will register the saga repository in the container.
 To configure the saga repository with a specific key formatter, use the code shown below with _KeyFormatter_ configuration extension.
 
 ```csharp
-CloudTable cloudTable;
+TableClient cloudTable;
 container.AddMassTransit(cfg =>
 {
     cfg.AddSagaStateMachine<OrderStateMachine, OrderState>()

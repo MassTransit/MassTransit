@@ -5,7 +5,7 @@
     using System.Linq;
     using System.Threading.Tasks;
     using AzureTable;
-    using Microsoft.Azure.Cosmos.Table;
+    using global::Azure.Data.Tables;
     using NUnit.Framework;
 
 
@@ -28,7 +28,7 @@
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            var storageAccount = CloudStorageAccount.Parse(ConnectionString);
+            var storageAccount = new TableServiceClient(ConnectionString);
             configurator.UseAzureTableAuditStore(storageAccount, TestTableName);
             base.ConfigureInMemoryBus(configurator);
         }

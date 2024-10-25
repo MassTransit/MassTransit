@@ -4,12 +4,12 @@ namespace MassTransit.AzureTable
     using System.Text;
     using System.Text.Json;
     using Audit;
-    using Microsoft.Azure.Cosmos.Table;
+    using Azure;
+    using Azure.Data.Tables;
     using Serialization;
 
 
-    public class AuditRecord :
-        TableEntity
+    public class AuditRecord : ITableEntity
     {
         static readonly char[] _disallowedCharacters;
 
@@ -34,6 +34,10 @@ namespace MassTransit.AzureTable
         public string Custom { get; set; }
         public string Headers { get; set; }
         public string Message { get; set; }
+        public string RowKey { get; set; }
+        public string PartitionKey { get; set; }
+        public ETag ETag { get; set; } = ETag.All;
+        public DateTimeOffset? Timestamp { get; set; }
 
         internal static AuditRecord Create<T>(T message, MessageAuditMetadata metadata, IPartitionKeyFormatter partitionKeyFormatter)
             where T : class

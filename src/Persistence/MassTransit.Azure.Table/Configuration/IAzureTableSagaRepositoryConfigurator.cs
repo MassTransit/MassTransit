@@ -1,8 +1,8 @@
 ﻿namespace MassTransit
 {
     using System;
+    using Azure.Data.Tables;
     using AzureTable;
-    using Microsoft.Azure.Cosmos.Table;
 
 
     public interface IAzureTableSagaRepositoryConfigurator<TSaga> :
@@ -23,12 +23,12 @@
         /// Use a simple factory method to create the connection
         /// </summary>
         /// <param name="connectionFactory"></param>
-        void ConnectionFactory(Func<CloudTable> connectionFactory);
+        void ConnectionFactory(Func<TableClient> connectionFactory);
 
         /// <summary>
         /// Supply factory for retrieving the Cloud Table.
         /// </summary>
         /// <param name="connectionFactory"></param>
-        void ConnectionFactory(Func<IServiceProvider, CloudTable> connectionFactory);
+        void ConnectionFactory(Func<IServiceProvider, TableClient> connectionFactory);
     }
 }

@@ -236,7 +236,7 @@ const items : Omit<ParsedContent,'body'>[] = [
         "_locale": "en",
         "_empty": false,
         "title": "Azure Table Storage",
-        "description": "Azure Tables are exposed in two ways in Azure - via Storage accounts & via the premium offering within Cosmos DB APIs. This persistence supports both implementations and behind the curtains uses the Microsoft.Azure.Cosmos.Table library for communication.",
+        "description": "Azure Tables are exposed in two ways in Azure - via Storage accounts & via the premium offering within Cosmos DB APIs. This persistence supports both implementations and behind the curtains uses the Azure.Data.Tables library for communication.",
         "_type": "markdown",
         "_id": "content:2.documentation:5.configuration:2.persistence:azure-table.md",
         "_source": "content",

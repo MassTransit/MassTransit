@@ -4,50 +4,49 @@ namespace MassTransit.AzureTable.Saga
     using Initializers;
     using Initializers.TypeConverters;
     using Internals;
-    using Microsoft.Azure.Cosmos.Table;
 
 
     public class EntityPropertyTypeConverter :
-        ITypeConverter<EntityProperty, bool>,
-        ITypeConverter<EntityProperty, bool?>,
-        ITypeConverter<bool, EntityProperty>,
-        ITypeConverter<bool?, EntityProperty>,
-        ITypeConverter<EntityProperty, int>,
-        ITypeConverter<EntityProperty, int?>,
-        ITypeConverter<int, EntityProperty>,
-        ITypeConverter<int?, EntityProperty>,
-        ITypeConverter<EntityProperty, long>,
-        ITypeConverter<EntityProperty, long?>,
-        ITypeConverter<long, EntityProperty>,
-        ITypeConverter<long?, EntityProperty>,
-        ITypeConverter<EntityProperty, double>,
-        ITypeConverter<EntityProperty, double?>,
-        ITypeConverter<double, EntityProperty>,
-        ITypeConverter<double?, EntityProperty>,
-        ITypeConverter<EntityProperty, Guid>,
-        ITypeConverter<EntityProperty, Guid?>,
-        ITypeConverter<Guid, EntityProperty>,
-        ITypeConverter<Guid?, EntityProperty>,
-        ITypeConverter<EntityProperty, DateTime>,
-        ITypeConverter<EntityProperty, DateTime?>,
-        ITypeConverter<DateTime, EntityProperty>,
-        ITypeConverter<DateTime?, EntityProperty>,
-        ITypeConverter<EntityProperty, TimeSpan>,
-        ITypeConverter<EntityProperty, TimeSpan?>,
-        ITypeConverter<TimeSpan, EntityProperty>,
-        ITypeConverter<TimeSpan?, EntityProperty>,
-        ITypeConverter<EntityProperty, DateTimeOffset>,
-        ITypeConverter<EntityProperty, DateTimeOffset?>,
-        ITypeConverter<DateTimeOffset, EntityProperty>,
-        ITypeConverter<DateTimeOffset?, EntityProperty>,
-        ITypeConverter<EntityProperty, byte[]>,
-        ITypeConverter<byte[], EntityProperty>,
-        ITypeConverter<EntityProperty, Uri>,
-        ITypeConverter<Uri, EntityProperty>,
-        ITypeConverter<EntityProperty, Version>,
-        ITypeConverter<Version, EntityProperty>,
-        ITypeConverter<EntityProperty, string>,
-        ITypeConverter<string, EntityProperty>
+        ITypeConverter<object, bool>,
+        ITypeConverter<object, bool?>,
+        ITypeConverter<bool, object>,
+        ITypeConverter<bool?, object>,
+        ITypeConverter<object, int>,
+        ITypeConverter<object, int?>,
+        ITypeConverter<int, object>,
+        ITypeConverter<int?, object>,
+        ITypeConverter<object, long>,
+        ITypeConverter<object, long?>,
+        ITypeConverter<long, object>,
+        ITypeConverter<long?, object>,
+        ITypeConverter<object, double>,
+        ITypeConverter<object, double?>,
+        ITypeConverter<double, object>,
+        ITypeConverter<double?, object>,
+        ITypeConverter<object, Guid>,
+        ITypeConverter<object, Guid?>,
+        ITypeConverter<Guid, object>,
+        ITypeConverter<Guid?, object>,
+        ITypeConverter<object, DateTime>,
+        ITypeConverter<object, DateTime?>,
+        ITypeConverter<DateTime, object>,
+        ITypeConverter<DateTime?, object>,
+        ITypeConverter<object, TimeSpan>,
+        ITypeConverter<object, TimeSpan?>,
+        ITypeConverter<TimeSpan, object>,
+        ITypeConverter<TimeSpan?, object>,
+        ITypeConverter<object, DateTimeOffset>,
+        ITypeConverter<object, DateTimeOffset?>,
+        ITypeConverter<DateTimeOffset, object>,
+        ITypeConverter<DateTimeOffset?, object>,
+        ITypeConverter<object, byte[]>,
+        ITypeConverter<byte[], object>,
+        ITypeConverter<object, Uri>,
+        ITypeConverter<Uri, object>,
+        ITypeConverter<object, Version>,
+        ITypeConverter<Version, object>,
+        ITypeConverter<object, string>,
+        ITypeConverter<string, object>
     {
         public static readonly EntityPropertyTypeConverter Instance = new EntityPropertyTypeConverter();
         static readonly TimeSpanTypeConverter _timeSpanConverter = new TimeSpanTypeConverter();
@@ -56,11 +55,11 @@ namespace MassTransit.AzureTable.Saga
         {
         }
 
-        public bool TryConvert(EntityProperty input, out bool result)
+        public bool TryConvert(object input, out bool result)
         {
-            if (input.PropertyType == EdmType.Boolean)
+            if (input is bool value)
             {
-                result = input.BooleanValue.HasValue && input.BooleanValue.Value;
+                result = value;
                 return true;
             }
 
@@ -68,11 +67,11 @@ namespace MassTransit.AzureTable.Saga
             return false;
         }
 
-        public bool TryConvert(EntityProperty input, out bool? result)
+        public bool TryConvert(object input, out bool? result)
         {
-            if (input.PropertyType == EdmType.Boolean)
+            if (input is bool value)
             {
-                result = input.BooleanValue;
+                result = value;
                 return true;
             }
 
@@ -80,11 +79,11 @@ namespace MassTransit.AzureTable.Saga
             return false;
         }
 
-        public bool TryConvert(EntityProperty input, out byte[] result)
+        public bool TryConvert(object input, out byte[] result)
         {
-            if (input.PropertyType == EdmType.Binary)
+            if (input is byte[] value)
             {
-                result = input.BinaryValue;
+                result = value;
                 return true;
             }
 
@@ -92,11 +91,17 @@ namespace MassTransit.AzureTable.Saga
             return false;
         }
 
-        public bool TryConvert(EntityProperty input, out DateTime result)
+        public bool TryConvert(object input, out DateTime result)
         {
-            if (input.PropertyType == EdmType.DateTime)
+            if (input is DateTime dt)
             {
-                result = input.DateTime ?? default;
+                result = dt;
+                return true;
+            }
+
+            if(input is DateTimeOffset dto)
+            {
+                result = dto.UtcDateTime;
                 return true;
             }
 
@@ -104,11 +109,30 @@ namespace MassTransit.AzureTable.Saga
             return false;
         }
 
-        public bool TryConvert(EntityProperty input, out DateTime? result)
+        public bool TryConvert(object input, out DateTime? result)
         {
-            if (input.PropertyType == EdmType.DateTime)
+            if (input is DateTime dt)
             {
-                result = input.DateTime;
+                result = dt;
+                return true;
+            }
+
+            if (input is DateTimeOffset dto)
+            {
+                result = dto.UtcDateTime;
+                return true;
+            }
+
+
+            result = default;
+            return false;
+        }
+
+        public bool TryConvert(object input, out DateTimeOffset result)
+        {
+            if (input is DateTimeOffset dto)
+            {
+                result = dto;
                 return true;
             }
 
@@ -116,11 +140,11 @@ namespace MassTransit.AzureTable.Saga
             return false;
         }
 
-        public bool TryConvert(EntityProperty input, out DateTimeOffset result)
+        public bool TryConvert(object input, out DateTimeOffset? result)
         {
-            if (input.PropertyType == EdmType.DateTime)
+            if (input is DateTimeOffset dto)
             {
-                result = input.DateTimeOffsetValue ?? default;
+                result = dto;
                 return true;
             }
 
@@ -128,11 +152,11 @@ namespace MassTransit.AzureTable.Saga
             return false;
         }
 
-        public bool TryConvert(EntityProperty input, out DateTimeOffset? result)
+        public bool TryConvert(object input, out double result)
         {
-            if (input.PropertyType == EdmType.DateTime)
+            if (input is double)
             {
-                result = input.DateTimeOffsetValue;
+                result = input as double? ?? default;
                 return true;
             }
 
@@ -140,11 +164,11 @@ namespace MassTransit.AzureTable.Saga
             return false;
         }
 
-        public bool TryConvert(EntityProperty input, out double result)
+        public bool TryConvert(object input, out double? result)
         {
-            if (input.PropertyType == EdmType.Double)
+            if (input is double value)
             {
-                result = input.DoubleValue ?? default;
+                result = value;
                 return true;
             }
 
@@ -152,11 +176,11 @@ namespace MassTransit.AzureTable.Saga
             return false;
         }
 
-        public bool TryConvert(EntityProperty input, out double? result)
+        public bool TryConvert(object input, out Guid result)
         {
-            if (input.PropertyType == EdmType.Double)
+            if (input is Guid)
             {
-                result = input.DoubleValue;
+                result = input as Guid? ?? default;
                 return true;
             }
 
@@ -164,11 +188,71 @@ namespace MassTransit.AzureTable.Saga
             return false;
         }
 
-        public bool TryConvert(bool? input, out EntityProperty result)
+        public bool TryConvert(object input, out Guid? result)
+        {
+            if (input is Guid value)
+            {
+                result = value;
+                return true;
+            }
+
+            result = default;
+            return false;
+        }
+
+        public bool TryConvert(object input, out int result)
+        {
+            if (input is int)
+            {
+                result = input as int? ?? default;
+                return true;
+            }
+
+            result = default;
+            return false;
+        }
+
+        public bool TryConvert(object input, out int? result)
+        {
+            if (input is int value)
+            {
+                result = value;
+                return true;
+            }
+
+            result = default;
+            return false;
+        }
+
+        public bool TryConvert(object input, out long result)
+        {
+            if (input is long)
+            {
+                result = input as long? ?? default;
+                return true;
+            }
+
+            result = default;
+            return false;
+        }
+
+        public bool TryConvert(object input, out long? result)
+        {
+            if (input is long value)
+            {
+                result = value;
+                return true;
+            }
+
+            result = default;
+            return false;
+        }
+
+        public bool TryConvert(bool? input, out object result)
         {
             if (input.HasValue)
             {
-                result = new EntityProperty(input);
+                result = input;
                 return true;
             }
 
@@ -176,17 +260,17 @@ namespace MassTransit.AzureTable.Saga
             return false;
         }
 
-        public bool TryConvert(bool input, out EntityProperty result)
+        public bool TryConvert(bool input, out object result)
         {
-            result = new EntityProperty(input);
+            result = input;
             return true;
         }
 
-        public bool TryConvert(byte[] input, out EntityProperty result)
+        public bool TryConvert(byte[] input, out object result)
         {
             if (input != null)
             {
-                result = new EntityProperty(input);
+                result = input;
                 return true;
             }
 
@@ -194,11 +278,11 @@ namespace MassTransit.AzureTable.Saga
             return false;
         }
 
-        public bool TryConvert(DateTime? input, out EntityProperty result)
+        public bool TryConvert(DateTime? input, out object result)
         {
             if (input.HasValue)
             {
-                result = new EntityProperty(input);
+                result = input;
                 return true;
             }
 
@@ -206,17 +290,113 @@ namespace MassTransit.AzureTable.Saga
             return false;
         }
 
-        public bool TryConvert(DateTime input, out EntityProperty result)
+        public bool TryConvert(DateTime input, out object result)
         {
-            result = new EntityProperty(input);
+            result = input;
             return true;
         }
 
-        public bool TryConvert(TimeSpan? input, out EntityProperty result)
+        public bool TryConvert(DateTimeOffset? input, out object result)
+        {
+            if (input.HasValue)
+            {
+                result = input;
+                return true;
+            }
+
+            result = default;
+            return false;
+        }
+
+        public bool TryConvert(DateTimeOffset input, out object result)
+        {
+            result = input;
+            return true;
+        }
+
+        public bool TryConvert(double? input, out object result)
+        {
+            if (input.HasValue)
+            {
+                result = input;
+                return true;
+            }
+
+            result = default;
+            return false;
+        }
+
+        public bool TryConvert(double input, out object result)
+        {
+            result = input;
+            return true;
+        }
+
+        public bool TryConvert(Guid? input, out object result)
+        {
+            if (input.HasValue)
+            {
+                result = input;
+                return true;
+            }
+
+            result = default;
+            return false;
+        }
+
+        public bool TryConvert(Guid input, out object result)
+        {
+            result = input;
+            return true;
+        }
+
+        public bool TryConvert(int? input, out object result)
+        {
+            if (input.HasValue)
+            {
+                result = input;
+                return true;
+            }
+
+            result = default;
+            return false;
+        }
+
+        public bool TryConvert(int input, out object result)
+        {
+            result = input;
+            return true;
+        }
+
+        public bool TryConvert(long? input, out object result)
+        {
+            if (input.HasValue)
+            {
+                result = input;
+                return true;
+            }
+
+            result = default;
+            return false;
+        }
+
+        public bool TryConvert(long input, out object result)
+        {
+            result = input;
+            return true;
+        }
+
+        public bool TryConvert(string input, out object result)
+        {
+            result = input;
+            return true;
+        }
+
+        public bool TryConvert(TimeSpan? input, out object result)
         {
             if (input.HasValue && _timeSpanConverter.TryConvert(input.Value, out var text))
             {
-                result = new EntityProperty(text);
+                result = text;
                 return true;
             }
 
@@ -224,11 +404,11 @@ namespace MassTransit.AzureTable.Saga
             return false;
         }
 
-        public bool TryConvert(TimeSpan input, out EntityProperty result)
+        public bool TryConvert(TimeSpan input, out object result)
         {
             if (_timeSpanConverter.TryConvert(input, out var text))
             {
-                result = new EntityProperty(text);
+                result = text;
                 return true;
             }
 
@@ -236,107 +416,11 @@ namespace MassTransit.AzureTable.Saga
             return false;
         }
 
-        public bool TryConvert(DateTimeOffset? input, out EntityProperty result)
-        {
-            if (input.HasValue)
-            {
-                result = new EntityProperty(input);
-                return true;
-            }
-
-            result = default;
-            return false;
-        }
-
-        public bool TryConvert(DateTimeOffset input, out EntityProperty result)
-        {
-            result = new EntityProperty(input);
-            return true;
-        }
-
-        public bool TryConvert(double? input, out EntityProperty result)
-        {
-            if (input.HasValue)
-            {
-                result = new EntityProperty(input);
-                return true;
-            }
-
-            result = default;
-            return false;
-        }
-
-        public bool TryConvert(double input, out EntityProperty result)
-        {
-            result = new EntityProperty(input);
-            return true;
-        }
-
-        public bool TryConvert(Guid? input, out EntityProperty result)
-        {
-            if (input.HasValue)
-            {
-                result = new EntityProperty(input);
-                return true;
-            }
-
-            result = default;
-            return false;
-        }
-
-        public bool TryConvert(Guid input, out EntityProperty result)
-        {
-            result = new EntityProperty(input);
-            return true;
-        }
-
-        public bool TryConvert(int? input, out EntityProperty result)
-        {
-            if (input.HasValue)
-            {
-                result = new EntityProperty(input);
-                return true;
-            }
-
-            result = default;
-            return false;
-        }
-
-        public bool TryConvert(int input, out EntityProperty result)
-        {
-            result = new EntityProperty(input);
-            return true;
-        }
-
-        public bool TryConvert(long? input, out EntityProperty result)
-        {
-            if (input.HasValue)
-            {
-                result = new EntityProperty(input);
-                return true;
-            }
-
-            result = default;
-            return false;
-        }
-
-        public bool TryConvert(long input, out EntityProperty result)
-        {
-            result = new EntityProperty(input);
-            return true;
-        }
-
-        public bool TryConvert(string input, out EntityProperty result)
-        {
-            result = new EntityProperty(input);
-            return true;
-        }
-
-        public bool TryConvert(Uri input, out EntityProperty result)
+        public bool TryConvert(Uri input, out object result)
         {
             if (input != null)
             {
-                result = new EntityProperty(input.ToString());
+                result = input.ToString();
                 return true;
             }
 
@@ -344,11 +428,11 @@ namespace MassTransit.AzureTable.Saga
             return false;
         }
 
-        public bool TryConvert(Version input, out EntityProperty result)
+        public bool TryConvert(Version input, out object result)
         {
             if (input != null)
             {
-                result = new EntityProperty(input.ToString());
+                result = input.ToString();
                 return true;
             }
 
@@ -356,11 +440,12 @@ namespace MassTransit.AzureTable.Saga
             return false;
         }
 
-        public bool TryConvert(EntityProperty input, out Guid result)
+        public bool TryConvert(object input, out string result)
         {
-            if (input.PropertyType == EdmType.Guid)
+            if (input is string value
+                && input.ToString() != null)
             {
-                result = input.GuidValue ?? default;
+                result = value;
                 return true;
             }
 
@@ -368,86 +453,13 @@ namespace MassTransit.AzureTable.Saga
             return false;
         }
 
-        public bool TryConvert(EntityProperty input, out Guid? result)
+        public bool TryConvert(object input, out TimeSpan result)
         {
-            if (input.PropertyType == EdmType.Guid)
+            if (input is string)
             {
-                result = input.GuidValue;
-                return true;
-            }
-
-            result = default;
-            return false;
-        }
-
-        public bool TryConvert(EntityProperty input, out int result)
-        {
-            if (input.PropertyType == EdmType.Int32)
-            {
-                result = input.Int32Value ?? default;
-                return true;
-            }
-
-            result = default;
-            return false;
-        }
-
-        public bool TryConvert(EntityProperty input, out int? result)
-        {
-            if (input.PropertyType == EdmType.Int32)
-            {
-                result = input.Int32Value;
-                return true;
-            }
-
-            result = default;
-            return false;
-        }
-
-        public bool TryConvert(EntityProperty input, out long result)
-        {
-            if (input.PropertyType == EdmType.Int64)
-            {
-                result = input.Int64Value ?? default;
-                return true;
-            }
-
-            result = default;
-            return false;
-        }
-
-        public bool TryConvert(EntityProperty input, out long? result)
-        {
-            if (input.PropertyType == EdmType.Int64)
-            {
-                result = input.Int64Value;
-                return true;
-            }
-
-            result = default;
-            return false;
-        }
-
-        public bool TryConvert(EntityProperty input, out string result)
-        {
-            if (input.PropertyType == EdmType.String
-                && input.StringValue != null)
-            {
-                result = input.StringValue;
-                return true;
-            }
-
-            result = default;
-            return false;
-        }
-
-        public bool TryConvert(EntityProperty input, out TimeSpan result)
-        {
-            if (input.PropertyType == EdmType.String)
-            {
-                result = string.IsNullOrWhiteSpace(input.StringValue)
+                result = string.IsNullOrWhiteSpace(input.ToString())
                     ? default
-                    : _timeSpanConverter.TryConvert(input.StringValue, out var value)
+                    : _timeSpanConverter.TryConvert(input.ToString(), out var value)
                         ? value
                         : default;
                 return true;
@@ -457,13 +469,13 @@ namespace MassTransit.AzureTable.Saga
             return false;
         }
 
-        public bool TryConvert(EntityProperty input, out TimeSpan? result)
+        public bool TryConvert(object input, out TimeSpan? result)
         {
-            if (input.PropertyType == EdmType.String)
+            if (input is string)
             {
-                result = string.IsNullOrWhiteSpace(input.StringValue)
+                result = string.IsNullOrWhiteSpace(input.ToString())
                     ? default
-                    : _timeSpanConverter.TryConvert(input.StringValue, out var value)
+                    : _timeSpanConverter.TryConvert(input.ToString(), out var value)
                         ? value
                         : default;
                 return true;
@@ -473,13 +485,13 @@ namespace MassTransit.AzureTable.Saga
             return false;
         }
 
-        public bool TryConvert(EntityProperty input, out Uri result)
+        public bool TryConvert(object input, out Uri result)
         {
-            if (input.PropertyType == EdmType.String
-                && input.StringValue != null
-                && Uri.IsWellFormedUriString(input.StringValue, UriKind.RelativeOrAbsolute))
+            if (input is string
+                && input.ToString() != null
+                && Uri.IsWellFormedUriString(input.ToString(), UriKind.RelativeOrAbsolute))
             {
-                result = new Uri(input.StringValue);
+                result = new Uri(input.ToString());
                 return true;
             }
 
@@ -487,11 +499,11 @@ namespace MassTransit.AzureTable.Saga
             return false;
         }
 
-        public bool TryConvert(EntityProperty input, out Version result)
+        public bool TryConvert(object input, out Version result)
         {
-            if (input.PropertyType == EdmType.String
-                && input.StringValue != null
-                && Version.TryParse(input.StringValue, out var version))
+            if (input is string
+                && input.ToString() != null
+                && Version.TryParse(input.ToString(), out var version))
             {
                 result = version;
                 return true;
@@ -503,8 +515,8 @@ namespace MassTransit.AzureTable.Saga
 
         public static bool IsSupported(Type propertyType)
         {
-            var fromType = typeof(ITypeConverter<,>).MakeGenericType(typeof(EntityProperty), propertyType);
-            var toType = typeof(ITypeConverter<,>).MakeGenericType(propertyType, typeof(EntityProperty));
+            var fromType = typeof(ITypeConverter<,>).MakeGenericType(typeof(object), propertyType);
+            var toType = typeof(ITypeConverter<,>).MakeGenericType(propertyType, typeof(object));
 
             return typeof(EntityPropertyTypeConverter).HasInterface(fromType) && typeof(EntityPropertyTypeConverter).HasInterface(toType);
         }

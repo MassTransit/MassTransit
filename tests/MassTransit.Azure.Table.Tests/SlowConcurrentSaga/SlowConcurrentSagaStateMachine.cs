@@ -5,7 +5,8 @@ namespace MassTransit.Azure.Table.Tests.SlowConcurrentSaga
     using Events;
 
 
-    public class SlowConcurrentSagaStateMachine : MassTransitStateMachine<SlowConcurrentSaga>
+    public class SlowConcurrentSagaStateMachine :
+        MassTransitStateMachine<SlowConcurrentSaga>
     {
         public SlowConcurrentSagaStateMachine()
         {
@@ -23,8 +24,10 @@ namespace MassTransit.Azure.Table.Tests.SlowConcurrentSaga
                 When(IncrementCounterSlowly)
                     .ThenAsync(async context =>
                     {
-                        await Task.Delay(5000);
+                        await Task.Delay(3000);
                         context.Instance.Counter++;
+
+                        LogContext.Debug?.Log("Incremented Counter: {0}", context.Saga.Counter);
                     }));
         }
 

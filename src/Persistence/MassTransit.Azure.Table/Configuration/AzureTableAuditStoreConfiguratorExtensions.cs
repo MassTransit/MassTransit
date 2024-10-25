@@ -1,8 +1,8 @@
 namespace MassTransit
 {
     using System;
+    using Azure.Data.Tables;
     using AzureTable;
-    using Microsoft.Azure.Cosmos.Table;
 
 
     public static class AzureTableAuditStoreConfiguratorExtensions
@@ -11,71 +11,67 @@ namespace MassTransit
         /// Supply your storage account and table name for audit logs. Default Partition Key Strategy and no filters will be applied.
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="storageAccount">Your cloud storage account.</param>
+        /// <param name="tableServiceClient">Service client used to perform all service level operations.</param>
         /// <param name="auditTableName">The name of the table for which the Audit Logs will be persisted.</param>
-        public static void UseAzureTableAuditStore(this IBusFactoryConfigurator configurator, CloudStorageAccount storageAccount, string auditTableName)
+        public static void UseAzureTableAuditStore(this IBusFactoryConfigurator configurator, TableServiceClient tableServiceClient, string auditTableName)
         {
-            var tableClient = storageAccount.CreateCloudTableClient();
-            var table = tableClient.GetTableReference(auditTableName);
-            table.CreateIfNotExists();
+            var tableClient = tableServiceClient.GetTableClient(auditTableName);
+            tableClient.CreateIfNotExists();
 
-            ConfigureAuditStore(configurator, table);
+            ConfigureAuditStore(configurator, tableClient);
         }
 
         /// <summary>
         /// Supply your storage account, table name and filter to be used. Default Partition Key Strategy will be applied.
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="storageAccount">Your cloud storage account.</param>
+        /// <param name="tableServiceClient">Service client used to perform all service level operations.</param>
         /// <param name="auditTableName">The name of the table for which the Audit Logs will be persisted.</param>
         /// <param name="configureFilter">Message Filter to exclude or include messages from audit based on requirements</param>
-        public static void UseAzureTableAuditStore(this IBusFactoryConfigurator configurator, CloudStorageAccount storageAccount, string auditTableName,
+        public static void UseAzureTableAuditStore(this IBusFactoryConfigurator configurator, TableServiceClient tableServiceClient, string auditTableName,
             Action<IMessageFilterConfigurator> configureFilter)
         {
-            var tableClient = storageAccount.CreateCloudTableClient();
-            var table = tableClient.GetTableReference(auditTableName);
-            table.CreateIfNotExists();
+            var tableClient = tableServiceClient.GetTableClient(auditTableName);
+            tableClient.CreateIfNotExists();
 
-            ConfigureAuditStore(configurator, table, configureFilter);
+            ConfigureAuditStore(configurator, tableClient, configureFilter);
         }
 
         /// <summary>
         /// Supply your storage account, table name and partition key strategy based on the message type and audit information. No Filters will be applied.
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="storageAccount">Your cloud storage account.</param>
+        /// <param name="tableServiceClient">Service client used to perform all service level operations.</param>
         /// <param name="auditTableName">The name of the table for which the Audit Logs will be persisted.</param>
         /// <param name="partitionKeyFormatter">
         /// Using the message type and audit information or otherwise, specify the partition key strategy
         /// </param>
-        public static void UseAzureTableAuditStore(this IBusFactoryConfigurator configurator, CloudStorageAccount storageAccount, string auditTableName,
+        public static void UseAzureTableAuditStore(this IBusFactoryConfigurator configurator, TableServiceClient tableServiceClient, string auditTableName,
             IPartitionKeyFormatter partitionKeyFormatter)
         {
-            var tableClient = storageAccount.CreateCloudTableClient();
-            var table = tableClient.GetTableReference(auditTableName);
-            table.CreateIfNotExists();
+            var tableClient = tableServiceClient.GetTableClient(auditTableName);
+            tableClient.CreateIfNotExists();
 
-            ConfigureAuditStore(configurator, table, null, partitionKeyFormatter);
+            ConfigureAuditStore(configurator, tableClient, null, partitionKeyFormatter);
         }
 
         /// <summary>
         /// Supply your storage account, table name, partition key strategy and message filter to be applied.
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="storageAccount">Your cloud storage account.</param>
+        /// <param name="tableServiceClient">Service client used to perform all service level operations.</param>
         /// <param name="auditTableName">The name of the table for which the Audit Logs will be persisted.</param>
         /// <param name="partitionKeyFormatter">
         /// Using the message type and audit information or otherwise, specify the partition key strategy
         /// </param>
         /// <param name="configureFilter">Message Filter to exclude or include messages from audit based on requirements</param>
-        public static void UseAzureTableAuditStore(this IBusFactoryConfigurator configurator, CloudStorageAccount storageAccount, string auditTableName,
+        public static void UseAzureTableAuditStore(this IBusFactoryConfigurator configurator, TableServiceClient tableServiceClient, string auditTableName,
             IPartitionKeyFormatter partitionKeyFormatter, Action<IMessageFilterConfigurator> configureFilter)
         {
-            var tableClient = storageAccount.CreateCloudTableClient();
-            var table = tableClient.GetTableReference(auditTableName);
-            table.CreateIfNotExists();
+            var tableClient = tableServiceClient.GetTableClient(auditTableName);
+            tableClient.CreateIfNotExists();
 
-            ConfigureAuditStore(configurator, table, configureFilter, partitionKeyFormatter);
+            ConfigureAuditStore(configurator, tableClient, configureFilter, partitionKeyFormatter);
         }
 
         /// <summary>
@@ -87,7 +83,7 @@ namespace MassTransit
         /// Using the message type and audit information or otherwise, specify the partition key strategy
         /// </param>
         /// <param name="configureFilter">Message Filter to exclude or include messages from audit based on requirements</param>
-        public static void UseAzureTableAuditStore(this IBusFactoryConfigurator configurator, CloudTable table,
+        public static void UseAzureTableAuditStore(this IBusFactoryConfigurator configurator, TableClient table,
             IPartitionKeyFormatter partitionKeyFormatter, Action<IMessageFilterConfigurator> configureFilter)
         {
             ConfigureAuditStore(configurator, table, configureFilter, partitionKeyFormatter);
@@ -99,7 +95,7 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="table">Your Azure Cloud Table</param>
         /// <param name="configureFilter">Message Filter to exclude or include messages from audit based on requirements</param>
-        public static void UseAzureTableAuditStore(this IBusFactoryConfigurator configurator, CloudTable table,
+        public static void UseAzureTableAuditStore(this IBusFactoryConfigurator configurator, TableClient table,
             Action<IMessageFilterConfigurator> configureFilter)
         {
             ConfigureAuditStore(configurator, table, configureFilter);
@@ -113,17 +109,17 @@ namespace MassTransit
         /// <param name="partitionKeyFormatter">
         /// Using the message type and audit information or otherwise, specify the partition key strategy
         /// </param>
-        public static void UseAzureTableAuditStore(this IBusFactoryConfigurator configurator, CloudTable table, IPartitionKeyFormatter partitionKeyFormatter)
+        public static void UseAzureTableAuditStore(this IBusFactoryConfigurator configurator, TableClient table, IPartitionKeyFormatter partitionKeyFormatter)
         {
             ConfigureAuditStore(configurator, table, null, partitionKeyFormatter);
         }
 
-        public static void UseAzureTableAuditStore(this IBusFactoryConfigurator configurator, CloudTable table)
+        public static void UseAzureTableAuditStore(this IBusFactoryConfigurator configurator, TableClient table)
         {
             ConfigureAuditStore(configurator, table);
         }
 
-        static void ConfigureAuditStore(IBusFactoryConfigurator configurator, CloudTable table, Action<IMessageFilterConfigurator> configureFilter = default,
+        static void ConfigureAuditStore(IBusFactoryConfigurator configurator, TableClient table, Action<IMessageFilterConfigurator> configureFilter = default,
             IPartitionKeyFormatter formatter = default)
         {
             var auditStore = new AzureTableAuditStore(table, formatter ?? new DefaultPartitionKeyFormatter());
