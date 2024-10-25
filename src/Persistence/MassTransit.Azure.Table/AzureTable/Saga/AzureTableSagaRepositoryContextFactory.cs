@@ -4,8 +4,7 @@ namespace MassTransit.AzureTable.Saga
     using System.Threading;
     using System.Threading.Tasks;
     using MassTransit.Saga;
-    using Microsoft.Azure.Cosmos.Table;
-
+    using Azure.Data.Tables;
 
     public class AzureTableSagaRepositoryContextFactory<TSaga> :
         ISagaRepositoryContextFactory<TSaga>,
@@ -25,7 +24,7 @@ namespace MassTransit.AzureTable.Saga
             _keyFormatter = keyFormatter;
         }
 
-        public AzureTableSagaRepositoryContextFactory(CloudTable cloudTable,
+        public AzureTableSagaRepositoryContextFactory(TableClient cloudTable,
             ISagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga> factory,
             ISagaKeyFormatter<TSaga> keyFormatter)
             : this(new ConstCloudTableProvider<TSaga>(cloudTable), factory, keyFormatter)

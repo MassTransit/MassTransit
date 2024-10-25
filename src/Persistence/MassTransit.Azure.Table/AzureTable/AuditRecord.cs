@@ -4,12 +4,10 @@ namespace MassTransit.AzureTable
     using System.Text;
     using System.Text.Json;
     using Audit;
-    using Microsoft.Azure.Cosmos.Table;
     using Serialization;
 
 
-    public class AuditRecord :
-        TableEntity
+    public class AuditRecord
     {
         static readonly char[] _disallowedCharacters;
 
@@ -17,6 +15,8 @@ namespace MassTransit.AzureTable
         {
             _disallowedCharacters = new[] { '/', '\\', '#', '?' };
         }
+        public string RowKey { get; set; }
+        public string PartitionKey { get; set; }
 
         public Guid? MessageId { get; set; }
         public Guid? ConversationId { get; set; }

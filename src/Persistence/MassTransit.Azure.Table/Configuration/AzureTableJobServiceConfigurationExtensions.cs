@@ -3,13 +3,13 @@
     using System;
     using AzureTable;
     using AzureTable.Saga;
-    using Microsoft.Azure.Cosmos.Table;
+    using Azure.Data.Tables;
 
 
     public static class AzureTableJobServiceConfigurationExtensions
     {
         public static void UseAzureTableSagaRepository(this IJobServiceConfigurator configurator,
-            Func<CloudTable> contextFactory,
+            Func<TableClient> contextFactory,
             ISagaKeyFormatter<JobTypeSaga> jobTypeKeyFormatter,
             ISagaKeyFormatter<JobSaga> jobKeyFormatter,
             ISagaKeyFormatter<JobAttemptSaga> jobAttemptKeyFormatter)
@@ -22,7 +22,7 @@
         }
 
         public static void UseAzureTableSagaRepository(this IJobServiceConfigurator configurator,
-            Func<CloudTable> contextFactory)
+            Func<TableClient> contextFactory)
         {
             UseAzureTableSagaRepository(configurator, contextFactory,
                 new ConstPartitionSagaKeyFormatter<JobTypeSaga>(nameof(JobTypeSaga)),

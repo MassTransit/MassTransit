@@ -2,13 +2,13 @@
 {
     using System;
     using MassTransit.Saga;
-    using Microsoft.Azure.Cosmos.Table;
+    using Azure.Data.Tables;
 
 
     public static class AzureTableSagaRepository<TSaga>
         where TSaga : class, ISaga
     {
-        public static ISagaRepository<TSaga> Create(Func<CloudTable> tableFactory, ISagaKeyFormatter<TSaga> keyFormatter)
+        public static ISagaRepository<TSaga> Create(Func<TableClient> tableFactory, ISagaKeyFormatter<TSaga> keyFormatter)
         {
             var consumeContextFactory = new SagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga>();
 
@@ -19,7 +19,7 @@
             return new SagaRepository<TSaga>(repositoryContextFactory, loadSagaRepositoryContextFactory: repositoryContextFactory);
         }
 
-        public static ISagaRepository<TSaga> Create(Func<CloudTable> tableFactory)
+        public static ISagaRepository<TSaga> Create(Func<TableClient> tableFactory)
         {
             return Create(tableFactory, new ConstPartitionSagaKeyFormatter<TSaga>(typeof(TSaga).Name));
         }

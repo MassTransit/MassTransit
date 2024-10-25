@@ -2,7 +2,7 @@ namespace MassTransit.AzureTable.Saga
 {
     using System.Collections.Generic;
     using Internals;
-    using Microsoft.Azure.Cosmos.Table;
+    using Azure.Data.Tables;
     using Serialization;
 
 
@@ -22,24 +22,24 @@ namespace MassTransit.AzureTable.Saga
             _write = WritePropertyCache<TEntity>.GetProperty<TProperty>(name);
         }
 
-        public void ToEntity(TEntity entity, IDictionary<string, EntityProperty> entityProperties)
+        public void ToEntity(TEntity entity, TableEntity entityProperties)
         {
             if (entityProperties.TryGetValue(_name, out var entityProperty))
             {
-                var propertyValue = ObjectDeserializer.Deserialize<TProperty>(entityProperty.StringValue);
+                var propertyValue = ObjectDeserializer.Deserialize<TProperty>(entityProperty.ToString());
 
                 if (propertyValue.HasValue)
                     _write.Set(entity, propertyValue.Value);
             }
         }
 
-        public void FromEntity(TEntity entity, IDictionary<string, EntityProperty> entityProperties)
+        public void FromEntity(TEntity entity, IDictionary<string, object> entityProperties)
         {
             var propertyValue = _read.Get(entity);
 
             var text = ObjectDeserializer.Serialize(propertyValue);
             if (!string.IsNullOrWhiteSpace(text))
-                entityProperties.Add(_name, new EntityProperty(text));
+                entityProperties.Add(_name, text);
         }
     }
 }

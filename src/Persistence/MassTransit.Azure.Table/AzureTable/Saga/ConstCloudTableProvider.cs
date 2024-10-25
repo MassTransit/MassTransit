@@ -1,20 +1,20 @@
 namespace MassTransit.AzureTable.Saga
 {
-    using Microsoft.Azure.Cosmos.Table;
+    using Azure.Data.Tables;
 
 
     public class ConstCloudTableProvider<TSaga> :
         ICloudTableProvider<TSaga>
         where TSaga : class, ISaga
     {
-        readonly CloudTable _cloudTable;
+        readonly TableClient _cloudTable;
 
-        public ConstCloudTableProvider(CloudTable cloudTable)
+        public ConstCloudTableProvider(TableClient cloudTable)
         {
             _cloudTable = cloudTable;
         }
 
-        public CloudTable GetCloudTable()
+        public TableClient GetCloudTable()
         {
             return _cloudTable;
         }

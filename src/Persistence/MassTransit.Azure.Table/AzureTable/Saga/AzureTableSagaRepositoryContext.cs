@@ -4,10 +4,11 @@
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using Azure;
     using Context;
     using Logging;
     using MassTransit.Saga;
-    using Microsoft.Azure.Cosmos.Table;
+    using Azure.Data.Tables;
     using Middleware;
 
 
@@ -39,12 +40,13 @@
         {
             try
             {
-                var result = await TableInsert(instance).ConfigureAwait(false);
-                if (result.Result is DynamicTableEntity tableEntity)
+                var (insert, entity) = TableInsert(instance);
+                var result = await insert.ConfigureAwait(false);
+                if (!result.IsError)
                 {
                     _consumeContext.LogInsert<TSaga, TMessage>(instance.CorrelationId);
 
-                    return await CreateSagaConsumeContext(tableEntity, SagaConsumeContextMode.Insert).ConfigureAwait(false);
+                    return await CreateSagaConsumeContext(entity, SagaConsumeContextMode.Insert).ConfigureAwait(false);
                 }
             }
             catch (Exception ex)
@@ -59,18 +61,18 @@
         {
             var (partitionKey, rowKey) = _context.Formatter.Format(correlationId);
 
-            var operation = TableOperation.Retrieve<DynamicTableEntity>(partitionKey, rowKey);
-            var result = await _context.Table.ExecuteAsync(operation, CancellationToken).ConfigureAwait(false);
+            var result = await _context.Table.GetEntityIfExistsAsync<TableEntity>(partitionKey, rowKey).ConfigureAwait(false);
 
-            if (result.Result is DynamicTableEntity tableEntity)
-                return await CreateSagaConsumeContext(tableEntity, SagaConsumeContextMode.Load).ConfigureAwait(false);
+            if (result.HasValue)
+                return await CreateSagaConsumeContext(new TableEntity(result.Value), SagaConsumeContextMode.Load).ConfigureAwait(false);
 
             return default;
         }
 
         public Task Save(SagaConsumeContext<TSaga> context)
         {
-            return TableInsert(context.Saga);
+            var (insert, _) = TableInsert(context.Saga);
+            return insert;
         }
 
         public async Task Update(SagaConsumeContext<TSaga> context)
@@ -79,19 +81,13 @@
 
             try
             {
-                IDictionary<string, EntityProperty> entityProperties = _context.Converter.GetDictionary(instance);
-
-                var (partitionKey, rowKey) = _context.Formatter.Format(instance.CorrelationId);
-
                 var eTag = context.GetPayload<SagaETag>();
+                var dict = _context.Converter.GetDictionary(instance);
+                TableEntity entity = new TableEntity(dict);
+                entity.ETag  = new ETag(eTag.ETag.ToString());
+                (entity.PartitionKey, entity.RowKey) = _context.Formatter.Format(instance.CorrelationId);
 
-                var operation = TableOperation.Replace(new DynamicTableEntity(partitionKey, rowKey)
-                {
-                    Properties = entityProperties,
-                    ETag = eTag.ETag
-                });
-
-                await _context.Table.ExecuteAsync(operation, context.CancellationToken).ConfigureAwait(false);
+                await _context.Table.UpdateEntityAsync(entity, entity.ETag, TableUpdateMode.Replace, context.CancellationToken).ConfigureAwait(false);
             }
             catch (Exception exception)
             {
@@ -103,15 +99,9 @@
         {
             var instance = context.Saga;
 
-            IDictionary<string, EntityProperty> entityProperties = _context.Converter.GetDictionary(instance);
-
             var (partitionKey, rowKey) = _context.Formatter.Format(instance.CorrelationId);
-
             var eTag = context.GetPayload<SagaETag>();
-
-            var operation = TableOperation.Delete(new DynamicTableEntity(partitionKey, rowKey, eTag.ETag, entityProperties));
-
-            await _context.Table.ExecuteAsync(operation, context.CancellationToken).ConfigureAwait(false);
+            await _context.Table.DeleteEntityAsync(partitionKey, rowKey, new ETag(eTag.ETag.ToString()), context.CancellationToken).ConfigureAwait(false);
         }
 
         public Task Discard(SagaConsumeContext<TSaga> context)
@@ -130,25 +120,23 @@
             return _factory.CreateSagaConsumeContext(_context, consumeContext, instance, mode);
         }
 
-        Task<TableResult> TableInsert(TSaga instance)
+        (Task<Azure.Response>, TableEntity) TableInsert(TSaga instance)
         {
-            IDictionary<string, EntityProperty> entityProperties = _context.Converter.GetDictionary(instance);
+            var dict = _context.Converter.GetDictionary(instance);
+            TableEntity entity = new TableEntity(dict);
+            (entity.PartitionKey, entity.RowKey) = _context.Formatter.Format(instance.CorrelationId);
 
-            var (partitionKey, rowKey) = _context.Formatter.Format(instance.CorrelationId);
-
-            var operation = TableOperation.Insert(new DynamicTableEntity(partitionKey, rowKey) { Properties = entityProperties });
-
-            return _context.Table.ExecuteAsync(operation, CancellationToken);
+            return (_context.Table.AddEntityAsync(entity, CancellationToken), entity);
         }
 
-        async Task<SagaConsumeContext<TSaga, TMessage>> CreateSagaConsumeContext(DynamicTableEntity entity, SagaConsumeContextMode mode)
+        async Task<SagaConsumeContext<TSaga, TMessage>> CreateSagaConsumeContext(TableEntity entity, SagaConsumeContextMode mode)
         {
-            var instance = _context.Converter.GetObject(entity.Properties);
+            var instance = _context.Converter.GetObject(entity);
 
             SagaConsumeContext<TSaga, TMessage> sagaConsumeContext = await _factory.CreateSagaConsumeContext(_context, _consumeContext, instance, mode)
                 .ConfigureAwait(false);
 
-            var eTag = new SagaETag(entity.ETag);
+            var eTag = new SagaETag(entity.ETag.ToString());
 
             sagaConsumeContext.AddOrUpdatePayload(() => eTag, _ => eTag);
 
@@ -174,10 +162,9 @@
         {
             var (partitionKey, rowKey) = _context.Formatter.Format(correlationId);
 
-            var operation = TableOperation.Retrieve<DynamicTableEntity>(partitionKey, rowKey);
-            var result = await _context.Table.ExecuteAsync(operation, CancellationToken).ConfigureAwait(false);
-            if (result.Result is DynamicTableEntity entity)
-                return _context.Converter.GetObject(entity.Properties);
+            var result = await _context.Table.GetEntityAsync<TableEntity>(partitionKey, rowKey, cancellationToken: CancellationToken).ConfigureAwait(false);
+            if (result.HasValue)
+                return _context.Converter.GetObject(new TableEntity(result.Value));
 
 
             return default;

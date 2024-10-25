@@ -1,13 +1,13 @@
 namespace MassTransit.AzureTable
 {
     using System.Collections.Generic;
-    using Microsoft.Azure.Cosmos.Table;
+    using Azure.Data.Tables;
 
 
     public interface IEntityConverter<T>
         where T : class
     {
-        IDictionary<string, EntityProperty> GetDictionary(T entity);
-        T GetObject(IDictionary<string, EntityProperty> entityProperties);
+        IDictionary<string, object> GetDictionary(T entity);
+        T GetObject(TableEntity entity);
     }
 }

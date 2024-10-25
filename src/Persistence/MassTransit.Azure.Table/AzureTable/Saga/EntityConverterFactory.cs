@@ -21,7 +21,7 @@ namespace MassTransit.AzureTable.Saga
         static IEntityPropertyConverter<T> CreatePropertyConverter<T>(PropertyInfo propertyInfo)
             where T : class
         {
-            if (EntityPropertyTypeConverter.IsSupported(propertyInfo.PropertyType))
+            if (objectTypeConverter.IsSupported(propertyInfo.PropertyType))
             {
                 return (IEntityPropertyConverter<T>)Activator.CreateInstance(
                     typeof(EntityPropertyConverter<,>).MakeGenericType(typeof(T), propertyInfo.PropertyType), propertyInfo.Name);

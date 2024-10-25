@@ -25,7 +25,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.Azure.Cosmos.Table" />
+      <PackageReference Include="Azure.Data.Tables" />
     </ItemGroup>
 
 </Project>
