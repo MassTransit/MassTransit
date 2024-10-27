@@ -2,15 +2,12 @@
 namespace MassTransit.RabbitMqTransport.Configuration;
 
 using System;
-using Initializers.TypeConverters;
 using RabbitMQ.Client;
 
 
 public class RabbitMqStreamConfigurator :
     IRabbitMqStreamConfigurator
 {
-    static readonly DateTimeTypeConverter _dateTimeConverter = new DateTimeTypeConverter();
-
     readonly RabbitMqReceiveSettings _settings;
 
     public RabbitMqStreamConfigurator(RabbitMqReceiveSettings settings)
@@ -56,10 +53,7 @@ public class RabbitMqStreamConfigurator :
         if (timestamp.Kind == DateTimeKind.Local)
             timestamp = timestamp.ToUniversalTime();
 
-        if (_dateTimeConverter.TryConvert(timestamp, out long result))
-            _settings.ConsumeArguments["x-stream-offset"] = new AmqpTimestamp(result);
-        else if (_dateTimeConverter.TryConvert(timestamp, out string text))
-            _settings.ConsumeArguments["x-stream-offset"] = text;
+        _settings.ConsumeArguments.SetAmqpTimestamp("x-stream-offset", timestamp);
     }
 
     public void FromFirst()

@@ -12,7 +12,6 @@ namespace MassTransit.RabbitMqTransport
     using Internals;
     using Logging;
     using Middleware;
-    using RabbitMQ.Client;
     using Transports;
 
 
@@ -206,19 +205,13 @@ namespace MassTransit.RabbitMqTransport
                 switch (header.Value)
                 {
                     case DateTimeOffset value:
-                        if (_dateTimeOffsetConverter.TryConvert(value, out long result))
-                            dictionary[header.Key] = new AmqpTimestamp(result);
-                        else if (_dateTimeOffsetConverter.TryConvert(value, out string text))
-                            dictionary[header.Key] = text;
-
+                        dictionary.SetAmqpTimestamp(header.Key, value.UtcDateTime);
                         break;
 
                     case DateTime value:
-                        if (_dateTimeConverter.TryConvert(value, out result))
-                            dictionary[header.Key] = new AmqpTimestamp(result);
-                        else if (_dateTimeConverter.TryConvert(value, out string text))
-                            dictionary[header.Key] = text;
-
+                        if (value.Kind == DateTimeKind.Local)
+                            value = value.ToUniversalTime();
+                        dictionary.SetAmqpTimestamp(header.Key, value);
                         break;
 
                     case Guid value:
