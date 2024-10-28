@@ -21,10 +21,7 @@
         Task IMessageAuditStore.StoreMessage<T>(T message, MessageAuditMetadata metadata)
         {
             var auditRecord = AuditRecord.Create(message, metadata, _partitionKeyFormatter);
-            var p = new Dictionary<string, object>();
-            p.Add(auditRecord.PartitionKey, auditRecord);
-            TableEntity entity = new TableEntity(p);
-            return _table.UpsertEntityAsync(entity);
+            return _table.UpsertEntityAsync(auditRecord, TableUpdateMode.Merge);
         }
     }
 }
