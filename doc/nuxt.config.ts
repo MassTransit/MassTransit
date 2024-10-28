@@ -13,7 +13,7 @@ export default defineNuxtConfig({
               dark: 'github-dark',
               default: 'github-light'
           },
-          preload: ['json', 'shell', 'markdown', 'yaml', 'bash', 'csharp']
+          preload: ['json', 'shell', 'markdown', 'yaml', 'bash', 'csharp', 'sql']
       },
       navigation: {
           fields: ['icon', 'titleTemplate', 'aside']

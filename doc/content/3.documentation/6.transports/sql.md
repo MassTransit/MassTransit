@@ -17,7 +17,7 @@ complex message flows and enable reliable communication between components.
 
 ## Details
 
-The database transport:
+The SQL transport:
 
 - Stores messages, queues, topics, and subscriptions using tables, indices, and functions/stored procedures
 - Requires no custom extensions or additional services
@@ -30,7 +30,7 @@ The database transport:
 
 ### Features
 
-The database transport supports:
+The SQL transport supports:
 
 - Durable messages, stored as JSON, with headers and metadata stored in separate columns
 - Publish/subscribe messaging using polymorphic, topic-based routing
