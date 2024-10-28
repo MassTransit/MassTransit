@@ -1136,6 +1136,7 @@ namespace MassTransit.SqlTransport.PostgreSql
                    COALESCE(SUM(x.consume_count), 0)::bigint     as consume_count,
                    COALESCE(SUM(x.error_count), 0)::bigint       as error_count,
                    COALESCE(SUM(x.dead_letter_count), 0)::bigint as dead_letter_count,
+                   MAX(x.start_time)                             as count_start_time,
                    COALESCE(MAX(x.duration), 0)::int             as count_duration
 
             FROM (SELECT q.name                                               as queue_name,
@@ -1143,6 +1144,7 @@ namespace MassTransit.SqlTransport.PostgreSql
                          qm.consume_count,
                          qm.error_count,
                          qm.dead_letter_count,
+                         qm.start_time,
                          qm.duration,
 
                          CASE
@@ -1178,6 +1180,7 @@ namespace MassTransit.SqlTransport.PostgreSql
                                                                        qm.consume_count                as consume_count,
                                                                        qm.error_count                  as error_count,
                                                                        qm.dead_letter_count            as dead_letter_count,
+                                                                       qm.start_time                   as start_time,
                                                                        EXTRACT(EPOCH FROM qm.duration) as duration
                                       FROM "{0}".queue_metric qm
                                                INNER JOIN "{0}".queue q2 on qm.queue_id = q2.id
