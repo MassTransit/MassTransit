@@ -1,9 +1,10 @@
+using Azure.Data.Tables;
+
 namespace MassTransit.Azure.Table.Tests
 {
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Azure.Data.Tables;
     using NUnit.Framework;
     using TestFramework;
 
@@ -19,9 +20,9 @@ namespace MassTransit.Azure.Table.Tests
         {
             ConnectionString = Configuration.StorageAccount;
             TestTableName = "azuretabletests";
-            var storageAccount = TableServiceClient(ConnectionString);
-            var tableClient = storageAccount.CreateCloudTableClient();
-            TestCloudTable = tableClient.GetTableReference(TestTableName);
+            var tableServiceClient = new TableServiceClient(ConnectionString);
+            var tableClient = tableServiceClient.GetTableClient(TestTableName);
+            TestCloudTable = tableClient;
         }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
@@ -31,34 +32,31 @@ namespace MassTransit.Azure.Table.Tests
             base.ConfigureInMemoryBus(configurator);
         }
 
-        public IEnumerable<T> GetRecords<T>()
+        public IEnumerable<T> GetRecords<T>() where T : class, ITableEntity, new()
         {
-            IEnumerable<TableEntity> entities = TestCloudTable.ExecuteQuery(new TableQuery());
-            return entities.Select(e => TableEntity.ConvertBack<T>(e.Properties, new OperationContext()));
+            return TestCloudTable.Query<T>().ToList();
         }
 
         public IEnumerable<TableEntity> GetTableEntities()
         {
-            return TestCloudTable.ExecuteQuery(new TableQuery());
+            return TestCloudTable.Query<TableEntity>();
         }
 
         [OneTimeSetUp]
         public async Task Bring_it_up()
         {
-            TestCloudTable.CreateIfNotExists();
+            await TestCloudTable.CreateIfNotExistsAsync();
 
             IEnumerable<TableEntity> entities = GetTableEntities();
-
-            foreach (IGrouping<string, TableEntity> key in entities.GroupBy(x => x.PartitionKey))
+            var groupedEntities = entities.GroupBy(e => e.PartitionKey);
+            foreach (var group in groupedEntities)
             {
-                // Create the batch operation.
-                var batchDeleteOperation = new TableBatchOperation();
+                var batchOperations = group
+                    .Select(entity => new TableTransactionAction(TableTransactionActionType.Delete, entity))
+                    .ToList();
 
-                foreach (var row in key)
-                    batchDeleteOperation.Delete(row);
-
-                // Execute the batch operation.
-                await TestCloudTable.ExecuteBatchAsync(batchDeleteOperation);
+                // Execute the batch operation
+                await TestCloudTable.SubmitTransactionAsync(batchOperations);
             }
         }
     }

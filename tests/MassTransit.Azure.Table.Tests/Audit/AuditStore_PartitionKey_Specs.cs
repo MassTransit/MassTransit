@@ -1,11 +1,12 @@
-﻿namespace MassTransit.Azure.Table.Tests.Audit
+﻿using Azure.Data.Tables;
+
+namespace MassTransit.Azure.Table.Tests.Audit
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using AzureTable;
-    using Microsoft.Azure.Cosmos.Table;
     using NUnit.Framework;
 
 
@@ -21,7 +22,7 @@
             Assert.That(_records[0].PartitionKey, Is.EqualTo(PartitionKey));
         }
 
-        List<DynamicTableEntity> _records;
+        List<TableEntity> _records;
         readonly string PartitionKey = "TestPartitionKey";
 
         [OneTimeSetUp]

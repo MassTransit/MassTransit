@@ -4,10 +4,12 @@ namespace MassTransit.AzureTable
     using System.Text;
     using System.Text.Json;
     using Audit;
+    using Azure;
+    using Azure.Data.Tables;
     using Serialization;
 
 
-    public class AuditRecord
+    public class AuditRecord : ITableEntity
     {
         static readonly char[] _disallowedCharacters;
 
@@ -17,6 +19,8 @@ namespace MassTransit.AzureTable
         }
         public string RowKey { get; set; }
         public string PartitionKey { get; set; }
+        public ETag ETag { get; set; } = ETag.All;
+        public DateTimeOffset? Timestamp { get; set; }
 
         public Guid? MessageId { get; set; }
         public Guid? ConversationId { get; set; }

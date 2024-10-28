@@ -1,11 +1,12 @@
-﻿namespace MassTransit.Azure.Table.Tests.Audit
+﻿using Azure.Data.Tables;
+
+namespace MassTransit.Azure.Table.Tests.Audit
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using AzureTable;
-    using Microsoft.Azure.Cosmos.Table;
     using NUnit.Framework;
 
 
@@ -28,8 +29,8 @@
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            var storageAccount = CloudStorageAccount.Parse(ConnectionString);
-            configurator.UseAzureTableAuditStore(storageAccount, TestTableName);
+            var tableServiceClient = new TableServiceClient(ConnectionString);
+            configurator.UseAzureTableAuditStore(tableServiceClient, TestTableName);
             base.ConfigureInMemoryBus(configurator);
         }
 
