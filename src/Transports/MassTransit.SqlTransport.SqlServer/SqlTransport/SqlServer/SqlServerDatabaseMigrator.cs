@@ -914,7 +914,7 @@ BEGIN
                           sum(CASE WHEN mdx.EnqueueTime > @now AND mdx.ConsumerId = @consumerId AND mdx.LockId IS NOT NULL THEN 1 END)
                            over (partition by mdx.PartitionKey
                                order by mdx.EnqueueTime DESC, mdx.MessageDeliveryId DESC) as ActiveCount
-                   FROM transport.MessageDelivery mdx WITH (ROWLOCK, READPAST, UPDLOCK)
+                   FROM {0}.MessageDelivery mdx WITH (ROWLOCK, READPAST, UPDLOCK)
                    WHERE mdx.QueueId = @queueId
                      AND mdx.DeliveryCount < mdx.MaxDeliveryCount),
          so_ready as (SELECT ready.MessageDeliveryId
@@ -926,7 +926,7 @@ BEGIN
                       ORDER BY ready.Priority, ready.EnqueueTime, ready.MessageDeliveryId
                       OFFSET 0 ROWS FETCH NEXT @fetchCount ROWS ONLY),
          msgs AS (SELECT md.*
-                  FROM transport.MessageDelivery md
+                  FROM {0}.MessageDelivery md
                   WITH (ROWLOCK, READPAST, UPDLOCK)
                   WHERE md.MessageDeliveryId IN (SELECT MessageDeliveryId FROM so_ready))
     UPDATE dm
