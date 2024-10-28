@@ -24,6 +24,8 @@ namespace MassTransit.Configuration
         {
             configurator.UseMessageRetry(r => r.Intervals(100, 500, 1000, 1000, 2000, 2000, 5000, 5000));
 
+            configurator.UseMessageScope(context);
+
             configurator.UseInMemoryOutbox(context);
 
             if (_options.ConcurrentMessageLimit.HasValue)

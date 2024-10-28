@@ -166,7 +166,6 @@ namespace MassTransit.Tests
 
                     x.AddConfigureEndpointsCallback((context, name, cfg) =>
                     {
-                        cfg.UseMessageScope(context);
                         cfg.UsePublishFilter(typeof(JobTestPublishFilter<>), context);
                     });
 
