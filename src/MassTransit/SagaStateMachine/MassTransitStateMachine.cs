@@ -1354,7 +1354,7 @@
                 When(request.Completed)
                     .CancelRequestTimeout(request),
                 When(request.Faulted)
-                    .CancelRequestTimeout(request));
+                    .CancelRequestTimeout(request, false));
         }
 
         /// <summary>
@@ -1400,7 +1400,7 @@
                 When(request.Completed)
                     .CancelRequestTimeout(request),
                 When(request.Faulted)
-                    .CancelRequestTimeout(request));
+                    .CancelRequestTimeout(request, false));
         }
 
         /// <summary>
@@ -1505,7 +1505,7 @@
                 When(request.Completed2)
                     .CancelRequestTimeout(request),
                 When(request.Faulted)
-                    .CancelRequestTimeout(request));
+                    .CancelRequestTimeout(request, false));
         }
 
         /// <summary>
@@ -1561,7 +1561,7 @@
                 When(request.Completed2)
                     .CancelRequestTimeout(request),
                 When(request.Faulted)
-                    .CancelRequestTimeout(request));
+                    .CancelRequestTimeout(request, false));
         }
 
         /// <summary>
@@ -1681,7 +1681,7 @@
                 When(request.Completed3)
                     .CancelRequestTimeout(request),
                 When(request.Faulted)
-                    .CancelRequestTimeout(request));
+                    .CancelRequestTimeout(request, false));
         }
 
         /// <summary>
@@ -1746,7 +1746,7 @@
                 When(request.Completed3)
                     .CancelRequestTimeout(request),
                 When(request.Faulted)
-                    .CancelRequestTimeout(request));
+                    .CancelRequestTimeout(request, false));
         }
 
         /// <summary>

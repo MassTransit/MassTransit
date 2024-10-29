@@ -126,7 +126,8 @@
             public Uri ServiceAddress { get; }
 
             public TimeSpan Timeout { get; }
-            public TimeSpan? TimeToLive { get; }
+            public bool ClearRequestIdOnFaulted => false;
+            public TimeSpan? TimeToLive => null;
             public Action<IEventCorrelationConfigurator<TestState, AddressValidated>> Completed { get; set; }
             public Action<IEventCorrelationConfigurator<TestState, AddressInvalidated>> Completed2 { get; set; }
             public Action<IEventCorrelationConfigurator<TestState, Fault<ValidateAddress>>> Faulted { get; set; }
