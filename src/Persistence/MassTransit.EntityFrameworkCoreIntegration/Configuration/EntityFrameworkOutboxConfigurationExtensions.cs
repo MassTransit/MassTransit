@@ -341,8 +341,8 @@ namespace MassTransit
             outbox.Property(p => p.OutboxId).IsRequired(false);
             outbox.HasIndex(p => new
             {
-                p.OutboxId,
                 p.SequenceNumber,
+                p.OutboxId
             }).IsUnique();
             outbox.HasOne<OutboxState>().WithMany().IsRequired(false)
                 .HasForeignKey(p => p.OutboxId);
