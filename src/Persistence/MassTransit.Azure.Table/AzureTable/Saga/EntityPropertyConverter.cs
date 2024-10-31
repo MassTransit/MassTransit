@@ -23,16 +23,16 @@ namespace MassTransit.AzureTable.Saga
             _read = ReadPropertyCache<TEntity>.GetProperty<TProperty>(name);
             _write = WritePropertyCache<TEntity>.GetProperty<TProperty>(name);
 
-            _toEntity = objectTypeConverter.Instance as ITypeConverter<TProperty, object>
+            _toEntity = EntityPropertyTypeConverter.Instance as ITypeConverter<TProperty, object>
                 ?? throw new ArgumentException("Invalid property type");
 
-            _fromEntity = objectTypeConverter.Instance as ITypeConverter<object, TProperty>
+            _fromEntity = EntityPropertyTypeConverter.Instance as ITypeConverter<object, TProperty>
                 ?? throw new ArgumentException("Invalid property type");
         }
 
-        public void ToEntity(TEntity entity, TableEntity tableEntity)
+        public void ToEntity(TEntity entity, IDictionary<string, object> entityProperties)
         {
-            if (tableEntity.TryGetValue(_name, out var entityProperty))
+            if (entityProperties.TryGetValue(_name, out var entityProperty))
             {
                 if (_toEntity.TryConvert(entityProperty, out var propertyValue))
                     _write.Set(entity, propertyValue);

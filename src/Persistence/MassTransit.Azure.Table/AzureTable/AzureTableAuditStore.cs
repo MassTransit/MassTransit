@@ -4,6 +4,7 @@
     using System.Threading.Tasks;
     using Audit;
     using Azure.Data.Tables;
+    using Azure.Data.Tables;
 
 
     public class AzureTableAuditStore :

@@ -2,7 +2,6 @@ namespace MassTransit.AzureTable.Saga
 {
     using System;
     using System.Collections.Generic;
-    using Azure.Data.Tables;
 
 
     public class EntityConverter<T> :
@@ -27,13 +26,13 @@ namespace MassTransit.AzureTable.Saga
             return entityProperties;
         }
 
-        public T GetObject(TableEntity tableEntity)
+        public T GetObject(IDictionary<string, object> entityProperties)
         {
             var entity = (T)Activator.CreateInstance(typeof(T));
 
             for (int i = 0; i < _converters.Count; i++)
             {
-                _converters[i].ToEntity(entity, tableEntity);
+                _converters[i].ToEntity(entity, entityProperties);
             }
 
             return entity;

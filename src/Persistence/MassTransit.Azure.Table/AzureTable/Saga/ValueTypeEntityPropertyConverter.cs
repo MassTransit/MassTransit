@@ -22,7 +22,7 @@ namespace MassTransit.AzureTable.Saga
             _write = WritePropertyCache<TEntity>.GetProperty<TProperty>(name);
         }
 
-        public void ToEntity(TEntity entity, TableEntity entityProperties)
+        public void ToEntity(TEntity entity, IDictionary<string, object> entityProperties)
         {
             if (entityProperties.TryGetValue(_name, out var entityProperty))
             {

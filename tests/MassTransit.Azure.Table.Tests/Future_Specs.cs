@@ -1,8 +1,11 @@
 using Azure.Data.Tables;
 
+using Azure.Data.Tables;
+
 namespace MassTransit.Azure.Table.Tests
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.Extensions.DependencyInjection;
@@ -35,8 +38,9 @@ namespace MassTransit.Azure.Table.Tests
                 })
                 .AddSingleton(provider =>
                 {
-                    var tableServiceClient = provider.GetRequiredService<TableServiceClient>();
-                    return tableServiceClient.GetTableClient(TableName);
+                    var storageAccount = provider.GetRequiredService<TableServiceClient>();
+                    var tableClient = storageAccount.CreateTableIfNotExists(TableName);
+                    return storageAccount;
                 });
         }
 
@@ -46,16 +50,19 @@ namespace MassTransit.Azure.Table.Tests
 
             await table.CreateIfNotExistsAsync();
 
-            var entities = table.Query<TableEntity>().ToList();
-            var groupedEntities = entities.GroupBy(e => e.PartitionKey);
-
-            foreach (var group in groupedEntities)
+            await foreach (var page in table.QueryAsync<TableEntity>().AsPages())
             {
-                var batchOperations = group
-                    .Select(entity => new TableTransactionAction(TableTransactionActionType.Delete, entity))
-                    .ToList();
+                foreach (var group in page.Values.GroupBy(x => x.PartitionKey))
+                {
+                    var batchDeleteOperations = new List<TableTransactionAction>();
 
-                await table.SubmitTransactionAsync(batchOperations);
+                    foreach (var entity in group)
+                    {
+                        batchDeleteOperations.Add(new TableTransactionAction(TableTransactionActionType.Delete, entity));
+                    }
+
+                    await table.SubmitTransactionAsync(batchDeleteOperations);
+                }
             }
         }
 

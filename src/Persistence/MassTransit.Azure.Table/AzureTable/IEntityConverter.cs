@@ -8,6 +8,6 @@ namespace MassTransit.AzureTable
         where T : class
     {
         IDictionary<string, object> GetDictionary(T entity);
-        T GetObject(TableEntity entity);
+        T GetObject(IDictionary<string, object> entityProperties);
     }
 }

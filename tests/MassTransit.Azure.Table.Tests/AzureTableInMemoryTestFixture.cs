@@ -8,9 +8,7 @@ namespace MassTransit.Azure.Table.Tests
     using NUnit.Framework;
     using TestFramework;
 
-
-    public class AzureTableInMemoryTestFixture :
-        InMemoryTestFixture
+    public class AzureTableInMemoryTestFixture : InMemoryTestFixture
     {
         protected readonly string ConnectionString;
         protected readonly TableClient TestCloudTable;
@@ -20,15 +18,14 @@ namespace MassTransit.Azure.Table.Tests
         {
             ConnectionString = Configuration.StorageAccount;
             TestTableName = "azuretabletests";
+            
             var tableServiceClient = new TableServiceClient(ConnectionString);
-            var tableClient = tableServiceClient.GetTableClient(TestTableName);
-            TestCloudTable = tableClient;
+            TestCloudTable = tableServiceClient.GetTableClient(TestTableName);
         }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.UseDelayedMessageScheduler();
-
             base.ConfigureInMemoryBus(configurator);
         }
 
@@ -49,13 +46,14 @@ namespace MassTransit.Azure.Table.Tests
 
             IEnumerable<TableEntity> entities = GetTableEntities();
             var groupedEntities = entities.GroupBy(e => e.PartitionKey);
+
             foreach (var group in groupedEntities)
             {
                 var batchOperations = group
                     .Select(entity => new TableTransactionAction(TableTransactionActionType.Delete, entity))
                     .ToList();
 
-                // Execute the batch operation
+                // Execute the batch transaction
                 await TestCloudTable.SubmitTransactionAsync(batchOperations);
             }
         }

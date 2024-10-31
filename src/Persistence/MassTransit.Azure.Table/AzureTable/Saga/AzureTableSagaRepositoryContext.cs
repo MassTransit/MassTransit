@@ -5,6 +5,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Azure;
+    using Azure;
     using Context;
     using Logging;
     using MassTransit.Saga;
@@ -165,7 +166,6 @@
             var result = await _context.Table.GetEntityAsync<TableEntity>(partitionKey, rowKey, cancellationToken: CancellationToken).ConfigureAwait(false);
             if (result.HasValue)
                 return _context.Converter.GetObject(new TableEntity(result.Value));
-
 
             return default;
         }

@@ -1,27 +1,21 @@
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Azure.Data.Tables;
+using MassTransit.Contracts.JobService;
+using MassTransit.Azure.Table.Tests.JobConsumerTests;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using NUnit.Framework;
+using MassTransit.Testing;
+using System.Collections.Generic;
 
 namespace MassTransit.Azure.Table.Tests
 {
-    using System;
-    using System.Linq;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using Contracts.JobService;
-    using JobConsumerTests;
-    using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Hosting;
-    using Microsoft.Extensions.Logging;
-    using NUnit.Framework;
-    using Testing;
-
-
     namespace JobConsumerTests
     {
-        using System;
-        using System.Threading.Tasks;
-        using Contracts.JobService;
-
-
         public interface OddJob
         {
             TimeSpan Duration { get; }
@@ -61,16 +55,14 @@ namespace MassTransit.Azure.Table.Tests
                 .AddSingleton(provider =>
                 {
                     var connectionString = Configuration.StorageAccount;
-                    var tableServiceClient = new TableServiceClient(connectionString);
+                    var storageAccount = new TableServiceClient(connectionString);
 
-                    return tableServiceClient;
+                    return storageAccount;
                 })
                 .AddSingleton(provider =>
                 {
-                    var tableServiceClient = provider.GetRequiredService<TableServiceClient>();
-
-                    var tableClient = tableServiceClient.GetTableClient(TableName);
-
+                    var storageAccount = provider.GetRequiredService<TableServiceClient>();
+                    var tableClient = storageAccount.CreateTableIfNotExists(TableName);
                     return tableClient;
                 })
                 .AddHostedService<CreateTableHostedService>()
@@ -166,16 +158,22 @@ namespace MassTransit.Azure.Table.Tests
                 var table = _provider.GetRequiredService<TableServiceClient>().GetTableClient(TableName);
 
                 await table.CreateIfNotExistsAsync(cancellationToken);
-                var entities = table.Query<TableEntity>().ToList();
-                var groupedEntities = entities.GroupBy(e => e.PartitionKey);
 
-                foreach (var group in groupedEntities)
+                var entities = table.QueryAsync<TableEntity>(cancellationToken: cancellationToken);
+
+                await foreach (var page in table.QueryAsync<TableEntity>().AsPages())
                 {
-                    var batchOperations = group
-                        .Select(entity => new TableTransactionAction(TableTransactionActionType.Delete, entity))
-                        .ToList();
+                    foreach (var group in page.Values.GroupBy(x => x.PartitionKey))
+                    {
+                        var batchDeleteOperations = new List<TableTransactionAction>();
 
-                    await table.SubmitTransactionAsync(batchOperations, cancellationToken);
+                        foreach (var row in group)
+                        {
+                            batchDeleteOperations.Add(new TableTransactionAction(TableTransactionActionType.Delete, row));
+                        }
+
+                        await table.SubmitTransactionAsync(batchDeleteOperations, cancellationToken);
+                    }
                 }
             }
 

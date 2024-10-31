@@ -2,8 +2,8 @@ namespace MassTransit.AzureTable.Saga
 {
     using System.Collections.Generic;
     using Internals;
-    using Azure.Data.Tables;
     using Serialization;
+    using Azure.Data.Tables;
 
 
     public class ObjectEntityPropertyConverter<TEntity, TProperty> :
@@ -22,11 +22,11 @@ namespace MassTransit.AzureTable.Saga
             _write = WritePropertyCache<TEntity>.GetProperty<TProperty>(name);
         }
 
-        public void ToEntity(TEntity entity, TableEntity tableEntity)
+        public void ToEntity(TEntity entity, IDictionary<string, object> entityProperties)
         {
-            if (tableEntity.TryGetValue(_name, out var entityProperty))
+            if (entityProperties.TryGetValue(_name, out var entityProperty))
             {
-                var propertyValue = ObjectDeserializer.Deserialize<TProperty>(entityProperty);
+                var propertyValue = ObjectDeserializer.Deserialize<TProperty>(entityProperty.ToString());
 
                 _write.Set(entity, propertyValue);
             }

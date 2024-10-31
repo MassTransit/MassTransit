@@ -29,8 +29,8 @@ namespace MassTransit.Azure.Table.Tests.Audit
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            var tableServiceClient = new TableServiceClient(ConnectionString);
-            configurator.UseAzureTableAuditStore(tableServiceClient, TestTableName);
+            var storageAccount = new TableServiceClient(ConnectionString);
+            configurator.UseAzureTableAuditStore(storageAccount, TestTableName);
             base.ConfigureInMemoryBus(configurator);
         }
 

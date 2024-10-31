@@ -7,7 +7,7 @@ namespace MassTransit.AzureTable.Saga
     using Azure.Data.Tables;
 
 
-    public class objectTypeConverter :
+    public class EntityPropertyTypeConverter :
         ITypeConverter<object, bool>,
         ITypeConverter<object, bool?>,
         ITypeConverter<bool, object>,
@@ -49,10 +49,10 @@ namespace MassTransit.AzureTable.Saga
         ITypeConverter<object, string>,
         ITypeConverter<string, object>
     {
-        public static readonly objectTypeConverter Instance = new objectTypeConverter();
+        public static readonly EntityPropertyTypeConverter Instance = new EntityPropertyTypeConverter();
         static readonly TimeSpanTypeConverter _timeSpanConverter = new TimeSpanTypeConverter();
 
-        objectTypeConverter()
+        EntityPropertyTypeConverter()
         {
         }
 
@@ -506,7 +506,7 @@ namespace MassTransit.AzureTable.Saga
             var fromType = typeof(ITypeConverter<,>).MakeGenericType(typeof(object), propertyType);
             var toType = typeof(ITypeConverter<,>).MakeGenericType(propertyType, typeof(object));
 
-            return typeof(objectTypeConverter).HasInterface(fromType) && typeof(objectTypeConverter).HasInterface(toType);
+            return typeof(EntityPropertyTypeConverter).HasInterface(fromType) && typeof(EntityPropertyTypeConverter).HasInterface(toType);
         }
     }
 }

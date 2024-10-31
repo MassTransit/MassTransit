@@ -8,7 +8,6 @@ namespace MassTransit.AzureTable
     using Azure.Data.Tables;
     using Serialization;
 
-
     public class AuditRecord : ITableEntity
     {
         static readonly char[] _disallowedCharacters;
