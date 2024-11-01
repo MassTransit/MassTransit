@@ -48,7 +48,7 @@ namespace MassTransit.ActiveMqTransport.Topology
 
             var exchangeEntity = Topics.Get(topic);
 
-            var queueEntity = Queues.Get(queue);
+            var queueEntity = queue != null ? Queues.Get(queue) : null;
 
             var binding = new ConsumerEntity(id, exchangeEntity, queueEntity, selector);
 

@@ -7,13 +7,13 @@ namespace MassTransit.ActiveMqTransport.Tests
 
 
     [TestFixture]
-    public class Sending_to_a_topic_endpoint :
+    public class Sending_to_a_virtual_topic_endpoint :
         ActiveMqTestFixture
     {
         [Test]
         public async Task Should_succeed()
         {
-            var endpoint = await Bus.GetSendEndpoint(new Uri("topic:private"));
+            var endpoint = await Bus.GetSendEndpoint(new Uri("topic:VirtualTopic.private"));
             await endpoint.Send(new PrivateMessage { Value = "Hello" });
 
             ConsumeContext<PrivateMessage> context = await _handler;
@@ -27,7 +27,7 @@ namespace MassTransit.ActiveMqTransport.Tests
         {
             configurator.ConfigureConsumeTopology = false;
 
-            configurator.Bind("private");
+            configurator.Bind("VirtualTopic.private");
 
             _handler = Handled<PrivateMessage>(configurator);
 

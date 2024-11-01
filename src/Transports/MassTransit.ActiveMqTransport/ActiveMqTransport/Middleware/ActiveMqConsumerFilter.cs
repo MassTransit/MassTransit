@@ -40,7 +40,11 @@ namespace MassTransit.ActiveMqTransport.Middleware
                     receiveSettings.AutoDelete), receiveSettings.Selector, executor)
             };
 
-            consumers.AddRange(_context.BrokerTopology.Consumers.Select(x =>
+            consumers.AddRange(_context.BrokerTopology.Consumers.Where(x => x.Destination == null).Select(x =>
+                CreateConsumer(context, new TopicEntity(0, GetReceiveEntityName(receiveSettings, x.Source.EntityName), x.Source.Durable,
+                    x.Source.AutoDelete), x.Selector, executor)));
+
+            consumers.AddRange(_context.BrokerTopology.Consumers.Where(x => x.Destination != null).Select(x =>
                 CreateConsumer(context, new QueueEntity(0, GetReceiveEntityName(receiveSettings, x.Destination.EntityName), x.Destination.Durable,
                     x.Destination.AutoDelete), x.Selector, executor)));
 
@@ -109,6 +113,20 @@ namespace MassTransit.ActiveMqTransport.Middleware
             var messageConsumer = await context.CreateMessageConsumer(queue, selector, false).ConfigureAwait(false);
 
             LogContext.Debug?.Log("Created consumer for {InputAddress}: {Queue}", _context.InputAddress, entity.EntityName);
+
+            var consumer = new ActiveMqConsumer(context, (MessageConsumer)messageConsumer, _context, executor);
+
+            return consumer;
+        }
+
+        async Task<ActiveMqConsumer> CreateConsumer(SessionContext context, Topic entity, string selector,
+            ChannelExecutor executor)
+        {
+            var topic = await context.GetTopic(entity).ConfigureAwait(false);
+
+            var messageConsumer = await context.CreateMessageConsumer(topic, selector, false).ConfigureAwait(false);
+
+            LogContext.Debug?.Log("Created consumer for {InputAddress}: {Topic}", _context.InputAddress, entity.EntityName);
 
             var consumer = new ActiveMqConsumer(context, (MessageConsumer)messageConsumer, _context, executor);
 

@@ -58,16 +58,14 @@ namespace MassTransit.ActiveMqTransport.Topology
 
         public void Bind(string topicName, Action<IActiveMqTopicBindingConfigurator>? configure = null)
         {
-            if (string.IsNullOrEmpty(_publishTopology.VirtualTopicPrefix) || topicName.StartsWith(_publishTopology.VirtualTopicPrefix))
-            {
-                var specification = new ConsumerConsumeTopologySpecification(topicName, ConsumerEndpointQueueNameFormatter);
+            IActiveMqTopicBindingConfigurator specification =
+                string.IsNullOrEmpty(_publishTopology.VirtualTopicPrefix) || topicName.StartsWith(_publishTopology.VirtualTopicPrefix)
+                    ? new ConsumerConsumeTopologySpecification(topicName, ConsumerEndpointQueueNameFormatter)
+                    : new ConsumerConsumeTopicTopologySpecification(topicName, ConsumerEndpointQueueNameFormatter);
 
-                configure?.Invoke(specification);
+            configure?.Invoke(specification);
 
-                _specifications.Add(specification);
-            }
-            else
-                _specifications.Add(new InvalidActiveMqConsumeTopologySpecification("Bind", $"Only virtual topics can be bound: {topicName}"));
+            _specifications.Add((IActiveMqConsumeTopologySpecification)specification);
         }
 
         public override string CreateTemporaryQueueName(string tag)

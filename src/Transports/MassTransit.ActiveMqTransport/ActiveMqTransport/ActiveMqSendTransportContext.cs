@@ -133,7 +133,7 @@ namespace MassTransit.ActiveMqTransport
 
             transportMessage.NMSReplyTo = sessionContext.GetTemporaryDestination(endpointName)
                 ?? (context.ResponseAddress.TryGetValueFromQueryString("temporary", out _)
-                    ? (IDestination)new ActiveMQTempQueue(endpointName)
+                    ? new ActiveMQTempQueue(endpointName)
                     : new ActiveMQQueue(endpointName));
         }
     }
