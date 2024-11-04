@@ -5,6 +5,7 @@
     using QuikGraph;
     using SagaStateMachine;
 
+
     public abstract class StateMachineGenerator
     {
         protected readonly AdjacencyGraph<Vertex, Edge<Vertex>> Graph;
