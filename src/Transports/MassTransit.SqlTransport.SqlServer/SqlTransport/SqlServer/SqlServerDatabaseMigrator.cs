@@ -1,5 +1,6 @@
 namespace MassTransit.SqlTransport.SqlServer
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Dapper;
@@ -1714,6 +1715,9 @@ END
 
         async Task GrantAccess(ISqlServerSqlTransportConnection connection, SqlTransportOptions options)
         {
+            if (string.IsNullOrWhiteSpace(options.Role))
+                throw new ArgumentException("The SQL transport migrator requires a valid Role, but Role was not specified", nameof(options));
+
             var result = await connection.Connection.ExecuteScalarAsync<int?>(string.Format(RoleExistsSql, options.Role)).ConfigureAwait(false);
             if (!result.HasValue)
             {
@@ -1725,6 +1729,9 @@ END
             await connection.Connection.ExecuteScalarAsync<int>(string.Format(GrantRoleSql, options.Role, options.Schema)).ConfigureAwait(false);
 
             _logger.LogDebug("Role {Role} granted access to schema {Schema}", options.Role, options.Schema);
+
+            if (string.IsNullOrWhiteSpace(options.Username))
+                throw new ArgumentException("The SQL transport migrator requires a valid Username, but Username was not specified", nameof(options));
 
             result = await connection.Connection.ExecuteScalarAsync<int?>(string.Format(RoleExistsSql, options.Username)).ConfigureAwait(false);
             if (!result.HasValue)
