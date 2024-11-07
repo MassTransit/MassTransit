@@ -1,5 +1,4 @@
-﻿version: '2.3'
-services:
+﻿services:
   mssql:
     image: "mcr.microsoft.com/azure-sql-edge"
     networks:

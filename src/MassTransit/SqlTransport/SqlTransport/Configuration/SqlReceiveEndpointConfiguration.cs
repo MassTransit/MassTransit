@@ -162,21 +162,10 @@ namespace MassTransit.SqlTransport.Configuration
 
         public void SetReceiveMode(SqlReceiveMode mode, int? concurrentDeliveryLimit = default)
         {
-            switch (mode)
-            {
-                case SqlReceiveMode.Normal:
-                case SqlReceiveMode.Partitioned:
-                case SqlReceiveMode.PartitionedOrdered:
-                    _settings.ReceiveMode = mode;
-                    break;
-                case SqlReceiveMode.PartitionedConcurrent:
-                case SqlReceiveMode.PartitionedOrderedConcurrent:
-                    _settings.ConcurrentDeliveryLimit = concurrentDeliveryLimit ?? _settings.ConcurrentDeliveryLimit;
-                    _settings.ReceiveMode = mode;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
-            }
+            if (concurrentDeliveryLimit != null)
+                _settings.ConcurrentDeliveryLimit = concurrentDeliveryLimit.Value;
+
+            _settings.ReceiveMode = mode;
         }
 
         public void ConfigureClient(Action<IPipeConfigurator<ClientContext>>? configure)
