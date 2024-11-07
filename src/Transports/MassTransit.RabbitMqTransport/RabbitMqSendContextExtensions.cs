@@ -82,5 +82,32 @@
             sendContext.AwaitAck = awaitAck;
             return true;
         }
+
+        /// <summary>
+        /// Sets the filter value used for server-side streams filtering.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="filterValue"></param>
+        public static void SetStreamFilterValue(this SendContext context, string filterValue)
+        {
+            if (!context.TryGetPayload(out RabbitMqSendContext sendContext))
+                throw new ArgumentException("The RabbitMqSendContext was not available");
+
+            sendContext.Headers.Set("x-stream-filter-value", filterValue);
+        }
+
+        /// <summary>
+        /// Sets the filter value used for server-side streams filtering.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="filterValue"></param>
+        public static bool TrySetStreamFilterValue(this SendContext context, string filterValue)
+        {
+            if (!context.TryGetPayload(out RabbitMqSendContext sendContext))
+                return false;
+
+            sendContext.Headers.Set("x-stream-filter-value", filterValue);
+            return true;
+        }
     }
 }
