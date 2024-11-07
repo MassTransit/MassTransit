@@ -43,6 +43,11 @@ public class RabbitMqStreamConfigurator :
         set => _settings.QueueArguments["x-stream-max-segment-size-bytes"] = value;
     }
 
+    public void UsingFilter(string filter)
+    {
+        _settings.ConsumeArguments["x-stream-filter"] = filter;
+    }
+
     public void FromOffset(long offset)
     {
         _settings.ConsumeArguments["x-stream-offset"] = offset;

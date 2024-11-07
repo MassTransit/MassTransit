@@ -22,6 +22,11 @@ public interface IRabbitMqStreamConfigurator
     long MaxSegmentSize { set; }
 
     /// <summary>
+    /// Set the stream filter value for the consumer
+    /// </summary>
+    void UsingFilter(string filter);
+
+    /// <summary>
     /// Begin consuming messages from the specified offset
     /// </summary>
     /// <param name="offset"></param>
