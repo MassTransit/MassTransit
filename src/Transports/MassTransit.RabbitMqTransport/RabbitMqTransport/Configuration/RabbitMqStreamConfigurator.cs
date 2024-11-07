@@ -2,7 +2,6 @@
 namespace MassTransit.RabbitMqTransport.Configuration;
 
 using System;
-using RabbitMQ.Client;
 
 
 public class RabbitMqStreamConfigurator :
@@ -41,6 +40,11 @@ public class RabbitMqStreamConfigurator :
     public long MaxSegmentSize
     {
         set => _settings.QueueArguments["x-stream-max-segment-size-bytes"] = value;
+    }
+
+    public string Filter
+    {
+        set => _settings.ConsumeArguments["x-stream-filter"] = value;
     }
 
     public void FromOffset(long offset)
