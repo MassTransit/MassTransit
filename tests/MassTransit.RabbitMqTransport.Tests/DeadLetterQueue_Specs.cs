@@ -1,5 +1,6 @@
 ﻿namespace MassTransit.RabbitMqTransport.Tests
 {
+    using System.Threading.Tasks;
     using NUnit.Framework;
     using RabbitMQ.Client;
 
@@ -24,13 +25,13 @@
             });
         }
 
-        protected override void OnCleanupVirtualHost(IModel model)
+        protected override async Task OnCleanupVirtualHost(IChannel channel)
         {
-            model.ExchangeDelete(QueueName);
-            model.QueueDelete(QueueName);
+            await channel.ExchangeDeleteAsync(QueueName);
+            await channel.QueueDeleteAsync(QueueName);
 
-            model.ExchangeDelete(DeadLetterQueueName);
-            model.QueueDelete(DeadLetterQueueName);
+            await channel.ExchangeDeleteAsync(DeadLetterQueueName);
+            await channel.QueueDeleteAsync(DeadLetterQueueName);
         }
     }
 }

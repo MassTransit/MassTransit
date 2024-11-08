@@ -91,11 +91,10 @@ namespace MassTransit.Testing
                 Password = _transportOptions.Pass
             };
 
-            var connection = factory.CreateConnection();
+            var connection = await factory.CreateConnectionAsync();
             try
             {
-                using var model = connection.CreateModel();
-                model.ConfirmSelect();
+                await using var channel = await connection.CreateChannelAsync();
 
                 var exchangeCount = 0;
                 var queueCount = 0;
@@ -103,28 +102,28 @@ namespace MassTransit.Testing
                 IList<string> exchanges = await GetVirtualHostEntities("exchanges");
                 foreach (var exchange in exchanges)
                 {
-                    model.ExchangeDelete(exchange);
+                    await channel.ExchangeDeleteAsync(exchange);
                     exchangeCount++;
                 }
 
                 IList<string> queues = await GetVirtualHostEntities("queues");
                 foreach (var queue in queues)
                 {
-                    model.QueueDelete(queue);
+                    await channel.QueueDeleteAsync(queue);
                     queueCount++;
                 }
 
-                model.Close();
+                await channel.CloseAsync();
 
                 if (exchangeCount > 0 || queueCount > 0)
                     _logger.LogInformation("Removed {QueueCount} queue(s), {ExchangeCount} exchange(s)", queueCount, exchangeCount);
 
-                connection.Close(200, "Completed (Ok)");
+                await connection.CloseAsync(200, "Completed (Ok)");
             }
             catch (Exception ex)
             {
                 if (connection.IsOpen)
-                    connection.Close(500, $"Completed (not OK): {ex.Message}");
+                    await connection.CloseAsync(500, $"Completed (not OK): {ex.Message}");
             }
         }
 
@@ -141,22 +140,21 @@ namespace MassTransit.Testing
                 Password = _transportOptions.Pass
             };
 
-            var connection = factory.CreateConnection();
+            var connection = await factory.CreateConnectionAsync();
             try
             {
-                using var model = connection.CreateModel();
-                model.ConfirmSelect();
+                await using var channel = await connection.CreateChannelAsync();
 
-                _testOptions.ConfigureVirtualHostCallback(model);
+                await _testOptions.ConfigureVirtualHostCallback(channel);
 
-                model.Close();
+                await channel.CloseAsync();
 
-                connection.Close(200, "Completed (Ok)");
+                await connection.CloseAsync(200, "Completed (Ok)");
             }
             catch (Exception ex)
             {
                 if (connection.IsOpen)
-                    connection.Close(500, $"Completed (not OK): {ex.Message}");
+                    await connection.CloseAsync(500, $"Completed (not OK): {ex.Message}");
             }
         }
 

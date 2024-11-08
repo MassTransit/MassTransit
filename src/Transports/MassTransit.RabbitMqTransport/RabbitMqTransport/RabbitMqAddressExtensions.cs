@@ -45,13 +45,15 @@ namespace MassTransit.RabbitMqTransport
                 HostName = settings.Host,
                 Port = settings.Port,
                 VirtualHost = settings.VirtualHost ?? "/",
-                RequestedHeartbeat = settings.Heartbeat,
+                RequestedHeartbeat = settings.Heartbeat == TimeSpan.Zero ? ConnectionFactory.DefaultHeartbeat : settings.Heartbeat,
                 RequestedConnectionTimeout = settings.RequestedConnectionTimeout,
                 RequestedChannelMax = settings.RequestedChannelMax,
+                ContinuationTimeout = settings.ContinuationTimeout,
+                HandshakeContinuationTimeout = settings.ContinuationTimeout
             };
 
             if (settings.MaxMessageSize.HasValue)
-                factory.MaxMessageSize = settings.MaxMessageSize.Value;
+                factory.MaxInboundMessageBodySize = settings.MaxMessageSize.Value;
 
             if (settings.EndpointResolver != null)
             {
@@ -75,8 +77,6 @@ namespace MassTransit.RabbitMqTransport
                 if (!string.IsNullOrWhiteSpace(settings.Password))
                     factory.Password = settings.Password;
             }
-
-            factory.CredentialsRefresher = settings.CredentialsRefresher;
 
             ApplySslOptions(settings, factory.Ssl);
 

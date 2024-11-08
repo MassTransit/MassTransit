@@ -12,27 +12,28 @@ namespace MassTransit.RabbitMqTransport
     using Internals;
     using Logging;
     using Middleware;
+    using RabbitMQ.Client;
     using Transports;
 
 
     public class RabbitMqSendTransportContext :
         BaseSendTransportContext,
-        SendTransportContext<ModelContext>
+        SendTransportContext<ChannelContext>
     {
         static readonly DateTimeOffsetTypeConverter _dateTimeOffsetConverter = new DateTimeOffsetTypeConverter();
         static readonly DateTimeTypeConverter _dateTimeConverter = new DateTimeTypeConverter();
         readonly ConfigureRabbitMqTopologyFilter<SendSettings> _configureTopologyFilter;
-        readonly IPipe<ModelContext> _delayConfigureTopologyPipe;
+        readonly IPipe<ChannelContext> _delayConfigureTopologyPipe;
         readonly string _delayExchange;
         readonly string _exchange;
 
         readonly IRabbitMqHostConfiguration _hostConfiguration;
-        readonly IModelContextSupervisor _supervisor;
+        readonly IChannelContextSupervisor _supervisor;
 
         public RabbitMqSendTransportContext(IRabbitMqHostConfiguration hostConfiguration, ReceiveEndpointContext receiveEndpointContext,
-            IModelContextSupervisor supervisor,
+            IChannelContextSupervisor supervisor,
             ConfigureRabbitMqTopologyFilter<SendSettings> configureTopologyFilter, string exchange,
-            IPipe<ModelContext> delayConfigureTopologyPipe, string delayExchange)
+            IPipe<ChannelContext> delayConfigureTopologyPipe, string delayExchange)
             : base(hostConfiguration, receiveEndpointContext.Serialization)
         {
             _hostConfiguration = hostConfiguration;
@@ -48,7 +49,7 @@ namespace MassTransit.RabbitMqTransport
         public override string EntityName => _exchange;
         public override string ActivitySystem => "rabbitmq";
 
-        public Task Send(IPipe<ModelContext> pipe, CancellationToken cancellationToken = default)
+        public Task Send(IPipe<ChannelContext> pipe, CancellationToken cancellationToken = default)
         {
             return _hostConfiguration.Retry(() => _supervisor.Send(pipe, cancellationToken), cancellationToken, _supervisor.SendStopping);
         }
@@ -63,11 +64,11 @@ namespace MassTransit.RabbitMqTransport
             return new IAgent[] { _supervisor };
         }
 
-        public async Task<SendContext<T>> CreateSendContext<T>(ModelContext context, T message, IPipe<SendContext<T>> pipe,
+        public async Task<SendContext<T>> CreateSendContext<T>(ChannelContext context, T message, IPipe<SendContext<T>> pipe,
             CancellationToken cancellationToken)
             where T : class
         {
-            var properties = context.Model.CreateBasicProperties();
+            var properties = new BasicProperties();
 
             var sendContext = new RabbitMqMessageSendContext<T>(properties, _exchange, message, cancellationToken);
 
@@ -99,7 +100,7 @@ namespace MassTransit.RabbitMqTransport
             return sendContext;
         }
 
-        public async Task Send<T>(ModelContext transportContext, SendContext<T> sendContext)
+        public async Task Send<T>(ChannelContext transportContext, SendContext<T> sendContext)
             where T : class
         {
             RabbitMqMessageSendContext<T> context = sendContext as RabbitMqMessageSendContext<T>

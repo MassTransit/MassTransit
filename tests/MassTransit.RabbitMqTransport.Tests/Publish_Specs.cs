@@ -239,10 +239,12 @@
                 });
             }
 
-            protected override void OnCleanupVirtualHost(IModel model)
+            protected override async Task OnCleanupVirtualHost(IChannel channel)
             {
-                model.ExchangeDelete("handle-fault");
-                model.QueueDelete("handle-fault");
+                await base.OnCleanupVirtualHost(channel);
+
+                await channel.ExchangeDeleteAsync("handle-fault");
+                await channel.QueueDeleteAsync("handle-fault");
             }
         }
 
@@ -336,10 +338,12 @@
                 });
             }
 
-            protected override void OnCleanupVirtualHost(IModel model)
+            protected override async Task OnCleanupVirtualHost(IChannel channel)
             {
-                model.ExchangeDelete("ack_queue");
-                model.QueueDelete("ack_queue");
+                await base.OnCleanupVirtualHost(channel);
+
+                await channel.ExchangeDeleteAsync("ack_queue");
+                await channel.QueueDeleteAsync("ack_queue");
             }
         }
 
@@ -464,16 +468,6 @@
                 base.ConfigureRabbitMqReceiveEndpoint(configurator);
                 _receivedA = Handled<A>(configurator);
             }
-
-            protected override void ConfigureRabbitMqHost(IRabbitMqHostConfigurator configurator)
-            {
-                base.ConfigureRabbitMqHost(configurator);
-
-                configurator.ConfigureBatchPublish(c =>
-                {
-                    c.Enabled = true;
-                });
-            }
         }
 
 
@@ -504,17 +498,6 @@
             {
                 base.ConfigureRabbitMqReceiveEndpoint(configurator);
                 _receivedA = Handled<A>(configurator);
-            }
-
-            protected override void ConfigureRabbitMqHost(IRabbitMqHostConfigurator configurator)
-            {
-                base.ConfigureRabbitMqHost(configurator);
-
-                configurator.ConfigureBatchPublish(c =>
-                {
-                    c.Enabled = true;
-                    c.Timeout = TimeSpan.Zero;
-                });
             }
         }
 

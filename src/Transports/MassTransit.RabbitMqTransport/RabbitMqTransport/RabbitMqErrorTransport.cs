@@ -17,7 +17,7 @@
 
         public Task Send(ExceptionReceiveContext context)
         {
-            void PreSend(IBasicProperties message, SendHeaders headers)
+            void PreSend(BasicProperties message, SendHeaders headers)
             {
                 headers.SetExceptionHeaders(context);
 

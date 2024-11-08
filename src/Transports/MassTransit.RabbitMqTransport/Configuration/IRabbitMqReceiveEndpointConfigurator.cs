@@ -44,10 +44,10 @@
         void BindDeadLetterQueue(string exchangeName, string queueName = null, Action<IRabbitMqQueueBindingConfigurator> configure = null);
 
         /// <summary>
-        /// Add middleware to the model pipe
+        /// Add middleware to the channel pipe
         /// </summary>
         /// <param name="configure"></param>
-        void ConfigureModel(Action<IPipeConfigurator<ModelContext>> configure);
+        void ConfigureChannel(Action<IPipeConfigurator<ChannelContext>> configure);
 
         /// <summary>
         /// Add middleware to the connection pipe

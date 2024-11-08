@@ -9,25 +9,25 @@
     /// </summary>
     [Serializable]
     public class MessageReturnedException :
-        TransportException
+        MassTransitException
     {
         public MessageReturnedException()
         {
         }
 
-        public MessageReturnedException(Uri uri, string message)
-            : base(uri, message)
+        public MessageReturnedException(string message)
+            : base(message)
         {
         }
 
-        public MessageReturnedException(Uri uri, string message, Exception innerException)
-            : base(uri, message, innerException)
+        public MessageReturnedException(string message, Exception innerException)
+            : base(message, innerException)
         {
         }
 
-#if NET8_0_OR_GREATER
+    #if NET8_0_OR_GREATER
         [Obsolete("Formatter-based serialization is obsolete and should not be used.")]
-#endif
+    #endif
         protected MessageReturnedException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {

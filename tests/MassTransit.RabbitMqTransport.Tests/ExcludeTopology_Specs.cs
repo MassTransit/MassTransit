@@ -30,17 +30,17 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             var connectionFactory = settings.GetConnectionFactory();
 
-            using var connection = settings.EndpointResolver != null
-                ? connectionFactory.CreateConnection(settings.EndpointResolver, settings.Host)
-                : connectionFactory.CreateConnection();
+            await using var connection = settings.EndpointResolver != null
+                ? await connectionFactory.CreateConnectionAsync(settings.EndpointResolver, settings.Host)
+                : await connectionFactory.CreateConnectionAsync();
 
-            using var model = connection.CreateModel();
+            await using var channel = await connection.CreateChannelAsync();
 
             var eventExchangeName = RabbitMqBusFactory.CreateMessageTopology().EntityNameFormatter.FormatEntityName<IEvent>();
 
-            var exception = Assert.Throws<OperationInterruptedException>(() => model.ExchangeDeclarePassive(eventExchangeName));
+            Assert.That(async () => await channel.ExchangeDeclarePassiveAsync(eventExchangeName), Throws.TypeOf<OperationInterruptedException>().With
+                .Property("ShutdownReason").Property("ReplyCode").EqualTo(404));
 
-            Assert.That(exception.ShutdownReason.ReplyCode, Is.EqualTo(404));
         }
 
         Task<ConsumeContext<TransactionEvent>> _handled;
@@ -58,15 +58,15 @@ namespace MassTransit.RabbitMqTransport.Tests
             _handled = Handled<TransactionEvent>(configurator);
         }
 
-        protected override void OnCleanupVirtualHost(IModel model)
+        protected override async Task OnCleanupVirtualHost(IChannel channel)
         {
-            base.OnCleanupVirtualHost(model);
+            await base.OnCleanupVirtualHost(channel);
 
             var eventExchangeName = RabbitMqBusFactory.CreateMessageTopology().EntityNameFormatter.FormatEntityName<IEvent>();
-            model.ExchangeDelete(eventExchangeName);
+            await channel.ExchangeDeleteAsync(eventExchangeName);
 
             var routedEventExchangeName = RabbitMqBusFactory.CreateMessageTopology().EntityNameFormatter.FormatEntityName<TransactionEvent>();
-            model.ExchangeDelete(routedEventExchangeName);
+            await channel.ExchangeDeleteAsync(routedEventExchangeName);
         }
     }
 

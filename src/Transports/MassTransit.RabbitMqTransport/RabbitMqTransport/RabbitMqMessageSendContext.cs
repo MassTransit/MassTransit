@@ -11,7 +11,7 @@ namespace MassTransit.RabbitMqTransport
         RabbitMqSendContext<T>
         where T : class
     {
-        public RabbitMqMessageSendContext(IBasicProperties basicProperties, string exchange, T message, CancellationToken cancellationToken)
+        public RabbitMqMessageSendContext(BasicProperties basicProperties, string exchange, T message, CancellationToken cancellationToken)
             : base(message, cancellationToken)
         {
             BasicProperties = basicProperties;
@@ -25,7 +25,7 @@ namespace MassTransit.RabbitMqTransport
 
         public string Exchange { get; private set; }
         public string RoutingKey { get; set; }
-        public IBasicProperties BasicProperties { get; }
+        public BasicProperties BasicProperties { get; }
         public bool AwaitAck { get; set; }
 
         public override void ReadPropertiesFrom(IReadOnlyDictionary<string, object> properties)

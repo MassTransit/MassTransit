@@ -47,10 +47,12 @@
             });
         }
 
-        protected override void OnCleanupVirtualHost(IModel model)
+        protected override async Task OnCleanupVirtualHost(IChannel channel)
         {
-            model.ExchangeDelete("priority_input_queue");
-            model.QueueDelete("priority_input_queue");
+            await base.OnCleanupVirtualHost(channel);
+
+            await channel.ExchangeDeleteAsync("priority_input_queue");
+            await channel.QueueDeleteAsync("priority_input_queue");
         }
     }
 

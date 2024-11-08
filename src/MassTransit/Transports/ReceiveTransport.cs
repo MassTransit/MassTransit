@@ -1,6 +1,7 @@
 namespace MassTransit.Transports
 {
     using System;
+    using System.Runtime.ExceptionServices;
     using System.Threading;
     using System.Threading.Tasks;
     using Configuration;
@@ -109,6 +110,18 @@ namespace MassTransit.Transports
 
             async Task Run()
             {
+                async Task DelayWithCancellation(TimeSpan delay)
+                {
+                    try
+                    {
+                        await Task.Delay(delay, Stopping).ConfigureAwait(false);
+                    }
+                    catch
+                    {
+                        // just a little breather before reconnecting the receive transport
+                    }
+                }
+
                 var stoppingContext = new TransportStoppingContext(Stopping);
 
                 RetryPolicyContext<TransportStoppingContext> policyContext = _retryPolicy.CreatePolicyContext(stoppingContext);
@@ -122,7 +135,7 @@ namespace MassTransit.Transports
                         try
                         {
                             if (retryContext?.Delay != null)
-                                await Task.Delay(retryContext.Delay.Value, Stopping).ConfigureAwait(false);
+                                await DelayWithCancellation(retryContext.Delay.Value).ConfigureAwait(false);
 
                             if (!IsStopping)
                                 await RunTransport().ConfigureAwait(false);
@@ -153,14 +166,7 @@ namespace MassTransit.Transports
                         if (IsStopping)
                             break;
 
-                        try
-                        {
-                            await Task.Delay(TimeSpan.FromSeconds(1), Stopping).ConfigureAwait(false);
-                        }
-                        catch
-                        {
-                            // just a little breather before reconnecting the receive transport
-                        }
+                        await DelayWithCancellation(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
                     }
                 }
                 catch (OperationCanceledException exception)

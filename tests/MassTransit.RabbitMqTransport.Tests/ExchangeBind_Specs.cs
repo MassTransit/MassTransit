@@ -31,11 +31,11 @@
             configurator.Bind(_boundExchange);
         }
 
-        protected override void OnCleanupVirtualHost(IModel model)
+        protected override async Task OnCleanupVirtualHost(IChannel channel)
         {
-            base.OnCleanupVirtualHost(model);
+            await base.OnCleanupVirtualHost(channel);
 
-            model.ExchangeDelete(_boundExchange);
+            await channel.ExchangeDeleteAsync(_boundExchange);
         }
     }
 
@@ -65,12 +65,12 @@
             configurator.Bind(BoundExchange, x => x.Bind(ReboundExchange));
         }
 
-        protected override void OnCleanupVirtualHost(IModel model)
+        protected override async Task OnCleanupVirtualHost(IChannel channel)
         {
-            base.OnCleanupVirtualHost(model);
+            await base.OnCleanupVirtualHost(channel);
 
-            model.ExchangeDelete(BoundExchange);
-            model.ExchangeDelete(ReboundExchange);
+            await channel.ExchangeDeleteAsync(BoundExchange);
+            await channel.ExchangeDeleteAsync(ReboundExchange);
         }
     }
 
@@ -112,11 +112,11 @@
             });
         }
 
-        protected override void OnCleanupVirtualHost(IModel model)
+        protected override async Task OnCleanupVirtualHost(IChannel channel)
         {
-            base.OnCleanupVirtualHost(model);
+            await base.OnCleanupVirtualHost(channel);
 
-            model.ExchangeDelete(BoundExchange);
+            await channel.ExchangeDeleteAsync(BoundExchange);
         }
     }
 }

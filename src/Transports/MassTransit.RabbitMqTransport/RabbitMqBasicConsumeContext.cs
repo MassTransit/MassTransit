@@ -5,7 +5,7 @@
 
     /// <summary>
     /// Contains the context of the BasicConsume call received by the BasicConsumer
-    /// bound to the inbound RabbitMQ model
+    /// bound to the inbound RabbitMQ channel
     /// </summary>
     public interface RabbitMqBasicConsumeContext :
         RoutingKeyConsumeContext
@@ -28,6 +28,6 @@
         /// <summary>
         /// The basic properties of the message
         /// </summary>
-        IBasicProperties Properties { get; }
+        IReadOnlyBasicProperties Properties { get; }
     }
 }

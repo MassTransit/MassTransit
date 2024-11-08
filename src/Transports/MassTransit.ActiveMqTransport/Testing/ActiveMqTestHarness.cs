@@ -155,7 +155,7 @@
                 .FirstOrDefault();
         }
 
-        protected override IBusControl CreateBus()
+        protected override async Task<IBusControl> CreateBus()
         {
             var busControl = MassTransit.Bus.Factory.CreateUsingActiveMq(x =>
             {

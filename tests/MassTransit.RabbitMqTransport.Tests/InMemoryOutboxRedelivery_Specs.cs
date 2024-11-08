@@ -44,10 +44,12 @@
             });
         }
 
-        protected override void OnCleanupVirtualHost(IModel model)
+        protected override async Task OnCleanupVirtualHost(IChannel channel)
         {
-            model.ExchangeDelete("input-fault");
-            model.QueueDelete("input-fault");
+            await base.OnCleanupVirtualHost(channel);
+
+            await channel.ExchangeDeleteAsync("input-fault");
+            await channel.QueueDeleteAsync("input-fault");
         }
 
 
@@ -124,10 +126,12 @@
             });
         }
 
-        protected override void OnCleanupVirtualHost(IModel model)
+        protected override async Task OnCleanupVirtualHost(IChannel channel)
         {
-            model.ExchangeDelete("input-fault");
-            model.QueueDelete("input-fault");
+            await base.OnCleanupVirtualHost(channel);
+
+            await channel.ExchangeDeleteAsync("input-fault");
+            await channel.QueueDeleteAsync("input-fault");
         }
 
 
@@ -200,10 +204,12 @@
             configurator.Consumer<TestHandler>();
         }
 
-        protected override void OnCleanupVirtualHost(IModel model)
+        protected override async Task OnCleanupVirtualHost(IChannel channel)
         {
-            model.ExchangeDelete("input-fault");
-            model.QueueDelete("input-fault");
+            await base.OnCleanupVirtualHost(channel);
+
+            await channel.ExchangeDeleteAsync("input-fault");
+            await channel.QueueDeleteAsync("input-fault");
         }
 
 

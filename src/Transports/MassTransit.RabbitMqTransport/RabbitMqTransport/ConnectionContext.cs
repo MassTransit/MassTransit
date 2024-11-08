@@ -39,16 +39,17 @@
         IRabbitMqBusTopology Topology { get; }
 
         /// <summary>
-        /// Create a model on the connection
+        /// Create a channel on the connection
         /// </summary>
         /// <returns></returns>
-        Task<IModel> CreateModel(CancellationToken cancellationToken);
+        Task<IChannel> CreateChannel(CancellationToken cancellationToken, ushort? concurrentMessageLimit1);
 
         /// <summary>
-        /// Create a channel, and return the <see cref="ModelContext" />.
+        /// Create a channel, and return the <see cref="ChannelContext" />.
         /// </summary>
         /// <param name="cancellationToken"></param>
+        /// <param name="concurrentMessageLimit"></param>
         /// <returns></returns>
-        Task<ModelContext> CreateModelContext(CancellationToken cancellationToken);
+        Task<ChannelContext> CreateChannelContext(CancellationToken cancellationToken, ushort? concurrentMessageLimit);
     }
 }

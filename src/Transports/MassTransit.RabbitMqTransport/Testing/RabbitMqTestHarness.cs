@@ -55,7 +55,7 @@
         public event Action<IRabbitMqBusFactoryConfigurator> OnConfigureRabbitMqBus;
         public event Action<IRabbitMqReceiveEndpointConfigurator> OnConfigureRabbitMqReceiveEndpoint;
         public event Action<IRabbitMqHostConfigurator> OnConfigureRabbitMqHost;
-        public event Action<IModel> OnCleanupVirtualHost;
+        public event Func<IChannel, Task> OnCleanupVirtualHost;
 
         protected virtual void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
@@ -72,9 +72,9 @@
             OnConfigureRabbitMqHost?.Invoke(configurator);
         }
 
-        protected virtual void CleanupVirtualHost(IModel model)
+        protected virtual Task CleanupVirtualHost(IChannel channel)
         {
-            OnCleanupVirtualHost?.Invoke(model);
+            return OnCleanupVirtualHost != null ? OnCleanupVirtualHost(channel) : Task.CompletedTask;
         }
 
         protected virtual void ConfigureHost(IRabbitMqBusFactoryConfigurator configurator)
@@ -100,22 +100,21 @@
 
             var connectionFactory = settings.GetConnectionFactory();
 
-            using var connection = settings.EndpointResolver != null
-                ? connectionFactory.CreateConnection(settings.EndpointResolver, settings.Host)
-                : connectionFactory.CreateConnection();
+            await using var connection = settings.EndpointResolver != null
+                ? await connectionFactory.CreateConnectionAsync(settings.EndpointResolver, settings.Host)
+                : await connectionFactory.CreateConnectionAsync();
 
-            using var model = connection.CreateModel();
-            model.ConfirmSelect();
+            await using var channel = await connection.CreateChannelAsync();
 
             IList<string> exchanges = await GetVirtualHostEntities("exchanges").ConfigureAwait(false);
             foreach (var exchange in exchanges)
-                model.ExchangeDelete(exchange);
+                await channel.ExchangeDeleteAsync(exchange);
 
             IList<string> queues = await GetVirtualHostEntities("queues").ConfigureAwait(false);
             foreach (var queue in queues)
-                model.QueueDelete(queue);
+                await channel.QueueDeleteAsync(queue);
 
-            model.Close();
+            await channel.CloseAsync();
 
             CleanVirtualHost = false;
         }
@@ -137,7 +136,7 @@
             return entities.Where(x => !string.IsNullOrWhiteSpace(x) && !x.StartsWith("amq.")).ToList();
         }
 
-        protected override IBusControl CreateBus()
+        protected override async Task<IBusControl> CreateBus()
         {
             var busControl = MassTransit.Bus.Factory.CreateUsingRabbitMq(x =>
             {
@@ -161,7 +160,7 @@
             });
 
             if (CleanVirtualHost)
-                CleanUpVirtualHost();
+                await CleanUpVirtualHost();
 
             return busControl;
         }
@@ -177,7 +176,7 @@
             ConfigureRabbitMqHost(configurator);
         }
 
-        void CleanUpVirtualHost()
+        async Task CleanUpVirtualHost()
         {
             try
             {
@@ -185,40 +184,40 @@
 
                 var connectionFactory = settings.GetConnectionFactory();
 
-                using var connection = settings.EndpointResolver != null
-                    ? connectionFactory.CreateConnection(settings.EndpointResolver, settings.Host)
-                    : connectionFactory.CreateConnection();
+                await using var connection = settings.EndpointResolver != null
+                    ? await connectionFactory.CreateConnectionAsync(settings.EndpointResolver, settings.Host)
+                    : await connectionFactory.CreateConnectionAsync();
 
-                using var model = connection.CreateModel();
+                await using var channel = await connection.CreateChannelAsync();
 
-                model.ExchangeDelete("input_queue");
-                model.QueueDelete("input_queue");
+                await channel.ExchangeDeleteAsync("input_queue");
+                await channel.QueueDeleteAsync("input_queue");
 
-                model.ExchangeDelete("input_queue_skipped");
-                model.QueueDelete("input_queue_skipped");
+                await channel.ExchangeDeleteAsync("input_queue_skipped");
+                await channel.QueueDeleteAsync("input_queue_skipped");
 
-                model.ExchangeDelete("input_queue_error");
-                model.QueueDelete("input_queue_error");
+                await channel.ExchangeDeleteAsync("input_queue_error");
+                await channel.QueueDeleteAsync("input_queue_error");
 
-                model.ExchangeDelete("input_queue_delay");
+                await channel.ExchangeDeleteAsync("input_queue_delay");
 
                 if (InputQueueName != "input_queue")
                 {
-                    model.ExchangeDelete(InputQueueName);
-                    model.QueueDelete(InputQueueName);
+                    await channel.ExchangeDeleteAsync(InputQueueName);
+                    await channel.QueueDeleteAsync(InputQueueName);
 
-                    model.ExchangeDelete(InputQueueName + "_skipped");
-                    model.QueueDelete(InputQueueName + "_skipped");
+                    await channel.ExchangeDeleteAsync(InputQueueName + "_skipped");
+                    await channel.QueueDeleteAsync(InputQueueName + "_skipped");
 
-                    model.ExchangeDelete(InputQueueName + "_error");
-                    model.QueueDelete(InputQueueName + "_error");
+                    await channel.ExchangeDeleteAsync(InputQueueName + "_error");
+                    await channel.QueueDeleteAsync(InputQueueName + "_error");
 
-                    model.ExchangeDelete(InputQueueName + "_delay");
+                    await channel.ExchangeDeleteAsync(InputQueueName + "_delay");
                 }
 
-                CleanupVirtualHost(model);
+                await CleanupVirtualHost(channel);
 
-                model.Close();
+                await channel.CloseAsync();
             }
             catch (Exception exception)
             {

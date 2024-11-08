@@ -13,7 +13,7 @@
     {
         readonly IRabbitMqReceiveEndpointConfiguration _configuration;
         readonly IRabbitMqHostConfiguration _hostConfiguration;
-        readonly Recycle<IModelContextSupervisor> _modelContext;
+        readonly Recycle<IChannelContextSupervisor> _channelContext;
 
         public RabbitMqQueueReceiveEndpointContext(IRabbitMqHostConfiguration hostConfiguration, IRabbitMqReceiveEndpointConfiguration configuration,
             BrokerTopology brokerTopology)
@@ -27,7 +27,12 @@
 
             IsNotReplyTo = configuration.Settings.QueueName != RabbitMqExchangeNames.ReplyTo;
 
-            _modelContext = new Recycle<IModelContextSupervisor>(() => new ModelContextSupervisor(hostConfiguration.ConnectionContextSupervisor));
+            var concurrentMessageLimit = ConcurrentMessageLimit ?? PrefetchCount;
+            if (concurrentMessageLimit > ushort.MaxValue)
+                concurrentMessageLimit = ushort.MaxValue;
+
+            _channelContext = new Recycle<IChannelContextSupervisor>(() =>
+                new ChannelContextSupervisor(hostConfiguration.ConnectionContextSupervisor, (ushort)concurrentMessageLimit));
         }
 
         public BrokerTopology BrokerTopology { get; }
@@ -35,16 +40,16 @@
         public bool ExclusiveConsumer { get; }
         public bool IsNotReplyTo { get; }
 
-        public IModelContextSupervisor ModelContextSupervisor => _modelContext.Supervisor;
+        public IChannelContextSupervisor ChannelContextSupervisor => _channelContext.Supervisor;
 
         public override void AddSendAgent(IAgent agent)
         {
-            _modelContext.Supervisor.AddSendAgent(agent);
+            _channelContext.Supervisor.AddSendAgent(agent);
         }
 
         public override void AddConsumeAgent(IAgent agent)
         {
-            _modelContext.Supervisor.AddConsumeAgent(agent);
+            _channelContext.Supervisor.AddConsumeAgent(agent);
         }
 
         public override Exception ConvertException(Exception exception, string message)

@@ -13,6 +13,6 @@
 
         bool IsNotReplyTo { get; }
 
-        IModelContextSupervisor ModelContextSupervisor { get; }
+        IChannelContextSupervisor ChannelContextSupervisor { get; }
     }
 }

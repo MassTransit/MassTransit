@@ -118,8 +118,9 @@
             }
         }
 
-        protected virtual void OnCleanupVirtualHost(IModel model)
+        protected virtual Task OnCleanupVirtualHost(IChannel channel)
         {
+            return Task.CompletedTask;
         }
     }
 }

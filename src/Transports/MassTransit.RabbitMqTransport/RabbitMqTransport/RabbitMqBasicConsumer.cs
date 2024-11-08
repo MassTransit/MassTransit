@@ -15,89 +15,36 @@ namespace MassTransit.RabbitMqTransport
     public class RabbitMqBasicConsumer :
         ConsumerAgent<ulong>,
         IAsyncBasicConsumer,
-        IBasicConsumer,
         RabbitMqDeliveryMetrics
     {
+        readonly ChannelContext _channel;
         readonly RabbitMqReceiveEndpointContext _context;
         readonly SemaphoreSlim _limit;
-
-        readonly ModelContext _model;
         readonly ReceiveSettings _receiveSettings;
 
         string _consumerTag;
-
-        EventHandler<ConsumerEventArgs> _onConsumerCancelled;
+        AsyncEventHandler<ConsumerEventArgs> _onConsumerCancelled;
 
         /// <summary>
         /// The basic consumer receives messages pushed from the broker.
         /// </summary>
-        /// <param name="model">The model context for the consumer</param>
+        /// <param name="channel">The channel context for the consumer</param>
         /// <param name="context">The topology</param>
-        public RabbitMqBasicConsumer(ModelContext model, RabbitMqReceiveEndpointContext context)
+        public RabbitMqBasicConsumer(ChannelContext channel, RabbitMqReceiveEndpointContext context)
             : base(context)
         {
-            _model = model;
+            _channel = channel;
             _context = context;
 
-            _receiveSettings = model.GetPayload<ReceiveSettings>();
+            _receiveSettings = channel.GetPayload<ReceiveSettings>();
 
             if (context.ConcurrentMessageLimit.HasValue)
                 _limit = new SemaphoreSlim(context.ConcurrentMessageLimit.Value);
 
-            ConsumerCancelled += OnConsumerCancelled;
-
             TrySetManualConsumeTask();
         }
 
-        /// <summary>
-        /// Called when the consumer is ready to be delivered messages by the broker
-        /// </summary>
-        /// <param name="consumerTag"></param>
-        Task IAsyncBasicConsumer.HandleBasicConsumeOk(string consumerTag)
-        {
-            HandleBasicConsumeOk(consumerTag);
-
-            return Task.CompletedTask;
-        }
-
-        Task IAsyncBasicConsumer.HandleBasicCancelOk(string consumerTag)
-        {
-            HandleBasicCancelOk(consumerTag);
-
-            return Task.CompletedTask;
-        }
-
-        Task IAsyncBasicConsumer.HandleBasicCancel(string consumerTag)
-        {
-            HandleBasicCancel(consumerTag);
-
-            return Task.CompletedTask;
-        }
-
-        Task IAsyncBasicConsumer.HandleModelShutdown(object model, ShutdownEventArgs reason)
-        {
-            HandleModelShutdown(_model, reason);
-
-            return Task.CompletedTask;
-        }
-
-        Task IAsyncBasicConsumer.HandleBasicDeliver(string consumerTag, ulong deliveryTag, bool redelivered, string exchange, string routingKey,
-            IBasicProperties properties, ReadOnlyMemory<byte> body)
-        {
-            HandleBasicDeliver(consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body);
-
-            return Task.CompletedTask;
-        }
-
-        public IModel Model => _model.Model;
-
-        public event AsyncEventHandler<ConsumerEventArgs> ConsumerCancelled;
-
-        /// <summary>
-        /// Called when the consumer is ready to be delivered messages by the broker
-        /// </summary>
-        /// <param name="consumerTag"></param>
-        public void HandleBasicConsumeOk(string consumerTag)
+        public Task HandleBasicConsumeOkAsync(string consumerTag, CancellationToken cancellationToken)
         {
             LogContext.Current = _context.LogContext;
 
@@ -106,55 +53,53 @@ namespace MassTransit.RabbitMqTransport
             _consumerTag = consumerTag;
 
             SetReady();
+
+            return Task.CompletedTask;
         }
 
-        /// <summary>
-        /// Called when the broker has received and acknowledged the BasicCancel, indicating
-        /// that the consumer is requesting to be shut down gracefully.
-        /// </summary>
-        /// <param name="consumerTag">The consumerTag that was shut down.</param>
-        public void HandleBasicCancelOk(string consumerTag)
+        public Task HandleBasicCancelOkAsync(string consumerTag, CancellationToken cancellationToken)
         {
             LogContext.Current = _context.LogContext;
 
             LogContext.Debug?.Log("Consumer Cancel Ok: {InputAddress} - {ConsumerTag}", _context.InputAddress, consumerTag);
 
             TrySetConsumeCompleted();
+
+            return Task.CompletedTask;
         }
 
-        /// <summary>
-        /// Called when the broker cancels the consumer due to an unexpected event, such as a
-        /// queue removal, or other change, that would disconnect the consumer.
-        /// </summary>
-        /// <param name="consumerTag">The consumerTag that is being cancelled.</param>
-        public void HandleBasicCancel(string consumerTag)
+        public async Task HandleBasicCancelAsync(string consumerTag, CancellationToken cancellationToken)
         {
             LogContext.Current = _context.LogContext;
 
             LogContext.Debug?.Log("Consumer Canceled: {InputAddress} - {ConsumerTag}", _context.InputAddress, consumerTag);
 
-            ConsumerCancelled?.Invoke(this, new ConsumerEventArgs(new[] { consumerTag }));
+            if (_onConsumerCancelled != null)
+                await _onConsumerCancelled(this, new ConsumerEventArgs([consumerTag])).ConfigureAwait(false);
 
-            TrySetConsumeCanceled();
+            TrySetConsumeCanceled(cancellationToken);
         }
 
-        public void HandleModelShutdown(object model, ShutdownEventArgs reason)
+        public Task HandleChannelShutdownAsync(object channel, ShutdownEventArgs reason)
         {
             LogContext.Current = _context.LogContext;
 
             LogContext.Debug?.Log(
-                "Consumer Model Shutdown: {InputAddress} - {ConsumerTag}, Concurrent Peak: {MaxConcurrentDeliveryCount}, {ReplyCode}-{ReplyText}",
+                "Consumer Channel Shutdown: {InputAddress} - {ConsumerTag}, Concurrent Peak: {MaxConcurrentDeliveryCount}, {ReplyCode}-{ReplyText}",
                 _context.InputAddress, _consumerTag, ConcurrentDeliveryCount, reason.ReplyCode, reason.ReplyText);
 
             TrySetConsumeCanceled();
+
+            return Task.CompletedTask;
         }
 
-        public void HandleBasicDeliver(string consumerTag, ulong deliveryTag, bool redelivered, string exchange, string routingKey,
-            IBasicProperties properties, ReadOnlyMemory<byte> body)
+        public async Task HandleBasicDeliverAsync(string consumerTag, ulong deliveryTag, bool redelivered, string exchange, string routingKey,
+            IReadOnlyBasicProperties properties, ReadOnlyMemory<byte> body, CancellationToken cancellationToken)
         {
             try
             {
-                _limit?.Wait(Stopping);
+                if (_limit != null)
+                    await _limit.WaitAsync(Stopping).ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {
@@ -163,53 +108,45 @@ namespace MassTransit.RabbitMqTransport
 
             var bodyBytes = body.ToArray();
 
-            Task.Run(async () =>
+            LogContext.Current = _context.LogContext;
+
+            var context = new RabbitMqReceiveContext(exchange, routingKey, _consumerTag, deliveryTag, bodyBytes, redelivered, properties,
+                _context, _receiveSettings, _channel, _channel.ConnectionContext);
+
+            try
             {
-                LogContext.Current = _context.LogContext;
+                if (IsStopping)
+                    return;
 
-                var context = new RabbitMqReceiveContext(exchange, routingKey, _consumerTag, deliveryTag, bodyBytes, redelivered, properties,
-                    _context, _receiveSettings, _model, _model.ConnectionContext);
+                await Dispatch(deliveryTag, context,
+                        _receiveSettings.NoAck ? NoLockReceiveContext.Instance : new RabbitMqReceiveLockContext(_channel, deliveryTag))
+                    .ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                context.LogTransportFaulted(exception);
+            }
+            finally
+            {
+                _limit?.Release();
 
-                try
-                {
-                    if (IsStopping)
-                        return;
-
-                    await Dispatch(deliveryTag, context,
-                            _receiveSettings.NoAck ? NoLockReceiveContext.Instance : new RabbitMqReceiveLockContext(_model, deliveryTag))
-                        .ConfigureAwait(false);
-                }
-                catch (Exception exception)
-                {
-                    context.LogTransportFaulted(exception);
-                }
-                finally
-                {
-                    _limit?.Release();
-
-                    context.Dispose();
-                }
-            });
+                context.Dispose();
+            }
         }
 
-        event EventHandler<ConsumerEventArgs> IBasicConsumer.ConsumerCancelled
+        public IChannel Channel => _channel.Channel;
+
+        string RabbitMqDeliveryMetrics.ConsumerTag => _consumerTag;
+
+        public event AsyncEventHandler<ConsumerEventArgs> ConsumerCancelled
         {
             add => _onConsumerCancelled += value;
             remove => _onConsumerCancelled -= value;
         }
 
-        string RabbitMqDeliveryMetrics.ConsumerTag => _consumerTag;
-
         protected override bool IsTrackable(ulong deliveryTag)
         {
             return deliveryTag != 1 || _context.IsNotReplyTo;
-        }
-
-        Task OnConsumerCancelled(object obj, ConsumerEventArgs args)
-        {
-            _onConsumerCancelled?.Invoke(obj, args);
-
-            return Task.CompletedTask;
         }
 
         protected override async Task StopAgent(StopContext context)
@@ -228,8 +165,8 @@ namespace MassTransit.RabbitMqTransport
         {
             try
             {
-                if (IsGracefulShutdown)
-                    await _model.BasicCancel(_consumerTag).ConfigureAwait(false);
+                if (IsGracefulShutdown && _channel.Channel.IsOpen)
+                    await _channel.BasicCancel(_consumerTag).ConfigureAwait(false);
             }
             catch (Exception exception)
             {

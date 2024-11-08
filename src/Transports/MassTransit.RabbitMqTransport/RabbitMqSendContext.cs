@@ -25,7 +25,7 @@
         /// <summary>
         /// The basic properties for the RabbitMQ message
         /// </summary>
-        IBasicProperties BasicProperties { get; }
+        BasicProperties BasicProperties { get; }
     }
 
 

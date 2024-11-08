@@ -139,7 +139,7 @@
         BatchSettings BatchSettings { get; }
 
         /// <summary>
-        /// The confirmation timeout for RPC commands via Models
+        /// The confirmation timeout for RPC commands via the channel
         /// </summary>
         TimeSpan ContinuationTimeout { get; }
 
@@ -152,11 +152,6 @@
         /// The credential provider, overriding the default username/password credentials
         /// </summary>
         ICredentialsProvider CredentialsProvider { get; }
-
-        /// <summary>
-        /// The credentials refresher, allowing access token based credentials to be refreshed
-        /// </summary>
-        ICredentialsRefresher CredentialsRefresher { get; }
 
         /// <summary>
         /// Called prior to the connection factory being used to connect, so that any settings can be updated.

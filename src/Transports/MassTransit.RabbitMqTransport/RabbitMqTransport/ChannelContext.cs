@@ -1,24 +1,25 @@
 ﻿namespace MassTransit.RabbitMqTransport
 {
     using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
     using RabbitMQ.Client;
 
 
     /// <summary>
-    /// With a connect, and a model from RabbitMQ, this context is passed forward to allow
-    /// the model to be configured and connected
+    /// With a connection, and a channel from RabbitMQ, this context is passed forward to allow
+    /// the channel to be configured and connected
     /// </summary>
-    public interface ModelContext :
+    public interface ChannelContext :
         PipeContext
     {
         /// <summary>
-        /// The model
+        /// The channel
         /// </summary>
-        IModel Model { get; }
+        IChannel Channel { get; }
 
         /// <summary>
-        /// The connection context on which the model was created
+        /// The connection context on which the channel was created
         /// </summary>
         ConnectionContext ConnectionContext { get; }
 
@@ -34,7 +35,7 @@
         /// <returns>
         /// An awaitable Task that is completed when the message is acknowledged by the broker
         /// </returns>
-        Task BasicPublishAsync(string exchange, string routingKey, bool mandatory, IBasicProperties basicProperties, byte[] body, bool awaitAck);
+        Task BasicPublishAsync(string exchange, string routingKey, bool mandatory, BasicProperties basicProperties, byte[] body, bool awaitAck);
 
         Task ExchangeBind(string destination, string source, string routingKey, IDictionary<string, object> arguments);
         Task ExchangeDeclare(string exchange, string type, bool durable, bool autoDelete, IDictionary<string, object> arguments);
@@ -48,12 +49,12 @@
 
         Task BasicQos(uint prefetchSize, ushort prefetchCount, bool global);
 
-        Task BasicAck(ulong deliveryTag, bool multiple);
+        ValueTask BasicAck(ulong deliveryTag, bool multiple);
 
         Task BasicNack(ulong deliveryTag, bool multiple, bool requeue);
 
-        Task<string> BasicConsume(string queue, bool noAck, bool exclusive, IDictionary<string, object> arguments, IBasicConsumer consumer,
-            string consumerTag);
+        Task<string> BasicConsume(string queue, bool noAck, bool exclusive, IDictionary<string, object> arguments, IAsyncBasicConsumer consumer,
+            string consumerTag, CancellationToken cancellationToken);
 
         Task BasicCancel(string consumerTag);
     }

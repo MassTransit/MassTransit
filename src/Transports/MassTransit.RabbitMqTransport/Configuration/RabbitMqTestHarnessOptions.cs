@@ -2,6 +2,7 @@
 namespace MassTransit
 {
     using System;
+    using System.Threading.Tasks;
     using RabbitMQ.Client;
 
 
@@ -27,6 +28,6 @@ namespace MassTransit
         /// If specified, and create virtual host if not exists is specified, will call this method to apply additional configuration
         /// to the virtual host after it has been created.
         /// </summary>
-        public Action<IModel>? ConfigureVirtualHostCallback { get; set; }
+        public Func<IChannel, Task>? ConfigureVirtualHostCallback { get; set; }
     }
 }

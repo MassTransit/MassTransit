@@ -21,11 +21,6 @@ namespace MassTransit
         ICredentialsProvider CredentialsProvider { set; }
 
         /// <summary>
-        /// Sets the credentials refresher, allowing access token based credentials to be refreshed
-        /// </summary>
-        ICredentialsRefresher CredentialsRefresher { set; }
-
-        /// <summary>
         /// Configure the use of SSL to connection to RabbitMQ
         /// </summary>
         /// <param name="configure"></param>
@@ -80,12 +75,6 @@ namespace MassTransit
         /// The requested connection timeout
         /// </summary>
         void RequestedConnectionTimeout(TimeSpan timeSpan);
-
-        /// <summary>
-        /// Configure the RabbitMQ Batch Publish transport settings
-        /// </summary>
-        /// <param name="configure"></param>
-        void ConfigureBatchPublish(Action<IRabbitMqBatchPublishConfigurator> configure);
 
         /// <summary>
         /// Sets the continuation timeout for command communication with RabbitMQ

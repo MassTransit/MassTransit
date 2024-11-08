@@ -41,10 +41,10 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         const string ServiceQueue = "unbound-service";
 
-        protected override void OnCleanupVirtualHost(IModel model)
+        protected override async Task OnCleanupVirtualHost(IChannel channel)
         {
-            model.ExchangeDelete(ServiceQueue);
-            model.QueueDelete(ServiceQueue);
+            await channel.ExchangeDeleteAsync(ServiceQueue);
+            await channel.QueueDeleteAsync(ServiceQueue);
         }
     }
 }

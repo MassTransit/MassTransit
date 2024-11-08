@@ -19,28 +19,26 @@
             _exchange = exchange;
         }
 
-        protected async Task Move(ReceiveContext context, Action<IBasicProperties, SendHeaders> preSend)
+        protected async Task Move(ReceiveContext context, Action<BasicProperties, SendHeaders> preSend)
         {
-            if (!context.TryGetPayload(out ModelContext modelContext))
-                throw new ArgumentException("The ReceiveContext must contain a ModelContext", nameof(context));
+            if (!context.TryGetPayload(out ChannelContext channelContext))
+                throw new ArgumentException("The ReceiveContext must contain a ChannelContext", nameof(context));
 
-            OneTimeContext<ConfigureTopologyContext<TSettings>> oneTimeContext = await _topologyFilter.Configure(modelContext).ConfigureAwait(false);
+            OneTimeContext<ConfigureTopologyContext<TSettings>> oneTimeContext = await _topologyFilter.Configure(channelContext).ConfigureAwait(false);
 
-            IBasicProperties properties;
+            BasicProperties properties;
             var routingKey = "";
             byte[] body;
 
             if (context.TryGetPayload(out RabbitMqBasicConsumeContext basicConsumeContext))
             {
-                properties = basicConsumeContext.Properties;
+                properties = new BasicProperties(basicConsumeContext.Properties);
                 routingKey = basicConsumeContext.RoutingKey;
                 body = context.GetBody();
             }
             else
             {
-                properties = modelContext.Model.CreateBasicProperties();
-                properties.Headers = new Dictionary<string, object>();
-
+                properties = new BasicProperties { Headers = new Dictionary<string, object>() };
                 body = context.GetBody();
             }
 
@@ -52,7 +50,7 @@
 
             try
             {
-                await modelContext.BasicPublishAsync(_exchange, routingKey, true, properties, body, true).ConfigureAwait(false);
+                await channelContext.BasicPublishAsync(_exchange, routingKey, true, properties, body, true).ConfigureAwait(false);
             }
             catch (Exception)
             {

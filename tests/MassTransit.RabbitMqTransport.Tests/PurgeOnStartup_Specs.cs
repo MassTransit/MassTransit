@@ -52,10 +52,12 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         const string QueueName = "connect_input_queue";
 
-        protected override void OnCleanupVirtualHost(IModel model)
+        protected override async Task OnCleanupVirtualHost(IChannel channel)
         {
-            model.ExchangeDelete(QueueName);
-            model.QueueDelete(QueueName);
+            await base.OnCleanupVirtualHost(channel);
+
+            await channel.ExchangeDeleteAsync(QueueName);
+            await channel.QueueDeleteAsync(QueueName);
         }
     }
 }

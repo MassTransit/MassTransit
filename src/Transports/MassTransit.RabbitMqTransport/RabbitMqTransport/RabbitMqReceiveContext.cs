@@ -16,7 +16,7 @@
         ITransportSequenceNumber
     {
         public RabbitMqReceiveContext(string exchange, string routingKey, string consumerTag, ulong deliveryTag, byte[] body,
-            bool redelivered, IBasicProperties properties, RabbitMqReceiveEndpointContext receiveEndpointContext, params object[] payloads)
+            bool redelivered, IReadOnlyBasicProperties properties, RabbitMqReceiveEndpointContext receiveEndpointContext, params object[] payloads)
             : base(redelivered, receiveEndpointContext, payloads)
         {
             Exchange = exchange;
@@ -36,7 +36,7 @@
         public ulong DeliveryTag { get; }
         public string Exchange { get; }
         public string RoutingKey { get; }
-        public IBasicProperties Properties { get; }
+        public IReadOnlyBasicProperties Properties { get; }
 
         public ulong? SequenceNumber => DeliveryTag;
 

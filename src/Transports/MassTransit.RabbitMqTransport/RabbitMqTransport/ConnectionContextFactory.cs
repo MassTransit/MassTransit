@@ -8,6 +8,7 @@
     using Configuration;
     using Internals;
     using RabbitMQ.Client;
+    using RabbitMQ.Client.Events;
     using RabbitMQ.Client.Exceptions;
     using Transports;
 
@@ -31,16 +32,16 @@
 
             IPipeContextAgent<ConnectionContext> contextHandle = supervisor.AddContext(context);
 
-            void HandleShutdown(object sender, ShutdownEventArgs args)
+            async Task HandleShutdown(object sender, ShutdownEventArgs args)
             {
-                contextHandle.Stop(args.ReplyText);
+                await contextHandle.Stop(args.ReplyText).ConfigureAwait(false);
             }
 
             context.ContinueWith(task =>
             {
-                task.Result.Connection.ConnectionShutdown += HandleShutdown;
+                task.Result.Connection.ConnectionShutdownAsync += HandleShutdown;
 
-                contextHandle.Completed.ContinueWith(_ => task.Result.Connection.ConnectionShutdown -= HandleShutdown);
+                contextHandle.Completed.ContinueWith(_ => task.Result.Connection.ConnectionShutdownAsync -= HandleShutdown);
             }, TaskContinuationOptions.OnlyOnRanToCompletion);
 
             return contextHandle;
@@ -75,14 +76,15 @@
 
                 if (_hostConfiguration.Settings.EndpointResolver != null)
                 {
-                    connection = _connectionFactory.Value.CreateConnection(_hostConfiguration.Settings.EndpointResolver,
-                        _hostConfiguration.Settings.ClientProvidedName);
+                    connection = await _connectionFactory.Value.CreateConnectionAsync(_hostConfiguration.Settings.EndpointResolver,
+                        _hostConfiguration.Settings.ClientProvidedName).ConfigureAwait(false);
                 }
                 else
                 {
                     var hostNames = new List<string>(1) { _hostConfiguration.Settings.Host };
 
-                    connection = _connectionFactory.Value.CreateConnection(hostNames, _hostConfiguration.Settings.ClientProvidedName);
+                    connection = await _connectionFactory.Value.CreateConnectionAsync(hostNames, _hostConfiguration.Settings.ClientProvidedName)
+                        .ConfigureAwait(false);
                 }
 
                 LogContext.Debug?.Log("Connected: {Host} (address: {RemoteAddress}, local: {LocalAddress})", description, connection.Endpoint,

@@ -54,7 +54,7 @@
         public IReceivedMessageList Consumed => _consumed.Messages;
         public IPublishedMessageList Published => _published.Messages;
 
-        protected abstract IBusControl CreateBus();
+        protected abstract Task<IBusControl> CreateBus();
 
         public virtual IRequestClient<TRequest> CreateRequestClient<TRequest>()
             where TRequest : class
@@ -115,7 +115,7 @@
 
             PreCreateBus?.Invoke(this);
 
-            BusControl = CreateBus();
+            BusControl = await CreateBus();
 
             ConnectObservers(BusControl);
 

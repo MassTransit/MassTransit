@@ -33,14 +33,14 @@
         public TimeSpan StopTimeout => _context.StopTimeout;
         public IRabbitMqBusTopology Topology => _context.Topology;
 
-        public Task<IModel> CreateModel(CancellationToken cancellationToken)
+        public Task<IChannel> CreateChannel(CancellationToken cancellationToken, ushort? concurrentMessageLimit1)
         {
-            return _context.CreateModel(cancellationToken);
+            return _context.CreateChannel(cancellationToken, concurrentMessageLimit1);
         }
 
-        public Task<ModelContext> CreateModelContext(CancellationToken cancellationToken)
+        public Task<ChannelContext> CreateChannelContext(CancellationToken cancellationToken, ushort? concurrentMessageLimit)
         {
-            return _context.CreateModelContext(cancellationToken);
+            return _context.CreateChannelContext(cancellationToken, concurrentMessageLimit);
         }
     }
 }

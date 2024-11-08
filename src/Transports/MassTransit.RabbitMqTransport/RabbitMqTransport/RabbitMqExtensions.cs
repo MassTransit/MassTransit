@@ -2,6 +2,8 @@ namespace MassTransit.RabbitMqTransport
 {
     using System;
     using System.Text;
+    using System.Threading;
+    using System.Threading.Tasks;
     using Configuration;
     using RabbitMQ.Client;
 
@@ -11,23 +13,25 @@ namespace MassTransit.RabbitMqTransport
         /// <summary>
         /// Close and dispose of a RabbitMQ channel without throwing any exceptions
         /// </summary>
-        /// <param name="model">The channel (can be null)</param>
+        /// <param name="channel">The channel (can be null)</param>
         /// <param name="replyCode"></param>
         /// <param name="message">Message for channel closure</param>
-        public static void Cleanup(this IModel model, ushort replyCode = 200, string message = "Unknown")
+        /// <param name="cancellationToken"></param>
+        public static async Task Cleanup(this IChannel channel, ushort replyCode = 200, string message = "Unknown",
+            CancellationToken cancellationToken = default)
         {
-            if (model != null)
+            if (channel != null)
             {
                 try
                 {
-                    if (model.IsOpen)
-                        model.Close(replyCode, message);
+                    if (channel.IsOpen)
+                        await channel.CloseAsync(replyCode, message, cancellationToken).ConfigureAwait(false);
                 }
                 catch (Exception)
                 {
                 }
 
-                model.Dispose();
+                await channel.DisposeAsync().ConfigureAwait(false);
             }
         }
 
@@ -37,19 +41,23 @@ namespace MassTransit.RabbitMqTransport
         /// <param name="connection">The channel (can be null)</param>
         /// <param name="replyCode"></param>
         /// <param name="message">Message for channel closure</param>
-        public static void Cleanup(this IConnection connection, ushort replyCode = 200, string message = "Unknown")
+        /// <param name="cancellationToken"></param>
+        public static async Task Cleanup(this IConnection connection, ushort replyCode = 200, string message = "Unknown",
+            CancellationToken cancellationToken = default)
         {
             if (connection != null)
             {
                 try
                 {
                     if (connection.IsOpen)
-                        connection.Close(replyCode, message);
+                        await connection.CloseAsync(replyCode, message, cancellationToken).ConfigureAwait(false);
                 }
                 catch (Exception)
                 {
                 }
             }
+
+            await connection.DisposeAsync().ConfigureAwait(false);
         }
 
         public static string ToDescription(this RabbitMqHostSettings settings)
