@@ -23,7 +23,7 @@ namespace MassTransit.AmazonSqsTransport
             _cancellationToken = cancellationToken;
         }
 
-        protected override int AddingEntry(PublishBatchRequestEntry entry, string entryId)
+        protected override int CalculateEntryLength(PublishBatchRequestEntry entry, string entryId)
         {
             entry.Id = entryId;
 
