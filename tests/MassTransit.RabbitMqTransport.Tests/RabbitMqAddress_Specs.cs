@@ -2,6 +2,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
     using NUnit.Framework;
+    using RabbitMQ.Client;
 
 
     [TestFixture]
@@ -447,7 +448,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public void HighAvailabilityQueue()
         {
-            Assert.That(_receiveSettings.QueueArguments["x-message-ttl"], Is.EqualTo("30000"));
+            Assert.That(_receiveSettings.QueueArguments[Headers.XMessageTTL], Is.EqualTo("30000"));
         }
 
         [Test]

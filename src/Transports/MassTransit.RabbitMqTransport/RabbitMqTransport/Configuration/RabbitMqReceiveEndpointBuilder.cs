@@ -4,6 +4,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using System.Collections.Generic;
     using MassTransit.Configuration;
     using Middleware;
+    using RabbitMQ.Client;
     using Topology;
     using Transports;
 
@@ -77,7 +78,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             var queueAutoDelete = settings.AutoDelete;
             if (settings.QueueExpiration.HasValue)
             {
-                queueArguments["x-expires"] = (long)settings.QueueExpiration.Value.TotalMilliseconds;
+                queueArguments[Headers.XExpires] = (long)settings.QueueExpiration.Value.TotalMilliseconds;
                 queueAutoDelete = false;
             }
 

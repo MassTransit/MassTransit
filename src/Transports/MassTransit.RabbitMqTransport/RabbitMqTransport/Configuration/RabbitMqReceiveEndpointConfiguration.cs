@@ -235,6 +235,21 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _settings.SetQuorumQueue(replicationFactor);
         }
 
+        public void SetDeliveryAcknowledgementTimeout(TimeSpan timeSpan)
+        {
+            if (timeSpan <= TimeSpan.Zero)
+                throw new ArgumentException("The RabbitMQ consumer timeout must be > 0");
+
+            SetQueueArgument("x-consumer-timeout", (long)timeSpan.TotalMilliseconds);
+        }
+
+        public void SetDeliveryAcknowledgementTimeout(int? d = null, int? h = null, int? m = null, int? s = null, int? ms = null)
+        {
+            var value = new TimeSpan(d ?? 0, h ?? 0, m ?? 0, s ?? 0, ms ?? 0);
+
+            SetDeliveryAcknowledgementTimeout(value);
+        }
+
         public void Bind(string exchangeName, Action<IRabbitMqExchangeToExchangeBindingConfigurator> callback)
         {
             if (exchangeName == null)

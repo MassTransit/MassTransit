@@ -74,5 +74,25 @@
         /// <param name="consumerTag">Overrides the default consumer tag with the specified name</param>
         /// <param name="callback"></param>
         void Stream(string consumerTag, Action<IRabbitMqStreamConfigurator> callback = null);
+
+        /// <summary>
+        /// Configure the RabbitMQ delivery acknowledgement timeout for this queue explicitly. This is entirely optional,
+        /// and generally not necessary.
+        /// <see href="https://www.rabbitmq.com/docs/consumers#acknowledgement-timeout"/>
+        /// </summary>
+        /// <param name="timeSpan"></param>
+        void SetDeliveryAcknowledgementTimeout(TimeSpan timeSpan);
+
+        /// <summary>
+        /// Configure the RabbitMQ delivery acknowledgement timeout for this queue explicitly. This is entirely optional,
+        /// and generally not necessary.
+        /// <see href="https://www.rabbitmq.com/docs/consumers#acknowledgement-timeout"/>
+        /// </summary>
+        /// <param name="d">days</param>
+        /// <param name="h">hours</param>
+        /// <param name="m">minutes</param>
+        /// <param name="s">seconds</param>
+        /// <param name="ms">milliseconds</param>
+        void SetDeliveryAcknowledgementTimeout(int? d = null, int? h = null, int? m = null, int? s = null, int? ms = null);
     }
 }

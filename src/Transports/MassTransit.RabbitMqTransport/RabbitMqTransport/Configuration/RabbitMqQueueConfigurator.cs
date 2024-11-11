@@ -81,7 +81,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         {
             get
             {
-                if (QueueArguments.TryGetValue("x-expires", out var value) && value is long milliseconds)
+                if (QueueArguments.TryGetValue(Headers.XExpires, out var value) && value is long milliseconds)
                     return TimeSpan.FromMilliseconds(milliseconds);
 
                 return null;
@@ -89,9 +89,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
             set
             {
                 if (value.HasValue && value.Value > TimeSpan.Zero)
-                    QueueArguments["x-expires"] = (long)value.Value.TotalMilliseconds;
+                    QueueArguments[Headers.XExpires] = (long)value.Value.TotalMilliseconds;
                 else
-                    QueueArguments.Remove("x-expires");
+                    QueueArguments.Remove(Headers.XExpires);
             }
         }
 
