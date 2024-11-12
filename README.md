@@ -19,6 +19,8 @@ Build Status
 | master        |    [![master](https://github.com/MassTransit/MassTransit/actions/workflows/build.yml/badge.svg?branch=master&event=push)](https://github.com/MassTransit/MassTransit/actions/workflows/build.yml)    |
 | develop       |   [![develop](https://github.com/MassTransit/MassTransit/actions/workflows/build.yml/badge.svg?branch=develop&event=push)](https://github.com/MassTransit/MassTransit/actions/workflows/build.yml)   |
 
+[![Gurubase](https://img.shields.io/badge/Gurubase-Ask%20MassTransit%20Guru-006BFF)](https://gurubase.io/g/masstransit)
+
 MassTransit NuGet Packages
 ---------------------------
 
