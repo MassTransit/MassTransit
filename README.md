@@ -19,8 +19,6 @@ Build Status
 | master        |    [![master](https://github.com/MassTransit/MassTransit/actions/workflows/build.yml/badge.svg?branch=master&event=push)](https://github.com/MassTransit/MassTransit/actions/workflows/build.yml)    |
 | develop       |   [![develop](https://github.com/MassTransit/MassTransit/actions/workflows/build.yml/badge.svg?branch=develop&event=push)](https://github.com/MassTransit/MassTransit/actions/workflows/build.yml)   |
 
-[![Gurubase](https://img.shields.io/badge/Gurubase-Ask%20MassTransit%20Guru-006BFF)](https://gurubase.io/g/masstransit)
-
 MassTransit NuGet Packages
 ---------------------------
 
@@ -73,6 +71,12 @@ MassTransit NuGet Packages
 Get help live at the MassTransit Discord server.
 
 [![alt Join the conversation](https://img.shields.io/discord/682238261753675864.svg "Discord")](https://discord.gg/rNpQgYn)
+
+## MassTransit Guru 
+
+You can [Ask MassTransit Guru](https://gurubase.io/g/masstransit), it is a MassTransit-focused AI to answer your questions.
+
+[![Gurubase](https://img.shields.io/badge/Gurubase-Ask%20MassTransit%20Guru-006BFF)](https://gurubase.io/g/masstransit)
 
 ## GitHub Issues
 
