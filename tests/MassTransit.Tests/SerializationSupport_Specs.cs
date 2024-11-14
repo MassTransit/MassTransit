@@ -28,8 +28,10 @@
             await _responseReceived;
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<A>> _requestReceived;
         Task<ConsumeContext<B>> _responseReceived;
+        #pragma warning restore NUnit1032
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {

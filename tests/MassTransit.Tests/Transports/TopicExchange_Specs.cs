@@ -10,7 +10,9 @@ namespace MassTransit.Tests.Transports
     public class Using_a_hash_topic_pattern :
         InMemoryTestFixture
     {
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<A>> _handled;
+        #pragma warning restore NUnit1032
 
         public Using_a_hash_topic_pattern()
         {
@@ -56,7 +58,9 @@ namespace MassTransit.Tests.Transports
     public class Using_a_wildcard_topic_pattern :
         InMemoryTestFixture
     {
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<A>> _handled;
+        #pragma warning restore NUnit1032
 
         public Using_a_wildcard_topic_pattern()
         {
@@ -106,7 +110,9 @@ namespace MassTransit.Tests.Transports
     public class Using_a_wildcard_topic_pattern_too :
         InMemoryTestFixture
     {
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<A>> _handled;
+        #pragma warning restore NUnit1032
 
         public Using_a_wildcard_topic_pattern_too()
         {

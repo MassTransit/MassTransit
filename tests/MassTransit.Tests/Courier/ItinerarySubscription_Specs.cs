@@ -36,11 +36,13 @@
             Assert.That(consumeContext.GetArgument<string>("Value"), Is.EqualTo("Added"));
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _handled;
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _testActivityCompleted;
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _reviseActivityCompleted;
         Guid _trackingNumber;
+        #pragma warning restore NUnit1032
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {

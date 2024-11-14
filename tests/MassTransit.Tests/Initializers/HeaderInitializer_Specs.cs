@@ -49,7 +49,9 @@ namespace MassTransit.Tests.Initializers
             });
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<Ping>> _handled;
+        #pragma warning restore NUnit1032
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {

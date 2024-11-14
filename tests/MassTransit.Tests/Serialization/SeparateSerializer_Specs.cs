@@ -30,7 +30,9 @@
                 $"actual type is {pongContext.ReceiveContext.ContentType}");
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<PingMessage>> _handled;
+        #pragma warning restore NUnit1032
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
@@ -78,7 +80,9 @@
             });
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<Command>> _handled;
+        #pragma warning restore NUnit1032
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
@@ -135,7 +139,9 @@
             });
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<Command>> _handled;
+        #pragma warning restore NUnit1032
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {

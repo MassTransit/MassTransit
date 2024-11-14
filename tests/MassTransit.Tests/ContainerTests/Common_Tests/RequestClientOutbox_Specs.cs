@@ -69,8 +69,10 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
     public class Using_the_outbox_with_a_routing_slip_request :
         InMemoryContainerTestFixture
     {
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
+        #pragma warning restore NUnit1032
         Uri _executeAddress;
         Guid _trackingNumber;
 

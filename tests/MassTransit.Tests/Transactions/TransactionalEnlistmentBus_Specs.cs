@@ -87,7 +87,9 @@
             await _received;
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<PingMessage>> _received;
+        #pragma warning restore NUnit1032
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
@@ -119,7 +121,9 @@
             await _received;
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<PingMessage>> _received;
+        #pragma warning restore NUnit1032
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
@@ -146,7 +150,9 @@
             Assert.That(async () => await _received.OrTimeout(s: 3), Throws.TypeOf<TimeoutException>());
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<PingMessage>> _received;
+        #pragma warning restore NUnit1032
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
@@ -174,7 +180,9 @@
             Assert.That(async () => await _received.OrTimeout(s: 3), Throws.TypeOf<TimeoutException>());
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<PingMessage>> _received;
+        #pragma warning restore NUnit1032
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {

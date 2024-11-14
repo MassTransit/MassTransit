@@ -29,7 +29,9 @@
             });
         }
 
+        #pragma warning disable NUnit1032
         Task _succeeded;
+        #pragma warning restore NUnit1032
         bool _firstCalled;
         bool? _firstRequested;
         bool _secondCalled;

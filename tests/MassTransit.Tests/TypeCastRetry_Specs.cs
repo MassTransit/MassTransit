@@ -9,7 +9,9 @@ namespace MassTransit.Tests
     public class TypeCastRetry_Specs :
         InMemoryTestFixture
     {
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<CreateCommand>> _received;
+        #pragma warning restore NUnit1032
 
         [Test]
         public async Task Should_receive_the_message()

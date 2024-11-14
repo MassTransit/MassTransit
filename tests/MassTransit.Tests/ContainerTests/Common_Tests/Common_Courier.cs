@@ -12,8 +12,10 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
     public class Courier_ExecuteActivity :
         InMemoryContainerTestFixture
     {
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
+        #pragma warning restore NUnit1032
         Uri _executeAddress;
         Guid _trackingNumber;
 
@@ -59,8 +61,10 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
     public class Courier_ExecuteActivity_Endpoint :
         InMemoryContainerTestFixture
     {
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
+        #pragma warning restore NUnit1032
         Guid _trackingNumber;
 
         [Test]
@@ -96,8 +100,10 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
     public class Courier_Activity :
         InMemoryContainerTestFixture
     {
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
+        #pragma warning restore NUnit1032
         Uri _executeAddress;
         Guid _trackingNumber;
 
@@ -142,7 +148,9 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
     public class Courier_Activity_Custom_Subscription :
         InMemoryContainerTestFixture
     {
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<RegistrationCompleted>> _completed;
+        #pragma warning restore NUnit1032
         Uri _executeAddress;
         Guid _trackingNumber;
 
@@ -197,8 +205,10 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
     public class Common_Activity_Filter :
         InMemoryContainerTestFixture
     {
+        #pragma warning disable NUnit1032
         readonly TaskCompletionSource<(TestActivity, MyId)> _activityTaskCompletionSource;
         readonly TaskCompletionSource<MyId> _executeTaskCompletionSource;
+        #pragma warning restore NUnit1032
         Uri _executeAddress;
 
         public Common_Activity_Filter()
@@ -347,8 +357,10 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
     public class Courier_Activity_Endpoint :
         InMemoryContainerTestFixture
     {
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
+        #pragma warning restore NUnit1032
         Guid _trackingNumber;
 
         [Test]

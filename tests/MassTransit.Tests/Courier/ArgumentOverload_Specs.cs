@@ -34,8 +34,10 @@
             Assert.That(context.Message.TrackingNumber, Is.EqualTo(_trackingNumber));
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
+        #pragma warning restore NUnit1032
         Guid _trackingNumber;
 
         [OneTimeSetUp]
@@ -94,8 +96,10 @@
             });
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
+        #pragma warning restore NUnit1032
         Guid _trackingNumber;
 
         [OneTimeSetUp]
@@ -150,8 +154,10 @@
             });
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
+        #pragma warning restore NUnit1032
         Guid _trackingNumber;
 
         [OneTimeSetUp]
@@ -215,8 +221,10 @@
             });
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
+        #pragma warning restore NUnit1032
         Guid _trackingNumber;
 
         [OneTimeSetUp]

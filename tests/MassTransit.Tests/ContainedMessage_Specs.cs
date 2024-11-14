@@ -25,8 +25,10 @@
             Assert.That(context.Message.Credentials.Username, Is.EqualTo("sa"));
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<SecureCommand<ExecuteSql>>> _secureCommandHandler;
         Task<ConsumeContext<ExecuteSql>> _commandHandler;
+        #pragma warning restore NUnit1032
 
         [OneTimeSetUp]
         public void Setup()

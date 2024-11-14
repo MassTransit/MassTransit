@@ -51,6 +51,13 @@
             await response;
         }
 
+        [OneTimeTearDown]
+        public async Task OneTimeTearDown()
+        {
+            await _harness.Stop();
+
+            _harness.Dispose();
+        }
 
         class TestConsumer : IConsumer<A>
         {

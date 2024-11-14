@@ -78,7 +78,9 @@
                 Assert.That(context.Message.Data, Is.InstanceOf<TestConcreteClass>());
             }
 
+            #pragma warning disable NUnit1032
             Task<ConsumeContext<ITestMessage>> _handled;
+            #pragma warning restore NUnit1032
 
             protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
             {
@@ -115,8 +117,10 @@
                 Assert.That(context.Message.Data[0], Is.InstanceOf<TestConcreteClass>());
             }
 
+            #pragma warning disable NUnit1032
             Task<ConsumeContext<ITestArrayMessage>> _handled;
             Task<ConsumeContext<ReceiveFault>> _faulted;
+            #pragma warning restore NUnit1032
 
             protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
             {
@@ -154,8 +158,10 @@
                 Assert.That(context.Message.Data[0], Is.InstanceOf<TestConcreteClass>());
             }
 
+            #pragma warning disable NUnit1032
             Task<ConsumeContext<ITestListMessage>> _handled;
             Task<ConsumeContext<ReceiveFault>> _faulted;
+            #pragma warning restore NUnit1032
 
             protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
             {

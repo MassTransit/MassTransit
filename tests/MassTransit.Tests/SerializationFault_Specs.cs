@@ -19,7 +19,9 @@
         }
 
         IRequestClient<PingMessage> _requestClient;
+        #pragma warning disable NUnit1032
         Task<Response<PongMessage>> _response;
+        #pragma warning restore NUnit1032
 
         [OneTimeSetUp]
         public void Setup()
@@ -56,12 +58,13 @@
             ConsumeContext<ReceiveFault> faultContext = await _faulted;
         }
 
-        Task<ConsumeContext<PingMessage>> _handled;
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<ReceiveFault>> _faulted;
+        #pragma warning restore NUnit1032
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            _handled = Handled<PingMessage>(configurator);
+            _ = Handled<PingMessage>(configurator);
 
             _faulted = Handled<ReceiveFault>(configurator);
         }

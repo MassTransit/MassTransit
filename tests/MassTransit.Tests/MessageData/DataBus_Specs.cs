@@ -61,8 +61,8 @@
 
                 await InputQueueSendEndpoint.Send<MessageWithStream>(new { Stream = ms });
 
-                ConsumeContext<MessageWithStream> recievedStreamcontext = await _receivedStream;
-                Assert.That(recievedStreamcontext.Message.Stream.Address, Is.Not.Null);
+                ConsumeContext<MessageWithStream> streamContext = await _receivedStream;
+                Assert.That(streamContext.Message.Stream.Address, Is.Not.Null);
 
                 using var receivedMemoryStream = new MemoryStream();
                 await _receivedStreamData.CopyToAsync(receivedMemoryStream);

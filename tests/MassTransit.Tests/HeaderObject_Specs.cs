@@ -34,7 +34,9 @@
             });
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<PingMessage>> _handled;
+        #pragma warning restore NUnit1032
         TaskCompletionSource<ClaimsIdentity> _header;
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

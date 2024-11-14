@@ -28,19 +28,15 @@
             await _credentials.Task;
         }
 
-        Task<ConsumeContext<SecureCommand>> _commandHandler;
-        readonly TaskCompletionSource<UserCredentials> _credentials = TaskUtil.GetTask<UserCredentials>();
-        Task<ConsumeContext<UserCredentials>> _credentialsHandler;
-
         [OneTimeSetUp]
-        public void Setup()
+        public async Task Setup()
         {
-            InputQueueSendEndpoint.Send(new CommandAndCredentials
+            await InputQueueSendEndpoint.Send(new CommandAndCredentials
             {
                 SqlText = "DROP TABLE [Users]",
                 Username = "sa",
                 Password = "god"
-            }).Wait(TestCancellationToken);
+            }, TestCancellationToken);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -76,5 +72,12 @@
             string Username { get; }
             string Password { get; }
         }
+
+
+        #pragma warning disable NUnit1032
+        Task<ConsumeContext<SecureCommand>> _commandHandler;
+        readonly TaskCompletionSource<UserCredentials> _credentials = TaskUtil.GetTask<UserCredentials>();
+        Task<ConsumeContext<UserCredentials>> _credentialsHandler;
+        #pragma warning restore NUnit1032
     }
 }

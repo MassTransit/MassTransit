@@ -50,6 +50,14 @@
             _after = new Semaphore(0, 100);
         }
 
+        [OneTimeTearDown]
+        public void OneTimeTearDown()
+        {
+            _wait.Dispose();
+            _before.Dispose();
+            _after.Dispose();
+        }
+
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             //            configurator.Subscribe(s =>

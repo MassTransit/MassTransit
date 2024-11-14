@@ -18,7 +18,9 @@
             await _handled;
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<NastyMessage>> _handled;
+        #pragma warning restore NUnit1032
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
@@ -47,7 +49,9 @@
             await _handled;
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<TastyMessage>> _handled;
+        #pragma warning restore NUnit1032
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
@@ -80,7 +84,9 @@
             await _handled;
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<NastyEvent>> _handled;
+        #pragma warning restore NUnit1032
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
@@ -121,7 +127,9 @@
             await _handled;
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<NastyEvent>> _handled;
+        #pragma warning restore NUnit1032
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
