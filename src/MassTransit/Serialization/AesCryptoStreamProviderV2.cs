@@ -1,5 +1,6 @@
 ﻿namespace MassTransit.Serialization
 {
+    using System;
     using System.IO;
     using System.Security.Cryptography;
 
@@ -21,7 +22,9 @@
             var key = _secureKeyProvider.GetKey(headers);
 
             var iv = new byte[16];
-            stream.Read(iv, 0, iv.Length);
+            var read = stream.Read(iv, 0, iv.Length);
+            if (read != iv.Length)
+                throw new InvalidOperationException("The stream does not contain enough bytes to read the IV.");
 
             var encryptor = CreateDecryptor(key, iv);
 

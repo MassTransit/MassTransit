@@ -117,6 +117,8 @@ namespace MassTransit.TestFramework
 
             await InMemoryTestHarness.Stop().ConfigureAwait(false);
 
+            InMemoryTestHarness.Dispose();
+
             switch (ServiceProvider)
             {
                 case IAsyncDisposable asyncDisposable:
