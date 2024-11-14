@@ -58,9 +58,11 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Turnout
         }
 
         Guid _jobId;
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<JobCanceled>> _cancelled;
         Task<ConsumeContext<JobSubmitted>> _submitted;
         Task<ConsumeContext<JobStarted>> _started;
+        #pragma warning restore NUnit1032
 
         [OneTimeSetUp]
         public async Task Arrange()

@@ -34,7 +34,8 @@ namespace MassTransit.TestFramework
             _cancellation = new List<Action<CancellationToken>>();
         }
 
-        protected IServiceProvider ServiceProvider { get; private set; }
+        ServiceProvider _serviceProvider;
+        protected IServiceProvider ServiceProvider => _serviceProvider;
 
         protected IBusRegistrationContext BusRegistrationContext => ServiceProvider.GetRequiredService<IBusRegistrationContext>();
 
@@ -82,7 +83,7 @@ namespace MassTransit.TestFramework
 
             collection = ConfigureServices(collection);
 
-            ServiceProvider = collection.BuildServiceProvider();
+            _serviceProvider = collection.BuildServiceProvider();
 
             ConfigureLogging(ServiceProvider);
 
@@ -119,15 +120,7 @@ namespace MassTransit.TestFramework
 
             InMemoryTestHarness.Dispose();
 
-            switch (ServiceProvider)
-            {
-                case IAsyncDisposable asyncDisposable:
-                    await asyncDisposable.DisposeAsync().ConfigureAwait(false);
-                    break;
-                case IDisposable disposable:
-                    disposable.Dispose();
-                    break;
-            }
+            await _serviceProvider.DisposeAsync();
         }
 
         protected virtual void ConfigureMassTransit(IBusRegistrationConfigurator configurator)

@@ -64,9 +64,11 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
                 await using var context = new TestInstanceContextFactory().CreateDbContext(DbContextOptionsBuilder);
 
                 await context.Database.EnsureDeletedAsync();
+
+                await _provider.DisposeAsync();
             }
 
-            readonly IServiceProvider _provider;
+            readonly ServiceProvider _provider;
 
             public Using_optimistic_concurrency()
             {
@@ -149,9 +151,11 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
                 await using var context = new TestInstanceContextFactory().CreateDbContext(DbContextOptionsBuilder);
 
                 await context.Database.EnsureDeletedAsync();
+
+                await _provider.DisposeAsync();
             }
 
-            readonly IServiceProvider _provider;
+            readonly ServiceProvider _provider;
 
             public Using_pessimistic_concurrency()
             {

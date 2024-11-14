@@ -105,7 +105,9 @@
             }
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<InitiateSimpleSaga>> _received;
+        #pragma warning restore NUnit1032
 
         TransactionOutboxTestsDbContext GetDbContext()
         {

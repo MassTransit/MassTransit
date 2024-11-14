@@ -101,9 +101,11 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Turnout
         }
 
         Guid _jobId;
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<JobCompleted>> _completed;
         Task<ConsumeContext<JobSubmitted>> _submitted;
         Task<ConsumeContext<JobStarted>> _started;
+        #pragma warning restore NUnit1032
 
         [OneTimeSetUp]
         public async Task Arrange()
@@ -202,10 +204,12 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Turnout
         }
 
         Guid _jobId;
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<JobCompleted>> _completed;
         Task<ConsumeContext<JobSubmitted>> _submitted;
         Task<ConsumeContext<JobStarted>> _started;
-        readonly IServiceProvider _provider;
+        #pragma warning restore NUnit1032
+        readonly ServiceProvider _provider;
 
         public Submitting_a_job_to_turnout_via_container()
         {
@@ -258,6 +262,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Turnout
             await using var context = new JobServiceSagaDbContextFactory().CreateDbContext(DbContextOptionsBuilder);
 
             await context.Database.EnsureDeletedAsync();
+
+            await _provider.DisposeAsync();
         }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
