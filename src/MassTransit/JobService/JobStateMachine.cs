@@ -153,6 +153,7 @@ namespace MassTransit
                                     .DetermineNextStartDate()
                                     .IfElse(context => context.Saga.NextStartDate.HasValue,
                                         start => start
+                                            .SendJobSlotReleased(JobSlotDisposition.Faulted)
                                             .WaitForNextScheduledTime(this),
                                         noStart => noStart
                                             .TransitionTo(Faulted)
@@ -198,7 +199,7 @@ namespace MassTransit
                 When(AttemptCanceled)
                     .IfElse(context => string.Equals(context.Message.Reason, JobCancellationReasons.Shutdown, StringComparison.Ordinal),
                         shutdown => shutdown
-                            .SendJobSlotReleased()
+                            .SendJobSlotReleased(JobSlotDisposition.Canceled)
                             .WaitForJobSlot(this),
                         other => other
                             .PublishJobCanceled()
@@ -647,14 +648,17 @@ namespace MassTransit
             });
         }
 
-        public static EventActivityBinder<JobSaga, JobAttemptCanceled> SendJobSlotReleased(this EventActivityBinder<JobSaga, JobAttemptCanceled> binder)
+        public static EventActivityBinder<JobSaga, T> SendJobSlotReleased<T>(this EventActivityBinder<JobSaga, T> binder, JobSlotDisposition disposition)
+            where T : class
         {
-            return binder.Send<JobSaga, JobAttemptCanceled, JobSlotReleased>(context => context.GetJobTypeSagaAddress(),
+            return binder.Send<JobSaga, T, JobSlotReleased>(context => context.GetJobTypeSagaAddress(),
                 context => new JobSlotReleasedEvent
                 {
                     JobId = context.Saga.CorrelationId,
                     JobTypeId = context.Saga.JobTypeId,
-                    Disposition = JobSlotDisposition.Canceled
+                    Disposition = disposition == JobSlotDisposition.Faulted && context.Saga.Reason.Contains("(Suspect)")
+                        ? JobSlotDisposition.Suspect
+                        : disposition
                 });
         }
 
