@@ -97,6 +97,15 @@ namespace MassTransit
 
             During(WaitingForSlot,
                 When(JobSlotWaitElapsed.Received)
+                    .If(context => context.IsScheduledJob() && context.Saga.NextStartDate.HasValue,
+                        scheduled => scheduled
+                            .FinalizeJobAttempts()
+                            .Then(context =>
+                            {
+                                context.Saga.AttemptId = NewId.NextGuid();
+                                context.Saga.RetryAttempt = 0;
+                            })
+                    )
                     .RequestJobSlot(this)
             );
 
