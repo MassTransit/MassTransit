@@ -1228,8 +1228,6 @@ namespace MassTransit.SqlTransport.PostgreSql
 
         public async Task CreateInfrastructure(SqlTransportOptions options, CancellationToken cancellationToken)
         {
-            await CreateSchemaIfNotExist(options, cancellationToken).ConfigureAwait(false);
-
             await using var connection = PostgresSqlTransportConnection.GetDatabaseConnection(options);
             await connection.Open(cancellationToken).ConfigureAwait(false);
 
@@ -1271,7 +1269,7 @@ namespace MassTransit.SqlTransport.PostgreSql
             }
         }
 
-        async Task CreateSchemaIfNotExist(SqlTransportOptions options, CancellationToken cancellationToken)
+        public async Task CreateSchemaIfNotExist(SqlTransportOptions options, CancellationToken cancellationToken)
         {
             await using var connection = PostgresSqlTransportConnection.GetDatabaseAdminConnection(options);
             await connection.Open(cancellationToken).ConfigureAwait(false);

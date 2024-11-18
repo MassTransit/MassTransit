@@ -1623,8 +1623,6 @@ END
 
         public async Task CreateInfrastructure(SqlTransportOptions options, CancellationToken cancellationToken)
         {
-            await CreateSchemaIfNotExist(options, cancellationToken).ConfigureAwait(false);
-
             await using var connection = SqlServerSqlTransportConnection.GetDatabaseConnection(options);
             await connection.Open(cancellationToken).ConfigureAwait(false);
 
@@ -1694,7 +1692,7 @@ END
             }
         }
 
-        async Task CreateSchemaIfNotExist(SqlTransportOptions options, CancellationToken cancellationToken)
+        public async Task CreateSchemaIfNotExist(SqlTransportOptions options, CancellationToken cancellationToken)
         {
             await using var connection = SqlServerSqlTransportConnection.GetDatabaseAdminConnection(options);
             await connection.Open(cancellationToken).ConfigureAwait(false);

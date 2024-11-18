@@ -13,6 +13,7 @@ namespace MassTransit
             services.AddSqlServerMigrationHostedService(options =>
             {
                 options.CreateDatabase = create;
+                options.CreateSchema = create;
                 options.CreateInfrastructure = create;
                 options.DeleteDatabase = delete;
             });
@@ -29,6 +30,7 @@ namespace MassTransit
                 .Configure(options =>
                 {
                     options.CreateDatabase = true;
+                    options.CreateSchema = true;
                     options.CreateInfrastructure = true;
                     options.DeleteDatabase = false;
 
