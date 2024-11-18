@@ -33,6 +33,13 @@ namespace MassTransit.SqlTransport
                 await _migrator.CreateDatabase(_transportOptions, cancellationToken).ConfigureAwait(false);
             }
 
+            if (_options.CreateSchema)
+            {
+                _logger.LogInformation("MassTransit SQL Transport creating schema for database {Database}", _transportOptions.Database);
+
+                await _migrator.CreateSchemaIfNotExist(_transportOptions, cancellationToken).ConfigureAwait(false);
+            }
+
             if (_options.CreateInfrastructure)
             {
                 _logger.LogInformation("MassTransit SQL Transport creating infrastructure for database {Database}", _transportOptions.Database);
