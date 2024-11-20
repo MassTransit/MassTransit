@@ -48,6 +48,20 @@ public static class JobServiceExtensions
     /// </summary>
     /// <param name="publishEndpoint"></param>
     /// <param name="job"></param>
+    /// <param name="cancellationToken"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static Task<Guid> SubmitJob<T>(this IPublishEndpoint publishEndpoint, T job, CancellationToken cancellationToken = default)
+        where T : class
+    {
+        return SubmitJob(publishEndpoint, NewId.NextGuid(), job, null, cancellationToken);
+    }
+
+    /// <summary>
+    /// Submits a job, returning the generated jobId
+    /// </summary>
+    /// <param name="publishEndpoint"></param>
+    /// <param name="job"></param>
     /// <param name="setJobProperties"></param>
     /// <param name="cancellationToken"></param>
     /// <typeparam name="T"></typeparam>
@@ -107,6 +121,20 @@ public static class JobServiceExtensions
     /// </summary>
     /// <param name="publishEndpoint"></param>
     /// <param name="job"></param>
+    /// <param name="cancellationToken"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static Task<Guid> SubmitJob<T>(this IPublishEndpoint publishEndpoint, object job, CancellationToken cancellationToken = default)
+        where T : class
+    {
+        return SubmitJob<T>(publishEndpoint, NewId.NextGuid(), job, null, cancellationToken);
+    }
+
+    /// <summary>
+    /// Submits a job, returning the generated jobId
+    /// </summary>
+    /// <param name="publishEndpoint"></param>
+    /// <param name="job"></param>
     /// <param name="setJobProperties"></param>
     /// <param name="cancellationToken"></param>
     /// <typeparam name="T"></typeparam>
@@ -148,6 +176,20 @@ public static class JobServiceExtensions
     /// </summary>
     /// <param name="client"></param>
     /// <param name="job"></param>
+    /// <param name="cancellationToken"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static Task<Guid> SubmitJob<T>(this IRequestClient<SubmitJob<T>> client, T job, CancellationToken cancellationToken = default)
+        where T : class
+    {
+        return SubmitJob(client, NewId.NextGuid(), job, null, cancellationToken);
+    }
+
+    /// <summary>
+    /// Submits a job, returning the accepted jobId
+    /// </summary>
+    /// <param name="client"></param>
+    /// <param name="job"></param>
     /// <param name="setJobProperties"></param>
     /// <param name="cancellationToken"></param>
     /// <typeparam name="T"></typeparam>
@@ -180,6 +222,20 @@ public static class JobServiceExtensions
             cancellationToken).ConfigureAwait(false);
 
         return response.Message.JobId;
+    }
+
+    /// <summary>
+    /// Submits a job, returning the accepted jobId
+    /// </summary>
+    /// <param name="client"></param>
+    /// <param name="job"></param>
+    /// <param name="cancellationToken"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static Task<Guid> SubmitJob<T>(this IRequestClient<SubmitJob<T>> client, object job, CancellationToken cancellationToken = default)
+        where T : class
+    {
+        return SubmitJob(client, NewId.NextGuid(), job, null, cancellationToken);
     }
 
     /// <summary>
