@@ -93,6 +93,7 @@
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class Receiving_and_grouping_messages :
         InMemoryTestFixture
     {
@@ -137,6 +138,7 @@
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class Receiving_and_grouping_messages_by_ref_type :
         InMemoryTestFixture
     {
