@@ -48,6 +48,20 @@ public static class JobServiceExtensions
     /// </summary>
     /// <param name="publishEndpoint"></param>
     /// <param name="job"></param>
+    /// <param name="cancellationToken"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static Task<Guid> SubmitJob<T>(this IPublishEndpoint publishEndpoint, T job, CancellationToken cancellationToken = default)
+        where T : class
+    {
+        return SubmitJob(publishEndpoint, NewId.NextGuid(), job, null, cancellationToken);
+    }
+
+    /// <summary>
+    /// Submits a job, returning the generated jobId
+    /// </summary>
+    /// <param name="publishEndpoint"></param>
+    /// <param name="job"></param>
     /// <param name="setJobProperties"></param>
     /// <param name="cancellationToken"></param>
     /// <typeparam name="T"></typeparam>
