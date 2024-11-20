@@ -10,7 +10,7 @@ on:
       - 'Directory.Build.props'
       - 'Directory.Packages.props'
       - '**/build.yml'
-    tags-ignore:
+    branches:
       - '**'
   pull_request:
     paths:
