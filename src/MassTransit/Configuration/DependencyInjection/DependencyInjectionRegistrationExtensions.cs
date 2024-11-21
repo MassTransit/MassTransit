@@ -120,7 +120,7 @@ namespace MassTransit
         {
             if (!collection.Any(x => x.ServiceType == typeof(TBus)))
             {
-                throw new ConfigurationException("No IBus implementation was found in the container. Please ensure that the AddMassTransit() configures the bus (at least UsingInMemory)");
+                throw new ConfigurationException($"No {typeof(TBus)} implementation was found in the container. Please ensure that the AddMassTransit() configures the bus (at least UsingInMemory)");
             }
         }
 
