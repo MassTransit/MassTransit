@@ -55,7 +55,7 @@ namespace MassTransit.Configuration
             {
                 _logContext = value;
 
-                SendLogContext = value?.    CreateLogContext(LogCategoryName.Transport.Send);
+                SendLogContext = value?.CreateLogContext(LogCategoryName.Transport.Send);
                 ReceiveLogContext = value?.CreateLogContext(LogCategoryName.Transport.Receive);
             }
         }
