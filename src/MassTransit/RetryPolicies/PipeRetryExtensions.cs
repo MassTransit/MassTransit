@@ -10,7 +10,7 @@ namespace MassTransit.RetryPolicies
 
     public static class PipeRetryExtensions
     {
-        static readonly ILogContext _namedLogger = LogContext.CreateLogContext(typeof(PipeRetryExtensions).FullName);
+        static readonly ILogContext NamedLogger = LogContext.CreateLogContext(typeof(PipeRetryExtensions).FullName);
 
         public static Task Retry(this IRetryPolicy retryPolicy, Func<Task> retryMethod, CancellationToken cancellationToken = default)
         {
@@ -99,7 +99,7 @@ namespace MassTransit.RetryPolicies
             while (context.CancellationToken.IsCancellationRequested == false)
             {
                 if (log)
-                    _namedLogger.Info?.Log(retryContext.Exception, "Retrying {Delay}: {Message}", retryContext.Delay, retryContext.Exception.Message);
+                    NamedLogger.Info?.Log(retryContext.Exception, "Retrying {Delay}: {Message}", retryContext.Delay, retryContext.Exception.Message);
 
                 try
                 {
@@ -136,7 +136,7 @@ namespace MassTransit.RetryPolicies
             while (context.CancellationToken.IsCancellationRequested == false)
             {
                 if (log)
-                    _namedLogger.Info?.Log(retryContext.Exception, "Retrying {Delay}: {Message}", retryContext.Delay, retryContext.Exception.Message);
+                    NamedLogger.Info?.Log(retryContext.Exception, "Retrying {Delay}: {Message}", retryContext.Delay, retryContext.Exception.Message);
 
                 try
                 {
