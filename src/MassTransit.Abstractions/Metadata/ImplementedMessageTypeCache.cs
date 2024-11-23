@@ -60,28 +60,36 @@ namespace MassTransit.Metadata
         {
             if (messageType.ClosesType(typeof(Fault<>), out Type[] arguments))
             {
-                var directFault = direct;
-                foreach (var faultMessageType in GetMessageTypes(used, arguments[0], false))
+                foreach (var faultMessageType in GetMessageTypes(used, arguments[0], direct))
                 {
                     var faultInterfaceType = typeof(Fault<>).MakeGenericType(faultMessageType.Type);
                     if (faultInterfaceType != typeof(TMessage) && used.Add(faultInterfaceType))
-                        yield return new ImplementedType(faultInterfaceType, directFault);
-
-                    directFault = false;
+                        yield return new ImplementedType(faultInterfaceType, faultMessageType.Direct);
                 }
             }
 
             var baseType = messageType.BaseType;
-            if (baseType != null && MessageTypeCache.IsValidMessageType(baseType))
+            if (baseType != null && baseType != typeof(object) && MessageTypeCache.IsValidMessageType(baseType))
             {
-                foreach (var baseMessageType in GetMessageTypes(used, baseType, false))
-                {
-                    if (used.Add(baseMessageType.Type))
-                        yield return new ImplementedType(baseMessageType.Type, direct);
-                }
-
                 if (used.Add(baseType))
                     yield return new ImplementedType(baseType, direct);
+
+                HashSet<Type> baseUsed = [..used];
+                List<Type> implementedTypes = [];
+
+                foreach (var baseMessageType in GetMessageTypes(baseUsed, baseType, false))
+                {
+                    var type = baseMessageType.Type;
+
+                    if (baseUsed.Add(type))
+                        implementedTypes.Add(type);
+                }
+
+                foreach (var implementedType in implementedTypes)
+                {
+                    if (used.Add(implementedType))
+                        yield return new ImplementedType(implementedType, direct);
+                }
             }
 
             Type[]? interfaces = messageType.GetInterfaces();
