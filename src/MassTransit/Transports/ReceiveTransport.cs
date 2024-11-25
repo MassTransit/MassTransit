@@ -1,7 +1,6 @@
 namespace MassTransit.Transports
 {
     using System;
-    using System.Runtime.ExceptionServices;
     using System.Threading;
     using System.Threading.Tasks;
     using Configuration;
@@ -134,8 +133,13 @@ namespace MassTransit.Transports
                     {
                         try
                         {
-                            if (retryContext?.Delay != null)
-                                await DelayWithCancellation(retryContext.Delay.Value).ConfigureAwait(false);
+                            if (retryContext != null)
+                            {
+                                LogContext.Info?.Log(retryContext.Exception, "Retrying {Delay}: {Message}", retryContext.Delay, retryContext.Exception.Message);
+
+                                if (retryContext.Delay != null)
+                                    await DelayWithCancellation(retryContext.Delay.Value).ConfigureAwait(false);
+                            }
 
                             if (!IsStopping)
                                 await RunTransport().ConfigureAwait(false);
