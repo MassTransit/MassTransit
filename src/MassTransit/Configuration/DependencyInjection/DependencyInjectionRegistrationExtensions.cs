@@ -42,6 +42,8 @@ namespace MassTransit
 
             configurator.Complete();
 
+            CheckForBusImplementation<IBus>(collection);
+
             return collection;
         }
 
@@ -108,7 +110,18 @@ namespace MassTransit
 
             configurator.Complete();
 
+            CheckForBusImplementation<TBus>(collection);
+
             return collection;
+        }
+
+        static void CheckForBusImplementation<TBus>(IServiceCollection collection)
+            where TBus : class, IBus
+        {
+            if (!collection.Any(x => x.ServiceType == typeof(TBus)))
+            {
+                throw new ConfigurationException($"No {typeof(TBus)} implementation was found in the container. Please ensure that the AddMassTransit() configures the bus (at least UsingInMemory)");
+            }
         }
 
         /// <summary>
