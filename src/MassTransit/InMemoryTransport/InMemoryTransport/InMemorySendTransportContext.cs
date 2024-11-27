@@ -80,50 +80,49 @@ namespace MassTransit.InMemoryTransport
             _exchange.Probe(context);
         }
 
-        static void SetHeaders(IDictionary<string, object> dictionary, Headers headers)
+        static void SetHeaders(SendHeaders sendHeaders, Headers headers)
         {
             foreach (KeyValuePair<string, object> header in headers.GetAll())
             {
                 if (header.Value == null)
                 {
-                    if (dictionary.ContainsKey(header.Key))
-                        dictionary.Remove(header.Key);
+                    sendHeaders.Set(header.Key, null);
 
                     continue;
                 }
 
-                if (dictionary.ContainsKey(header.Key))
+                if (sendHeaders.TryGetHeader(header.Key, out _))
                     continue;
 
                 switch (header.Value)
                 {
                     case DateTimeOffset value:
                         if (_dateTimeOffsetConverter.TryConvert(value, out string text))
-                            dictionary[header.Key] = text;
+                            sendHeaders.Set(header.Key, text);
                         break;
 
                     case DateTime value:
                         if (_dateTimeConverter.TryConvert(value, out text))
-                            dictionary[header.Key] = text;
+                            sendHeaders.Set(header.Key, text);
                         break;
 
                     case Uri value:
-                        dictionary[header.Key] = value.ToString();
+                        sendHeaders.Set(header.Key, value.ToString());
                         break;
 
                     case string value:
-                        dictionary[header.Key] = value;
+                        sendHeaders.Set(header.Key, value);
                         break;
 
                     case bool value when value:
-                        dictionary[header.Key] = bool.TrueString;
+                        sendHeaders.Set(header.Key, bool.TrueString);
                         break;
 
                     case IFormattable formatValue:
                         if (header.Value.GetType().IsValueType)
-                            dictionary[header.Key] = header.Value;
+                            sendHeaders.Set(header.Key, header.Value);
                         else
-                            dictionary[header.Key] = formatValue.ToString();
+                            sendHeaders.Set(header.Key, formatValue.ToString());
                         break;
                 }
             }

@@ -24,7 +24,7 @@
         {
             void PreSend(SendMessageBatchRequestEntry entry, IDictionary<string, MessageAttributeValue> headers)
             {
-                _headerAdapter.SetExceptionHeaders(headers, context);
+                _headerAdapter.CopyFrom(headers, context.ExceptionHeaders);
             }
 
             return Move(context, PreSend);

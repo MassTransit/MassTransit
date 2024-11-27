@@ -38,7 +38,7 @@
             }
             else
             {
-                properties = new BasicProperties { Headers = new Dictionary<string, object>() };
+                properties = new BasicProperties { Headers = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase) };
                 body = context.GetBody();
             }
 

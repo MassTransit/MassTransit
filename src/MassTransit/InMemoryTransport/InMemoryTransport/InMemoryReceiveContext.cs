@@ -18,7 +18,7 @@ namespace MassTransit.InMemoryTransport
             Body = new BytesMessageBody(message.Body);
         }
 
-        protected override IHeaderProvider HeaderProvider => new DictionaryHeaderProvider(_message.Headers);
+        protected override IHeaderProvider HeaderProvider => new DictionarySendHeaderProvider(_message.Headers);
 
         public override MessageBody Body { get; }
         public string? RoutingKey => _message.RoutingKey;

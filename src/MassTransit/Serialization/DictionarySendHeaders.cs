@@ -11,7 +11,7 @@ namespace MassTransit.Serialization
     public class DictionarySendHeaders :
         SendHeaders
     {
-        readonly Dictionary<string, object> _headers;
+        readonly IDictionary<string, object> _headers;
 
         public DictionarySendHeaders()
         {
@@ -27,6 +27,22 @@ namespace MassTransit.Serialization
             foreach (KeyValuePair<string, object?> header in headers)
             {
                 if (header.Value != null)
+                    _headers.Add(header.Key, header.Value);
+            }
+        }
+
+        public DictionarySendHeaders(IDictionary<string, object> headers, bool useExistingDictionary)
+        {
+            if (headers == null)
+                throw new ArgumentNullException(nameof(headers));
+
+            if (useExistingDictionary)
+                _headers = headers;
+            else
+            {
+                _headers = new Dictionary<string, object>(headers, StringComparer.OrdinalIgnoreCase);
+
+                foreach (KeyValuePair<string, object> header in headers)
                     _headers.Add(header.Key, header.Value);
             }
         }

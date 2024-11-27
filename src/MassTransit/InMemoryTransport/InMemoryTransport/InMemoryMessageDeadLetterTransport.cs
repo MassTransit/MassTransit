@@ -1,6 +1,5 @@
 namespace MassTransit.InMemoryTransport
 {
-    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Transports;
     using Transports.Fabric;
@@ -17,9 +16,9 @@ namespace MassTransit.InMemoryTransport
 
         public Task Send(ReceiveContext context, string reason)
         {
-            void PreSend(InMemoryTransportMessage message, IDictionary<string, object> headers)
+            void PreSend(InMemoryTransportMessage message, SendHeaders headers)
             {
-                headers.Set(new HeaderValue(MessageHeaders.Reason, reason ?? "Unspecified"));
+                headers.Set(MessageHeaders.Reason, reason ?? "Unspecified");
             }
 
             return Move(context, PreSend);

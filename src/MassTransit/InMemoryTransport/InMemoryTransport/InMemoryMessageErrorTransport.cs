@@ -1,6 +1,5 @@
 namespace MassTransit.InMemoryTransport
 {
-    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Transports;
     using Transports.Fabric;
@@ -17,9 +16,9 @@ namespace MassTransit.InMemoryTransport
 
         public Task Send(ExceptionReceiveContext context)
         {
-            void PreSend(InMemoryTransportMessage message, IDictionary<string, object> headers)
+            void PreSend(InMemoryTransportMessage message, SendHeaders headers)
             {
-                headers.SetExceptionHeaders(context);
+                headers.CopyFrom(context.ExceptionHeaders);
             }
 
             return Move(context, PreSend);

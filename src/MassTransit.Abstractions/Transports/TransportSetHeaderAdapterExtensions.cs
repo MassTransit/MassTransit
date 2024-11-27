@@ -106,11 +106,13 @@ namespace MassTransit.Transports
                 _adapter.Set(dictionary, header);
         }
 
+        [Obsolete("Removed with change to exception headers")]
         public static void SetExceptionHeaders(this IDictionary<string, object> dictionary, ExceptionReceiveContext exceptionContext)
         {
             _adapter.SetExceptionHeaders(dictionary, exceptionContext);
         }
 
+        [Obsolete("Removed with change to exception headers")]
         public static void SetHostHeaders(this IDictionary<string, object> dictionary)
         {
             _adapter.SetHostHeaders(dictionary);

@@ -20,7 +20,7 @@
         {
             void PreSend(IMessage message, SendHeaders headers)
             {
-                headers.SetExceptionHeaders(context);
+                headers.CopyFrom(context.ExceptionHeaders);
             }
 
             return Move(context, PreSend);

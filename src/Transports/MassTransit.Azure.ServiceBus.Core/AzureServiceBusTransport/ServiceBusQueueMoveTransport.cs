@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Threading.Tasks;
     using Azure.Messaging.ServiceBus;
+    using Serialization;
     using Transports;
     using Util;
 
@@ -18,7 +19,7 @@
             _sendEndpointContext = new Recycle<ISendEndpointContextSupervisor>(() => supervisor.CreateSendEndpointContextSupervisor(settings));
         }
 
-        protected Task Move(ReceiveContext context, Action<ServiceBusMessage, IDictionary<string, object>> preSend)
+        protected Task Move(ReceiveContext context, Action<ServiceBusMessage, SendHeaders> preSend)
         {
             IPipe<SendEndpointContext> clientPipe = Pipe.ExecuteAsync<SendEndpointContext>(async clientContext =>
             {
@@ -46,9 +47,11 @@
                 foreach (KeyValuePair<string, object> property in messageContext.Properties.Where(x => !x.Key.StartsWith("MT-")))
                     message.ApplicationProperties.Set(new HeaderValue(property.Key, property.Value));
 
-                message.ApplicationProperties.SetHostHeaders();
+                var sendHeaders = new DictionarySendHeaders(message.ApplicationProperties, true);
 
-                preSend(message, message.ApplicationProperties);
+                sendHeaders.SetHostHeaders();
+
+                preSend(message, sendHeaders);
 
                 await clientContext.Send(message).ConfigureAwait(false);
             });

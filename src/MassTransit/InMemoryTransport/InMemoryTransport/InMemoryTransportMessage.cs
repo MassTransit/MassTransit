@@ -2,8 +2,8 @@
 namespace MassTransit.InMemoryTransport
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading;
+    using Serialization;
 
 
     public class InMemoryTransportMessage
@@ -12,12 +12,12 @@ namespace MassTransit.InMemoryTransport
 
         public InMemoryTransportMessage(Guid messageId, byte[] body, string contentType)
         {
-            Headers = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+            Headers = new DictionarySendHeaders();
             MessageId = messageId;
             Body = body;
 
-            Headers[MessageHeaders.MessageId] = messageId.ToString();
-            Headers[MessageHeaders.ContentType] = contentType;
+            Headers.Set(MessageHeaders.MessageId, messageId.ToString());
+            Headers.Set(MessageHeaders.ContentType, contentType);
 
             SequenceNumber = Interlocked.Increment(ref _nextSequenceNumber);
         }
@@ -30,7 +30,7 @@ namespace MassTransit.InMemoryTransport
 
         public int DeliveryCount { get; set; }
 
-        public IDictionary<string, object> Headers { get; }
+        public SendHeaders Headers { get; }
 
         public TimeSpan? Delay { get; set; }
         public string? RoutingKey { get; set; }

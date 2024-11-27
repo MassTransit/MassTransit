@@ -1,6 +1,5 @@
 ﻿namespace MassTransit.AzureServiceBusTransport
 {
-    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Azure.Messaging.ServiceBus;
     using Transports;
@@ -17,9 +16,9 @@
 
         public Task Send(ExceptionReceiveContext context)
         {
-            void PreSend(ServiceBusMessage message, IDictionary<string, object> headers)
+            void PreSend(ServiceBusMessage message, SendHeaders headers)
             {
-                headers.SetExceptionHeaders(context);
+                headers.CopyFrom(context.ExceptionHeaders);
 
                 message.TimeToLive = Defaults.BasicMessageTimeToLive;
             }

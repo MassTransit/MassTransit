@@ -19,7 +19,7 @@
         {
             void PreSend(BasicProperties message, SendHeaders headers)
             {
-                headers.SetExceptionHeaders(context);
+                headers.CopyFrom(context.ExceptionHeaders);
 
                 message.ClearExpiration();
             }
