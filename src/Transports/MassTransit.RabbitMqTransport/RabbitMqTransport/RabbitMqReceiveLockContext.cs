@@ -8,8 +8,8 @@ namespace MassTransit.RabbitMqTransport
     public class RabbitMqReceiveLockContext :
         ReceiveLockContext
     {
-        readonly ulong _deliveryTag;
         readonly ChannelContext _channel;
+        readonly ulong _deliveryTag;
 
         public RabbitMqReceiveLockContext(ChannelContext channel, ulong deliveryTag)
         {
@@ -23,7 +23,7 @@ namespace MassTransit.RabbitMqTransport
             {
                 await _channel.BasicAck(_deliveryTag, false).ConfigureAwait(false);
             }
-            catch (InvalidOperationException exception)
+            catch (Exception exception)
             {
                 throw new TransportUnavailableException($"Message ACK failed: {_deliveryTag}", exception);
             }

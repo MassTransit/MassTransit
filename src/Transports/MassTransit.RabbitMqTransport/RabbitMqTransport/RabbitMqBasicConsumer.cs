@@ -1,11 +1,13 @@
 namespace MassTransit.RabbitMqTransport
 {
     using System;
+    using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
+    using RabbitMQ.Client.Exceptions;
     using Transports;
 
 
@@ -19,11 +21,9 @@ namespace MassTransit.RabbitMqTransport
     {
         readonly ChannelContext _channel;
         readonly RabbitMqReceiveEndpointContext _context;
-        readonly SemaphoreSlim _limit;
         readonly ReceiveSettings _receiveSettings;
 
         string _consumerTag;
-        AsyncEventHandler<ConsumerEventArgs> _onConsumerCancelled;
 
         /// <summary>
         /// The basic consumer receives messages pushed from the broker.
@@ -37,9 +37,6 @@ namespace MassTransit.RabbitMqTransport
             _context = context;
 
             _receiveSettings = channel.GetPayload<ReceiveSettings>();
-
-            if (context.ConcurrentMessageLimit.HasValue)
-                _limit = new SemaphoreSlim(context.ConcurrentMessageLimit.Value);
 
             TrySetManualConsumeTask();
         }
@@ -74,9 +71,6 @@ namespace MassTransit.RabbitMqTransport
 
             LogContext.Debug?.Log("Consumer Canceled: {InputAddress} - {ConsumerTag}", _context.InputAddress, consumerTag);
 
-            if (_onConsumerCancelled != null)
-                await _onConsumerCancelled(this, new ConsumerEventArgs([consumerTag])).ConfigureAwait(false);
-
             TrySetConsumeCanceled(cancellationToken);
         }
 
@@ -96,21 +90,9 @@ namespace MassTransit.RabbitMqTransport
         public async Task HandleBasicDeliverAsync(string consumerTag, ulong deliveryTag, bool redelivered, string exchange, string routingKey,
             IReadOnlyBasicProperties properties, ReadOnlyMemory<byte> body, CancellationToken cancellationToken)
         {
-            try
-            {
-                if (_limit != null)
-                    await _limit.WaitAsync(Stopping).ConfigureAwait(false);
-            }
-            catch (OperationCanceledException)
-            {
-                return;
-            }
-
-            var bodyBytes = body.ToArray();
-
             LogContext.Current = _context.LogContext;
 
-            var context = new RabbitMqReceiveContext(exchange, routingKey, _consumerTag, deliveryTag, bodyBytes, redelivered, properties,
+            var context = new RabbitMqReceiveContext(exchange, routingKey, _consumerTag, deliveryTag, body, redelivered, properties,
                 _context, _receiveSettings, _channel, _channel.ConnectionContext);
 
             try
@@ -122,14 +104,37 @@ namespace MassTransit.RabbitMqTransport
                         _receiveSettings.NoAck ? NoLockReceiveContext.Instance : new RabbitMqReceiveLockContext(_channel, deliveryTag))
                     .ConfigureAwait(false);
             }
+            catch (OperationInterruptedException exception)
+            {
+                LogContext.Debug?.Log(exception,
+                    "Consumer Channel Shutdown: {InputAddress} - {ConsumerTag}, Concurrent Peak: {MaxConcurrentDeliveryCount}",
+                    _context.InputAddress, _consumerTag, ConcurrentDeliveryCount);
+
+                // ReSharper disable once MethodSupportsCancellation
+                TrySetConsumeCanceled();
+
+                if (exception.ShutdownReason != null)
+                    await _channel.Channel.CloseAsync(exception.ShutdownReason, true, CancellationToken.None).ConfigureAwait(false);
+                else
+                    await _channel.Channel.CloseAsync(CancellationToken.None).ConfigureAwait(false);
+            }
+            catch (EndOfStreamException exception)
+            {
+                LogContext.Debug?.Log(exception,
+                    "Consumer Channel Shutdown: {InputAddress} - {ConsumerTag}, Concurrent Peak: {MaxConcurrentDeliveryCount}",
+                    _context.InputAddress, _consumerTag, ConcurrentDeliveryCount);
+
+                // ReSharper disable once MethodSupportsCancellation
+                TrySetConsumeCanceled();
+
+                await _channel.Channel.CloseAsync(CancellationToken.None).ConfigureAwait(false);
+            }
             catch (Exception exception)
             {
                 context.LogTransportFaulted(exception);
             }
             finally
             {
-                _limit?.Release();
-
                 context.Dispose();
             }
         }
@@ -138,27 +143,9 @@ namespace MassTransit.RabbitMqTransport
 
         string RabbitMqDeliveryMetrics.ConsumerTag => _consumerTag;
 
-        public event AsyncEventHandler<ConsumerEventArgs> ConsumerCancelled
-        {
-            add => _onConsumerCancelled += value;
-            remove => _onConsumerCancelled -= value;
-        }
-
         protected override bool IsTrackable(ulong deliveryTag)
         {
             return deliveryTag != 1 || _context.IsNotReplyTo;
-        }
-
-        protected override async Task StopAgent(StopContext context)
-        {
-            try
-            {
-                await base.StopAgent(context).ConfigureAwait(false);
-            }
-            finally
-            {
-                _limit?.Dispose();
-            }
         }
 
         protected override async Task ActiveAndActualAgentsCompleted(StopContext context)

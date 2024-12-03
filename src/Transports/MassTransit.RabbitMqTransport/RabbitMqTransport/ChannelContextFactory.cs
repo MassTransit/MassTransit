@@ -10,8 +10,8 @@
     public class ChannelContextFactory :
         IPipeContextFactory<ChannelContext>
     {
-        readonly IConnectionContextSupervisor _supervisor;
         readonly ushort? _concurrentMessageLimit;
+        readonly IConnectionContextSupervisor _supervisor;
 
         public ChannelContextFactory(IConnectionContextSupervisor supervisor, ushort? concurrentMessageLimit)
         {
@@ -25,9 +25,11 @@
 
             Task<ChannelContext> context = CreateChannel(asyncContext, supervisor.Stopped);
 
-            async Task HandleShutdown(object sender, ShutdownEventArgs args)
+            Task HandleShutdown(object sender, ShutdownEventArgs args)
             {
-                await asyncContext.Stop(args.ReplyText).ConfigureAwait(false);
+                _ = Task.Run(() => asyncContext.Stop(args.ReplyText));
+
+                return Task.CompletedTask;
             }
 
             context.ContinueWith(task =>
@@ -55,12 +57,13 @@
 
         Task<ChannelContext> CreateChannel(IAsyncPipeContextAgent<ChannelContext> asyncContext, CancellationToken cancellationToken)
         {
-            static Task<ChannelContext> CreateChannelContext(ConnectionContext connectionContext, CancellationToken createCancellationToken, ushort? concurrentMessageLimit)
+            static Task<ChannelContext> CreateChannelContext(ConnectionContext connectionContext, CancellationToken createCancellationToken,
+                ushort? concurrentMessageLimit)
             {
                 return connectionContext.CreateChannelContext(createCancellationToken, concurrentMessageLimit);
             }
 
-            return _supervisor.CreateAgent(asyncContext, (context,token) => CreateChannelContext(context,token,_concurrentMessageLimit), cancellationToken);
+            return _supervisor.CreateAgent(asyncContext, (context, token) => CreateChannelContext(context, token, _concurrentMessageLimit), cancellationToken);
         }
     }
 }

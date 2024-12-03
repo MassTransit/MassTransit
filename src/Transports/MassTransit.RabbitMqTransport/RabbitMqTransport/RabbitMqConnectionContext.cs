@@ -6,7 +6,6 @@ namespace MassTransit.RabbitMqTransport
     using Configuration;
     using MassTransit.Middleware;
     using RabbitMQ.Client;
-    using RabbitMQ.Client.Events;
     using Transports;
 
 
@@ -31,8 +30,6 @@ namespace MassTransit.RabbitMqTransport
             Topology = hostConfiguration.Topology;
 
             StopTimeout = TimeSpan.FromSeconds(30);
-
-            connection.ConnectionShutdownAsync += OnConnectionShutdown;
         }
 
         public IConnection Connection { get; }
@@ -66,18 +63,11 @@ namespace MassTransit.RabbitMqTransport
 
         public async ValueTask DisposeAsync()
         {
-            Connection.ConnectionShutdownAsync -= OnConnectionShutdown;
-
             TransportLogMessages.DisconnectHost(Description);
 
             await Connection.Cleanup(200, "Connection Disposed").ConfigureAwait(false);
 
             TransportLogMessages.DisconnectedHost(Description);
-        }
-
-        Task OnConnectionShutdown(object connection, ShutdownEventArgs reason)
-        {
-            return Connection.Cleanup(reason.ReplyCode, reason.ReplyText);
         }
     }
 }

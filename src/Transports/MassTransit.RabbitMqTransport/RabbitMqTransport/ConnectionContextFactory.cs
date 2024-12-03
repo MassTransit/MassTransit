@@ -32,9 +32,11 @@
 
             IPipeContextAgent<ConnectionContext> contextHandle = supervisor.AddContext(context);
 
-            async Task HandleShutdown(object sender, ShutdownEventArgs args)
+            Task HandleShutdown(object sender, ShutdownEventArgs args)
             {
-                await contextHandle.Stop(args.ReplyText).ConfigureAwait(false);
+                _ = Task.Run(() => contextHandle.Stop(args.ReplyText));
+
+                return Task.CompletedTask;
             }
 
             context.ContinueWith(task =>
