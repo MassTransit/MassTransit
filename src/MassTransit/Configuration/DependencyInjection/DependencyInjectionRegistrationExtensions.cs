@@ -42,8 +42,6 @@ namespace MassTransit
 
             configurator.Complete();
 
-            CheckForBusImplementation<IBus>(collection);
-
             return collection;
         }
 
@@ -54,7 +52,8 @@ namespace MassTransit
         /// <param name="collection"></param>
         /// <param name="configure"></param>
         /// <param name="baseAddress"></param>
-        public static IServiceCollection AddMediator(this IServiceCollection collection, Uri baseAddress, Action<IMediatorRegistrationConfigurator> configure = null)
+        public static IServiceCollection AddMediator(this IServiceCollection collection, Uri baseAddress,
+            Action<IMediatorRegistrationConfigurator> configure = null)
         {
             if (collection.Any(d => d.ServiceType == typeof(IMediator)))
                 throw new ConfigurationException("AddMediator() was already called and may only be called once per container.");
@@ -110,18 +109,7 @@ namespace MassTransit
 
             configurator.Complete();
 
-            CheckForBusImplementation<TBus>(collection);
-
             return collection;
-        }
-
-        static void CheckForBusImplementation<TBus>(IServiceCollection collection)
-            where TBus : class, IBus
-        {
-            if (!collection.Any(x => x.ServiceType == typeof(TBus)))
-            {
-                throw new ConfigurationException($"No {typeof(TBus)} implementation was found in the container. Please ensure that the AddMassTransit() configures the bus (at least UsingInMemory)");
-            }
         }
 
         /// <summary>
