@@ -70,9 +70,11 @@
             }
 
             IMessageDataRepository _repository;
+            #pragma warning disable NUnit1032
             Task<ConsumeContext<MessageWithBigData>> _received;
             Task<ConsumeContext<MessageWithByteArray>> _receivedBytes;
             Task<ConsumeContext<MessageWithStream>> _receivedStream;
+            #pragma warning restore NUnit1032
             string _receivedBody;
             byte[] _receivedBytesArray;
             Stream _receivedStreamData;
@@ -161,9 +163,11 @@
             }
 
             IMessageDataRepository _repository;
+            #pragma warning disable NUnit1032
             Task<ConsumeContext<MessageWithBigData>> _received;
             Task<ConsumeContext<MessageWithByteArray>> _receivedBytes;
             Task<ConsumeContext<MessageWithStream>> _receivedStream;
+            #pragma warning restore NUnit1032
             string _receivedBody;
             byte[] _receivedBytesArray;
             Stream _receivedStreamData;
@@ -251,9 +255,11 @@
             }
 
             IMessageDataRepository _repository;
+            #pragma warning disable NUnit1032
             Task<ConsumeContext<MessageWithBigData>> _received;
             Task<ConsumeContext<MessageWithByteArray>> _receivedBytes;
             Task<ConsumeContext<MessageWithStream>> _receivedStream;
+            #pragma warning restore NUnit1032
             string _receivedBody;
             byte[] _receivedBytesArray;
             Stream _receivedStreamData;
@@ -319,7 +325,9 @@
             }
 
             IMessageDataRepository _messageDataRepository;
+            #pragma warning disable NUnit1032
             Task<ConsumeContext<MessageWithBigData>> _received;
+            #pragma warning restore NUnit1032
             string _receivedBody;
 
             protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
@@ -410,7 +418,9 @@
 
             IMessageDataRepository _messageDataRepository;
 
+            #pragma warning disable NUnit1032
             Task<ConsumeContext<IMessage>> _received;
+            #pragma warning restore NUnit1032
             MessageData<byte[]> _body;
             MessageData<byte[]> _body0;
             MessageData<byte[]> _bodyList0;
@@ -465,7 +475,9 @@
 
             IMessageDataRepository _messageDataRepository;
 
+            #pragma warning disable NUnit1032
             Task<ConsumeContext<MessageWithByteArray>> _received;
+            #pragma warning restore NUnit1032
             byte[] _receivedBytesArray;
 
             protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
@@ -518,7 +530,9 @@
 
             IMessageDataRepository _messageDataRepository;
 
+            #pragma warning disable NUnit1032
             Task<ConsumeContext<MessageWithStream>> _received;
+            #pragma warning restore NUnit1032
             Stream _receivedStream;
 
             protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)

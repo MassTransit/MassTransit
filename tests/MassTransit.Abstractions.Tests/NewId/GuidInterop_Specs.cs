@@ -219,7 +219,7 @@
             Assert.That(ng, Is.EqualTo(n));
 
             // Also checks to see if this would throw
-            Assert.That(ng.Timestamp, Is.Not.EqualTo(default));
+            Assert.That(ng.Timestamp, Is.Not.EqualTo(default(DateTime)));
         }
 
         [Test]
@@ -235,7 +235,7 @@
             Assert.That(ng, Is.EqualTo(n));
 
             // Also checks to see if this would throw
-            Assert.That(ng.Timestamp, Is.Not.EqualTo(default));
+            Assert.That(ng.Timestamp, Is.Not.EqualTo(default(DateTime)));
         }
 
         [Test]
