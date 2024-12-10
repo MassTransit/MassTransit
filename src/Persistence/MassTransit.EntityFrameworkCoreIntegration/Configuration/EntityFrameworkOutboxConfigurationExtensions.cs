@@ -175,6 +175,20 @@ namespace MassTransit
             return configurator;
         }
 
+        public static IEntityFrameworkOutboxConfigurator UseOracle(this IEntityFrameworkOutboxConfigurator configurator)
+        {
+            configurator.LockStatementProvider = new OracleLockStatementProvider();
+
+            return configurator;
+        }
+
+        public static IEntityFrameworkOutboxConfigurator UseOracle(this IEntityFrameworkOutboxConfigurator configurator, bool enableSchemaCaching)
+        {
+            configurator.LockStatementProvider = new OracleLockStatementProvider(enableSchemaCaching);
+
+            return configurator;
+        }
+
         /// <summary>
         /// Adds all three entities (<see cref="InboxState"/>, <see cref="OutboxState"/>, and <see cref="OutboxMessage"/>)
         /// to the DbContext. If this method is used, the <see cref="AddInboxStateEntity"/>, <see cref="AddOutboxStateEntity"/>, and

@@ -275,6 +275,22 @@ namespace MassTransit
             return configurator;
         }
 
+        public static IEntityFrameworkSagaRepositoryConfigurator<T> UseOracle<T>(this IEntityFrameworkSagaRepositoryConfigurator<T> configurator)
+            where T : class, ISaga
+        {
+            configurator.LockStatementProvider = new OracleLockStatementProvider();
+
+            return configurator;
+        }
+
+        public static IEntityFrameworkSagaRepositoryConfigurator UseOracle(this IEntityFrameworkSagaRepositoryConfigurator configurator)
+        {
+            configurator.LockStatementProvider = new OracleLockStatementProvider();
+
+            return configurator;
+        }
+
+
         /// <summary>
         /// Create EntityFramework saga repository
         /// </summary>

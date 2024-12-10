@@ -2,6 +2,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 {
     using System;
     using System.Data;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.EntityFrameworkCore;
@@ -44,10 +45,10 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
                 try
                 {
-                    var inboxState = await _dbContext.Set<InboxState>()
+                    var inboxStateList = await _dbContext.Set<InboxState>()
                         .FromSqlRaw(_lockStatement, messageId, options.ConsumerId)
-                        .AsTracking()
-                        .SingleOrDefaultAsync(context.CancellationToken).ConfigureAwait(false);
+                        .AsTracking().ToListAsync(context.CancellationToken).ConfigureAwait(false);
+                    var inboxState = inboxStateList.SingleOrDefault();
 
                     bool continueProcessing;
 
