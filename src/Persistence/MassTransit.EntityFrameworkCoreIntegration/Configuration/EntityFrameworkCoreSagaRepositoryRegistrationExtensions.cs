@@ -276,6 +276,32 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Configure the repository for use with Oracle
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static IEntityFrameworkSagaRepositoryConfigurator<T> UseOracle<T>(this IEntityFrameworkSagaRepositoryConfigurator<T> configurator)
+            where T : class, ISaga
+        {
+            configurator.LockStatementProvider = new OracleLockStatementProvider();
+
+            return configurator;
+        }
+
+        /// <summary>
+        /// Configure the repository for use with Oracle
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <returns></returns>
+        public static IEntityFrameworkSagaRepositoryConfigurator UseOracle(this IEntityFrameworkSagaRepositoryConfigurator configurator)
+        {
+            configurator.LockStatementProvider = new OracleLockStatementProvider();
+
+            return configurator;
+        }
+
+        /// <summary>
         /// Create EntityFramework saga repository
         /// </summary>
         /// <param name="registrationConfigurator"></param>

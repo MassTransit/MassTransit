@@ -176,9 +176,34 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Adds all three entities (<see cref="InboxState"/>, <see cref="OutboxState"/>, and <see cref="OutboxMessage"/>)
-        /// to the DbContext. If this method is used, the <see cref="AddInboxStateEntity"/>, <see cref="AddOutboxStateEntity"/>, and
-        /// <see cref="AddOutboxMessageEntity"/> methods should not be used.
+        /// Configure the outbox for use with Oracle
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <returns></returns>
+        public static IEntityFrameworkOutboxConfigurator UseOracle(this IEntityFrameworkOutboxConfigurator configurator)
+        {
+            configurator.LockStatementProvider = new OracleLockStatementProvider();
+
+            return configurator;
+        }
+
+        /// <summary>
+        /// Configure the outbox for use with Oracle
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="enableSchemaCaching">Set to false when using multiple DbContexts</param>
+        /// <returns></returns>
+        public static IEntityFrameworkOutboxConfigurator UseOracle(this IEntityFrameworkOutboxConfigurator configurator, bool enableSchemaCaching)
+        {
+            configurator.LockStatementProvider = new OracleLockStatementProvider(enableSchemaCaching);
+
+            return configurator;
+        }
+
+        /// <summary>
+        /// Adds all three entities (<see cref="InboxState" />, <see cref="OutboxState" />, and <see cref="OutboxMessage" />)
+        /// to the DbContext. If this method is used, the <see cref="AddInboxStateEntity" />, <see cref="AddOutboxStateEntity" />, and
+        /// <see cref="AddOutboxMessageEntity" /> methods should not be used.
         /// </summary>
         /// <param name="modelBuilder"></param>
         /// <param name="callback">Optional, to customize all three entity model builders</param>
@@ -190,7 +215,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Adds the <see cref="InboxState"/> entity to the DbContext. If used, the <see cref="AddTransactionalOutboxEntities"/> method should not be used.
+        /// Adds the <see cref="InboxState" /> entity to the DbContext. If used, the <see cref="AddTransactionalOutboxEntities" /> method should not be used.
         /// </summary>
         /// <param name="modelBuilder"></param>
         /// <param name="callback">Optional, to customize the entity model builder</param>
@@ -204,7 +229,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Configures the <see cref="InboxState"/> entity using an already created <see cref="ModelBuilder"/>.
+        /// Configures the <see cref="InboxState" /> entity using an already created <see cref="ModelBuilder" />.
         /// </summary>
         /// <param name="inbox">The model builder</param>
         public static void ConfigureInboxStateEntity(this EntityTypeBuilder<InboxState> inbox)
@@ -239,7 +264,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Adds the <see cref="OutboxState"/> entity to the DbContext. If used, the <see cref="AddTransactionalOutboxEntities"/> method should not be used.
+        /// Adds the <see cref="OutboxState" /> entity to the DbContext. If used, the <see cref="AddTransactionalOutboxEntities" /> method should not be used.
         /// </summary>
         /// <param name="modelBuilder"></param>
         /// <param name="callback">Optional, to customize the entity model builder</param>
@@ -253,7 +278,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Configures the <see cref="OutboxState"/> entity using an already created <see cref="ModelBuilder"/>.
+        /// Configures the <see cref="OutboxState" /> entity using an already created <see cref="ModelBuilder" />.
         /// </summary>
         /// <param name="outbox">The model builder</param>
         public static void ConfigureOutboxStateEntity(this EntityTypeBuilder<OutboxState> outbox)
@@ -275,7 +300,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Adds the <see cref="OutboxMessage"/> entity to the DbContext. If used, the <see cref="AddTransactionalOutboxEntities"/> method should not be used.
+        /// Adds the <see cref="OutboxMessage" /> entity to the DbContext. If used, the <see cref="AddTransactionalOutboxEntities" /> method should not be used.
         /// </summary>
         /// <param name="modelBuilder"></param>
         /// <param name="callback">Optional, to customize the entity model builder</param>
@@ -289,7 +314,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Configures the <see cref="OutboxMessage"/> entity using an already created <see cref="ModelBuilder"/>.
+        /// Configures the <see cref="OutboxMessage" /> entity using an already created <see cref="ModelBuilder" />.
         /// </summary>
         /// <param name="outbox">The model builder</param>
         public static void ConfigureOutboxMessageEntity(this EntityTypeBuilder<OutboxMessage> outbox)
@@ -366,9 +391,7 @@ namespace MassTransit
         internal static void OptOutOfEntityFrameworkConventions(this EntityTypeBuilder builder)
         {
             foreach (var properties in builder.Metadata.GetProperties())
-            {
                 properties.SetMaxLength(null);
-            }
         }
     }
 }
