@@ -1,8 +1,7 @@
-using Microsoft.Extensions.Primitives;
-using System.Text;
-
 namespace MassTransit.EntityFrameworkCoreIntegration
 {
+    using System.Text;
+
     public class OracleLockStatementFormatter : ILockStatementFormatter
     {
         public void Create(StringBuilder sb, string schema, string table)
@@ -20,6 +19,10 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
         public void Complete(StringBuilder sb)
         {
+            // Attaching the FOR UPDATE makes the query fail with ORA-00907: Missing right parenthesis
+            // I think the problem is that the query is wrapped in a subquery and the FOR UPDATE cannot be
+            // in subquery in Oracle.
+
             //sb.Append(" FOR UPDATE");
         }
 
