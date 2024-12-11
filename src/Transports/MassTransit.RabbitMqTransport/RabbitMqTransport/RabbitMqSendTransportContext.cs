@@ -8,7 +8,6 @@ namespace MassTransit.RabbitMqTransport
     using System.Threading;
     using System.Threading.Tasks;
     using Configuration;
-    using Initializers.TypeConverters;
     using Internals;
     using Logging;
     using Middleware;
@@ -20,8 +19,6 @@ namespace MassTransit.RabbitMqTransport
         BaseSendTransportContext,
         SendTransportContext<ChannelContext>
     {
-        static readonly DateTimeOffsetTypeConverter _dateTimeOffsetConverter = new DateTimeOffsetTypeConverter();
-        static readonly DateTimeTypeConverter _dateTimeConverter = new DateTimeTypeConverter();
         readonly ConfigureRabbitMqTopologyFilter<SendSettings> _configureTopologyFilter;
         readonly IPipe<ChannelContext> _delayConfigureTopologyPipe;
         readonly string _delayExchange;
@@ -61,7 +58,7 @@ namespace MassTransit.RabbitMqTransport
 
         public override IEnumerable<IAgent> GetAgentHandles()
         {
-            return new IAgent[] { _supervisor };
+            return [_supervisor];
         }
 
         public async Task<SendContext<T>> CreateSendContext<T>(ChannelContext context, T message, IPipe<SendContext<T>> pipe,
@@ -124,7 +121,7 @@ namespace MassTransit.RabbitMqTransport
 
             context.BasicProperties.Headers ??= new Dictionary<string, object>();
 
-            context.BasicProperties.ContentType = context.ContentType.ToString();
+            context.BasicProperties.ContentType = context.ContentType?.ToString();
 
             SetHeaders(context.BasicProperties.Headers, context.Headers);
 

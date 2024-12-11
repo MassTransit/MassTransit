@@ -2,6 +2,9 @@ namespace MassTransit.RabbitMqTransport
 {
     using System;
     using System.Threading.Tasks;
+    using RabbitMQ.Client;
+    using RabbitMQ.Client.Events;
+    using RabbitMQ.Client.Exceptions;
     using Transports;
 
 
@@ -19,6 +22,12 @@ namespace MassTransit.RabbitMqTransport
 
         public async Task Complete()
         {
+            if (_channel.Channel.IsClosed)
+            {
+                throw new OperationInterruptedException(
+                    new ShutdownEventArgs(ShutdownInitiator.Peer, 491, $"Channel is already closed: {_channel.Channel.CloseReason}"));
+            }
+
             try
             {
                 await _channel.BasicAck(_deliveryTag, false).ConfigureAwait(false);
@@ -31,6 +40,12 @@ namespace MassTransit.RabbitMqTransport
 
         public async Task Faulted(Exception exception)
         {
+            if (_channel.Channel.IsClosed)
+            {
+                throw new OperationInterruptedException(
+                    new ShutdownEventArgs(ShutdownInitiator.Peer, 491, $"Channel is already closed: {_channel.Channel.CloseReason}"));
+            }
+
             try
             {
                 await _channel.BasicNack(_deliveryTag, false, true).ConfigureAwait(false);
@@ -43,6 +58,12 @@ namespace MassTransit.RabbitMqTransport
 
         public Task ValidateLockStatus()
         {
+            if (_channel.Channel.IsClosed)
+            {
+                throw new OperationInterruptedException(
+                    new ShutdownEventArgs(ShutdownInitiator.Peer, 491, $"Channel is already closed: {_channel.Channel.CloseReason}"));
+            }
+
             return Task.CompletedTask;
         }
     }

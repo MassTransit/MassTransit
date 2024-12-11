@@ -5,6 +5,9 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System.Threading.Tasks;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
+    using RabbitMQ.Client;
+    using RabbitMQ.Client.Events;
+    using RabbitMQ.Client.Exceptions;
     using Testing;
 
 
@@ -113,8 +116,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             public MessageBody GetMessageBody<T>(SendContext<T> context)
                 where T : class
             {
-                throw new MessageNotConfirmedException(context.DestinationAddress,
-                    "exchange:instance => The message was not confirmed: NOT_FOUND - no exchange 'instance' in vhost");
+                throw new PublishException(69, true);
             }
         }
 

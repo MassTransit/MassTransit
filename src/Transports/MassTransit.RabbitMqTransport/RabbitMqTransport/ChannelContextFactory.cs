@@ -19,7 +19,7 @@
             _concurrentMessageLimit = concurrentMessageLimit;
         }
 
-        IPipeContextAgent<ChannelContext> IPipeContextFactory<ChannelContext>.CreateContext(ISupervisor supervisor)
+        public IPipeContextAgent<ChannelContext> CreateContext(ISupervisor supervisor)
         {
             IAsyncPipeContextAgent<ChannelContext> asyncContext = supervisor.AddAsyncContext<ChannelContext>();
 
@@ -34,15 +34,24 @@
 
             context.ContinueWith(task =>
             {
-                task.Result.Channel.ChannelShutdownAsync += HandleShutdown;
+                var channelContext = task.Result;
 
-                asyncContext.Completed.ContinueWith(_ => task.Result.Channel.ChannelShutdownAsync -= HandleShutdown);
+                channelContext.Channel.ChannelShutdownAsync += HandleShutdown;
+                channelContext.ConnectionContext.Connection.ConnectionShutdownAsync += HandleShutdown;
+
+                void RemoveHandlers()
+                {
+                    channelContext.ConnectionContext.Connection.ConnectionShutdownAsync -= HandleShutdown;
+                    channelContext.Channel.ChannelShutdownAsync -= HandleShutdown;
+                }
+
+                asyncContext.Completed.ContinueWith(_ => RemoveHandlers());
             }, TaskContinuationOptions.OnlyOnRanToCompletion);
 
             return asyncContext;
         }
 
-        IActivePipeContextAgent<ChannelContext> IPipeContextFactory<ChannelContext>.CreateActiveContext(ISupervisor supervisor,
+        public IActivePipeContextAgent<ChannelContext> CreateActiveContext(ISupervisor supervisor,
             PipeContextHandle<ChannelContext> context, CancellationToken cancellationToken)
         {
             return supervisor.AddActiveContext(context, CreateSharedChannel(context.Context, cancellationToken));

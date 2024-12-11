@@ -47,6 +47,9 @@ namespace MassTransit.RabbitMqTransport
 
             LogContext.Debug?.Log("Consumer Ok: {InputAddress} - {ConsumerTag}", _context.InputAddress, consumerTag);
 
+            _channel.Channel.ChannelShutdownAsync += HandleChannelShutdown;
+            _ = Completed.ContinueWith(_ => _channel.Channel.ChannelShutdownAsync -= HandleChannelShutdown, CancellationToken.None);
+
             _consumerTag = consumerTag;
 
             SetReady();
@@ -161,6 +164,19 @@ namespace MassTransit.RabbitMqTransport
             }
 
             await base.ActiveAndActualAgentsCompleted(context).ConfigureAwait(false);
+        }
+
+        Task HandleChannelShutdown(object channel, ShutdownEventArgs reason)
+        {
+            LogContext.Current = _context.LogContext;
+
+            LogContext.Debug?.Log(
+                "Channel Shutdown: {InputAddress} - {ConsumerTag}, Concurrent Peak: {MaxConcurrentDeliveryCount}, {ReplyCode}-{ReplyText}",
+                _context.InputAddress, _consumerTag, ConcurrentDeliveryCount, reason.ReplyCode, reason.ReplyText);
+
+            TrySetConsumeCanceled();
+
+            return Task.CompletedTask;
         }
     }
 }

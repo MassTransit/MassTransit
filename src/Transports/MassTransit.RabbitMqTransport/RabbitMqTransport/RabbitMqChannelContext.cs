@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Threading;
-    using System.Threading.Channels;
     using System.Threading.Tasks;
     using MassTransit.Middleware;
     using RabbitMQ.Client;
@@ -119,7 +118,7 @@
             {
                 await _channel.BasicNackAsync(deliveryTag, multiple, requeue, CancellationToken).ConfigureAwait(false);
             }
-            catch (ChannelClosedException) // if we are shutting down, the broker would already nack prefetched messages anyway
+            catch (AlreadyClosedException) // if we are shutting down, the broker would already nack prefetched messages anyway
             {
             }
         }
