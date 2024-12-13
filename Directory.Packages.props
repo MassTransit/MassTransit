@@ -29,7 +29,7 @@
     <PackageVersion Include="Marten" Version="7.31.3" />
     <PackageVersion Include="MathNet.Numerics" Version="5.0.0" />
     <PackageVersion Include="MediatR" Version="12.2.0" />
-    <PackageVersion Include="MessagePack" Version="2.5.192" />
+    <PackageVersion Include="MessagePack" Version="3.1.0" />
     <PackageVersion Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.22.0" />
     <PackageVersion Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
     <PackageVersion Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="9.0.0" />

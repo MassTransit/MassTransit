@@ -167,7 +167,12 @@
 
             var builder = _moduleBuilders.GetOrAdd(assemblyName, name =>
             {
+
+            #if NETFRAMEWORK
+                const AssemblyBuilderAccess access = AssemblyBuilderAccess.RunAndSave;
+            #else
                 const AssemblyBuilderAccess access = AssemblyBuilderAccess.RunAndCollect;
+            #endif
 
                 var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(name), access);
 
