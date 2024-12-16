@@ -11,7 +11,7 @@
         int MaxConcurrentCalls { set; }
 
         /// <summary>
-        /// True if the queue should be deleted if idle
+        /// If specified, the queue/subscription will be automatically removed after no consumer activity within the specific idle period
         /// </summary>
         TimeSpan AutoDeleteOnIdle { set; }
 
