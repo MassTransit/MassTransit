@@ -83,7 +83,7 @@ namespace MassTransit.AmazonSqsTransport
                         if (_channel.Reader.TryPeek(out BatchEntry<TEntry> entry))
                         {
                             var entryLength = CalculateEntryLength(entry.Entry, entryId.ToString());
-                            if (entryLength + batchLength > _settings.SizeLimit)
+                            if (entryId > 0 && entryLength + batchLength > _settings.SizeLimit)
                                 break;
 
                             batchLength += entryLength;
