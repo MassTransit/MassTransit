@@ -12,7 +12,7 @@
         [Test]
         public void ThenExpectedObjectIdReturnedFromUri()
         {
-            Assert.That(_result, Is.EqualTo(_expected));
+            Assert.That(_result == _expected, Is.True);
         }
 
         [SetUp]
