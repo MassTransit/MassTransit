@@ -34,7 +34,7 @@ namespace MassTransit.Configuration
 
             collection.AddScoped(CreateScopeProvider);
             collection.AddSingleton(_ =>
-                Bind<IBus>.Create((ISetScopedConsumeContext)new SetScopedConsumeContext(provider =>
+                Bind<IBus>.Create((ISetScopedConsumeContext)new SetScopedConsumeContext<IBus>(provider =>
                     provider.GetRequiredService<Bind<IBus, IScopedConsumeContextProvider>>().Value)));
 
             collection.AddSingleton(provider => Bind<IBus>.Create(CreateRegistrationContext(provider)));
@@ -53,8 +53,9 @@ namespace MassTransit.Configuration
             collection.TryAddSingleton(provider => provider.GetRequiredService<Bind<IBus, IClientFactory>>().Value);
 
             collection.TryAddScoped<IScopedBusContextProvider<IBus>, ScopedBusContextProvider<IBus>>();
-            collection.TryAddScoped(provider => provider.GetRequiredService<IScopedBusContextProvider<IBus>>().Context.SendEndpointProvider);
-            collection.TryAddScoped(provider => provider.GetRequiredService<IScopedBusContextProvider<IBus>>().Context.PublishEndpoint);
+            collection.TryAddScoped(provider => Bind<IBus>.Create(provider.GetRequiredService<IScopedBusContextProvider<IBus>>().Context.SendEndpointProvider));
+            collection.TryAddScoped(provider => Bind<IBus>.Create(provider.GetRequiredService<IScopedBusContextProvider<IBus>>().Context.PublishEndpoint));
+
             collection.TryAddScoped<IRoutingSlipExecutor>(provider => new RoutingSlipExecutor(
                 provider.GetRequiredService<IScopedBusContextProvider<IBus>>().Context.SendEndpointProvider,
                 provider.GetRequiredService<IScopedBusContextProvider<IBus>>().Context.PublishEndpoint));
@@ -140,6 +141,10 @@ namespace MassTransit.Configuration
             collection.TryAddScoped<ScopedConsumeContextProvider>();
             collection.TryAddScoped<IScopedConsumeContextProvider>(provider => provider.GetRequiredService<ScopedConsumeContextProvider>());
 
+            collection.TryAddScoped<IScopedBusContextProvider, ScopedBusContextProvider>();
+            collection.TryAddScoped(provider => provider.GetRequiredService<IScopedBusContextProvider<IBus>>().Context.SendEndpointProvider);
+            collection.TryAddScoped(provider => provider.GetRequiredService<IScopedBusContextProvider<IBus>>().Context.PublishEndpoint);
+
             collection.TryAddScoped(provider => provider.GetRequiredService<IScopedConsumeContextProvider>().GetContext() ?? MissingConsumeContext.Instance);
 
             collection.TryAddScoped(typeof(IRequestClient<>), typeof(GenericRequestClient<>));
@@ -182,9 +187,10 @@ namespace MassTransit.Configuration
             collection.TryAddScoped(CreateScopeProvider);
 
             collection.AddSingleton(_ =>
-                Bind<TBus>.Create((ISetScopedConsumeContext)new SetScopedConsumeContext(provider =>
+                Bind<TBus>.Create((ISetScopedConsumeContext)new SetScopedConsumeContext<TBus>(provider =>
                     provider.GetRequiredService<Bind<TBus, IScopedConsumeContextProvider>>().Value)));
             collection.TryAddSingleton(provider => Bind<TBus>.Create(CreateClientFactory(provider.GetRequiredService<TBus>(), DefaultRequestTimeout)));
+
             collection.TryAddScoped<IScopedBusContextProvider<TBus>, ScopedBusContextProvider<TBus>>();
             collection.TryAddScoped(provider => Bind<TBus>.Create(provider.GetRequiredService<IScopedBusContextProvider<TBus>>().Context.SendEndpointProvider));
             collection.TryAddScoped(provider => Bind<TBus>.Create(provider.GetRequiredService<IScopedBusContextProvider<TBus>>().Context.PublishEndpoint));

@@ -43,4 +43,34 @@ namespace MassTransit.DependencyInjection
             }
         }
     }
+
+
+    public class BusScopedBusContext :
+        ScopedBusContext
+    {
+        readonly IClientFactory _clientFactory;
+        readonly IServiceProvider _provider;
+        readonly ScopedBusContext _scopedBusContext;
+        IScopedClientFactory? _scopedClientFactory;
+
+        public BusScopedBusContext(ScopedBusContext scopedBusContext, IClientFactory clientFactory, IServiceProvider provider)
+        {
+            _scopedBusContext = scopedBusContext;
+            _clientFactory = clientFactory;
+            _provider = provider;
+        }
+
+        public ISendEndpointProvider SendEndpointProvider => _scopedBusContext.SendEndpointProvider;
+
+        public IPublishEndpoint PublishEndpoint => _scopedBusContext.PublishEndpoint;
+
+        public IScopedClientFactory ClientFactory
+        {
+            get
+            {
+                return _scopedClientFactory ??=
+                    new ScopedClientFactory(new ClientFactory(new ScopedClientFactoryContext(_clientFactory, _provider)), null);
+            }
+        }
+    }
 }
