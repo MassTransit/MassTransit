@@ -48,10 +48,6 @@ jobs:
         run: dotnet build -c Release --no-restore
         working-directory: ./
 
-      - name: Test Analyzers
-        run: dotnet test -c Release --logger GitHubActions --no-build --filter Category!=Flaky
-        working-directory: tests/MassTransit.Analyzers.Tests
-
   test-ubuntu:
     name: Unit Tests
     runs-on: ubuntu-latest
