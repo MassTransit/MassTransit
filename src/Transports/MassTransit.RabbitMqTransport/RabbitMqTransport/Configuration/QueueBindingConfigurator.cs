@@ -29,11 +29,5 @@ namespace MassTransit.RabbitMqTransport.Configuration
         }
 
         public string RoutingKey { get; set; }
-
-        public void AutoDeleteAfter(TimeSpan duration)
-        {
-            AutoDelete = true;
-            QueueExpiration = duration;
-        }
     }
 }
