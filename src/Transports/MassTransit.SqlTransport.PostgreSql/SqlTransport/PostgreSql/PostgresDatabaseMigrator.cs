@@ -925,6 +925,7 @@ namespace MassTransit.SqlTransport.PostgreSql
             AS
             $$
             BEGIN
+                LOCK TABLE "{0}".queue_metric IN EXCLUSIVE MODE;
                 WITH metrics AS (
                     DELETE FROM "{0}".queue_metric_capture
                         WHERE queue_metric_id < COALESCE((SELECT MIN(queue_metric_id) FROM "{0}".queue_metric_capture), 0) + row_limit

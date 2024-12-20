@@ -1399,7 +1399,7 @@ BEGIN
         INTO @DeletedMetrics
     WHERE Id < COALESCE((SELECT MIN(id) FROM {0}.queuemetriccapture), 0) + @rowLimit;
 
-    MERGE INTO {0}.QueueMetric WITH (ROWLOCK) AS target
+    MERGE INTO {0}.QueueMetric WITH (TABLOCK) AS target
     USING (SELECT m.StartTime,
                   m.Duration,
                   m.QueueId,
@@ -1434,7 +1434,7 @@ BEGIN
     WHERE Duration = 60
       AND StartTime < DATEADD(HOUR, -8, GETUTCDATE())
 
-    MERGE INTO {0}.QueueMetric WITH (ROWLOCK) AS target
+    MERGE INTO {0}.QueueMetric WITH (TABLOCK) AS target
     USING (SELECT m.StartTime,
                   m.Duration,
                   m.QueueId,
@@ -1469,7 +1469,7 @@ BEGIN
     WHERE Duration = 3600
       AND StartTime < DATEADD(HOUR, -48, GETUTCDATE())
 
-    MERGE INTO {0}.QueueMetric WITH (ROWLOCK) AS target
+    MERGE INTO {0}.QueueMetric WITH (TABLOCK) AS target
     USING (SELECT m.StartTime,
                   m.Duration,
                   m.QueueId,
