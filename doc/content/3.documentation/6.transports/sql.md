@@ -43,6 +43,7 @@ The SQL transport supports:
 - Partitioned message consumption, enabling fair message consumption across tenants, customers, etc. and ordered message delivery
 - Supports all consumer types, including consumers, sagas, state machines, and routing slips
 - Transactional Outbox using Entity Framework Core
+- [Web-based UI](https://github.com/filipbekic01/resqueue) simplifies managing SQL and PostgreSQL messaging transports through a straightforward web interface
 
 ### Sample
 
