@@ -261,7 +261,7 @@ namespace MassTransit.Configuration
         }
 
         public void SetBusFactory<T>(T busFactory)
-            where T : IRegistrationBusFactory
+            where T : class, IRegistrationBusFactory
         {
             _configurator.SetBusFactory(busFactory);
 

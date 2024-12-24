@@ -121,6 +121,10 @@
 
             _busHandle = await BusControl.StartAsync(cancellationToken).ConfigureAwait(false);
 
+            await _received.RestartTimer();
+            await _published.RestartTimer();
+            await _sent.RestartTimer();
+
             BusSendEndpoint = await GetSendEndpoint(BusControl.Address).ConfigureAwait(false);
 
             InputQueueSendEndpoint = await GetSendEndpoint(InputQueueAddress).ConfigureAwait(false);

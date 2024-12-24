@@ -259,5 +259,12 @@ namespace MassTransit.DependencyInjection.Testing
             _handles.Add(bus.ConnectReceiveObserver(_received.Value));
             _handles.Add(bus.ConnectSendObserver(_sent.Value));
         }
+
+        public void PostStart(IBus bus)
+        {
+            _ = _received.Value.RestartTimer();
+            _ = _published.Value.RestartTimer();
+            _ = _sent.Value.RestartTimer();
+        }
     }
 }

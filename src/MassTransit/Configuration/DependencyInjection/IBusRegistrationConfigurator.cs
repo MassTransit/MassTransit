@@ -26,7 +26,7 @@ namespace MassTransit
         /// <param name="busFactory"></param>
         /// <typeparam name="T"></typeparam>
         void SetBusFactory<T>(T busFactory)
-            where T : IRegistrationBusFactory;
+            where T : class, IRegistrationBusFactory;
 
         /// <summary>
         /// Add bus rider

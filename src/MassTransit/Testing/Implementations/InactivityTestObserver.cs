@@ -36,7 +36,7 @@ namespace MassTransit.Testing.Implementations
             _inactivityTimer.Start();
         }
 
-        protected Task RestartTimer(bool activityDetected = true)
+        public Task RestartTimer(bool activityDetected = true)
         {
             if (activityDetected)
                 Interlocked.CompareExchange(ref _activityDetected, 1, 0);

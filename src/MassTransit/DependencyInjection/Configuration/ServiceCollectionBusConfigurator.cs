@@ -76,7 +76,7 @@ namespace MassTransit.Configuration
         }
 
         public virtual void SetBusFactory<T>(T busFactory)
-            where T : IRegistrationBusFactory
+            where T : class, IRegistrationBusFactory
         {
             if (busFactory == null)
                 throw new ArgumentNullException(nameof(busFactory));
@@ -104,7 +104,7 @@ namespace MassTransit.Configuration
             if (callback == null)
                 throw new ArgumentNullException(nameof(callback));
 
-            this.AddSingleton(provider => Bind<IBus>.Create((IConfigureReceiveEndpoint)new ConfigureReceiveEndpointDelegate(callback)));
+            this.AddSingleton(_ => Bind<IBus>.Create<IConfigureReceiveEndpoint>(new ConfigureReceiveEndpointDelegate(callback)));
         }
 
         public virtual void AddConfigureEndpointsCallback(ConfigureEndpointsProviderCallback callback)
@@ -112,7 +112,7 @@ namespace MassTransit.Configuration
             if (callback == null)
                 throw new ArgumentNullException(nameof(callback));
 
-            this.AddSingleton(provider => Bind<IBus>.Create((IConfigureReceiveEndpoint)new ConfigureReceiveEndpointDelegateProvider(
+            this.AddSingleton(provider => Bind<IBus>.Create<IConfigureReceiveEndpoint>(new ConfigureReceiveEndpointDelegateProvider(
                 provider.GetRequiredService<Bind<IBus, IBusRegistrationContext>>().Value, callback)));
         }
 
@@ -237,7 +237,7 @@ namespace MassTransit.Configuration
 
         public override void AddConfigureEndpointsCallback(ConfigureEndpointsCallback callback)
         {
-            this.AddSingleton(provider => Bind<TBus>.Create((IConfigureReceiveEndpoint)new ConfigureReceiveEndpointDelegate(callback)));
+            this.AddSingleton(_ => Bind<TBus>.Create<IConfigureReceiveEndpoint>(new ConfigureReceiveEndpointDelegate(callback)));
         }
 
         public override void AddConfigureEndpointsCallback(ConfigureEndpointsProviderCallback callback)
@@ -245,7 +245,7 @@ namespace MassTransit.Configuration
             if (callback == null)
                 throw new ArgumentNullException(nameof(callback));
 
-            this.AddSingleton(provider => Bind<TBus>.Create((IConfigureReceiveEndpoint)new ConfigureReceiveEndpointDelegateProvider(
+            this.AddSingleton(provider => Bind<TBus>.Create<IConfigureReceiveEndpoint>(new ConfigureReceiveEndpointDelegateProvider(
                 provider.GetRequiredService<Bind<TBus, IBusRegistrationContext>>().Value,
                 callback)));
         }
