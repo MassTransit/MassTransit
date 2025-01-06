@@ -55,6 +55,20 @@
             }
 
             [Test]
+            public async Task Should_invoke_the_observer_on_request()
+            {
+                var observer = new Observer();
+                using (Bus.ConnectPublishObserver(observer))
+                {
+                    IRequestClient<Request> client = Bus.CreateRequestClient<Request>();
+
+                    await client.GetResponse<Response>(new Request());
+
+                    await observer.PostSent;
+                }
+            }
+
+            [Test]
             public async Task Should_not_invoke_post_sent_on_exception()
             {
                 var observer = new Observer();
@@ -87,6 +101,14 @@
                     }
                 }
             }
+
+            protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+            {
+                configurator.Handler<Request>(x => x.RespondAsync(new Response()));
+            }
+
+            record Request;
+            record Response;
 
 
             class Observer :

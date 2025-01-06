@@ -19,8 +19,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
         [Test]
         public async Task Should_support_the_test_harness()
         {
-            using var tracerProvider = TraceConfig.CreateTraceProvider("ef-core-tests");
-
             await using var provider = new ServiceCollection()
                 .AddBusOutboxServices()
                 .AddTelemetryListener()
@@ -89,8 +87,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
         [Test]
         public async Task Should_include_headers_when_using_raw_json()
         {
-            using var tracerProvider = TraceConfig.CreateTraceProvider("ef-core-tests");
-
             await using var provider = new ServiceCollection()
                 .AddBusOutboxServices()
                 .AddTelemetryListener()
@@ -166,8 +162,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
         [Test]
         public async Task Should_support_baggage_in_telemetry()
         {
-            using var tracerProvider = TraceConfig.CreateTraceProvider("ef-core-tests");
-
             await using var provider = new ServiceCollection()
                 .AddBusOutboxServices()
                 .AddTelemetryListener()
@@ -227,8 +221,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
         [Test]
         public async Task Should_support_multiple_save_changes()
         {
-            using var tracerProvider = TraceConfig.CreateTraceProvider("ef-core-tests");
-
             await using var provider = new ServiceCollection()
                 .AddBusOutboxServices()
                 .AddTelemetryListener()
@@ -292,8 +284,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
         [Test]
         public async Task Should_start_immediately_when_context_disposed()
         {
-            using var tracerProvider = TraceConfig.CreateTraceProvider("ef-core-tests");
-
             await using var provider = new ServiceCollection()
                 .AddBusOutboxServices()
                 .AddTelemetryListener()
@@ -353,8 +343,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
         [Explicit]
         public async Task Fill_up_the_outbox()
         {
-            using var tracerProvider = TraceConfig.CreateTraceProvider("ef-core-tests");
-
             await using var provider = new ServiceCollection()
                 .AddBusOutboxServices()
                 .AddMassTransitTestHarness(x =>
@@ -427,10 +415,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
         [Explicit]
         public async Task Should_support_delayed_message_scheduler()
         {
-            using var tracerProvider = TraceConfig.CreateTraceProvider("ef-core-tests");
-
             await using var provider = new ServiceCollection()
                 .AddBusOutboxServices()
+                .AddTelemetryListener()
                 .AddMassTransitTestHarness(x =>
                 {
                     x.AddEntityFrameworkOutbox<ReliableDbContext>(o =>
@@ -478,10 +465,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
         [Test]
         public async Task Should_work_without_starting_the_bus()
         {
-            using var tracerProvider = TraceConfig.CreateTraceProvider("ef-core-tests");
-
             await using var provider = new ServiceCollection()
                 .AddBusOutboxServices()
+                .AddTelemetryListener()
                 .AddMassTransitTestHarness(x =>
                 {
                     x.AddEntityFrameworkOutbox<ReliableDbContext>(o =>

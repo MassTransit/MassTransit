@@ -13,7 +13,7 @@ namespace MassTransit.Transports
         readonly Uri _hostAddress;
         readonly PublishObservable _publishObservers;
         readonly IPublishTopology _publishTopology;
-        readonly ISendPipe _sendPipe;
+        readonly ISendPipe _publishPipe;
         readonly IPublishTransportProvider _transportProvider;
 
         public PublishEndpointProvider(IPublishTransportProvider transportProvider, Uri hostAddress, PublishObservable publishObservers,
@@ -25,7 +25,7 @@ namespace MassTransit.Transports
             _publishObservers = publishObservers;
             _context = context;
 
-            _sendPipe = new PipeAdapter(publishPipe);
+            _publishPipe = new PipeAdapter(publishPipe);
 
             _cache = new SendEndpointCache<Type>();
         }
@@ -54,7 +54,7 @@ namespace MassTransit.Transports
             {
                 var sendTransport = sendTransportTask.Result;
 
-                var sendEndpoint = new SendEndpoint(sendTransport, _context, publishAddress, _sendPipe, sendTransport.ConnectSendObserver(_publishObservers));
+                var sendEndpoint = new SendEndpoint(sendTransport, _context, publishAddress, _publishPipe, sendTransport.ConnectSendObserver(_publishObservers));
 
                 return Task.FromResult<ISendEndpoint>(sendEndpoint);
             }
@@ -63,7 +63,7 @@ namespace MassTransit.Transports
             {
                 var sendTransport = await sendTransportTask.ConfigureAwait(false);
 
-                return new SendEndpoint(sendTransport, _context, publishAddress, _sendPipe, sendTransport.ConnectSendObserver(_publishObservers));
+                return new SendEndpoint(sendTransport, _context, publishAddress, _publishPipe, sendTransport.ConnectSendObserver(_publishObservers));
             }
 
             return CreateAsync();
