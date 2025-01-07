@@ -26,11 +26,30 @@ DROP DATABASE [{0}];";
         const string RoleExistsSql = @"SELECT DATABASE_PRINCIPAL_ID('{0}')";
         const string CreateRoleSql = @"CREATE ROLE {0} AUTHORIZATION [dbo]";
 
-        const string GrantRoleSql = @"ALTER AUTHORIZATION ON SCHEMA::{1} TO [{0}];
-GRANT CREATE TABLE to {0};
-GRANT CREATE PROCEDURE to {0};
-GRANT CREATE VIEW to {0};
-GRANT REFERENCES to {0};
+        const string GrantRoleSql = @"IF NOT EXISTS (
+    SELECT 1
+    FROM sys.schemas s
+    INNER JOIN sys.database_principals p ON s.principal_id = p.principal_id
+    WHERE s.name = '{1}' AND p.name = '{0}'
+)
+OR NOT EXISTS (
+    SELECT 1
+    FROM sys.database_permissions dp
+    WHERE dp.grantee_principal_id = DATABASE_PRINCIPAL_ID('{0}')
+      AND dp.type IN (
+          'CRTB' -- CREATE TABLE
+        , 'CRPR' -- CREATE PROCEDURE
+        , 'CRVW' -- CREATE VIEW
+        , 'RF'   -- REFERENCES
+      )
+)
+BEGIN
+    ALTER AUTHORIZATION ON SCHEMA::{1} TO [{0}];
+    GRANT CREATE TABLE TO {0};
+    GRANT CREATE PROCEDURE TO {0};
+    GRANT CREATE VIEW TO {0};
+    GRANT REFERENCES TO {0};
+END
 ";
 
         const string LoginExistsSql = @"SELECT 1 FROM sys.sql_logins WHERE [name] = '{0}'";
