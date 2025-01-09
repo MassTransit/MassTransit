@@ -1402,7 +1402,7 @@ BEGIN
 	BEGIN TRY
 		BEGIN TRANSACTION
     
-		declare @Lock int
+		DECLARE @Lock int
 		EXEC @Lock = sp_getapplock @Resource = '_MT_ProcessMetrics',
 								   @LockMode = 'Exclusive'
 		IF (@Lock < 0)
