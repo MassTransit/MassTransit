@@ -119,7 +119,7 @@ namespace MassTransit.AzureStorage.MessageData
                 LogContext.Debug?.Log("GET Message Data: {Address} ({Blob})", address, blob.Name);
 
                 var stream = await blob.OpenReadAsync(new BlobOpenReadOptions(false), cancellationToken).ConfigureAwait(false);
-                return blobName.EndsWith(".gz", StringComparison.OrdinalIgnoreCase) || _compress ? new GZipStream(stream, CompressionMode.Decompress, true) : stream;
+                return blobName.EndsWith(".gz", StringComparison.OrdinalIgnoreCase) || _compress ? new GZipStream(stream, CompressionMode.Decompress, false) : stream;
             }
             catch (RequestFailedException exception)
             {
@@ -130,12 +130,15 @@ namespace MassTransit.AzureStorage.MessageData
         public async Task<Uri> Put(Stream stream, TimeSpan? timeToLive = default, CancellationToken cancellationToken = default)
         {
             var blobName = _nameGenerator.GenerateBlobName();
+            if (_compress)
+            {
+                blobName += ".gz";
+            }
+
             var blob = _container.GetBlobClient(blobName);
 
             if (_compress)
             {
-                blobName += ".gz";
-                blob = _container.GetBlobClient(blobName);
                 var compressedStream = new MemoryStream();
                 using (var gzipStream = new GZipStream(compressedStream, CompressionMode.Compress, leaveOpen: true))
                 {
