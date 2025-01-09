@@ -3,6 +3,7 @@ namespace MassTransit.AzureStorage.MessageData
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.IO.Compression;
     using System.Threading;
     using System.Threading.Tasks;
     using Azure;
@@ -19,36 +20,38 @@ namespace MassTransit.AzureStorage.MessageData
     {
         readonly BlobContainerClient _container;
         readonly IBlobNameGenerator _nameGenerator;
+        readonly bool _compress;
 
-        public AzureStorageMessageDataRepository(string connectionString, string containerName)
-            : this(new BlobServiceClient(connectionString), containerName)
+        public AzureStorageMessageDataRepository(string connectionString, string containerName, bool compress = false)
+            : this(new BlobServiceClient(connectionString), containerName, compress)
         {
         }
 
-        public AzureStorageMessageDataRepository(Uri serviceUri, string containerName, string accountName, string accountKey)
-            : this(new BlobServiceClient(serviceUri, new StorageSharedKeyCredential(accountName, accountKey)), containerName)
+        public AzureStorageMessageDataRepository(Uri serviceUri, string containerName, string accountName, string accountKey, bool compress = false)
+            : this(new BlobServiceClient(serviceUri, new StorageSharedKeyCredential(accountName, accountKey)), containerName, compress)
         {
         }
 
-        public AzureStorageMessageDataRepository(Uri serviceUri, string containerName, string signature)
-            : this(new BlobServiceClient(serviceUri, new AzureSasCredential(signature)), containerName)
+        public AzureStorageMessageDataRepository(Uri serviceUri, string containerName, string signature, bool compress = false)
+            : this(new BlobServiceClient(serviceUri, new AzureSasCredential(signature)), containerName, compress)
         {
         }
 
-        public AzureStorageMessageDataRepository(Uri serviceUri, string containerName, string tenantId, string clientId, string clientSecret)
-            : this(new BlobServiceClient(serviceUri, new ClientSecretCredential(tenantId, clientId, clientSecret)), containerName)
+        public AzureStorageMessageDataRepository(Uri serviceUri, string containerName, string tenantId, string clientId, string clientSecret, bool compress = false)
+            : this(new BlobServiceClient(serviceUri, new ClientSecretCredential(tenantId, clientId, clientSecret)), containerName, compress)
         {
         }
 
-        public AzureStorageMessageDataRepository(BlobServiceClient client, string containerName)
-            : this(client, containerName, new NewIdBlobNameGenerator())
+        public AzureStorageMessageDataRepository(BlobServiceClient client, string containerName, bool compress = false)
+            : this(client, containerName, new NewIdBlobNameGenerator(), compress)
         {
         }
 
-        public AzureStorageMessageDataRepository(BlobServiceClient client, string containerName, IBlobNameGenerator nameGenerator)
+        public AzureStorageMessageDataRepository(BlobServiceClient client, string containerName, IBlobNameGenerator nameGenerator, bool compress = false)
         {
             _container = client.GetBlobContainerClient(containerName);
             _nameGenerator = nameGenerator;
+            _compress = compress;
         }
 
         public void PostCreate(IBus bus)
@@ -115,7 +118,8 @@ namespace MassTransit.AzureStorage.MessageData
             {
                 LogContext.Debug?.Log("GET Message Data: {Address} ({Blob})", address, blob.Name);
 
-                return await blob.OpenReadAsync(new BlobOpenReadOptions(false), cancellationToken).ConfigureAwait(false);
+                var stream = await blob.OpenReadAsync(new BlobOpenReadOptions(false), cancellationToken).ConfigureAwait(false);
+                return blobName.EndsWith(".gz", StringComparison.OrdinalIgnoreCase) || _compress ? new GZipStream(stream, CompressionMode.Decompress, false) : stream;
             }
             catch (RequestFailedException exception)
             {
@@ -126,9 +130,28 @@ namespace MassTransit.AzureStorage.MessageData
         public async Task<Uri> Put(Stream stream, TimeSpan? timeToLive = default, CancellationToken cancellationToken = default)
         {
             var blobName = _nameGenerator.GenerateBlobName();
+            if (_compress)
+            {
+                blobName += ".gz";
+            }
+
             var blob = _container.GetBlobClient(blobName);
 
-            await blob.UploadAsync(stream, cancellationToken).ConfigureAwait(false);
+            if (_compress)
+            {
+                var compressedStream = new MemoryStream();
+                using (var gzipStream = new GZipStream(compressedStream, CompressionMode.Compress, leaveOpen: true))
+                {
+                    await stream.CopyToAsync(gzipStream);
+                }
+
+                compressedStream.Position = 0;
+                await blob.UploadAsync(compressedStream, cancellationToken).ConfigureAwait(false);
+            }
+            else
+            {
+                await blob.UploadAsync(stream, cancellationToken).ConfigureAwait(false);
+            }
 
             await SetBlobExpiration(blob, timeToLive).ConfigureAwait(false);
 
