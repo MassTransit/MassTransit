@@ -1399,6 +1399,13 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    declare @Lock int
+    EXEC @Lock = sp_getapplock @Resource = '_MT_ProcessMetrics',
+                               @LockMode = 'Exclusive',
+							   @LockOwner = 'Session'
+    IF (@Lock < 0)
+       RETURN;
+
     DECLARE @DeletedMetrics TABLE
                             (
                                 StartTime       datetime2 not null,
@@ -1513,6 +1520,9 @@ BEGIN
     DELETE
     FROM {0}.QueueMetric
     WHERE StartTime < DATEADD(DAY, -90, GETUTCDATE());
+
+    EXEC sp_releaseapplock @Resource = '_MT_ProcessMetrics', @LockOwner = 'Session';
+
 END
 ";
 
