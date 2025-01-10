@@ -8,6 +8,7 @@
         /// <summary>
         /// Specify the number of concurrent consumers (separate from prefetch count)
         /// </summary>
+        [Obsolete("Set ConcurrentMessageLimit instead (which is exactly what setting this property does)")]
         int MaxConcurrentCalls { set; }
 
         /// <summary>
