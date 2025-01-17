@@ -26,7 +26,9 @@ namespace MassTransit.ActiveMqTransport.Topology
         /// <param name="topic"></param>
         /// <param name="queue"></param>
         /// <param name="selector"></param>
+        /// <param name="consumerName"></param>
+        /// <param name="shared"></param>
         /// <returns></returns>
-        ConsumerHandle BindConsumer(TopicHandle topic, QueueHandle queue, string selector);
+        ConsumerHandle BindConsumer(TopicHandle topic, QueueHandle queue, string selector, string consumerName = null, bool shared = false);
     }
 }

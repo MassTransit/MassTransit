@@ -42,7 +42,7 @@ namespace MassTransit.ActiveMqTransport.Topology
             return Queues.GetOrAdd(queue);
         }
 
-        public ConsumerHandle BindConsumer(TopicHandle topic, QueueHandle queue, string selector)
+        public ConsumerHandle BindConsumer(TopicHandle topic, QueueHandle queue, string selector, string consumerName = null, bool shared = false)
         {
             var id = GetNextId();
 
@@ -50,7 +50,7 @@ namespace MassTransit.ActiveMqTransport.Topology
 
             var queueEntity = queue != null ? Queues.Get(queue) : null;
 
-            var binding = new ConsumerEntity(id, exchangeEntity, queueEntity, selector);
+            var binding = new ConsumerEntity(id, exchangeEntity, queueEntity, selector, consumerName, shared);
 
             return Consumers.GetOrAdd(binding);
         }

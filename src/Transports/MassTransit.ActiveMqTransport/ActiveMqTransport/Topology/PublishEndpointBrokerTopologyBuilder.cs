@@ -62,9 +62,9 @@ namespace MassTransit.ActiveMqTransport.Topology
                 return _builder.CreateQueue(name, durable, autoDelete);
             }
 
-            public ConsumerHandle BindConsumer(TopicHandle topic, QueueHandle queue, string selector)
+            public ConsumerHandle BindConsumer(TopicHandle topic, QueueHandle queue, string selector, string consumerName = null, bool shared = false)
             {
-                return _builder.BindConsumer(topic, queue, selector);
+                return _builder.BindConsumer(topic, queue, selector, consumerName, shared);
             }
         }
     }

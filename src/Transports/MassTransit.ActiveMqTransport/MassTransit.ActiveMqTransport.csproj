@@ -21,6 +21,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Apache.NMS.AMQP" />
     <PackageReference Include="Apache.NMS.ActiveMQ" />
     <PackageReference Include="System.Net.Http" Condition="'$(TargetFramework)' == 'net472'"/>
   </ItemGroup>

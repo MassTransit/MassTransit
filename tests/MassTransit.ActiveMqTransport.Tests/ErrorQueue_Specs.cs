@@ -8,10 +8,15 @@
     using TestFramework.Messages;
 
 
-    [TestFixture]
+    [TestFixture(ActiveMqHostAddress.ActiveMqScheme)]
+    [TestFixture(ActiveMqHostAddress.AmqpScheme)]
     public class A_serialization_exception :
         ActiveMqTestFixture
     {
+        public A_serialization_exception(string protocol)
+            : base(protocol)
+        {
+        }
         [Test]
         public async Task Should_have_the_correlation_id()
         {

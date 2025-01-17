@@ -8,10 +8,16 @@
     using TestFramework.Messages;
 
 
-    [TestFixture]
+    [TestFixture(ActiveMqHostAddress.ActiveMqScheme)]
+    [TestFixture(ActiveMqHostAddress.AmqpScheme)]
     public class Request_reply_use_temporary_queue_name_envelope
         : ActiveMqTestFixture
     {
+        public Request_reply_use_temporary_queue_name_envelope(string protocol)
+            : base(protocol)
+        {
+        }
+
         [Test]
         public async Task Should_use_temporary_replyAddress()
         {
@@ -55,10 +61,16 @@
     }
 
 
-    [TestFixture]
+    [TestFixture(ActiveMqHostAddress.ActiveMqScheme)]
+    [TestFixture(ActiveMqHostAddress.AmqpScheme)]
     public class Request_reply_use_temporary_queue_name_raw
         : ActiveMqTestFixture
     {
+        public Request_reply_use_temporary_queue_name_raw(string protocol)
+            : base(protocol)
+        {
+        }
+
         [Test]
         public async Task Should_use_temporary_replyAddress()
         {

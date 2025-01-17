@@ -1,5 +1,6 @@
 namespace MassTransit.ActiveMqTransport.Tests
 {
+    using System;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -70,6 +71,11 @@ namespace MassTransit.ActiveMqTransport.Tests
 
             var bus = MassTransit.Bus.Factory.CreateUsingActiveMq(x =>
             {
+                x.Host(new Uri("amqp://localhost:5672"), h =>
+                {
+                    h.Username("admin");
+                    h.Password("admin");
+                });
                 ConfigureBusDiagnostics(x);
 
                 x.ReceiveEndpoint("input_queue", e =>

@@ -203,7 +203,8 @@
     }
 
 
-    [TestFixture]
+    [TestFixture(ActiveMqHostAddress.ActiveMqScheme)]
+    [TestFixture(ActiveMqHostAddress.AmqpScheme)]
     public class Scheduling_a_published_message_using_quartz :
         ActiveMqTestFixture
     {
@@ -219,7 +220,8 @@
 
         TimeSpan _testOffset;
 
-        public Scheduling_a_published_message_using_quartz()
+        public Scheduling_a_published_message_using_quartz(string protocol)
+            : base(protocol)
         {
             _testOffset = TimeSpan.Zero;
         }

@@ -9,10 +9,16 @@ namespace MassTransit.ActiveMqTransport.Tests
     using Transports;
 
 
-    [TestFixture]
+    [TestFixture(ActiveMqHostAddress.ActiveMqScheme)]
+    [TestFixture(ActiveMqHostAddress.AmqpScheme)]
     public class Reconnecting_Specs :
         ActiveMqTestFixture
     {
+        public Reconnecting_Specs(string protocol)
+            : base(protocol)
+        {
+        }
+
         [Test]
         [Explicit]
         public async Task Should_fault_nicely()

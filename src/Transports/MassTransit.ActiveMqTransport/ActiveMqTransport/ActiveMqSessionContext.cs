@@ -64,11 +64,13 @@
         {
             return _executor.Run(() =>
             {
+                var topicName = topic.EntityName.Split('?')[0];
+
                 if (!topic.Durable && topic.AutoDelete
                     && topic.EntityName.StartsWith(ConnectionContext.Topology.PublishTopology.VirtualTopicPrefix, StringComparison.InvariantCulture))
-                    return ConnectionContext.GetTemporaryTopic(_session, topic.EntityName);
+                    return ConnectionContext.GetTemporaryTopic(_session, topicName);
 
-                return SessionUtil.GetTopic(_session, topic.EntityName);
+                return SessionUtil.GetTopic(_session, topicName);
             }, CancellationToken);
         }
 
@@ -92,9 +94,26 @@
             return _executor.Run(() => SessionUtil.GetDestination(_session, destinationName, destinationType), CancellationToken);
         }
 
-        public Task<IMessageConsumer> CreateMessageConsumer(IDestination destination, string selector, bool noLocal)
+        public Task<IMessageConsumer> CreateMessageConsumer(IDestination destination, string selector, bool noLocal, string consumerName = null, bool shared = false)
         {
-            return _executor.Run(() => _session.CreateConsumerAsync(destination, selector, noLocal), CancellationToken);
+            return _executor.Run(() => {
+                if (destination.IsTopic && !String.IsNullOrEmpty(consumerName) && shared)
+                {
+                    if(_session is not Apache.NMS.AMQP.NmsSession)
+                    {
+                        throw new NotSupportedException("Shared durable consumers are supported only on ActiveMQ Artemis broker and with AMQP communication.");
+                    }
+                    return _session.CreateSharedDurableConsumerAsync((ITopic)destination, consumerName, selector);
+                }
+                else if (destination.IsTopic && !String.IsNullOrEmpty(consumerName) && !shared)
+                {
+                    return _session.CreateDurableConsumerAsync((ITopic)destination, consumerName, selector);
+                }
+                else
+                {
+                    return _session.CreateConsumerAsync(destination, selector, noLocal);
+                }
+                }, CancellationToken);
         }
 
         public async Task SendAsync(IDestination destination, IMessage message, CancellationToken cancellationToken)
