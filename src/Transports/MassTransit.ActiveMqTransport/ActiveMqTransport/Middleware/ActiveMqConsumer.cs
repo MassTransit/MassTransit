@@ -3,7 +3,6 @@ namespace MassTransit.ActiveMqTransport.Middleware
     using System;
     using System.Threading.Tasks;
     using Apache.NMS;
-    using Apache.NMS.ActiveMQ;
     using Transports;
     using Util;
 
@@ -16,7 +15,7 @@ namespace MassTransit.ActiveMqTransport.Middleware
     {
         readonly ActiveMqReceiveEndpointContext _context;
         readonly ChannelExecutor _executor;
-        readonly MessageConsumer _messageConsumer;
+        readonly IMessageConsumer _messageConsumer;
         readonly ReceiveSettings _receiveSettings;
         readonly SessionContext _session;
 
@@ -27,7 +26,7 @@ namespace MassTransit.ActiveMqTransport.Middleware
         /// <param name="messageConsumer"></param>
         /// <param name="context">The topology</param>
         /// <param name="executor"></param>
-        public ActiveMqConsumer(SessionContext session, MessageConsumer messageConsumer, ActiveMqReceiveEndpointContext context, ChannelExecutor executor)
+        public ActiveMqConsumer(SessionContext session, IMessageConsumer messageConsumer, ActiveMqReceiveEndpointContext context, ChannelExecutor executor)
             : base(context, StringComparer.Ordinal)
         {
             _session = session;

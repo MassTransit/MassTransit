@@ -61,7 +61,7 @@ namespace MassTransit.ActiveMqTransport.Topology
             IActiveMqTopicBindingConfigurator specification =
                 string.IsNullOrEmpty(_publishTopology.VirtualTopicPrefix) || topicName.StartsWith(_publishTopology.VirtualTopicPrefix)
                     ? new ConsumerConsumeTopologySpecification(topicName, ConsumerEndpointQueueNameFormatter)
-                    : new ConsumerConsumeTopicTopologySpecification(topicName, ConsumerEndpointQueueNameFormatter);
+                    : new ConsumerConsumeTopicTopologySpecification(topicName);
 
             configure?.Invoke(specification);
 

@@ -47,10 +47,19 @@ namespace MassTransit.ActiveMqTransport.Tests
         }
 
 
-        [TestFixture]
+        [TestFixture(ActiveMqHostAddress.ActiveMqScheme)]
+        [TestFixture(ActiveMqHostAddress.AmqpScheme)]
         public class Using_conductor_for_service_discovery :
             ActiveMqTestFixture
         {
+            private readonly string protocol;
+
+            public Using_conductor_for_service_discovery(string protocol)
+                : base(protocol)
+            {
+                this.protocol = protocol;
+            }
+
             [Test]
             public async Task Should_connect_using_the_service_client()
             {
@@ -63,7 +72,10 @@ namespace MassTransit.ActiveMqTransport.Tests
 
             protected override void ConfigureActiveMqHost(IActiveMqHostConfigurator configurator)
             {
-                configurator.TransportOptions(new Dictionary<string, string> {{"nms.useCompression", "true"}});
+                if (protocol != ActiveMqHostAddress.AmqpScheme)
+                {
+                    configurator.TransportOptions(new Dictionary<string, string> { { "nms.useCompression", "true" } });
+                }
             }
 
             protected override void ConfigureActiveMqBus(IActiveMqBusFactoryConfigurator configurator)

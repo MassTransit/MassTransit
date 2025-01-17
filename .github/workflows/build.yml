@@ -79,6 +79,7 @@ jobs:
         ports:
           - "61616:61616"
           - "8161:8161"
+          - "5672:5672"
     steps:
       - name: Check out code
         uses: actions/checkout@v4

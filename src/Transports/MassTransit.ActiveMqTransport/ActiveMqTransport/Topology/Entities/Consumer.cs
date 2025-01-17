@@ -19,5 +19,18 @@ namespace MassTransit.ActiveMqTransport.Topology
         /// A routing key for the exchange binding
         /// </summary>
         string Selector { get; }
+
+        /// <summary>
+        /// The consumer name
+        /// </summary>
+        string ConsumerName { get; }
+
+        /// <summary>
+        /// True if the consumer is shared. 
+        /// </summary>
+        /// <remarks>
+        /// When you have multiple consumers on the same topic with same <see cref="ConsumerName"/>, you can use a shared consumer to load balance messages between the consumers.
+        /// </remarks>
+        bool IsShared { get; }
     }
 }

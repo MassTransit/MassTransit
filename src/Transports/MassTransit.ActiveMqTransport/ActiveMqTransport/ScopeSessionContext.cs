@@ -40,9 +40,9 @@ namespace MassTransit.ActiveMqTransport
             return _context.GetDestination(destinationName, destinationType);
         }
 
-        public Task<IMessageConsumer> CreateMessageConsumer(IDestination destination, string selector, bool noLocal)
+        public Task<IMessageConsumer> CreateMessageConsumer(IDestination destination, string selector, bool noLocal, string consumerName = null, bool shared = false)
         {
-            return _context.CreateMessageConsumer(destination, selector, noLocal);
+            return _context.CreateMessageConsumer(destination, selector, noLocal, consumerName, shared);
         }
 
         public Task SendAsync(IDestination destination, IMessage message, CancellationToken cancellationToken)

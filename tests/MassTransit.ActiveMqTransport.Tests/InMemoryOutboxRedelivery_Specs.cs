@@ -5,11 +5,17 @@
     using NUnit.Framework;
 
 
-    [TestFixture]
+    [TestFixture(ActiveMqHostAddress.ActiveMqScheme)]
+    [TestFixture(ActiveMqHostAddress.AmqpScheme)]
     [Category("Flaky")]
     public class Using_delayed_redelivery_for_a_specific_message_type :
         ActiveMqTestFixture
     {
+        public Using_delayed_redelivery_for_a_specific_message_type(string protocol)
+            : base(protocol)
+        {
+        }
+
         [Test]
         public async Task Should_not_send_twice()
         {
@@ -79,11 +85,17 @@
     }
 
 
-    [TestFixture]
+    [TestFixture(ActiveMqHostAddress.ActiveMqScheme)]
+    [TestFixture(ActiveMqHostAddress.AmqpScheme)]
     [Category("Flaky")]
     public class Using_delayed_redelivery_for_a_specific_message_type_with_send :
         ActiveMqTestFixture
     {
+        public Using_delayed_redelivery_for_a_specific_message_type_with_send(string protocol)
+            : base(protocol)
+        {
+        }
+
         [Test]
         public async Task Should_not_send_twice()
         {
@@ -153,11 +165,17 @@
     }
 
 
-    [TestFixture]
+    [TestFixture(ActiveMqHostAddress.ActiveMqScheme)]
+    [TestFixture(ActiveMqHostAddress.AmqpScheme)]
     [Category("Flaky")]
     public class Using_delayed_redelivery_for_all_message_types :
         ActiveMqTestFixture
     {
+        public Using_delayed_redelivery_for_all_message_types(string protocol)
+            : base(protocol)
+        {
+        }
+
         [Test]
         public async Task Should_not_send_twice()
         {

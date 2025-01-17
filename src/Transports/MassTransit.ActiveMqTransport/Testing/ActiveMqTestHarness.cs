@@ -20,14 +20,21 @@
         Uri _hostAddress;
         Uri _inputQueueAddress;
 
-        public ActiveMqTestHarness(string inputQueueName = null)
+        public ActiveMqTestHarness(string protocol = "activemq", string inputQueueName = null)
         {
             Username = "admin";
             Password = "admin";
 
             InputQueueName = inputQueueName ?? "input_queue";
 
-            HostAddress = new Uri("activemq://localhost/");
+            if (protocol == "amqp")
+            {
+                HostAddress = new Uri("amqp://localhost:5672");
+            }
+            else
+            {
+                HostAddress = new Uri("activemq://localhost:61616");
+            }
         }
 
         public Uri HostAddress
@@ -205,9 +212,19 @@
 
         static void CleanUpQueue(ISession model, string queueName)
         {
-            model.DeleteDestination(SessionUtil.GetQueue(model, queueName));
-            model.DeleteDestination(SessionUtil.GetQueue(model, $"{queueName}_skipped"));
-            model.DeleteDestination(SessionUtil.GetQueue(model, $"{queueName}_error"));
+            DeleteDestinationIfPossible(model, queueName);
+            DeleteDestinationIfPossible(model, $"{queueName}_skipped");
+            DeleteDestinationIfPossible(model, $"{queueName}_error");
+        }
+
+        private static void DeleteDestinationIfPossible(ISession session, string destinationName)
+        {
+            var destination = SessionUtil.GetQueue(session, destinationName);
+            // AMQP does not support deleting not temporary destinations
+            if (session is not Apache.NMS.AMQP.NmsSession || destination.IsTemporary)
+            {
+                session.DeleteDestination(destination);
+            }
         }
     }
 }

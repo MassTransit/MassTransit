@@ -4,6 +4,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Apache.NMS.ActiveMQ" Version="2.1.0" />
+    <PackageVersion Include="Apache.NMS.AMQP" Version="2.2.0" />
     <PackageVersion Include="AWSSDK.DynamoDBv2" Version="3.7.405.6" />
     <PackageVersion Include="AWSSDK.SimpleNotificationService" Version="3.7.400.80" />
     <PackageVersion Include="AWSSDK.S3" Version="3.7.412" />

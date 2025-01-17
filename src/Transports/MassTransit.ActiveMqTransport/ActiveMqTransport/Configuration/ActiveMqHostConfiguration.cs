@@ -2,7 +2,7 @@
 {
     using System;
     using System.Threading.Channels;
-    using Apache.NMS.ActiveMQ;
+    using Apache.NMS;
     using MassTransit.Configuration;
     using Topology;
     using Transports;
@@ -23,13 +23,13 @@
         {
             _busConfiguration = busConfiguration;
 
-            _hostSettings = new ConfigurationHostSettings(new Uri("activemq://localhost"));
+            _hostSettings = new OpenWireHostSettings(new Uri("activemq://localhost"));
             _topology = new ActiveMqBusTopology(this, topologyConfiguration);
 
             ReceiveTransportRetryPolicy = Retry.CreatePolicy(x =>
             {
                 x.Handle<ConnectionException>();
-                x.Handle<IOException>();
+                x.Handle<NMSException>();
                 x.Handle<ChannelClosedException>();
 
                 x.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));

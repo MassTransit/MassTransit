@@ -13,8 +13,8 @@
     {
         TestExecutionContext _fixtureContext;
 
-        public ActiveMqTestFixture(string inputQueueName = null)
-            : this(new ActiveMqTestHarness(inputQueueName))
+        public ActiveMqTestFixture(string protocol = ActiveMqHostAddress.ActiveMqScheme, string inputQueueName = null)
+            : this(new ActiveMqTestHarness(protocol, inputQueueName))
         {
         }
 

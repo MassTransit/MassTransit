@@ -6,10 +6,16 @@ namespace MassTransit.ActiveMqTransport.Tests
     using TestFramework.Messages;
 
 
-    [TestFixture]
+    [TestFixture(ActiveMqHostAddress.ActiveMqScheme)]
+    [TestFixture(ActiveMqHostAddress.AmqpScheme)]
     public class Sending_to_a_virtual_topic_endpoint :
         ActiveMqTestFixture
     {
+        public Sending_to_a_virtual_topic_endpoint(string protocol)
+            : base(protocol)
+        {
+        }
+
         [Test]
         public async Task Should_succeed()
         {
