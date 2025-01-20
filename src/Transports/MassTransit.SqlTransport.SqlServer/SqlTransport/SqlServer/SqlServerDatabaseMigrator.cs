@@ -1404,7 +1404,8 @@ BEGIN
     
 		DECLARE @Lock int
 		EXEC @Lock = sp_getapplock @Resource = '_MT_ProcessMetrics',
-								   @LockMode = 'Exclusive'
+								   @LockMode = 'Exclusive',
+								   @LockTimeout = 500
 		IF (@Lock < 0)
 		   RETURN;
 
@@ -1541,18 +1542,41 @@ END
 CREATE OR ALTER PROCEDURE {0}.PurgeTopology
 AS
 BEGIN
-    WITH expired AS (SELECT q.Id, q.name, DATEADD(second, -q.autodelete, GETUTCDATE()) as expires_at
-                     FROM {0}.Queue q
-                     WHERE q.Type = 1 AND  q.AutoDelete IS NOT NULL AND DATEADD(second, -q.AutoDelete, GETUTCDATE()) > Updated),
-         metrics AS (SELECT qm.queueid, MAX(starttime) as start_time
-                     FROM {0}.queuemetric qm
-                              INNER JOIN expired q2 on q2.Id = qm.QueueId
-                     WHERE DATEADD(second, duration, starttime) > q2.expires_at
-                     GROUP BY qm.queueid)
-    DELETE FROM {0}.Queue
-    FROM {0}.Queue qd
-    INNER JOIN expired qdx ON qdx.Name = qd.Name
-        WHERE qdx.Id NOT IN (SELECT QueueId FROM metrics);
+    SET NOCOUNT ON;
+
+	BEGIN TRY
+		BEGIN TRANSACTION
+    
+		DECLARE @Lock int
+		EXEC @Lock = sp_getapplock @Resource = '_MT_PurgeTopology',
+								   @LockMode = 'Exclusive',
+								   @LockTimeout = 500
+		IF (@Lock < 0)
+		   RETURN;
+
+        WITH expired AS (SELECT q.Id, q.name, DATEADD(second, -q.autodelete, GETUTCDATE()) as expires_at
+                        FROM {0}.Queue q
+                        WHERE q.Type = 1 AND  q.AutoDelete IS NOT NULL AND DATEADD(second, -q.AutoDelete, GETUTCDATE()) > Updated),
+            metrics AS (SELECT qm.queueid, MAX(starttime) as start_time
+                        FROM {0}.queuemetric qm
+                                INNER JOIN expired q2 on q2.Id = qm.QueueId
+                        WHERE DATEADD(second, duration, starttime) > q2.expires_at
+                        GROUP BY qm.queueid)
+        DELETE FROM {0}.Queue
+        FROM {0}.Queue qd
+        INNER JOIN expired qdx ON qdx.Name = qd.Name
+            WHERE qdx.Id NOT IN (SELECT QueueId FROM metrics);
+
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+
+        IF @@TRANCOUNT > 0
+        BEGIN
+            ROLLBACK TRANSACTION;
+        END
+
+    END CATCH
 
 END
 ";
