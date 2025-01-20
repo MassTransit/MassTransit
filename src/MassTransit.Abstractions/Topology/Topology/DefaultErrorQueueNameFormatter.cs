@@ -9,7 +9,7 @@ namespace MassTransit.Topology
 
         public string FormatErrorQueueName(string queueName)
         {
-            return queueName += ErrorQueueSuffix;
+            return queueName + ErrorQueueSuffix;
         }
     }
 }

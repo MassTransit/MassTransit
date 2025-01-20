@@ -148,6 +148,54 @@ public static class RecurringJobConsumerExtensions
     }
 
     /// <summary>
+    /// Cancel a recurring job
+    /// </summary>
+    /// <param name="publishEndpoint">An available publish endpoint instance</param>
+    /// <param name="jobName"></param>
+    /// <param name="reason">The reason for canceling the job</param>
+    /// <param name="cancellationToken"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static async Task<Guid> CancelRecurringJob<T>(this IPublishEndpoint publishEndpoint, string jobName, string reason,
+        CancellationToken cancellationToken = default)
+        where T : class
+    {
+        if (string.IsNullOrWhiteSpace(jobName))
+            throw new ArgumentNullException(nameof(jobName));
+
+        var jobId = JobMetadataCache<T>.GenerateRecurringJobId(jobName);
+
+        await publishEndpoint.Publish<CancelJob>(new CancelJobCommand
+        {
+            JobId = jobId,
+            Reason = reason ?? "Unspecified"
+        }, cancellationToken).ConfigureAwait(false);
+
+        return jobId;
+    }
+
+    /// <summary>
+    /// Finalize a canceled recurring job
+    /// </summary>
+    /// <param name="publishEndpoint">An available publish endpoint instance</param>
+    /// <param name="jobName"></param>
+    /// <param name="cancellationToken"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static async Task<Guid> FinalizeRecurringJob<T>(this IPublishEndpoint publishEndpoint, string jobName, CancellationToken cancellationToken = default)
+        where T : class
+    {
+        if (string.IsNullOrWhiteSpace(jobName))
+            throw new ArgumentNullException(nameof(jobName));
+
+        var jobId = JobMetadataCache<T>.GenerateRecurringJobId(jobName);
+
+        await publishEndpoint.Publish<FinalizeJob>(new FinalizeJobCommand { JobId = jobId }, cancellationToken).ConfigureAwait(false);
+
+        return jobId;
+    }
+
+    /// <summary>
     /// Submits a job, returning the generated jobId
     /// </summary>
     /// <param name="publishEndpoint"></param>

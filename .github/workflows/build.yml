@@ -62,7 +62,7 @@ jobs:
           dotnet-version: '9.0.x'
 
       - name: Unit Tests
-        run: dotnet test -c Release -f net8.0 --logger GitHubActions --filter Category!=Flaky
+        run: dotnet test -c Release -f net9.0 --logger GitHubActions --filter Category!=Flaky
         working-directory: tests/MassTransit.Tests
 
       - name: Test Abstractions

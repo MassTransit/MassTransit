@@ -6,9 +6,9 @@ namespace MassTransit
 
     public static class AzureStorageConfigurationExtensions
     {
-        public static AzureStorageMessageDataRepository CreateMessageDataRepository(this BlobServiceClient client, string containerName)
+        public static AzureStorageMessageDataRepository CreateMessageDataRepository(this BlobServiceClient client, string containerName, bool compress = false)
         {
-            return new AzureStorageMessageDataRepository(client, containerName);
+            return new AzureStorageMessageDataRepository(client, containerName, compress);
         }
     }
 }

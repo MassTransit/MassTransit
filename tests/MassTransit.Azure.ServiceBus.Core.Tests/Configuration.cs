@@ -30,6 +30,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
                 ? TestContext.Parameters.Get(nameof(StorageAccount))
                 : Environment.GetEnvironmentVariable("MT_AZURE_STORAGE_ACCOUNT") ?? "";
 
+        public static string? Compress =>
+            TestContext.Parameters.Exists(nameof(Compress))
+                ? TestContext.Parameters.Get(nameof(Compress))
+                : Environment.GetEnvironmentVariable("MT_AZURE_STORAGE_COMPRESS") ?? "false";
+
         public static ServiceBusAdministrationClient GetManagementClient()
         {
             var hostAddress = AzureServiceBusEndpointUriCreator.Create(ServiceNamespace);

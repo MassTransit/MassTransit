@@ -50,6 +50,19 @@ namespace MassTransit.SqlTransport.PostgreSql
             END;
             $$ LANGUAGE plpgsql;
 
+            CREATE OR REPLACE FUNCTION "{0}".create_index_if_not_exists (i_name text, index_sql text)
+            RETURNS void AS
+            $$
+            BEGIN
+                IF NOT EXISTS (SELECT indexname
+                              FROM pg_indexes
+                              WHERE schemaname = '{0}'
+                              AND indexname = i_name) THEN
+                    EXECUTE index_sql;
+                END IF;
+            END;
+            $$ LANGUAGE plpgsql;
+
             CREATE SEQUENCE IF NOT EXISTS "{0}".topology_seq AS bigint;
 
             CREATE TABLE IF NOT EXISTS "{0}".queue
@@ -65,7 +78,8 @@ namespace MassTransit.SqlTransport.PostgreSql
             SELECT "{0}".create_constraint_if_not_exists('queue', 'unique_queue',
                     'CREATE UNIQUE INDEX IF NOT EXISTS queue_uqx ON "{0}".queue (type, name) INCLUDE (id);ALTER TABLE "{0}".queue ADD CONSTRAINT unique_queue UNIQUE USING INDEX queue_uqx;');
 
-            CREATE INDEX IF NOT EXISTS queue_auto_delete_ndx ON "{0}".queue (auto_delete) INCLUDE (id);
+            SELECT "{0}".create_index_if_not_exists('queue_auto_delete_ndx',
+                    'CREATE INDEX IF NOT EXISTS queue_auto_delete_ndx ON "{0}".queue (auto_delete) INCLUDE (id);');
 
             CREATE TABLE IF NOT EXISTS "{0}".topic
             (
@@ -94,9 +108,11 @@ namespace MassTransit.SqlTransport.PostgreSql
             SELECT "{0}".create_constraint_if_not_exists('topic_subscription', 'unique_topic_subscription',
                     'CREATE UNIQUE INDEX IF NOT EXISTS topic_subscription_uqx ON "{0}".topic_subscription (source_id, destination_id, sub_type, routing_key, filter) INCLUDE (id);ALTER TABLE "{0}".topic_subscription ADD CONSTRAINT unique_topic_subscription UNIQUE USING INDEX topic_subscription_uqx;');
 
-            CREATE INDEX IF NOT EXISTS topic_subscription_source_id_ndx ON "{0}".topic_subscription (source_id) INCLUDE (id, destination_id);
+            SELECT "{0}".create_index_if_not_exists('topic_subscription_source_id_ndx',
+                    'CREATE INDEX IF NOT EXISTS topic_subscription_source_id_ndx ON "{0}".topic_subscription (source_id) INCLUDE (id, destination_id);');
 
-            CREATE INDEX IF NOT EXISTS topic_subscription_destination_id_ndx ON "{0}".topic_subscription (destination_id) INCLUDE (id, source_id);
+            SELECT "{0}".create_index_if_not_exists('topic_subscription_destination_id_ndx',
+                    'CREATE INDEX IF NOT EXISTS topic_subscription_destination_id_ndx ON "{0}".topic_subscription (destination_id) INCLUDE (id, source_id);');
 
             CREATE TABLE IF NOT EXISTS "{0}".queue_subscription
             (
@@ -114,9 +130,11 @@ namespace MassTransit.SqlTransport.PostgreSql
             SELECT "{0}".create_constraint_if_not_exists('queue_subscription', 'unique_queue_subscription',
                     'CREATE UNIQUE INDEX IF NOT EXISTS queue_subscription_uqx ON "{0}".queue_subscription (source_id, destination_id, sub_type, routing_key, filter);ALTER TABLE "{0}".queue_subscription ADD CONSTRAINT unique_queue_subscription UNIQUE USING INDEX queue_subscription_uqx;');
 
-            CREATE INDEX IF NOT EXISTS queue_subscription_source_id_ndx ON "{0}".queue_subscription (source_id) INCLUDE (id, destination_id);
+            SELECT "{0}".create_index_if_not_exists('queue_subscription_source_id_ndx',
+                    'CREATE INDEX IF NOT EXISTS queue_subscription_source_id_ndx ON "{0}".queue_subscription (source_id) INCLUDE (id, destination_id);');
 
-            CREATE INDEX IF NOT EXISTS queue_subscription_destination_id_ndx ON "{0}".queue_subscription (destination_id) INCLUDE (id, source_id);
+            SELECT "{0}".create_index_if_not_exists('queue_subscription_destination_id_ndx',
+                    'CREATE INDEX IF NOT EXISTS queue_subscription_destination_id_ndx ON "{0}".queue_subscription (destination_id) INCLUDE (id, source_id);');
 
             CREATE TABLE IF NOT EXISTS "{0}".message
             (
@@ -145,7 +163,8 @@ namespace MassTransit.SqlTransport.PostgreSql
                 host                 jsonb
             );
 
-            CREATE INDEX IF NOT EXISTS message_scheduling_token_id_ndx ON "{0}".message (scheduling_token_id) where message.scheduling_token_id IS NOT NULL;
+            SELECT "{0}".create_index_if_not_exists('message_scheduling_token_id_ndx',
+                    'CREATE INDEX IF NOT EXISTS message_scheduling_token_id_ndx ON "{0}".message (scheduling_token_id) where message.scheduling_token_id IS NOT NULL;');
 
             CREATE TABLE IF NOT EXISTS "{0}".message_delivery
             (
@@ -169,11 +188,14 @@ namespace MassTransit.SqlTransport.PostgreSql
                 transport_headers       jsonb
             );
 
-            CREATE INDEX IF NOT EXISTS message_delivery_fetch_ndx on "{0}".message_delivery (queue_id, priority, enqueue_time, message_delivery_id);
+            SELECT "{0}".create_index_if_not_exists('message_delivery_fetch_ndx',
+                    'CREATE INDEX IF NOT EXISTS message_delivery_fetch_ndx on "{0}".message_delivery (queue_id, priority, enqueue_time, message_delivery_id);');
 
-            CREATE INDEX IF NOT EXISTS message_delivery_fetch_part_ndx on "{0}".message_delivery (queue_id, partition_key, priority, enqueue_time, message_delivery_id);
+            SELECT "{0}".create_index_if_not_exists('message_delivery_fetch_part_ndx',
+                    'CREATE INDEX IF NOT EXISTS message_delivery_fetch_part_ndx on "{0}".message_delivery (queue_id, partition_key, priority, enqueue_time, message_delivery_id);');
 
-            CREATE INDEX IF NOT EXISTS message_delivery_transport_message_id_ndx ON "{0}".message_delivery (transport_message_id);
+            SELECT "{0}".create_index_if_not_exists('message_delivery_transport_message_id_ndx',
+                    'CREATE INDEX IF NOT EXISTS message_delivery_transport_message_id_ndx ON "{0}".message_delivery (transport_message_id);');
 
             CREATE OR REPLACE FUNCTION "{0}".create_queue(queue_name text, auto_delete integer DEFAULT NULL)
                 RETURNS integer
@@ -917,7 +939,8 @@ namespace MassTransit.SqlTransport.PostgreSql
             SELECT "{0}".create_constraint_if_not_exists('queue_metric', 'unique_queue_metric',
                     'CREATE UNIQUE INDEX IF NOT EXISTS queue_metric_ndx ON "{0}".queue_metric (start_time, duration, queue_id);ALTER TABLE "{0}".queue_metric ADD CONSTRAINT unique_queue_metric UNIQUE USING INDEX queue_metric_ndx;');
 
-            CREATE INDEX IF NOT EXISTS queue_metric_queue_id ON "{0}".queue_metric (queue_id, start_time) INCLUDE (duration);
+            SELECT "{0}".create_index_if_not_exists('queue_metric_queue_id',
+                'CREATE INDEX IF NOT EXISTS queue_metric_queue_id ON "{0}".queue_metric (queue_id, start_time) INCLUDE (duration);');
 
             CREATE OR REPLACE FUNCTION "{0}".process_metrics(row_limit int DEFAULT 10000)
                 RETURNS int
