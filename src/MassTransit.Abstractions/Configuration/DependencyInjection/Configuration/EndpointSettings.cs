@@ -4,11 +4,11 @@ namespace MassTransit.Configuration
     using System.Collections.Generic;
 
 
-    public class EndpointSettings<T> :
-        IEndpointSettings<T>
-        where T : class
+    public class EndpointSettings<TConsumer> :
+        IEndpointSettings<TConsumer>
+        where TConsumer : class
     {
-        List<Action<IReceiveEndpointConfigurator>>? _callbacks;
+        List<Action<IRegistrationContext?, IReceiveEndpointConfigurator>>? _callbacks;
 
         public EndpointSettings()
         {
@@ -27,13 +27,14 @@ namespace MassTransit.Configuration
 
         public string? InstanceId { get; set; }
 
-        public void ConfigureEndpoint(IReceiveEndpointConfigurator configurator)
+        public void ConfigureEndpoint<T>(T configurator, IRegistrationContext? context)
+            where T : IReceiveEndpointConfigurator
         {
-            if (_callbacks != null)
-            {
-                foreach (Action<IReceiveEndpointConfigurator> callback in _callbacks)
-                    callback(configurator);
-            }
+            if (_callbacks == null)
+                return;
+
+            foreach (Action<IRegistrationContext?, IReceiveEndpointConfigurator> callback in _callbacks)
+                callback(context, configurator);
         }
 
         public void AddConfigureEndpointCallback(Action<IReceiveEndpointConfigurator>? callback)
@@ -41,9 +42,25 @@ namespace MassTransit.Configuration
             if (callback == null)
                 return;
 
-            _callbacks ??= new List<Action<IReceiveEndpointConfigurator>>(1);
+            _callbacks ??= new List<Action<IRegistrationContext?, IReceiveEndpointConfigurator>>(1);
 
-            _callbacks.Add(callback);
+            _callbacks.Add((_, cfg) => callback(cfg));
+        }
+
+        public void AddConfigureEndpointCallback(Action<IRegistrationContext, IReceiveEndpointConfigurator>? callback)
+        {
+            if (callback == null)
+                return;
+
+            _callbacks ??= new List<Action<IRegistrationContext?, IReceiveEndpointConfigurator>>(1);
+
+            _callbacks.Add((context, cfg) =>
+            {
+                if (context is null)
+                    throw new ConfigurationException("The bus registration context cannot be null (via AddConfigureEndpointCallback).");
+
+                callback(context, cfg);
+            });
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿namespace MassTransit.RabbitMqTransport
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Agents;
@@ -41,8 +42,21 @@
 
                 void RemoveHandlers()
                 {
-                    channelContext.ConnectionContext.Connection.ConnectionShutdownAsync -= HandleShutdown;
-                    channelContext.Channel.ChannelShutdownAsync -= HandleShutdown;
+                    try
+                    {
+                        channelContext.ConnectionContext.Connection.ConnectionShutdownAsync -= HandleShutdown;
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                    }
+
+                    try
+                    {
+                        channelContext.Channel.ChannelShutdownAsync -= HandleShutdown;
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                    }
                 }
 
                 asyncContext.Completed.ContinueWith(_ => RemoveHandlers());

@@ -2,8 +2,8 @@ namespace MassTransit.RabbitMqTransport.Tests
 {
     using System.Threading.Tasks;
     using MassTransit.Configuration;
-    using MassTransit.Testing;
     using NUnit.Framework;
+    using Testing;
 
 
     [TestFixture]
@@ -12,13 +12,13 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_fan_out_published_messages()
         {
-            var endpointSettings = new EndpointSettings<IEndpointDefinition<EventConsumer>> { InstanceId = "27" };
-            var endpointDefinition = new ConsumerEndpointDefinition<EventConsumer>(endpointSettings);
-
             var firstHarness = new RabbitMqTestHarness();
             var firstConsumer = new EventConsumer(firstHarness.GetTask<ConsumeContext<SomeEvent>>());
             firstHarness.OnConfigureRabbitMqBus += configurator =>
             {
+                var endpointSettings = new EndpointSettings<IEndpointDefinition<EventConsumer>> { InstanceId = "27" };
+                var endpointDefinition = new ConsumerEndpointDefinition<EventConsumer>(endpointSettings);
+
                 configurator.ReceiveEndpoint(endpointDefinition, KebabCaseEndpointNameFormatter.Instance, e =>
                 {
                     e.Consumer(() => firstConsumer);
@@ -28,13 +28,13 @@ namespace MassTransit.RabbitMqTransport.Tests
             await firstHarness.Start();
             try
             {
-                endpointSettings = new EndpointSettings<IEndpointDefinition<EventConsumer>> { InstanceId = "42" };
-                endpointDefinition = new ConsumerEndpointDefinition<EventConsumer>(endpointSettings);
-
                 var secondHarness = new RabbitMqTestHarness();
                 var secondConsumer = new EventConsumer(secondHarness.GetTask<ConsumeContext<SomeEvent>>());
                 secondHarness.OnConfigureRabbitMqBus += configurator =>
                 {
+                    var endpointSettings = new EndpointSettings<IEndpointDefinition<EventConsumer>> { InstanceId = "42" };
+                    var endpointDefinition = new ConsumerEndpointDefinition<EventConsumer>(endpointSettings);
+
                     configurator.ReceiveEndpoint(endpointDefinition, KebabCaseEndpointNameFormatter.Instance, e =>
                     {
                         e.Consumer(() => secondConsumer);

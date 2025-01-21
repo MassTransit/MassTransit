@@ -49,7 +49,7 @@
             public int? ConcurrentMessageLimit { get; }
             public bool ConfigureConsumeTopology => false;
 
-            public void Configure<T>(T configurator)
+            public void Configure<T>(T configurator, IRegistrationContext context)
                 where T : IReceiveEndpointConfigurator
             {
             }

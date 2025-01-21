@@ -6,7 +6,7 @@ namespace MassTransit.Configuration
 
     public static class EndpointDefinitionExtensions
     {
-        public static IEndpointDefinition Combine(this IEnumerable<IEndpointDefinition> definitions)
+        public static IEndpointDefinition Combine(this IEnumerable<IEndpointDefinition> definitions, IRegistrationContext context)
         {
             List<IEndpointDefinition> list = definitions.ToList();
             if (list.Count == 0)
@@ -15,7 +15,7 @@ namespace MassTransit.Configuration
             if (list.Count == 1)
                 return list[0];
 
-            return new CombinedEndpointDefinition(list);
+            return new CombinedEndpointDefinition(list, context);
         }
     }
 }

@@ -430,11 +430,30 @@ namespace MassTransit.RabbitMqTransport.Tests
                         .Endpoint(e => e.ConcurrentMessageLimit = 1);
 
                     x.AddJobSagaStateMachines();
-                    x.SetJobConsumerOptions(options => options.HeartbeatInterval = TimeSpan.FromSeconds(10))
-                        .Endpoint(e => e.PrefetchCount = 100);
+                    x.SetJobConsumerOptions(options =>
+                        {
+                            options.HeartbeatInterval = TimeSpan.FromSeconds(10);
+                        })
+                        .Endpoint(e =>
+                        {
+                            e.PrefetchCount = 100;
+
+                            e.AddConfigureEndpointCallback(cfg =>
+                            {
+                                if (cfg is IRabbitMqReceiveEndpointConfigurator rmq)
+                                    rmq.SetQuorumQueue();
+                            });
+                        });
+
+                    x.AddConfigureEndpointsCallback((_, _, cfg) =>
+                    {
+                        if (cfg is IRabbitMqReceiveEndpointConfigurator rmq)
+                            rmq.SetQuorumQueue();
+                    });
 
                     x.UsingRabbitMq((context, cfg) =>
                     {
+                        cfg.SetQuorumQueue();
                         cfg.UseDelayedMessageScheduler();
 
                         cfg.ConfigureEndpoints(context);

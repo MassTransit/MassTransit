@@ -29,7 +29,7 @@ namespace MassTransit
         public int? ConcurrentMessageLimit { get; }
         public bool ConfigureConsumeTopology { get; }
 
-        public void Configure<T>(T configurator)
+        public void Configure<T>(T configurator, IRegistrationContext? context)
             where T : IReceiveEndpointConfigurator
         {
         }

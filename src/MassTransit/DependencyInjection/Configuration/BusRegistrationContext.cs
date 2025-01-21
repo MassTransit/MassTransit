@@ -86,7 +86,7 @@ namespace MassTransit.Configuration
                 .GroupBy(x => x.Name, (name, values) => new
                 {
                     Name = name,
-                    Definition = values.Select(x => x.Definition).Combine()
+                    Definition = values.Select(x => x.Definition).Combine(this)
                 })
                 .ToList();
 
@@ -117,11 +117,11 @@ namespace MassTransit.Configuration
                 from f in fs.DefaultIfEmpty()
                 join ep in endpointsWithName on e equals ep.Name into eps
                 from ep in eps.Select(x => x.Definition)
-                    .DefaultIfEmpty(c?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x, x.EndpointDefinition)).Combine()
-                        ?? s?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x, x.EndpointDefinition)).Combine()
-                        ?? a?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x, x.ExecuteEndpointDefinition)).Combine()
-                        ?? ea?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x, x.ExecuteEndpointDefinition)).Combine()
-                        ?? f?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x, x.EndpointDefinition)).Combine()
+                    .DefaultIfEmpty(c?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x, x.EndpointDefinition)).Combine(this)
+                        ?? s?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x, x.EndpointDefinition)).Combine(this)
+                        ?? a?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x, x.ExecuteEndpointDefinition)).Combine(this)
+                        ?? ea?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x, x.ExecuteEndpointDefinition)).Combine(this)
+                        ?? f?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x, x.EndpointDefinition)).Combine(this)
                         ?? new NamedEndpointDefinition(e))
                 select new Endpoint(ep, c, s, a, ea, f)).ToList();
 
@@ -131,7 +131,9 @@ namespace MassTransit.Configuration
                 var registration = Selector.GetRegistrations<IJobServiceRegistration>(this).SingleOrDefault();
                 registration ??= new JobServiceRegistration();
 
-                configurator.ReceiveEndpoint(registration.EndpointDefinition, endpointNameFormatter, endpointConfigurator =>
+                var endpointDefinition = new CombinedEndpointDefinition([registration.EndpointDefinition], this);
+
+                configurator.ReceiveEndpoint(endpointDefinition, endpointNameFormatter, endpointConfigurator =>
                 {
                     var options = new ServiceInstanceOptions().SetEndpointNameFormatter(endpointNameFormatter);
 

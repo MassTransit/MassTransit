@@ -22,7 +22,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
         public void SetQuorumQueue(int? replicationFactor)
         {
             SetQueueArgument(Headers.XQueueType, "quorum");
-            Durable = true;
             Exclusive = false;
 
             QueueArguments.Remove(Headers.XMaxPriority);

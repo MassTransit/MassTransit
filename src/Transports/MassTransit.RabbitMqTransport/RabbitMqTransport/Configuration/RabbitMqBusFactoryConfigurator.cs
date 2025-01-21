@@ -23,7 +23,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             var queueName = busConfiguration.Topology.Consume.CreateTemporaryQueueName("bus");
             var exchangeType = busConfiguration.BusEndpointConfiguration.Topology.Consume.ExchangeTypeSelector.DefaultExchangeType;
-            _settings = new RabbitMqReceiveSettings(busConfiguration.BusEndpointConfiguration, queueName, exchangeType, false, false)
+            _settings = new RabbitMqReceiveSettings(busConfiguration.BusEndpointConfiguration, queueName, exchangeType, false, true)
             {
                 QueueExpiration = TimeSpan.FromMinutes(1)
             };

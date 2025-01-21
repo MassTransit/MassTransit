@@ -47,7 +47,13 @@
 
                 void RemoveHandler(Task _)
                 {
-                    connectionContext.Connection.ConnectionShutdownAsync -= HandleShutdown;
+                    try
+                    {
+                        connectionContext.Connection.ConnectionShutdownAsync -= HandleShutdown;
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                    }
                 }
 
                 contextHandle.Completed.ContinueWith(RemoveHandler);

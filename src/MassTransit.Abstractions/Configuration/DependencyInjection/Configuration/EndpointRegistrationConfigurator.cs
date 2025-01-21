@@ -50,5 +50,10 @@ namespace MassTransit.Configuration
         {
             _settings.AddConfigureEndpointCallback(callback);
         }
+
+        public void AddConfigureEndpointCallback(Action<IRegistrationContext, IReceiveEndpointConfigurator>? callback)
+        {
+            _settings.AddConfigureEndpointCallback(callback);
+        }
     }
 }

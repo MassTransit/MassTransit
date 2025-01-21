@@ -77,6 +77,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             if (definition.IsTemporary)
             {
                 configurator.QueueExpiration = TimeSpan.FromMinutes(1);
+                configurator.AutoDelete = true;
                 configurator.Durable = false;
             }
 

@@ -87,7 +87,10 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             if (settings.BindQueue)
             {
-                topologyBuilder.Queue = topologyBuilder.QueueDeclare(settings.QueueName, settings.Durable, queueAutoDelete, settings.Exclusive, queueArguments);
+                var isQuorumQueue = queueArguments.TryGetValue(Headers.XQueueType, out var queueType) && queueType.Equals("quorum");
+
+                var durableQueue = settings.Durable || isQuorumQueue;
+                topologyBuilder.Queue = topologyBuilder.QueueDeclare(settings.QueueName, durableQueue, queueAutoDelete, settings.Exclusive, queueArguments);
 
                 topologyBuilder.QueueBind(topologyBuilder.Exchange, topologyBuilder.Queue, settings.RoutingKey, settings.BindingArguments);
             }
