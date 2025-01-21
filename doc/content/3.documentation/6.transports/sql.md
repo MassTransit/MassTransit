@@ -273,6 +273,16 @@ x.UsingSqlServer((context, cfg) =>
 });
 ```
 
+#### Global Topology
+
+To configure transport-specific topology conventions at a global level using `GlobalTopology`, the appropriate conventions must be added. For example, to globally configure a _PartitionKey_ formatter for a base interface on a message contract:
+
+```cs
+GlobalTopology.Send.TryAddConvention(new PartitionKeySendTopologyConvention());
+
+GlobalTopology.Send.UsePartitionKeyFormatter<ICanHasPartitionKey>(x => x.Message.PartitionKey.ToString());
+```
+
 ### Set Receive Mode
 
 The SQL transport supports multiple receive modes when configuring a receive endpoint. To enable partitioned delivery, one of the partitioned receive modes
