@@ -10,7 +10,6 @@ export default defineAppConfig({
         image: 'https://raw.githubusercontent.com/phatboyg/MassTransit/docus/docus/public/landing-image.png',
         url: 'https://masstransit-project.com',
         socials: {
-            twitter: 'mtproj',
             github: 'MassTransit/MassTransit'
         },
         aside: {
