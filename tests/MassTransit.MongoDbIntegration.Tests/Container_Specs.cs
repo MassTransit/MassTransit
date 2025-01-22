@@ -51,9 +51,6 @@ namespace MassTransit.MongoDbIntegration.Tests
 
             public Using_the_container_integration()
             {
-                // add new migration by calling
-                // dotnet ef migrations add --context "TestInstanceDbContext" Init  -v
-
                 _provider = new ServiceCollection()
                     .AddMassTransit(ConfigureRegistration)
                     .AddScoped<PublishTestStartedActivity>()

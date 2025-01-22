@@ -5,7 +5,6 @@ namespace MassTransit.MongoDbIntegration.Tests.Audit
     using System.Threading.Tasks;
     using MassTransit.Audit;
     using MongoDB.Driver;
-    using MongoDB.Driver.Linq;
     using MongoDbIntegration.Audit;
 
 
@@ -25,20 +24,24 @@ namespace MassTransit.MongoDbIntegration.Tests.Audit
         public static IMessageAuditStore AuditStore { get; }
         public static IMongoCollection<AuditDocument> AuditCollection { get; }
 
-        public static Task<List<AuditDocument>> GetAuditRecordsForMessage(Guid messageId)
+        public static async Task<List<AuditDocument>> GetAuditRecordsForMessage(Guid messageId)
         {
-            return Database.GetCollection<AuditDocument>(AuditCollectionName)
-                .AsQueryable()
-                .Where(x => x.MessageId == messageId.ToString())
-                .ToListAsync();
+            FilterDefinition<AuditDocument> filter = new FilterDefinitionBuilder<AuditDocument>()
+                .Eq(x => x.MessageId, messageId.ToString());
+
+            IAsyncCursor<AuditDocument> results = await Database.GetCollection<AuditDocument>(AuditCollectionName).FindAsync(filter);
+
+            return await results.ToListAsync();
         }
 
-        public static Task<List<AuditDocument>> GetAuditRecords(string contextType)
+        public static async Task<List<AuditDocument>> GetAuditRecords(string contextType)
         {
-            return Database.GetCollection<AuditDocument>(AuditCollectionName)
-                .AsQueryable()
-                .Where(x => x.ContextType == contextType)
-                .ToListAsync();
+            FilterDefinition<AuditDocument> filter = new FilterDefinitionBuilder<AuditDocument>()
+                .Eq(x => x.ContextType, contextType);
+
+            IAsyncCursor<AuditDocument> results = await Database.GetCollection<AuditDocument>(AuditCollectionName).FindAsync(filter);
+
+            return await results.ToListAsync();
         }
 
         public static Task Cleanup()

@@ -23,7 +23,7 @@ namespace MassTransit.Configuration
             ClassMap(provider => provider.GetService<BsonClassMap<TSaga>>() ?? new BsonClassMap<TSaga>(cfg =>
             {
                 cfg.AutoMap();
-                cfg.MapIdProperty(x => x.CorrelationId);
+                cfg.MapIdProperty(x => x.CorrelationId).EnsureGuidRepresentationSpecified();
                 cfg.MapProperty(x => x.Version).SetIgnoreIfDefault(false);
             }));
         }

@@ -5,6 +5,9 @@ namespace MassTransit.MongoDbIntegration.Tests
     using Contracts.JobService;
     using JobConsumerTests;
     using Microsoft.Extensions.DependencyInjection;
+    using MongoDB.Bson;
+    using MongoDB.Bson.Serialization;
+    using MongoDB.Bson.Serialization.Serializers;
     using NUnit.Framework;
     using Testing;
 
@@ -89,7 +92,7 @@ namespace MassTransit.MongoDbIntegration.Tests
 
                 IRequestClient<SubmitJob<OddJob>> client = harness.GetRequestClient<SubmitJob<OddJob>>();
 
-                var responseJobId = await client.SubmitJob(jobId, new {Duration = TimeSpan.FromSeconds(1)}, p => p.Set("Variable", "Knife"));
+                var responseJobId = await client.SubmitJob(jobId, new { Duration = TimeSpan.FromSeconds(1) }, p => p.Set("Variable", "Knife"));
 
                 await Assert.MultipleAsync(async () =>
                 {

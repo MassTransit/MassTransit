@@ -93,19 +93,32 @@ namespace MassTransit.Configuration
             BsonClassMap.TryRegisterClassMap(new BsonClassMap<InboxState>(cfg =>
             {
                 cfg.AutoMap();
-                cfg.MapIdProperty(x => x.Id);
+                cfg.MapIdProperty(x => x.Id).EnsureGuidRepresentationSpecified();
+
+                cfg.MapProperty(x => x.MessageId).EnsureGuidRepresentationSpecified();
+                cfg.MapProperty(x => x.ConsumerId).EnsureGuidRepresentationSpecified();
             }));
 
             BsonClassMap.TryRegisterClassMap(new BsonClassMap<OutboxState>(cfg =>
             {
                 cfg.AutoMap();
-                cfg.MapIdProperty(x => x.OutboxId);
+                cfg.MapIdProperty(x => x.OutboxId).EnsureGuidRepresentationSpecified();
             }));
 
             BsonClassMap.TryRegisterClassMap(new BsonClassMap<OutboxMessage>(cfg =>
             {
                 cfg.AutoMap();
                 cfg.MapIdProperty(x => x.Id);
+
+                cfg.MapProperty(x => x.InboxMessageId).EnsureGuidRepresentationSpecified();
+                cfg.MapProperty(x => x.InboxConsumerId).EnsureGuidRepresentationSpecified();
+                cfg.MapProperty(x => x.OutboxId).EnsureGuidRepresentationSpecified();
+                cfg.MapProperty(x => x.MessageId).EnsureGuidRepresentationSpecified();
+
+                cfg.MapProperty(x => x.ConversationId).EnsureGuidRepresentationSpecified();
+                cfg.MapProperty(x => x.CorrelationId).EnsureGuidRepresentationSpecified();
+                cfg.MapProperty(x => x.InitiatorId).EnsureGuidRepresentationSpecified();
+                cfg.MapProperty(x => x.RequestId).EnsureGuidRepresentationSpecified();
             }));
         }
     }

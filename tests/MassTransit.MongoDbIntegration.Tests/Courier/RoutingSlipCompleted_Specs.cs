@@ -3,6 +3,9 @@
     using System;
     using System.Threading.Tasks;
     using MassTransit.Courier.Contracts;
+    using MongoDB.Bson;
+    using MongoDB.Bson.Serialization;
+    using MongoDB.Bson.Serialization.Serializers;
     using MongoDB.Driver;
     using MongoDbIntegration.Courier;
     using MongoDbIntegration.Courier.Consumers;
