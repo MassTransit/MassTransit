@@ -10,8 +10,6 @@ namespace MassTransit.Serialization
     using Initializers;
     using Initializers.TypeConverters;
     using JsonConverters;
-    using Metadata;
-    using Internals;
 
 
     public class SystemTextJsonMessageSerializer :
