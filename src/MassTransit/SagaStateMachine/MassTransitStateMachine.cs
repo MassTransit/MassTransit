@@ -1790,10 +1790,13 @@
 
             Event(propertyExpression, x => x.Received);
 
-            Event(propertyExpression, x => x.AnyReceived, x =>
-            {
-                settings.Received?.Invoke(x);
-            });
+            if (settings.Received == null)
+                Event(propertyExpression, x => x.AnyReceived);
+            else
+                Event(propertyExpression, x => x.AnyReceived, x =>
+                {
+                    settings.Received(x);
+                });
 
             DuringAny(
                 When(schedule.AnyReceived)
