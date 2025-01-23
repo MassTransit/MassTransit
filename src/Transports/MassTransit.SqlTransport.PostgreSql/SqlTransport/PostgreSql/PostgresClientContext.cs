@@ -33,6 +33,7 @@ namespace MassTransit.SqlTransport.PostgreSql
         readonly string _sendSql;
         readonly string _touchQueueSql;
         readonly string _unlockSql;
+        readonly string _deadLetterMessagesSql;
 
         public PostgresClientContext(PostgresDbConnectionContext context, CancellationToken cancellationToken)
             : base(context, cancellationToken)
@@ -48,6 +49,7 @@ namespace MassTransit.SqlTransport.PostgreSql
             _processMetricsSql = string.Format(SqlStatements.DbProcessMetricsSql, _context.Schema);
             _publishSql = string.Format(SqlStatements.DbPublishSql, _context.Schema);
             _purgeQueueSql = string.Format(SqlStatements.DbPurgeQueueSql, _context.Schema);
+            _deadLetterMessagesSql = string.Format(SqlStatements.DbDeadLetterMessagesSql, _context.Schema);
             _createTopicSql = string.Format(SqlStatements.DbCreateTopicSql, _context.Schema);
             _createQueueSql = string.Format(SqlStatements.DbCreateQueueSql, _context.Schema);
             _deleteMessageSql = string.Format(SqlStatements.DbDeleteMessageSql, _context.Schema);
@@ -144,7 +146,16 @@ namespace MassTransit.SqlTransport.PostgreSql
 
         public override Task TouchQueue(string queueName)
         {
-            return _context.Query((x, t) => x.QueryAsync<SqlTransportMessage>(_touchQueueSql, new { queue_name = queueName }), CancellationToken);
+            return _context.Query((x, t) => x.ExecuteScalarAsync<int?>(_touchQueueSql, new { queue_name = queueName }), CancellationToken);
+        }
+
+        public override Task<int?> DeadLetterQueue(string queueName, int messageCount)
+        {
+            return _context.Query((x, t) => x.ExecuteScalarAsync<int?>(_deadLetterMessagesSql, new
+            {
+                queue_name = queueName,
+                message_count = messageCount
+            }), CancellationToken);
         }
 
         public override Task Send<T>(string queueName, SqlMessageSendContext<T> context)

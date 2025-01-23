@@ -22,9 +22,10 @@ namespace MassTransit.SqlTransport.Middleware
         readonly OrderedChannelExecutorPool _executorPool;
         readonly object _lock = new();
         readonly ReceiveSettings _receiveSettings;
+        readonly TimeSpan? _touchQueueInterval;
         CancellationTokenSource _cancellationTokenSource;
-
-        DateTime? _lastMetricUpdate;
+        DateTime? _lastMaintenance;
+        DateTime? _lastTouched;
 
         /// <summary>
         /// The basic consumer receives messages pushed from the broker.
@@ -38,6 +39,9 @@ namespace MassTransit.SqlTransport.Middleware
             _context = context;
 
             _receiveSettings = client.GetPayload<ReceiveSettings>();
+
+            if (_receiveSettings.AutoDeleteOnIdle.HasValue)
+                _touchQueueInterval = new TimeSpan(_receiveSettings.AutoDeleteOnIdle.Value.Ticks / 2);
 
             _executorPool = new OrderedChannelExecutorPool(_receiveSettings);
 
@@ -118,16 +122,38 @@ namespace MassTransit.SqlTransport.Middleware
                 if (messages.Count > 0)
                     return messages;
 
-                if (_receiveSettings.AutoDeleteOnIdle.HasValue)
+                try
                 {
-                    if (_lastMetricUpdate.HasValue == false
-                        || _lastMetricUpdate.Value + new TimeSpan(_receiveSettings.AutoDeleteOnIdle.Value.Ticks / 2) > DateTime.UtcNow)
-                    {
-                        await _client.TouchQueue(_receiveSettings.EntityName).ConfigureAwait(false);
+                    int? count = 0;
 
-                        _lastMetricUpdate = DateTime.UtcNow;
+                    if (_lastMaintenance.HasValue == false || _lastMaintenance.Value + TimeSpan.FromSeconds(30) > DateTime.UtcNow)
+                    {
+                        count = await _client.DeadLetterQueue(_receiveSettings.QueueName, _receiveSettings.MaintenanceBatchSize).ConfigureAwait(false);
+
+                        if (count < _receiveSettings.MaintenanceBatchSize)
+                            _lastMaintenance = DateTime.UtcNow;
+                    }
+
+                    if (_touchQueueInterval.HasValue && count is null or 0)
+                    {
+                        if (_lastTouched.HasValue == false || _lastTouched.Value + _touchQueueInterval.Value > DateTime.UtcNow)
+                        {
+                            await _client.TouchQueue(_receiveSettings.EntityName).ConfigureAwait(false);
+
+                            _lastTouched = DateTime.UtcNow;
+                        }
                     }
                 }
+                catch (ObjectDisposedException)
+                {
+                }
+                catch (OperationCanceledException)
+                {
+                }
+                catch (TimeoutException)
+                {
+                }
+
 
                 await WaitForPollingIntervalOrMessageHandled(cancellationToken).ConfigureAwait(false);
 
@@ -139,7 +165,7 @@ namespace MassTransit.SqlTransport.Middleware
             }
         }
 
-        public async Task WaitForPollingIntervalOrMessageHandled(CancellationToken cancellationToken)
+        async Task WaitForPollingIntervalOrMessageHandled(CancellationToken cancellationToken)
         {
             lock (_lock)
                 _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);

@@ -30,5 +30,10 @@
         /// If true, messages that exist in the queue will be purged when the bus is started
         /// </summary>
         bool PurgeOnStartup { set; }
+
+        /// <summary>
+        /// Set the number of rows to process at a time when performing queue maintenance
+        /// </summary>
+        int MaintenanceBatchSize { set; }
     }
 }

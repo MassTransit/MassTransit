@@ -39,6 +39,7 @@ namespace MassTransit.SqlTransport
             TimeSpan lockDuration);
 
         public abstract Task TouchQueue(string queueName);
+        public abstract Task<int?> DeadLetterQueue(string queueName, int messageCount);
 
         public abstract Task<bool> DeleteMessage(Guid lockId, long messageDeliveryId);
         public abstract Task<bool> DeleteScheduledMessage(Guid tokenId, CancellationToken cancellationToken);

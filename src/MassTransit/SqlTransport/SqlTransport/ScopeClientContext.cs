@@ -83,6 +83,11 @@ namespace MassTransit.SqlTransport
             return _context.TouchQueue(queueName);
         }
 
+        public Task<int?> DeadLetterQueue(string queueName, int messageCount)
+        {
+            return _context.DeadLetterQueue(queueName, messageCount);
+        }
+
         public Task<bool> DeleteMessage(Guid lockId, long messageDeliveryId)
         {
             return _context.DeleteMessage(lockId, messageDeliveryId);

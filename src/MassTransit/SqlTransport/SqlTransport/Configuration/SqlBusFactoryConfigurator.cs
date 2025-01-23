@@ -69,6 +69,11 @@ namespace MassTransit.SqlTransport.Configuration
             set => _settings.PurgeOnStartup = value;
         }
 
+        public int MaintenanceBatchSize
+        {
+            set => _settings.MaintenanceBatchSize = value;
+        }
+
         public void Host(SqlHostSettings settings)
         {
             _busConfiguration.HostConfiguration.Settings = settings;

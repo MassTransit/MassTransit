@@ -46,7 +46,7 @@ namespace MassTransit.SqlTransport
 
         public override IEnumerable<IAgent> GetAgentHandles()
         {
-            return new IAgent[] { };
+            return [];
         }
 
         public Task Send(IPipe<ClientContext> pipe, CancellationToken cancellationToken = default)

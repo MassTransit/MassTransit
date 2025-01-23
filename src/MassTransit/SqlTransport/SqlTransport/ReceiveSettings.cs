@@ -58,5 +58,7 @@
         /// The amount of time, when a message is abandoned, before the message is available for redelivery
         /// </summary>
         TimeSpan? UnlockDelay { get; }
+
+        int MaintenanceBatchSize { get; }
     }
 }

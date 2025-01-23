@@ -21,6 +21,7 @@ namespace MassTransit.SqlTransport.Configuration
             LockDuration = TimeSpan.FromMinutes(1);
             MaxLockDuration = TimeSpan.FromHours(12);
             MaxDeliveryCount = 10;
+            MaintenanceBatchSize = 100;
         }
 
         public long? QueueId { get; set; }
@@ -59,6 +60,8 @@ namespace MassTransit.SqlTransport.Configuration
         public TimeSpan MaxLockDuration { get; set; }
 
         public string EntityName => QueueName;
+
+        public int MaintenanceBatchSize { get; set; }
 
         public Uri GetInputAddress(Uri hostAddress)
         {

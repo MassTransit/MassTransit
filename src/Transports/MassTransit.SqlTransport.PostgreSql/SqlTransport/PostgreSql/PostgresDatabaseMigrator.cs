@@ -1083,6 +1083,50 @@ namespace MassTransit.SqlTransport.PostgreSql
             END;
             $$;
 
+            CREATE OR REPLACE FUNCTION "{0}".dead_letter_messages(queue_name text, message_count int)
+                RETURNS int
+                LANGUAGE PLPGSQL
+            AS
+            $$
+            DECLARE
+                v_source_queue_id bigint;
+                v_target_queue_id bigint;
+                v_count           int;
+                v_current_time    timestamptz;
+            BEGIN
+                SELECT INTO v_source_queue_id q.Id FROM "{0}".queue q WHERE q.name = queue_name AND q.type = 1;
+                IF v_source_queue_id IS NULL THEN
+                    RAISE EXCEPTION 'Queue not found: %', queue_name;
+                END IF;
+
+                SELECT INTO v_target_queue_id q.Id FROM "{0}".queue q WHERE q.name = queue_name AND q.type = 3;
+                IF v_target_queue_id IS NULL THEN
+                    RAISE EXCEPTION 'Dead-Letter Queue not found: %', queue_name;
+                END IF;
+
+                v_current_time := (now() at time zone 'utc');
+
+                UPDATE "{0}".message_delivery md
+                SET queue_id = v_target_queue_id
+                FROM (SELECT mdx.message_delivery_id, queue_id
+                      FROM "{0}".message_delivery mdx
+                      WHERE mdx.queue_id = v_source_queue_id
+                        AND mdx.enqueue_time < v_current_time
+                        AND mdx.delivery_count >= mdx.max_delivery_count
+                        AND (mdx.expiration_time IS NULL OR mdx.expiration_time > v_current_time)
+                        ORDER BY mdx.message_delivery_id FOR UPDATE SKIP LOCKED LIMIT message_count) mdy
+                WHERE mdy.message_delivery_id = md.message_delivery_id;
+                GET DIAGNOSTICS v_count = ROW_COUNT;
+
+                IF v_count > 0 THEN
+                    INSERT INTO "{0}".queue_metric_capture (captured, queue_id, consume_count, error_count, dead_letter_count)
+                        VALUES (now() at time zone 'utc', v_source_queue_id, 0, 0, v_count);
+                END IF;
+
+                RETURN v_count;
+            END;
+            $$;
+
             CREATE OR REPLACE FUNCTION "{0}".requeue_message(
                 message_delivery_id bigint,
                 target_queue_type int,

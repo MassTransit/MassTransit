@@ -33,6 +33,7 @@ namespace MassTransit.SqlTransport.SqlServer
         readonly string _sendSql;
         readonly string _touchQueueSql;
         readonly string _unlockSql;
+        readonly string _deadLetterMessagesSql;
 
         public SqlServerClientContext(SqlServerDbConnectionContext context, CancellationToken cancellationToken)
             : base(context, cancellationToken)
@@ -47,6 +48,7 @@ namespace MassTransit.SqlTransport.SqlServer
             _sendSql = $"{_context.Schema}.SendMessage";
             _publishSql = $"{_context.Schema}.PublishMessage";
             _purgeQueueSql = $"{_context.Schema}.PurgeQueue";
+            _deadLetterMessagesSql = $"{_context.Schema}.DeadLetterMessages";
             _receiveSql = $"{_context.Schema}.FetchMessages";
             _receivePartitionedSql = $"{_context.Schema}.FetchMessagesPartitioned";
             _deleteMessageSql = $"{_context.Schema}.DeleteMessage";
@@ -147,13 +149,18 @@ namespace MassTransit.SqlTransport.SqlServer
             }
             catch (SqlException exception) when (exception.Number == 1205)
             {
-                return Array.Empty<SqlTransportMessage>();
+                return [];
             }
         }
 
         public override Task TouchQueue(string queueName)
         {
-            return Query<SqlTransportMessage>(_touchQueueSql, new { queueName });
+            return Execute<long>(_touchQueueSql, new { queueName });
+        }
+
+        public override Task<int?> DeadLetterQueue(string queueName, int messageCount)
+        {
+            return Execute<int>(_deadLetterMessagesSql, new { queueName, messageCount });
         }
 
         public override Task Send<T>(string queueName, SqlMessageSendContext<T> context)

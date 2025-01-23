@@ -97,6 +97,12 @@ namespace MassTransit.SqlTransport.Configuration
             if (_settings.PurgeOnStartup)
                 yield return this.Warning(_settings.QueueName, "Existing messages will be purged on service start");
 
+            if (_settings.MaintenanceBatchSize <= 0)
+                yield return this.Failure(_settings.QueueName, nameof(_settings.MaintenanceBatchSize), "Must be >= 1");
+
+            if (_settings.UnlockDelay.HasValue && _settings.UnlockDelay < TimeSpan.Zero)
+                yield return this.Failure(_settings.QueueName, nameof(_settings.UnlockDelay), "Must be > TimeSpan.Zero");
+
             foreach (var result in base.Validate())
                 yield return result.WithParentKey(_settings.QueueName);
         }
@@ -134,6 +140,11 @@ namespace MassTransit.SqlTransport.Configuration
         public bool PurgeOnStartup
         {
             set => _settings.PurgeOnStartup = value;
+        }
+
+        public int MaintenanceBatchSize
+        {
+            set => _settings.MaintenanceBatchSize = value;
         }
 
         public void Subscribe(string topicName, Action<ISqlTopicSubscriptionConfigurator>? callback)
