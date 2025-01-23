@@ -10,7 +10,7 @@ namespace MassTransit
         RequestException
     {
         public RequestFaultException(string requestType, Fault fault)
-            : base($"The {requestType} request faulted: {string.Join(Environment.NewLine, fault.Exceptions.Select(x => x.Message))}")
+            : base($"The {requestType} request faulted: {string.Join(Environment.NewLine, fault.Exceptions?.Select(x => x.Message) ?? [])}")
         {
             RequestType = requestType;
             Fault = fault;

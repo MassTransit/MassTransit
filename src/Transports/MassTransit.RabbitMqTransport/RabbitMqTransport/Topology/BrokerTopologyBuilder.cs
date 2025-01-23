@@ -53,7 +53,22 @@ namespace MassTransit.RabbitMqTransport.Topology
         {
             var id = GetNextId();
 
-            var queue = new QueueEntity(id, name, durable, autoDelete, exclusive, arguments);
+            var queueArguments = new Dictionary<string, object>(arguments);
+
+            var queueAutoDelete = autoDelete;
+            if (queueArguments.TryGetValue(RabbitMQ.Client.Headers.XExpires, out _))
+            {
+                queueAutoDelete = false;
+                autoDelete = true;
+            }
+
+            var isQuorumQueue = queueArguments.TryGetValue(RabbitMQ.Client.Headers.XQueueType, out var queueType) && queueType.Equals("quorum");
+
+            var durableQueue = durable || isQuorumQueue;
+
+            exclusive = exclusive || autoDelete && !isQuorumQueue;
+
+            var queue = new QueueEntity(id, name, durableQueue, queueAutoDelete, exclusive, arguments);
 
             return _queues.GetOrAdd(queue);
         }

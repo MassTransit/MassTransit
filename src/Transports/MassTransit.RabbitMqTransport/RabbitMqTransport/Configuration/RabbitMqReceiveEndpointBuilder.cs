@@ -75,22 +75,16 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             var queueArguments = new Dictionary<string, object>(settings.QueueArguments);
 
-            var queueAutoDelete = settings.AutoDelete;
             if (settings.QueueExpiration.HasValue)
-            {
                 queueArguments[Headers.XExpires] = (long)settings.QueueExpiration.Value.TotalMilliseconds;
-                queueAutoDelete = false;
-            }
 
             topologyBuilder.Exchange = topologyBuilder.ExchangeDeclare(settings.ExchangeName ?? settings.QueueName, settings.ExchangeType, settings.Durable,
                 settings.AutoDelete, settings.ExchangeArguments);
 
             if (settings.BindQueue)
             {
-                var isQuorumQueue = queueArguments.TryGetValue(Headers.XQueueType, out var queueType) && queueType.Equals("quorum");
-
-                var durableQueue = settings.Durable || isQuorumQueue;
-                topologyBuilder.Queue = topologyBuilder.QueueDeclare(settings.QueueName, durableQueue, queueAutoDelete, settings.Exclusive, queueArguments);
+                topologyBuilder.Queue = topologyBuilder.QueueDeclare(settings.QueueName, settings.Durable, settings.AutoDelete, settings.Exclusive,
+                    queueArguments);
 
                 topologyBuilder.QueueBind(topologyBuilder.Exchange, topologyBuilder.Queue, settings.RoutingKey, settings.BindingArguments);
             }
