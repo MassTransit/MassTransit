@@ -1,7 +1,9 @@
+#nullable enable
 namespace MassTransit.Configuration
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
 
 
     /// <summary>
@@ -17,11 +19,29 @@ namespace MassTransit.Configuration
         /// <param name="value"></param>
         /// <typeparam name="T">The registration type</typeparam>
         /// <returns></returns>
-        bool TryGetValue<T>(IServiceProvider provider, Type type, out T value)
+        bool TryGetRegistration<T>(IServiceProvider provider, Type type, [NotNullWhen(true)] out T? value)
             where T : class, IRegistration;
 
         IEnumerable<T> GetRegistrations<T>(IServiceProvider provider)
             where T : class, IRegistration;
+
+        /// <summary>
+        /// Returns the definition from the service provider, if it exists
+        /// </summary>
+        /// <param name="provider">The service provider</param>
+        /// <typeparam name="T">The definition type</typeparam>
+        /// <returns>The definition, if found, otherwise null</returns>
+        T? GetDefinition<T>(IServiceProvider provider)
+            where T : class, IDefinition;
+
+        /// <summary>
+        /// Returns the endpoint definition from the service provider, if it exists
+        /// </summary>
+        /// <param name="provider">The service provider</param>
+        /// <typeparam name="T">The definition target type</typeparam>
+        /// <returns></returns>
+        IEndpointDefinition<T>? GetEndpointDefinition<T>(IServiceProvider provider)
+            where T : class;
 
         IConfigureReceiveEndpoint GetConfigureReceiveEndpoints(IServiceProvider provider);
 

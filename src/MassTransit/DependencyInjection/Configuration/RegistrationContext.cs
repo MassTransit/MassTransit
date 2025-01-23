@@ -23,7 +23,7 @@ namespace MassTransit.Configuration
 
         public void ConfigureConsumer(Type consumerType, IReceiveEndpointConfigurator configurator)
         {
-            if (!Selector.TryGetValue<IConsumerRegistration>(_provider, consumerType, out var consumer))
+            if (!Selector.TryGetRegistration<IConsumerRegistration>(_provider, consumerType, out var consumer))
                 throw new ArgumentException($"The consumer type was not found: {TypeCache.GetShortName(consumerType)}", nameof(consumerType));
 
             consumer.Configure(configurator, this);
@@ -32,7 +32,7 @@ namespace MassTransit.Configuration
         public void ConfigureConsumer<T>(IReceiveEndpointConfigurator configurator, Action<IConsumerConfigurator<T>> configure)
             where T : class, IConsumer
         {
-            if (!Selector.TryGetValue<IConsumerRegistration>(_provider, typeof(T), out var consumer))
+            if (!Selector.TryGetRegistration<IConsumerRegistration>(_provider, typeof(T), out var consumer))
                 throw new ArgumentException($"The consumer type was not found: {TypeCache.GetShortName(typeof(T))}", nameof(T));
 
             if (configure != null)
@@ -48,7 +48,7 @@ namespace MassTransit.Configuration
 
         public void ConfigureSaga(Type sagaType, IReceiveEndpointConfigurator configurator)
         {
-            if (!Selector.TryGetValue<ISagaRegistration>(_provider, sagaType, out var saga))
+            if (!Selector.TryGetRegistration<ISagaRegistration>(_provider, sagaType, out var saga))
                 throw new ArgumentException($"The saga type was not found: {TypeCache.GetShortName(sagaType)}", nameof(sagaType));
 
             saga.Configure(configurator, this);
@@ -57,7 +57,7 @@ namespace MassTransit.Configuration
         public void ConfigureSaga<T>(IReceiveEndpointConfigurator configurator, Action<ISagaConfigurator<T>> configure)
             where T : class, ISaga
         {
-            if (!Selector.TryGetValue<ISagaRegistration>(_provider, typeof(T), out var saga))
+            if (!Selector.TryGetRegistration<ISagaRegistration>(_provider, typeof(T), out var saga))
                 throw new ArgumentException($"The saga type was not found: {TypeCache.GetShortName(typeof(T))}", nameof(T));
 
             if (configure != null)
@@ -73,7 +73,7 @@ namespace MassTransit.Configuration
 
         public void ConfigureExecuteActivity(Type activityType, IReceiveEndpointConfigurator configurator)
         {
-            if (!Selector.TryGetValue<IExecuteActivityRegistration>(_provider, activityType, out var activity))
+            if (!Selector.TryGetRegistration<IExecuteActivityRegistration>(_provider, activityType, out var activity))
                 throw new ArgumentException($"The activity type was not found: {TypeCache.GetShortName(activityType)}", nameof(activityType));
 
             activity.Configure(configurator, this);
@@ -82,7 +82,7 @@ namespace MassTransit.Configuration
         public void ConfigureActivity(Type activityType, IReceiveEndpointConfigurator executeEndpointConfigurator,
             IReceiveEndpointConfigurator compensateEndpointConfigurator)
         {
-            if (!Selector.TryGetValue<IActivityRegistration>(_provider, activityType, out var activity))
+            if (!Selector.TryGetRegistration<IActivityRegistration>(_provider, activityType, out var activity))
                 throw new ArgumentException($"The activity type was not found: {TypeCache.GetShortName(activityType)}", nameof(activityType));
 
             activity.Configure(executeEndpointConfigurator, compensateEndpointConfigurator, this);
@@ -90,7 +90,7 @@ namespace MassTransit.Configuration
 
         public void ConfigureActivityExecute(Type activityType, IReceiveEndpointConfigurator executeEndpointConfigurator, Uri compensateAddress)
         {
-            if (!Selector.TryGetValue<IActivityRegistration>(_provider, activityType, out var activity))
+            if (!Selector.TryGetRegistration<IActivityRegistration>(_provider, activityType, out var activity))
                 throw new ArgumentException($"The activity type was not found: {TypeCache.GetShortName(activityType)}", nameof(activityType));
 
             activity.ConfigureExecute(executeEndpointConfigurator, this, compensateAddress);
@@ -98,7 +98,7 @@ namespace MassTransit.Configuration
 
         public void ConfigureActivityCompensate(Type activityType, IReceiveEndpointConfigurator compensateEndpointConfigurator)
         {
-            if (!Selector.TryGetValue<IActivityRegistration>(_provider, activityType, out var activity))
+            if (!Selector.TryGetRegistration<IActivityRegistration>(_provider, activityType, out var activity))
                 throw new ArgumentException($"The activity type was not found: {TypeCache.GetShortName(activityType)}", nameof(activityType));
 
             activity.ConfigureCompensate(compensateEndpointConfigurator, this);
@@ -106,7 +106,7 @@ namespace MassTransit.Configuration
 
         public void ConfigureFuture(Type futureType, IReceiveEndpointConfigurator configurator)
         {
-            if (!Selector.TryGetValue<IFutureRegistration>(_provider, futureType, out var future))
+            if (!Selector.TryGetRegistration<IFutureRegistration>(_provider, futureType, out var future))
                 throw new ArgumentException($"The future type was not found: {TypeCache.GetShortName(futureType)}", nameof(futureType));
 
             future.Configure(configurator, this);
@@ -115,7 +115,7 @@ namespace MassTransit.Configuration
         public void ConfigureFuture<T>(IReceiveEndpointConfigurator configurator)
             where T : class, ISaga
         {
-            if (!Selector.TryGetValue<IFutureRegistration>(_provider, typeof(T), out var future))
+            if (!Selector.TryGetRegistration<IFutureRegistration>(_provider, typeof(T), out var future))
                 throw new ArgumentException($"The future type was not found: {TypeCache.GetShortName(typeof(T))}", nameof(T));
 
             future.Configure(configurator, this);

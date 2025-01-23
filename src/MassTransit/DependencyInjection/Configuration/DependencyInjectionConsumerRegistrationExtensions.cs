@@ -110,7 +110,7 @@ namespace MassTransit.Configuration
             {
                 collection.TryAddScoped<TConsumer>();
 
-                return registrar.GetOrAdd<IConsumerRegistration>(typeof(TConsumer), _ => new ConsumerRegistration<TConsumer>());
+                return registrar.GetOrAddRegistration<IConsumerRegistration>(typeof(TConsumer), _ => new ConsumerRegistration<TConsumer>(registrar));
             }
         }
 
@@ -124,8 +124,7 @@ namespace MassTransit.Configuration
             {
                 var registration = base.Register(collection, registrar);
 
-                collection.AddSingleton<TDefinition>();
-                collection.AddSingleton<IConsumerDefinition<TConsumer>>(provider => provider.GetRequiredService<TDefinition>());
+                registrar.AddDefinition<IConsumerDefinition<TConsumer>, TDefinition>();
 
                 return registration;
             }

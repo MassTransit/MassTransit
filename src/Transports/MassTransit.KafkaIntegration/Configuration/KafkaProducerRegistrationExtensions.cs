@@ -60,7 +60,7 @@ namespace MassTransit
 
             var registration = new KafkaProducerRegistration<TKey, T>(topicName, configure);
             configurator.TryAddScoped<IKafkaRider, ITopicProducer<TKey, T>>((rider, provider) => GetProducer<TKey, T>(topicName, rider, provider));
-            configurator.Registrar.GetOrAdd<IKafkaProducerRegistration>(typeof(IKafkaProducerRegistration), _ => registration);
+            configurator.Registrar.GetOrAddRegistration<IKafkaProducerRegistration>(typeof(IKafkaProducerRegistration), _ => registration);
         }
 
         /// <summary>
@@ -85,7 +85,7 @@ namespace MassTransit
 
             var registration = new KafkaProducerRegistration<TKey, T>(topicName, configure, producerConfig);
             configurator.TryAddScoped<IKafkaRider, ITopicProducer<TKey, T>>((rider, provider) => GetProducer<TKey, T>(topicName, rider, provider));
-            configurator.Registrar.GetOrAdd<IKafkaProducerRegistration>(typeof(IKafkaProducerRegistration), _ => registration);
+            configurator.Registrar.GetOrAddRegistration<IKafkaProducerRegistration>(typeof(IKafkaProducerRegistration), _ => registration);
         }
 
         /// <summary>

@@ -4,7 +4,6 @@ namespace MassTransit.DependencyInjection.Registration
     using System.Collections.Generic;
     using Configuration;
     using Internals;
-    using Microsoft.Extensions.DependencyInjection;
     using Transports;
 
 
@@ -16,10 +15,12 @@ namespace MassTransit.DependencyInjection.Registration
     {
         readonly List<Action<IRegistrationContext, ICompensateActivityConfigurator<TActivity, TLog>>> _compensateActions;
         readonly List<Action<IRegistrationContext, IExecuteActivityConfigurator<TActivity, TArguments>>> _executeActions;
+        readonly IContainerSelector _selector;
         IActivityDefinition<TActivity, TArguments, TLog> _definition;
 
-        public ActivityRegistration()
+        public ActivityRegistration(IContainerSelector selector)
         {
+            _selector = selector;
             _executeActions = new List<Action<IRegistrationContext, IExecuteActivityConfigurator<TActivity, TArguments>>>();
             _compensateActions = new List<Action<IRegistrationContext, ICompensateActivityConfigurator<TActivity, TLog>>>();
             IncludeInConfigureEndpoints = !Type.HasAttribute<ExcludeFromConfigureEndpointsAttribute>();
@@ -112,14 +113,15 @@ namespace MassTransit.DependencyInjection.Registration
             if (_definition != null)
                 return _definition;
 
-            _definition = provider.GetService<IActivityDefinition<TActivity, TArguments, TLog>>()
+            _definition = _selector.GetDefinition<IActivityDefinition<TActivity, TArguments, TLog>>(provider)
                 ?? new DefaultActivityDefinition<TActivity, TArguments, TLog>();
 
-            var executeEndpointDefinition = provider.GetService<IEndpointDefinition<IExecuteActivity<TArguments>>>();
+            IEndpointDefinition<IExecuteActivity<TArguments>> executeEndpointDefinition =
+                _selector.GetEndpointDefinition<IExecuteActivity<TArguments>>(provider);
             if (executeEndpointDefinition != null)
                 _definition.ExecuteEndpointDefinition = executeEndpointDefinition;
 
-            var compensateEndpointDefinition = provider.GetService<IEndpointDefinition<ICompensateActivity<TLog>>>();
+            IEndpointDefinition<ICompensateActivity<TLog>> compensateEndpointDefinition = _selector.GetEndpointDefinition<ICompensateActivity<TLog>>(provider);
             if (compensateEndpointDefinition != null)
                 _definition.CompensateEndpointDefinition = compensateEndpointDefinition;
 

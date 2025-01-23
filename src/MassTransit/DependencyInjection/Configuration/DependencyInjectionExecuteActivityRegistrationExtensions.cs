@@ -123,7 +123,8 @@ namespace MassTransit.Configuration
             {
                 collection.TryAddScoped<TActivity>();
 
-                return registrar.GetOrAdd<IExecuteActivityRegistration>(typeof(TActivity), _ => new ExecuteActivityRegistration<TActivity, TArguments>());
+                return registrar.GetOrAddRegistration<IExecuteActivityRegistration>(typeof(TActivity),
+                    _ => new ExecuteActivityRegistration<TActivity, TArguments>(registrar));
             }
         }
 
@@ -138,8 +139,7 @@ namespace MassTransit.Configuration
             {
                 var registration = base.Register(collection, registrar);
 
-                collection.TryAddSingleton<TDefinition>();
-                collection.TryAddSingleton<IExecuteActivityDefinition<TActivity, TArguments>>(provider => provider.GetRequiredService<TDefinition>());
+                registrar.AddDefinition<IExecuteActivityDefinition<TActivity, TArguments>, TDefinition>();
 
                 return registration;
             }

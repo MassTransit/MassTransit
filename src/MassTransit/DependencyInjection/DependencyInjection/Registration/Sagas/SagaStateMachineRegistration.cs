@@ -19,11 +19,13 @@ namespace MassTransit.DependencyInjection.Registration
         where TStateMachine : class, SagaStateMachine<TInstance>
         where TInstance : class, SagaStateMachineInstance
     {
+        readonly IContainerSelector _selector;
         readonly List<Action<IRegistrationContext, ISagaConfigurator<TInstance>>> _configureActions;
         ISagaDefinition<TInstance> _definition;
 
-        public SagaStateMachineRegistration()
+        public SagaStateMachineRegistration(IContainerSelector selector)
         {
+            _selector = selector;
             _configureActions = new List<Action<IRegistrationContext, ISagaConfigurator<TInstance>>>();
             IncludeInConfigureEndpoints = !Type.HasAttribute<ExcludeFromConfigureEndpointsAttribute>();
         }
@@ -83,9 +85,9 @@ namespace MassTransit.DependencyInjection.Registration
             if (_definition != null)
                 return _definition;
 
-            _definition = provider.GetService<ISagaDefinition<TInstance>>() ?? new DefaultSagaDefinition<TInstance>();
+            _definition = _selector.GetDefinition<ISagaDefinition<TInstance>>(provider) ?? new DefaultSagaDefinition<TInstance>();
 
-            var endpointDefinition = provider.GetService<IEndpointDefinition<TInstance>>();
+            IEndpointDefinition<TInstance> endpointDefinition = _selector.GetEndpointDefinition<TInstance>(provider);
             if (endpointDefinition != null)
                 _definition.EndpointDefinition = endpointDefinition;
 

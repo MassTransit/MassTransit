@@ -1,7 +1,9 @@
+#nullable enable
 namespace MassTransit.Configuration
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using DependencyInjection;
     using Microsoft.Extensions.DependencyInjection;
@@ -40,10 +42,10 @@ namespace MassTransit.Configuration
             Collection.TryAddSingleton(endpointNameFormatter);
         }
 
-        public T GetOrAdd<T>(Type type, Func<Type, T> missingRegistrationFactory = default)
+        public T GetOrAddRegistration<T>(Type type, Func<Type, T>? missingRegistrationFactory = default)
             where T : class, IRegistration
         {
-            if (TryGetValue<T>(type, out var value))
+            if (TryGetRegistration<T>(type, out var value))
                 return value;
 
             Func<Type, T> factory = missingRegistrationFactory ?? throw new ArgumentNullException(nameof(missingRegistrationFactory));
@@ -55,13 +57,33 @@ namespace MassTransit.Configuration
             return value;
         }
 
+        public virtual void AddDefinition<T, TDefinition>()
+            where T : class, IDefinition
+            where TDefinition : class, T
+        {
+            Collection.AddSingleton<TDefinition>();
+            Collection.AddSingleton<T>(provider => ActivatorUtilities.CreateInstance<TDefinition>(provider));
+        }
+
+        public virtual void AddEndpointDefinition<T, TDefinition>(IEndpointSettings<IEndpointDefinition<T>>? settings)
+            where T : class
+            where TDefinition : class, IEndpointDefinition<T>
+        {
+            Collection.AddSingleton<TDefinition>();
+
+            if (settings == null)
+                Collection.AddSingleton<IEndpointDefinition<T>, TDefinition>();
+            else
+                Collection.AddSingleton<IEndpointDefinition<T>>(provider => ActivatorUtilities.CreateInstance<TDefinition>(provider, settings));
+        }
+
         public virtual IEnumerable<T> GetRegistrations<T>()
             where T : class, IRegistration
         {
             return Collection.Where(x => x.ServiceType == typeof(T)).Select(x => x.ImplementationInstance).Cast<T>();
         }
 
-        public bool TryGetValue<T>(IServiceProvider provider, Type type, out T value)
+        public bool TryGetRegistration<T>(IServiceProvider provider, Type type, [NotNullWhen(true)] out T? value)
             where T : class, IRegistration
         {
             value = GetRegistrations<T>(provider).FirstOrDefault(x => x.Type == type);
@@ -72,7 +94,19 @@ namespace MassTransit.Configuration
         public virtual IEnumerable<T> GetRegistrations<T>(IServiceProvider provider)
             where T : class, IRegistration
         {
-            return provider.GetService<IEnumerable<T>>() ?? Array.Empty<T>();
+            return provider.GetServices<T>();
+        }
+
+        public virtual T? GetDefinition<T>(IServiceProvider provider)
+            where T : class, IDefinition
+        {
+            return provider.GetService<T>();
+        }
+
+        public virtual IEndpointDefinition<T>? GetEndpointDefinition<T>(IServiceProvider provider)
+            where T : class
+        {
+            return provider.GetService<IEndpointDefinition<T>>();
         }
 
         public IConfigureReceiveEndpoint GetConfigureReceiveEndpoints(IServiceProvider provider)
@@ -92,7 +126,7 @@ namespace MassTransit.Configuration
             return provider.GetServices<Bind<IBus, IConfigureReceiveEndpoint>>().Select(x => x.Value).ToArray();
         }
 
-        bool TryGetValue<T>(Type type, out T value)
+        bool TryGetRegistration<T>(Type type, [NotNullWhen(true)] out T? value)
             where T : class, IRegistration
         {
             value = GetRegistrations<T>().FirstOrDefault(x => x.Type == type);
@@ -154,12 +188,42 @@ namespace MassTransit.Configuration
 
         public override IEnumerable<T> GetRegistrations<T>(IServiceProvider provider)
         {
-            return provider.GetService<IEnumerable<Bind<TBus, T>>>().Select(x => x.Value) ?? Array.Empty<T>();
+            return provider.GetServices<Bind<TBus, T>>().Select(x => x.Value);
         }
 
         protected override void AddRegistration<T>(T value)
         {
             Collection.Add(ServiceDescriptor.Singleton(Bind<TBus>.Create(value)));
+        }
+
+        public override T? GetDefinition<T>(IServiceProvider provider)
+            where T : class
+        {
+            return provider.GetService<Bind<TBus, T>>()?.Value;
+        }
+
+        public override IEndpointDefinition<T>? GetEndpointDefinition<T>(IServiceProvider provider)
+        {
+            return provider.GetService<Bind<TBus, IEndpointDefinition<T>>>()?.Value;
+        }
+
+        public override void AddDefinition<T, TDefinition>()
+        {
+            Collection.AddSingleton<Bind<TBus, TDefinition>>();
+            Collection.AddSingleton<Bind<TBus, T>>(provider => Bind<TBus>.Create<T>(ActivatorUtilities.CreateInstance<TDefinition>(provider)));
+        }
+
+        public override void AddEndpointDefinition<T, TDefinition>(IEndpointSettings<IEndpointDefinition<T>>? settings)
+        {
+            Collection.AddSingleton<TDefinition>();
+
+            if (settings == null)
+                Collection.AddSingleton(provider => Bind<TBus>.Create<IEndpointDefinition<T>>(provider.GetRequiredService<TDefinition>()));
+            else
+            {
+                Collection.AddSingleton(provider =>
+                    Bind<TBus>.Create<IEndpointDefinition<T>>(ActivatorUtilities.CreateInstance<TDefinition>(provider, settings)));
+            }
         }
 
         public override void RegisterEndpointNameFormatter(IEndpointNameFormatter endpointNameFormatter)

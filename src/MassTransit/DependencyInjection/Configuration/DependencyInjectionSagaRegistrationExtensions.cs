@@ -4,7 +4,6 @@ namespace MassTransit.Configuration
     using DependencyInjection.Registration;
     using Internals;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.DependencyInjection.Extensions;
 
 
     public static class DependencyInjectionSagaRegistrationExtensions
@@ -104,7 +103,7 @@ namespace MassTransit.Configuration
         {
             public virtual ISagaRegistration Register(IServiceCollection collection, IContainerRegistrar registrar)
             {
-                return registrar.GetOrAdd<ISagaRegistration>(typeof(TSaga), _ => new SagaRegistration<TSaga>());
+                return registrar.GetOrAddRegistration<ISagaRegistration>(typeof(TSaga), _ => new SagaRegistration<TSaga>(registrar));
             }
         }
 
@@ -118,8 +117,7 @@ namespace MassTransit.Configuration
             {
                 var registration = base.Register(collection, registrar);
 
-                collection.TryAddSingleton<TDefinition>();
-                collection.TryAddSingleton<ISagaDefinition<TSaga>>(provider => provider.GetRequiredService<TDefinition>());
+                registrar.AddDefinition<ISagaDefinition<TSaga>, TDefinition>();
 
                 return registration;
             }

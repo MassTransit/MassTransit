@@ -65,7 +65,7 @@ namespace MassTransit.Configuration
 
             _setOptions.JobSagaEndpointAddress = configurator.InputAddress;
 
-            if (context.GetRequiredService<IContainerSelector>().TryGetValue(context, typeof(JobService), out IJobServiceRegistration registration))
+            if (context.GetRequiredService<IContainerSelector>().TryGetRegistration(context, typeof(JobService), out IJobServiceRegistration registration))
                 registration.AddReceiveEndpointDependency(configurator);
         }
     }
