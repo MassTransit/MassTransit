@@ -94,14 +94,20 @@ IF OBJECT_ID('{0}.Queue', 'U') IS NULL
 BEGIN
     CREATE TABLE {0}.Queue
     (
-        Id          bigint          not null primary key default next value for [{0}].[TopologySequence],
-        Updated     datetime2       not null default SYSUTCDATETIME(),
+        Id               bigint          not null primary key default next value for [{0}].[TopologySequence],
+        Updated          datetime2       not null default SYSUTCDATETIME(),
 
-        Name        nvarchar(256)   not null,
-        Type        tinyint         not null,
-        AutoDelete  integer
+        Name             nvarchar(256)   not null,
+        Type             tinyint         not null,
+        AutoDelete       integer,
+        MaxDeliveryCount integer         not null DEFAULT 10
     )
 END;
+
+IF COL_LENGTH('{0}.Queue', 'MaxDeliveryCount') IS NULL
+BEGIN
+    ALTER TABLE {0}.Queue ADD MaxDeliveryCount integer not null DEFAULT 10;
+END
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM sys.indexes indexes
     INNER JOIN sys.objects objects ON indexes.object_id = objects.object_id
@@ -366,6 +372,23 @@ CREATE OR ALTER PROCEDURE {0}.CreateQueue
 AS
 BEGIN
     SET NOCOUNT ON;
+    DECLARE @temp_table TABLE
+    (
+        Id bigint NOT NULL
+    )
+    INSERT INTO @temp_table
+        EXEC {0}.CreateQueueV2 @QueueName, @AutoDelete
+    SELECT TOP 1 Id FROM @temp_table
+END";
+
+        const string SqlFnCreateQueueV2 = @"
+CREATE OR ALTER PROCEDURE {0}.CreateQueueV2
+    @QueueName nvarchar(256),
+    @AutoDelete integer = NULL,
+    @MaxDeliveryCount integer = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
 
     IF @QueueName IS NULL OR LEN(@QueueName) < 1
     BEGIN
@@ -375,14 +398,16 @@ BEGIN
     DECLARE @QueueTable table (Id BIGINT, Type tinyint)
     MERGE INTO {0}.Queue WITH (ROWLOCK) AS target
         USING (VALUES
-                   (@QueueName, 1, @AutoDelete),
-                   (@QueueName, 2, @AutoDelete),
-                   (@QueueName, 3, @AutoDelete)
-               ) AS source (Name, Type, AutoDelete)
+                   (@QueueName, 1, @AutoDelete, @MaxDeliveryCount),
+                   (@QueueName, 2, @AutoDelete, @MaxDeliveryCount),
+                   (@QueueName, 3, @AutoDelete, @MaxDeliveryCount)
+               ) AS source (Name, Type, AutoDelete, MaxDeliveryCount)
         ON (target.Name = source.Name AND target.Type = source.Type)
-        WHEN MATCHED THEN UPDATE SET Updated = SYSUTCDATETIME(), AutoDelete = COALESCE(source.AutoDelete, target.AutoDelete)
-        WHEN NOT MATCHED THEN INSERT (Name, Type, AutoDelete)
-        VALUES (source.Name, source.Type, source.AutoDelete)
+        WHEN MATCHED THEN UPDATE SET Updated = SYSUTCDATETIME(),
+                                     AutoDelete = COALESCE(source.AutoDelete, target.AutoDelete),
+                                     MaxDeliveryCount = COALESCE(@MaxDeliveryCount, source.MaxDeliveryCount, 10)
+        WHEN NOT MATCHED THEN INSERT (Name, Type, AutoDelete, MaxDeliveryCount)
+        VALUES (source.Name, source.Type, source.AutoDelete, COALESCE(@MaxDeliveryCount, 10))
         OUTPUT inserted.Id, inserted.Type INTO @QueueTable;
 
     SET NOCOUNT OFF
@@ -615,12 +640,13 @@ BEGIN
     )
     INSERT INTO {0}.MessageDelivery (QueueId, TransportMessageId, Priority, EnqueueTime, DeliveryCount, MaxDeliveryCount, PartitionKey, RoutingKey)
     OUTPUT inserted.QueueId, inserted.TransportMessageId, inserted.Priority, inserted.EnqueueTime, inserted.RoutingKey INTO @vRow
-    SELECT DISTINCT qs.DestinationId, @transportMessageId, @priority, @vEnqueueTime, 0, @maxDeliveryCount, @partitionKey, @routingKey
+    SELECT DISTINCT qs.DestinationId, @transportMessageId, @priority, @vEnqueueTime, 0, q.MaxDeliveryCount, @partitionKey, @routingKey
     FROM {0}.QueueSubscription qs
     JOIN Fabric ON (qs.SourceId = fabric.DestinationId OR qs.SourceId = @vTopicId)
         AND (  (qs.SubType = 1)
             OR (qs.SubType = 2 AND @routingKey = qs.RoutingKey)
-            OR (qs.SubType = 3 AND @routingKey LIKE qs.RoutingKey));
+            OR (qs.SubType = 3 AND @routingKey LIKE qs.RoutingKey))
+    JOIN {0}.Queue q ON q.Id = qs.DestinationId;
 
     SELECT @vRowCount = COUNT(*) FROM @vRow;
 
@@ -663,7 +689,8 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    DECLARE @vQueueId int;
+    DECLARE @vQueueId bigint;
+    DECLARE @vMaxDeliveryCount int;
     DECLARE @vEnqueueTime datetimeoffset;
 
     IF @entityName IS NULL OR LEN(@entityName) < 1
@@ -671,7 +698,7 @@ BEGIN
         THROW 50000, 'Queue names must not be null or empty', 1;
     END;
 
-    SELECT @vQueueId = q.Id FROM {0}.Queue q WHERE q.Name = @entityName AND q.type = 1;
+    SELECT @vQueueId = q.Id, @vMaxDeliveryCount = q.MaxDeliveryCount FROM {0}.Queue q WHERE q.Name = @entityName AND q.type = 1;
     IF @vQueueId IS NULL
     BEGIN
         THROW 50000, 'Queue not found', 1;
@@ -698,7 +725,7 @@ BEGIN
     );
 
     INSERT INTO {0}.MessageDelivery (QueueId, TransportMessageId, Priority, EnqueueTime, DeliveryCount, MaxDeliveryCount, PartitionKey, RoutingKey)
-    VALUES (@vQueueId, @transportMessageId, @priority, @vEnqueueTime, 0, @maxDeliveryCount, @partitionKey, @routingKey)
+    VALUES (@vQueueId, @transportMessageId, @priority, @vEnqueueTime, 0, @vMaxDeliveryCount, @partitionKey, @routingKey)
 
     RETURN 1;
 END;
@@ -1648,7 +1675,8 @@ END
                    ISNULL(MAX(x.ErrorCount), 0)          AS ErrorCount,
                    ISNULL(MAX(x.DeadLetterCount), 0)     AS DeadLetterCount,
                    MAX(x.StartTime)                      AS CountStartTime,
-                   ISNULL(MAX(x.Duration), 0)            AS CountDuration
+                   ISNULL(MAX(x.Duration), 0)            AS CountDuration,
+                   MAX(x.QueueMaxDeliveryCount)          AS QueueMaxDeliveryCount
             FROM (SELECT q.Name                                              AS QueueName,
                          q.AutoDelete                                        AS QueueAutoDelete,
                          qm.ConsumeCount,
@@ -1672,7 +1700,8 @@ END
                          IIF(q.Type = 2
                                  AND md.MessageDeliveryId IS NOT NULL, 1, 0) AS MessageError,
                          IIF(q.Type = 3
-                                 AND md.MessageDeliveryId IS NOT NULL, 1, 0) AS MessageDeadLetter
+                                 AND md.MessageDeliveryId IS NOT NULL, 1, 0) AS MessageDeadLetter,
+                         IIF(q.Type = 1, q.MaxDeliveryCount, NULL)           AS QueueMaxDeliveryCount
                   FROM {0}.Queue q
                            LEFT JOIN {0}.MessageDelivery md ON q.Id = md.QueueId
                            LEFT JOIN (SELECT qm.QueueId,
@@ -1748,6 +1777,7 @@ END
                 await connection.Connection.ExecuteScalarAsync<int>(string.Format(CreateInfrastructureSql, options.Schema)).ConfigureAwait(false);
 
                 await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnCreateQueue, options.Schema)).ConfigureAwait(false);
+                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnCreateQueueV2, options.Schema)).ConfigureAwait(false);
                 await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnCreateTopic, options.Schema)).ConfigureAwait(false);
                 await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnCreateTopicSubscription, options.Schema)).ConfigureAwait(false);
                 await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnCreateQueueSubscription, options.Schema)).ConfigureAwait(false);

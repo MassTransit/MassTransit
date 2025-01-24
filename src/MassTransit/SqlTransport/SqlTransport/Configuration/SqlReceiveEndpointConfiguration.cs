@@ -132,7 +132,7 @@ namespace MassTransit.SqlTransport.Configuration
             set => _settings.MaxLockDuration = value;
         }
 
-        public int MaxDeliveryCount
+        public int? MaxDeliveryCount
         {
             set => _settings.MaxDeliveryCount = value;
         }

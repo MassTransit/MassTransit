@@ -47,7 +47,10 @@
         /// </summary>
         TimeSpan MaxLockDuration { get; }
 
-        int MaxDeliveryCount { get; }
+        /// <summary>
+        /// The maximum number of message delivery attempts by the transport before moving the message to the DLQ (defaults to 10)
+        /// </summary>
+        int? MaxDeliveryCount { get; }
 
         /// <summary>
         /// How often to poll for messages when no messages exist

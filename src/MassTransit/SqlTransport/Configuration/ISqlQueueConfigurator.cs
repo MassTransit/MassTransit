@@ -11,6 +11,11 @@
         /// <summary>
         /// If specified, the queue will be automatically removed after no consumer activity within the specific idle period
         /// </summary>
-        public TimeSpan? AutoDeleteOnIdle { set; }
+        TimeSpan? AutoDeleteOnIdle { set; }
+
+        /// <summary>
+        /// The maximum number of message delivery attempts by the transport before moving the message to the DLQ (defaults to 10)
+        /// </summary>
+        int? MaxDeliveryCount { set; }
     }
 }

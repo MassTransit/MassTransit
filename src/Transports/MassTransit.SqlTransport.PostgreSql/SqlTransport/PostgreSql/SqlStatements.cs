@@ -2,7 +2,7 @@ namespace MassTransit.SqlTransport.PostgreSql
 {
     static class SqlStatements
     {
-        public const string DbCreateQueueSql = """SELECT * FROM "{0}".create_queue(@queue_name,@auto_delete)""";
+        public const string DbCreateQueueSql = """SELECT * FROM "{0}".create_queue_v2(@queue_name,@auto_delete,@max_delivery_count)""";
         public const string DbCreateTopicSql = """SELECT * FROM "{0}".create_topic(@topic_name)""";
 
         public const string DbCreateTopicSubscriptionSql =

@@ -20,7 +20,6 @@ namespace MassTransit.SqlTransport.Configuration
 
             LockDuration = TimeSpan.FromMinutes(1);
             MaxLockDuration = TimeSpan.FromHours(12);
-            MaxDeliveryCount = 10;
             MaintenanceBatchSize = 100;
         }
 
@@ -50,8 +49,6 @@ namespace MassTransit.SqlTransport.Configuration
         public bool PurgeOnStartup { get; set; }
 
         public TimeSpan LockDuration { get; set; }
-
-        public int MaxDeliveryCount { get; set; }
 
         public TimeSpan PollingInterval { get; set; }
 

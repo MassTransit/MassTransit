@@ -22,11 +22,6 @@
         TimeSpan MaxLockDuration { set; }
 
         /// <summary>
-        /// The maximum number of message delivery attempts by the transport before moving the message to the DLQ
-        /// </summary>
-        int MaxDeliveryCount { set; }
-
-        /// <summary>
         /// If true, messages that exist in the queue will be purged when the bus is started
         /// </summary>
         bool PurgeOnStartup { set; }

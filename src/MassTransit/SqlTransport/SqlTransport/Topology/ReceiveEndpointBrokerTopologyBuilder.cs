@@ -6,7 +6,7 @@ namespace MassTransit.SqlTransport.Topology
     {
         public ReceiveEndpointBrokerTopologyBuilder(ReceiveSettings settings)
         {
-            Queue = CreateQueue(settings.QueueName, settings.AutoDeleteOnIdle);
+            Queue = CreateQueue(settings.QueueName, settings.AutoDeleteOnIdle, settings.MaxDeliveryCount);
         }
 
         public QueueHandle Queue { get; }

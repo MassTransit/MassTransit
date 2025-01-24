@@ -51,11 +51,11 @@ namespace MassTransit.SqlTransport.Topology
             return _topicSubscriptions.GetOrAdd(binding);
         }
 
-        public QueueHandle CreateQueue(string name, TimeSpan? autoDeleteOnIdle = null)
+        public QueueHandle CreateQueue(string name, TimeSpan? autoDeleteOnIdle = null, int? maxDeliveryCount = null)
         {
             var id = GetNextId();
 
-            var queue = new QueueEntity(id, name, autoDeleteOnIdle);
+            var queue = new QueueEntity(id, name, autoDeleteOnIdle, maxDeliveryCount);
 
             return _queues.GetOrAdd(queue);
         }

@@ -41,7 +41,7 @@ namespace MassTransit.SqlTransport.SqlServer
             _context = context;
             _consumerId = NewId.NextGuid();
 
-            _createQueueSql = $"{_context.Schema}.CreateQueue";
+            _createQueueSql = $"{_context.Schema}.CreateQueueV2";
             _createTopicSql = $"{_context.Schema}.CreateTopic";
             _createTopicSubscriptionSql = $"{_context.Schema}.CreateTopicSubscription";
             _createQueueSubscriptionSql = $"{_context.Schema}.CreateQueueSubscription";
@@ -64,7 +64,8 @@ namespace MassTransit.SqlTransport.SqlServer
             var result = await Execute<long>(_createQueueSql, new
             {
                 queueName = queue.QueueName,
-                autoDelete = (int?)queue.AutoDeleteOnIdle?.TotalSeconds
+                autoDelete = (int?)queue.AutoDeleteOnIdle?.TotalSeconds,
+                maxDeliveryCount = queue.MaxDeliveryCount
             });
 
             return result ?? throw new SqlTopologyException("Create queue failed");

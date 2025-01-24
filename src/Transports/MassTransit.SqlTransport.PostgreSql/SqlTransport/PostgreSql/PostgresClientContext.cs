@@ -65,7 +65,8 @@ namespace MassTransit.SqlTransport.PostgreSql
             return _context.Query((x, t) => x.ExecuteScalarAsync<long>(_createQueueSql, new
             {
                 queue_name = queue.QueueName,
-                auto_delete = (int?)queue.AutoDeleteOnIdle?.TotalSeconds
+                auto_delete = (int?)queue.AutoDeleteOnIdle?.TotalSeconds,
+                max_delivery_count = queue.MaxDeliveryCount
             }, t), CancellationToken);
         }
 

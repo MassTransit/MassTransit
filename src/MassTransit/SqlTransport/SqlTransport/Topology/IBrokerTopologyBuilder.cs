@@ -29,8 +29,9 @@ namespace MassTransit.SqlTransport.Topology
         /// </summary>
         /// <param name="name"></param>
         /// <param name="autoDeleteOnIdle"></param>
+        /// <param name="maxDeliveryCount"></param>
         /// <returns></returns>
-        QueueHandle CreateQueue(string name, TimeSpan? autoDeleteOnIdle = null);
+        QueueHandle CreateQueue(string name, TimeSpan? autoDeleteOnIdle = null, int? maxDeliveryCount = null);
 
         /// <summary>
         /// Binds an exchange to a queue, with the specified routing key and arguments
