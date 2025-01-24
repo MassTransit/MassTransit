@@ -21,7 +21,14 @@ public class Using_the_request_client<T>
             .AddMassTransitTestHarness(x =>
             {
                 x.SetTestTimeouts(testInactivityTimeout: TimeSpan.FromSeconds(5));
-                x.AddHandler<PingMessage, PongMessage>(async context => new PongMessage(context.Message.CorrelationId));
+                x.AddHandler<PingMessage, PongMessage>(async context => new PongMessage(context.Message.CorrelationId))
+                    .Endpoint(e => e.AddConfigureEndpointCallback((context, cfg) =>
+                    {
+                        if(cfg is ISqlReceiveEndpointConfigurator configurator)
+                        {
+                            configurator.MaxDeliveryCount = 5;
+                        }
+                    }));
 
                 _configuration.Configure(x, (context, cfg) =>
                 {

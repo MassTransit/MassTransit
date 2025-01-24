@@ -131,7 +131,7 @@ namespace MassTransit.Configuration
                 var registration = Selector.GetRegistrations<IJobServiceRegistration>(this).SingleOrDefault();
                 registration ??= new JobServiceRegistration();
 
-                var endpointDefinition = new CombinedEndpointDefinition([registration.EndpointDefinition], this);
+                var endpointDefinition = new RegistrationContextEndpointDefinition(registration.EndpointDefinition, this);
 
                 configurator.ReceiveEndpoint(endpointDefinition, endpointNameFormatter, endpointConfigurator =>
                 {
@@ -171,9 +171,11 @@ namespace MassTransit.Configuration
                     ? instanceConfigurator
                     : configurator;
 
-                useConfigurator.ReceiveEndpoint(endpoint.Definition, endpointNameFormatter, cfg =>
+                var endpointDefinition = new RegistrationContextEndpointDefinition(endpoint.Definition, this);
+
+                useConfigurator.ReceiveEndpoint(endpointDefinition, endpointNameFormatter, cfg =>
                 {
-                    configureReceiveEndpoint.Configure(endpoint.Definition.GetEndpointName(endpointNameFormatter), cfg);
+                    configureReceiveEndpoint.Configure(endpointDefinition.GetEndpointName(endpointNameFormatter), cfg);
 
                     foreach (var consumer in endpoint.Consumers)
                         ConfigureConsumer(consumer.ConsumerType, cfg);
@@ -188,6 +190,7 @@ namespace MassTransit.Configuration
                         var compensateDefinition = activity.CompensateEndpointDefinition ?? getEndpointDefinitionByName(compensateEndpointName);
                         if (compensateDefinition != null)
                         {
+                            compensateDefinition = new RegistrationContextEndpointDefinition(compensateDefinition, this);
                             configurator.ReceiveEndpoint(compensateDefinition, endpointNameFormatter, compensateEndpointConfigurator =>
                             {
                                 configureReceiveEndpoint.Configure(compensateDefinition.GetEndpointName(endpointNameFormatter),
