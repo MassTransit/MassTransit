@@ -74,6 +74,11 @@ namespace MassTransit.SqlTransport.Configuration
             set => _settings.MaintenanceBatchSize = value;
         }
 
+        public bool DeadLetterExpiredMessages
+        {
+            set => _settings.DeadLetterExpiredMessages = value;
+        }
+
         public void Host(SqlHostSettings settings)
         {
             _busConfiguration.HostConfiguration.Settings = settings;

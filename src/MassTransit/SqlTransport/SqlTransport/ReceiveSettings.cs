@@ -63,5 +63,7 @@
         TimeSpan? UnlockDelay { get; }
 
         int MaintenanceBatchSize { get; }
+
+        bool DeadLetterExpiredMessages { get; }
     }
 }

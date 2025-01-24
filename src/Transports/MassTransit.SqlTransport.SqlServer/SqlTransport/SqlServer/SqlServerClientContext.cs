@@ -45,8 +45,8 @@ namespace MassTransit.SqlTransport.SqlServer
             _createTopicSql = $"{_context.Schema}.CreateTopic";
             _createTopicSubscriptionSql = $"{_context.Schema}.CreateTopicSubscription";
             _createQueueSubscriptionSql = $"{_context.Schema}.CreateQueueSubscription";
-            _sendSql = $"{_context.Schema}.SendMessage";
-            _publishSql = $"{_context.Schema}.PublishMessage";
+            _sendSql = $"{_context.Schema}.SendMessageV2";
+            _publishSql = $"{_context.Schema}.PublishMessageV2";
             _purgeQueueSql = $"{_context.Schema}.PurgeQueue";
             _deadLetterMessagesSql = $"{_context.Schema}.DeadLetterMessages";
             _receiveSql = $"{_context.Schema}.FetchMessages";
@@ -170,6 +170,7 @@ namespace MassTransit.SqlTransport.SqlServer
             var headersAsJson = headers.Any() ? JsonSerializer.Serialize(headers, SystemTextJsonMessageSerializer.Options) : null;
 
             Guid? schedulingTokenId = context.Headers.Get<Guid>(MessageHeaders.SchedulingTokenId);
+            DateTime? expirationTime = context.TimeToLive.HasValue ? DateTime.UtcNow + context.TimeToLive.Value : null;
 
             return Execute<long>(_sendSql, new
             {
@@ -190,6 +191,7 @@ namespace MassTransit.SqlTransport.SqlServer
                 responseAddress = context.ResponseAddress,
                 faultAddress = context.FaultAddress,
                 sentTime = context.SentTime,
+                expirationTime,
                 headers = headersAsJson,
                 host = HostInfoCache.HostInfoJson,
                 partitionKey = context.PartitionKey,
@@ -205,6 +207,7 @@ namespace MassTransit.SqlTransport.SqlServer
             var headersAsJson = headers.Any() ? JsonSerializer.Serialize(headers, SystemTextJsonMessageSerializer.Options) : null;
 
             Guid? schedulingTokenId = context.Headers.Get<Guid>(MessageHeaders.SchedulingTokenId);
+            DateTime? expirationTime = context.TimeToLive.HasValue ? DateTime.UtcNow + context.TimeToLive.Value : null;
 
             return Execute<long>(_publishSql, new
             {
@@ -225,6 +228,7 @@ namespace MassTransit.SqlTransport.SqlServer
                 responseAddress = context.ResponseAddress,
                 faultAddress = context.FaultAddress,
                 sentTime = context.SentTime,
+                expirationTime,
                 headers = headersAsJson,
                 host = HostInfoCache.HostInfoJson,
                 partitionKey = context.PartitionKey,

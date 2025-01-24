@@ -24,7 +24,6 @@ namespace MassTransit.SqlTransport.PostgreSql
         readonly string _deleteMessageSql;
         readonly string _deleteScheduledMessageSql;
         readonly string _moveMessageTypeSql;
-        readonly string _processMetricsSql;
         readonly string _publishSql;
         readonly string _purgeQueueSql;
         readonly string _receivePartitionedSql;
@@ -46,7 +45,6 @@ namespace MassTransit.SqlTransport.PostgreSql
             _receivePartitionedSql = string.Format(SqlStatements.DbReceivePartitionedSql, _context.Schema);
             _sendSql = string.Format(SqlStatements.DbEnqueueSql, _context.Schema);
             _createTopicSubscriptionSql = string.Format(SqlStatements.DbCreateTopicSubscriptionSql, _context.Schema);
-            _processMetricsSql = string.Format(SqlStatements.DbProcessMetricsSql, _context.Schema);
             _publishSql = string.Format(SqlStatements.DbPublishSql, _context.Schema);
             _purgeQueueSql = string.Format(SqlStatements.DbPurgeQueueSql, _context.Schema);
             _deadLetterMessagesSql = string.Format(SqlStatements.DbDeadLetterMessagesSql, _context.Schema);
@@ -165,6 +163,7 @@ namespace MassTransit.SqlTransport.PostgreSql
             var headersAsJson = headers.Any() ? JsonSerializer.Serialize(headers, SystemTextJsonMessageSerializer.Options) : null;
 
             Guid? schedulingTokenId = context.Headers.Get<Guid>(MessageHeaders.SchedulingTokenId);
+            DateTime? expirationTime = context.TimeToLive.HasValue ? DateTime.UtcNow + context.TimeToLive.Value : null;
 
             return _context.Query((x, t) => x.ExecuteScalarAsync<long?>(_sendSql, new
             {
@@ -185,6 +184,7 @@ namespace MassTransit.SqlTransport.PostgreSql
                 response_address = context.ResponseAddress,
                 fault_address = context.FaultAddress,
                 sent_time = context.SentTime,
+                expiration_time = expirationTime,
                 headers = new JsonParameter(headersAsJson),
                 host = new JsonParameter(HostInfoCache.HostInfoJson),
                 partition_key = context.PartitionKey,
@@ -200,6 +200,7 @@ namespace MassTransit.SqlTransport.PostgreSql
             var headersAsJson = headers.Any() ? JsonSerializer.Serialize(headers, SystemTextJsonMessageSerializer.Options) : null;
 
             Guid? schedulingTokenId = context.Headers.Get<Guid>(MessageHeaders.SchedulingTokenId);
+            DateTime? expirationTime = context.TimeToLive.HasValue ? DateTime.UtcNow + context.TimeToLive.Value : null;
 
             return _context.Query((x, t) => x.ExecuteScalarAsync<long?>(_publishSql, new
             {
@@ -220,6 +221,7 @@ namespace MassTransit.SqlTransport.PostgreSql
                 response_address = context.ResponseAddress,
                 fault_address = context.FaultAddress,
                 sent_time = context.SentTime,
+                expiration_time = expirationTime,
                 headers = new JsonParameter(headersAsJson),
                 host = new JsonParameter(HostInfoCache.HostInfoJson),
                 partition_key = context.PartitionKey,

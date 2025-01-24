@@ -15,9 +15,9 @@ namespace MassTransit.SqlTransport
     {
         IHeaderProvider? _headerProvider;
 
-        public SqlReceiveContext(SqlTransportMessage message, bool redelivered, SqlReceiveEndpointContext context,
-            ReceiveSettings settings, ClientContext clientContext, ConnectionContext connectionContext, SqlReceiveLockContext lockContext)
-            : base(redelivered, context, settings, clientContext, connectionContext, lockContext)
+        public SqlReceiveContext(SqlTransportMessage message, SqlReceiveEndpointContext context, ReceiveSettings settings, ClientContext clientContext,
+            ConnectionContext connectionContext, SqlReceiveLockContext lockContext)
+            : base(message.DeliveryCount > 0, context, settings, clientContext, connectionContext, lockContext)
         {
             TransportMessage = message;
 
@@ -29,6 +29,8 @@ namespace MassTransit.SqlTransport
         public override MessageBody Body { get; }
 
         protected override IHeaderProvider HeaderProvider => _headerProvider ??= new SqlHeaderProvider(TransportMessage);
+
+        public ulong? SequenceNumber => (ulong)DeliveryMessageId;
 
         public SqlTransportMessage TransportMessage { get; }
 
@@ -43,8 +45,6 @@ namespace MassTransit.SqlTransport
         public long DeliveryMessageId => TransportMessage.MessageDeliveryId;
         public DateTime EnqueueTime => TransportMessage.EnqueueTime;
         public int DeliveryCount => TransportMessage.DeliveryCount;
-
-        public ulong? SequenceNumber => (ulong)DeliveryMessageId;
 
         public string? PartitionKey => TransportMessage.PartitionKey;
 

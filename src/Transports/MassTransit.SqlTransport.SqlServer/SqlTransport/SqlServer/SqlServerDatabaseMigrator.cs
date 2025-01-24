@@ -572,15 +572,73 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    DECLARE @vDeliveryCount bigint;
+    EXEC @vDeliveryCount = {0}.PublishMessageV2
+    @entityName,
+    @priority,
+    @transportMessageId,
+    @body,
+    @binaryBody,
+    @contentType,
+    @messageType,
+    @messageId,
+    @correlationId,
+    @conversationId,
+    @requestId,
+    @initiatorId,
+    @sourceAddress,
+    @destinationAddress,
+    @responseAddress,
+    @faultAddress,
+    @sentTime,
+    NULL,
+    @headers,
+    @host,
+    @partitionKey,
+    @routingKey,
+    @delay,
+    @schedulingTokenId;
+
+    RETURN @vDeliveryCount;
+END;
+";
+
+        const string SqlFnPublishV2 = @"
+CREATE OR ALTER PROCEDURE {0}.PublishMessageV2
+    @entityName varchar(256),
+    @priority int = 100,
+    @transportMessageId uniqueidentifier,
+    @body nvarchar(max) = NULL,
+    @binaryBody varbinary(max) = NULL,
+    @contentType varchar(max) = NULL,
+    @messageType varchar(max) = NULL,
+    @messageId uniqueidentifier = NULL,
+    @correlationId uniqueidentifier = NULL,
+    @conversationId uniqueidentifier = NULL,
+    @requestId uniqueidentifier = NULL,
+    @initiatorId uniqueidentifier = NULL,
+    @sourceAddress varchar(max) = NULL,
+    @destinationAddress varchar(max) = NULL,
+    @responseAddress varchar(max) = NULL,
+    @faultAddress varchar(max) = NULL,
+    @sentTime datetimeoffset = NULL,
+    @expirationTime datetimeoffset = NULL,
+    @headers nvarchar(max) = NULL,
+    @host nvarchar(max) = NULL,
+    @partitionKey nvarchar(128) = NULL,
+    @routingKey nvarchar(256) = NULL,
+    @delay int = 0,
+    @schedulingTokenId uniqueidentifier = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
     DECLARE @vTopicId bigint;
     DECLARE @vRowCount bigint;
     DECLARE @vEnqueueTime datetimeoffset;
     DECLARE @vRow table (
         queueId bigint,
-        transportMessageId uniqueidentifier,
-        priority int,
-        enqueueTime datetimeoffset,
-        routingKey varchar(100)
+        transportMessageId uniqueidentifier
     );
 
     IF @entityName IS NULL OR LEN(@entityName) < 1
@@ -638,9 +696,9 @@ BEGIN
             OR (ts.SubType = 2 AND @routingKey = ts.RoutingKey)
             OR (ts.SubType = 3 AND @routingKey LIKE ts.RoutingKey)
     )
-    INSERT INTO {0}.MessageDelivery (QueueId, TransportMessageId, Priority, EnqueueTime, DeliveryCount, MaxDeliveryCount, PartitionKey, RoutingKey)
-    OUTPUT inserted.QueueId, inserted.TransportMessageId, inserted.Priority, inserted.EnqueueTime, inserted.RoutingKey INTO @vRow
-    SELECT DISTINCT qs.DestinationId, @transportMessageId, @priority, @vEnqueueTime, 0, q.MaxDeliveryCount, @partitionKey, @routingKey
+    INSERT INTO {0}.MessageDelivery (QueueId, TransportMessageId, Priority, EnqueueTime, ExpirationTime, DeliveryCount, MaxDeliveryCount, PartitionKey, RoutingKey)
+    OUTPUT inserted.QueueId, inserted.TransportMessageId INTO @vRow
+    SELECT DISTINCT qs.DestinationId, @transportMessageId, @priority, @vEnqueueTime, @expirationTime, 0, q.MaxDeliveryCount, @partitionKey, @routingKey
     FROM {0}.QueueSubscription qs
     JOIN Fabric ON (qs.SourceId = fabric.DestinationId OR qs.SourceId = @vTopicId)
         AND (  (qs.SubType = 1)
@@ -689,6 +747,68 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    DECLARE @vDeliveryId bigint;
+    EXEC @vDeliveryId = {0}.SendMessageV2
+    @entityName,
+    @priority,
+    @transportMessageId,
+    @body,
+    @binaryBody,
+    @contentType,
+    @messageType,
+    @messageId,
+    @correlationId,
+    @conversationId,
+    @requestId,
+    @initiatorId,
+    @sourceAddress,
+    @destinationAddress,
+    @responseAddress,
+    @faultAddress,
+    @sentTime,
+    NULL,
+    @headers,
+    @host,
+    @partitionKey,
+    @routingKey,
+    @delay,
+    @schedulingTokenId;
+
+    RETURN @vDeliveryId;
+END;
+";
+
+        const string SqlFnSendV2 = @"
+CREATE OR ALTER PROCEDURE {0}.SendMessageV2
+    @entityName varchar(256),
+    @priority int = 100,
+    @transportMessageId uniqueidentifier,
+    @body nvarchar(max) = NULL,
+    @binaryBody varbinary(max) = NULL,
+    @contentType varchar(max) = NULL,
+    @messageType varchar(max) = NULL,
+    @messageId uniqueidentifier = NULL,
+    @correlationId uniqueidentifier = NULL,
+    @conversationId uniqueidentifier = NULL,
+    @requestId uniqueidentifier = NULL,
+    @initiatorId uniqueidentifier = NULL,
+    @sourceAddress varchar(max) = NULL,
+    @destinationAddress varchar(max) = NULL,
+    @responseAddress varchar(max) = NULL,
+    @faultAddress varchar(max) = NULL,
+    @sentTime datetimeoffset = NULL,
+    @expirationTime datetimeoffset = NULL,
+    @headers nvarchar(max) = NULL,
+    @host nvarchar(max) = NULL,
+    @partitionKey nvarchar(128) = NULL,
+    @routingKey nvarchar(256) = NULL,
+    @delay int = 0,
+    @schedulingTokenId uniqueidentifier = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @vDeliveryId bigint;
     DECLARE @vQueueId bigint;
     DECLARE @vMaxDeliveryCount int;
     DECLARE @vEnqueueTime datetimeoffset;
@@ -724,10 +844,11 @@ BEGIN
         @sentTime, @headers, @host, @schedulingTokenId
     );
 
-    INSERT INTO {0}.MessageDelivery (QueueId, TransportMessageId, Priority, EnqueueTime, DeliveryCount, MaxDeliveryCount, PartitionKey, RoutingKey)
-    VALUES (@vQueueId, @transportMessageId, @priority, @vEnqueueTime, 0, @vMaxDeliveryCount, @partitionKey, @routingKey)
+    INSERT INTO {0}.MessageDelivery (QueueId, TransportMessageId, Priority, EnqueueTime, ExpirationTime, DeliveryCount, MaxDeliveryCount, PartitionKey, RoutingKey)
+    VALUES (@vQueueId, @transportMessageId, @priority, @vEnqueueTime, @expirationTime, 0, @vMaxDeliveryCount, @partitionKey, @routingKey);
+    SELECT @vDeliveryId = SCOPE_IDENTITY();
 
-    RETURN 1;
+    RETURN @vDeliveryId;
 END;
 ";
 
@@ -1783,7 +1904,9 @@ END
                 await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnCreateQueueSubscription, options.Schema)).ConfigureAwait(false);
                 await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnPurgeQueue, options.Schema)).ConfigureAwait(false);
                 await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnPublish, options.Schema)).ConfigureAwait(false);
+                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnPublishV2, options.Schema)).ConfigureAwait(false);
                 await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnSend, options.Schema)).ConfigureAwait(false);
+                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnSendV2, options.Schema)).ConfigureAwait(false);
                 await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnFetchMessages, options.Schema)).ConfigureAwait(false);
                 await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnFetchMessagesPartitioned, options.Schema)).ConfigureAwait(false);
                 await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnDeleteMessage, options.Schema)).ConfigureAwait(false);

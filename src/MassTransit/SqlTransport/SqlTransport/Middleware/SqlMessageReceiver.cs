@@ -94,22 +94,31 @@ namespace MassTransit.SqlTransport.Middleware
             if (IsStopping)
                 return;
 
-            var context =
-                new SqlReceiveContext(message, message.DeliveryCount > 0, _context, _receiveSettings, _client, _client.ConnectionContext, lockContext);
-            try
+            if (message.ExpirationTime.HasValue && message.ExpirationTime.Value < DateTime.UtcNow)
             {
-                await Dispatch(message.TransportMessageId, context, lockContext).ConfigureAwait(false);
+                if (_receiveSettings.DeadLetterExpiredMessages)
+                    await lockContext.Expired().ConfigureAwait(false);
+                else
+                    await lockContext.Complete().ConfigureAwait(false);
             }
-            catch (Exception exception)
+            else
             {
-                context.LogTransportFaulted(exception);
-            }
-            finally
-            {
-                context.Dispose();
-            }
+                var context = new SqlReceiveContext(message, _context, _receiveSettings, _client, _client.ConnectionContext, lockContext);
+                try
+                {
+                    await Dispatch(message.TransportMessageId, context, lockContext).ConfigureAwait(false);
+                }
+                catch (Exception exception)
+                {
+                    context.LogTransportFaulted(exception);
+                }
+                finally
+                {
+                    context.Dispose();
+                }
 
-            MessageHandled();
+                MessageHandled();
+            }
         }
 
         async Task<IEnumerable<SqlTransportMessage>> ReceiveMessages(int messageLimit, CancellationToken cancellationToken)

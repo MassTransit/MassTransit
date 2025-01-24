@@ -791,6 +791,62 @@ namespace MassTransit.SqlTransport.PostgreSql
             )
                 RETURNS bigint AS
             $$
+            BEGIN
+            RETURN "{0}".send_message_v2(entity_name
+            , priority
+            , transport_message_id
+            , body
+            , binary_body
+            , content_type
+            , message_type
+            , message_id
+            , correlation_id
+            , conversation_id
+            , request_id
+            , initiator_id
+            , source_address
+            , destination_address
+            , response_address
+            , fault_address
+            , sent_time
+            , NULL
+            , headers
+            , host
+            , partition_key
+            , routing_key
+            , delay
+            , scheduling_token_id);
+            END;
+            $$ LANGUAGE plpgsql;
+
+            CREATE OR REPLACE FUNCTION "{0}".send_message_v2(
+              entity_name text
+            , priority integer DEFAULT NULL
+            , transport_message_id uuid DEFAULT gen_random_uuid()
+            , body jsonb DEFAULT NULL
+            , binary_body bytea DEFAULT NULL
+            , content_type text DEFAULT NULL
+            , message_type text DEFAULT NULL
+            , message_id uuid DEFAULT NULL
+            , correlation_id uuid DEFAULT NULL
+            , conversation_id uuid DEFAULT NULL
+            , request_id uuid DEFAULT NULL
+            , initiator_id uuid DEFAULT NULL
+            , source_address text DEFAULT NULL
+            , destination_address text DEFAULT NULL
+            , response_address text DEFAULT NULL
+            , fault_address text DEFAULT NULL
+            , sent_time timestamptz DEFAULT NULL
+            , expiration_time timestamptz DEFAULT NULL
+            , headers jsonb DEFAULT NULL
+            , host jsonb DEFAULT NULL
+            , partition_key text DEFAULT NULL
+            , routing_key text DEFAULT NULL
+            , delay interval DEFAULT INTERVAL '0 seconds'
+            , scheduling_token_id uuid DEFAULT NULL
+            )
+                RETURNS bigint AS
+            $$
             DECLARE
                 v_queue_id     bigint;
                 v_max_delivery_count int;
@@ -814,8 +870,8 @@ namespace MassTransit.SqlTransport.PostgreSql
                     source_address, destination_address, response_address, fault_address, sent_time, headers, host, scheduling_token_id)
                 VALUES (transport_message_id, body, binary_body, content_type, message_type, message_id, correlation_id, conversation_id, request_id, initiator_id,
                     source_address, destination_address, response_address, fault_address, sent_time, headers, host, scheduling_token_id);
-                INSERT INTO "{0}".message_delivery (queue_id, transport_message_id, priority, enqueue_time, delivery_count, max_delivery_count, partition_key, routing_key)
-                VALUES (v_queue_id, send_message.transport_message_id, send_message.priority, v_enqueue_time, 0, v_max_delivery_count, send_message.partition_key, send_message.routing_key);
+                INSERT INTO "{0}".message_delivery (queue_id, transport_message_id, priority, enqueue_time, expiration_time, delivery_count, max_delivery_count, partition_key, routing_key)
+                VALUES (v_queue_id, send_message_v2.transport_message_id, send_message_v2.priority, v_enqueue_time, expiration_time, 0, v_max_delivery_count, send_message_v2.partition_key, send_message_v2.routing_key);
 
                 RETURN 1;
 
@@ -850,6 +906,63 @@ namespace MassTransit.SqlTransport.PostgreSql
             )
                 RETURNS bigint AS
             $$
+            BEGIN
+            RETURN "{0}".publish_message_v2(entity_name
+            , priority
+            , transport_message_id
+            , body
+            , binary_body
+            , content_type
+            , message_type
+            , message_id
+            , correlation_id
+            , conversation_id
+            , request_id
+            , initiator_id
+            , source_address
+            , destination_address
+            , response_address
+            , fault_address
+            , sent_time
+            , NULL
+            , headers
+            , host
+            , partition_key
+            , routing_key
+            , delay
+            , scheduling_token_id);
+            END;
+            $$ LANGUAGE plpgsql;
+
+
+            CREATE OR REPLACE FUNCTION "{0}".publish_message_v2(
+              entity_name text
+            , priority integer DEFAULT NULL
+            , transport_message_id uuid DEFAULT gen_random_uuid()
+            , body jsonb DEFAULT NULL
+            , binary_body bytea DEFAULT NULL
+            , content_type text DEFAULT NULL
+            , message_type text DEFAULT NULL
+            , message_id uuid DEFAULT NULL
+            , correlation_id uuid DEFAULT NULL
+            , conversation_id uuid DEFAULT NULL
+            , request_id uuid DEFAULT NULL
+            , initiator_id uuid DEFAULT NULL
+            , source_address text DEFAULT NULL
+            , destination_address text DEFAULT NULL
+            , response_address text DEFAULT NULL
+            , fault_address text DEFAULT NULL
+            , sent_time timestamptz DEFAULT NULL
+            , expiration_time timestamptz DEFAULT NULL
+            , headers jsonb DEFAULT NULL
+            , host jsonb DEFAULT NULL
+            , partition_key text DEFAULT NULL
+            , routing_key text DEFAULT NULL
+            , delay interval DEFAULT INTERVAL '0 seconds'
+            , scheduling_token_id uuid DEFAULT NULL
+            )
+                RETURNS bigint AS
+            $$
             DECLARE
                 v_topic_id      bigint;
                 v_enqueue_time  timestamptz;
@@ -875,15 +988,15 @@ namespace MassTransit.SqlTransport.PostgreSql
                     source_address, destination_address, response_address, fault_address, sent_time, headers, host, scheduling_token_id);
 
                 WITH delivered AS (
-                INSERT INTO "{0}".message_delivery (queue_id, transport_message_id, priority, enqueue_time, delivery_count, max_delivery_count, partition_key, routing_key)
+                INSERT INTO "{0}".message_delivery (queue_id, transport_message_id, priority, enqueue_time, expiration_time, delivery_count, max_delivery_count, partition_key, routing_key)
                 WITH RECURSIVE fabric AS (
                     SELECT source_id, destination_id
                         FROM "{0}".topic t
                         LEFT JOIN "{0}".topic_subscription ts ON t.id = ts.source_id
                         AND CASE
                             WHEN ts.sub_type = 1 THEN true
-                            WHEN ts.sub_type = 2 THEN publish_message.routing_key = ts.routing_key
-                            WHEN ts.sub_type = 3 THEN publish_message.routing_key ~ ts.routing_key
+                            WHEN ts.sub_type = 2 THEN publish_message_v2.routing_key = ts.routing_key
+                            WHEN ts.sub_type = 3 THEN publish_message_v2.routing_key ~ ts.routing_key
                             ELSE false END
                         WHERE t.id = v_topic_id
 
@@ -894,16 +1007,16 @@ namespace MassTransit.SqlTransport.PostgreSql
                         WHERE ts.source_id = fabric.destination_id
                         AND CASE
                             WHEN ts.sub_type = 1 THEN true
-                            WHEN ts.sub_type = 2 THEN publish_message.routing_key = ts.routing_key
-                            WHEN ts.sub_type = 3 THEN publish_message.routing_key ~ ts.routing_key
+                            WHEN ts.sub_type = 2 THEN publish_message_v2.routing_key = ts.routing_key
+                            WHEN ts.sub_type = 3 THEN publish_message_v2.routing_key ~ ts.routing_key
                             ELSE false END
                     )
-                SELECT DISTINCT qs.destination_id, publish_message.transport_message_id, publish_message.priority, v_enqueue_time, 0, q.max_delivery_count, publish_message.partition_key, publish_message.routing_key
+                SELECT DISTINCT qs.destination_id, publish_message_v2.transport_message_id, publish_message_v2.priority, v_enqueue_time, publish_message_v2.expiration_time, 0, q.max_delivery_count, publish_message_v2.partition_key, publish_message_v2.routing_key
                     FROM "{0}".queue_subscription qs, "{0}".queue q, fabric
                     WHERE CASE
                         WHEN qs.sub_type = 1 THEN true
-                        WHEN qs.sub_type = 2 THEN publish_message.routing_key = qs.routing_key
-                        WHEN qs.sub_type = 3 THEN publish_message.routing_key ~ qs.routing_key
+                        WHEN qs.sub_type = 2 THEN publish_message_v2.routing_key = qs.routing_key
+                        WHEN qs.sub_type = 3 THEN publish_message_v2.routing_key ~ qs.routing_key
                         ELSE false END
                     AND qs.destination_id = q.id
                     AND (qs.source_id = fabric.destination_id OR qs.source_id = v_topic_id)
@@ -911,7 +1024,7 @@ namespace MassTransit.SqlTransport.PostgreSql
                 SELECT COUNT(d.message_delivery_id) FROM delivered d INTO v_publish_count;
 
                 IF v_publish_count = 0 THEN
-                    DELETE FROM "{0}".message WHERE message.transport_message_id = publish_message.transport_message_id;
+                    DELETE FROM "{0}".message WHERE message.transport_message_id = publish_message_v2.transport_message_id;
                 END IF;
 
                 RETURN v_publish_count;

@@ -60,6 +60,8 @@ namespace MassTransit.SqlTransport.Configuration
 
         public int MaintenanceBatchSize { get; set; }
 
+        public bool DeadLetterExpiredMessages { get; set; }
+
         public Uri GetInputAddress(Uri hostAddress)
         {
             return GetEndpointAddress(hostAddress);

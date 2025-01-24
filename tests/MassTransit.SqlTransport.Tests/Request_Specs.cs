@@ -27,6 +27,7 @@ public class Using_the_request_client<T>
                         if(cfg is ISqlReceiveEndpointConfigurator configurator)
                         {
                             configurator.MaxDeliveryCount = 5;
+                            configurator.DeadLetterExpiredMessages = true;
                         }
                     }));
 
