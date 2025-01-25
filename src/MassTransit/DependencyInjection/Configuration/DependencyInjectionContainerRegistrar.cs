@@ -74,7 +74,11 @@ namespace MassTransit.Configuration
             if (settings == null)
                 Collection.AddSingleton<IEndpointDefinition<T>, TDefinition>();
             else
+            {
+                Collection.TryAddTransient<IEndpointSettings<IEndpointDefinition<T>>>(
+                    _ => throw new InvalidOperationException("The settings are no longer configured in the container."));
                 Collection.AddSingleton<IEndpointDefinition<T>>(provider => ActivatorUtilities.CreateInstance<TDefinition>(provider, settings));
+            }
         }
 
         public virtual IEnumerable<T> GetRegistrations<T>()
@@ -221,6 +225,9 @@ namespace MassTransit.Configuration
                 Collection.AddSingleton(provider => Bind<TBus>.Create<IEndpointDefinition<T>>(provider.GetRequiredService<TDefinition>()));
             else
             {
+                Collection.TryAddTransient<IEndpointSettings<IEndpointDefinition<T>>>(
+                    _ => throw new InvalidOperationException("The settings are no longer configured in the container."));
+
                 Collection.AddSingleton(provider =>
                     Bind<TBus>.Create<IEndpointDefinition<T>>(ActivatorUtilities.CreateInstance<TDefinition>(provider, settings)));
             }
