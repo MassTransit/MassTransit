@@ -21,13 +21,13 @@ namespace MassTransit.Configuration
         readonly PublishObservable _publishObservers;
         readonly ReceiveObservable _receiveObservers;
         readonly SendObservable _sendObservers;
-        IList<TConfiguration> _endpoints;
+        List<TConfiguration> _endpoints;
         ILogContext? _logContext;
 
         protected BaseHostConfiguration(IBusConfiguration busConfiguration)
         {
             BusConfiguration = busConfiguration;
-            _endpoints = new List<TConfiguration>();
+            _endpoints = [];
 
             _endpointObservable = new EndpointConfigurationObservable();
 
@@ -80,7 +80,7 @@ namespace MassTransit.Configuration
 
         public virtual IEnumerable<ValidationResult> Validate()
         {
-            return _endpoints.SelectMany(x => x.Validate()) ?? Enumerable.Empty<ValidationResult>();
+            return _endpoints.SelectMany(x => x.Validate());
         }
 
         public abstract IBusTopology Topology { get; }
@@ -88,6 +88,7 @@ namespace MassTransit.Configuration
         public abstract IRetryPolicy ReceiveTransportRetryPolicy { get; }
         public virtual IRetryPolicy SendTransportRetryPolicy => ReceiveTransportRetryPolicy;
         public TimeSpan? ConsumerStopTimeout { get; set; }
+        public TimeSpan? StopTimeout { get; set; }
 
         public abstract IReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName, Action<IReceiveEndpointConfigurator>? configure);
 

@@ -104,6 +104,7 @@ namespace MassTransit.Transports
         }
 
         public TimeSpan? ConsumerStopTimeout => _hostConfiguration.ConsumerStopTimeout;
+        public TimeSpan? StopTimeout => _hostConfiguration.StopTimeout;
 
         public Uri InputAddress { get; }
 

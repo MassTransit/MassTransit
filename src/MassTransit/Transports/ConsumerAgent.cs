@@ -94,7 +94,11 @@ namespace MassTransit.Transports
                 {
                     LogContext.SetCurrentIfNull(_context.LogContext);
 
-                    await this.Stop("Consume Loop Exited").ConfigureAwait(false);
+                    using var tokenSource = _context.StopTimeout.HasValue
+                        ? new CancellationTokenSource(_context.StopTimeout.Value)
+                        : new CancellationTokenSource();
+
+                    await this.Stop("Consume Loop Exited", tokenSource.Token).ConfigureAwait(false);
                 }
                 catch (Exception exception)
                 {
