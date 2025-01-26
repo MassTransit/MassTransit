@@ -1,6 +1,5 @@
 namespace MassTransit
 {
-    using System;
     using System.IO;
     using System.Text;
 
@@ -26,7 +25,7 @@ namespace MassTransit
         public byte[] GetBytes()
         {
             return _bytes ??= string.IsNullOrWhiteSpace(_body)
-                ? Array.Empty<byte>()
+                ? []
                 : Encoding.UTF8.GetBytes(_body);
         }
 

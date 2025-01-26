@@ -68,7 +68,7 @@ namespace MassTransit.Transports
 
         public virtual IEnumerable<IAgent> GetAgentHandles()
         {
-            return Array.Empty<IAgent>();
+            return [];
         }
     }
 }

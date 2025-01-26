@@ -1,7 +1,6 @@
 #nullable enable
 namespace MassTransit.Serialization
 {
-    using System;
     using System.Net.Mime;
     using Newtonsoft.Json;
 
@@ -15,7 +14,7 @@ namespace MassTransit.Serialization
         public NewtonsoftJsonSerializerContext(JsonSerializer deserializer, IObjectDeserializer objectDeserializer, MessageEnvelope envelope,
             ContentType contentType)
             : base(deserializer, objectDeserializer, new EnvelopeMessageContext(envelope, objectDeserializer), envelope.Message,
-                envelope.MessageType ?? Array.Empty<string>())
+                envelope.MessageType ?? [])
         {
             _contentType = contentType;
             _envelope = envelope;

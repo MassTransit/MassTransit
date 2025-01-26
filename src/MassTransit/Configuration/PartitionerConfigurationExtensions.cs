@@ -154,7 +154,7 @@
             {
                 var key = keyProvider(context);
                 return key == null
-                    ? Array.Empty<byte>()
+                    ? []
                     : textEncoding.GetBytes(key);
             }
 
@@ -219,7 +219,7 @@
             {
                 var key = keyProvider(context);
                 return key == null
-                    ? Array.Empty<byte>()
+                    ? []
                     : textEncoding.GetBytes(key);
             }
 
@@ -320,7 +320,7 @@
             {
                 var key = keyProvider(context);
                 return key == null
-                    ? Array.Empty<byte>()
+                    ? []
                     : textEncoding.GetBytes(key);
             }
 
@@ -356,7 +356,7 @@
             {
                 var key = keyProvider(context);
                 return key == null
-                    ? Array.Empty<byte>()
+                    ? []
                     : textEncoding.GetBytes(key);
             }
 
@@ -448,7 +448,7 @@
             {
                 var key = keyProvider(context);
                 return key == null
-                    ? Array.Empty<byte>()
+                    ? []
                     : textEncoding.GetBytes(key);
             }
 
@@ -484,7 +484,7 @@
             {
                 var key = keyProvider(context);
                 return key == null
-                    ? Array.Empty<byte>()
+                    ? []
                     : textEncoding.GetBytes(key);
             }
 
@@ -580,7 +580,7 @@
             {
                 var key = keyProvider(context);
                 return key == null
-                    ? Array.Empty<byte>()
+                    ? []
                     : textEncoding.GetBytes(key);
             }
 
@@ -614,7 +614,7 @@
             {
                 var key = keyProvider(context);
                 return key == null
-                    ? Array.Empty<byte>()
+                    ? []
                     : textEncoding.GetBytes(key);
             }
 
@@ -694,7 +694,7 @@
 
             byte[] PartitionKeyProvider(T context)
             {
-                return keyProvider(context) ?? Array.Empty<byte>();
+                return keyProvider(context) ?? [];
             }
 
             var specification = new PartitionerPipeSpecification<T>(PartitionKeyProvider, partitionCount);
@@ -721,7 +721,7 @@
 
             byte[] PartitionKeyProvider(T context)
             {
-                return keyProvider(context) ?? Array.Empty<byte>();
+                return keyProvider(context) ?? [];
             }
 
             var specification = new PartitionerPipeSpecification<T>(PartitionKeyProvider, partitioner);

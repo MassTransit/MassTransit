@@ -170,7 +170,7 @@ namespace MassTransit.SqlTransport.Middleware
             }
             catch (OperationCanceledException)
             {
-                return Array.Empty<SqlTransportMessage>();
+                return [];
             }
         }
 

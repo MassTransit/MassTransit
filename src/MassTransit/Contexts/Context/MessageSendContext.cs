@@ -155,7 +155,7 @@ namespace MassTransit.Context
                 }
             }
 
-            return Array.Empty<string>();
+            return [];
         }
 
         protected static TimeSpan? ReadTimeSpan(IReadOnlyDictionary<string, object> properties, string key, TimeSpan? defaultValue = null)

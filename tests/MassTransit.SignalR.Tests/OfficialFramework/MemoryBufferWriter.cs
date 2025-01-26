@@ -128,7 +128,7 @@
             if (_completedSegments == null)
             {
                 // There is only one segment so write without awaiting.
-                return destination.WriteAsync(_currentSegment, 0, _position);
+                return destination.WriteAsync(_currentSegment, 0, _position, cancellationToken);
             }
 
             return CopyToSlowAsync(destination);
@@ -156,8 +156,7 @@
             if (_currentSegment != null)
             {
                 // We're adding a segment to the list
-                if (_completedSegments == null)
-                    _completedSegments = new List<CompletedBuffer>();
+                _completedSegments ??= [];
 
                 // Position might be less than the segment length if there wasn't enough space to satisfy the sizeHint when
                 // GetMemory was called. In that case we'll take the current segment and call it "completed", but need to
@@ -189,7 +188,7 @@
         public byte[] ToArray()
         {
             if (_currentSegment == null)
-                return Array.Empty<byte>();
+                return [];
 
             var result = new byte[_bytesWritten];
 

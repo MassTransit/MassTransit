@@ -1,5 +1,4 @@
-﻿#nullable enable
-namespace MassTransit.QuartzIntegration
+﻿namespace MassTransit.QuartzIntegration
 {
     using System;
     using System.Collections.Generic;
@@ -32,7 +31,7 @@ namespace MassTransit.QuartzIntegration
 
             var supportedMessageTypes = (jobData.TryGetString("MessageType", out var text)
                 ? text?.Split(';').ToArray()
-                : default) ?? Array.Empty<string>();
+                : default) ?? [];
 
             try
             {

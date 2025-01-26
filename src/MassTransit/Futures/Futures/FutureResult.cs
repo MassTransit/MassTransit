@@ -1,6 +1,5 @@
 namespace MassTransit.Futures
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -31,7 +30,7 @@ namespace MassTransit.Futures
             context.SetCompleted(context.Saga.CorrelationId);
 
             var result = await context.SendMessageToSubscriptions(_factory,
-                context.Saga.HasSubscriptions() ? context.Saga.Subscriptions.ToArray() : Array.Empty<FutureSubscription>());
+                context.Saga.HasSubscriptions() ? context.Saga.Subscriptions.ToArray() : []);
 
             context.SetResult(context.Saga.CorrelationId, result);
         }
@@ -61,7 +60,7 @@ namespace MassTransit.Futures
             context.SetCompleted(context.Saga.CorrelationId);
 
             var result = await context.SendMessageToSubscriptions(_factory,
-                context.Saga.HasSubscriptions() ? context.Saga.Subscriptions.ToArray() : Array.Empty<FutureSubscription>());
+                context.Saga.HasSubscriptions() ? context.Saga.Subscriptions.ToArray() : []);
 
             context.SetResult(context.Saga.CorrelationId, result);
         }

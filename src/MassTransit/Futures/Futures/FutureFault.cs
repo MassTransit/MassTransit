@@ -40,7 +40,7 @@ namespace MassTransit.Futures
                 context.SetFaulted(context.Saga.CorrelationId);
 
                 var fault = await context.SendMessageToSubscriptions(_factory,
-                    context.Saga.HasSubscriptions() ? context.Saga.Subscriptions.ToArray() : Array.Empty<FutureSubscription>());
+                    context.Saga.HasSubscriptions() ? context.Saga.Subscriptions.ToArray() : []);
 
                 context.SetFault(context.Saga.CorrelationId, fault);
             }
@@ -105,7 +105,7 @@ namespace MassTransit.Futures
                 context.SetFaulted(context.Saga.CorrelationId);
 
                 var fault = await context.SendMessageToSubscriptions(_factory,
-                    context.Saga.HasSubscriptions() ? context.Saga.Subscriptions.ToArray() : Array.Empty<FutureSubscription>());
+                    context.Saga.HasSubscriptions() ? context.Saga.Subscriptions.ToArray() : []);
 
                 context.SetFault(context.Saga.CorrelationId, fault);
             }

@@ -179,7 +179,7 @@ namespace MassTransit.EventHubIntegration
                 _messages = messages as T[] ?? messages.ToArray();
                 _context = context;
                 _pipe = pipe;
-                _initializerPipes = sendPipes as IPipe<SendContext<T>>[] ?? sendPipes?.ToArray() ?? Array.Empty<IPipe<SendContext<T>>>();
+                _initializerPipes = sendPipes as IPipe<SendContext<T>>[] ?? sendPipes?.ToArray() ?? [];
                 _cancellationToken = cancellationToken;
             }
 

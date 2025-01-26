@@ -88,7 +88,7 @@
                 return true;
             }
 
-            arguments = Array.Empty<Type>();
+            arguments = [];
             return false;
         }
 
@@ -130,7 +130,7 @@
             {
                 if (baseType.IsGenericType && baseType.GetGenericTypeDefinition() == openType)
                 {
-                    if (!baseType.IsGenericTypeDefinition && !baseType.ContainsGenericParameters)
+                    if (baseType is { IsGenericTypeDefinition: false, ContainsGenericParameters: false })
                     {
                         closedType = baseType;
                         return true;

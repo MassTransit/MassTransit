@@ -8,7 +8,7 @@ namespace MassTransit.Transports.Fabric
         public static T[] Copy<T>(this T[] array)
         {
             if ((array?.Length ?? 0) == 0)
-                return Array.Empty<T>();
+                return [];
 
             var result = new T[array.Length];
             Array.Copy(array, result, array.Length);

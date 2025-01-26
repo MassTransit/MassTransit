@@ -132,7 +132,7 @@ namespace MassTransit.AmazonSqsTransport.Middleware
             }
             catch (OperationCanceledException)
             {
-                return Array.Empty<Message>();
+                return [];
             }
         }
 
@@ -168,7 +168,7 @@ namespace MassTransit.AmazonSqsTransport.Middleware
             {
                 return message.Attributes.TryGetValue(MessageSystemAttributeName.MessageGroupId, out var groupId) && !string.IsNullOrEmpty(groupId)
                     ? Encoding.UTF8.GetBytes(groupId)
-                    : Array.Empty<byte>();
+                    : [];
             }
         }
     }

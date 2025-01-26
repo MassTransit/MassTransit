@@ -14,8 +14,7 @@ namespace MassTransit.Serialization
 
         public NewtonsoftEncryptedV2SerializerContext(JsonSerializer deserializer, IObjectDeserializer objectDeserializer, MessageEnvelope envelope,
             ContentType contentType, ICryptoStreamProviderV2 cryptoStreamProvider)
-            : base(deserializer, objectDeserializer, new EnvelopeMessageContext(envelope, objectDeserializer), envelope.Message,
-                envelope.MessageType ?? Array.Empty<string>())
+            : base(deserializer, objectDeserializer, new EnvelopeMessageContext(envelope, objectDeserializer), envelope.Message, envelope.MessageType ?? [])
         {
             _envelope = envelope;
             _contentType = contentType;

@@ -18,7 +18,7 @@ namespace MassTransit.SagaStateMachine
         {
             Event = @event;
             _machine = machine;
-            _activities = activities ?? Array.Empty<IActivityBinder<TInstance>>();
+            _activities = activities ?? [];
         }
 
         public TriggerEventActivityBinder(StateMachine<TInstance> machine, Event @event, StateMachineCondition<TInstance> filter,
@@ -27,7 +27,7 @@ namespace MassTransit.SagaStateMachine
             Event = @event;
             _filter = filter;
             _machine = machine;
-            _activities = activities ?? Array.Empty<IActivityBinder<TInstance>>();
+            _activities = activities ?? [];
         }
 
         TriggerEventActivityBinder(StateMachine<TInstance> machine, Event @event, StateMachineCondition<TInstance> filter,
@@ -87,13 +87,13 @@ namespace MassTransit.SagaStateMachine
         EventActivityBinder<TInstance> EventActivityBinder<TInstance>.If(StateMachineCondition<TInstance> condition,
             Func<EventActivityBinder<TInstance>, EventActivityBinder<TInstance>> activityCallback)
         {
-            return IfElse(condition, activityCallback, _ => _);
+            return IfElse(condition, activityCallback, b => b);
         }
 
         EventActivityBinder<TInstance> EventActivityBinder<TInstance>.IfAsync(StateMachineAsyncCondition<TInstance> condition,
             Func<EventActivityBinder<TInstance>, EventActivityBinder<TInstance>> activityCallback)
         {
-            return IfElseAsync(condition, activityCallback, _ => _);
+            return IfElseAsync(condition, activityCallback, b => b);
         }
 
         public EventActivityBinder<TInstance> IfElse(StateMachineCondition<TInstance> condition,

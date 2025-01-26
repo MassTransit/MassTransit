@@ -14,7 +14,7 @@ namespace MassTransit.SagaStateMachine
 
         public CatchExceptionActivityBinder(StateMachine<TInstance> machine, Event @event)
         {
-            _activities = Array.Empty<IActivityBinder<TInstance>>();
+            _activities = [];
             _machine = machine;
             Event = @event;
         }
@@ -63,13 +63,13 @@ namespace MassTransit.SagaStateMachine
         public ExceptionActivityBinder<TInstance, TException> If(StateMachineExceptionCondition<TInstance, TException> condition,
             Func<ExceptionActivityBinder<TInstance, TException>, ExceptionActivityBinder<TInstance, TException>> activityCallback)
         {
-            return IfElse(condition, activityCallback, _ => _);
+            return IfElse(condition, activityCallback, b => b);
         }
 
         public ExceptionActivityBinder<TInstance, TException> IfAsync(StateMachineAsyncExceptionCondition<TInstance, TException> condition,
             Func<ExceptionActivityBinder<TInstance, TException>, ExceptionActivityBinder<TInstance, TException>> activityCallback)
         {
-            return IfElseAsync(condition, activityCallback, _ => _);
+            return IfElseAsync(condition, activityCallback, b => b);
         }
 
         public ExceptionActivityBinder<TInstance, TException> IfElse(StateMachineExceptionCondition<TInstance, TException> condition,
@@ -116,7 +116,7 @@ namespace MassTransit.SagaStateMachine
 
         public CatchExceptionActivityBinder(StateMachine<TInstance> machine, Event<TData> @event)
         {
-            _activities = Array.Empty<IActivityBinder<TInstance>>();
+            _activities = [];
             _machine = machine;
             Event = @event;
         }
@@ -174,13 +174,13 @@ namespace MassTransit.SagaStateMachine
         public ExceptionActivityBinder<TInstance, TData, TException> If(StateMachineExceptionCondition<TInstance, TData, TException> condition,
             Func<ExceptionActivityBinder<TInstance, TData, TException>, ExceptionActivityBinder<TInstance, TData, TException>> activityCallback)
         {
-            return IfElse(condition, activityCallback, _ => _);
+            return IfElse(condition, activityCallback, b => b);
         }
 
         public ExceptionActivityBinder<TInstance, TData, TException> IfAsync(StateMachineAsyncExceptionCondition<TInstance, TData, TException> condition,
             Func<ExceptionActivityBinder<TInstance, TData, TException>, ExceptionActivityBinder<TInstance, TData, TException>> activityCallback)
         {
-            return IfElseAsync(condition, activityCallback, _ => _);
+            return IfElseAsync(condition, activityCallback, b => b);
         }
 
         public ExceptionActivityBinder<TInstance, TData, TException> IfElse(StateMachineExceptionCondition<TInstance, TData, TException> condition,

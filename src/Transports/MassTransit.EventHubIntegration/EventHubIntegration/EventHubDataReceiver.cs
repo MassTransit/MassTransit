@@ -63,7 +63,7 @@
         static byte[] GetBytes(ProcessEventArgs eventArgs)
         {
             var partitionKey = eventArgs.Data.PartitionKey;
-            return !string.IsNullOrEmpty(partitionKey) ? Encoding.UTF8.GetBytes(partitionKey) : Array.Empty<byte>();
+            return !string.IsNullOrEmpty(partitionKey) ? Encoding.UTF8.GetBytes(partitionKey) : [];
         }
 
         async Task HandleMessage(ProcessEventArgs eventArgs)

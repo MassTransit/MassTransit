@@ -139,7 +139,7 @@ namespace MassTransit.SqlTransport.PostgreSql
             }
             catch (PostgresException exception) when (exception.ErrorCode == 40001)
             {
-                return Array.Empty<SqlTransportMessage>();
+                return [];
             }
         }
 

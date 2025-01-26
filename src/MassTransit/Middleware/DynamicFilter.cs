@@ -29,7 +29,7 @@
             ConverterFactory = converterFactory;
 
             _outputPipes = new Dictionary<Type, IOutputFilter>();
-            _outputPipeArray = Array.Empty<IOutputFilter>();
+            _outputPipeArray = [];
 
             Observers = new FilterObservable();
             _empty = Pipe.Empty<TInput>();
