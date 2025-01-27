@@ -67,6 +67,12 @@ public interface ISqlHostConfigurator
     int ConnectionLimit { set; }
 
     /// <summary>
+    /// Opt out of ongoing maintenance and cleanup jobs (metrics consolidation, topology cleanup, etc.)
+    /// Should typically not be used, reserved for use cases such as delegating maintenance activities explicitly as application quantities grow.
+    /// </summary>
+    bool MaintenanceOptOut { set; }
+
+    /// <summary>
     /// How often database maintenance should be performed (metrics consolidation, topology cleanup, etc.)
     /// </summary>
     TimeSpan MaintenanceInterval { set; }

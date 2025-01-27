@@ -87,6 +87,11 @@ namespace MassTransit.SqlTransport.Configuration
             set => _settings.ConnectionLimit = value;
         }
 
+        public bool MaintenanceOptOut
+        {
+            set => _settings.MaintenanceOptOut = value;
+        }
+
         public TimeSpan MaintenanceInterval
         {
             set => _settings.MaintenanceInterval = value;

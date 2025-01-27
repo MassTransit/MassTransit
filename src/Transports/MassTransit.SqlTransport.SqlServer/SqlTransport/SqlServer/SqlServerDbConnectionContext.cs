@@ -42,7 +42,8 @@ public class SqlServerDbConnectionContext :
 
         Topology = hostConfiguration.Topology;
 
-        supervisor.AddConsumeAgent(new MaintenanceAgent(this, hostConfiguration));
+        if(!_hostSettings.MaintenanceOptOut)
+            supervisor.AddConsumeAgent(new MaintenanceAgent(this, hostConfiguration));
 
         _executor = new TaskExecutor(hostConfiguration.Settings.ConnectionLimit);
     }
