@@ -1600,142 +1600,127 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-	BEGIN TRY
-		BEGIN TRANSACTION
+	DECLARE @Lock int
+	EXEC @Lock = sp_getapplock @Resource = '_MT_ProcessMetrics',
+							   @LockMode = 'Exclusive',
+							   @LockTimeout = 500
+	IF (@Lock < 0)
+	   RETURN;
 
-		DECLARE @Lock int
-		EXEC @Lock = sp_getapplock @Resource = '_MT_ProcessMetrics',
-								   @LockMode = 'Exclusive',
-								   @LockTimeout = 500
-		IF (@Lock < 0)
-		   RETURN;
+	DECLARE @DeletedMetrics TABLE
+							(
+								StartTime       datetime2 not null,
+								Duration        int       not null,
+								QueueId         bigint    not null,
+								ConsumeCount    bigint    not null,
+								ErrorCount      bigint    not null,
+								DeadLetterCount bigint    not null
+							);
 
-		DECLARE @DeletedMetrics TABLE
-								(
-									StartTime       datetime2 not null,
-									Duration        int       not null,
-									QueueId         bigint    not null,
-									ConsumeCount    bigint    not null,
-									ErrorCount      bigint    not null,
-									DeadLetterCount bigint    not null
-								);
-
-		DELETE
-		FROM {0}.QueueMetricCapture
-		OUTPUT CONVERT(DATETIME, CONVERT(VARCHAR(16), deleted.Captured, 120) + ':00'), 60, deleted.QueueId,
-																						   deleted.ConsumeCount,
-																						   deleted.ErrorCount,
-																						   deleted.DeadLetterCount
-			INTO @DeletedMetrics
-		WHERE Id < COALESCE((SELECT MIN(id) FROM {0}.queuemetriccapture), 0) + @rowLimit;
-
-		MERGE INTO {0}.QueueMetric WITH (TABLOCK) AS target
-		USING (SELECT m.StartTime,
-					  m.Duration,
-					  m.QueueId,
-					  sum(m.ConsumeCount),
-					  sum(m.ErrorCount),
-					  sum(m.DeadLetterCount)
-			   FROM @DeletedMetrics m
-			   GROUP BY StartTime, m.Duration, m.QueueId) as source
-			(StartTime, Duration, QueueId, ConsumeCount, ErrorCount, DeadLetterCount)
-		ON target.StartTime = source.starttime AND target.Duration = source.duration AND
-		   target.QueueId = source.QueueId
-		WHEN MATCHED THEN
-			UPDATE
-			SET ConsumeCount    = source.ConsumeCount + target.ConsumeCount,
-				ErrorCount      = source.ErrorCount + target.ErrorCount,
-				DeadLetterCount = source.DeadLetterCount + target.DeadLetterCount
-		WHEN NOT MATCHED THEN
-			INSERT (starttime, duration, QueueId, ConsumeCount, ErrorCount, DeadLetterCount)
-			values (source.starttime, source.duration, source.QueueId, source.ConsumeCount, source.ErrorCount,
-					source.DeadLetterCount);
-
-		DELETE
-		FROM @DeletedMetrics;
-
-		DELETE
-		FROM {0}.QueueMetric
-		OUTPUT CONVERT(DATETIME, CONVERT(VARCHAR(13), deleted.StartTime, 120) + ':00:00'), 3600, deleted.QueueId,
-																								 deleted.ConsumeCount,
-																								 deleted.ErrorCount,
-																								 deleted.DeadLetterCount
-			INTO @DeletedMetrics
-		WHERE Duration = 60
-		  AND StartTime < DATEADD(HOUR, -8, SYSUTCDATETIME())
-
-		MERGE INTO {0}.QueueMetric WITH (TABLOCK) AS target
-		USING (SELECT m.StartTime,
-					  m.Duration,
-					  m.QueueId,
-					  sum(m.ConsumeCount),
-					  sum(m.ErrorCount),
-					  sum(m.DeadLetterCount)
-			   FROM @DeletedMetrics m
-			   GROUP BY StartTime, m.Duration, m.QueueId) as source
-			(StartTime, Duration, QueueId, ConsumeCount, ErrorCount, DeadLetterCount)
-		ON target.StartTime = source.starttime AND target.Duration = source.duration AND
-		   target.QueueId = source.QueueId
-		WHEN MATCHED THEN
-			UPDATE
-			SET ConsumeCount    = source.ConsumeCount + target.ConsumeCount,
-				ErrorCount      = source.ErrorCount + target.ErrorCount,
-				DeadLetterCount = source.DeadLetterCount + target.DeadLetterCount
-		WHEN NOT MATCHED THEN
-			INSERT (starttime, duration, QueueId, ConsumeCount, ErrorCount, DeadLetterCount)
-			values (source.starttime, source.duration, source.QueueId, source.ConsumeCount, source.ErrorCount,
-					source.DeadLetterCount);
-
-		DELETE
-		FROM @DeletedMetrics;
-
-		DELETE
-		FROM {0}.QueueMetric
-		OUTPUT CONVERT(DATETIME, CONVERT(VARCHAR(10), deleted.StartTime, 120)), 86400, deleted.QueueId,
+	DELETE
+	FROM {0}.QueueMetricCapture
+	OUTPUT CONVERT(DATETIME, CONVERT(VARCHAR(16), deleted.Captured, 120) + ':00'), 60, deleted.QueueId,
 																					   deleted.ConsumeCount,
 																					   deleted.ErrorCount,
 																					   deleted.DeadLetterCount
-			INTO @DeletedMetrics
-		WHERE Duration = 3600
-		  AND StartTime < DATEADD(HOUR, -48, SYSUTCDATETIME())
+		INTO @DeletedMetrics
+	WHERE Id < COALESCE((SELECT MIN(id) FROM {0}.queuemetriccapture), 0) + @rowLimit;
 
-		MERGE INTO {0}.QueueMetric WITH (TABLOCK) AS target
-		USING (SELECT m.StartTime,
-					  m.Duration,
-					  m.QueueId,
-					  sum(m.ConsumeCount),
-					  sum(m.ErrorCount),
-					  sum(m.DeadLetterCount)
-			   FROM @DeletedMetrics m
-			   GROUP BY StartTime, m.Duration, m.QueueId) as source
-			(StartTime, Duration, QueueId, ConsumeCount, ErrorCount, DeadLetterCount)
-		ON target.StartTime = source.starttime AND target.Duration = source.duration AND
-		   target.QueueId = source.QueueId
-		WHEN MATCHED THEN
-			UPDATE
-			SET ConsumeCount    = source.ConsumeCount + target.ConsumeCount,
-				ErrorCount      = source.ErrorCount + target.ErrorCount,
-				DeadLetterCount = source.DeadLetterCount + target.DeadLetterCount
-		WHEN NOT MATCHED THEN
-			INSERT (starttime, duration, QueueId, ConsumeCount, ErrorCount, DeadLetterCount)
-			values (source.starttime, source.duration, source.QueueId, source.ConsumeCount, source.ErrorCount,
-					source.DeadLetterCount);
+	MERGE INTO {0}.QueueMetric WITH (TABLOCK) AS target
+	USING (SELECT m.StartTime,
+				  m.Duration,
+				  m.QueueId,
+				  sum(m.ConsumeCount),
+				  sum(m.ErrorCount),
+				  sum(m.DeadLetterCount)
+		   FROM @DeletedMetrics m
+		   GROUP BY StartTime, m.Duration, m.QueueId) as source
+		(StartTime, Duration, QueueId, ConsumeCount, ErrorCount, DeadLetterCount)
+	ON target.StartTime = source.starttime AND target.Duration = source.duration AND
+	   target.QueueId = source.QueueId
+	WHEN MATCHED THEN
+		UPDATE
+		SET ConsumeCount    = source.ConsumeCount + target.ConsumeCount,
+			ErrorCount      = source.ErrorCount + target.ErrorCount,
+			DeadLetterCount = source.DeadLetterCount + target.DeadLetterCount
+	WHEN NOT MATCHED THEN
+		INSERT (starttime, duration, QueueId, ConsumeCount, ErrorCount, DeadLetterCount)
+		values (source.starttime, source.duration, source.QueueId, source.ConsumeCount, source.ErrorCount,
+				source.DeadLetterCount);
 
-		DELETE
-		FROM {0}.QueueMetric
-		WHERE StartTime < DATEADD(DAY, -90, SYSUTCDATETIME());
+	DELETE
+	FROM @DeletedMetrics;
 
-        COMMIT TRANSACTION;
-    END TRY
-    BEGIN CATCH
+	DELETE
+	FROM {0}.QueueMetric
+	OUTPUT CONVERT(DATETIME, CONVERT(VARCHAR(13), deleted.StartTime, 120) + ':00:00'), 3600, deleted.QueueId,
+																							 deleted.ConsumeCount,
+																							 deleted.ErrorCount,
+																							 deleted.DeadLetterCount
+		INTO @DeletedMetrics
+	WHERE Duration = 60
+	  AND StartTime < DATEADD(HOUR, -8, SYSUTCDATETIME())
 
-        IF @@TRANCOUNT > 0
-        BEGIN
-            ROLLBACK TRANSACTION;
-        END
+	MERGE INTO {0}.QueueMetric WITH (TABLOCK) AS target
+	USING (SELECT m.StartTime,
+				  m.Duration,
+				  m.QueueId,
+				  sum(m.ConsumeCount),
+				  sum(m.ErrorCount),
+				  sum(m.DeadLetterCount)
+		   FROM @DeletedMetrics m
+		   GROUP BY StartTime, m.Duration, m.QueueId) as source
+		(StartTime, Duration, QueueId, ConsumeCount, ErrorCount, DeadLetterCount)
+	ON target.StartTime = source.starttime AND target.Duration = source.duration AND
+	   target.QueueId = source.QueueId
+	WHEN MATCHED THEN
+		UPDATE
+		SET ConsumeCount    = source.ConsumeCount + target.ConsumeCount,
+			ErrorCount      = source.ErrorCount + target.ErrorCount,
+			DeadLetterCount = source.DeadLetterCount + target.DeadLetterCount
+	WHEN NOT MATCHED THEN
+		INSERT (starttime, duration, QueueId, ConsumeCount, ErrorCount, DeadLetterCount)
+		values (source.starttime, source.duration, source.QueueId, source.ConsumeCount, source.ErrorCount,
+				source.DeadLetterCount);
 
-    END CATCH
+	DELETE
+	FROM @DeletedMetrics;
 
+	DELETE
+	FROM {0}.QueueMetric
+	OUTPUT CONVERT(DATETIME, CONVERT(VARCHAR(10), deleted.StartTime, 120)), 86400, deleted.QueueId,
+																				   deleted.ConsumeCount,
+																				   deleted.ErrorCount,
+																				   deleted.DeadLetterCount
+		INTO @DeletedMetrics
+	WHERE Duration = 3600
+	  AND StartTime < DATEADD(HOUR, -48, SYSUTCDATETIME())
+
+	MERGE INTO {0}.QueueMetric WITH (TABLOCK) AS target
+	USING (SELECT m.StartTime,
+				  m.Duration,
+				  m.QueueId,
+				  sum(m.ConsumeCount),
+				  sum(m.ErrorCount),
+				  sum(m.DeadLetterCount)
+		   FROM @DeletedMetrics m
+		   GROUP BY StartTime, m.Duration, m.QueueId) as source
+		(StartTime, Duration, QueueId, ConsumeCount, ErrorCount, DeadLetterCount)
+	ON target.StartTime = source.starttime AND target.Duration = source.duration AND
+	   target.QueueId = source.QueueId
+	WHEN MATCHED THEN
+		UPDATE
+		SET ConsumeCount    = source.ConsumeCount + target.ConsumeCount,
+			ErrorCount      = source.ErrorCount + target.ErrorCount,
+			DeadLetterCount = source.DeadLetterCount + target.DeadLetterCount
+	WHEN NOT MATCHED THEN
+		INSERT (starttime, duration, QueueId, ConsumeCount, ErrorCount, DeadLetterCount)
+		values (source.starttime, source.duration, source.QueueId, source.ConsumeCount, source.ErrorCount,
+				source.DeadLetterCount);
+
+	DELETE
+	FROM {0}.QueueMetric
+	WHERE StartTime < DATEADD(DAY, -90, SYSUTCDATETIME());
 END
 ";
 
@@ -1745,40 +1730,25 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-	BEGIN TRY
-		BEGIN TRANSACTION
+	DECLARE @Lock int
+	EXEC @Lock = sp_getapplock @Resource = '_MT_PurgeTopology',
+							   @LockMode = 'Exclusive',
+							   @LockTimeout = 500
+	IF (@Lock < 0)
+	   RETURN;
 
-		DECLARE @Lock int
-		EXEC @Lock = sp_getapplock @Resource = '_MT_PurgeTopology',
-								   @LockMode = 'Exclusive',
-								   @LockTimeout = 500
-		IF (@Lock < 0)
-		   RETURN;
-
-        WITH expired AS (SELECT q.Id, q.name, DATEADD(second, -q.autodelete, SYSUTCDATETIME()) as expires_at
-                        FROM {0}.Queue q
-                        WHERE q.Type = 1 AND  q.AutoDelete IS NOT NULL AND DATEADD(second, -q.AutoDelete, SYSUTCDATETIME()) > Updated),
-            metrics AS (SELECT qm.queueid, MAX(starttime) as start_time
-                        FROM {0}.queuemetric qm
-                                INNER JOIN expired q2 on q2.Id = qm.QueueId
-                        WHERE DATEADD(second, duration, starttime) > q2.expires_at
-                        GROUP BY qm.queueid)
-        DELETE FROM {0}.Queue
-        FROM {0}.Queue qd
-        INNER JOIN expired qdx ON qdx.Name = qd.Name
-            WHERE qdx.Id NOT IN (SELECT QueueId FROM metrics);
-
-        COMMIT TRANSACTION;
-    END TRY
-    BEGIN CATCH
-
-        IF @@TRANCOUNT > 0
-        BEGIN
-            ROLLBACK TRANSACTION;
-        END
-
-    END CATCH
-
+    WITH expired AS (SELECT q.Id, q.name, DATEADD(second, -q.autodelete, SYSUTCDATETIME()) as expires_at
+                    FROM {0}.Queue q
+                    WHERE q.Type = 1 AND  q.AutoDelete IS NOT NULL AND DATEADD(second, -q.AutoDelete, SYSUTCDATETIME()) > Updated),
+        metrics AS (SELECT qm.queueid, MAX(starttime) as start_time
+                    FROM {0}.queuemetric qm
+                            INNER JOIN expired q2 on q2.Id = qm.QueueId
+                    WHERE DATEADD(second, duration, starttime) > q2.expires_at
+                    GROUP BY qm.queueid)
+    DELETE FROM {0}.Queue
+    FROM {0}.Queue qd
+    INNER JOIN expired qdx ON qdx.Name = qd.Name
+        WHERE qdx.Id NOT IN (SELECT QueueId FROM metrics);
 END
 ";
 
