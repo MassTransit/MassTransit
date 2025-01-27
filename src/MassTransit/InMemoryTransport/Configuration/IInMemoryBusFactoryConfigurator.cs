@@ -33,5 +33,13 @@ namespace MassTransit
         /// <param name="configure"></param>
         /// <returns></returns>
         void Host(Uri baseAddress, Action<IInMemoryHostConfigurator>? configure = null);
+
+        /// <summary>
+        /// Configure the virtual host, to differentiate in-memory bus instances
+        /// </summary>
+        /// <param name="virtualHost">The virtual host path</param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        void Host(string virtualHost, Action<IInMemoryHostConfigurator>? configure = null);
     }
 }

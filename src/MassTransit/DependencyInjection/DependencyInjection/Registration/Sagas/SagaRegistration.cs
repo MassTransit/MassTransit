@@ -58,8 +58,6 @@ namespace MassTransit.DependencyInjection.Registration
                 TypeCache<TSaga>.ShortName);
 
             configurator.AddEndpointSpecification(sagaConfigurator);
-
-            IncludeInConfigureEndpoints = false;
         }
 
         ISagaDefinition ISagaRegistration.GetDefinition(IRegistrationContext context)

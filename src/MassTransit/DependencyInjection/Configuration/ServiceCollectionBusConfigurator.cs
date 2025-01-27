@@ -196,8 +196,8 @@ namespace MassTransit.Configuration
             collection.TryAddScoped(provider => Bind<TBus>.Create(provider.GetRequiredService<IScopedBusContextProvider<TBus>>().Context.PublishEndpoint));
 
             collection.TryAddScoped(provider => Bind<TBus>.Create<IRoutingSlipExecutor>(new RoutingSlipExecutor(
-                provider.GetRequiredService<IScopedBusContextProvider<IBus>>().Context.SendEndpointProvider,
-                provider.GetRequiredService<IScopedBusContextProvider<IBus>>().Context.PublishEndpoint)));
+                provider.GetRequiredService<IScopedBusContextProvider<TBus>>().Context.SendEndpointProvider,
+                provider.GetRequiredService<IScopedBusContextProvider<TBus>>().Context.PublishEndpoint)));
 
             collection.AddSingleton(provider => Bind<TBus>.Create(CreateRegistrationContext(provider)));
         }

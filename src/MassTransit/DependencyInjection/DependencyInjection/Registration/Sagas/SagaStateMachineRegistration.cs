@@ -71,8 +71,6 @@ namespace MassTransit.DependencyInjection.Registration
                 TypeCache<TInstance>.ShortName, TypeCache.GetShortName(stateMachine.GetType()));
 
             configurator.AddEndpointSpecification(stateMachineConfigurator);
-
-            IncludeInConfigureEndpoints = false;
         }
 
         ISagaDefinition ISagaRegistration.GetDefinition(IRegistrationContext context)

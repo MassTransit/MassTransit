@@ -125,9 +125,6 @@ namespace MassTransit
             if (configure == null)
                 throw new ArgumentNullException(nameof(configure));
 
-            AddHostedService(collection);
-            AddInstrumentation(collection);
-
             var doIt = new Callback<TBus>(collection, configure);
 
             BusInstanceBuilder.Instance.GetBusInstanceType(doIt);

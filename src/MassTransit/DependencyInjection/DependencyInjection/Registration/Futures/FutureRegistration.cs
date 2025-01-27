@@ -42,8 +42,6 @@ namespace MassTransit.DependencyInjection.Registration
                 configurator.InputAddress.GetEndpointName(), TypeCache<TFuture>.ShortName);
 
             configurator.AddEndpointSpecification(sagaConfigurator);
-
-            IncludeInConfigureEndpoints = false;
         }
 
         public IFutureDefinition GetDefinition(IRegistrationContext context)

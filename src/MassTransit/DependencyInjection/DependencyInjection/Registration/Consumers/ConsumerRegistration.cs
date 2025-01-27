@@ -64,8 +64,6 @@ namespace MassTransit.DependencyInjection.Registration
             LogContext.Info?.Log("Configured endpoint {Endpoint}, Consumer: {ConsumerType}", endpointName, TypeCache<TConsumer>.ShortName);
 
             configurator.AddEndpointSpecification(consumerConfigurator);
-
-            IncludeInConfigureEndpoints = false;
         }
 
         IConsumerDefinition IConsumerRegistration.GetDefinition(IRegistrationContext context)

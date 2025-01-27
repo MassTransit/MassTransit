@@ -32,7 +32,7 @@ namespace MassTransit.Configuration
             Collection.TryAddScoped(provider => GetScopedBusContext(provider).CreateRequestClient<T>(destinationAddress, timeout));
         }
 
-        public void RegisterScopedClientFactory()
+        public virtual void RegisterScopedClientFactory()
         {
             Collection.TryAddScoped(provider => GetScopedBusContext(provider));
         }
@@ -236,6 +236,11 @@ namespace MassTransit.Configuration
         public override void RegisterEndpointNameFormatter(IEndpointNameFormatter endpointNameFormatter)
         {
             Collection.TryAddSingleton(Bind<TBus>.Create(endpointNameFormatter));
+        }
+
+        public override void RegisterScopedClientFactory()
+        {
+            Collection.TryAddScoped(provider => Bind<TBus>.Create(GetScopedBusContext(provider)));
         }
 
         protected override IScopedClientFactory GetScopedBusContext(IServiceProvider provider)

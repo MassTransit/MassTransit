@@ -53,8 +53,6 @@ namespace MassTransit.DependencyInjection.Registration
                 TypeCache<TActivity>.ShortName);
 
             configurator.AddEndpointSpecification(specification);
-
-            IncludeInConfigureEndpoints = false;
         }
 
         IExecuteActivityDefinition IExecuteActivityRegistration.GetDefinition(IRegistrationContext context)
