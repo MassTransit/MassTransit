@@ -40,8 +40,7 @@ namespace MassTransit.KafkaIntegration
         public KafkaReceiveEndpointContext<TKey, TValue> CreateReceiveEndpointContext()
         {
             var context = new TopicKafkaReceiveEndpointContext<TKey, TValue>(_busInstance, _hostConfiguration, _groupId, _endpointConfiguration,
-                _receiveSetting,
-                _headersDeserializer, _keyDeserializer, _valueDeserializer, _consumerBuilderFactory);
+                _receiveSetting, _headersDeserializer, _keyDeserializer, _valueDeserializer, _consumerBuilderFactory);
 
             context.GetOrAddPayload(() => _busInstance.HostConfiguration.Topology);
             context.AddOrUpdatePayload(() => _receiveSetting, _ => _receiveSetting);

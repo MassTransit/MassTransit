@@ -23,8 +23,8 @@ namespace MassTransit.KafkaIntegration.Middleware
             var receiveSettings = _context.GetPayload<ReceiveSettings>();
             var consumers = new IKafkaMessageConsumer<TKey, TValue>[receiveSettings.ConcurrentConsumerLimit];
 
-            for (var i = 0; i < consumers.Length; i++)
-                consumers[i] = new KafkaMessageConsumer<TKey, TValue>(receiveSettings, _context, context);
+            for (var consumerIndex = 0; consumerIndex < consumers.Length; consumerIndex++)
+                consumers[consumerIndex] = new KafkaMessageConsumer<TKey, TValue>(receiveSettings, _context, context, consumerIndex + 1);
 
             var supervisor = CreateConsumerSupervisor(consumers);
 

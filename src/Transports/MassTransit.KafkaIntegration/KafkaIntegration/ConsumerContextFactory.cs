@@ -49,8 +49,8 @@ namespace MassTransit.KafkaIntegration
         {
             Task<ConsumerContext> Create(ClientContext clientContext, CancellationToken createCancellationToken)
             {
-                ConsumerContext context =
-                    new KafkaConsumerContext(_hostConfiguration, _consumerBuilderFactory, cancellationToken);
+                ConsumerContext context = new KafkaConsumerContext(_hostConfiguration, _consumerBuilderFactory, cancellationToken);
+
                 return Task.FromResult(context);
             }
 
