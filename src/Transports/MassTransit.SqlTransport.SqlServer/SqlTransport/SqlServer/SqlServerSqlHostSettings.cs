@@ -42,6 +42,8 @@ namespace MassTransit.SqlTransport.SqlServer
 
             if (options.ConnectionLimit.HasValue)
                 ConnectionLimit = options.ConnectionLimit.Value;
+
+            MaintenanceEnabled = !options.DisableMaintenance;
         }
 
         public string? ConnectionString

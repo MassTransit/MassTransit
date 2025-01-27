@@ -25,6 +25,7 @@ namespace MassTransit
 
         int ConnectionLimit { get; }
 
+        bool MaintenanceEnabled { get; }
         TimeSpan MaintenanceInterval { get; }
         TimeSpan QueueCleanupInterval { get; }
         int MaintenanceBatchSize { get; }

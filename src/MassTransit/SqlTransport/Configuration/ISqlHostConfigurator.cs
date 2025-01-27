@@ -67,6 +67,11 @@ public interface ISqlHostConfigurator
     int ConnectionLimit { set; }
 
     /// <summary>
+    /// Should typically be left to the default (true), reserved for use cases such as delegating maintenance activities explicitly as application quantities grow.
+    /// </summary>
+    bool MaintenanceEnabled { set; }
+
+    /// <summary>
     /// How often database maintenance should be performed (metrics consolidation, topology cleanup, etc.)
     /// </summary>
     TimeSpan MaintenanceInterval { set; }
