@@ -192,11 +192,7 @@ MassTransit provides several options when dealing with raw JSON messages. The op
 | AddTransportHeaders |   2   |    Y    | MassTransit will add the above headers to outbound messages  |
 | CopyHeaders         |   4   |    Y    | Received message headers will be copied to outbound messages |
 
-In cases where MassTransit is used and raw JSON messages are preferred, the non-default options are recommended.
-
-```csharp
-cfg.UseRawJsonSerializer(RawSerializerOptions.AddTransportHeaders | RawSerializerOptions.CopyHeaders);
-```
+In cases where MassTransit is used and raw JSON messages are preferred, the default options are recommended. When integrating with external systems (non-MassTransit generated messages), see [below](#configuration).
 
 ### Headers 
 
