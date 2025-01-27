@@ -53,7 +53,7 @@ namespace MassTransit.SqlTransport.PostgreSql
             if (options.ConnectionLimit.HasValue)
                 ConnectionLimit = options.ConnectionLimit.Value;
 
-            MaintenanceOptOut = options.MaintenanceOptOut;
+            MaintenanceEnabled = !options.DisableMaintenance;
         }
 
         public string? MultipleHosts { get; set; }

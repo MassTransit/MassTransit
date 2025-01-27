@@ -44,7 +44,7 @@ namespace MassTransit.SqlTransport.Configuration
 
             _hostAddress = new Lazy<Uri>(FormatHostAddress);
 
-            MaintenanceOptOut = false;
+            MaintenanceEnabled = true;
             MaintenanceInterval = TimeSpan.FromSeconds(5);
             QueueCleanupInterval = TimeSpan.FromMinutes(1);
             MaintenanceBatchSize = 10000;
@@ -64,7 +64,7 @@ namespace MassTransit.SqlTransport.Configuration
 
         public int ConnectionLimit { get; set; }
 
-        public bool MaintenanceOptOut { get; set; }
+        public bool MaintenanceEnabled { get; set; }
         public TimeSpan MaintenanceInterval { get; set; }
         public TimeSpan QueueCleanupInterval { get; set; }
         public int MaintenanceBatchSize { get; set; }

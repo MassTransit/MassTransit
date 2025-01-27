@@ -52,7 +52,7 @@ namespace MassTransit.SqlTransport.PostgreSql
             _agent = new NotificationAgent(this, hostConfiguration);
             supervisor.AddConsumeAgent(_agent);
 
-            if(!_hostSettings.MaintenanceOptOut)
+            if(_hostSettings.MaintenanceEnabled)
                 supervisor.AddConsumeAgent(new MaintenanceAgent(this, hostConfiguration));
 
             _executor = new TaskExecutor(hostConfiguration.Settings.ConnectionLimit);

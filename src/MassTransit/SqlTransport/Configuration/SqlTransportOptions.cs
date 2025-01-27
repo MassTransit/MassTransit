@@ -25,8 +25,8 @@ public class SqlTransportOptions
     public int? ConnectionLimit { get; set; }
 
     /// <summary>
-    /// Opt out of ongoing maintenance and cleanup jobs (metrics consolidation, topology cleanup, etc.)
-    /// Should typically not be used, reserved for use cases such as delegating maintenance activities explicitly as application quantities grow.
+    /// Disable maintenance and cleanup jobs (metrics consolidation, topology cleanup, etc.)
+    /// Should typically be left to the default (false), reserved for use cases such as delegating maintenance activities explicitly as application quantities grow.
     /// </summary>
-    public bool MaintenanceOptOut { get; set; }
+    public bool DisableMaintenance { get; set; }
 }
