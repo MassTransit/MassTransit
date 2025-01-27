@@ -106,7 +106,7 @@ namespace MassTransit.MongoDbIntegration.Outbox
         public void Probe(ProbeContext context)
         {
             var scope = context.CreateFilterScope("outboxContextFactory");
-            scope.Add("provider", "entityFrameworkCore");
+            scope.Add("provider", "mongoDb");
         }
 
         async Task AbortTransaction()
