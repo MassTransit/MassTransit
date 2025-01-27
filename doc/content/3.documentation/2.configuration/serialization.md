@@ -188,9 +188,9 @@ MassTransit provides several options when dealing with raw JSON messages. The op
 
 | Option              | Value | Default | Notes                                                        |
 |:--------------------|:-----:|:-------:|:-------------------------------------------------------------|
-| AnyMessageType      |   1   |    Y    | Messages will match any consumed message type                |
+| AnyMessageType      |   1   |    N    | Messages will match any consumed message type                |
 | AddTransportHeaders |   2   |    Y    | MassTransit will add the above headers to outbound messages  |
-| CopyHeaders         |   4   |    N    | Received message headers will be copied to outbound messages |
+| CopyHeaders         |   4   |    Y    | Received message headers will be copied to outbound messages |
 
 In cases where MassTransit is used and raw JSON messages are preferred, the non-default options are recommended.
 
@@ -225,8 +225,13 @@ Serialization customizations for using raw JSON is generally recommended on indi
 To configure a receive endpoint so that it can _receive_ raw JSON messages, specify the default content type and add the deserializer as shown below. When a raw JSON message is received, it will be delivered to every consumer configured on the receive endpoint.
 
 ```csharp
-endpointConfigurator.DefaultContentType = new ContentType("application/json");
-endpointConfigurator.UseRawJsonDeserializer();
+endpointConfigurator.UseRawJsonDeserializer(isDefault: true);
+```
+
+If there is no `Message-Type` header that meets MassTransit's requirements (typical for messages not produced by MassTransit), specify the deserializer should return all message types consumed by the consumer. This should only be used when the consumer has only a single `IConsumer<T>` interface.
+
+```csharp
+endpointConfigurator.UseRawJsonDeserializer(RawSerializerOptions.All, isDefault: true);
 ```
 
 If messages produced by consumers on the receive endpoint should also be in the raw JSON format, `UseRawJsonSerializer()` may be used instead.
