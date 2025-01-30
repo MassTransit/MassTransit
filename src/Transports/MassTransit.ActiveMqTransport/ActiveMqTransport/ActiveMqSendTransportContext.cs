@@ -5,6 +5,7 @@ namespace MassTransit.ActiveMqTransport
     using System.Threading;
     using System.Threading.Tasks;
     using Apache.NMS;
+    using Apache.NMS.ActiveMQ;
     using Configuration;
     using Internals;
     using Transports;
@@ -99,7 +100,7 @@ namespace MassTransit.ActiveMqTransport
                 transportMessage.NMSTimeToLive = context.TimeToLive > TimeSpan.Zero ? context.TimeToLive.Value : TimeSpan.FromSeconds(1);
             //If protocol is AMQP TTL cannot be TimeSpan.Zero = NMSConstants.defaultTimeToLive. A message sent with TTL 0 will be discarded when broker receive it.
             //Otherwise OpenWire protocol does not set TTL=0 to a message when is 0.
-            else if (sessionContext.Session is Apache.NMS.ActiveMQ.Session)
+            else if (sessionContext.Session is Session)
                 transportMessage.NMSTimeToLive = NMSConstants.defaultTimeToLive;
 
             transportMessage.NMSPriority = context.Priority ?? NMSConstants.defaultPriority;

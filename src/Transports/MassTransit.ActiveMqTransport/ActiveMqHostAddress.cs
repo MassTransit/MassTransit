@@ -37,7 +37,9 @@ namespace MassTransit
         }
 
         public ActiveMqHostAddress(string host, int? port, string virtualHost)
-            : this(ActiveMqScheme, host, port, virtualHost) { }
+            : this(ActiveMqScheme, host, port, virtualHost)
+        {
+        }
 
         public ActiveMqHostAddress(string scheme, string host, int? port, string virtualHost)
         {

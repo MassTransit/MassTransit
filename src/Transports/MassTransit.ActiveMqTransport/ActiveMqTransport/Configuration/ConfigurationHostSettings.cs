@@ -65,6 +65,14 @@ namespace MassTransit.ActiveMqTransport.Configuration
         public string[] FailoverHosts { get; set; }
         public Dictionary<string, string> TransportOptions { get; }
 
+        public abstract string HostScheme { get; }
+
+        public abstract string FailoverScheme { get; }
+
+        public abstract string Scheme { get; }
+
+        public abstract string NmsScheme { get; }
+
         public string Host { get; }
         public int Port { get; set; }
         public string Username { get; set; }
@@ -74,21 +82,11 @@ namespace MassTransit.ActiveMqTransport.Configuration
         public Uri HostAddress => _hostAddress.Value;
         public Uri BrokerAddress => _brokerAddress.Value;
 
-        public abstract string HostScheme { get; }
-
-        public abstract string FailoverScheme { get; }
-
-        public abstract string Scheme { get; }
-
-        public abstract string NmsScheme { get; }
-
         public IConnection CreateConnection()
         {
             var factory = new NMSConnectionFactory(BrokerAddress);
-            if(string.IsNullOrEmpty(Username) && string.IsNullOrEmpty(Password))
-            {
+            if (string.IsNullOrEmpty(Username) && string.IsNullOrEmpty(Password))
                 return factory.ConnectionFactory.CreateConnection();
-            }
             return factory.ConnectionFactory.CreateConnection(Username, Password);
         }
 

@@ -2,7 +2,9 @@ namespace MassTransit.ActiveMqTransport.Configuration
 {
     using System;
 
-    public class AmqpHostSettings : ConfigurationHostSettings
+
+    public class AmqpHostSettings :
+        ConfigurationHostSettings
     {
         public AmqpHostSettings(Uri address)
             : base(address)

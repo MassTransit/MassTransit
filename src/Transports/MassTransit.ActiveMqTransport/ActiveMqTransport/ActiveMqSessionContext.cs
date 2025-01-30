@@ -4,6 +4,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Apache.NMS;
+    using Apache.NMS.AMQP;
     using Apache.NMS.Util;
     using Internals;
     using MassTransit.Middleware;
@@ -94,26 +95,23 @@
             return _executor.Run(() => SessionUtil.GetDestination(_session, destinationName, destinationType), CancellationToken);
         }
 
-        public Task<IMessageConsumer> CreateMessageConsumer(IDestination destination, string selector, bool noLocal, string consumerName = null, bool shared = false)
+        public Task<IMessageConsumer> CreateMessageConsumer(IDestination destination, string selector, bool noLocal, string consumerName = null,
+            bool shared = false)
         {
-            return _executor.Run(() => {
-                if (destination.IsTopic && !String.IsNullOrEmpty(consumerName) && shared)
+            return _executor.Run(() =>
+            {
+                if (destination.IsTopic && !string.IsNullOrEmpty(consumerName) && shared)
                 {
-                    if(_session is not Apache.NMS.AMQP.NmsSession)
-                    {
+                    if (_session is not NmsSession)
                         throw new NotSupportedException("Shared durable consumers are supported only on ActiveMQ Artemis broker and with AMQP communication.");
-                    }
                     return _session.CreateSharedDurableConsumerAsync((ITopic)destination, consumerName, selector);
                 }
-                else if (destination.IsTopic && !String.IsNullOrEmpty(consumerName) && !shared)
-                {
+
+                if (destination.IsTopic && !string.IsNullOrEmpty(consumerName) && !shared)
                     return _session.CreateDurableConsumerAsync((ITopic)destination, consumerName, selector);
-                }
-                else
-                {
-                    return _session.CreateConsumerAsync(destination, selector, noLocal);
-                }
-                }, CancellationToken);
+
+                return _session.CreateConsumerAsync(destination, selector, noLocal);
+            }, CancellationToken);
         }
 
         public async Task SendAsync(IDestination destination, IMessage message, CancellationToken cancellationToken)

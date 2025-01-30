@@ -28,13 +28,9 @@
             InputQueueName = inputQueueName ?? "input_queue";
 
             if (protocol == ActiveMqHostAddress.AmqpScheme)
-            {
                 HostAddress = new Uri("amqp://localhost:5672");
-            }
             else
-            {
                 HostAddress = new Uri("activemq://localhost:61616");
-            }
         }
 
         public Uri HostAddress
@@ -100,10 +96,8 @@
         public ActiveMqHostSettings GetHostSettings()
         {
             var address = HostAddress;
-            if(HostAddress.Scheme == ActiveMqHostAddress.AmqpScheme)
-            {
+            if (HostAddress.Scheme == ActiveMqHostAddress.AmqpScheme)
                 address = new UriBuilder(ActiveMqHostAddress.ActiveMqScheme, HostAddress.Host, HostAddress.Port).Uri;
-            }
             var host = new ActiveMqHostConfigurator(address);
 
             ConfigureHostSettings(host);
@@ -222,7 +216,7 @@
             DeleteDestination(session, $"{queueName}_error");
         }
 
-        private static void DeleteDestination(ISession session, string destinationName)
+        static void DeleteDestination(ISession session, string destinationName)
         {
             var destination = SessionUtil.GetQueue(session, destinationName);
             session.DeleteDestination(destination);

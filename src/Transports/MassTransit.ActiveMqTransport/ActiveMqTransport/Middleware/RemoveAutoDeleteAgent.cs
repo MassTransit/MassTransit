@@ -41,7 +41,7 @@ public sealed class RemoveAutoDeleteAgent :
         try
         {
             await Task.WhenAll(_brokerTopology.Consumers.Where(x => x.Destination is not null && x.Destination.AutoDelete)
-                .Select(consumer => Delete(context, consumer.Destination)))
+                    .Select(consumer => Delete(context, consumer.Destination)))
                 .ConfigureAwait(false);
 
             await Task.WhenAll(_brokerTopology.Topics.Where(x => x.AutoDelete).Select(topic => Delete(context, topic))).ConfigureAwait(false);

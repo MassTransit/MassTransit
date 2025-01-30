@@ -9,6 +9,11 @@
         ActiveMqTopicBindingConfigurator,
         IActiveMqConsumeTopologySpecification
     {
+        public ConsumerConsumeTopicTopologySpecification(string topicName, bool durable = true, bool autoDelete = false)
+            : base(topicName, durable, autoDelete)
+        {
+        }
+
         /// <summary>
         /// If set to <c>true</c>, the consumer is shared between multiple receive endpoints.
         /// It means if you have multiple instances of the application a broker will balance messages between them.
@@ -23,11 +28,6 @@
         /// The consumer name, if specified
         /// </summary>
         public string ConsumerName { get; set; } = null;
-
-        public ConsumerConsumeTopicTopologySpecification(string topicName, bool durable = true, bool autoDelete = false)
-            : base(topicName, durable, autoDelete)
-        {
-        }
 
         public IEnumerable<ValidationResult> Validate()
         {

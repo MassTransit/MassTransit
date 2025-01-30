@@ -11,7 +11,6 @@ namespace MassTransit.ActiveMqTransport.Configuration
 
         public ActiveMqHostConfigurator(Uri address)
         {
-
             switch (address.Scheme.ToLowerInvariant())
             {
                 case ActiveMqHostAddress.AmqpScheme:
@@ -21,7 +20,7 @@ namespace MassTransit.ActiveMqTransport.Configuration
                     _settings = new OpenWireHostSettings(address);
                     break;
             }
-            
+
 
             if (_settings.Port == 61617 || _settings.Host.EndsWith("amazonaws.com", StringComparison.OrdinalIgnoreCase))
                 UseSsl();
