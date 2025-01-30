@@ -34,31 +34,7 @@ namespace MassTransit.DependencyInjection
 
         public IDisposable PushContext(IServiceScope scope, ConsumeContext context)
         {
-            var provider = scope.ServiceProvider;
-
-            var busContextProvider = provider.GetRequiredService<IScopedBusContextProvider>();
-
-            return new CombinedDisposable(
-                _setterProvider(provider).PushContext(context),
-                busContextProvider.PushContext(provider.GetRequiredService<IScopedBusContextProvider<TBus>>().Context));
-        }
-
-
-        class CombinedDisposable :
-            IDisposable
-        {
-            readonly IDisposable[] _disposables;
-
-            public CombinedDisposable(params IDisposable[] disposables)
-            {
-                _disposables = disposables;
-            }
-
-            public void Dispose()
-            {
-                for (var i = 0; i < _disposables.Length; i++)
-                    _disposables[i].Dispose();
-            }
+            return _setterProvider(scope.ServiceProvider).PushContext(context);
         }
     }
 }

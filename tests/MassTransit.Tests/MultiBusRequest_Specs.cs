@@ -2,7 +2,10 @@ namespace MassTransit.Tests
 {
     using System;
     using System.Threading.Tasks;
+    using Context;
+    using DependencyInjection;
     using MassTransit.Testing;
+    using MassTransit.Transports;
     using Microsoft.Extensions.DependencyInjection;
     using MultiBusMessages;
     using NUnit.Framework;
@@ -59,14 +62,21 @@ namespace MassTransit.Tests
             IConsumer<RequestA>
         {
             readonly IRequestClient<RequestB> _client;
+            readonly ISendEndpointProvider _bus;
+            readonly ISendEndpointProvider _busB;
 
-            public ConsumerA(IRequestClient<RequestB> client)
+            public ConsumerA(IRequestClient<RequestB> client, Bind<IBus, ISendEndpointProvider> bus, Bind<IBusB, ISendEndpointProvider> busB)
             {
                 _client = client;
+                _bus = bus.Value;
+                _busB = busB.Value;
             }
 
             public async Task Consume(ConsumeContext<RequestA> context)
             {
+                Assert.That(_bus, Is.InstanceOf<ConsumeContextScope<RequestA>>());
+                Assert.That(_busB, Is.InstanceOf<ScopedConsumeSendEndpointProvider>());
+
                 Response<ResponseB> response = await _client.GetResponse<ResponseB>(context.Message);
 
                 await context.RespondAsync<ResponseA>(response.Message);

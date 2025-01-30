@@ -141,7 +141,6 @@ namespace MassTransit.Configuration
             collection.TryAddScoped<ScopedConsumeContextProvider>();
             collection.TryAddScoped<IScopedConsumeContextProvider>(provider => provider.GetRequiredService<ScopedConsumeContextProvider>());
 
-            collection.TryAddScoped<IScopedBusContextProvider, ScopedBusContextProvider>();
             collection.TryAddScoped(provider => provider.GetRequiredService<IScopedBusContextProvider<IBus>>().Context.SendEndpointProvider);
             collection.TryAddScoped(provider => provider.GetRequiredService<IScopedBusContextProvider<IBus>>().Context.PublishEndpoint);
 
