@@ -268,23 +268,10 @@ namespace MassTransit.ActiveMqTransport.Tests
         {
             var bus = Bus.Factory.CreateUsingActiveMq(cfg =>
             {
+                cfg.ConfigureHost(flavor);
                 if (flavor == "artemis")
                 {
-                    cfg.Host("localhost", 61618, cfgHost =>
-                    {
-                        cfgHost.Username("admin");
-                        cfgHost.Password("admin");
-                    });
-                    cfg.EnableArtemisCompatibility();
                     cfg.SetTemporaryQueueNamePrefix("myprefix.");
-                }
-                else if (flavor == ActiveMqHostAddress.AmqpScheme)
-                {
-                    cfg.Host(new Uri("amqp://localhost:5672"), cfgHost =>
-                    {
-                        cfgHost.Username("admin");
-                        cfgHost.Password("admin");
-                    });
                 }
 
 
@@ -317,23 +304,11 @@ namespace MassTransit.ActiveMqTransport.Tests
         {
             var bus = Bus.Factory.CreateUsingActiveMq(cfg =>
             {
+                cfg.ConfigureHost(flavor);
                 if (flavor == "artemis")
                 {
-                    cfg.Host("localhost", 61618, cfgHost =>
-                    {
-                        cfgHost.Username("admin");
-                        cfgHost.Password("admin");
-                    });
                     cfg.SetConsumerEndpointQueueNameFormatter(new ArtemisConsumerEndpointQueueNameFormatter());
                     cfg.SetTemporaryQueueNameFormatter(new PrefixTemporaryQueueNameFormatter("myprefix."));
-                }
-                else if (flavor == ActiveMqHostAddress.AmqpScheme)
-                {
-                    cfg.Host(new Uri("amqp://localhost:5672"), cfgHost =>
-                    {
-                        cfgHost.Username("admin");
-                        cfgHost.Password("admin");
-                    });
                 }
 
                 cfg.ReceiveEndpoint("test", e =>
@@ -369,23 +344,7 @@ namespace MassTransit.ActiveMqTransport.Tests
 
             var busControl = Bus.Factory.CreateUsingActiveMq(cfg =>
             {
-                if (flavor == "artemis")
-                {
-                    cfg.Host("localhost", 61618, cfgHost =>
-                    {
-                        cfgHost.Username("admin");
-                        cfgHost.Password("admin");
-                    });
-                    cfg.EnableArtemisCompatibility();
-                }
-                else if (flavor == ActiveMqHostAddress.AmqpScheme)
-                {
-                    cfg.Host(new Uri("amqp://localhost:5672"), cfgHost =>
-                    {
-                        cfgHost.Username("admin");
-                        cfgHost.Password("admin");
-                    });
-                }
+                cfg.ConfigureHost(flavor);
 
                 cfg.ReceiveEndpoint("input-queue", x =>
                 {

@@ -85,7 +85,7 @@ namespace MassTransit.ActiveMqTransport.Configuration
         public IConnection CreateConnection()
         {
             var factory = new NMSConnectionFactory(BrokerAddress);
-            if(String.IsNullOrEmpty(Username) && String.IsNullOrEmpty(Password))
+            if(string.IsNullOrEmpty(Username) && string.IsNullOrEmpty(Password))
             {
                 return factory.ConnectionFactory.CreateConnection();
             }
@@ -94,7 +94,7 @@ namespace MassTransit.ActiveMqTransport.Configuration
 
         Uri FormatHostAddress()
         {
-            return new ActiveMqHostAddress(new Uri($"{NmsScheme}://{Host}:{Port}"));
+            return new ActiveMqHostAddress(NmsScheme, Host, Port, "/");
         }
 
         Uri FormatBrokerAddress()

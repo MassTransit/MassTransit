@@ -12,9 +12,9 @@ namespace MassTransit.ActiveMqTransport.Configuration
         public ActiveMqHostConfigurator(Uri address)
         {
 
-            switch (address.Scheme)
+            switch (address.Scheme.ToLowerInvariant())
             {
-                case "amqp":
+                case ActiveMqHostAddress.AmqpScheme:
                     _settings = new AmqpHostSettings(address);
                     break;
                 default:

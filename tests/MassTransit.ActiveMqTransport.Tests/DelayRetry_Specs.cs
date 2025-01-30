@@ -254,25 +254,9 @@
             {
                 BusTestFixture.ConfigureBusDiagnostics(cfg);
 
-                if (flavor == "artemis")
-                {
-                    cfg.Host("localhost", 61618, cfgHost =>
-                    {
-                        cfgHost.Username("admin");
-                        cfgHost.Password("admin");
-                    });
-                    cfg.EnableArtemisCompatibility();
-                }
-                else if (flavor == ActiveMqHostAddress.AmqpScheme)
-                {
-                    cfg.Host(new Uri("amqp://localhost:5672"), cfgHost =>
-                    {
-                        cfgHost.Username("guest");
-                        cfgHost.Password("guest");
-                    });
-                }
+                cfg.ConfigureHost(flavor);
 
-                    cfg.ReceiveEndpoint("input-queue", x =>
+                cfg.ReceiveEndpoint("input-queue", x =>
                 {
                     x.ConfigureConsumeTopology = false;
 

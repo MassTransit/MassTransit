@@ -1,7 +1,7 @@
-﻿using System;
-
 namespace MassTransit.ActiveMqTransport.Configuration
 {
+    using System;
+
     public class AmqpHostSettings : ConfigurationHostSettings
     {
         public AmqpHostSettings(Uri address)

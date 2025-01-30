@@ -2,7 +2,6 @@ namespace MassTransit.ActiveMqTransport.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Apache.NMS;
     using MassTransit.ActiveMqTransport.Configuration;
     using MassTransit.Testing;
     using NUnit.Framework;

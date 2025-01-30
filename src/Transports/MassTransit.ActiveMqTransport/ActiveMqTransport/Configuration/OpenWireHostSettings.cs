@@ -1,7 +1,7 @@
-﻿using System;
-
 namespace MassTransit.ActiveMqTransport.Configuration
 {
+    using System;
+
     public class OpenWireHostSettings : ConfigurationHostSettings
     {
         public OpenWireHostSettings(Uri address)

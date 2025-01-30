@@ -1,11 +1,11 @@
-﻿using Apache.NMS;
-using Apache.NMS.ActiveMQ;
-using Apache.NMS.ActiveMQ.Commands;
-using Apache.NMS.AMQP;
-using Apache.NMS.AMQP.Message;
-
 namespace MassTransit.ActiveMqTransport
 {
+    using Apache.NMS;
+    using Apache.NMS.ActiveMQ;
+    using Apache.NMS.ActiveMQ.Commands;
+    using Apache.NMS.AMQP;
+    using Apache.NMS.AMQP.Message;
+
     internal static class NmsExtensions
     {
         public static void Stop(this IMessageConsumer consumer)
