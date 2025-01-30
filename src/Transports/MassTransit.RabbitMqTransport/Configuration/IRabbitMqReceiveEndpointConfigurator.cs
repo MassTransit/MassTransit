@@ -94,5 +94,12 @@
         /// <param name="s">seconds</param>
         /// <param name="ms">milliseconds</param>
         void SetDeliveryAcknowledgementTimeout(int? d = null, int? h = null, int? m = null, int? s = null, int? ms = null);
+
+        /// <summary>
+        /// a switch to enable or disable the deployment of the consume topology.
+        /// if set to false, the exchange with the queue will not be declared.
+        /// Default value is True for backwards compatibility.
+        /// </summary>
+        bool DeployConsumeTopology { set; }
     }
 }

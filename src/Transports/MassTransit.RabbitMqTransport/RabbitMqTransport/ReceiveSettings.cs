@@ -74,5 +74,12 @@
         /// Get the input address for the transport on the specified host
         /// </summary>
         Uri GetInputAddress(Uri hostAddress);
+
+        /// <summary>
+        /// a switch to enable or disable the deployment of the consume topology.
+        /// if set to false, the exchange with the queue will not be declared.
+        /// Default value is True for backwards compatibility.
+        /// </summary>
+        bool DeployConsumeTopology { get; }
     }
 }

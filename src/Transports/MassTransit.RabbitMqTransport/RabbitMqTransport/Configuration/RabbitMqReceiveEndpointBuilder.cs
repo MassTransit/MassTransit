@@ -73,6 +73,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
             if (settings.QueueName.Equals(RabbitMqExchangeNames.ReplyTo, StringComparison.OrdinalIgnoreCase))
                 return topologyBuilder.BuildBrokerTopology();
 
+            if (!settings.DeployConsumeTopology)
+                return topologyBuilder.BuildBrokerTopology();
+
             var queueArguments = new Dictionary<string, object>(settings.QueueArguments);
 
             if (settings.QueueExpiration.HasValue)

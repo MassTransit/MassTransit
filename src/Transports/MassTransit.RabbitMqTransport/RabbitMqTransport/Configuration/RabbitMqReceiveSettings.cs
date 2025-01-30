@@ -44,5 +44,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         {
             return GetEndpointAddress(hostAddress);
         }
+
+        public bool DeployConsumeTopology { get; set; } = true;
     }
 }

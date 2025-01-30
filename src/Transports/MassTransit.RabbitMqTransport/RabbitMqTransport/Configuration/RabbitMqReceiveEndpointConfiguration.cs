@@ -304,5 +304,10 @@ namespace MassTransit.RabbitMqTransport.Configuration
         {
             return _inputAddress.IsValueCreated || base.IsAlreadyConfigured();
         }
+
+        public bool DeployConsumeTopology
+        {
+            set => _settings.DeployConsumeTopology = value;
+        }
     }
 }
