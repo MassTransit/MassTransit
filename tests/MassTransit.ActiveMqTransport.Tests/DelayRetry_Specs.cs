@@ -10,10 +10,16 @@
     using Util;
 
 
-    [TestFixture]
+    [TestFixture(ActiveMqHostAddress.ActiveMqScheme)]
+    [TestFixture(ActiveMqHostAddress.AmqpScheme)]
     public class Using_the_delayed_exchange :
         ActiveMqTestFixture
     {
+        public Using_the_delayed_exchange(string protocol)
+            : base(protocol)
+        {
+        }
+
         [Test]
         public async Task Should_properly_defer_the_message_delivery()
         {
@@ -62,10 +68,16 @@
     }
 
 
-    [TestFixture]
+    [TestFixture(ActiveMqHostAddress.ActiveMqScheme)]
+    [TestFixture(ActiveMqHostAddress.AmqpScheme)]
     public class Delaying_a_message_retry_with_policy :
         ActiveMqTestFixture
     {
+        public Delaying_a_message_retry_with_policy(string protocol)
+            : base(protocol)
+        {
+        }
+
         [Test]
         public async Task Should_only_defer_up_to_the_retry_count()
         {
@@ -99,10 +111,16 @@
     }
 
 
-    [TestFixture]
+    [TestFixture(ActiveMqHostAddress.ActiveMqScheme)]
+    [TestFixture(ActiveMqHostAddress.AmqpScheme)]
     public class Retrying_a_message_retry_with_policy :
         ActiveMqTestFixture
     {
+        public Retrying_a_message_retry_with_policy(string protocol)
+            : base(protocol)
+        {
+        }
+
         [Test]
         public async Task Should_only_retry_up_to_the_retry_count()
         {
@@ -136,10 +154,16 @@
     }
 
 
-    [TestFixture]
+    [TestFixture(ActiveMqHostAddress.ActiveMqScheme)]
+    [TestFixture(ActiveMqHostAddress.AmqpScheme)]
     public class Using_delayed_exchange_redelivery_with_a_consumer :
         ActiveMqTestFixture
     {
+        public Using_delayed_exchange_redelivery_with_a_consumer(string protocol)
+            : base(protocol)
+        {
+        }
+
         [Test]
         public async Task Should_retry_each_message_type()
         {
@@ -217,7 +241,8 @@
     {
         [Test]
         [Category("Flaky")]
-        [TestCase("activemq")]
+        [TestCase(ActiveMqHostAddress.ActiveMqScheme)]
+        [TestCase(ActiveMqHostAddress.AmqpScheme)]
         [TestCase("artemis")]
         public async Task Should_properly_redeliver(string flavor)
         {
@@ -229,15 +254,7 @@
             {
                 BusTestFixture.ConfigureBusDiagnostics(cfg);
 
-                if (flavor == "artemis")
-                {
-                    cfg.Host("localhost", 61618, cfgHost =>
-                    {
-                        cfgHost.Username("admin");
-                        cfgHost.Password("admin");
-                    });
-                    cfg.EnableArtemisCompatibility();
-                }
+                cfg.ConfigureHost(flavor);
 
                 cfg.ReceiveEndpoint("input-queue", x =>
                 {
@@ -343,10 +360,16 @@
     }
 
 
-    [TestFixture]
+    [TestFixture(ActiveMqHostAddress.ActiveMqScheme)]
+    [TestFixture(ActiveMqHostAddress.AmqpScheme)]
     public class Using_delayed_exchange_redelivery_with_a_consumer_and_retry :
         ActiveMqTestFixture
     {
+        public Using_delayed_exchange_redelivery_with_a_consumer_and_retry(string protocol)
+            : base(protocol)
+        {
+        }
+
         [Test]
         public async Task Should_retry_and_redeliver()
         {
@@ -396,10 +419,16 @@
     }
 
 
-    [TestFixture]
+    [TestFixture(ActiveMqHostAddress.ActiveMqScheme)]
+    [TestFixture(ActiveMqHostAddress.AmqpScheme)]
     public class Delaying_a_message_retry_with_policy_but_no_retries :
         ActiveMqTestFixture
     {
+        public Delaying_a_message_retry_with_policy_but_no_retries(string protocol)
+            : base(protocol)
+        {
+        }
+
         [Test]
         public async Task Should_immediately_fault_with_no_delay()
         {
@@ -433,10 +462,16 @@
     }
 
 
-    [TestFixture]
+    [TestFixture(ActiveMqHostAddress.ActiveMqScheme)]
+    [TestFixture(ActiveMqHostAddress.AmqpScheme)]
     public class Explicitly_deferring_a_message_instead_of_throwing :
         ActiveMqTestFixture
     {
+        public Explicitly_deferring_a_message_instead_of_throwing(string protocol)
+            : base(protocol)
+        {
+        }
+
         [Test]
         public async Task Should_properly_defer_the_message_delivery()
         {
@@ -485,10 +520,16 @@
     }
 
 
-    [TestFixture]
+    [TestFixture(ActiveMqHostAddress.ActiveMqScheme)]
+    [TestFixture(ActiveMqHostAddress.AmqpScheme)]
     public class execute_callback_function_during_defer :
         ActiveMqTestFixture
     {
+        public execute_callback_function_during_defer(string protocol)
+            : base(protocol)
+        {
+        }
+
         [Test]
         public async Task Should_execute_callback_during_defer_the_message_delivery()
         {

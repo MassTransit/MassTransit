@@ -18,10 +18,16 @@ namespace MassTransit.ActiveMqTransport.Tests
     }
 
 
-    [TestFixture]
+    [TestFixture(ActiveMqHostAddress.ActiveMqScheme)]
+    [TestFixture(ActiveMqHostAddress.AmqpScheme)]
     public class When_publishing_messages_from_the_bus :
         ActiveMqTestFixture
     {
+        public When_publishing_messages_from_the_bus(string protocol)
+            : base(protocol)
+        {
+        }
+
         [Test]
         public async Task Should_support_multiple_types()
         {

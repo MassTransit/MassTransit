@@ -6,7 +6,7 @@ namespace MassTransit.ActiveMqTransport.Configuration
     using Apache.NMS;
 
 
-    public class ConfigurationHostSettings :
+    public abstract class ConfigurationHostSettings :
         ActiveMqHostSettings
     {
         // ActiveMQ Failover connection parameters https://activemq.apache.org/components/classic/documentation/failover-transport-reference
@@ -37,7 +37,7 @@ namespace MassTransit.ActiveMqTransport.Configuration
         readonly Lazy<Uri> _brokerAddress;
         readonly Lazy<Uri> _hostAddress;
 
-        public ConfigurationHostSettings(Uri address)
+        protected ConfigurationHostSettings(Uri address)
         {
             var hostAddress = new ActiveMqHostAddress(address);
 
@@ -56,7 +56,7 @@ namespace MassTransit.ActiveMqTransport.Configuration
                     Password = parts[1];
             }
 
-            TransportOptions = new Dictionary<string, string> { { "wireFormat.tightEncodingEnabled", "true" } };
+            TransportOptions = new Dictionary<string, string>();
 
             _hostAddress = new Lazy<Uri>(FormatHostAddress);
             _brokerAddress = new Lazy<Uri>(FormatBrokerAddress);
@@ -74,22 +74,31 @@ namespace MassTransit.ActiveMqTransport.Configuration
         public Uri HostAddress => _hostAddress.Value;
         public Uri BrokerAddress => _brokerAddress.Value;
 
+        public abstract string HostScheme { get; }
+
+        public abstract string FailoverScheme { get; }
+
+        public abstract string Scheme { get; }
+
+        public abstract string NmsScheme { get; }
+
         public IConnection CreateConnection()
         {
             var factory = new NMSConnectionFactory(BrokerAddress);
-
+            if(string.IsNullOrEmpty(Username) && string.IsNullOrEmpty(Password))
+            {
+                return factory.ConnectionFactory.CreateConnection();
+            }
             return factory.ConnectionFactory.CreateConnection(Username, Password);
         }
 
         Uri FormatHostAddress()
         {
-            return new ActiveMqHostAddress(Host, Port, "/");
+            return new ActiveMqHostAddress(NmsScheme, Host, Port, "/");
         }
 
         Uri FormatBrokerAddress()
         {
-            var scheme = UseSsl ? "ssl" : "tcp";
-
             // create broker URI: http://activemq.apache.org/nms/activemq-uri-configuration.html
             if (FailoverHosts?.Length > 0)
             {
@@ -98,7 +107,7 @@ namespace MassTransit.ActiveMqTransport.Configuration
                 var failoverPart = string.Join(",", FailoverHosts
                     .Select(failoverHost => new UriBuilder
                         {
-                            Scheme = scheme,
+                            Scheme = HostScheme,
                             Host = failoverHost,
                             Port = Port,
                             Query = failoverServerPart
@@ -106,11 +115,11 @@ namespace MassTransit.ActiveMqTransport.Configuration
                     ));
                 //filter failover parameters only. Apache.NMS.ActiveMQ requires prefix "transport." for failover parameters
                 var failoverQueryPart = GetQueryString(kv => IsFailoverArgument(kv.Key), "transport.");
-                return new Uri($"activemq:failover:({failoverPart}){failoverQueryPart}");
+                return new Uri($"{FailoverScheme}:({failoverPart}){failoverQueryPart}");
             }
 
             var queryPart = GetQueryString(_ => true);
-            var uri = new Uri($"activemq:{scheme}://{Host}:{Port}{queryPart}");
+            var uri = new Uri($"{Scheme}://{Host}:{Port}{queryPart}");
             return uri;
         }
 

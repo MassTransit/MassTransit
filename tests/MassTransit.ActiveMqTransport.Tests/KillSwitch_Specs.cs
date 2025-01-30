@@ -9,10 +9,16 @@ namespace MassTransit.ActiveMqTransport.Tests
 
 
     [Category("Flaky")]
-    [TestFixture]
+    [TestFixture(ActiveMqHostAddress.ActiveMqScheme)]
+    [TestFixture(ActiveMqHostAddress.AmqpScheme)]
     public class KillSwitch_Specs :
         ActiveMqTestFixture
     {
+        public KillSwitch_Specs(string protocol)
+            : base(protocol)
+        {
+        }
+
         [Test]
         public async Task Should_be_degraded_after_too_many_exceptions()
         {

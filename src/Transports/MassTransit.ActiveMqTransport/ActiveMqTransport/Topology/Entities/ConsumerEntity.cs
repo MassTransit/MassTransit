@@ -11,6 +11,13 @@ namespace MassTransit.ActiveMqTransport.Topology
         readonly QueueEntity _queue;
         readonly TopicEntity _topic;
 
+        public ConsumerEntity(long id, TopicEntity topic, QueueEntity queue, string selector, string consumerName, bool shared)
+            : this(id, topic, queue, selector)
+        {
+            ConsumerName = consumerName;
+            IsShared = shared;
+        }
+
         public ConsumerEntity(long id, TopicEntity topic, QueueEntity queue, string selector)
         {
             Id = id;
@@ -25,6 +32,8 @@ namespace MassTransit.ActiveMqTransport.Topology
         public Topic Source => _topic.Topic;
         public Queue Destination => _queue?.Queue;
         public string Selector { get; }
+        public string ConsumerName { get; }
+        public bool IsShared { get; }
 
         public long Id { get; }
         public Consumer Consumer => this;
@@ -36,7 +45,8 @@ namespace MassTransit.ActiveMqTransport.Topology
                 {
                     $"source: {Source.EntityName}",
                     $"destination: {Destination?.EntityName}",
-                    string.IsNullOrWhiteSpace(Selector) ? "" : $"selector: {Selector}"
+                    string.IsNullOrWhiteSpace(Selector) ? "" : $"selector: {Selector}",
+                    string.IsNullOrWhiteSpace(ConsumerName) ? "" : $"consumerName: {ConsumerName}"
                 }.Where(x => !string.IsNullOrWhiteSpace(x)));
         }
 

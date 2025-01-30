@@ -4,8 +4,7 @@
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Apache.NMS;
-    using Apache.NMS.ActiveMQ.Commands;
-    using Context;
+        using Context;
     using Transports;
 
 
@@ -30,9 +29,9 @@
 
         public IPrimitiveMap Properties => TransportMessage.Properties;
 
-        public string GroupId => TransportMessage is Message message ? message.GroupID : null;
+        public string GroupId => TransportMessage.GetGroupId();
 
-        public int GroupSequence => TransportMessage is Message message ? message.GroupSequence : default;
+        public int GroupSequence => TransportMessage.GetGroupSequence();
 
         public IDictionary<string, object> GetTransportProperties()
         {
