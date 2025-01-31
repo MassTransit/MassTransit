@@ -61,7 +61,7 @@
 
         static RetryConsumeContext<TMessage> Factory(ConsumeContext<TMessage> context, IRetryPolicy retryPolicy, RetryContext retryContext)
         {
-            return context as RetryConsumeContext<TMessage> ?? new RedeliveryRetryConsumeContext<TMessage>(context, retryPolicy, retryContext);
+            return new RedeliveryRetryConsumeContext<TMessage>(context, retryPolicy, retryContext);
         }
     }
 }

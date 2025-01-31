@@ -51,7 +51,7 @@ namespace MassTransit.Configuration
 
         static RetryCompensateContext<TLog> Factory(CompensateContext<TLog> context, IRetryPolicy retryPolicy, RetryContext retryContext)
         {
-            return context as RetryCompensateContext<TLog> ?? new RetryCompensateContext<TLog>(context, retryPolicy, retryContext);
+            return new RetryCompensateContext<TLog>(context, retryPolicy, retryContext);
         }
     }
 }

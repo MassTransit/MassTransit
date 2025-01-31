@@ -39,21 +39,24 @@
             using (RetryPolicyContext<TContext> policyContext = _retryPolicy.CreatePolicyContext(context))
             {
                 if (_observers.Count > 0)
-                    await _observers.PostCreate(policyContext).ConfigureAwait(false);
+                {
+                    var postCreateTask = _observers.PostCreate(policyContext);
+                    if (postCreateTask.Status != TaskStatus.RanToCompletion)
+                        await postCreateTask.ConfigureAwait(false);
+                }
 
                 try
                 {
                     await next.Send(policyContext.Context).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException exception)
-                    when (exception.CancellationToken == context.CancellationToken || exception.CancellationToken == policyContext.Context.CancellationToken)
+                    when (exception.CancellationToken == policyContext.Context.CancellationToken || exception.CancellationToken == context.CancellationToken)
                 {
                     throw;
                 }
                 catch (Exception exception)
                 {
-                    if (policyContext.Context.CancellationToken.IsCancellationRequested)
-                        policyContext.Context.CancellationToken.ThrowIfCancellationRequested();
+                    policyContext.Context.CancellationToken.ThrowIfCancellationRequested();
 
                     if (!policyContext.CanRetry(exception, out RetryContext<TContext> retryContext))
                     {
@@ -61,10 +64,16 @@
                         {
                             context.GetOrAddPayload(() => retryContext);
 
-                            await retryContext.RetryFaulted(exception).ConfigureAwait(false);
+                            var retryFaultedTask = retryContext.RetryFaulted(exception);
+                            if (retryFaultedTask.Status != TaskStatus.RanToCompletion)
+                                await retryFaultedTask.ConfigureAwait(false);
 
                             if (_observers.Count > 0)
-                                await _observers.RetryFault(retryContext).ConfigureAwait(false);
+                            {
+                                var retryFaultTask = _observers.RetryFault(retryContext);
+                                if (retryFaultTask.Status != TaskStatus.RanToCompletion)
+                                    await retryFaultTask.ConfigureAwait(false);
+                            }
                         }
 
                         throw;
@@ -79,10 +88,16 @@
                             {
                                 context.GetOrAddPayload(() => retryContext);
 
-                                await retryContext.RetryFaulted(exception).ConfigureAwait(false);
+                                var retryFaultedTask = retryContext.RetryFaulted(exception);
+                                if (retryFaultedTask.Status != TaskStatus.RanToCompletion)
+                                    await retryFaultedTask.ConfigureAwait(false);
 
                                 if (_observers.Count > 0)
-                                    await _observers.RetryFault(retryContext).ConfigureAwait(false);
+                                {
+                                    var retryFaultTask = _observers.RetryFault(retryContext);
+                                    if (retryFaultTask.Status != TaskStatus.RanToCompletion)
+                                        await retryFaultTask.ConfigureAwait(false);
+                                }
                             }
 
                             throw;
@@ -90,7 +105,11 @@
                     }
 
                     if (_observers.Count > 0)
-                        await _observers.PostFault(retryContext).ConfigureAwait(false);
+                    {
+                        var postFaultTask = _observers.PostFault(retryContext);
+                        if (postFaultTask.Status != TaskStatus.RanToCompletion)
+                            await postFaultTask.ConfigureAwait(false);
+                    }
 
                     try
                     {

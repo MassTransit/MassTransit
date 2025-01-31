@@ -51,7 +51,7 @@ namespace MassTransit.Configuration
 
         static RetryExecuteContext<TArguments> Factory(ExecuteContext<TArguments> context, IRetryPolicy retryPolicy, RetryContext retryContext)
         {
-            return context as RetryExecuteContext<TArguments> ?? new RetryExecuteContext<TArguments>(context, retryPolicy, retryContext);
+            return new RetryExecuteContext<TArguments>(context, retryPolicy, retryContext);
         }
     }
 }
