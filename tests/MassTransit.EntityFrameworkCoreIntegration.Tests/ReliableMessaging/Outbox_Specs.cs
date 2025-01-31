@@ -206,6 +206,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
     {
         using System.Collections.Generic;
         using System.Reflection;
+        using Context;
         using DependencyInjection;
         using MassTransit.Tests;
         using Microsoft.EntityFrameworkCore;
@@ -243,6 +244,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
                         .Then(context => throw new IntentionalTestException()),
                     When(Started, x => x.Data.FailToStart == false && x.Data.Delay.HasValue == false)
                         .Respond(new StartupComplete())
+                        .Activity(x => x.OfType<ReliableStateMachineActivity>())
                         .TransitionTo(Running),
                     When(Started, x => x.Data.FailToStart == false && x.Data.Delay.HasValue)
                         .Then(context =>
@@ -264,6 +266,43 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
             public State Running { get; private set; }
             public State Delayed { get; private set; }
             public Event<Start> Started { get; private set; }
+        }
+
+
+        public class ReliableStateMachineActivity :
+            IStateMachineActivity<ResponsibleState, Start>
+        {
+            readonly IPublishEndpoint _publishEndpoint;
+            readonly ISendEndpointProvider _sendEndpointProvider;
+
+            public ReliableStateMachineActivity(IPublishEndpoint publishEndpoint, ISendEndpointProvider sendEndpointProvider)
+            {
+                _publishEndpoint = publishEndpoint;
+                _sendEndpointProvider = sendEndpointProvider;
+            }
+
+            public void Probe(ProbeContext context)
+            {
+            }
+
+            public void Accept(StateMachineVisitor visitor)
+            {
+                visitor.Visit(this);
+            }
+
+            public Task Execute(BehaviorContext<ResponsibleState, Start> context, IBehavior<ResponsibleState, Start> next)
+            {
+                Assert.That(_publishEndpoint, Is.InstanceOf<CorrelationIdConsumeContextProxy<Start>>());
+                Assert.That(_sendEndpointProvider, Is.InstanceOf<CorrelationIdConsumeContextProxy<Start>>());
+
+                return next.Execute(context);
+            }
+
+            public Task Faulted<TException>(BehaviorExceptionContext<ResponsibleState, Start, TException> context, IBehavior<ResponsibleState, Start> next)
+                where TException : Exception
+            {
+                return next.Faulted(context);
+            }
         }
 
 
