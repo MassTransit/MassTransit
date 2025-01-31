@@ -135,7 +135,7 @@ namespace MassTransit.SqlTransport.Middleware
                 {
                     int? count = 0;
 
-                    if (_lastMaintenance.HasValue == false || _lastMaintenance.Value + TimeSpan.FromSeconds(30) > DateTime.UtcNow)
+                    if (_lastMaintenance.HasValue == false || _lastMaintenance.Value + TimeSpan.FromSeconds(30) < DateTime.UtcNow)
                     {
                         count = await _client.DeadLetterQueue(_receiveSettings.QueueName, _receiveSettings.MaintenanceBatchSize).ConfigureAwait(false);
 
@@ -145,7 +145,7 @@ namespace MassTransit.SqlTransport.Middleware
 
                     if (_touchQueueInterval.HasValue && count is null or 0)
                     {
-                        if (_lastTouched.HasValue == false || _lastTouched.Value + _touchQueueInterval.Value > DateTime.UtcNow)
+                        if (_lastTouched.HasValue == false || _lastTouched.Value + _touchQueueInterval.Value < DateTime.UtcNow)
                         {
                             await _client.TouchQueue(_receiveSettings.EntityName).ConfigureAwait(false);
 
