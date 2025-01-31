@@ -67,11 +67,23 @@ namespace MassTransit.Tests.Serialization
 
     public interface ComplaintAdded
     {
+        #if NET5_0_OR_GREATER
+            /// <summary>
+            /// Explicit init declaration to test init properties are dynamically created correctly in > .NET 5.
+            /// </summary>
+            int Id { get; init; }
+        #else
+            int Id { get; set; }
+        #endif
+
         User AddedBy { get; }
 
         DateTime AddedAt { get; }
 
-        string Subject { get; }
+        /// <summary>
+        /// Explicit set declaration to test set properties are dynamically created correctly.
+        /// </summary>
+        string Subject { get; set; }
 
         string Body { get; }
 
@@ -159,6 +171,12 @@ namespace MassTransit.Tests.Serialization
         {
         }
 
+        #if NET5_0_OR_GREATER
+            public int Id { get; init; }
+        #else
+            public int Id { get; set; }
+        #endif
+
         public User AddedBy { get; set; }
 
         public DateTime AddedAt { get; set; }
@@ -176,7 +194,7 @@ namespace MassTransit.Tests.Serialization
             if (ReferenceEquals(this, other))
                 return true;
             return AddedBy.Equals(other.AddedBy) && other.AddedAt.Equals(AddedAt) && Equals(other.Subject, Subject) && Equals(other.Body, Body)
-                && Equals(other.Area, Area);
+                && Equals(other.Area, Area) && Equals(other.Id, Id);
         }
 
         public override bool Equals(object obj)
@@ -199,6 +217,7 @@ namespace MassTransit.Tests.Serialization
                 result = (result * 397) ^ (Subject != null ? Subject.GetHashCode() : 0);
                 result = (result * 397) ^ (Body != null ? Body.GetHashCode() : 0);
                 result = (result * 397) ^ Area.GetHashCode();
+                result = (result * 397) ^ Id.GetHashCode();
                 return result;
             }
         }

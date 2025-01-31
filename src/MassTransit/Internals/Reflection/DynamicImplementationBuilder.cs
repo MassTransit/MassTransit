@@ -7,6 +7,7 @@
     using System.Linq;
     using System.Reflection;
     using System.Reflection.Emit;
+    using System.Runtime.CompilerServices;
 
 
     public class DynamicImplementationBuilder :
@@ -108,8 +109,13 @@
         {
             var setMethodBuilder = typeBuilder.DefineMethod("set_" + propertyInfo.Name,
                 PropertyAccessMethodAttributes,
+                CallingConventions.HasThis,
+                typeof(void),
+                ReturnTypeCustomModifiersForProperty(propertyInfo),
                 null,
-                new[] { propertyInfo.PropertyType });
+                new[] { propertyInfo.PropertyType },
+                null,
+                null);
 
             var il = setMethodBuilder.GetILGenerator();
             il.Emit(OpCodes.Ldarg_0);
@@ -177,6 +183,18 @@
             });
 
             return callback(builder);
+        }
+
+        static Type[] ReturnTypeCustomModifiersForProperty(PropertyInfo propertyInfo)
+        {
+            Type[] returnTypeCustomModifiers = null;
+
+            #if NET5_0_OR_GREATER
+                var hasInitSetter = propertyInfo.SetMethod?.ReturnParameter?.GetRequiredCustomModifiers()?.Contains(typeof(IsExternalInit)) ?? false;
+                returnTypeCustomModifiers = hasInitSetter ? new[] { typeof(IsExternalInit) } : null;
+            #endif
+
+            return returnTypeCustomModifiers;
         }
     }
 }
