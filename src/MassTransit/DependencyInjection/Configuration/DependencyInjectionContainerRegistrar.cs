@@ -213,6 +213,7 @@ namespace MassTransit.Configuration
 
         public override void AddDefinition<T, TDefinition>()
         {
+            Collection.AddSingleton<TDefinition>();
             Collection.AddSingleton<Bind<TBus, TDefinition>>();
             Collection.AddSingleton<Bind<TBus, T>>(provider => Bind<TBus>.Create<T>(ActivatorUtilities.CreateInstance<TDefinition>(provider)));
         }
