@@ -465,14 +465,14 @@ BEGIN
     SELECT @SourceTopicId = t.Id FROM {0}.Topic t WHERE t.Name = @SourceTopicName;
     IF @SourceTopicId IS NULL
     BEGIN
-        THROW 50000, 'Source topic not found', 1;
+        RAISERROR('Source topic not found: %s', 16, 1, @SourceTopicName);
     END
 
     DECLARE @DestinationTopicId BIGINT
     SELECT @DestinationTopicId = t.Id FROM {0}.Topic t WHERE t.Name = @DestinationTopicName;
     IF @DestinationTopicId IS NULL
     BEGIN
-        THROW 50000, 'Destination topic not found', 1;
+        RAISERROR('Destination topic not found: %s', 16, 1, @DestinationTopicName);
     END
 
     DECLARE @ResultTable table (Id BIGINT)
@@ -523,7 +523,7 @@ BEGIN
     SELECT @DestinationQueueId = q.Id FROM {0}.Queue q WHERE q.Name = @DestinationQueueName AND q.Type = 1;
     IF @DestinationQueueId IS NULL
     BEGIN
-        THROW 50000, 'Destination queue not found', 1;
+        RAISERROR('Destination queue not found: %s', 16, 1, @DestinationQueueName);
     END
 
     DECLARE @ResultTable table (Id BIGINT)
@@ -652,7 +652,7 @@ BEGIN
 
     IF @vTopicId IS NULL
     BEGIN
-        THROW 50000, 'Topic not found', 1;
+        RAISERROR('Topic not found for entityName: %s', 16, 1, @entityName);
     END;
 
     SET @vEnqueueTime = SYSUTCDATETIME();
@@ -821,7 +821,7 @@ BEGIN
     SELECT @vQueueId = q.Id, @vMaxDeliveryCount = q.MaxDeliveryCount FROM {0}.Queue q WHERE q.Name = @entityName AND q.type = 1;
     IF @vQueueId IS NULL
     BEGIN
-        THROW 50000, 'Queue not found', 1;
+        RAISERROR('Queue not found for entityName: %s', 16, 1, @entityName);
     END;
 
     SET @vEnqueueTime = SYSUTCDATETIME();
@@ -873,7 +873,7 @@ BEGIN
 
     IF @queueId IS NULL
     BEGIN
-        THROW 50000, 'Queue not found', 1;
+        RAISERROR('Queue not found: %s', 16, 1, @queueName);
     END;
 
     IF @lockDuration <= 0
@@ -1029,7 +1029,7 @@ BEGIN
 
     IF @queueId IS NULL
     BEGIN
-        THROW 50000, 'Queue not found', 1;
+        RAISERROR('Queue not found: %s', 16, 1, @queueName);
     END;
 
     IF @lockDuration <= 0
@@ -1228,7 +1228,7 @@ BEGIN
 
     IF @queueId IS NULL
     BEGIN
-        THROW 50000, 'Queue not found', 1;
+        RAISERROR('Queue not found: %s', 16, 1, @queueName);
     END;
 
     INSERT INTO {0}.QueueMetricCapture (Captured, QueueId, ConsumeCount, ErrorCount, DeadLetterCount)
@@ -1251,7 +1251,7 @@ BEGIN
 
     IF @sourceQueueId IS NULL
     BEGIN
-        THROW 50000, 'Queue not found', 1;
+        RAISERROR('Queue not found: %s', 16, 1, @queueName);
     END;
 
     DECLARE @targetQueueId bigint
@@ -1261,7 +1261,7 @@ BEGIN
 
     IF @targetQueueId IS NULL
     BEGIN
-        THROW 50000, 'Dead-letter queue not found', 1;
+        RAISERROR('Dead-letter queue not found: %s', 16, 1, @queueName);
     END;
 
     DECLARE @now datetime2;
@@ -1429,7 +1429,7 @@ BEGIN
 
     IF @queueId IS NULL
     BEGIN
-        THROW 50000, 'Queue not found', 1;
+        RAISERROR('Queue not found: %s', 16, 1, @queueName);
     END;
 
     DECLARE @updatedMessages TABLE (
@@ -1489,7 +1489,7 @@ BEGIN
 
     IF @sourceQueueId IS NULL
     BEGIN
-        THROW 50000, 'Source queue not found', 1;
+        RAISERROR('Source queue not found: %s', 16, 1, @queueName);
     END;
 
     DECLARE @targetQueueId bigint
@@ -1499,7 +1499,7 @@ BEGIN
 
     IF @targetQueueId IS NULL
     BEGIN
-        THROW 50000, 'Target queue not found', 1;
+        RAISERROR('Target queue not found: %s', 16, 1, @queueName);
     END;
 
     DECLARE @enqueueTime datetime2;
