@@ -1,0 +1,96 @@
+---
+
+title: RequestPipeConfiguratorCallback<TRequest>
+
+---
+
+# RequestPipeConfiguratorCallback\<TRequest\>
+
+Namespace: MassTransit
+
+```csharp
+public sealed class RequestPipeConfiguratorCallback<TRequest> : MulticastDelegate, ICloneable, ISerializable
+```
+
+#### Type Parameters
+
+`TRequest`<br/>
+
+Inheritance [Object](https://learn.microsoft.com/en-us/dotnet/api/system.object) → [Delegate](https://learn.microsoft.com/en-us/dotnet/api/system.delegate) → [MulticastDelegate](https://learn.microsoft.com/en-us/dotnet/api/system.multicastdelegate) → [RequestPipeConfiguratorCallback\<TRequest\>](../masstransit/requestpipeconfiguratorcallback-1)<br/>
+Implements [ICloneable](https://learn.microsoft.com/en-us/dotnet/api/system.icloneable), [ISerializable](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.serialization.iserializable)
+
+## Properties
+
+### **Target**
+
+```csharp
+public object Target { get; }
+```
+
+#### Property Value
+
+[Object](https://learn.microsoft.com/en-us/dotnet/api/system.object)<br/>
+
+### **Method**
+
+```csharp
+public MethodInfo Method { get; }
+```
+
+#### Property Value
+
+[MethodInfo](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.methodinfo)<br/>
+
+## Constructors
+
+### **RequestPipeConfiguratorCallback(Object, IntPtr)**
+
+```csharp
+public RequestPipeConfiguratorCallback(object object, IntPtr method)
+```
+
+#### Parameters
+
+`object` [Object](https://learn.microsoft.com/en-us/dotnet/api/system.object)<br/>
+
+`method` [IntPtr](https://learn.microsoft.com/en-us/dotnet/api/system.intptr)<br/>
+
+## Methods
+
+### **Invoke(IRequestPipeConfigurator\<TRequest\>)**
+
+```csharp
+public void Invoke(IRequestPipeConfigurator<TRequest> configurator)
+```
+
+#### Parameters
+
+`configurator` [IRequestPipeConfigurator\<TRequest\>](../masstransit/irequestpipeconfigurator-1)<br/>
+
+### **BeginInvoke(IRequestPipeConfigurator\<TRequest\>, AsyncCallback, Object)**
+
+```csharp
+public IAsyncResult BeginInvoke(IRequestPipeConfigurator<TRequest> configurator, AsyncCallback callback, object object)
+```
+
+#### Parameters
+
+`configurator` [IRequestPipeConfigurator\<TRequest\>](../masstransit/irequestpipeconfigurator-1)<br/>
+
+`callback` [AsyncCallback](https://learn.microsoft.com/en-us/dotnet/api/system.asynccallback)<br/>
+
+`object` [Object](https://learn.microsoft.com/en-us/dotnet/api/system.object)<br/>
+
+#### Returns
+
+[IAsyncResult](https://learn.microsoft.com/en-us/dotnet/api/system.iasyncresult)<br/>
+
+### **EndInvoke(IAsyncResult)**
+
+```csharp
+public void EndInvoke(IAsyncResult result)
+```
+
+#### Parameters
+
+`result` [IAsyncResult](https://learn.microsoft.com/en-us/dotnet/api/system.iasyncresult)<br/>

@@ -1,0 +1,86 @@
+---
+
+title: MessageIdMessageHeader
+
+---
+
+# MessageIdMessageHeader
+
+Namespace: MassTransit.Serialization
+
+```csharp
+public class MessageIdMessageHeader : Headers, IEnumerable<HeaderValue>, IEnumerable
+```
+
+Inheritance [Object](https://learn.microsoft.com/en-us/dotnet/api/system.object) → [MessageIdMessageHeader](../masstransit-serialization/messageidmessageheader)<br/>
+Implements [Headers](../../masstransit-abstractions/masstransit/headers), [IEnumerable\<HeaderValue\>](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.ienumerable-1), [IEnumerable](https://learn.microsoft.com/en-us/dotnet/api/system.collections.ienumerable)
+
+## Constructors
+
+### **MessageIdMessageHeader(Guid)**
+
+```csharp
+public MessageIdMessageHeader(Guid messageId)
+```
+
+#### Parameters
+
+`messageId` [Guid](https://learn.microsoft.com/en-us/dotnet/api/system.guid)<br/>
+
+## Methods
+
+### **GetAll()**
+
+```csharp
+public IEnumerable<KeyValuePair<string, object>> GetAll()
+```
+
+#### Returns
+
+[IEnumerable\<KeyValuePair\<String, Object\>\>](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.ienumerable-1)<br/>
+
+### **TryGetHeader(String, Object)**
+
+```csharp
+public bool TryGetHeader(string key, out object value)
+```
+
+#### Parameters
+
+`key` [String](https://learn.microsoft.com/en-us/dotnet/api/system.string)<br/>
+
+`value` [Object](https://learn.microsoft.com/en-us/dotnet/api/system.object)<br/>
+
+#### Returns
+
+[Boolean](https://learn.microsoft.com/en-us/dotnet/api/system.boolean)<br/>
+
+### **Get\<T\>(String, Nullable\<T\>)**
+
+```csharp
+public Nullable<T> Get<T>(string key, Nullable<T> defaultValue)
+```
+
+#### Type Parameters
+
+`T`<br/>
+
+#### Parameters
+
+`key` [String](https://learn.microsoft.com/en-us/dotnet/api/system.string)<br/>
+
+`defaultValue` [Nullable\<T\>](https://learn.microsoft.com/en-us/dotnet/api/system.nullable-1)<br/>
+
+#### Returns
+
+[Nullable\<T\>](https://learn.microsoft.com/en-us/dotnet/api/system.nullable-1)<br/>
+
+### **GetEnumerator()**
+
+```csharp
+public IEnumerator<HeaderValue> GetEnumerator()
+```
+
+#### Returns
+
+[IEnumerator\<HeaderValue\>](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.ienumerator-1)<br/>
