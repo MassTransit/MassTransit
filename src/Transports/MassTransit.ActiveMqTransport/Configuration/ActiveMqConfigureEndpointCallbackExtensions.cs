@@ -6,7 +6,7 @@ using System;
 public static class ActiveMqConfigureEndpointCallbackExtensions
 {
     /// <summary>
-    /// Add an Azure Service Bus specific configure callback to the endpoint.
+    /// Add an ActiveMQ specific configure callback to the endpoint.
     /// </summary>
     /// <param name="configurator"></param>
     /// <param name="callback"></param>
@@ -24,7 +24,7 @@ public static class ActiveMqConfigureEndpointCallbackExtensions
     }
 
     /// <summary>
-    /// Add an Azure Service Bus specific configure callback for configured endpoints
+    /// Add an ActiveMQ specific configure callback for configured endpoints
     /// </summary>
     /// <param name="configurator"></param>
     /// <param name="callback"></param>
