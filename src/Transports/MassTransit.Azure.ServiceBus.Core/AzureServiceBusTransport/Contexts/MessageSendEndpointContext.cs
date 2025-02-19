@@ -24,11 +24,13 @@ namespace MassTransit.AzureServiceBusTransport
 
         public Task Send(ServiceBusMessage message)
         {
+            ServiceBusHeaders.TruncateFaultHeaders(message.ApplicationProperties);
             return _client.SendMessageAsync(message);
         }
 
         public Task<long> ScheduleSend(ServiceBusMessage message, DateTime scheduleEnqueueTimeUtc)
         {
+            ServiceBusHeaders.TruncateFaultHeaders(message.ApplicationProperties);
             return _client.ScheduleMessageAsync(message, scheduleEnqueueTimeUtc);
         }
 
