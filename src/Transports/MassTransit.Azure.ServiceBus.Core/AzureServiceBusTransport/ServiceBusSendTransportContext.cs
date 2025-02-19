@@ -15,7 +15,8 @@ namespace MassTransit.AzureServiceBusTransport
         BaseSendTransportContext,
         SendTransportContext<SendEndpointContext>
     {
-        static readonly ITransportSetHeaderAdapter<object> _adapter = new DictionaryTransportSetHeaderAdapter(new SimpleHeaderValueConverter());
+        internal static readonly ITransportSetHeaderAdapter<object> Adapter =
+            new DictionaryTransportSetHeaderAdapter(new SimpleHeaderValueConverter()) { MaxHeaderLength = Defaults.MaxHeaderLength };
 
         readonly IServiceBusHostConfiguration _hostConfiguration;
         readonly ISendEndpointContextSupervisor _supervisor;
@@ -56,7 +57,7 @@ namespace MassTransit.AzureServiceBusTransport
 
         public override IEnumerable<IAgent> GetAgentHandles()
         {
-            return new IAgent[] { _supervisor };
+            return [_supervisor];
         }
 
         public Task<SendContext<T>> CreateSendContext<T>(SendEndpointContext context, T message, IPipe<SendContext<T>> pipe,
@@ -176,7 +177,7 @@ namespace MassTransit.AzureServiceBusTransport
         {
             var message = new ServiceBusMessage(context.Body.GetBytes()) { ContentType = context.ContentType.ToString() };
 
-            _adapter.Set(message.ApplicationProperties, context.Headers);
+            Adapter.Set(message.ApplicationProperties, context.Headers);
 
             if (context.TimeToLive.HasValue)
                 message.TimeToLive = context.TimeToLive > TimeSpan.Zero ? context.TimeToLive.Value : TimeSpan.FromSeconds(1);

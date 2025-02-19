@@ -22,6 +22,9 @@
         public static int MaxConcurrentSessions { get; set; } = 8;
         public static int MaxConcurrentCallsPerSessions { get; set; } = 1;
 
+        public const int MaxHeaderLengthBytes = 32767;
+        public const int MaxHeaderLength = MaxHeaderLengthBytes / sizeof(char) - 1;
+
         public static CreateQueueOptions GetCreateQueueOptions(string queueName)
         {
             return new CreateQueueOptions(queueName)

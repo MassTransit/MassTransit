@@ -3,6 +3,7 @@ namespace MassTransit.Util
     using System;
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
+    using Transports;
 
 
     public static class ExceptionUtil
@@ -39,6 +40,7 @@ namespace MassTransit.Util
             return _cleanup.Replace(stackTrace, "");
         }
 
+        [Obsolete("This method is obsolete and will be removed in a future version.")]
         public static IDictionary<string, object> GetExceptionHeaderDictionary(Exception exception)
         {
             (Dictionary<string, object>? dictionary, var message) = GetExceptionHeaderDetail(exception);
@@ -46,6 +48,7 @@ namespace MassTransit.Util
             return dictionary;
         }
 
+        [Obsolete("This method is obsolete and will be removed in a future version.")]
         public static (Dictionary<string, object>, string) GetExceptionHeaderDetail(Exception exception)
         {
             exception = exception.GetBaseException() ?? exception;
@@ -59,6 +62,22 @@ namespace MassTransit.Util
                 { MessageHeaders.FaultMessage, exceptionMessage },
                 { MessageHeaders.FaultStackTrace, GetStackTrace(exception) }
             }, exceptionMessage);
+        }
+
+        public static (Dictionary<string, object>, string) GetExceptionHeaderDetail(Exception exception, ITransportSetHeaderAdapter<object> adapter)
+        {
+            exception = exception.GetBaseException() ?? exception;
+
+            var exceptionMessage = GetMessage(exception);
+
+            var dictionary = new Dictionary<string, object>();
+
+            adapter.Set(dictionary, MessageHeaders.Reason, "fault");
+            adapter.Set(dictionary, MessageHeaders.FaultExceptionType, TypeCache.GetShortName(exception.GetType()));
+            adapter.Set(dictionary, MessageHeaders.FaultMessage, exceptionMessage);
+            adapter.Set(dictionary, MessageHeaders.FaultStackTrace, GetStackTrace(exception));
+
+            return (dictionary, exceptionMessage);
         }
     }
 }
