@@ -10,10 +10,6 @@
     public class ScheduleMessage_Specs :
         ActiveMqTestFixture
     {
-        Task<ConsumeContext<FirstMessage>> _first;
-
-        Task<ConsumeContext<SecondMessage>> _second;
-
         [Test]
         public async Task Should_get_both_messages()
         {
@@ -50,16 +46,16 @@
         public class SecondMessage
         {
         }
+        #pragma warning disable NUnit1032
+        Task<ConsumeContext<FirstMessage>> _first;
+        Task<ConsumeContext<SecondMessage>> _second;
+        #pragma warning restore NUnit1032
     }
 
 
     public class SchedulePublish_Specs :
         ActiveMqTestFixture
     {
-        Task<ConsumeContext<FirstMessage>> _first;
-
-        Task<ConsumeContext<SecondMessage>> _second;
-
         [Test]
         public async Task Should_get_both_messages()
         {
@@ -96,16 +92,16 @@
         public class SecondMessage
         {
         }
+        #pragma warning disable NUnit1032
+        Task<ConsumeContext<FirstMessage>> _first;
+        Task<ConsumeContext<SecondMessage>> _second;
+        #pragma warning restore NUnit1032
     }
 
 
     public class Should_schedule_in_the_future :
         ActiveMqTestFixture
     {
-        Task<ConsumeContext<FirstMessage>> _first;
-
-        Task<ConsumeContext<SecondMessage>> _second;
-
         [Test]
         public async Task Should_get_both_messages()
         {
@@ -148,16 +144,16 @@
         public class SecondMessage
         {
         }
+        #pragma warning disable NUnit1032
+        Task<ConsumeContext<FirstMessage>> _first;
+        Task<ConsumeContext<SecondMessage>> _second;
+        #pragma warning restore NUnit1032
     }
 
 
     public class Should_not_schedule_subsequent_messages :
         ActiveMqTestFixture
     {
-        Task<ConsumeContext<FirstMessage>> _first;
-
-        Task<ConsumeContext<SecondMessage>> _second;
-
         [Test]
         public async Task Should_get_both_messages()
         {
@@ -200,6 +196,10 @@
         public class SecondMessage
         {
         }
+        #pragma warning disable NUnit1032
+        Task<ConsumeContext<FirstMessage>> _first;
+        Task<ConsumeContext<SecondMessage>> _second;
+        #pragma warning restore NUnit1032
     }
 
 
@@ -228,9 +228,6 @@
 
         Uri QuartzAddress { get; set; }
 
-        Task<ConsumeContext<SecondMessage>> _second;
-        Task<ConsumeContext<FirstMessage>> _first;
-
         protected override void ConfigureActiveMqReceiveEndpoint(IActiveMqReceiveEndpointConfigurator configurator)
         {
             _first = Handler<FirstMessage>(configurator, async context =>
@@ -255,6 +252,11 @@
         public class SecondMessage
         {
         }
-    }
 
+
+        #pragma warning disable NUnit1032
+        Task<ConsumeContext<FirstMessage>> _first;
+        Task<ConsumeContext<SecondMessage>> _second;
+        #pragma warning restore NUnit1032
+    }
 }

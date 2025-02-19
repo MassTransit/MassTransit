@@ -2,20 +2,16 @@ namespace MassTransit.ActiveMqTransport.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using MassTransit.ActiveMqTransport.Configuration;
-    using MassTransit.Testing;
+    using Configuration;
     using NUnit.Framework;
     using TestFramework.Messages;
+    using Testing;
+
 
     [TestFixture]
     public class Sending_to_a_shared_topic_subscription_endpoint :
         ActiveMqTestFixture
     {
-        public Sending_to_a_shared_topic_subscription_endpoint()
-            : base(new ActiveMqTestHarness { HostAddress = new Uri("amqp://localhost:61618") })
-        {
-        }
-
         [Test]
         [Category("Flaky")] //Only Artemis support shared durable topic
         public async Task Should_succeed()
@@ -28,7 +24,14 @@ namespace MassTransit.ActiveMqTransport.Tests
             Assert.That(context.Message.Value, Is.EqualTo("Hello"));
         }
 
+        public Sending_to_a_shared_topic_subscription_endpoint()
+            : base(new ActiveMqTestHarness { HostAddress = new Uri("amqp://localhost:61618") })
+        {
+        }
+
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<PrivateMessage>> _handler;
+        #pragma warning restore NUnit1032
 
         protected override void ConfigureActiveMqReceiveEndpoint(IActiveMqReceiveEndpointConfigurator configurator)
         {
@@ -50,6 +53,7 @@ namespace MassTransit.ActiveMqTransport.Tests
             configurator.EnableArtemisCompatibility();
             base.ConfigureActiveMqBus(configurator);
         }
+
 
         class PrivateMessage
         {

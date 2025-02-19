@@ -2,8 +2,6 @@ namespace MassTransit.ActiveMqTransport.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Apache.NMS;
-    using MassTransit.Testing;
     using NUnit.Framework;
     using TestFramework.Messages;
 
@@ -13,11 +11,6 @@ namespace MassTransit.ActiveMqTransport.Tests
     public class Sending_to_a_topic_endpoint :
         ActiveMqTestFixture
     {
-        public Sending_to_a_topic_endpoint(string protocol)
-            : base(protocol)
-        {
-        }
-
         [Test]
         public async Task Should_succeed()
         {
@@ -29,12 +22,14 @@ namespace MassTransit.ActiveMqTransport.Tests
             Assert.That(context.Message.Value, Is.EqualTo("Hello"));
         }
 
-        Task<ConsumeContext<PrivateMessage>> _handler;
-
-        protected override void ConfigureActiveMqBus(IActiveMqBusFactoryConfigurator configurator)
+        public Sending_to_a_topic_endpoint(string protocol)
+            : base(protocol)
         {
-            base.ConfigureActiveMqBus(configurator);
         }
+
+        #pragma warning disable NUnit1032
+        Task<ConsumeContext<PrivateMessage>> _handler;
+        #pragma warning restore NUnit1032
 
         protected override void ConfigureActiveMqReceiveEndpoint(IActiveMqReceiveEndpointConfigurator configurator)
         {
