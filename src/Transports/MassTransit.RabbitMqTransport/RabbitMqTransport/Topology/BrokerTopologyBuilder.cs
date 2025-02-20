@@ -66,7 +66,7 @@ namespace MassTransit.RabbitMqTransport.Topology
 
             var durableQueue = durable || isQuorumQueue;
 
-            exclusive = exclusive || autoDelete && !isQuorumQueue;
+            exclusive = exclusive || autoDelete && !durableQueue;
 
             var queue = new QueueEntity(id, name, durableQueue, queueAutoDelete, exclusive, arguments);
 
