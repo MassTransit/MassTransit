@@ -1157,6 +1157,28 @@ namespace MassTransit.SqlTransport.PostgreSql
             END;
             $$;
 
+            CREATE OR REPLACE FUNCTION "{0}".remove_orphaned_messages(row_limit int DEFAULT 10000)
+                    RETURNS int
+                    LANGUAGE PLPGSQL
+            AS
+            $$
+            DECLARE
+                v_removed_count   int;
+            BEGIN
+                DELETE FROM "{0}".message
+                    WHERE transport_message_id IN (
+                    	SELECT m.transport_message_id
+                    	    FROM "{0}".message m
+                    	    WHERE NOT EXISTS (SELECT FROM "{0}".message_delivery md WHERE md.transport_message_id = m.transport_message_id)
+                    	    LIMIT row_limit);
+
+                GET DIAGNOSTICS v_removed_count = ROW_COUNT;
+
+                RETURN v_removed_count;
+
+            END;
+            $$;
+
             CREATE OR REPLACE FUNCTION "{0}".purge_topology()
                 RETURNS int
                 LANGUAGE PLPGSQL

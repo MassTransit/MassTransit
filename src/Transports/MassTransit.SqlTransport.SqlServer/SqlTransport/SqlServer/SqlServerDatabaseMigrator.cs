@@ -1455,6 +1455,32 @@ BEGIN
     SELECT MessageDeliveryId FROM @updatedMessages;
 END";
 
+        const string SqlFnRemovedOrphanedMessages = @"
+CREATE OR ALTER PROCEDURE {0}.RemoveOrphanedMessages
+    @RowLimit int
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @DeletedMessages TABLE (
+        TransportMessageId uniqueidentifier INDEX DMIDX CLUSTERED
+    );
+
+    DELETE FROM {0}.Message
+        OUTPUT deleted.TransportMessageId
+        INTO @DeletedMessages
+        WHERE TransportMessageId IN (
+            SELECT m.TransportMessageId
+            FROM {0}.Message m
+            WHERE NOT EXISTS (SELECT 1 FROM {0}.MessageDelivery md WHERE md.TransportMessageId = m.TransportMessageId)
+            ORDER BY m.TransportMessageId
+            OFFSET 0 ROWS
+            FETCH NEXT @RowLimit ROWS ONLY);
+
+    SELECT COUNT(*) FROM @DeletedMessages
+END";
+
+
         const string SqlFnRequeueMessages = @"
 CREATE OR ALTER PROCEDURE {0}.RequeueMessages
     @queueName nvarchar(256),
@@ -1884,6 +1910,7 @@ END
                 await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnRenewMessageLock, options.Schema)).ConfigureAwait(false);
                 await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnUnlockMessage, options.Schema)).ConfigureAwait(false);
                 await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnMoveMessage, options.Schema)).ConfigureAwait(false);
+                await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnRemovedOrphanedMessages, options.Schema)).ConfigureAwait(false);
                 await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnRequeueMessage, options.Schema)).ConfigureAwait(false);
                 await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnRequeueMessages, options.Schema)).ConfigureAwait(false);
                 await connection.Connection.ExecuteScalarAsync<int>(string.Format(SqlFnProcessMetrics, options.Schema)).ConfigureAwait(false);

@@ -29,6 +29,7 @@ namespace MassTransit.SqlTransport.PostgreSql
 
         public const string DbProcessMetricsSql = """SELECT * FROM "{0}".process_metrics(@row_limit)""";
         public const string DbPurgeTopologySql = """SELECT * FROM "{0}".purge_topology()""";
+        public const string DbRemoveOrphanedMessages = """SELECT * FROM "{0}".remove_orphaned_messages(@row_limit)""";
         public const string DbReceiveSql = """SELECT * FROM "{0}".fetch_messages(@queue_name,@fetch_consumer_id,@fetch_lock_id,@lock_duration,@fetch_count)""";
 
         public const string DbReceivePartitionedSql =

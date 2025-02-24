@@ -42,7 +42,7 @@ public class SqlServerDbConnectionContext :
 
         Topology = hostConfiguration.Topology;
 
-        if(_hostSettings.MaintenanceEnabled)
+        if (_hostSettings.MaintenanceEnabled)
             supervisor.AddConsumeAgent(new MaintenanceAgent(this, hostConfiguration));
 
         _executor = new TaskExecutor(hostConfiguration.Settings.ConnectionLimit);
@@ -168,16 +168,17 @@ public class SqlServerDbConnectionContext :
 
             var processMetricsSql = $"{_context.Schema}.ProcessMetrics";
             var purgeTopologySql = $"{_context.Schema}.PurgeTopology";
+            var removeOrphanedMessagesSql = $"{_context.Schema}.RemoveOrphanedMessages";
 
             var random = new Random();
 
             var cleanupInterval = _hostConfiguration.Settings.QueueCleanupInterval
                 + TimeSpan.FromSeconds(random.Next(0, (int)(_hostConfiguration.Settings.QueueCleanupInterval.TotalSeconds / 10)));
 
+            DateTime? lastCleanup = null;
+
             while (!Stopping.IsCancellationRequested)
             {
-                DateTime? lastCleanup = null;
-
                 try
                 {
                     var maintenanceInterval = _hostConfiguration.Settings.MaintenanceInterval
@@ -212,6 +213,9 @@ public class SqlServerDbConnectionContext :
                             lastCleanup = DateTime.UtcNow;
                             cleanupInterval = _hostConfiguration.Settings.QueueCleanupInterval
                                 + TimeSpan.FromSeconds(random.Next(0, (int)(_hostConfiguration.Settings.QueueCleanupInterval.TotalSeconds / 10)));
+
+                            await _context.Query((x, t) => x.ExecuteScalarAsync<long?>(removeOrphanedMessagesSql,
+                                new { RowLimit = _hostConfiguration.Settings.MaintenanceBatchSize }, t), Stopping);
                         }
                     }, Stopping, Stopping);
                 }

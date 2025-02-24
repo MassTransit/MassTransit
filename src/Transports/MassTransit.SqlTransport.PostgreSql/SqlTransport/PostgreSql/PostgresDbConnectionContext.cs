@@ -52,7 +52,7 @@ namespace MassTransit.SqlTransport.PostgreSql
             _agent = new NotificationAgent(this, hostConfiguration);
             supervisor.AddConsumeAgent(_agent);
 
-            if(_hostSettings.MaintenanceEnabled)
+            if (_hostSettings.MaintenanceEnabled)
                 supervisor.AddConsumeAgent(new MaintenanceAgent(this, hostConfiguration));
 
             _executor = new TaskExecutor(hostConfiguration.Settings.ConnectionLimit);
@@ -295,16 +295,17 @@ namespace MassTransit.SqlTransport.PostgreSql
 
                 var processMetricsSql = string.Format(SqlStatements.DbProcessMetricsSql, _context.Schema);
                 var purgeTopologySql = string.Format(SqlStatements.DbPurgeTopologySql, _context.Schema);
+                var removeOrphanedMessagesSql = string.Format(SqlStatements.DbRemoveOrphanedMessages, _context.Schema);
 
                 var random = new Random();
 
                 var cleanupInterval = _hostConfiguration.Settings.QueueCleanupInterval
                     + TimeSpan.FromSeconds(random.Next(0, (int)(_hostConfiguration.Settings.QueueCleanupInterval.TotalSeconds / 10)));
 
+                DateTime? lastCleanup = null;
+
                 while (!Stopping.IsCancellationRequested)
                 {
-                    DateTime? lastCleanup = null;
-
                     try
                     {
                         var maintenanceInterval = _hostConfiguration.Settings.MaintenanceInterval
@@ -352,6 +353,9 @@ namespace MassTransit.SqlTransport.PostgreSql
                                 lastCleanup = DateTime.UtcNow;
                                 cleanupInterval = _hostConfiguration.Settings.QueueCleanupInterval
                                     + TimeSpan.FromSeconds(random.Next(0, (int)(_hostConfiguration.Settings.QueueCleanupInterval.TotalSeconds / 10)));
+
+                                await _context.Query((x, t) => x.ExecuteScalarAsync<long?>(removeOrphanedMessagesSql,
+                                    new { row_limit = _hostConfiguration.Settings.MaintenanceBatchSize }, t), Stopping);
                             }
                         }, Stopping, Stopping);
                     }
