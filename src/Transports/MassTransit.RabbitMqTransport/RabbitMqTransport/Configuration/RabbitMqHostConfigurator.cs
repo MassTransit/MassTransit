@@ -122,6 +122,11 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _settings.RequestedChannelMax = value;
         }
 
+        public void RequestedFrameMax(uint value)
+        {
+            _settings.RequestedFrameMax = value;
+        }
+
         public void RequestedConnectionTimeout(int milliseconds)
         {
             _settings.RequestedConnectionTimeout = TimeSpan.FromMilliseconds(milliseconds);

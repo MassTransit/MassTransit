@@ -66,6 +66,12 @@ namespace MassTransit
         void RequestedChannelMax(ushort value);
 
         /// <summary>
+        /// Set the request frame max for the connection
+        /// </summary>
+        /// <param name="value"></param>
+        void RequestedFrameMax(uint value);
+
+        /// <summary>
         /// The requested connection timeout, in milliseconds
         /// </summary>
         /// <param name="milliseconds"></param>

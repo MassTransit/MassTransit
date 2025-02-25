@@ -154,6 +154,11 @@
         ICredentialsProvider CredentialsProvider { get; }
 
         /// <summary>
+        /// The requested maximum frame size
+        /// </summary>
+        uint? RequestedFrameMax { get; }
+
+        /// <summary>
         /// Called prior to the connection factory being used to connect, so that any settings can be updated.
         /// Typically this would be the username/password in response to an expired token, etc.
         /// </summary>

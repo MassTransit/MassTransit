@@ -67,6 +67,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         public uint? MaxMessageSize { get; set; }
 
         public ICredentialsProvider? CredentialsProvider { get; set; }
+        public uint? RequestedFrameMax { get; set; }
 
         public Task Refresh(ConnectionFactory connectionFactory)
         {

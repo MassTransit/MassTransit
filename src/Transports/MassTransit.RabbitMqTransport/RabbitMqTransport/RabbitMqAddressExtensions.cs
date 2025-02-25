@@ -54,6 +54,8 @@ namespace MassTransit.RabbitMqTransport
 
             if (settings.MaxMessageSize.HasValue)
                 factory.MaxInboundMessageBodySize = settings.MaxMessageSize.Value;
+            if (settings.RequestedFrameMax.HasValue)
+                factory.RequestedFrameMax = settings.RequestedFrameMax.Value;
 
             if (settings.EndpointResolver != null)
             {
