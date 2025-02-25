@@ -4,6 +4,7 @@ namespace MassTransit.SqlTransport.SqlServer
     using System.Threading;
     using System.Threading.Tasks;
     using Dapper;
+    using Microsoft.Data.SqlClient;
     using Microsoft.Extensions.Logging;
 
 
@@ -1996,28 +1997,41 @@ END
 
             _logger.LogDebug("Role {Role} granted access to schema {Schema}", options.Role, options.Schema);
 
+            var currentUser = options.Username;
             if (string.IsNullOrWhiteSpace(options.Username))
-                throw new ArgumentException("The SQL transport migrator requires a valid Username, but Username was not specified", nameof(options));
+            {
+                var sqlBuilder = new SqlConnectionStringBuilder(connection.Connection.ConnectionString);
+                if (sqlBuilder.IntegratedSecurity)
+                {
+                    using SqlCommand command = new("SELECT ORIGINAL_LOGIN()", connection.Connection);
+                    currentUser = (await command.ExecuteScalarAsync())?.ToString();
+                }
+                else if (sqlBuilder.Authentication == SqlAuthenticationMethod.ActiveDirectoryManagedIdentity)
+                {
+                    using SqlCommand command = new("SELECT CURRENT_USER", connection.Connection);
+                    currentUser = (await command.ExecuteScalarAsync())?.ToString();
+                }
+            }
 
-            result = await connection.Connection.ExecuteScalarAsync<int?>(string.Format(RoleExistsSql, options.Username)).ConfigureAwait(false);
+            result = await connection.Connection.ExecuteScalarAsync<int?>(string.Format(RoleExistsSql, currentUser)).ConfigureAwait(false);
             if (!result.HasValue)
             {
                 result = await connection.Connection
-                    .ExecuteScalarAsync<int?>(string.Format(CreateUserSql, options.Schema, options.Username))
+                    .ExecuteScalarAsync<int?>(string.Format(CreateUserSql, options.Schema, currentUser))
                     .ConfigureAwait(false);
 
                 if (result is 1)
-                    _logger.LogDebug("User {Username} created", options.Username);
+                    _logger.LogDebug("User {Username} created", currentUser);
             }
 
-            result = await connection.Connection.ExecuteScalarAsync<int?>(string.Format(IsRoleMemberSql, options.Role, options.Username)).ConfigureAwait(false);
+            result = await connection.Connection.ExecuteScalarAsync<int?>(string.Format(IsRoleMemberSql, options.Role, currentUser)).ConfigureAwait(false);
             if (result is null or 0)
             {
                 await connection.Connection
-                    .ExecuteScalarAsync<int>(string.Format(AddRoleMemberSql, options.Database, options.Username, options.Role))
+                    .ExecuteScalarAsync<int>(string.Format(AddRoleMemberSql, options.Database, currentUser, options.Role))
                     .ConfigureAwait(false);
 
-                _logger.LogDebug("User {Username} added to role {Role}", options.Username, options.Role);
+                _logger.LogDebug("User {Username} added to role {Role}", currentUser, options.Role);
             }
         }
     }
