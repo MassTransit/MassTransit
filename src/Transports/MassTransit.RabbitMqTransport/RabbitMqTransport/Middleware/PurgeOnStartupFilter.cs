@@ -8,7 +8,7 @@ namespace MassTransit.RabbitMqTransport.Middleware
     /// Purges the queue on startup, only once per filter instance
     /// </summary>
     public class PurgeOnStartupFilter :
-        IFilter<ModelContext>
+        IFilter<ChannelContext>
     {
         readonly string _queueName;
         bool _queueAlreadyPurged;
@@ -23,7 +23,7 @@ namespace MassTransit.RabbitMqTransport.Middleware
             context.CreateFilterScope("purgeOnStartup");
         }
 
-        async Task IFilter<ModelContext>.Send(ModelContext context, IPipe<ModelContext> next)
+        async Task IFilter<ChannelContext>.Send(ChannelContext context, IPipe<ChannelContext> next)
         {
             var queueOk = await context.QueueDeclarePassive(_queueName).ConfigureAwait(false);
 
@@ -33,7 +33,7 @@ namespace MassTransit.RabbitMqTransport.Middleware
             await next.Send(context).ConfigureAwait(false);
         }
 
-        async Task PurgeIfRequested(ModelContext context, QueueDeclareOk queueOk, string queueName)
+        async Task PurgeIfRequested(ChannelContext context, QueueDeclareOk queueOk, string queueName)
         {
             if (!_queueAlreadyPurged)
             {

@@ -23,15 +23,14 @@ namespace MassTransit.JobService
             _jobPipe = jobPipe;
         }
 
-        public async Task Consume(ConsumeContext<StartJob> context)
+        public Task Consume(ConsumeContext<StartJob> context)
         {
             if (context.Message.JobTypeId != _jobTypeId)
-                return;
+                return Task.CompletedTask;
 
             var job = context.GetJob<TJob>() ?? throw new SerializationException($"The job could not be deserialized: {TypeCache<TJob>.ShortName}");
 
-            await _jobService.StartJob(context, job, _jobPipe, _options);
-            await context.Publish<JobStarted<TJob>>(context.Message);
+            return _jobService.StartJob(context, job, _jobPipe, _options);
         }
     }
 }

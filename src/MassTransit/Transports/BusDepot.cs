@@ -22,6 +22,9 @@ namespace MassTransit.Transports
 
         public Task Start(CancellationToken cancellationToken)
         {
+            if (_instances.Count == 0)
+                throw new ConfigurationException("No bus instances were found. Ensure that AddMassTransit() is used to configure the transport.");
+
             _logger.LogDebug("Starting bus instances: {Instances}", string.Join(", ", _instances.Keys.Select(x => x.Name)));
 
             return Task.WhenAll(_instances.Values.Select(x => x.BusControl.StartAsync(cancellationToken)));
@@ -29,6 +32,9 @@ namespace MassTransit.Transports
 
         public Task Stop(CancellationToken cancellationToken)
         {
+            if (_instances.Count == 0)
+                return Task.CompletedTask;
+
             _logger.LogDebug("Stopping bus instances: {Instances}", string.Join(", ", _instances.Keys.Select(x => x.Name)));
 
             return Task.WhenAll(_instances.Values.Select(x => x.BusControl.StopAsync(cancellationToken)));

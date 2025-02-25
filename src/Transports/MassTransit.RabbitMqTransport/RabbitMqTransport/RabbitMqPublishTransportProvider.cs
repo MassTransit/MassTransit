@@ -10,13 +10,13 @@ namespace MassTransit.RabbitMqTransport
         IPublishTransportProvider
     {
         readonly IConnectionContextSupervisor _connectionContextSupervisor;
-        readonly IModelContextSupervisor _supervisor;
+        readonly IChannelContextSupervisor _supervisor;
         readonly RabbitMqReceiveEndpointContext _receiveEndpointContext;
 
         public RabbitMqPublishTransportProvider(IConnectionContextSupervisor connectionContextSupervisor, RabbitMqReceiveEndpointContext receiveEndpointContext)
         {
             _connectionContextSupervisor = connectionContextSupervisor;
-            _supervisor = receiveEndpointContext.ModelContextSupervisor;
+            _supervisor = receiveEndpointContext.ChannelContextSupervisor;
             _receiveEndpointContext = receiveEndpointContext;
         }
 

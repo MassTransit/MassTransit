@@ -1,6 +1,5 @@
 ﻿namespace MassTransit
 {
-    using System.Threading.Tasks;
     using RabbitMqTransport;
 
 
@@ -12,13 +11,22 @@
         /// <param name="connector">The connector, typically the bus instance</param>
         /// <param name="timeout">The default request timeout</param>
         /// <returns></returns>
-        public static Task<IClientFactory> CreateReplyToClientFactory(this IReceiveConnector connector, RequestTimeout timeout = default)
+        public static IClientFactory CreateReplyToClientFactory(this IReceiveConnector connector, RequestTimeout timeout = default)
         {
             var endpointDefinition = new ReplyToEndpointDefinition(default, 1000);
 
             var receiveEndpointHandle = connector.ConnectReceiveEndpoint(endpointDefinition, KebabCaseEndpointNameFormatter.Instance);
 
             return receiveEndpointHandle.CreateClientFactory(timeout);
+        }
+
+        /// <summary>
+        /// Enables the RabbitMQ Reply-To response endpoint, which uses the AMQP reply-to header for replies without using the bus endpoint
+        /// </summary>
+        /// <param name="configurator"></param>
+        public static void SetRabbitMqReplyToRequestClientFactory(this IBusRegistrationConfigurator configurator)
+        {
+            configurator.SetRequestClientFactory((bus, timeout) => CreateReplyToClientFactory(bus, timeout));
         }
 
 
@@ -41,7 +49,7 @@
             public int? ConcurrentMessageLimit { get; }
             public bool ConfigureConsumeTopology => false;
 
-            public void Configure<T>(T configurator)
+            public void Configure<T>(T configurator, IRegistrationContext context)
                 where T : IReceiveEndpointConfigurator
             {
             }

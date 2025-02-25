@@ -20,7 +20,7 @@ namespace MassTransit.SqlTransport.Configuration
 
             LockDuration = TimeSpan.FromMinutes(1);
             MaxLockDuration = TimeSpan.FromHours(12);
-            MaxDeliveryCount = 10;
+            MaintenanceBatchSize = 100;
         }
 
         public long? QueueId { get; set; }
@@ -31,21 +31,17 @@ namespace MassTransit.SqlTransport.Configuration
 
         public int ConcurrentDeliveryLimit
         {
-            get => _concurrentDeliveryLimit;
-            set
+            get
             {
-                _concurrentDeliveryLimit = value;
-
-                ReceiveMode = ReceiveMode switch
+                return ReceiveMode switch
                 {
-                    SqlReceiveMode.Normal => ReceiveMode,
-                    SqlReceiveMode.Partitioned when _concurrentDeliveryLimit > 1 => SqlReceiveMode.PartitionedConcurrent,
-                    SqlReceiveMode.PartitionedOrdered when _concurrentDeliveryLimit > 1 => SqlReceiveMode.PartitionedOrderedConcurrent,
-                    SqlReceiveMode.PartitionedConcurrent when _concurrentDeliveryLimit == 1 => SqlReceiveMode.Partitioned,
-                    SqlReceiveMode.PartitionedOrderedConcurrent when _concurrentDeliveryLimit == 1 => SqlReceiveMode.PartitionedOrdered,
-                    _ => ReceiveMode
+                    SqlReceiveMode.Normal => 1,
+                    SqlReceiveMode.Partitioned => 1,
+                    SqlReceiveMode.PartitionedOrdered => 1,
+                    _ => _concurrentDeliveryLimit
                 };
             }
+            set => _concurrentDeliveryLimit = value;
         }
 
         public SqlReceiveMode ReceiveMode { get; set; }
@@ -54,8 +50,6 @@ namespace MassTransit.SqlTransport.Configuration
 
         public TimeSpan LockDuration { get; set; }
 
-        public int MaxDeliveryCount { get; set; }
-
         public TimeSpan PollingInterval { get; set; }
 
         public TimeSpan? UnlockDelay { get; set; }
@@ -63,6 +57,10 @@ namespace MassTransit.SqlTransport.Configuration
         public TimeSpan MaxLockDuration { get; set; }
 
         public string EntityName => QueueName;
+
+        public int MaintenanceBatchSize { get; set; }
+
+        public bool DeadLetterExpiredMessages { get; set; }
 
         public Uri GetInputAddress(Uri hostAddress)
         {

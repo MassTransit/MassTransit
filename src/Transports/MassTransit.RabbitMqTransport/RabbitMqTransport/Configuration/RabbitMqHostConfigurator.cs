@@ -69,16 +69,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _settings.CertificateValidationCallback = configurator.CertificateValidationCallback;
         }
 
-        public void ConfigureBatchPublish(Action<IRabbitMqBatchPublishConfigurator> configure)
-        {
-            _settings.ConfigureBatch(settings =>
-            {
-                var configurator = new RabbitMqBatchPublishConfigurator(settings);
-
-                configure?.Invoke(configurator);
-            });
-        }
-
         public void ContinuationTimeout(TimeSpan timeout)
         {
             _settings.ContinuationTimeout = timeout;
@@ -117,11 +107,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
         public ICredentialsProvider CredentialsProvider
         {
             set => _settings.CredentialsProvider = value;
-        }
-
-        public ICredentialsRefresher CredentialsRefresher
-        {
-            set => _settings.CredentialsRefresher = value;
         }
 
         public void UseCluster(Action<IRabbitMqClusterConfigurator> configureCluster)

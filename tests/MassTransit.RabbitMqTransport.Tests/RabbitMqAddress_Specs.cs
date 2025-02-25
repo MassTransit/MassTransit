@@ -2,6 +2,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
     using NUnit.Framework;
+    using RabbitMQ.Client;
 
 
     [TestFixture]
@@ -213,6 +214,14 @@ namespace MassTransit.RabbitMqTransport.Tests
     [TestFixture]
     public class Given_a_valid_endpoint_address
     {
+        [Test]
+        public void Should_be_valid_for_international_characters()
+        {
+            var hostAddress = new Uri("rabbitmq://localhost/test");
+
+            var address = new RabbitMqEndpointAddress(hostAddress, new Uri("rabbitmq://localhost/test/ßäöüÄÖÜ1234abc"));
+        }
+
         [Test]
         public void Should_return_a_valid_address_for_a_full_address()
         {
@@ -439,7 +448,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public void HighAvailabilityQueue()
         {
-            Assert.That(_receiveSettings.QueueArguments["x-message-ttl"], Is.EqualTo("30000"));
+            Assert.That(_receiveSettings.QueueArguments[Headers.XMessageTTL], Is.EqualTo("30000"));
         }
 
         [Test]

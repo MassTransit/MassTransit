@@ -47,10 +47,7 @@ namespace MassTransit
         public static IServiceCollection AddMassTransitTestHarness(this IServiceCollection services, TextWriter textWriter,
             Action<IBusRegistrationConfigurator>? configure = null)
         {
-            services.AddOptions<TextWriterLoggerOptions>();
-            services.TryAddSingleton<ILoggerFactory>(provider =>
-                new TextWriterLoggerFactory(textWriter, provider.GetRequiredService<IOptions<TextWriterLoggerOptions>>()));
-            services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
+            AddMassTransitTextWriterLogger(services, textWriter);
 
             services.AddOptions<TestHarnessOptions>();
             services.AddBusObserver<ContainerTestHarnessBusObserver>();
@@ -100,6 +97,21 @@ namespace MassTransit
                     });
                 }
             });
+        }
+
+        /// <summary>
+        /// Internally used by AddMassTransitTestHarness to add a console-based <see cref="ILogger"/> for unit testing
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="textWriter"></param>
+        public static IServiceCollection AddMassTransitTextWriterLogger(this IServiceCollection services, TextWriter? textWriter = null)
+        {
+            services.AddOptions<TextWriterLoggerOptions>();
+            services.TryAddSingleton<ILoggerFactory>(provider =>
+                new TextWriterLoggerFactory(textWriter ?? Console.Out, provider.GetRequiredService<IOptions<TextWriterLoggerOptions>>()));
+            services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
+
+            return services;
         }
 
         /// <summary>

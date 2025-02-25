@@ -161,7 +161,7 @@ namespace MassTransit.KafkaIntegration.Tests
         {
             public Task<byte[]> SerializeAsync(T data, SerializationContext context)
             {
-                return Task.FromResult(Array.Empty<byte>());
+                return Task.FromResult<byte[]>([]);
             }
         }
 

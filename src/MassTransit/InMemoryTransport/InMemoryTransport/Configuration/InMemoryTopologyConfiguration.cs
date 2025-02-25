@@ -20,6 +20,7 @@
 
             _sendTopology = new SendTopology();
             _sendTopology.ConnectSendTopologyConfigurationObserver(new DelegateSendTopologyConfigurationObserver(GlobalTopology.Send));
+            _sendTopology.TryAddConvention(new RoutingKeySendTopologyConvention());
 
             _publishTopology = new InMemoryPublishTopology(messageTopology);
             _publishTopology.ConnectPublishTopologyConfigurationObserver(new DelegatePublishTopologyConfigurationObserver(GlobalTopology.Publish));

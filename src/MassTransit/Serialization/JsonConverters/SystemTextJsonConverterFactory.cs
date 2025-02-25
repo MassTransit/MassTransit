@@ -6,10 +6,12 @@
     using System.Text.Json;
     using System.Text.Json.Serialization;
     using Batching;
+    using Contracts.JobService;
     using Courier.Contracts;
     using Courier.Messages;
     using Events;
     using Internals;
+    using JobService.Messages;
     using Metadata;
     using Scheduling;
 
@@ -23,6 +25,8 @@
         {
             { typeof(Fault<>), typeof(FaultEvent<>) },
             { typeof(Batch<>), typeof(MessageBatch<>) },
+            { typeof(SubmitJob<>), typeof(SubmitJobCommand<>) },
+            { typeof(JobCompleted<>), typeof(JobCompletedEvent<>) },
         };
 
         static SystemTextJsonConverterFactory()
@@ -53,7 +57,41 @@
                 .Add<RoutingSlipActivityCompensationFailed, RoutingSlipActivityCompensationFailedMessage>()
                 .Add<RoutingSlipCompensationFailed, RoutingSlipCompensationFailedMessage>()
                 .Add<RoutingSlipTerminated, RoutingSlipTerminatedMessage>()
-                .Add<RoutingSlipRevised, RoutingSlipRevisedMessage>();
+                .Add<RoutingSlipRevised, RoutingSlipRevisedMessage>()
+                .Add<RecurringJobSchedule, RecurringJobScheduleInfo>()
+                .Add<AllocateJobSlot, AllocateJobSlotCommand>()
+                .Add<CancelJob, CancelJobCommand>()
+                .Add<CancelJobAttempt, CancelJobAttemptCommand>()
+                .Add<CompleteJob, CompleteJobCommand>()
+                .Add<FaultJob, FaultJobCommand>()
+                .Add<FinalizeJob, FinalizeJobCommand>()
+                .Add<FinalizeJobAttempt, FinalizeJobAttemptCommand>()
+                .Add<GetJobAttemptStatus, GetJobAttemptStatusRequest>()
+                .Add<GetJobState, GetJobStateRequest>()
+                .Add<JobAttemptCanceled, JobAttemptCanceledEvent>()
+                .Add<JobAttemptCompleted, JobAttemptCompletedEvent>()
+                .Add<JobAttemptFaulted, JobAttemptFaultedEvent>()
+                .Add<JobAttemptStarted, JobAttemptStartedEvent>()
+                .Add<JobCanceled, JobCanceledEvent>()
+                .Add<JobCompleted, JobCompletedEvent>()
+                .Add<JobFaulted, JobFaultedEvent>()
+                .Add<JobRetryDelayElapsed, JobRetryDelayElapsedEvent>()
+                .Add<JobSlotAllocated, JobSlotAllocatedResponse>()
+                .Add<JobSlotReleased, JobSlotReleasedEvent>()
+                .Add<JobSlotUnavailable, JobSlotUnavailableResponse>()
+                .Add<JobSlotWaitElapsed, JobSlotWaitElapsedEvent>()
+                .Add<JobState, JobStateResponse>()
+                .Add<JobStarted, JobStartedEvent>()
+                .Add<JobStatusCheckRequested, JobStatusCheckRequestedEvent>()
+                .Add<JobSubmissionAccepted, JobSubmissionAcceptedResponse>()
+                .Add<JobSubmitted, JobSubmittedEvent>()
+                .Add<RetryJob, RetryJobCommand>()
+                .Add<RunJob, RunJobCommand>()
+                .Add<SaveJobState, SaveJobStateCommand>()
+                .Add<SetConcurrentJobLimit, SetConcurrentJobLimitCommand>()
+                .Add<SetJobProgress, SetJobProgressCommand>()
+                .Add<StartJob, StartJobCommand>()
+                .Add<StartJobAttempt, StartJobAttemptCommand>();
         }
 
         public override bool CanConvert(Type typeToConvert)

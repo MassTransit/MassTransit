@@ -266,7 +266,7 @@ namespace MassTransit
         /// the number of intervals provided
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="intervals">The intervals before each subsequent retry attempt</param>
+        /// <param name="intervals">The intervals in milliseconds before each subsequent retry attempt</param>
         /// <returns></returns>
         public static IRetryConfigurator Intervals(this IRetryConfigurator configurator, params int[] intervals)
         {
@@ -300,7 +300,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="retryCount">The number of retry attempts</param>
-        /// <param name="interval">The interval between each retry attempt</param>
+        /// <param name="interval">The interval in milliseconds between each retry attempt</param>
         /// <returns></returns>
         public static IRetryConfigurator Interval(this IRetryConfigurator configurator, int retryCount, int interval)
         {

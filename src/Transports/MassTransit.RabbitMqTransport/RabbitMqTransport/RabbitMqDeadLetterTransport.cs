@@ -17,7 +17,7 @@
 
         public Task Send(ReceiveContext context, string reason)
         {
-            void PreSend(IBasicProperties message, SendHeaders headers)
+            void PreSend(BasicProperties message, SendHeaders headers)
             {
                 headers.Set(MessageHeaders.Reason, reason ?? "Unspecified");
             }

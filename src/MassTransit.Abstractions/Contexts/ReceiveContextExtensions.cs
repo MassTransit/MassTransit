@@ -112,7 +112,7 @@ namespace MassTransit
             if (context.TransportHeaders.TryGetHeader(MessageHeaders.MessageType, out var value) && value is string text && !string.IsNullOrWhiteSpace(text))
                 return text.Split(';');
 
-            return Array.Empty<string>();
+            return [];
         }
 
         /// <summary>
@@ -227,7 +227,7 @@ namespace MassTransit
                     return text.Split(';');
             }
 
-            return Array.Empty<string>();
+            return [];
         }
 
         /// <summary>

@@ -94,6 +94,7 @@ namespace MassTransit.Tests.Testing
         public async Task Teardown()
         {
             await _harness.Stop();
+            _harness.Dispose();
         }
 
 

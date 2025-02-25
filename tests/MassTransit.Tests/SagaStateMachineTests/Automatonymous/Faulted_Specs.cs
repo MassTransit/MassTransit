@@ -20,7 +20,7 @@ namespace MassTransit.Tests.SagaStateMachineTests.Automatonymous
 
             Assert.That(async () => await _machine.RaiseEvent(_claim, _machine.Create, data), Throws.TypeOf<EventExecutionException>());
 
-            Assert.That(_claim.Value, Is.EqualTo(default));
+            Assert.That(_claim.Value, Is.EqualTo((string)default));
         }
 
         ClaimAdjustmentInstance _claim;

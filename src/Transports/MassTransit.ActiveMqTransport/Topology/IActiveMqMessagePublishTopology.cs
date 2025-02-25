@@ -19,7 +19,7 @@ namespace MassTransit
         /// <returns></returns>
         SendSettings GetSendSettings(Uri hostAddress);
 
-        BrokerTopology GetBrokerTopology(ActiveMqTransport.Topology.PublishBrokerTopologyOptions options = ActiveMqTransport.Topology.PublishBrokerTopologyOptions.MaintainHierarchy);
+        BrokerTopology GetBrokerTopology(PublishBrokerTopologyOptions options = PublishBrokerTopologyOptions.MaintainHierarchy);
     }
 
 

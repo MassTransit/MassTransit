@@ -20,7 +20,9 @@ namespace MassTransit.Tests
             await _received;
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<PingMessage>> _received;
+        #pragma warning restore NUnit1032
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
@@ -42,7 +44,9 @@ namespace MassTransit.Tests
             await _received;
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<PingMessage>> _received;
+        #pragma warning restore NUnit1032
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
@@ -70,7 +74,9 @@ namespace MassTransit.Tests
             });
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<PingMessage>> _received;
+        #pragma warning restore NUnit1032
         readonly Guid _requestId = NewId.NextGuid();
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -99,7 +105,9 @@ namespace MassTransit.Tests
             });
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<PingMessage>> _received;
+        #pragma warning restore NUnit1032
         readonly Guid _requestId = NewId.NextGuid();
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -124,7 +132,9 @@ namespace MassTransit.Tests
             Assert.That(consumeContext.RequestId, Is.EqualTo(_requestId));
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<PingMessage>> _received;
+        #pragma warning restore NUnit1032
         readonly Guid _requestId = NewId.NextGuid();
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -146,7 +156,9 @@ namespace MassTransit.Tests
             ConsumeContext<PingMessage> context = await _received;
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<PingMessage>> _received;
+        #pragma warning restore NUnit1032
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
@@ -173,7 +185,9 @@ namespace MassTransit.Tests
             });
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<PingMessage>> _received;
+        #pragma warning restore NUnit1032
         readonly Guid _requestId = NewId.NextGuid();
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

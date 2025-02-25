@@ -267,7 +267,7 @@ namespace MassTransit.Analyzers
                         continue;
                 }
 
-                if (type is object)
+                if (type is not null)
                 {
                     // Multiple visible types with the same metadata name are present
                     return null;
@@ -344,7 +344,7 @@ namespace MassTransit.Analyzers
             }
 
             return paths.Count == 0
-                ? Array.Empty<string>()
+                ? []
                 : paths.OrderBy(value => value.Count(c => c == '.')).ThenBy(value => value, StringComparer.Ordinal).ToArray();
 
             static string ComputeFullPath(string? prefix, ISymbol symbols)
@@ -370,7 +370,7 @@ namespace MassTransit.Analyzers
             {
                 // quickly skips some basic types that are known to not contain CancellationToken
                 if ((int)symbol.SpecialType >= 1 && (int)symbol.SpecialType <= 45)
-                    return Enumerable.Empty<ISymbol>();
+                    return [];
 
                 var result = new HashSet<ISymbol>(SymbolEqualityComparer.Default);
                 foreach (var member in GetPipeContextMembers(symbol, pipeContextSymbol))
@@ -394,7 +394,7 @@ namespace MassTransit.Analyzers
         static HashSet<ISymbol> GetPipeContextMembers(ITypeSymbol? symbol, ISymbol pipeContextSymbol)
         {
             if (symbol == null)
-                return new HashSet<ISymbol>(Array.Empty<ISymbol>(), SymbolEqualityComparer.Default);
+                return new HashSet<ISymbol>(SymbolEqualityComparer.Default);
 
             static bool Filter(ISymbol symbol)
             {
@@ -404,7 +404,7 @@ namespace MassTransit.Analyzers
             if (TryGetInterface(symbol, pipeContextSymbol, out var result) && result != null)
                 return new HashSet<ISymbol>(result.GetMembers().Where(Filter), SymbolEqualityComparer.Default);
 
-            return new HashSet<ISymbol>(Array.Empty<ISymbol>(), SymbolEqualityComparer.Default);
+            return new HashSet<ISymbol>(SymbolEqualityComparer.Default);
         }
 
 

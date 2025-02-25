@@ -5,6 +5,7 @@
     using Microsoft.Extensions.DependencyInjection;
     using Quartz;
     using Quartz.Impl;
+    using Quartz.Spi;
     using QuartzIntegration;
     using Scheduling;
     using Util;
@@ -50,7 +51,10 @@
             return configurator.UseInMemoryScheduler(options =>
             {
                 options.SchedulerFactory = schedulerFactory;
-                options.JobFactoryFactory = bus => new MassTransitJobFactory(bus);
+
+                IJobFactory OptionsJobFactoryFactory(IBus bus) => new MassTransitJobFactory(bus);
+
+                options.JobFactoryFactory = OptionsJobFactoryFactory;
                 options.QueueName = queueName;
             });
         }

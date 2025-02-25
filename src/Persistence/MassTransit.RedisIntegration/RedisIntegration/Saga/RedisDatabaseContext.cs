@@ -163,7 +163,7 @@ namespace MassTransit.RedisIntegration.Saga
                     throw new MassTransitException($"Unable to lock saga: {TypeCache<TSaga>.ShortName}({_key})");
                 }
 
-                return _options.RetryPolicy.Retry(LockAsync, cancellationToken);
+                return _options.RetryPolicy.Retry(LockAsync, false, cancellationToken);
             }
         }
     }

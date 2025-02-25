@@ -19,8 +19,13 @@ namespace MassTransit.SqlTransport.Middleware
     {
         readonly ClientContext _client;
         readonly SqlReceiveEndpointContext _context;
-        readonly IChannelExecutorPool<SqlTransportMessage> _executorPool;
+        readonly OrderedChannelExecutorPool _executorPool;
+        readonly object _lock = new();
         readonly ReceiveSettings _receiveSettings;
+        readonly TimeSpan? _touchQueueInterval;
+        CancellationTokenSource _cancellationTokenSource;
+        DateTime? _lastMaintenance;
+        DateTime? _lastTouched;
 
         /// <summary>
         /// The basic consumer receives messages pushed from the broker.
@@ -34,6 +39,9 @@ namespace MassTransit.SqlTransport.Middleware
             _context = context;
 
             _receiveSettings = client.GetPayload<ReceiveSettings>();
+
+            if (_receiveSettings.AutoDeleteOnIdle.HasValue)
+                _touchQueueInterval = new TimeSpan(_receiveSettings.AutoDeleteOnIdle.Value.Ticks / 2);
 
             _executorPool = new OrderedChannelExecutorPool(_receiveSettings);
 
@@ -86,19 +94,30 @@ namespace MassTransit.SqlTransport.Middleware
             if (IsStopping)
                 return;
 
-            var context =
-                new SqlReceiveContext(message, message.DeliveryCount > 0, _context, _receiveSettings, _client, _client.ConnectionContext, lockContext);
-            try
+            if (message.ExpirationTime.HasValue && message.ExpirationTime.Value < DateTime.UtcNow)
             {
-                await Dispatch(message.TransportMessageId, context, lockContext).ConfigureAwait(false);
+                if (_receiveSettings.DeadLetterExpiredMessages)
+                    await lockContext.Expired().ConfigureAwait(false);
+                else
+                    await lockContext.Complete().ConfigureAwait(false);
             }
-            catch (Exception exception)
+            else
             {
-                context.LogTransportFaulted(exception);
-            }
-            finally
-            {
-                context.Dispose();
+                var context = new SqlReceiveContext(message, _context, _receiveSettings, _client, _client.ConnectionContext, lockContext);
+                try
+                {
+                    await Dispatch(message.TransportMessageId, context, lockContext).ConfigureAwait(false);
+                }
+                catch (Exception exception)
+                {
+                    context.LogTransportFaulted(exception);
+                }
+                finally
+                {
+                    context.Dispose();
+                }
+
+                MessageHandled();
             }
         }
 
@@ -114,23 +133,78 @@ namespace MassTransit.SqlTransport.Middleware
 
                 try
                 {
-                    var delayTask = _receiveSettings.QueueId.HasValue
-                        ? _client.ConnectionContext.DelayUntilMessageReady(_receiveSettings.QueueId.Value, _receiveSettings.PollingInterval,
-                            cancellationToken)
-                        : Task.Delay(_receiveSettings.PollingInterval, cancellationToken);
+                    int? count = 0;
 
-                    await delayTask.ConfigureAwait(false);
+                    if (_lastMaintenance.HasValue == false || _lastMaintenance.Value + TimeSpan.FromSeconds(30) < DateTime.UtcNow)
+                    {
+                        count = await _client.DeadLetterQueue(_receiveSettings.QueueName, _receiveSettings.MaintenanceBatchSize).ConfigureAwait(false);
+
+                        if (count < _receiveSettings.MaintenanceBatchSize)
+                            _lastMaintenance = DateTime.UtcNow;
+                    }
+
+                    if (_touchQueueInterval.HasValue && count is null or 0)
+                    {
+                        if (_lastTouched.HasValue == false || _lastTouched.Value + _touchQueueInterval.Value < DateTime.UtcNow)
+                        {
+                            await _client.TouchQueue(_receiveSettings.EntityName).ConfigureAwait(false);
+
+                            _lastTouched = DateTime.UtcNow;
+                        }
+                    }
+                }
+                catch (ObjectDisposedException)
+                {
                 }
                 catch (OperationCanceledException)
                 {
                 }
+                catch (TimeoutException)
+                {
+                }
+
+
+                await WaitForPollingIntervalOrMessageHandled(cancellationToken).ConfigureAwait(false);
 
                 return messages;
             }
             catch (OperationCanceledException)
             {
-                return Array.Empty<SqlTransportMessage>();
+                return [];
             }
+        }
+
+        async Task WaitForPollingIntervalOrMessageHandled(CancellationToken cancellationToken)
+        {
+            lock (_lock)
+                _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+
+            try
+            {
+                var delayTask = _receiveSettings.QueueId.HasValue
+                    ? _client.ConnectionContext.DelayUntilMessageReady(_receiveSettings.QueueId.Value, _receiveSettings.PollingInterval,
+                        _cancellationTokenSource.Token)
+                    : Task.Delay(_receiveSettings.PollingInterval, _cancellationTokenSource.Token);
+
+                await delayTask.ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            finally
+            {
+                lock (_lock)
+                {
+                    _cancellationTokenSource.Dispose();
+                    _cancellationTokenSource = null;
+                }
+            }
+        }
+
+        public void MessageHandled()
+        {
+            lock (_lock)
+                _cancellationTokenSource?.Cancel();
         }
 
 
@@ -164,7 +238,7 @@ namespace MassTransit.SqlTransport.Middleware
             static byte[] PartitionKeyProvider(SqlTransportMessage message)
             {
                 return string.IsNullOrEmpty(message.PartitionKey)
-                    ? Array.Empty<byte>()
+                    ? []
                     : Encoding.UTF8.GetBytes(message.PartitionKey);
             }
         }

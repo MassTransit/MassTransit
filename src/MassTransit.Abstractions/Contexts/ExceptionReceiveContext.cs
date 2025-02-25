@@ -20,5 +20,10 @@ namespace MassTransit
         /// The exception info, suitable for inclusion in a fault message
         /// </summary>
         ExceptionInfo ExceptionInfo { get; }
+
+        /// <summary>
+        /// Additional headers added to the transport message when moved to the error queue
+        /// </summary>
+        SendHeaders ExceptionHeaders { get; }
     }
 }

@@ -4,6 +4,7 @@ namespace MassTransit.JobService
     using System.Runtime.Serialization;
     using System.Threading.Tasks;
     using Contracts.JobService;
+    using Messages;
 
 
     public class FinalizeJobConsumer<TJob> :
@@ -25,9 +26,16 @@ namespace MassTransit.JobService
             if (context.Message.JobTypeId != _jobTypeId)
                 return Task.CompletedTask;
 
-            _ = context.GetJob<TJob>() ?? throw new SerializationException($"The job could not be deserialized: {TypeCache<TJob>.ShortName}");
+            var job = context.GetJob<TJob>() ?? throw new SerializationException($"The job could not be deserialized: {TypeCache<TJob>.ShortName}");
 
-            return context.Publish<JobCompleted<TJob>>(context.Message);
+            return context.Publish<JobCompleted<TJob>>(new JobCompletedEvent<TJob>
+            {
+                JobId = context.Message.JobId,
+                Timestamp = context.Message.Timestamp,
+                Duration = context.Message.Duration,
+                Job = job,
+                Result = context.Message.Result,
+            });
         }
 
         public Task Consume(ConsumeContext<FaultJob> context)

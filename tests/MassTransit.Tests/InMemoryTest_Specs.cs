@@ -23,7 +23,9 @@
         {
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<A>> _receivedA;
+        #pragma warning restore NUnit1032
 
 
         class A
@@ -52,7 +54,9 @@
             await _receivedA;
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<A>> _receivedA;
+        #pragma warning restore NUnit1032
 
 
         class A
@@ -86,7 +90,9 @@
             await _receivedA;
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<A>> _receivedA;
+        #pragma warning restore NUnit1032
 
 
         class A

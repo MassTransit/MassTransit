@@ -215,9 +215,11 @@ namespace MassTransit.KafkaIntegration.Configuration
 
         KafkaReceiveEndpointContext<TKey, TValue> CreateReceiveKafkaEndpointContext()
         {
-            ConsumerBuilder<byte[], byte[]> CreateConsumerBuilder()
+            ConsumerBuilder<byte[], byte[]> CreateConsumerBuilder(int index)
             {
                 var consumerConfig = _hostConfiguration.GetConsumerConfig(_consumerConfig);
+                if (!string.IsNullOrWhiteSpace(consumerConfig.GroupInstanceId) && ConcurrentConsumerLimit > 1)
+                    consumerConfig.GroupInstanceId += $"{index:D2}";
 
                 ConsumerBuilder<byte[], byte[]> consumerBuilder = new ConsumerBuilder<byte[], byte[]>(consumerConfig)
                     .SetLogHandler((c, message) => _busInstance.HostConfiguration.ReceiveLogContext?.Debug?.Log(message.Message));
@@ -232,8 +234,9 @@ namespace MassTransit.KafkaIntegration.Configuration
                 return consumerBuilder;
             }
 
-            var builder = new KafkaReceiveEndpointBuilder<TKey, TValue>(_busInstance, _hostConfiguration, _consumerConfig.GroupId, this,
-                this, _headersDeserializer, _keyDeserializer, _valueDeserializer, CreateConsumerBuilder);
+            var builder = new KafkaReceiveEndpointBuilder<TKey, TValue>(_busInstance, _hostConfiguration, _consumerConfig.GroupId, this, this,
+                _headersDeserializer, _keyDeserializer, _valueDeserializer, CreateConsumerBuilder);
+
             ApplySpecifications(builder);
 
             return builder.CreateReceiveEndpointContext();

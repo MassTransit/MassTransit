@@ -24,6 +24,8 @@ namespace MassTransit.Configuration
         {
             configurator.UseMessageRetry(r => r.Intervals(100, 500, 1000, 1000, 2000, 2000, 5000, 5000));
 
+            configurator.UseMessageScope(context);
+
             configurator.UseInMemoryOutbox(context);
 
             if (_options.ConcurrentMessageLimit.HasValue)
@@ -33,6 +35,8 @@ namespace MassTransit.Configuration
                 var partition = new Partitioner(_options.ConcurrentMessageLimit.Value, new Murmur3UnsafeHashGenerator());
 
                 configurator.UsePartitioner<StartJobAttempt>(partition, p => p.Message.AttemptId);
+                configurator.UsePartitioner<FinalizeJobAttempt>(partition, p => p.Message.AttemptId);
+                configurator.UsePartitioner<CancelJobAttempt>(partition, p => p.Message.AttemptId);
                 configurator.UsePartitioner<Fault<StartJob>>(partition, p => p.Message.Message.AttemptId);
 
                 configurator.UsePartitioner<JobAttemptStarted>(partition, p => p.Message.AttemptId);
@@ -48,7 +52,7 @@ namespace MassTransit.Configuration
 
             _setOptions.JobAttemptSagaEndpointAddress = configurator.InputAddress;
 
-            if (context.GetRequiredService<IContainerSelector>().TryGetValue(context, typeof(JobService), out IJobServiceRegistration registration))
+            if (context.GetRequiredService<IContainerSelector>().TryGetRegistration(context, typeof(JobService), out IJobServiceRegistration registration))
                 registration.AddReceiveEndpointDependency(configurator);
         }
     }

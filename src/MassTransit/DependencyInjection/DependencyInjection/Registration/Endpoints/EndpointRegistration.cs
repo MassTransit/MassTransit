@@ -2,7 +2,6 @@ namespace MassTransit.DependencyInjection.Registration
 {
     using System;
     using Configuration;
-    using Microsoft.Extensions.DependencyInjection;
 
 
     public class EndpointRegistration<T> :
@@ -10,10 +9,12 @@ namespace MassTransit.DependencyInjection.Registration
         where T : class
     {
         readonly IRegistration _registration;
+        readonly IContainerSelector _selector;
 
-        public EndpointRegistration(IRegistration registration)
+        public EndpointRegistration(IRegistration registration, IContainerSelector selector)
         {
             _registration = registration;
+            _selector = selector;
         }
 
         public Type Type => typeof(T);
@@ -26,7 +27,8 @@ namespace MassTransit.DependencyInjection.Registration
 
         public IEndpointDefinition GetDefinition(IServiceProvider provider)
         {
-            return provider.GetRequiredService<IEndpointDefinition<T>>();
+            return _selector.GetEndpointDefinition<T>(provider)
+                ?? throw new ConfigurationException($"Endpoint definition not found: {TypeCache<T>.ShortName}");
         }
     }
 }

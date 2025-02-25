@@ -10,7 +10,6 @@ namespace MassTransit.Serialization
     using Initializers;
     using Initializers.TypeConverters;
     using JsonConverters;
-    using Metadata;
 
 
     public class SystemTextJsonMessageSerializer :
@@ -86,7 +85,7 @@ namespace MassTransit.Serialization
 
                 var messageContext = new EnvelopeMessageContext(envelope, this);
 
-                var messageTypes = envelope.MessageType ?? Array.Empty<string>();
+                var messageTypes = envelope.MessageType ?? [];
 
                 return new SystemTextJsonSerializerContext(this, Options, ContentType, messageContext, messageTypes, envelope);
             }
@@ -126,16 +125,16 @@ namespace MassTransit.Serialization
                     && typeConverter.TryConvert(text, out var result):
                     return result;
                 case string text:
-                    return GetObject<T>(JsonSerializer.Deserialize<JsonElement>(text, Options));
+                    return JsonSerializer.Deserialize<JsonElement>(text, Options).GetObject<T>(Options);
                 case JsonElement jsonElement:
-                    return GetObject<T>(jsonElement);
+                    return jsonElement.GetObject<T>(Options);
             }
 
             var element = JsonSerializer.SerializeToElement(value, Options);
 
             return element.ValueKind == JsonValueKind.Null
                 ? defaultValue
-                : GetObject<T>(element);
+                : element.GetObject<T>(Options);
         }
 
         public T? DeserializeObject<T>(object? value, T? defaultValue = null)
@@ -171,20 +170,6 @@ namespace MassTransit.Serialization
                 return new EmptyMessageBody();
 
             return new SystemTextJsonObjectMessageBody(value, Options);
-        }
-
-        static T? GetObject<T>(JsonElement jsonElement)
-            where T : class
-        {
-            if (typeof(T).IsInterface && MessageTypeCache<T>.IsValidMessageType)
-            {
-                var messageType = TypeMetadataCache<T>.ImplementationType;
-
-                if (jsonElement.Deserialize(messageType, Options) is T obj)
-                    return obj;
-            }
-
-            return jsonElement.Deserialize<T>(Options);
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿namespace MassTransit.AzureServiceBusTransport
 {
-    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Azure.Messaging.ServiceBus;
     using Transports;
@@ -17,9 +16,9 @@
 
         public Task Send(ReceiveContext context, string reason)
         {
-            void PreSend(ServiceBusMessage message, IDictionary<string, object> headers)
+            void PreSend(ServiceBusMessage message, SendHeaders headers)
             {
-                headers.Set(new HeaderValue(MessageHeaders.Reason, reason ?? "Unspecified"));
+                headers.Set(MessageHeaders.Reason, reason ?? "Unspecified");
             }
 
             return Move(context, PreSend);

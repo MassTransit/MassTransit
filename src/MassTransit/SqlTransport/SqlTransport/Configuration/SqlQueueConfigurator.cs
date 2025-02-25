@@ -16,6 +16,8 @@ namespace MassTransit.SqlTransport.Configuration
 
         public TimeSpan? AutoDeleteOnIdle { get; set; }
 
+        public int? MaxDeliveryCount { get; set; }
+
         public string QueueName { get; set; }
 
         protected SqlEndpointAddress GetEndpointAddress(Uri hostAddress)

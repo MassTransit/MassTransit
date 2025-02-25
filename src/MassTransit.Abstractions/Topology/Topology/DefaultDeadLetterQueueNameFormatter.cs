@@ -9,7 +9,7 @@ namespace MassTransit.Topology
 
         public string FormatDeadLetterQueueName(string queueName)
         {
-            return queueName += DeadLetterQueueSuffix;
+            return queueName + DeadLetterQueueSuffix;
         }
     }
 }

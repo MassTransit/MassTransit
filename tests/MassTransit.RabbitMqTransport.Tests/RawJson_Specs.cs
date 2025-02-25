@@ -8,6 +8,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System.Threading.Tasks;
     using Initializers;
     using NUnit.Framework;
+    using RabbitMQ.Client;
     using Serialization;
     using TestFramework.Messages;
 
@@ -28,7 +29,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             var body = JsonSerializer.SerializeToUtf8Bytes(message, SystemTextJsonMessageSerializer.Options);
 
-            SendRawMessage(body);
+            await SendRawMessage(body);
 
             ConsumeContext<RawContract> received = await _receivedA;
 
@@ -50,25 +51,25 @@ namespace MassTransit.RabbitMqTransport.Tests
             _receivedA = Handled<RawContract>(configurator);
         }
 
-        void SendRawMessage(byte[] body)
+        async Task SendRawMessage(byte[] body)
         {
             try
             {
-                TestContext.Out.WriteLine(Encoding.UTF8.GetString(body));
+                await TestContext.Out.WriteLineAsync(Encoding.UTF8.GetString(body));
 
                 var settings = GetHostSettings();
                 var connectionFactory = settings.GetConnectionFactory();
 
-                using var connection = settings.EndpointResolver != null
-                    ? connectionFactory.CreateConnection(settings.EndpointResolver, settings.Host)
-                    : connectionFactory.CreateConnection();
+                await using var connection = settings.EndpointResolver != null
+                    ? await connectionFactory.CreateConnectionAsync(settings.EndpointResolver, settings.Host)
+                    : await connectionFactory.CreateConnectionAsync();
 
-                using var model = connection.CreateModel();
+                await using var channel = await connection.CreateChannelAsync();
 
-                var properties = model.CreateBasicProperties();
+                var properties = new BasicProperties();
                 properties.SetHeader(MessageHeaders.MessageId, "Whiskey-Tango-Foxtrot 3-5-9er");
 
-                model.BasicPublish(RabbitMqTestHarness.InputQueueName, "", false, properties, body);
+                await channel.BasicPublishAsync(RabbitMqTestHarness.InputQueueName, "", false, properties, body);
             }
             catch (Exception exception)
             {
@@ -105,7 +106,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             var body = ms.ToArray();
 
-            SendRawMessage(body);
+            await SendRawMessage(body);
 
             ConsumeContext<RawContract> received = await _receivedA;
 
@@ -127,25 +128,25 @@ namespace MassTransit.RabbitMqTransport.Tests
             _receivedA = Handled<RawContract>(configurator);
         }
 
-        void SendRawMessage(byte[] body)
+        async Task SendRawMessage(byte[] body)
         {
             try
             {
-                TestContext.Out.WriteLine(Encoding.UTF8.GetString(body));
+                await TestContext.Out.WriteLineAsync(Encoding.UTF8.GetString(body));
 
                 var settings = GetHostSettings();
                 var connectionFactory = settings.GetConnectionFactory();
 
-                using var connection = settings.EndpointResolver != null
-                    ? connectionFactory.CreateConnection(settings.EndpointResolver, settings.Host)
-                    : connectionFactory.CreateConnection();
+                await using var connection = settings.EndpointResolver != null
+                    ? await connectionFactory.CreateConnectionAsync(settings.EndpointResolver, settings.Host)
+                    : await connectionFactory.CreateConnectionAsync();
 
-                using var model = connection.CreateModel();
+                await using var channel = await connection.CreateChannelAsync();
 
-                var properties = model.CreateBasicProperties();
+                var properties = new BasicProperties();
                 properties.SetHeader(MessageHeaders.MessageId, "Whiskey-Tango-Foxtrot 3-5-9er");
 
-                model.BasicPublish(RabbitMqTestHarness.InputQueueName, "", false, properties, body);
+                await channel.BasicPublishAsync(RabbitMqTestHarness.InputQueueName, "", false, properties, body);
             }
             catch (Exception exception)
             {
@@ -267,7 +268,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
                 Assert.That(context.Message.CorrelationId, Is.EqualTo(message.CommandId));
 
-                Assert.That(context.Headers.Get<string>(headerName), Is.EqualTo(default));
+                Assert.That(context.Headers.Get<string>(headerName), Is.EqualTo((string)default));
             });
         }
 

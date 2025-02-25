@@ -41,9 +41,11 @@ namespace MassTransit.Tests.Courier
             TestTimeout = TimeSpan.FromSeconds(5);
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
         Task<ConsumeContext<RoutingSlipFaulted>> _faulted;
+        #pragma warning restore NUnit1032
         Guid _trackingNumber;
         readonly IMessageDataRepository _repository = new InMemoryMessageDataRepository();
 

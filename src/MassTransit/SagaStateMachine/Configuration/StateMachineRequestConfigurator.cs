@@ -29,6 +29,7 @@ namespace MassTransit.Configuration
 
         public Uri ServiceAddress { get; set; }
         public TimeSpan Timeout { get; set; }
+        public bool ClearRequestIdOnFaulted { get; set; }
         public TimeSpan? TimeToLive { get; set; }
 
         public Action<IEventCorrelationConfigurator<TInstance, TResponse>> Completed { get; set; }

@@ -1,8 +1,7 @@
 namespace MassTransit.SqlTransport.PostgreSql
 {
     using Configuration;
-    using MassTransit.SqlTransport;
-    using MassTransit.Transports;
+    using Transports;
 
 
     public class PostgresConnectionContextFactory :

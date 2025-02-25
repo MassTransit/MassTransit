@@ -1,6 +1,5 @@
 namespace MassTransit.Tests.ContainerTests
 {
-    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Context;
@@ -66,7 +65,7 @@ namespace MassTransit.Tests.ContainerTests
         {
             var sendContext = new MessageSendContext<T>(obj);
 
-            var bytes = Array.Empty<byte>();
+            byte[] bytes = [];
 
             var headers = new Dictionary<string, object>
             {

@@ -10,7 +10,7 @@ namespace MassTransit.Configuration
         public static IJobServiceRegistration RegisterJobService(this IServiceCollection collection, IContainerRegistrar registrar)
         {
             collection.AddOptions<JobConsumerOptions>();
-            return registrar.GetOrAdd<IJobServiceRegistration>(typeof(JobService), _ => new JobServiceRegistration());
+            return registrar.GetOrAddRegistration<IJobServiceRegistration>(typeof(JobService), _ => new JobServiceRegistration());
         }
     }
 }

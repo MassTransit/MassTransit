@@ -1,6 +1,5 @@
 namespace MassTransit
 {
-    using System;
     using System.IO;
 
 
@@ -18,7 +17,7 @@ namespace MassTransit
 
         public byte[] GetBytes()
         {
-            return Array.Empty<byte>();
+            return [];
         }
 
         public string GetString()

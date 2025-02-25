@@ -24,7 +24,9 @@
             Assert.That(responseContext.SourceAddress, Is.EqualTo(InputQueueAddress));
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<PingMessage>> _handled;
+        #pragma warning restore NUnit1032
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {

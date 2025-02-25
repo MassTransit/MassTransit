@@ -57,9 +57,9 @@ namespace MassTransit.SqlTransport.Topology
                 return _builder.CreateTopicSubscription(source, destination, subscriptionType, routingKey);
             }
 
-            public QueueHandle CreateQueue(string name, TimeSpan? autoDeleteOnIdle)
+            public QueueHandle CreateQueue(string name, TimeSpan? autoDeleteOnIdle, int? maxDeliveryCount = null)
             {
-                return _builder.CreateQueue(name, autoDeleteOnIdle);
+                return _builder.CreateQueue(name, autoDeleteOnIdle, maxDeliveryCount);
             }
 
             public QueueSubscriptionHandle CreateQueueSubscription(TopicHandle topic, QueueHandle queue, SqlSubscriptionType subscriptionType,

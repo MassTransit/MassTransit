@@ -40,8 +40,9 @@ namespace MassTransit
         /// Configure the endpoint, as provided by the transport-specific receive endpoint configurator
         /// </summary>
         /// <param name="configurator"></param>
+        /// <param name="context"></param>
         /// <typeparam name="T"></typeparam>
-        void Configure<T>(T configurator)
+        void Configure<T>(T configurator, IRegistrationContext? context = null)
             where T : IReceiveEndpointConfigurator;
     }
 

@@ -1,0 +1,3 @@
+namespace MassTransit;
+
+public delegate void ActiveMqConfigureEndpointsCallback(IRegistrationContext context, string queueName, IActiveMqReceiveEndpointConfigurator configurator);

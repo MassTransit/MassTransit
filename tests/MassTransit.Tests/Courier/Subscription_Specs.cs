@@ -94,14 +94,15 @@
             Assert.That(loaded.Subscriptions[0].Events, Is.EqualTo(RoutingSlipEvents.Completed | RoutingSlipEvents.Faulted));
         }
 
-        Task<ConsumeContext<RoutingSlipCompleted>> _completed;
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
+        #pragma warning restore NUnit1032
         Guid _trackingNumber;
 
         [OneTimeSetUp]
         public async Task Should_publish_the_completed_event()
         {
-            _completed = SubscribeHandler<RoutingSlipCompleted>();
+            _ = SubscribeHandler<RoutingSlipCompleted>();
             _activityCompleted = SubscribeHandler<RoutingSlipActivityCompleted>();
 
             _trackingNumber = NewId.NextGuid();

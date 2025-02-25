@@ -57,6 +57,16 @@ namespace MassTransit.SqlTransport
         Task<IEnumerable<SqlTransportMessage>> ReceiveMessages(string queueName, SqlReceiveMode mode, int messageLimit, int concurrentCount,
             TimeSpan lockDuration);
 
+        Task TouchQueue(string queueName);
+
+        /// <summary>
+        /// Move any messages that have either expired or exceeded their delivery count to the dead-letter queue
+        /// </summary>
+        /// <param name="queueName"></param>
+        /// <param name="messageCount"></param>
+        /// <returns></returns>
+        Task<int?> DeadLetterQueue(string queueName, int messageCount);
+
         Task<bool> DeleteMessage(Guid lockId, long messageDeliveryId);
         Task<bool> DeleteScheduledMessage(Guid tokenId, CancellationToken cancellationToken);
         Task<bool> MoveMessage(Guid lockId, long messageDeliveryId, string queueName, SqlQueueType queueType, SendHeaders sendHeaders);

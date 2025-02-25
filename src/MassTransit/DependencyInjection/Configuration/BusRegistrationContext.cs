@@ -39,19 +39,19 @@ namespace MassTransit.Configuration
             var registrationFilter = builder.Filter;
 
             List<IGrouping<string, IConsumerDefinition>> consumersByEndpoint = Selector.GetRegistrations<IConsumerRegistration>(this)
-                .Where(x => x.IncludeInConfigureEndpoints && registrationFilter.Matches(x))
+                .Where(x => x.IncludeInConfigureEndpoints && !WasConfigured(x.Type) && registrationFilter.Matches(x))
                 .Select(x => x.GetDefinition(this))
                 .GroupBy(x => x.GetEndpointName(endpointNameFormatter))
                 .ToList();
 
             List<IGrouping<string, ISagaDefinition>> sagasByEndpoint = Selector.GetRegistrations<ISagaRegistration>(this)
-                .Where(x => x.IncludeInConfigureEndpoints && registrationFilter.Matches(x))
+                .Where(x => x.IncludeInConfigureEndpoints && !WasConfigured(x.Type) && registrationFilter.Matches(x))
                 .Select(x => x.GetDefinition(this))
                 .GroupBy(x => x.GetEndpointName(endpointNameFormatter))
                 .ToList();
 
             List<IActivityDefinition> activities = Selector.GetRegistrations<IActivityRegistration>(this)
-                .Where(x => x.IncludeInConfigureEndpoints && registrationFilter.Matches(x))
+                .Where(x => x.IncludeInConfigureEndpoints && !WasConfigured(x.Type) && registrationFilter.Matches(x))
                 .Select(x => x.GetDefinition(this))
                 .ToList();
 
@@ -64,19 +64,19 @@ namespace MassTransit.Configuration
                 .ToList();
 
             List<IGrouping<string, IExecuteActivityDefinition>> executeActivitiesByEndpoint = Selector.GetRegistrations<IExecuteActivityRegistration>(this)
-                .Where(x => x.IncludeInConfigureEndpoints && registrationFilter.Matches(x))
+                .Where(x => x.IncludeInConfigureEndpoints && !WasConfigured(x.Type) && registrationFilter.Matches(x))
                 .Select(x => x.GetDefinition(this))
                 .GroupBy(x => x.GetExecuteEndpointName(endpointNameFormatter))
                 .ToList();
 
             List<IGrouping<string, IFutureDefinition>> futuresByEndpoint = Selector.GetRegistrations<IFutureRegistration>(this)
-                .Where(x => x.IncludeInConfigureEndpoints && registrationFilter.Matches(x))
+                .Where(x => x.IncludeInConfigureEndpoints && !WasConfigured(x.Type) && registrationFilter.Matches(x))
                 .Select(x => x.GetDefinition(this))
                 .GroupBy(x => x.GetEndpointName(endpointNameFormatter))
                 .ToList();
 
             var endpointsWithName = Selector.GetRegistrations<IEndpointRegistration>(this)
-                .Where(x => x.IncludeInConfigureEndpoints && registrationFilter.Matches(x))
+                .Where(x => x.IncludeInConfigureEndpoints && !WasConfigured(x.Type) && registrationFilter.Matches(x))
                 .Select(x => x.GetDefinition(this))
                 .Select(x => new
                 {
@@ -86,7 +86,7 @@ namespace MassTransit.Configuration
                 .GroupBy(x => x.Name, (name, values) => new
                 {
                     Name = name,
-                    Definition = values.Select(x => x.Definition).Combine()
+                    Definition = values.Select(x => x.Definition).Combine(this)
                 })
                 .ToList();
 
@@ -117,11 +117,11 @@ namespace MassTransit.Configuration
                 from f in fs.DefaultIfEmpty()
                 join ep in endpointsWithName on e equals ep.Name into eps
                 from ep in eps.Select(x => x.Definition)
-                    .DefaultIfEmpty(c?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x, x.EndpointDefinition)).Combine()
-                        ?? s?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x, x.EndpointDefinition)).Combine()
-                        ?? a?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x, x.ExecuteEndpointDefinition)).Combine()
-                        ?? ea?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x, x.ExecuteEndpointDefinition)).Combine()
-                        ?? f?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x, x.EndpointDefinition)).Combine()
+                    .DefaultIfEmpty(c?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x, x.EndpointDefinition)).Combine(this)
+                        ?? s?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x, x.EndpointDefinition)).Combine(this)
+                        ?? a?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x, x.ExecuteEndpointDefinition)).Combine(this)
+                        ?? ea?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x, x.ExecuteEndpointDefinition)).Combine(this)
+                        ?? f?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x, x.EndpointDefinition)).Combine(this)
                         ?? new NamedEndpointDefinition(e))
                 select new Endpoint(ep, c, s, a, ea, f)).ToList();
 
@@ -131,7 +131,9 @@ namespace MassTransit.Configuration
                 var registration = Selector.GetRegistrations<IJobServiceRegistration>(this).SingleOrDefault();
                 registration ??= new JobServiceRegistration();
 
-                configurator.ReceiveEndpoint(registration.EndpointDefinition, endpointNameFormatter, endpointConfigurator =>
+                var endpointDefinition = new RegistrationContextEndpointDefinition(registration.EndpointDefinition, this);
+
+                configurator.ReceiveEndpoint(endpointDefinition, endpointNameFormatter, endpointConfigurator =>
                 {
                     var options = new ServiceInstanceOptions().SetEndpointNameFormatter(endpointNameFormatter);
 
@@ -169,9 +171,11 @@ namespace MassTransit.Configuration
                     ? instanceConfigurator
                     : configurator;
 
-                useConfigurator.ReceiveEndpoint(endpoint.Definition, endpointNameFormatter, cfg =>
+                var endpointDefinition = new RegistrationContextEndpointDefinition(endpoint.Definition, this);
+
+                useConfigurator.ReceiveEndpoint(endpointDefinition, endpointNameFormatter, cfg =>
                 {
-                    configureReceiveEndpoint.Configure(endpoint.Definition.GetEndpointName(endpointNameFormatter), cfg);
+                    configureReceiveEndpoint.Configure(endpointDefinition.GetEndpointName(endpointNameFormatter), cfg);
 
                     foreach (var consumer in endpoint.Consumers)
                         ConfigureConsumer(consumer.ConsumerType, cfg);
@@ -186,6 +190,7 @@ namespace MassTransit.Configuration
                         var compensateDefinition = activity.CompensateEndpointDefinition ?? getEndpointDefinitionByName(compensateEndpointName);
                         if (compensateDefinition != null)
                         {
+                            compensateDefinition = new RegistrationContextEndpointDefinition(compensateDefinition, this);
                             configurator.ReceiveEndpoint(compensateDefinition, endpointNameFormatter, compensateEndpointConfigurator =>
                             {
                                 configureReceiveEndpoint.Configure(compensateDefinition.GetEndpointName(endpointNameFormatter),

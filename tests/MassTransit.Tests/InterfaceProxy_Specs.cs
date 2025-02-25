@@ -51,7 +51,9 @@
         const int IntValue = 42;
         const string StringValue = "Hello";
         readonly Guid _correlationId = Guid.NewGuid();
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<IProxyMe>> _handler;
+        #pragma warning restore NUnit1032
         const string UriString = "http://localhost/";
 
         [OneTimeSetUp]

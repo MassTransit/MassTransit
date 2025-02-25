@@ -47,14 +47,13 @@ namespace MassTransit.Configuration
                 yield return this.Failure("Expiration", "If specified, must be > 30 seconds");
         }
 
-        public void Register<T>(ISagaRepositoryRegistrationConfigurator<T> configurator)
-            where T : class, ISagaVersion
+        public void Register(ISagaRepositoryRegistrationConfigurator<TSaga> configurator)
         {
             configurator.TryAddSingleton(_contextFactory);
-            configurator.TryAddSingleton(new DynamoDbSagaRepositoryOptions<T>(TableName, Expiration));
-            configurator.RegisterLoadSagaRepository<T, DynamoDbSagaRepositoryContextFactory<T>>();
-            configurator
-                .RegisterSagaRepository<T, DatabaseContext<T>, SagaConsumeContextFactory<DatabaseContext<T>, T>, DynamoDbSagaRepositoryContextFactory<T>>();
+            configurator.TryAddSingleton(new DynamoDbSagaRepositoryOptions<TSaga>(TableName, Expiration));
+            configurator.RegisterLoadSagaRepository<TSaga, DynamoDbSagaRepositoryContextFactory<TSaga>>();
+            configurator.RegisterSagaRepository<TSaga, DatabaseContext<TSaga>, SagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga>,
+                DynamoDbSagaRepositoryContextFactory<TSaga>>();
         }
     }
 }

@@ -1,9 +1,13 @@
 namespace MassTransit
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using Configuration;
     using Contracts.JobService;
+    using Internals;
+    using JobService.Messages;
+    using JobService.Scheduling;
 
 
     public sealed class JobStateMachine :
@@ -15,44 +19,24 @@ namespace MassTransit
 
             Event(() => JobSlotAllocated, x =>
             {
-                x.CorrelateById(m => m.Message.JobId);
                 x.ConfigureConsumeTopology = false;
             });
             Event(() => JobSlotUnavailable, x =>
             {
-                x.CorrelateById(m => m.Message.JobId);
                 x.ConfigureConsumeTopology = false;
             });
             Event(() => AllocateJobSlotFaulted, x =>
             {
-                x.CorrelateById(m => m.Message.Message.JobId);
                 x.ConfigureConsumeTopology = false;
             });
 
-            Event(() => JobAttemptCreated, x =>
-            {
-                x.CorrelateById(m => m.Message.JobId);
-                x.ConfigureConsumeTopology = false;
-            });
             Event(() => StartJobAttemptFaulted, x =>
             {
-                x.CorrelateById(m => m.Message.Message.JobId);
                 x.ConfigureConsumeTopology = false;
             });
-
-            Event(() => AttemptCanceled, x => x.CorrelateById(m => m.Message.JobId));
-            Event(() => AttemptCompleted, x => x.CorrelateById(m => m.Message.JobId));
-            Event(() => AttemptFaulted, x => x.CorrelateById(m => m.Message.JobId));
-            Event(() => AttemptStarted, x => x.CorrelateById(m => m.Message.JobId));
-
-            Event(() => JobCompleted, x => x.CorrelateById(m => m.Message.JobId));
-
-            Event(() => CancelJob, x => x.CorrelateById(m => m.Message.JobId));
-            Event(() => RetryJob, x => x.CorrelateById(m => m.Message.JobId));
 
             Event(() => GetJobState, x =>
             {
-                x.CorrelateById(m => m.Message.JobId);
                 x.ReadOnly = true;
                 x.OnMissingInstance(i => i.ExecuteAsync(context => context.RespondAsync<JobState>(new
                 {
@@ -81,12 +65,26 @@ namespace MassTransit
             });
 
             InstanceState(x => x.CurrentState, Submitted, WaitingToStart, WaitingForSlot, Started, Completed, Faulted, Canceled, StartingJobAttempt,
-                AllocatingJobSlot, WaitingToRetry);
+                AllocatingJobSlot, WaitingToRetry, CancellationPending);
 
             Initially(
                 When(JobSubmitted)
                     .InitializeJob()
-                    .RequestJobSlot(this));
+                    .IfElse(context => context.IsScheduledJob(),
+                        scheduled => scheduled
+                            .IfElse(context => context.CalculateNextStartDate(),
+                                start => start
+                                    .WaitForNextScheduledTime(this),
+                                noStart => noStart
+                                    .IfElse(context => context.GetPayload<JobSagaSettings>().FinalizeCompleted,
+                                        final => final.Finalize(),
+                                        complete => complete.TransitionTo(Completed)
+                                    )
+                            ),
+                        immediate => immediate
+                            .RequestJobSlot(this)
+                    )
+            );
 
             During(AllocatingJobSlot,
                 When(JobSlotAllocated)
@@ -94,58 +92,46 @@ namespace MassTransit
                 When(JobSlotUnavailable)
                     .WaitForJobSlot(this),
                 When(AllocateJobSlotFaulted)
-                    .WaitForJobSlot(this),
-                Ignore(CancelJob),
-                Ignore(RetryJob)
+                    .WaitForJobSlot(this)
             );
 
             During(WaitingForSlot,
                 When(JobSlotWaitElapsed.Received)
-                    .RequestJobSlot(this),
-                When(CancelJob)
-                    .Then(context =>
-                    {
-                        context.Saga.Faulted = DateTime.UtcNow;
-                        context.Saga.Reason = "Job Cancellation Requested";
-                    })
-                    .PublishJobCanceled()
-                    .TransitionTo(Canceled),
-                Ignore(RetryJob)
+                    .If(context => context.IsScheduledJob() && context.Saga.NextStartDate.HasValue,
+                        scheduled => scheduled
+                            .FinalizeJobAttempts()
+                            .Then(context =>
+                            {
+                                context.Saga.AttemptId = NewId.NextGuid();
+                                context.Saga.RetryAttempt = 0;
+                            })
+                    )
+                    .RequestJobSlot(this)
             );
 
             During(StartingJobAttempt,
                 When(StartJobAttemptFaulted)
                     .Then(context =>
                     {
+                        context.AddIncompleteAttempt(context.Message.Message.AttemptId);
+
                         context.Saga.Reason = context.Message.Exceptions.FirstOrDefault()?.Message;
                     })
                     .NotifyJobFaulted()
-                    .TransitionTo(Faulted),
-                Ignore(CancelJob),
-                Ignore(RetryJob)
-            );
-
-            During(WaitingToStart,
-                Ignore(CancelJob),
-                Ignore(RetryJob)
+                    .TransitionTo(Faulted)
             );
 
             During(Started, Completed, Faulted,
-                Ignore(JobAttemptCreated),
-                Ignore(StartJobAttemptFaulted),
-                Ignore(CancelJob)
+                Ignore(StartJobAttemptFaulted)
             );
 
-            During(Started, Completed,
-                Ignore(RetryJob));
-
-            During(StartingJobAttempt, WaitingToStart, Started,
+            During(StartingJobAttempt, Started,
                 When(AttemptStarted)
                     .Then(context => context.Saga.Started = context.Message.Timestamp)
                     .PublishJobStarted()
                     .TransitionTo(Started));
 
-            During(StartingJobAttempt, WaitingToStart, Started,
+            During(StartingJobAttempt, Started,
                 When(AttemptCompleted)
                     .Then(context =>
                     {
@@ -155,21 +141,37 @@ namespace MassTransit
                     .NotifyJobCompleted()
                     .TransitionTo(Completed));
 
-            During(StartingJobAttempt, WaitingToStart, Started,
+            During(StartingJobAttempt, Started,
                 When(AttemptFaulted)
                     .Then(context =>
                     {
+                        context.AddIncompleteAttempt(context.Message.AttemptId);
+
                         context.Saga.Faulted = context.Message.Timestamp;
                         context.Saga.Reason = context.Message.Exceptions?.Message ?? "Job Attempt Faulted (unknown reason)";
                     })
                     .IfElse(context => context.Message.RetryDelay.HasValue,
                         retry => retry
-                            .Schedule(JobRetryDelayElapsed, context => context.Init<JobRetryDelayElapsed>(new { context.Message.JobId }),
+                            .Schedule(JobRetryDelayElapsed, context => new JobRetryDelayElapsedEvent { JobId = context.Message.JobId },
                                 context => context.Message.RetryDelay.Value)
                             .TransitionTo(WaitingToRetry),
                         fault => fault
                             .NotifyJobFaulted()
-                            .TransitionTo(Faulted)));
+                            .IfElse(context => context.IsScheduledJob(),
+                                scheduled => scheduled
+                                    .DetermineNextStartDate()
+                                    .IfElse(context => context.Saga.NextStartDate.HasValue,
+                                        start => start
+                                            .SendJobSlotReleased(JobSlotDisposition.Faulted)
+                                            .WaitForNextScheduledTime(this),
+                                        noStart => noStart
+                                            .TransitionTo(Faulted)
+                                    ),
+                                notScheduled => notScheduled
+                                    .TransitionTo(Faulted)
+                            )
+                    )
+            );
 
             During(Completed,
                 When(AttemptCompleted)
@@ -178,7 +180,21 @@ namespace MassTransit
                     .Then(context => context.Saga.Started = context.Message.Timestamp)
                     .PublishJobStarted(),
                 When(JobCompleted)
-                    .If(context => context.GetPayload<JobSagaSettings>().FinalizeCompleted, x => x.Finalize()));
+                    .FinalizeJobAttempts()
+                    .IfElse(context => context.IsScheduledJob(),
+                        scheduled => scheduled
+                            .DetermineNextStartDate()
+                            .IfElse(context => context.Saga.NextStartDate.HasValue,
+                                start => start
+                                    .WaitForNextScheduledTime(this),
+                                noStart => noStart
+                                    .If(context => context.GetPayload<JobSagaSettings>().FinalizeCompleted, x => x.Finalize()
+                                    )
+                            ),
+                        notScheduled => notScheduled
+                            .If(context => context.GetPayload<JobSagaSettings>().FinalizeCompleted, x => x.Finalize())
+                    )
+            );
 
             During(Faulted,
                 When(AttemptFaulted)
@@ -187,63 +203,150 @@ namespace MassTransit
                     .Then(context => context.Saga.Started = context.Message.Timestamp)
                     .PublishJobStarted());
 
-            During(WaitingToRetry,
-                Ignore(AttemptFaulted),
-                When(JobRetryDelayElapsed.Received)
+
+            During(StartingJobAttempt, Started,
+                When(AttemptCanceled)
+                    .IfElse(context => string.Equals(context.Message.Reason, JobCancellationReasons.Shutdown, StringComparison.Ordinal),
+                        shutdown => shutdown
+                            .SendJobSlotReleased(JobSlotDisposition.Canceled)
+                            .WaitForJobSlot(this),
+                        other => other
+                            .PublishJobCanceled()
+                            .TransitionTo(Canceled)
+                    )
+            );
+
+            During([StartingJobAttempt, Started, Completed, Faulted, Canceled, WaitingToRetry],
+                When(SetJobProgress)
                     .Then(context =>
                     {
-                        context.Saga.AttemptId = NewId.NextGuid();
-                        context.Saga.RetryAttempt++;
+                        if (context.Saga.AttemptId == context.Message.AttemptId
+                            && context.Message.SequenceNumber > (context.Saga.LastProgressSequenceNumber ?? 0))
+                        {
+                            context.Saga.LastProgressValue = context.Message.Value;
+                            context.Saga.LastProgressLimit = context.Message.Limit;
+                        }
+                    }));
+
+            During([Started, Completed, Faulted, Canceled, WaitingToRetry],
+                When(SaveJobState)
+                    .Then(context =>
+                    {
+                        if (context.Saga.AttemptId == context.Message.AttemptId)
+                            context.Saga.JobState = context.Message.JobState;
+                    }));
+
+            DuringAny(
+                When(GetJobState)
+                    .RespondAsync(async context => new JobStateResponse
+                    {
+                        JobId = context.Message.JobId,
+                        Submitted = context.Saga.Submitted,
+                        Started = context.Saga.Started,
+                        Completed = context.Saga.Completed,
+                        Duration = context.Saga.Duration,
+                        Faulted = context.Saga.Faulted,
+                        Reason = context.Saga.Reason,
+                        LastRetryAttempt = context.Saga.RetryAttempt,
+                        CurrentState = (await Accessor.Get(context).ConfigureAwait(false)).Name,
+                        ProgressValue = context.Saga.LastProgressValue,
+                        ProgressLimit = context.Saga.LastProgressLimit,
+                        JobState = context.Saga.JobState,
+                        NextStartDate = context.Saga.NextStartDate?.UtcDateTime,
+                        IsRecurring = !string.IsNullOrWhiteSpace(context.Saga.CronExpression),
+                        StartDate = context.Saga.StartDate?.UtcDateTime,
+                        EndDate = context.Saga.EndDate?.UtcDateTime
                     })
-                    .RequestJobSlot(this),
+            );
+
+            // Cancel Job
+            During([WaitingForSlot, WaitingToRetry],
                 When(CancelJob)
-                    .Then(context =>
-                    {
-                        context.Saga.Faulted = DateTime.UtcNow;
-                        context.Saga.Reason = "Job Cancellation Requested";
-                    })
+                    .Unschedule(JobSlotWaitElapsed)
                     .PublishJobCanceled()
                     .TransitionTo(Canceled)
             );
 
-            During(WaitingToRetry, Faulted, Canceled,
-                When(RetryJob)
-                    .Unschedule(JobRetryDelayElapsed)
-                    .Then(context =>
-                    {
-                        context.Saga.AttemptId = NewId.NextGuid();
-                        context.Saga.RetryAttempt++;
-                    })
-                    .RequestJobSlot(this));
-
-            During(StartingJobAttempt, WaitingToStart, Started,
-                When(AttemptCanceled)
-                    .Then(context =>
-                    {
-                        context.Saga.Faulted = context.Message.Timestamp;
-                        context.Saga.Reason = "Job Attempt Canceled";
-                    })
-                    .PublishJobCanceled()
-                    .TransitionTo(Canceled));
-
             During(Canceled,
                 Ignore(CancelJob),
-                When(AttemptCanceled)
-                    .PublishJobCanceled());
+                Ignore(AttemptCanceled));
 
+            During([StartingJobAttempt, Started],
+                When(CancelJob)
+                    .CancelCurrentJobAttempt());
+
+            During(AllocatingJobSlot,
+                When(CancelJob)
+                    .TransitionTo(CancellationPending));
+
+            During(CancellationPending,
+                When(JobSlotAllocated)
+                    .TransitionTo(Canceled),
+                When(JobSlotUnavailable)
+                    .TransitionTo(Canceled),
+                When(AllocateJobSlotFaulted)
+                    .TransitionTo(Canceled)
+            );
+
+            // Retry Job
+            During([AllocatingJobSlot, StartingJobAttempt, Started, Completed, CancellationPending],
+                Ignore(RetryJob));
+
+            During(WaitingForSlot,
+                When(RetryJob)
+                    .Unschedule(JobSlotWaitElapsed));
+
+            During(WaitingToRetry,
+                When(RetryJob)
+                    .Unschedule(JobRetryDelayElapsed));
+
+            During(WaitingForSlot, WaitingToRetry, Faulted, Canceled,
+                When(RetryJob)
+                    .RequestRetryJobSlot(this));
+
+            During(WaitingToRetry,
+                Ignore(AttemptFaulted),
+                When(JobRetryDelayElapsed.Received)
+                    .RequestRetryJobSlot(this));
+
+
+            // Run Job (only accepted while waiting for the scheduled job event)
+            During([AllocatingJobSlot, StartingJobAttempt, Started, Completed, Canceled, Faulted, WaitingToRetry, CancellationPending],
+                Ignore(RunJob));
+
+            During(WaitingForSlot,
+                When(RunJob)
+                    .Unschedule(JobSlotWaitElapsed)
+                    .RequestJobSlot(this));
+
+
+            // Finalize Job (only accepted while waiting for the scheduled job event)
+            During([WaitingForSlot, AllocatingJobSlot, StartingJobAttempt, Started, Completed, WaitingToRetry],
+                Ignore(FinalizeJob));
+
+            During(Canceled, Faulted,
+                When(FinalizeJob)
+                    .FinalizeJobAttempts()
+                    .Finalize());
+
+
+            // Update recurring jobs, otherwise we're just going to any subsequent duplicate job submissions with a warning
             DuringAny(
-                When(GetJobState)
-                    .RespondAsync(x => x.Init<JobState>(new
-                    {
-                        x.Message.JobId,
-                        x.Saga.Submitted,
-                        x.Saga.Started,
-                        x.Saga.Completed,
-                        x.Saga.Faulted,
-                        x.Saga.Reason,
-                        LastRetryAttempt = x.Saga.RetryAttempt,
-                        CurrentState = Accessor.Get(x).ContinueWith(t => t.Result.Name)
-                    })));
+                When(JobSubmitted)
+                    .IfElse(context => context.IsScheduledJob(), x => x.UpdateRecurringJob(),
+                        x => x.Then(context => LogContext.Warning?.Log("Duplicate Job Submission: {JobTypeId} {JobId}", context.Message.JobTypeId,
+                            context.Message.JobId)))
+            );
+
+            // if the job is in a state where it could be waiting or idle, update the next scheduled start date
+            During([WaitingForSlot, Canceled, Completed, Faulted],
+                When(JobSubmitted)
+                    .If(context => context.IsScheduledJob() && context.CalculateNextStartDate(),
+                        start => start
+                            .WaitForNextScheduledTime(this)
+                    )
+            );
+
 
             WhenEnter(Completed, x => x.SendJobSlotReleased(JobSlotDisposition.Completed));
             WhenEnter(Canceled, x => x.SendJobSlotReleased(JobSlotDisposition.Canceled));
@@ -257,7 +360,7 @@ namespace MassTransit
         // ReSharper disable UnassignedGetOnlyAutoProperty
         // ReSharper disable MemberCanBePrivate.Global
         public State Submitted { get; }
-        public State WaitingToStart { get; }
+        public State WaitingToStart { get; } // no longer used, but do not remove as it would change the CurrentState int values
         public State WaitingToRetry { get; }
         public State WaitingForSlot { get; }
         public State Started { get; }
@@ -266,12 +369,12 @@ namespace MassTransit
         public State Faulted { get; }
         public State AllocatingJobSlot { get; }
         public State StartingJobAttempt { get; }
+        public State CancellationPending { get; }
 
         public Event<JobSlotAllocated> JobSlotAllocated { get; }
         public Event<JobSlotUnavailable> JobSlotUnavailable { get; }
         public Event<Fault<AllocateJobSlot>> AllocateJobSlotFaulted { get; }
 
-        public Event<JobAttemptCreated> JobAttemptCreated { get; }
         public Event<Fault<StartJobAttempt>> StartJobAttemptFaulted { get; }
 
         public Event<JobSubmitted> JobSubmitted { get; }
@@ -282,8 +385,14 @@ namespace MassTransit
         public Event<JobAttemptFaulted> AttemptFaulted { get; }
 
         public Event<JobCompleted> JobCompleted { get; }
+
         public Event<CancelJob> CancelJob { get; }
         public Event<RetryJob> RetryJob { get; }
+        public Event<RunJob> RunJob { get; }
+        public Event<FinalizeJob> FinalizeJob { get; }
+
+        public Event<SetJobProgress> SetJobProgress { get; }
+        public Event<SaveJobState> SaveJobState { get; }
 
         public Event<GetJobState> GetJobState { get; }
 
@@ -305,6 +414,62 @@ namespace MassTransit
             return context.GetPayload<JobSagaSettings>().JobTypeSagaEndpointAddress;
         }
 
+        internal static bool IsScheduledJob(this SagaConsumeContext<JobSaga> context)
+        {
+            return !string.IsNullOrWhiteSpace(context.Saga.CronExpression) || context.Saga.StartDate is not null;
+        }
+
+        internal static void AddIncompleteAttempt(this SagaConsumeContext<JobSaga> context, Guid attemptId)
+        {
+            context.Saga.IncompleteAttempts ??= [];
+
+            if (!context.Saga.IncompleteAttempts.Contains(attemptId))
+                context.Saga.IncompleteAttempts.Add(attemptId);
+        }
+
+        public static bool CalculateNextStartDate(this SagaConsumeContext<JobSaga> context)
+        {
+            if (string.IsNullOrWhiteSpace(context.Saga.CronExpression))
+            {
+                if (context.Saga.StartDate is not null)
+                {
+                    // if the start date hasn't changed, clear it and return false (no schedule change)
+                    if (context.Saga.StartDate == context.Saga.NextStartDate)
+                    {
+                        context.Saga.StartDate = null;
+                        return false;
+                    }
+
+                    context.Saga.NextStartDate = context.Saga.StartDate.Value;
+                    context.Saga.StartDate = null;
+                    return true;
+                }
+            }
+
+            var cronExpression = new CronExpression(context.Saga.CronExpression) { TimeZone = TimeZoneInfo.Utc };
+
+            var now = DateTimeOffset.UtcNow;
+
+            DateTimeOffset? nextStartDate = cronExpression.GetTimeAfter(context.Saga.StartDate.HasValue
+                ? context.Saga.StartDate.Value > now
+                    ? context.Saga.StartDate.Value
+                    : now
+                : now);
+
+            if (nextStartDate != null)
+            {
+                if (nextStartDate.Value > context.Saga.EndDate)
+                    nextStartDate = null;
+            }
+
+            // the next start date didn't change, so don't bother with it
+            if (nextStartDate == context.Saga.NextStartDate)
+                return false;
+
+            context.Saga.NextStartDate = nextStartDate;
+            return true;
+        }
+
         public static EventActivityBinder<JobSaga, JobSubmitted> InitializeJob(this EventActivityBinder<JobSaga, JobSubmitted> binder)
         {
             return binder.Then(context =>
@@ -316,150 +481,290 @@ namespace MassTransit
                 context.Saga.JobTimeout = context.Message.JobTimeout;
                 context.Saga.JobTypeId = context.Message.JobTypeId;
 
+                SetJobProperties(context);
+
+                if (context.Message.Schedule != null)
+                {
+                    context.Saga.CronExpression = context.Message.Schedule.CronExpression;
+                    context.Saga.TimeZoneId = context.Message.Schedule.TimeZoneId;
+                    context.Saga.StartDate = context.Message.Schedule.Start;
+                    context.Saga.EndDate = context.Message.Schedule.End;
+                }
+
                 context.Saga.AttemptId = NewId.NextGuid();
             });
+        }
+
+        public static EventActivityBinder<JobSaga, JobSubmitted> UpdateRecurringJob(this EventActivityBinder<JobSaga, JobSubmitted> binder)
+        {
+            return binder.Then(context =>
+            {
+                context.Saga.Job = context.Message.Job;
+
+                if (context.Message.Schedule != null)
+                {
+                    context.Saga.CronExpression = context.Message.Schedule.CronExpression;
+                    context.Saga.TimeZoneId = context.Message.Schedule.TimeZoneId;
+                    context.Saga.StartDate = context.Message.Schedule.Start;
+                    context.Saga.EndDate = context.Message.Schedule.End;
+                }
+
+                SetJobProperties(context);
+            });
+        }
+
+        static void SetJobProperties(BehaviorContext<JobSaga, JobSubmitted> context)
+        {
+            if (context.Message.JobProperties is { Count: > 0 })
+            {
+                context.Saga.JobProperties ??= new Dictionary<string, object>(context.Message.JobProperties.Count, StringComparer.OrdinalIgnoreCase);
+                context.Saga.JobProperties.SetValues(context.Message.JobProperties);
+            }
         }
 
         public static EventActivityBinder<JobSaga, T> RequestJobSlot<T>(this EventActivityBinder<JobSaga, T> binder, JobStateMachine machine)
             where T : class
         {
-            return binder.SendAsync(context => context.GetJobTypeSagaAddress(),
-                    context => context.Init<AllocateJobSlot>(new
+            return binder
+                .Send<JobSaga, T, AllocateJobSlot>(context => context.GetJobTypeSagaAddress(),
+                    context => new AllocateJobSlotCommand
                     {
                         JobId = context.Saga.CorrelationId,
-                        context.Saga.JobTypeId,
-                        context.Saga.JobTimeout
-                    }), (behaviorContext, context) => context.ResponseAddress = behaviorContext.ReceiveContext.InputAddress)
+                        JobTypeId = context.Saga.JobTypeId,
+                        JobTimeout = context.Saga.JobTimeout ?? TimeSpan.Zero,
+                        JobProperties = context.Saga.JobProperties
+                    }, (behaviorContext, context) => context.ResponseAddress = behaviorContext.ReceiveContext.InputAddress)
                 .TransitionTo(machine.AllocatingJobSlot);
+        }
+
+        public static EventActivityBinder<JobSaga, T> RequestRetryJobSlot<T>(this EventActivityBinder<JobSaga, T> binder, JobStateMachine machine)
+            where T : class
+        {
+            return binder
+                .Then(context =>
+                {
+                    context.Saga.AttemptId = NewId.NextGuid();
+                    context.Saga.RetryAttempt++;
+                })
+                .RequestJobSlot(machine);
+            ;
+        }
+
+        public static EventActivityBinder<JobSaga, T> ClearJobState<T>(this EventActivityBinder<JobSaga, T> binder)
+            where T : class
+        {
+            return binder
+                .Then(context =>
+                {
+                    context.Saga.LastProgressValue = null;
+                    context.Saga.LastProgressLimit = null;
+                    context.Saga.LastProgressSequenceNumber = null;
+                    context.Saga.JobState = null;
+                });
         }
 
         public static EventActivityBinder<JobSaga, JobSlotAllocated> RequestStartJob(this EventActivityBinder<JobSaga, JobSlotAllocated> binder,
             JobStateMachine machine)
         {
-            return binder.SendAsync(context => context.GetJobAttemptSagaAddress(),
-                    context => context.Init<StartJobAttempt>(new
+            return binder
+                .Send<JobSaga, JobSlotAllocated, StartJobAttempt>(context => context.GetJobAttemptSagaAddress(),
+                    context => new StartJobAttemptCommand
                     {
                         JobId = context.Saga.CorrelationId,
-                        context.Saga.AttemptId,
-                        context.Saga.ServiceAddress,
-                        context.Message.InstanceAddress,
-                        context.Saga.RetryAttempt,
-                        context.Saga.Job,
-                        context.Saga.JobTypeId
-                    }), (behaviorContext, context) => context.ResponseAddress = behaviorContext.ReceiveContext.InputAddress)
+                        AttemptId = context.Saga.AttemptId,
+                        ServiceAddress = context.Saga.ServiceAddress,
+                        InstanceAddress = context.Message.InstanceAddress,
+                        RetryAttempt = context.Saga.RetryAttempt,
+                        Job = context.Saga.Job,
+                        JobTypeId = context.Saga.JobTypeId,
+                        LastProgressValue = context.Saga.LastProgressValue,
+                        LastProgressLimit = context.Saga.LastProgressLimit,
+                        JobState = context.Saga.JobState,
+                        JobProperties = context.Saga.JobProperties
+                    }, (behaviorContext, context) => context.ResponseAddress = behaviorContext.ReceiveContext.InputAddress)
                 .TransitionTo(machine.StartingJobAttempt);
+        }
+
+        public static EventActivityBinder<JobSaga, T> FinalizeJobAttempts<T>(this EventActivityBinder<JobSaga, T> binder)
+            where T : class
+        {
+            return binder.ThenAsync(async context =>
+            {
+                if (context.Saga.IncompleteAttempts is { Count: > 0 })
+                {
+                    var endpoint = await context.GetSendEndpoint(context.GetJobAttemptSagaAddress());
+
+                    foreach (var attemptId in context.Saga.IncompleteAttempts)
+                    {
+                        _ = endpoint.Send<FinalizeJobAttempt>(new FinalizeJobAttemptCommand
+                        {
+                            JobId = context.Saga.CorrelationId,
+                            AttemptId = attemptId
+                        });
+                    }
+
+                    context.Saga.IncompleteAttempts = null;
+                }
+            });
+        }
+
+        public static EventActivityBinder<JobSaga, CancelJob> CancelCurrentJobAttempt(this EventActivityBinder<JobSaga, CancelJob> binder)
+        {
+            return binder.Send<JobSaga, CancelJob, CancelJobAttempt>(context => context.GetJobAttemptSagaAddress(),
+                context => new CancelJobAttemptCommand
+                {
+                    JobId = context.Saga.CorrelationId,
+                    AttemptId = context.Saga.AttemptId,
+                    Reason = context.Message.Reason ?? JobCancellationReasons.CancellationRequested
+                });
         }
 
         public static EventActivityBinder<JobSaga, T> WaitForJobSlot<T>(this EventActivityBinder<JobSaga, T> binder, JobStateMachine machine)
             where T : class
         {
-            return binder.Schedule(machine.JobSlotWaitElapsed, context => context.Init<JobSlotWaitElapsed>(new { JobId = context.Saga.CorrelationId }))
+            return binder.Schedule(machine.JobSlotWaitElapsed, context => new JobSlotWaitElapsedEvent { JobId = context.Saga.CorrelationId })
                 .TransitionTo(machine.WaitingForSlot);
+        }
+
+        public static EventActivityBinder<JobSaga, T> WaitForNextScheduledTime<T>(this EventActivityBinder<JobSaga, T> binder, JobStateMachine machine)
+            where T : class
+        {
+            return binder
+                .ClearJobState()
+                .Schedule(machine.JobSlotWaitElapsed, context => new JobSlotWaitElapsedEvent { JobId = context.Saga.CorrelationId },
+                    context => context.Saga.NextStartDate.Value.DateTime)
+                .TransitionTo(machine.WaitingForSlot);
+        }
+
+        public static EventActivityBinder<JobSaga, T> DetermineNextStartDate<T>(this EventActivityBinder<JobSaga, T> binder)
+            where T : class
+        {
+            return binder.Then(context =>
+            {
+                context.CalculateNextStartDate();
+            });
         }
 
         public static EventActivityBinder<JobSaga> SendJobSlotReleased(this EventActivityBinder<JobSaga> binder, JobSlotDisposition disposition)
         {
-            return binder.SendAsync(context => context.GetJobTypeSagaAddress(),
-                context => context.Init<JobSlotReleased>(new
+            return binder.Send<JobSaga, JobSlotReleased>(context => context.GetJobTypeSagaAddress(), context => new JobSlotReleasedEvent
+            {
+                JobId = context.Saga.CorrelationId,
+                JobTypeId = context.Saga.JobTypeId,
+                Disposition = disposition == JobSlotDisposition.Faulted && context.Saga.Reason.Contains("(Suspect)")
+                    ? JobSlotDisposition.Suspect
+                    : disposition
+            });
+        }
+
+        public static EventActivityBinder<JobSaga, T> SendJobSlotReleased<T>(this EventActivityBinder<JobSaga, T> binder, JobSlotDisposition disposition)
+            where T : class
+        {
+            return binder.Send<JobSaga, T, JobSlotReleased>(context => context.GetJobTypeSagaAddress(),
+                context => new JobSlotReleasedEvent
                 {
                     JobId = context.Saga.CorrelationId,
-                    context.Saga.JobTypeId,
+                    JobTypeId = context.Saga.JobTypeId,
                     Disposition = disposition == JobSlotDisposition.Faulted && context.Saga.Reason.Contains("(Suspect)")
                         ? JobSlotDisposition.Suspect
                         : disposition
-                }));
+                });
         }
 
         public static EventActivityBinder<JobSaga, JobAttemptStarted> PublishJobStarted(this EventActivityBinder<JobSaga, JobAttemptStarted> binder)
         {
-            return binder.PublishAsync(context => context.Init<JobStarted>(new
+            return binder.Publish<JobSaga, JobAttemptStarted, JobStarted>(context => new JobStartedEvent
             {
                 JobId = context.Saga.CorrelationId,
-                context.Message.AttemptId,
-                context.Message.RetryAttempt,
-                context.Message.Timestamp
-            }));
+                AttemptId = context.Message.AttemptId,
+                RetryAttempt = context.Message.RetryAttempt,
+                Timestamp = context.Message.Timestamp
+            });
         }
 
         public static EventActivityBinder<JobSaga, JobAttemptCompleted> NotifyJobCompleted(this EventActivityBinder<JobSaga, JobAttemptCompleted> binder)
         {
-            return binder.SendAsync(context => context.Saga.ServiceAddress,
-                context => context.Init<CompleteJob>(new
+            return binder
+                .Send<JobSaga, JobAttemptCompleted, CompleteJob>(context => context.Saga.ServiceAddress,
+                    context => new CompleteJobCommand
+                    {
+                        JobId = context.Saga.CorrelationId,
+                        Job = context.Saga.Job,
+                        JobTypeId = context.Saga.JobTypeId,
+                        Timestamp = context.Message.Timestamp,
+                        Duration = context.Message.Timestamp - context.Saga.Started ?? TimeSpan.Zero
+                    })
+                .Publish<JobSaga, JobAttemptCompleted, JobCompleted>(context => new JobCompletedEvent
                 {
                     JobId = context.Saga.CorrelationId,
-                    context.Saga.Job,
-                    context.Saga.JobTypeId,
-                    context.Message.Timestamp,
-                    Duration = context.Message.Timestamp - context.Saga.Started ?? TimeSpan.Zero
-                })).PublishAsync(context => context.Init<JobCompleted>(new
-            {
-                JobId = context.Saga.CorrelationId,
-                context.Saga.Job,
-                context.Message.Timestamp,
-                context.Message.Duration
-            }));
+                    Job = context.Saga.Job,
+                    Timestamp = context.Message.Timestamp,
+                    Duration = context.Message.Duration
+                });
         }
 
         public static EventActivityBinder<JobSaga, JobAttemptFaulted> NotifyJobFaulted(this EventActivityBinder<JobSaga, JobAttemptFaulted> binder)
         {
-            return binder.PublishAsync(context => context.Init<JobFaulted>(new
-            {
-                JobId = context.Saga.CorrelationId,
-                context.Saga.Job,
-                context.Message.Exceptions,
-                context.Message.Timestamp,
-                Duration = context.Message.Timestamp - context.Saga.Started
-            })).SendAsync(context => context.Saga.ServiceAddress,
-                context => context.Init<FaultJob>(new
+            return binder
+                .Send<JobSaga, JobAttemptFaulted, FaultJob>(context => context.Saga.ServiceAddress,
+                    context => new FaultJobCommand
+                    {
+                        JobId = context.Saga.CorrelationId,
+                        Job = context.Saga.Job,
+                        JobTypeId = context.Saga.JobTypeId,
+                        AttemptId = context.Saga.AttemptId,
+                        RetryAttempt = context.Saga.RetryAttempt,
+                        Exceptions = context.Message.Exceptions,
+                        Duration = context.Message.Timestamp - context.Saga.Started
+                    })
+                .Publish<JobSaga, JobAttemptFaulted, JobFaulted>(context => new JobFaultedEvent
                 {
                     JobId = context.Saga.CorrelationId,
-                    context.Saga.Job,
-                    context.Saga.JobTypeId,
-                    context.Saga.AttemptId,
-                    context.Saga.RetryAttempt,
-                    context.Message.Exceptions,
+                    Job = context.Saga.Job,
+                    Exceptions = context.Message.Exceptions,
+                    Timestamp = context.Message.Timestamp,
                     Duration = context.Message.Timestamp - context.Saga.Started
-                }));
+                });
         }
 
-        public static EventActivityBinder<JobSaga, JobAttemptCanceled> PublishJobCanceled(this EventActivityBinder<JobSaga, JobAttemptCanceled> binder)
+        public static EventActivityBinder<JobSaga, T> PublishJobCanceled<T>(this EventActivityBinder<JobSaga, T> binder, string reason = null)
+            where T : class
         {
-            return binder.PublishAsync(context => context.Init<JobCanceled>(new
-            {
-                JobId = context.Saga.CorrelationId,
-                context.Message.Timestamp
-            }));
-        }
-
-        public static EventActivityBinder<JobSaga, CancelJob> PublishJobCanceled(this EventActivityBinder<JobSaga, CancelJob> binder)
-        {
-            return binder.PublishAsync(context => context.Init<JobCanceled>(new
-            {
-                JobId = context.Saga.CorrelationId,
-                context.Message.Timestamp
-            }));
+            return binder
+                .Then(context =>
+                {
+                    context.Saga.Faulted = DateTime.UtcNow;
+                    context.Saga.Reason = reason ?? JobCancellationReasons.CancellationRequested;
+                })
+                .Publish<JobSaga, T, JobCanceled>(context => new JobCanceledEvent
+                {
+                    JobId = context.Saga.CorrelationId,
+                    Timestamp = context.Saga.Faulted.Value
+                });
         }
 
         public static EventActivityBinder<JobSaga, Fault<StartJobAttempt>> NotifyJobFaulted(this EventActivityBinder<JobSaga, Fault<StartJobAttempt>> binder)
         {
-            return binder.SendAsync(context => context.Saga.ServiceAddress,
-                context => context.Init<FaultJob>(new
+            return binder
+                .Send<JobSaga, Fault<StartJobAttempt>, FaultJob>(context => context.Saga.ServiceAddress,
+                    context => new FaultJobCommand
+                    {
+                        JobId = context.Saga.CorrelationId,
+                        Job = context.Saga.Job,
+                        JobTypeId = context.Saga.JobTypeId,
+                        AttemptId = context.Saga.AttemptId,
+                        RetryAttempt = context.Saga.RetryAttempt,
+                        Exceptions = context.Message.Exceptions?.FirstOrDefault(),
+                        Duration = context.Message.Timestamp - context.Saga.Started
+                    })
+                .Publish<JobSaga, Fault<StartJobAttempt>, JobFaulted>(context => new JobFaultedEvent
                 {
                     JobId = context.Saga.CorrelationId,
-                    context.Saga.Job,
-                    context.Saga.JobTypeId,
-                    context.Saga.AttemptId,
-                    context.Saga.RetryAttempt,
-                    context.Message.Exceptions,
+                    Job = context.Saga.Job,
+                    Exceptions = context.Message.Exceptions?.FirstOrDefault(),
+                    Timestamp = context.Message.Timestamp,
                     Duration = context.Message.Timestamp - context.Saga.Started
-                })).PublishAsync(context => context.Init<JobFaulted>(new
-            {
-                JobId = context.Saga.CorrelationId,
-                context.Saga.Job,
-                context.Message.Exceptions,
-                context.Message.Timestamp,
-                Duration = context.Message.Timestamp - context.Saga.Started
-            }));
+                });
         }
     }
 }

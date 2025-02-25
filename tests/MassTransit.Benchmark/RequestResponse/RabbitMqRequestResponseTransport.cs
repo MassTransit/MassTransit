@@ -11,7 +11,7 @@ namespace MassTransitBenchmark.RequestResponse
         readonly RabbitMqHostSettings _hostSettings;
         readonly IRequestResponseSettings _settings;
         IBusControl _busControl;
-        Task<IClientFactory> _clientFactory;
+        IClientFactory _clientFactory;
         Uri _targetEndpointAddress;
 
         public RabbitMqRequestResponseTransport(RabbitMqHostSettings hostSettings, IRequestResponseSettings settings)
@@ -23,9 +23,7 @@ namespace MassTransitBenchmark.RequestResponse
         public async Task<IRequestClient<T>> GetRequestClient<T>(TimeSpan settingsRequestTimeout)
             where T : class
         {
-            var clientFactory = await _clientFactory;
-
-            return clientFactory.CreateRequestClient<T>(_targetEndpointAddress, settingsRequestTimeout);
+            return _clientFactory.CreateRequestClient<T>(_targetEndpointAddress, settingsRequestTimeout);
         }
 
         public void GetBusControl(Action<IReceiveEndpointConfigurator> callback)

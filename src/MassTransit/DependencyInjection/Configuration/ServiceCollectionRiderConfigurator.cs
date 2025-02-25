@@ -47,7 +47,7 @@ namespace MassTransit.Configuration
 
             this.TryAddScoped(CreateScopeProvider);
 
-            this.AddSingleton(_ => Bind<IBus, TRider>.Create((ISetScopedConsumeContext)new SetScopedConsumeContext(provider =>
+            this.AddSingleton(_ => Bind<IBus, TRider>.Create((ISetScopedConsumeContext)new SetScopedConsumeContext<IBus>(provider =>
                 provider.GetRequiredService<Bind<IBus, TRider, IScopedConsumeContextProvider>>().Value)));
             this.AddSingleton(provider => Bind<IBus, TRider>.Create(CreateRegistrationContext(provider)));
             this.AddSingleton(provider =>
@@ -102,7 +102,7 @@ namespace MassTransit.Configuration
 
             this.TryAddScoped(CreateScopeProvider);
 
-            this.AddSingleton(_ => Bind<TBus, TRider>.Create((ISetScopedConsumeContext)new SetScopedConsumeContext(provider =>
+            this.AddSingleton(_ => Bind<TBus, TRider>.Create((ISetScopedConsumeContext)new SetScopedConsumeContext<TBus>(provider =>
                 provider.GetRequiredService<Bind<TBus, TRider, IScopedConsumeContextProvider>>().Value)));
             this.AddSingleton(provider => Bind<TBus, TRider>.Create(CreateRegistrationContext(provider)));
             this.AddSingleton(provider =>

@@ -166,9 +166,8 @@ namespace MassTransit.Configuration
             configurator.TryAddSingleton(DatabaseContextFactory);
             configurator.RegisterLoadSagaRepository<TSaga, CosmosSagaRepositoryContextFactory<TSaga>>();
             configurator.RegisterQuerySagaRepository<TSaga, CosmosSagaRepositoryContextFactory<TSaga>>();
-            configurator
-                .RegisterSagaRepository<TSaga, DatabaseContext<TSaga>, SagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga>,
-                    CosmosSagaRepositoryContextFactory<TSaga>>();
+            configurator.RegisterSagaRepository<TSaga, DatabaseContext<TSaga>, SagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga>,
+                CosmosSagaRepositoryContextFactory<TSaga>>();
             configurator.AddOptions<CosmosClientOptions>();
         }
 

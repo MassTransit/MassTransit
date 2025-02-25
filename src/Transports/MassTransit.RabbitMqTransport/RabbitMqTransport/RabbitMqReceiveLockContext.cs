@@ -2,28 +2,37 @@ namespace MassTransit.RabbitMqTransport
 {
     using System;
     using System.Threading.Tasks;
+    using RabbitMQ.Client;
+    using RabbitMQ.Client.Events;
+    using RabbitMQ.Client.Exceptions;
     using Transports;
 
 
     public class RabbitMqReceiveLockContext :
         ReceiveLockContext
     {
+        readonly ChannelContext _channel;
         readonly ulong _deliveryTag;
-        readonly ModelContext _model;
 
-        public RabbitMqReceiveLockContext(ModelContext model, ulong deliveryTag)
+        public RabbitMqReceiveLockContext(ChannelContext channel, ulong deliveryTag)
         {
-            _model = model;
+            _channel = channel;
             _deliveryTag = deliveryTag;
         }
 
         public async Task Complete()
         {
+            if (_channel.Channel.IsClosed)
+            {
+                throw new OperationInterruptedException(
+                    new ShutdownEventArgs(ShutdownInitiator.Peer, 491, $"Channel is already closed: {_channel.Channel.CloseReason}"));
+            }
+
             try
             {
-                await _model.BasicAck(_deliveryTag, false).ConfigureAwait(false);
+                await _channel.BasicAck(_deliveryTag, false).ConfigureAwait(false);
             }
-            catch (InvalidOperationException exception)
+            catch (Exception exception)
             {
                 throw new TransportUnavailableException($"Message ACK failed: {_deliveryTag}", exception);
             }
@@ -31,9 +40,15 @@ namespace MassTransit.RabbitMqTransport
 
         public async Task Faulted(Exception exception)
         {
+            if (_channel.Channel.IsClosed)
+            {
+                throw new OperationInterruptedException(
+                    new ShutdownEventArgs(ShutdownInitiator.Peer, 491, $"Channel is already closed: {_channel.Channel.CloseReason}"));
+            }
+
             try
             {
-                await _model.BasicNack(_deliveryTag, false, true).ConfigureAwait(false);
+                await _channel.BasicNack(_deliveryTag, false, true).ConfigureAwait(false);
             }
             catch (Exception ackEx)
             {
@@ -43,6 +58,12 @@ namespace MassTransit.RabbitMqTransport
 
         public Task ValidateLockStatus()
         {
+            if (_channel.Channel.IsClosed)
+            {
+                throw new OperationInterruptedException(
+                    new ShutdownEventArgs(ShutdownInitiator.Peer, 491, $"Channel is already closed: {_channel.Channel.CloseReason}"));
+            }
+
             return Task.CompletedTask;
         }
     }

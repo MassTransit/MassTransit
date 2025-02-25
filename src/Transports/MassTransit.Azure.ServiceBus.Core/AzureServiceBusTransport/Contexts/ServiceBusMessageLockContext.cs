@@ -29,9 +29,12 @@ namespace MassTransit.AzureServiceBusTransport
 
         public Task Abandon(Exception exception)
         {
-            return _deadLettered
-                ? Task.CompletedTask
-                : _eventArgs.AbandonMessageAsync(_message, ExceptionUtil.GetExceptionHeaderDictionary(exception));
+            if (_deadLettered)
+                return Task.CompletedTask;
+
+            (Dictionary<string, object> dictionary, _) = ExceptionUtil.GetExceptionHeaderDetail(exception, ServiceBusSendTransportContext.Adapter);
+
+            return _eventArgs.AbandonMessageAsync(_message, dictionary);
         }
 
         public async Task DeadLetter()
@@ -44,7 +47,9 @@ namespace MassTransit.AzureServiceBusTransport
 
         public async Task DeadLetter(Exception exception)
         {
-            await _eventArgs.DeadLetterMessageAsync(_message, ExceptionUtil.GetExceptionHeaderDictionary(exception)).ConfigureAwait(false);
+            (Dictionary<string, object> dictionary, _) = ExceptionUtil.GetExceptionHeaderDetail(exception, ServiceBusSendTransportContext.Adapter);
+
+            await _eventArgs.DeadLetterMessageAsync(_message, dictionary).ConfigureAwait(false);
 
             _deadLettered = true;
         }

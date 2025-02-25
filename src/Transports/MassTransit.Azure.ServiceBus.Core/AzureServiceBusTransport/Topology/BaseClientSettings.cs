@@ -22,9 +22,10 @@ namespace MassTransit.AzureServiceBusTransport.Topology
         public IServiceBusEndpointEntityConfigurator Configurator { get; }
 
         public abstract bool RequiresSession { get; }
+        public abstract int MaxConcurrentSessions { get; }
         public abstract int MaxConcurrentCallsPerSession { get; }
 
-        public TimeSpan SessionIdleTimeout { get; set; }
+        public TimeSpan? SessionIdleTimeout { get; set; }
 
         public int MaxConcurrentCalls => Math.Max(_configuration.Transport.GetConcurrentMessageLimit(), 1);
         public int PrefetchCount => _configuration.Transport.PrefetchCount;

@@ -4,17 +4,19 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
+    using Abstractions;
     using Internals;
-    using MassTransit.SagaStateMachine;
-    using MassTransit.Visualizer.Abstractions;
     using QuikGraph;
+    using SagaStateMachine;
+
 
     public class StateMachineMermaidGenerator : StateMachineGenerator
     {
         const string OpenBracket = "«";
         const string CloseBracket = "»";
 
-        public StateMachineMermaidGenerator(StateMachineGraph data) : base(data)
+        public StateMachineMermaidGenerator(StateMachineGraph data)
+            : base(data)
         {
         }
 
@@ -27,9 +29,9 @@
 
             foreach (Edge<Vertex> edge in Graph.Edges)
             {
-                string source = FormatVertex(edge.Source, vertices);
-                string target = FormatVertex(edge.Target, vertices);
-                string line = $"{Environment.NewLine}    {source} --> {target};";
+                var source = FormatVertex(edge.Source, vertices);
+                var target = FormatVertex(edge.Target, vertices);
+                var line = $"{Environment.NewLine}    {source} --> {target};";
 
                 output.Append(line);
             }
@@ -52,11 +54,11 @@
 
         static string FormatVertex(Vertex vertex, List<Vertex> vertices)
         {
-            int index = vertices.IndexOf(vertex);
+            var index = vertices.IndexOf(vertex);
 
             if (vertex.VertexType == typeof(Event))
             {
-                string vertexLabel = GetVertexLabel(vertex, true);
+                var vertexLabel = GetVertexLabel(vertex, true);
 
                 if (vertex.IsComposite)
                     return $"{index}[\\\"{vertexLabel}\"/]";

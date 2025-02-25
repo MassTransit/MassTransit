@@ -20,7 +20,7 @@ namespace MassTransit.Tests.SagaStateMachineTests.Dynamic_Modify
 
             Assert.That(async () => await _machine.RaiseEvent(_claim, Create, data), Throws.TypeOf<EventExecutionException>());
 
-            Assert.That(_claim.Value, Is.EqualTo(default));
+            Assert.That(_claim.Value, Is.EqualTo((string)default));
         }
 
         Event<CreateClaim> Create;

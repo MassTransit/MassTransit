@@ -12,8 +12,7 @@ namespace MassTransit.DapperIntegration.Saga
 
 
     public class DapperDatabaseContext<TSaga> :
-        DatabaseContext<TSaga>,
-        IDisposable
+        DatabaseContext<TSaga>
     {
         readonly SqlConnection _connection;
         readonly SemaphoreSlim _inUse;
@@ -106,16 +105,18 @@ namespace MassTransit.DapperIntegration.Saga
             }
         }
 
-        public void Dispose()
+        public void Commit()
+        {
+            _transaction.Commit();
+        }
+
+        public ValueTask DisposeAsync()
         {
             _inUse.Dispose();
             _transaction.Dispose();
             _connection.Dispose();
-        }
 
-        public void Commit()
-        {
-            _transaction.Commit();
+            return default;
         }
 
         static string GetTableName<T>()

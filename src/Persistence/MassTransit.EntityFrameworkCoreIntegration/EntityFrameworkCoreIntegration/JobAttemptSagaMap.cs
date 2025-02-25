@@ -16,6 +16,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
         protected override void Configure(EntityTypeBuilder<JobAttemptSaga> entity, ModelBuilder model)
         {
+            entity.OptOutOfEntityFrameworkConventions();
+
             entity.Property(x => x.CurrentState);
 
             entity.Ignore(x => x.Version);
@@ -29,6 +31,10 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                 entity.Ignore(x => x.RowVersion);
 
             entity.Property(x => x.JobId);
+            entity.HasOne<JobSaga>().WithMany()
+                .HasForeignKey(x => x.JobId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             entity.Property(x => x.RetryAttempt);
 
             entity.HasIndex(x => new

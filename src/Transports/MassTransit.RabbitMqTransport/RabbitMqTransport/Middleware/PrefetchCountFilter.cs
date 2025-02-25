@@ -7,7 +7,7 @@ namespace MassTransit.RabbitMqTransport.Middleware
     /// Prepares a queue for receiving messages using the ReceiveSettings specified.
     /// </summary>
     public class PrefetchCountFilter :
-        IFilter<ModelContext>
+        IFilter<ChannelContext>
     {
         ushort _prefetchCount;
 
@@ -22,7 +22,7 @@ namespace MassTransit.RabbitMqTransport.Middleware
             scope.Add("prefetchCount", _prefetchCount);
         }
 
-        async Task IFilter<ModelContext>.Send(ModelContext context, IPipe<ModelContext> next)
+        async Task IFilter<ChannelContext>.Send(ChannelContext context, IPipe<ChannelContext> next)
         {
             await context.BasicQos(0, _prefetchCount, false).ConfigureAwait(false);
 

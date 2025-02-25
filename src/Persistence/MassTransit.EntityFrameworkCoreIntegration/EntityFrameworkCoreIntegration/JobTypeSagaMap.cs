@@ -16,6 +16,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
         protected override void Configure(EntityTypeBuilder<JobTypeSaga> entity, ModelBuilder model)
         {
+            entity.OptOutOfEntityFrameworkConventions();
+
             entity.Property(x => x.CurrentState);
 
             entity.Ignore(x => x.Version);
@@ -30,6 +32,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
             entity.Property(x => x.ActiveJobCount);
             entity.Property(x => x.ConcurrentJobLimit);
+            entity.Property(x => x.GlobalConcurrentJobLimit);
             entity.Property(x => x.Name);
 
             entity.Property(x => x.OverrideJobLimit);
@@ -39,6 +42,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                 .HasJsonConversion();
 
             entity.Property(x => x.Instances)
+                .HasJsonConversion();
+
+            entity.Property(x => x.Properties)
                 .HasJsonConversion();
         }
     }

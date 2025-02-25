@@ -43,7 +43,7 @@ namespace MassTransit.DependencyInjection
             var result = (TResult)typeof(IBusInstanceBuilderCallback<TBus, TResult>)
                 .GetMethod("GetResult")
                 .MakeGenericMethod(busInstanceType)
-                .Invoke(callback, Array.Empty<object>());
+                .Invoke(callback, []);
 
             return result;
         }
@@ -82,9 +82,9 @@ namespace MassTransit.DependencyInjection
 
                 var typeBuilder = builder.DefineType(typeName,
                     TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed,
-                    parentType, new[] { interfaceType });
+                    parentType, [interfaceType]);
 
-                Type[] parameterTypes = { typeof(IBusControl) };
+                Type[] parameterTypes = [typeof(IBusControl)];
 
                 var ctorParent = parentType.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, parameterTypes, null);
                 var ctorBuilder = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, parameterTypes);
@@ -149,7 +149,7 @@ namespace MassTransit.DependencyInjection
             var setMethodBuilder = typeBuilder.DefineMethod("set_" + propertyInfo.Name,
                 PropertyAccessMethodAttributes,
                 null,
-                new[] { propertyInfo.PropertyType });
+                [propertyInfo.PropertyType]);
 
             var il = setMethodBuilder.GetILGenerator();
             il.Emit(OpCodes.Ldarg_0);

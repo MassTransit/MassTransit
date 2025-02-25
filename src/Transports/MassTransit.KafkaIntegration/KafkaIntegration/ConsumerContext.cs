@@ -9,6 +9,6 @@ namespace MassTransit.KafkaIntegration
         PipeContext
     {
         ILogContext LogContext { get; }
-        IConsumer<byte[], byte[]> CreateConsumer(KafkaConsumerBuilderContext context, Action<IConsumer<byte[], byte[]>, Error> onError);
+        IConsumer<byte[], byte[]> CreateConsumer(KafkaConsumerBuilderContext context, Action<IConsumer<byte[], byte[]>, Error> onError, int consumerIndex);
     }
 }

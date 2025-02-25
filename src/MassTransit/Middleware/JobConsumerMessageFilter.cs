@@ -21,13 +21,13 @@ namespace MassTransit.Middleware
             _retryPolicy = retryPolicy;
         }
 
-        void IProbeSite.Probe(ProbeContext context)
+        public void Probe(ProbeContext context)
         {
             var scope = context.CreateScope("consume");
             scope.Add("method", $"Consume(ConsumeContext<{TypeCache<TJob>.ShortName}> context)");
         }
 
-        Task IFilter<ConsumerConsumeContext<TConsumer, TJob>>.Send(ConsumerConsumeContext<TConsumer, TJob> context,
+        public Task Send(ConsumerConsumeContext<TConsumer, TJob> context,
             IPipe<ConsumerConsumeContext<TConsumer, TJob>> next)
         {
             if (context.Consumer is IJobConsumer<TJob> messageConsumer)
@@ -41,20 +41,21 @@ namespace MassTransit.Middleware
         async Task RunJob(PipeContext context, IJobConsumer<TJob> jobConsumer)
         {
             var jobContext = context.GetPayload<JobContext<TJob>>();
+            var notifyJobContext = context.GetPayload<INotifyJobContext>();
 
             RetryPolicyContext<JobContext<TJob>> policyContext = _retryPolicy.CreatePolicyContext(jobContext);
 
             try
             {
-                await jobContext.NotifyStarted().ConfigureAwait(false);
+                await notifyJobContext.NotifyStarted().ConfigureAwait(false);
 
                 await jobConsumer.Run(jobContext).ConfigureAwait(false);
 
-                await jobContext.NotifyCompleted().ConfigureAwait(false);
+                await notifyJobContext.NotifyCompleted().ConfigureAwait(false);
             }
             catch (OperationCanceledException exception) when (jobContext.CancellationToken == exception.CancellationToken)
             {
-                await jobContext.NotifyCanceled("Operation canceled").ConfigureAwait(false);
+                await notifyJobContext.NotifyCanceled().ConfigureAwait(false);
             }
             catch (Exception exception)
             {
@@ -67,7 +68,7 @@ namespace MassTransit.Middleware
                         await retryContext.RetryFaulted(exception).ConfigureAwait(false);
                     }
 
-                    await jobContext.NotifyFaulted(exception).ConfigureAwait(false);
+                    await notifyJobContext.NotifyFaulted(exception).ConfigureAwait(false);
                     return;
                 }
 
@@ -83,14 +84,14 @@ namespace MassTransit.Middleware
                             await retryContext.RetryFaulted(exception).ConfigureAwait(false);
                         }
 
-                        await jobContext.NotifyFaulted(exception).ConfigureAwait(false);
+                        await notifyJobContext.NotifyFaulted(exception).ConfigureAwait(false);
                         return;
                     }
                 }
 
                 var delay = retryContext.Delay ?? TimeSpan.Zero;
 
-                await jobContext.NotifyFaulted(exception, delay).ConfigureAwait(false);
+                await notifyJobContext.NotifyFaulted(exception, delay).ConfigureAwait(false);
             }
             finally
             {

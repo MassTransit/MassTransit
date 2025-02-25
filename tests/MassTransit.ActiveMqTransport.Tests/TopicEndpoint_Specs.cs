@@ -6,28 +6,36 @@ namespace MassTransit.ActiveMqTransport.Tests
     using TestFramework.Messages;
 
 
-    [TestFixture]
+    [TestFixture(ActiveMqHostAddress.ActiveMqScheme)]
+    [TestFixture(ActiveMqHostAddress.AmqpScheme)]
     public class Sending_to_a_topic_endpoint :
         ActiveMqTestFixture
     {
         [Test]
         public async Task Should_succeed()
         {
-            var endpoint = await Bus.GetSendEndpoint(new Uri("topic:VirtualTopic.private"));
-            await endpoint.Send(new PrivateMessage {Value = "Hello"});
+            var endpoint = await Bus.GetSendEndpoint(new Uri("topic:private"));
+            await endpoint.Send(new PrivateMessage { Value = "Hello" });
 
             ConsumeContext<PrivateMessage> context = await _handler;
 
             Assert.That(context.Message.Value, Is.EqualTo("Hello"));
         }
 
+        public Sending_to_a_topic_endpoint(string protocol)
+            : base(protocol)
+        {
+        }
+
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<PrivateMessage>> _handler;
+        #pragma warning restore NUnit1032
 
         protected override void ConfigureActiveMqReceiveEndpoint(IActiveMqReceiveEndpointConfigurator configurator)
         {
             configurator.ConfigureConsumeTopology = false;
 
-            configurator.Bind("VirtualTopic.private");
+            configurator.Bind("private");
 
             _handler = Handled<PrivateMessage>(configurator);
 

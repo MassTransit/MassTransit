@@ -1,3 +1,4 @@
+#nullable enable
 namespace MassTransit.JobService
 {
     using System;
@@ -7,7 +8,8 @@ namespace MassTransit.JobService
     /// <summary>
     /// A JobHandle contains the JobContext, Task, and provides access to the job control
     /// </summary>
-    public interface JobHandle
+    public interface JobHandle :
+        IAsyncDisposable
     {
         Guid JobId { get; }
 
@@ -17,6 +19,6 @@ namespace MassTransit.JobService
         /// Cancel the job task
         /// </summary>
         /// <returns></returns>
-        Task Cancel();
+        Task Cancel(string? reason);
     }
 }

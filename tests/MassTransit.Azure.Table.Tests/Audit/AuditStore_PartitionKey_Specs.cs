@@ -5,7 +5,7 @@
     using System.Linq;
     using System.Threading.Tasks;
     using AzureTable;
-    using Microsoft.Azure.Cosmos.Table;
+    using global::Azure.Data.Tables;
     using NUnit.Framework;
 
 
@@ -21,7 +21,7 @@
             Assert.That(_records[0].PartitionKey, Is.EqualTo(PartitionKey));
         }
 
-        List<DynamicTableEntity> _records;
+        List<TableEntity> _records;
         readonly string PartitionKey = "TestPartitionKey";
 
         [OneTimeSetUp]

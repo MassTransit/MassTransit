@@ -29,26 +29,26 @@ namespace MassTransit.Courier
             TrackingNumber = routingSlip.TrackingNumber;
             CreateTimestamp = routingSlip.CreateTimestamp;
 
-            Itinerary = (routingSlip.Itinerary ?? Array.Empty<Activity>())
-                .Select(x => (Activity)new RoutingSlipActivity(x))
+            Itinerary = (routingSlip.Itinerary ?? [])
+                .Select(Activity (x) => new RoutingSlipActivity(x))
                 .ToList();
 
-            ActivityLogs = (routingSlip.ActivityLogs ?? Array.Empty<ActivityLog>())
-                .Select(x => (ActivityLog)new RoutingSlipActivityLog(x))
+            ActivityLogs = (routingSlip.ActivityLogs ?? [])
+                .Select(ActivityLog (x) => new RoutingSlipActivityLog(x))
                 .ToList();
 
-            CompensateLogs = (routingSlip.CompensateLogs ?? Array.Empty<CompensateLog>())
-                .Select(x => (CompensateLog)new RoutingSlipCompensateLog(x))
+            CompensateLogs = (routingSlip.CompensateLogs ?? [])
+                .Select(CompensateLog (x) => new RoutingSlipCompensateLog(x))
                 .ToList();
 
             Variables = routingSlip.Variables ?? new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
-            ActivityExceptions = (routingSlip.ActivityExceptions ?? Array.Empty<ActivityException>())
-                .Select(x => (ActivityException)new RoutingSlipActivityException(x))
+            ActivityExceptions = (routingSlip.ActivityExceptions ?? [])
+                .Select(ActivityException (x) => new RoutingSlipActivityException(x))
                 .ToList();
 
-            Subscriptions = (routingSlip.Subscriptions ?? Array.Empty<Subscription>())
-                .Select(x => (Subscription)new RoutingSlipSubscription(x))
+            Subscriptions = (routingSlip.Subscriptions ?? [])
+                .Select(Subscription (x) => new RoutingSlipSubscription(x))
                 .ToList();
         }
 

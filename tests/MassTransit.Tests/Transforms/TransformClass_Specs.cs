@@ -24,7 +24,9 @@
             });
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<A>> _received;
+        #pragma warning restore NUnit1032
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {

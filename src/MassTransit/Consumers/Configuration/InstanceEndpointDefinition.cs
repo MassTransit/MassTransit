@@ -38,7 +38,7 @@ namespace MassTransit.Configuration
             return formatter.SanitizeName(sb.ToString());
         }
 
-        public void Configure<T>(T configurator)
+        public void Configure<T>(T configurator, IRegistrationContext context)
             where T : IReceiveEndpointConfigurator
         {
         }

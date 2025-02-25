@@ -60,7 +60,9 @@ namespace MassTransit.Tests
             Assert.That(ping.SourceAddress, Is.EqualTo(BusAddress));
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<PingMessage>> _ping;
+        #pragma warning restore NUnit1032
         Guid _correlationId;
 
         [OneTimeSetUp]
@@ -134,9 +136,11 @@ namespace MassTransit.Tests
             Assert.That(context.ConversationId, Is.EqualTo(_conversationId));
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<PingMessage>> _ping;
         Task<ConsumeContext<PongMessage>> _responseHandler;
         Task<Response<PongMessage>> _request;
+        #pragma warning restore NUnit1032
         Guid? _conversationId;
 
         [OneTimeSetUp]
@@ -186,9 +190,11 @@ namespace MassTransit.Tests
             Assert.That(async () => await completed, Throws.TypeOf<TaskCanceledException>());
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<PingMessage>> _ping;
         Task<ConsumeContext<PongMessage>> _responseHandler;
         Task<Response<PingMessage, PingNotSupported>> _request;
+        #pragma warning restore NUnit1032
 
         [OneTimeSetUp]
         public async Task Setup()
@@ -220,8 +226,10 @@ namespace MassTransit.Tests
             Assert.That(message.Message.CorrelationId, Is.EqualTo(_ping.Result.Message.CorrelationId));
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<PingMessage>> _ping;
         Task<Response<PongMessage>> _request;
+        #pragma warning restore NUnit1032
 
         [OneTimeSetUp]
         public async Task Setup()
@@ -256,7 +264,9 @@ namespace MassTransit.Tests
                 Throws.TypeOf<RequestTimeoutException>());
         }
 
+        #pragma warning disable NUnit1032
         Task<Response<PongMessage>> _request;
+        #pragma warning restore NUnit1032
 
         [OneTimeSetUp]
         public async Task Setup()

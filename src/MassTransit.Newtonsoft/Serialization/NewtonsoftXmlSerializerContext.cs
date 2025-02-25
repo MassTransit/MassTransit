@@ -13,8 +13,7 @@ namespace MassTransit.Serialization
 
         public NewtonsoftXmlSerializerContext(JsonSerializer deserializer, IObjectDeserializer objectDeserializer, MessageEnvelope envelope,
             ContentType contentType)
-            : base(deserializer, objectDeserializer, new EnvelopeMessageContext(envelope, objectDeserializer), envelope.Message,
-                envelope.MessageType ?? Array.Empty<string>())
+            : base(deserializer, objectDeserializer, new EnvelopeMessageContext(envelope, objectDeserializer), envelope.Message, envelope.MessageType ?? [])
         {
             _envelope = envelope;
             _contentType = contentType;

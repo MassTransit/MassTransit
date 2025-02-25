@@ -22,8 +22,18 @@ namespace MassTransit.AzureServiceBusTransport
 
         /// <summary>
         /// The timeout before a message session is abandoned
+        /// - if unset the SDK will use
+        /// <see
+        ///     href="https://learn.microsoft.com/en-us/dotnet/api/azure.messaging.servicebus.servicebusretryoptions.trytimeout?view=azure-dotnet#azure-messaging-servicebus-servicebusretryoptions-trytimeout">
+        /// ServiceBusRetryOptions.TryTimeout
+        /// </see>
         /// </summary>
-        TimeSpan SessionIdleTimeout { get; }
+        TimeSpan? SessionIdleTimeout { get; }
+
+        /// <summary>
+        /// The maximum number of concurrent sessions
+        /// </summary>
+        int MaxConcurrentSessions { get; }
 
         /// <summary>
         /// The maximum number of concurrent calls per session

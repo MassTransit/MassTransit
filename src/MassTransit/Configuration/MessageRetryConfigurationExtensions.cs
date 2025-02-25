@@ -22,7 +22,7 @@ namespace MassTransit
             if (configure == null)
                 throw new ArgumentNullException(nameof(configure));
 
-            var observer = new MessageRetryConfigurationObserver(configurator, CancellationToken.None, configure);
+            var _ = new MessageRetryConfigurationObserver(configurator, CancellationToken.None, configure);
         }
 
         /// <summary>
@@ -46,11 +46,11 @@ namespace MassTransit
             var retryObserver = new RetryBusObserver();
             connector.ConnectBusObserver(retryObserver);
 
-            var observer = new MessageRetryConfigurationObserver(configurator, retryObserver.Stopping, configure);
+            var _ = new MessageRetryConfigurationObserver(configurator, retryObserver.Stopping, configure);
         }
 
         /// <summary>
-        /// Configures the message retry for the consumer consumer, regardless of message type.
+        /// Configures the message retry for the consumer, regardless of message type.
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="configure"></param>
@@ -65,7 +65,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Configures the message retry for the consumer consumer, regardless of message type.
+        /// Configures the message retry for the consumer, regardless of message type.
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="busFactoryConfigurator">
@@ -87,7 +87,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Configures the message retry for the consumer consumer, regardless of message type.
+        /// Configures the message retry for the consumer, regardless of message type.
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="configure"></param>
@@ -102,7 +102,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Configures the message retry for the consumer consumer, regardless of message type.
+        /// Configures the message retry for the consumer, regardless of message type.
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="busFactoryConfigurator">
@@ -124,7 +124,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Configures the message retry for the consumer consumer, regardless of message type.
+        /// Configures the message retry for the consumer, regardless of message type.
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="configure"></param>
@@ -139,7 +139,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Configures the message retry for the consumer consumer, regardless of message type.
+        /// Configures the message retry for the consumer, regardless of message type.
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="busFactoryConfigurator">

@@ -3,7 +3,7 @@ namespace MassTransit.ActiveMqTransport.Middleware;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Apache.NMS.ActiveMQ;
+using Apache.NMS;
 using MassTransit.Middleware;
 using Topology;
 
@@ -40,14 +40,15 @@ public sealed class RemoveAutoDeleteAgent :
     {
         try
         {
-            await Task.WhenAll(_brokerTopology.Consumers.Where(x => x.Destination.AutoDelete).Select(consumer => Delete(context, consumer.Destination)))
+            await Task.WhenAll(_brokerTopology.Consumers.Where(x => x.Destination is not null && x.Destination.AutoDelete)
+                    .Select(consumer => Delete(context, consumer.Destination)))
                 .ConfigureAwait(false);
 
             await Task.WhenAll(_brokerTopology.Topics.Where(x => x.AutoDelete).Select(topic => Delete(context, topic))).ConfigureAwait(false);
 
             await Task.WhenAll(_brokerTopology.Queues.Where(x => x.AutoDelete).Select(queue => Delete(context, queue))).ConfigureAwait(false);
         }
-        catch (ConnectionClosedException exception)
+        catch (NMSException exception)
         {
             LogContext.Debug?.Log(exception, "Connection was closed, auto-delete queues/topics/consumers could not be deleted");
         }

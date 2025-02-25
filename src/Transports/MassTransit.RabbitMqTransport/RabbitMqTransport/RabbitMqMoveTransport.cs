@@ -1,64 +1,70 @@
-﻿namespace MassTransit.RabbitMqTransport
+﻿#nullable enable
+namespace MassTransit.RabbitMqTransport;
+
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Middleware;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
+using RabbitMQ.Client.Exceptions;
+
+
+public class RabbitMqMoveTransport<TSettings>
+    where TSettings : class
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using Middleware;
-    using RabbitMQ.Client;
+    readonly string _exchange;
+    readonly ConfigureRabbitMqTopologyFilter<TSettings> _topologyFilter;
 
-
-    public class RabbitMqMoveTransport<TSettings>
-        where TSettings : class
+    protected RabbitMqMoveTransport(string exchange, ConfigureRabbitMqTopologyFilter<TSettings> topologyFilter)
     {
-        readonly string _exchange;
-        readonly ConfigureRabbitMqTopologyFilter<TSettings> _topologyFilter;
+        _topologyFilter = topologyFilter;
+        _exchange = exchange;
+    }
 
-        protected RabbitMqMoveTransport(string exchange, ConfigureRabbitMqTopologyFilter<TSettings> topologyFilter)
+    protected async Task Move(ReceiveContext context, Action<BasicProperties, SendHeaders> preSend)
+    {
+        if (!context.TryGetPayload(out ChannelContext? channelContext))
+            throw new ArgumentException("The ReceiveContext must contain a ChannelContext", nameof(context));
+
+        if (channelContext.Channel.IsClosed)
         {
-            _topologyFilter = topologyFilter;
-            _exchange = exchange;
+            throw new OperationInterruptedException(
+                new ShutdownEventArgs(ShutdownInitiator.Peer, 491, $"Channel is already closed: {channelContext.Channel.CloseReason}"));
         }
 
-        protected async Task Move(ReceiveContext context, Action<IBasicProperties, SendHeaders> preSend)
+        OneTimeContext<ConfigureTopologyContext<TSettings>> oneTimeContext = await _topologyFilter.Configure(channelContext).ConfigureAwait(false);
+
+        BasicProperties properties;
+        var routingKey = "";
+        byte[] body;
+
+        if (context.TryGetPayload(out RabbitMqBasicConsumeContext? basicConsumeContext))
         {
-            if (!context.TryGetPayload(out ModelContext modelContext))
-                throw new ArgumentException("The ReceiveContext must contain a ModelContext", nameof(context));
+            properties = new BasicProperties(basicConsumeContext.Properties);
+            routingKey = basicConsumeContext.RoutingKey;
+            body = context.GetBody();
+        }
+        else
+        {
+            properties = new BasicProperties { Headers = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase) };
+            body = context.GetBody();
+        }
 
-            OneTimeContext<ConfigureTopologyContext<TSettings>> oneTimeContext = await _topologyFilter.Configure(modelContext).ConfigureAwait(false);
+        SendHeaders headers = new MoveTransportHeaders(properties);
 
-            IBasicProperties properties;
-            var routingKey = "";
-            byte[] body;
+        headers.SetHostHeaders();
 
-            if (context.TryGetPayload(out RabbitMqBasicConsumeContext basicConsumeContext))
-            {
-                properties = basicConsumeContext.Properties;
-                routingKey = basicConsumeContext.RoutingKey;
-                body = context.GetBody();
-            }
-            else
-            {
-                properties = modelContext.Model.CreateBasicProperties();
-                properties.Headers = new Dictionary<string, object>();
+        preSend(properties, headers);
 
-                body = context.GetBody();
-            }
-
-            SendHeaders headers = new MoveTransportHeaders(properties);
-
-            headers.SetHostHeaders();
-
-            preSend(properties, headers);
-
-            try
-            {
-                await modelContext.BasicPublishAsync(_exchange, routingKey, true, properties, body, true).ConfigureAwait(false);
-            }
-            catch (Exception)
-            {
-                oneTimeContext.Evict();
-                throw;
-            }
+        try
+        {
+            await channelContext.BasicPublishAsync(_exchange, routingKey, true, properties, body, true).ConfigureAwait(false);
+        }
+        catch (Exception)
+        {
+            oneTimeContext?.Evict();
+            throw;
         }
     }
 }

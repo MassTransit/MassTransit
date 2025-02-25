@@ -1,21 +1,21 @@
 namespace MassTransit.AzureTable.Saga
 {
     using System;
-    using Microsoft.Azure.Cosmos.Table;
+    using Azure.Data.Tables;
 
 
     public class DelegateCloudTableProvider<TSaga> :
         ICloudTableProvider<TSaga>
         where TSaga : class, ISaga
     {
-        readonly Func<CloudTable> _cloudTable;
+        readonly Func<TableClient> _cloudTable;
 
-        public DelegateCloudTableProvider(Func<CloudTable> cloudTable)
+        public DelegateCloudTableProvider(Func<TableClient> cloudTable)
         {
             _cloudTable = cloudTable;
         }
 
-        public CloudTable GetCloudTable()
+        public TableClient GetCloudTable()
         {
             return _cloudTable();
         }

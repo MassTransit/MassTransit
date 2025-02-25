@@ -8,10 +8,11 @@
         /// <summary>
         /// Specify the number of concurrent consumers (separate from prefetch count)
         /// </summary>
+        [Obsolete("Set ConcurrentMessageLimit instead (which is exactly what setting this property does)")]
         int MaxConcurrentCalls { set; }
 
         /// <summary>
-        /// True if the queue should be deleted if idle
+        /// If specified, the queue/subscription will be automatically removed after no consumer activity within the specific idle period
         /// </summary>
         TimeSpan AutoDeleteOnIdle { set; }
 
@@ -52,6 +53,11 @@
         bool RequiresSession { set; }
 
         /// <summary>
+        /// If session is required, sets the maximum concurrent sessions (defaults to 1)
+        /// </summary>
+        int MaxConcurrentSessions { set; }
+
+        /// <summary>
         /// If session is required, sets the maximum concurrent calls per session (defaults to 1)
         /// </summary>
         int MaxConcurrentCallsPerSession { set; }
@@ -62,15 +68,9 @@
         string UserMetadata { set; }
 
         /// <summary>
-        /// Sets the message session timeout period
-        /// </summary>
-        [Obsolete("use SessionIdleTimeout, which this method calls through to for now")]
-        TimeSpan MessageWaitTimeout { set; }
-
-        /// <summary>
         /// Sets the message session idle timeout period
         /// </summary>
-        TimeSpan SessionIdleTimeout { set; }
+        TimeSpan? SessionIdleTimeout { set; }
 
         /// <summary>
         /// Sets the maximum time for locks/sessions to be automatically renewed

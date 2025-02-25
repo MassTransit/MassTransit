@@ -86,12 +86,14 @@
             Assert.That(context.GetVariable<string>("Variable"), Is.EqualTo("Knife"));
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<RoutingSlipFaulted>> _faulted;
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
         Task<ConsumeContext<RoutingSlipActivityFaulted>> _activityFaulted;
         Guid _trackingNumber;
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _secondActivityCompleted;
         Task<ConsumeContext<RoutingSlipActivityCompensated>> _activityCompensated;
+        #pragma warning restore NUnit1032
 
         [OneTimeSetUp]
         public async Task Setup()

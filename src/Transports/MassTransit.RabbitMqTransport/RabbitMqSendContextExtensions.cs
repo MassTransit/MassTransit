@@ -7,6 +7,8 @@
 
     public static class RabbitMqSendContextExtensions
     {
+        const string StreamFilterValueHeaderName = "x-stream-filter-value";
+
         public static void SetTransportHeader(this RabbitMqSendContext context, string key, object value)
         {
             SetHeader(context.BasicProperties, key, value);
@@ -80,6 +82,33 @@
                 return false;
 
             sendContext.AwaitAck = awaitAck;
+            return true;
+        }
+
+        /// <summary>
+        /// Sets the filter value used for server-side streams filtering.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="value"></param>
+        public static void SetStreamFilterValue(this SendContext context, string value)
+        {
+            if (!context.TryGetPayload(out RabbitMqSendContext sendContext))
+                throw new ArgumentException("The RabbitMqSendContext was not available");
+
+            sendContext.Headers.Set(StreamFilterValueHeaderName, value);
+        }
+
+        /// <summary>
+        /// Sets the filter value used for server-side streams filtering.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="value"></param>
+        public static bool TrySetStreamFilterValue(this SendContext context, string value)
+        {
+            if (!context.TryGetPayload(out RabbitMqSendContext sendContext))
+                return false;
+
+            sendContext.Headers.Set(StreamFilterValueHeaderName, value);
             return true;
         }
     }

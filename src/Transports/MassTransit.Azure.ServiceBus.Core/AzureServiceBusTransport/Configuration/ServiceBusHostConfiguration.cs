@@ -40,6 +40,7 @@
                 x.Handle<RequestFailedException>();
                 x.Handle<ServiceBusException>(ex => ex.Reason switch
                 {
+                    ServiceBusFailureReason.MessagingEntityDisabled => true,
                     ServiceBusFailureReason.MessagingEntityNotFound => false,
                     ServiceBusFailureReason.MessagingEntityAlreadyExists => false,
                     ServiceBusFailureReason.MessageNotFound => false,

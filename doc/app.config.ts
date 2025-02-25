@@ -7,10 +7,9 @@ export default defineAppConfig({
     docus: {
         title: 'MassTransit',
         description: 'An open-source distributed application framework for .NET',
-        image: 'https://raw.githubusercontent.com/phatboyg/MassTransit/docus/docus/public/landing-image.png',
-        url: 'https://masstransit-project.com',
+        image: 'https://masstransit.io/mt-logo-color.png',
+        url: 'https://masstransit.io',
         socials: {
-            twitter: 'mtproj',
             github: 'MassTransit/MassTransit'
         },
         aside: {

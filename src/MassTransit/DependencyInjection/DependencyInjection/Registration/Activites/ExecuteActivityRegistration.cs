@@ -4,7 +4,6 @@ namespace MassTransit.DependencyInjection.Registration
     using System.Collections.Generic;
     using Configuration;
     using Internals;
-    using Microsoft.Extensions.DependencyInjection;
     using Transports;
 
 
@@ -14,10 +13,12 @@ namespace MassTransit.DependencyInjection.Registration
         where TArguments : class
     {
         readonly List<Action<IRegistrationContext, IExecuteActivityConfigurator<TActivity, TArguments>>> _configureActions;
+        readonly IContainerSelector _selector;
         IExecuteActivityDefinition<TActivity, TArguments> _definition;
 
-        public ExecuteActivityRegistration()
+        public ExecuteActivityRegistration(IContainerSelector selector)
         {
+            _selector = selector;
             _configureActions = new List<Action<IRegistrationContext, IExecuteActivityConfigurator<TActivity, TArguments>>>();
             IncludeInConfigureEndpoints = !Type.HasAttribute<ExcludeFromConfigureEndpointsAttribute>();
         }
@@ -52,8 +53,6 @@ namespace MassTransit.DependencyInjection.Registration
                 TypeCache<TActivity>.ShortName);
 
             configurator.AddEndpointSpecification(specification);
-
-            IncludeInConfigureEndpoints = false;
         }
 
         IExecuteActivityDefinition IExecuteActivityRegistration.GetDefinition(IRegistrationContext context)
@@ -66,10 +65,11 @@ namespace MassTransit.DependencyInjection.Registration
             if (_definition != null)
                 return _definition;
 
-            _definition = provider.GetService<IExecuteActivityDefinition<TActivity, TArguments>>()
+            _definition = _selector.GetDefinition<IExecuteActivityDefinition<TActivity, TArguments>>(provider)
                 ?? new DefaultExecuteActivityDefinition<TActivity, TArguments>();
 
-            var executeEndpointDefinition = provider.GetService<IEndpointDefinition<IExecuteActivity<TArguments>>>();
+            IEndpointDefinition<IExecuteActivity<TArguments>> executeEndpointDefinition =
+                _selector.GetEndpointDefinition<IExecuteActivity<TArguments>>(provider);
             if (executeEndpointDefinition != null)
                 _definition.ExecuteEndpointDefinition = executeEndpointDefinition;
 

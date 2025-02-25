@@ -21,6 +21,11 @@ namespace MassTransit
         /// is > TimeSpan.Zero, the <see cref="Timeout" /> value is used.
         /// </summary>
         TimeSpan? TimeToLive { set; }
+
+        /// <summary>
+        /// By default, the RequestId is not cleared when the request is Faulted. Set to true to clear the requestId
+        /// </summary>
+        bool ClearRequestIdOnFaulted { set; }
     }
 
 

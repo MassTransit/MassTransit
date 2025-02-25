@@ -38,5 +38,52 @@ namespace MassTransit.Internals
 
             return result;
         }
+
+        public static Dictionary<string, object> SetValue(this Dictionary<string, object> dictionary, string key, string? value)
+        {
+            if (dictionary == null)
+                throw new ArgumentNullException(nameof(dictionary));
+            if (key == null)
+                throw new ArgumentNullException(nameof(key));
+
+            if (value == null)
+                dictionary.Remove(key);
+            else
+                dictionary[key] = value;
+
+            return dictionary;
+        }
+
+        public static Dictionary<string, object> SetValue(this Dictionary<string, object> dictionary, string key, object? value, bool overwrite = true)
+        {
+            if (dictionary == null)
+                throw new ArgumentNullException(nameof(dictionary));
+            if (key == null)
+                throw new ArgumentNullException(nameof(key));
+
+            if (overwrite)
+            {
+                if (value == null)
+                    dictionary.Remove(key);
+                else
+                    dictionary[key] = value;
+            }
+            else if (!dictionary.ContainsKey(key) && value != null)
+                dictionary.Add(key, value);
+
+            return dictionary;
+        }
+
+        public static Dictionary<string, object> SetValues(this Dictionary<string, object> dictionary, IEnumerable<KeyValuePair<string, object?>>? properties,
+            bool overwrite = true)
+        {
+            if (properties != null)
+            {
+                foreach (KeyValuePair<string, object?> header in properties)
+                    SetValue(dictionary, header.Key, header.Value, overwrite);
+            }
+
+            return dictionary;
+        }
     }
 }

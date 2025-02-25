@@ -23,6 +23,7 @@ namespace MassTransit.SqlTransport.PostgreSql
         IAsyncDisposable
     {
         readonly NotificationAgent _agent;
+        readonly NpgsqlDataSource _dataSource;
         readonly TaskExecutor _executor;
         readonly ISqlHostConfiguration _hostConfiguration;
         readonly PostgresSqlHostSettings _hostSettings;
@@ -42,6 +43,8 @@ namespace MassTransit.SqlTransport.PostgreSql
             _hostSettings = hostConfiguration.Settings as PostgresSqlHostSettings
                 ?? throw new ConfigurationException("The host settings were not of the expected type");
 
+            _dataSource = _hostSettings.GetDataSource();
+
             _retryPolicy = Retry.CreatePolicy(x => x.Immediate(10).Handle<PostgresException>(ex => ex.IsTransient));
 
             Topology = hostConfiguration.Topology;
@@ -49,7 +52,8 @@ namespace MassTransit.SqlTransport.PostgreSql
             _agent = new NotificationAgent(this, hostConfiguration);
             supervisor.AddConsumeAgent(_agent);
 
-            supervisor.AddConsumeAgent(new MaintenanceAgent(this, hostConfiguration));
+            if (_hostSettings.MaintenanceEnabled)
+                supervisor.AddConsumeAgent(new MaintenanceAgent(this, hostConfiguration));
 
             _executor = new TaskExecutor(hostConfiguration.Settings.ConnectionLimit);
         }
@@ -74,17 +78,17 @@ namespace MassTransit.SqlTransport.PostgreSql
 
         public Task<T> Query<T>(Func<IDbConnection, IDbTransaction, Task<T>> callback, CancellationToken cancellationToken)
         {
-            return _executor.Run(async () =>
+            return _executor.Run(() =>
             {
-                await using var connection = await CreateConnection(cancellationToken);
-
-                return await _retryPolicy.Retry(async () =>
+                return _retryPolicy.Retry(async () =>
                 {
+                    await using var connection = await CreateConnection(cancellationToken).ConfigureAwait(false);
+
                 #if NET6_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
-                    await using var transaction = await connection.Connection.BeginTransactionAsync(_hostSettings.IsolationLevel, cancellationToken);
+                    await using var transaction = await connection.Connection.BeginTransactionAsync(_hostSettings.IsolationLevel, cancellationToken)
+                        .ConfigureAwait(false);
                 #else
-                // ReSharper disable AccessToDisposedClosure
-                await using var transaction = connection.Connection.BeginTransaction(_hostSettings.IsolationLevel);
+                    await using var transaction = connection.Connection.BeginTransaction(_hostSettings.IsolationLevel);
                 #endif
 
                     var result = await callback(connection.Connection, transaction).ConfigureAwait(false);
@@ -92,7 +96,7 @@ namespace MassTransit.SqlTransport.PostgreSql
                     await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
 
                     return result;
-                }, false, cancellationToken).ConfigureAwait(false);
+                }, false, cancellationToken);
             }, cancellationToken);
         }
 
@@ -117,12 +121,15 @@ namespace MassTransit.SqlTransport.PostgreSql
 
         public async ValueTask DisposeAsync()
         {
+            if (_hostSettings.IsProvidedDataSource == false)
+                await _dataSource.DisposeAsync().ConfigureAwait(false);
+
             TransportLogMessages.DisconnectedHost(_hostConfiguration.HostAddress.ToString());
         }
 
-        public async Task<IPostgresSqlTransportConnection> CreateConnection(CancellationToken cancellationToken)
+        async Task<IPostgresSqlTransportConnection> CreateConnection(CancellationToken cancellationToken)
         {
-            var connection = new PostgresSqlTransportConnection(_hostSettings.GetConnectionString());
+            var connection = new PostgresSqlTransportConnection(_dataSource.CreateConnection());
 
             await connection.Open(cancellationToken).ConfigureAwait(false);
 
@@ -226,7 +233,7 @@ namespace MassTransit.SqlTransport.PostgreSql
                                 foreach (var queueId in _notificationTokens.Keys)
                                 {
                                     if (queueIds.Contains(queueId))
-                                        break;
+                                        continue;
 
                                     await connection.Connection.ExecuteScalarAsync<int>($"LISTEN \"{sanitizedSchemaName}_msg_{queueId}\"", Stopping)
                                         .ConfigureAwait(false);
@@ -288,16 +295,17 @@ namespace MassTransit.SqlTransport.PostgreSql
 
                 var processMetricsSql = string.Format(SqlStatements.DbProcessMetricsSql, _context.Schema);
                 var purgeTopologySql = string.Format(SqlStatements.DbPurgeTopologySql, _context.Schema);
+                var removeOrphanedMessagesSql = string.Format(SqlStatements.DbRemoveOrphanedMessages, _context.Schema);
 
                 var random = new Random();
 
                 var cleanupInterval = _hostConfiguration.Settings.QueueCleanupInterval
                     + TimeSpan.FromSeconds(random.Next(0, (int)(_hostConfiguration.Settings.QueueCleanupInterval.TotalSeconds / 10)));
 
+                DateTime? lastCleanup = null;
+
                 while (!Stopping.IsCancellationRequested)
                 {
-                    DateTime? lastCleanup = null;
-
                     try
                     {
                         var maintenanceInterval = _hostConfiguration.Settings.MaintenanceInterval
@@ -309,13 +317,26 @@ namespace MassTransit.SqlTransport.PostgreSql
                         }
                         catch (OperationCanceledException)
                         {
-                            await _context.Query((x, t) => x.ExecuteScalarAsync<long?>(processMetricsSql, new
-                            {
-                                row_limit = _hostConfiguration.Settings.MaintenanceBatchSize,
-                            }), CancellationToken.None);
+                            using var timeoutToken = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
-                            if (lastCleanup == null)
-                                await _context.Query((x, t) => x.ExecuteScalarAsync<long?>(purgeTopologySql), CancellationToken.None);
+                            try
+                            {
+                                await _context.Query(
+                                    (x, t) => x.ExecuteScalarAsync<long?>(processMetricsSql,
+                                        new { row_limit = _hostConfiguration.Settings.MaintenanceBatchSize }, t), timeoutToken.Token);
+
+                                if (lastCleanup == null)
+                                    await _context.Query((x, t) => x.ExecuteScalarAsync<long?>(purgeTopologySql, t), timeoutToken.Token);
+                            }
+                            catch (ObjectDisposedException)
+                            {
+                            }
+                            catch (OperationCanceledException)
+                            {
+                            }
+                            catch (TimeoutException)
+                            {
+                            }
                         }
 
                         await _hostConfiguration.Retry(async () =>
@@ -323,15 +344,18 @@ namespace MassTransit.SqlTransport.PostgreSql
                             await _context.Query((x, t) => x.ExecuteScalarAsync<long?>(processMetricsSql, new
                             {
                                 row_limit = _hostConfiguration.Settings.MaintenanceBatchSize,
-                            }), Stopping);
+                            }, t), Stopping);
 
                             if (lastCleanup == null || lastCleanup < DateTime.UtcNow - cleanupInterval)
                             {
-                                await _context.Query((x, t) => x.ExecuteScalarAsync<long?>(purgeTopologySql), Stopping);
+                                await _context.Query((x, t) => x.ExecuteScalarAsync<long?>(purgeTopologySql, t), Stopping);
 
                                 lastCleanup = DateTime.UtcNow;
                                 cleanupInterval = _hostConfiguration.Settings.QueueCleanupInterval
                                     + TimeSpan.FromSeconds(random.Next(0, (int)(_hostConfiguration.Settings.QueueCleanupInterval.TotalSeconds / 10)));
+
+                                await _context.Query((x, t) => x.ExecuteScalarAsync<long?>(removeOrphanedMessagesSql,
+                                    new { row_limit = _hostConfiguration.Settings.MaintenanceBatchSize }, t), Stopping);
                             }
                         }, Stopping, Stopping);
                     }

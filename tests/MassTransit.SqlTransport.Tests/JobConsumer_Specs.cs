@@ -80,7 +80,7 @@ namespace MassTransit.DbTransport.Tests
                 Assert.That(await harness.Published.Any<JobStarted<OddJob>>(), Is.True);
             });
 
-            await harness.Bus.Publish<CancelJob>(new { JobId = jobId });
+            await harness.Bus.CancelJob(jobId);
 
             Assert.That(await harness.Published.Any<JobCanceled>(), Is.True);
 
@@ -123,7 +123,7 @@ namespace MassTransit.DbTransport.Tests
 
             Assert.That(jobState.Message.CurrentState, Is.EqualTo("Started"));
 
-            await harness.Bus.Publish<CancelJob>(new { JobId = jobId });
+            await harness.Bus.CancelJob(jobId);
 
             await Assert.MultipleAsync(async () =>
             {
@@ -168,7 +168,7 @@ namespace MassTransit.DbTransport.Tests
                 Assert.That(await harness.Published.Any<JobStarted<OddJob>>(), Is.True);
             });
 
-            await harness.Bus.Publish<CancelJob>(new { JobId = jobId });
+            await harness.Bus.CancelJob(jobId);
 
             await Assert.MultipleAsync(async () =>
             {
@@ -178,7 +178,8 @@ namespace MassTransit.DbTransport.Tests
 
             await Task.Delay(500);
 
-            await harness.Bus.Publish<RetryJob>(new { JobId = jobId });
+            await harness.Bus.RetryJob(jobId);
+
             await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Published.Any<JobCompleted>(), Is.True);
@@ -204,7 +205,7 @@ namespace MassTransit.DbTransport.Tests
 
             IRequestClient<SubmitJob<OddJob>> client = harness.GetRequestClient<SubmitJob<OddJob>>();
 
-            Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new
+            await client.GetResponse<JobSubmissionAccepted>(new
             {
                 JobId = previousJobId,
                 Job = new { Duration = TimeSpan.FromSeconds(10) }
@@ -212,7 +213,7 @@ namespace MassTransit.DbTransport.Tests
 
             Assert.That(await harness.Published.Any<JobStarted>(x => x.Context.Message.JobId == previousJobId), Is.True);
 
-            response = await client.GetResponse<JobSubmissionAccepted>(new
+            Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new
             {
                 JobId = jobId,
                 Job = new { Duration = TimeSpan.FromSeconds(10) }
@@ -227,11 +228,11 @@ namespace MassTransit.DbTransport.Tests
                 Assert.That(await harness.Sent.Any<JobSlotWaitElapsed>(x => x.Context.Message.JobId == jobId), Is.True);
             });
 
-            await harness.Bus.Publish<CancelJob>(new { JobId = jobId });
+            await harness.Bus.CancelJob(jobId);
 
             Assert.That(await harness.Published.Any<JobCanceled>(x => x.Context.Message.JobId == jobId), Is.True);
 
-            await harness.Bus.Publish<CancelJob>(new { JobId = previousJobId });
+            await harness.Bus.CancelJob(previousJobId);
             Assert.That(await harness.Published.Any<JobCanceled>(x => x.Context.Message.JobId == previousJobId), Is.True);
 
             await harness.Stop();

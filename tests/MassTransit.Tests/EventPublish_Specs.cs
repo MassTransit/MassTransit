@@ -35,10 +35,12 @@
             ConsumeContext<PingConsumed> consumed = await _consumed;
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<PingReceived>> _received;
         Task<ConsumeContext<PingConsumed>> _consumed;
         Task<ConsumeContext<PingCompleted>> _completed;
         Task<ConsumeContext<PingProcessing>> _processing;
+        #pragma warning restore NUnit1032
 
         [OneTimeSetUp]
         public async Task Setup()

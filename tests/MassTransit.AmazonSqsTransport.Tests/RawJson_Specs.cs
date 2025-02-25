@@ -128,7 +128,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
 
                 Assert.That(context.Message.CorrelationId, Is.EqualTo(message.CommandId));
 
-                Assert.That(context.Headers.Get<string>(headerName), Is.EqualTo(default));
+                Assert.That(context.Headers.Get<string>(headerName), Is.EqualTo((string)default));
             });
         }
 

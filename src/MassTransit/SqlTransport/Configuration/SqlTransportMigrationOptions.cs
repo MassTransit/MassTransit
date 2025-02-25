@@ -8,6 +8,13 @@ namespace MassTransit
         public bool CreateDatabase { get; set; }
 
         /// <summary>
+        /// If true, the schema for transport components will be created/updated on startup
+        ///
+        /// Use this, without CreateDatabase, if you do not have the required permissions to create the schema and grant access
+        /// </summary>
+        public bool CreateSchema { get; set; }
+
+        /// <summary>
         /// If true, the infrastructure components for the transport will be created/updated on startup
         ///
         /// Use this, without CreateDatabase, if you do not have the required permissions to create databases and logins

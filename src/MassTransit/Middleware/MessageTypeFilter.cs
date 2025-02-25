@@ -23,7 +23,7 @@
         public ConsumeContextMessageTypeFilter()
         {
             _outputPipes = new Dictionary<Type, IOutputFilter>();
-            _outputPipeArray = Array.Empty<IOutputFilter>();
+            _outputPipeArray = [];
 
             _empty = Pipe.Empty<ConsumeContext>();
 

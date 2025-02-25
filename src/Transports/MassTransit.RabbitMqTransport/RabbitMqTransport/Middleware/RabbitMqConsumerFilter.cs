@@ -5,10 +5,10 @@ namespace MassTransit.RabbitMqTransport.Middleware
 
 
     /// <summary>
-    /// A filter that uses the model context to create a basic consumer and connect it to the model
+    /// A filter that uses the channel context to create a basic consumer and connect it to the channel
     /// </summary>
     public class RabbitMqConsumerFilter :
-        IFilter<ModelContext>
+        IFilter<ChannelContext>
     {
         readonly RabbitMqReceiveEndpointContext _context;
         string _consumerTag;
@@ -20,11 +20,11 @@ namespace MassTransit.RabbitMqTransport.Middleware
             _consumerTag = "";
         }
 
-        void IProbeSite.Probe(ProbeContext context)
+        public void Probe(ProbeContext context)
         {
         }
 
-        async Task IFilter<ModelContext>.Send(ModelContext context, IPipe<ModelContext> next)
+        public async Task Send(ChannelContext context, IPipe<ChannelContext> next)
         {
             var receiveSettings = context.GetPayload<ReceiveSettings>();
 
@@ -34,7 +34,7 @@ namespace MassTransit.RabbitMqTransport.Middleware
             var consumer = new RabbitMqBasicConsumer(context, _context);
 
             _consumerTag = await context.BasicConsume(receiveSettings.QueueName, receiveSettings.NoAck, _context.ExclusiveConsumer,
-                receiveSettings.ConsumeArguments, consumer, _consumerTag).ConfigureAwait(false);
+                receiveSettings.ConsumeArguments, consumer, _consumerTag, context.CancellationToken).ConfigureAwait(false);
 
             await consumer.Ready.ConfigureAwait(false);
 

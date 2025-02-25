@@ -42,7 +42,9 @@ namespace MassTransit.Tests.Serialization
             });
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<Command>> _handled;
+        #pragma warning restore NUnit1032
         Task<ConsumeContext<BagOfCrap>> _forwarded;
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
@@ -113,7 +115,9 @@ namespace MassTransit.Tests.Serialization
             });
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<Command>> _handled;
+        #pragma warning restore NUnit1032
         Task<ConsumeContext<BagOfCrap>> _forwarded;
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
@@ -184,7 +188,9 @@ namespace MassTransit.Tests.Serialization
             });
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<Command>> _handled;
+        #pragma warning restore NUnit1032
         Task<ConsumeContext<BagOfCrap>> _forwarded;
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)

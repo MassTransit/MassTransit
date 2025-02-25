@@ -41,6 +41,7 @@ namespace MassTransit.Configuration
         IRetryPolicy SendTransportRetryPolicy { get; }
 
         TimeSpan? ConsumerStopTimeout { get; set; }
+        TimeSpan? StopTimeout { get; set; }
 
         /// <summary>
         /// Create a receive endpoint configuration

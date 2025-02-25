@@ -1352,10 +1352,9 @@
 
             DuringAny(
                 When(request.Completed)
-                    .CancelRequestTimeout(request)
-                    .ClearRequest(request),
+                    .CancelRequestTimeout(request),
                 When(request.Faulted)
-                    .CancelRequestTimeout(request));
+                    .CancelRequestTimeout(request, false));
         }
 
         /// <summary>
@@ -1401,7 +1400,7 @@
                 When(request.Completed)
                     .CancelRequestTimeout(request),
                 When(request.Faulted)
-                    .CancelRequestTimeout(request));
+                    .CancelRequestTimeout(request, false));
         }
 
         /// <summary>
@@ -1502,13 +1501,11 @@
 
             DuringAny(
                 When(request.Completed)
-                    .CancelRequestTimeout(request)
-                    .ClearRequest(request),
+                    .CancelRequestTimeout(request),
                 When(request.Completed2)
-                    .CancelRequestTimeout(request)
-                    .ClearRequest(request),
+                    .CancelRequestTimeout(request),
                 When(request.Faulted)
-                    .CancelRequestTimeout(request));
+                    .CancelRequestTimeout(request, false));
         }
 
         /// <summary>
@@ -1564,7 +1561,7 @@
                 When(request.Completed2)
                     .CancelRequestTimeout(request),
                 When(request.Faulted)
-                    .CancelRequestTimeout(request));
+                    .CancelRequestTimeout(request, false));
         }
 
         /// <summary>
@@ -1678,16 +1675,13 @@
 
             DuringAny(
                 When(request.Completed)
-                    .CancelRequestTimeout(request)
-                    .ClearRequest(request),
+                    .CancelRequestTimeout(request),
                 When(request.Completed2)
-                    .CancelRequestTimeout(request)
-                    .ClearRequest(request),
+                    .CancelRequestTimeout(request),
                 When(request.Completed3)
-                    .CancelRequestTimeout(request)
-                    .ClearRequest(request),
+                    .CancelRequestTimeout(request),
                 When(request.Faulted)
-                    .CancelRequestTimeout(request));
+                    .CancelRequestTimeout(request, false));
         }
 
         /// <summary>
@@ -1752,7 +1746,7 @@
                 When(request.Completed3)
                     .CancelRequestTimeout(request),
                 When(request.Faulted)
-                    .CancelRequestTimeout(request));
+                    .CancelRequestTimeout(request, false));
         }
 
         /// <summary>

@@ -27,7 +27,7 @@ namespace MassTransit.MongoDbIntegration.Tests
                 {
                     x.AddMongoDbOutbox(o =>
                     {
-                        o.Connection = "mongodb://127.0.0.1:27021";
+                        o.Connection = "mongodb://127.0.0.1";
                         o.DatabaseName = "sagaTest";
 
                         o.QueryDelay = TimeSpan.FromSeconds(1);
@@ -99,7 +99,7 @@ namespace MassTransit.MongoDbIntegration.Tests
                 {
                     x.AddMongoDbOutbox(o =>
                     {
-                        o.Connection = "mongodb://127.0.0.1:27021";
+                        o.Connection = "mongodb://127.0.0.1";
                         o.DatabaseName = "sagaTest";
 
                         o.QueryDelay = TimeSpan.FromSeconds(1);
@@ -153,7 +153,7 @@ namespace MassTransit.MongoDbIntegration.Tests
                     x.SetTestTimeouts(testInactivityTimeout: TimeSpan.FromSeconds(5));
                     x.AddMongoDbOutbox(o =>
                     {
-                        o.Connection = "mongodb://127.0.0.1:27021";
+                        o.Connection = "mongodb://127.0.0.1";
                         o.DatabaseName = "sagaTest";
 
                         o.QueryDelay = TimeSpan.FromMinutes(1);
@@ -207,7 +207,7 @@ namespace MassTransit.MongoDbIntegration.Tests
                 {
                     x.AddMongoDbOutbox(o =>
                     {
-                        o.Connection = "mongodb://127.0.0.1:27021";
+                        o.Connection = "mongodb://127.0.0.1";
                         o.DatabaseName = "sagaTest";
                         o.QueryDelay = TimeSpan.FromSeconds(1);
 
@@ -264,7 +264,7 @@ namespace MassTransit.MongoDbIntegration.Tests
                     x.SetTestTimeouts(testInactivityTimeout: TimeSpan.FromSeconds(5));
                     x.AddMongoDbOutbox(o =>
                     {
-                        o.Connection = "mongodb://127.0.0.1:27021";
+                        o.Connection = "mongodb://127.0.0.1";
                         o.DatabaseName = "sagaTest";
 
                         o.QueryDelay = TimeSpan.FromMinutes(1);
@@ -330,7 +330,7 @@ namespace MassTransit.MongoDbIntegration.Tests
                     x.SetTestTimeouts(testInactivityTimeout: TimeSpan.FromSeconds(10));
                     x.AddMongoDbOutbox(o =>
                     {
-                        o.Connection = "mongodb://127.0.0.1:27021";
+                        o.Connection = "mongodb://127.0.0.1";
                         o.DatabaseName = "sagaTest";
 
                         o.QueryDelay = TimeSpan.FromSeconds(1);
@@ -383,7 +383,7 @@ namespace MassTransit.MongoDbIntegration.Tests
                 {
                     x.AddMongoDbOutbox(o =>
                     {
-                        o.Connection = "mongodb://127.0.0.1:27021";
+                        o.Connection = "mongodb://127.0.0.1";
                         o.DatabaseName = "sagaTest";
                         o.DisableInboxCleanupService();
 

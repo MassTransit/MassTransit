@@ -5,6 +5,7 @@
     using System.Runtime.Serialization;
     using System.Text;
     using System.Threading.Tasks;
+    using MassTransit.Middleware;
     using Metadata;
     using NUnit.Framework;
     using RabbitMQ.Client;
@@ -156,22 +157,21 @@
         public async Task Setup()
         {
             var connectionFactory = GetHostSettings().GetConnectionFactory();
-            using (var connection = connectionFactory.CreateConnection())
-            using (var model = connection.CreateModel())
-            {
-                var bytes = Encoding.UTF8.GetBytes("[]");
+            await using var connection = await connectionFactory.CreateConnectionAsync();
+            await using var channel = await connection.CreateChannelAsync();
 
-                model.BasicPublish("input_queue", "", model.CreateBasicProperties(), bytes);
+            var bytes = Encoding.UTF8.GetBytes("[]");
 
-                await Task.Delay(3000).ConfigureAwait(false);
+            await channel.BasicPublishAsync("input_queue", "", false, new BasicProperties(), bytes);
 
-                _basicGetResult = model.BasicGet("input_queue_error", true);
+            await Task.Delay(3000).ConfigureAwait(false);
 
-                _body = Encoding.UTF8.GetString(_basicGetResult.Body.ToArray());
+            _basicGetResult = await channel.BasicGetAsync("input_queue_error", true);
 
-                model.Close(200, "Cleanup complete");
-                connection.Close(200, "Cleanup complete");
-            }
+            _body = Encoding.UTF8.GetString(_basicGetResult.Body.ToArray());
+
+            await channel.CloseAsync(200, "Cleanup complete");
+            await connection.CloseAsync(200, "Cleanup complete");
         }
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
@@ -213,20 +213,19 @@
         public async Task Setup()
         {
             var connectionFactory = GetHostSettings().GetConnectionFactory();
-            using (var connection = connectionFactory.CreateConnection())
-            using (var model = connection.CreateModel())
-            {
-                model.BasicPublish("input_queue", "", model.CreateBasicProperties(), null);
+            await using var connection = await connectionFactory.CreateConnectionAsync();
+            await using var channel = await connection.CreateChannelAsync();
 
-                await Task.Delay(5000).ConfigureAwait(false);
+            await channel.BasicPublishAsync("input_queue", "", false, new BasicProperties(), null);
 
-                _basicGetResult = model.BasicGet("input_queue_error", true);
+            await Task.Delay(5000).ConfigureAwait(false);
 
-                _body = Encoding.UTF8.GetString(_basicGetResult.Body.ToArray());
+            _basicGetResult = await channel.BasicGetAsync("input_queue_error", true);
 
-                model.Close(200, "Cleanup complete");
-                connection.Close(200, "Cleanup complete");
-            }
+            _body = Encoding.UTF8.GetString(_basicGetResult.Body.ToArray());
+
+            await channel.CloseAsync(200, "Cleanup complete");
+            await connection.CloseAsync(200, "Cleanup complete");
         }
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
@@ -300,15 +299,14 @@
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
 
-            using (var body = context.ReceiveContext.GetBodyStream())
-            using (var output = new MemoryStream())
-            {
-                await body.CopyToAsync(output);
-                await output.FlushAsync();
+            await using var body = context.ReceiveContext.GetBodyStream();
+            using var output = new MemoryStream();
 
-                var text = Encoding.UTF8.GetString(output.ToArray());
-                Console.WriteLine(text);
-            }
+            await body.CopyToAsync(output);
+            await output.FlushAsync();
+
+            var text = Encoding.UTF8.GetString(output.ToArray());
+            Console.WriteLine(text);
         }
 
         Task<ConsumeContext<PingMessage>> _errorHandler;
@@ -384,6 +382,79 @@
             {
                 throw new AggregateException("Request is so bad, I'm dying here!");
             });
+        }
+    }
+
+
+    [TestFixture]
+    public class An_additional_exception_header :
+        RabbitMqTestFixture
+    {
+        [Test]
+        public async Task Should_have_the_additional_header()
+        {
+            ConsumeContext<PingMessage> context = await _errorHandler;
+
+            Assert.That(context.ReceiveContext.TransportHeaders.Get<bool>("Extra-Faulty", false), Is.True);
+        }
+
+        [Test]
+        public async Task Should_move_the_message_to_the_error_queue()
+        {
+            await _errorHandler;
+        }
+
+        Task<ConsumeContext<PingMessage>> _errorHandler;
+        Task<Response<PongMessage>> _responseTask;
+
+        [OneTimeSetUp]
+        public async Task Setup()
+        {
+            IRequestClient<PingMessage> client = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, TestTimeout);
+
+            _responseTask = client.GetResponse<PongMessage>(new PingMessage());
+        }
+
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
+        {
+            configurator.ReceiveEndpoint("input_queue_error", x =>
+            {
+                x.PurgeOnStartup = true;
+
+                _errorHandler = Handled<PingMessage>(x);
+            });
+        }
+
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        {
+            configurator.ConfigureError(x =>
+            {
+                x.UseFilter(new ExceptionHeaderTransportFilter());
+                x.UseFilter(new GenerateFaultFilter());
+                x.UseFilter(new ErrorTransportFilter());
+            });
+
+            Handler<PingMessage>(configurator, async context =>
+            {
+                throw new AggregateException("Request is so bad, I'm dying here!");
+            });
+        }
+
+
+        public class ExceptionHeaderTransportFilter :
+            IFilter<ExceptionReceiveContext>
+        {
+            public void Probe(ProbeContext context)
+            {
+                context.CreateFilterScope("header");
+            }
+
+            public Task Send(ExceptionReceiveContext context, IPipe<ExceptionReceiveContext> next)
+            {
+                context.ExceptionHeaders.Set("Extra-Faulty", "true");
+
+                return next.Send(context);
+            }
         }
     }
 }

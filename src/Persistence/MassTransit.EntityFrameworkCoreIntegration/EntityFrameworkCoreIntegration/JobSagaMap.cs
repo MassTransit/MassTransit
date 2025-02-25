@@ -16,6 +16,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
         protected override void Configure(EntityTypeBuilder<JobSaga> entity, ModelBuilder model)
         {
+            entity.OptOutOfEntityFrameworkConventions();
+
             entity.Property(x => x.CurrentState);
 
             entity.Ignore(x => x.Version);
@@ -49,6 +51,25 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
             entity.Property(x => x.JobSlotWaitToken);
             entity.Property(x => x.JobRetryDelayToken);
+
+            entity.Property(x => x.IncompleteAttempts)
+                .HasJsonConversion();
+
+            entity.Property(x => x.LastProgressValue);
+            entity.Property(x => x.LastProgressLimit);
+            entity.Property(x => x.LastProgressSequenceNumber);
+
+            entity.Property(x => x.JobState)
+                .HasJsonConversion();
+
+            entity.Property(x => x.JobProperties)
+                .HasJsonConversion();
+
+            entity.Property(x => x.CronExpression);
+            entity.Property(x => x.TimeZoneId);
+            entity.Property(x => x.StartDate);
+            entity.Property(x => x.EndDate);
+            entity.Property(x => x.NextStartDate);
         }
     }
 }

@@ -94,7 +94,7 @@ namespace MassTransit.Configuration
             {
                 collection.TryAddSingleton<TFuture>();
 
-                return registrar.GetOrAdd<IFutureRegistration>(typeof(TFuture), _ => new FutureRegistration<TFuture>());
+                return registrar.GetOrAddRegistration<IFutureRegistration>(typeof(TFuture), _ => new FutureRegistration<TFuture>(registrar));
             }
         }
 
@@ -108,8 +108,7 @@ namespace MassTransit.Configuration
             {
                 var registration = base.Register(collection, registrar);
 
-                collection.AddSingleton<TDefinition>();
-                collection.AddSingleton<IFutureDefinition<TFuture>>(provider => provider.GetRequiredService<TDefinition>());
+                registrar.AddDefinition<IFutureDefinition<TFuture>, TDefinition>();
 
                 return registration;
             }

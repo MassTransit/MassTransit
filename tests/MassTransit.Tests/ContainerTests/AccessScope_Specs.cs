@@ -1,6 +1,5 @@
 namespace MassTransit.Tests.ContainerTests
 {
-    using System;
     using System.Threading.Tasks;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
@@ -11,7 +10,7 @@ namespace MassTransit.Tests.ContainerTests
     public class Accessing_a_scope_from_middleware :
         InMemoryTestFixture
     {
-        readonly IServiceProvider _provider;
+        readonly ServiceProvider _provider;
 
         public Accessing_a_scope_from_middleware()
         {
@@ -22,6 +21,12 @@ namespace MassTransit.Tests.ContainerTests
                     x.AddBus(provider => BusControl);
                 })
                 .BuildServiceProvider(true);
+        }
+
+        [OneTimeTearDown]
+        public async Task OneTimeTearDown()
+        {
+            await _provider.DisposeAsync();
         }
 
         [Test]

@@ -14,12 +14,22 @@ namespace MassTransit
         IConfigureReceiveEndpoint,
         ISpecification
     {
+        /// <summary>
+        /// Override the default receive endpoint configuration done by the batch options
+        /// </summary>
+        public delegate void ConfigurationCallback(string name, IReceiveEndpointConfigurator configurator);
+
+
+        ConfigurationCallback _configurationCallback;
+
         public BatchOptions()
         {
             ConcurrencyLimit = 1;
             MessageLimit = 10;
             TimeLimit = TimeSpan.FromSeconds(1);
             TimeLimitStart = BatchTimeLimitStart.FromFirst;
+
+            _configurationCallback = DefaultConfigurationCallback;
         }
 
         /// <summary>
@@ -49,12 +59,7 @@ namespace MassTransit
 
         public void Configure(string name, IReceiveEndpointConfigurator configurator)
         {
-            var messageCapacity = ConcurrencyLimit * MessageLimit;
-
-            configurator.PrefetchCount = Math.Max(messageCapacity, configurator.PrefetchCount);
-
-            if (configurator.ConcurrentMessageLimit < messageCapacity)
-                configurator.ConcurrentMessageLimit = messageCapacity;
+            _configurationCallback(name, configurator);
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -65,6 +70,25 @@ namespace MassTransit
                 yield return this.Failure("Batch", "MessageLimit", "Must be > 0");
             if (ConcurrencyLimit <= 0)
                 yield return this.Failure("Batch", "ConcurrencyLimit", "Must be > 0");
+        }
+
+        public BatchOptions SetConfigurationCallback(ConfigurationCallback callback)
+        {
+            if (callback == null)
+                throw new ArgumentNullException(nameof(callback));
+
+            _configurationCallback = callback;
+            return this;
+        }
+
+        void DefaultConfigurationCallback(string name, IReceiveEndpointConfigurator configurator)
+        {
+            var messageCapacity = ConcurrencyLimit * MessageLimit;
+
+            configurator.PrefetchCount = Math.Max(messageCapacity, configurator.PrefetchCount);
+
+            if (configurator.ConcurrentMessageLimit < messageCapacity)
+                configurator.ConcurrentMessageLimit = messageCapacity;
         }
 
         /// <summary>
@@ -99,7 +123,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Sets the starting point for the <see cref="TimeLimit"/>
+        /// Sets the starting point for the <see cref="TimeLimit" />
         /// </summary>
         /// <param name="timeLimitStart">The starting point</param>
         public BatchOptions SetTimeLimitStart(BatchTimeLimitStart timeLimitStart)

@@ -1,6 +1,6 @@
 namespace MassTransit.AzureTable
 {
-    using Microsoft.Azure.Cosmos.Table;
+    using Azure.Data.Tables;
 
 
     public interface DatabaseContext<TSaga>
@@ -8,7 +8,7 @@ namespace MassTransit.AzureTable
     {
         ISagaKeyFormatter<TSaga> Formatter { get; }
 
-        CloudTable Table { get; }
+        TableClient Table { get; }
 
         IEntityConverter<TSaga> Converter { get; }
     }

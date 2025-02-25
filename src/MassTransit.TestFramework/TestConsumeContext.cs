@@ -284,7 +284,7 @@
         {
             HeaderProvider = new DictionaryHeaderProvider(new Dictionary<string, object>());
 
-            Body = new BytesMessageBody(Array.Empty<byte>());
+            Body = new BytesMessageBody([]);
         }
 
         protected override IHeaderProvider HeaderProvider { get; }

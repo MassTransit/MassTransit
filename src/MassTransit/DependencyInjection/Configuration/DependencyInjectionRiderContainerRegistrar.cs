@@ -29,7 +29,7 @@ namespace MassTransit.Configuration
 
         public override IEnumerable<T> GetRegistrations<T>(IServiceProvider provider)
         {
-            return provider.GetService<IEnumerable<Bind<TBus, Rider, T>>>().Select(x => x.Value) ?? Array.Empty<T>();
+            return provider.GetService<IEnumerable<Bind<TBus, Rider, T>>>().Select(x => x.Value) ?? [];
         }
 
         protected override void AddRegistration<T>(T value)

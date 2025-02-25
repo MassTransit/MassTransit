@@ -1,16 +1,18 @@
 ﻿namespace MassTransit.Visualizer
 {
     using System;
+    using Abstractions;
     using Internals;
-    using MassTransit.Visualizer.Abstractions;
     using QuikGraph;
     using QuikGraph.Graphviz;
     using QuikGraph.Graphviz.Dot;
     using SagaStateMachine;
 
+
     public class StateMachineGraphvizGenerator : StateMachineGenerator
     {
-        public StateMachineGraphvizGenerator(StateMachineGraph data) : base(data)
+        public StateMachineGraphvizGenerator(StateMachineGraph data)
+            : base(data)
         {
         }
 
@@ -33,9 +35,7 @@
                 if (args.Vertex.TargetType != typeof(Event) && args.Vertex.TargetType != typeof(Exception))
                 {
                     if (args.Vertex.TargetType.ClosesType(typeof(Fault<>), out Type[] arguments))
-                    {
                         args.VertexFormat.Label += "<" + arguments[0].Name + ">";
-                    }
                     else
                         args.VertexFormat.Label += "<" + args.Vertex.TargetType.Name + ">";
                 }

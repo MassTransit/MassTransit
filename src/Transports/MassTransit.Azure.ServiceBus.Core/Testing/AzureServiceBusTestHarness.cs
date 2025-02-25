@@ -82,7 +82,7 @@
             return new ServiceBusAdministrationClient(endpoint, NamedKeyCredential);
         }
 
-        protected override IBusControl CreateBus()
+        protected override async Task<IBusControl> CreateBus()
         {
             return MassTransit.Bus.Factory.CreateUsingAzureServiceBus(x =>
             {

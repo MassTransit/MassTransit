@@ -1,6 +1,5 @@
 namespace MassTransit
 {
-    using System;
     using System.IO;
     using System.Text;
 
@@ -13,7 +12,7 @@ namespace MassTransit
 
         public BytesMessageBody(byte[]? bytes)
         {
-            _bytes = bytes ?? Array.Empty<byte>();
+            _bytes = bytes ?? [];
         }
 
         public long? Length => _bytes.Length;

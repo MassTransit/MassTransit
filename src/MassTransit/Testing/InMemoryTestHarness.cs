@@ -71,7 +71,7 @@
             return Task.FromResult(Bus.CreateRequestClient<TRequest>(destinationAddress, TestTimeout));
         }
 
-        protected override IBusControl CreateBus()
+        protected override async Task<IBusControl> CreateBus()
         {
             var configurator = new InMemoryBusFactoryConfigurator(_busConfiguration);
 

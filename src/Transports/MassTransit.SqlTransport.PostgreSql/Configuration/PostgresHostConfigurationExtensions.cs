@@ -3,6 +3,7 @@ namespace MassTransit
     using System;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
+    using Npgsql;
     using SqlTransport.PostgreSql;
 
 
@@ -42,9 +43,26 @@ namespace MassTransit
         /// Configures the database transport to use PostgreSQL as the storage engine
         /// </summary>
         /// <param name="configurator"></param>
+        /// <param name="dataSource">A preconfigured data source used to create connections</param>
+        /// <param name="configure"></param>
+        public static void UsePostgres(this ISqlBusFactoryConfigurator configurator, NpgsqlDataSource dataSource,
+            Action<ISqlHostConfigurator>? configure = null)
+        {
+            var hostConfigurator = new PostgresSqlHostConfigurator(dataSource);
+
+            configure?.Invoke(hostConfigurator);
+
+            configurator.Host(hostConfigurator.Settings);
+        }
+
+        /// <summary>
+        /// Configures the database transport to use PostgreSQL as the storage engine
+        /// </summary>
+        /// <param name="configurator"></param>
         /// <param name="context">The bus registration context, used to retrieve the DbTransportOptions</param>
         /// <param name="configure"></param>
-        public static void UsePostgres(this ISqlBusFactoryConfigurator configurator, IBusRegistrationContext context, Action<ISqlHostConfigurator>? configure = null)
+        public static void UsePostgres(this ISqlBusFactoryConfigurator configurator, IBusRegistrationContext context,
+            Action<ISqlHostConfigurator>? configure = null)
         {
             var hostConfigurator = new PostgresSqlHostConfigurator(context.GetRequiredService<IOptions<SqlTransportOptions>>().Value);
 

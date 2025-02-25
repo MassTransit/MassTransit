@@ -21,7 +21,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
                 await handle.Ready;
 
-                var clientFactory = await handle.CreateClientFactory();
+                var clientFactory = handle.CreateClientFactory();
                 try
                 {
                     using RequestHandle<PingMessage> requestHandle = clientFactory.CreateRequest(new PingMessage());
@@ -43,7 +43,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             var health = BusControl.CheckHealth();
 
             foreach (KeyValuePair<string, EndpointHealthResult> healthEndpoint in health.Endpoints)
-                TestContext.WriteLine("Endpoint: {0}, Status: {1}", healthEndpoint.Key, healthEndpoint.Value.Description);
+                TestContext.Out.WriteLine("Endpoint: {0}, Status: {1}", healthEndpoint.Key, healthEndpoint.Value.Description);
 
             Assert.That(health.Status, Is.EqualTo(BusHealthStatus.Healthy));
         }

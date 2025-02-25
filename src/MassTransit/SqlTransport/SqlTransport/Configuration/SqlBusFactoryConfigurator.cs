@@ -59,7 +59,7 @@ namespace MassTransit.SqlTransport.Configuration
             set => _settings.MaxLockDuration = value;
         }
 
-        public int MaxDeliveryCount
+        public int? MaxDeliveryCount
         {
             set => _settings.MaxDeliveryCount = value;
         }
@@ -67,6 +67,16 @@ namespace MassTransit.SqlTransport.Configuration
         public bool PurgeOnStartup
         {
             set => _settings.PurgeOnStartup = value;
+        }
+
+        public int MaintenanceBatchSize
+        {
+            set => _settings.MaintenanceBatchSize = value;
+        }
+
+        public bool DeadLetterExpiredMessages
+        {
+            set => _settings.DeadLetterExpiredMessages = value;
         }
 
         public void Host(SqlHostSettings settings)

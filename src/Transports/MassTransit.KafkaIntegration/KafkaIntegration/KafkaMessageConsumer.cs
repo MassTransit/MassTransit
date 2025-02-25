@@ -26,7 +26,8 @@
         readonly ConsumerLockContext _lockContext;
         readonly ReceiveSettings _receiveSettings;
 
-        public KafkaMessageConsumer(ReceiveSettings receiveSettings, KafkaReceiveEndpointContext<TKey, TValue> context, ConsumerContext consumerContext)
+        public KafkaMessageConsumer(ReceiveSettings receiveSettings, KafkaReceiveEndpointContext<TKey, TValue> context, ConsumerContext consumerContext,
+            int consumerIndex)
             : base(context)
         {
             _receiveSettings = receiveSettings;
@@ -37,7 +38,7 @@
             _checkpointTokenSource = CancellationTokenSource.CreateLinkedTokenSource(Stopped);
             _lockContext = new ConsumerLockContext(consumerContext, receiveSettings, _checkpointTokenSource.Token);
 
-            _consumer = consumerContext.CreateConsumer(this, HandleKafkaError);
+            _consumer = consumerContext.CreateConsumer(this, HandleKafkaError, consumerIndex);
 
             IHashGenerator hashGenerator = new Murmur3UnsafeHashGenerator();
             _executorPool = new PartitionChannelExecutorPool<ConsumeResult<byte[], byte[]>>(x => x.Message.Key, hashGenerator,

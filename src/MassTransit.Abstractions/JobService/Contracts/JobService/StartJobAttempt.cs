@@ -34,11 +34,31 @@ namespace MassTransit.Contracts.JobService
         /// <summary>
         /// The job, as an object dictionary
         /// </summary>
-        IDictionary<string, object> Job { get; }
+        Dictionary<string, object> Job { get; }
 
         /// <summary>
         /// The JobTypeId, to ensure the proper job type is started
         /// </summary>
         Guid JobTypeId { get; }
+
+        /// <summary>
+        /// The last reported progress value from a previous job execution
+        /// </summary>
+        long? LastProgressValue { get; }
+
+        /// <summary>
+        /// The last reported progress limit
+        /// </summary>
+        long? LastProgressLimit { get; }
+
+        /// <summary>
+        /// The job state, as a dictionary
+        /// </summary>
+        Dictionary<string, object>? JobState { get; }
+
+        /// <summary>
+        /// The job properties, supplied when the job was submitted
+        /// </summary>
+        Dictionary<string, object>? JobProperties { get; }
     }
 }

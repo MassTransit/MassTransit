@@ -4,17 +4,16 @@ namespace MassTransit.AzureTable.Saga
     using System.Collections.Generic;
     using Initializers;
     using Internals;
-    using Microsoft.Azure.Cosmos.Table;
 
 
     public class EntityPropertyConverter<TEntity, TProperty> :
         IEntityPropertyConverter<TEntity>
         where TEntity : class
     {
-        readonly ITypeConverter<EntityProperty, TProperty> _fromEntity;
+        readonly ITypeConverter<object, TProperty> _fromEntity;
         readonly string _name;
         readonly IReadProperty<TEntity, TProperty> _read;
-        readonly ITypeConverter<TProperty, EntityProperty> _toEntity;
+        readonly ITypeConverter<TProperty, object> _toEntity;
         readonly IWriteProperty<TEntity, TProperty> _write;
 
         public EntityPropertyConverter(string name)
@@ -23,14 +22,14 @@ namespace MassTransit.AzureTable.Saga
             _read = ReadPropertyCache<TEntity>.GetProperty<TProperty>(name);
             _write = WritePropertyCache<TEntity>.GetProperty<TProperty>(name);
 
-            _toEntity = EntityPropertyTypeConverter.Instance as ITypeConverter<TProperty, EntityProperty>
+            _toEntity = EntityPropertyTypeConverter.Instance as ITypeConverter<TProperty, object>
                 ?? throw new ArgumentException("Invalid property type");
 
-            _fromEntity = EntityPropertyTypeConverter.Instance as ITypeConverter<EntityProperty, TProperty>
+            _fromEntity = EntityPropertyTypeConverter.Instance as ITypeConverter<object, TProperty>
                 ?? throw new ArgumentException("Invalid property type");
         }
 
-        public void ToEntity(TEntity entity, IDictionary<string, EntityProperty> entityProperties)
+        public void ToEntity(TEntity entity, IDictionary<string, object> entityProperties)
         {
             if (entityProperties.TryGetValue(_name, out var entityProperty))
             {
@@ -39,7 +38,7 @@ namespace MassTransit.AzureTable.Saga
             }
         }
 
-        public void FromEntity(TEntity entity, IDictionary<string, EntityProperty> entityProperties)
+        public void FromEntity(TEntity entity, IDictionary<string, object> entityProperties)
         {
             var propertyValue = _read.Get(entity);
 

@@ -1,63 +1,20 @@
-version: '3.8'
-
 services:
   mongo1:
-    container_name: mongo1
-    image: mongo
+    image: mongo:7.0
+    command: [ "--replSet", "rs0", "--bind_ip_all", "--port", "27017" ]
     networks:
       - mongors-network
     ports:
       - "27017:27017"
-      - "27021:27017"
-    links:
-      - mongo2
-      - mongo3
-    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "dbrs" ]
+    extra_hosts:
+      - "localhost:host-gateway"
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
-      interval: 10s
-      start_period: 30s
-  mongo2:
-    container_name: mongo2
-    image: mongo
-    networks:
-      - mongors-network
-    ports:
-      - "27022:27017"
-    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "dbrs" ]
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
-      interval: 10s
-      start_period: 30s
-  mongo3:
-    container_name: mongo3
-    image: mongo
-    networks:
-      - mongors-network
-    ports:
-      - "27023:27017"
-    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "dbrs" ]
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
-      interval: 10s
-      start_period: 30s
-
-  mongosetup:
-    image: mongo
-    networks:
-      - mongors-network
-    depends_on:
-      - mongo1
-      - mongo2
-      - mongo3
-    volumes:
-      - ./scripts:/scripts
-    restart: "no"
-    entrypoint: [ "bash", "/scripts/rs-init.sh" ]
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh mongo1:27017/test --quiet
-      interval: 10s
-      start_period: 30s
+      test: echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'localhost:27017'}]}) }" | mongosh --port 27017 --quiet
+      interval: 5s
+      timeout: 30s
+      start_period: 0s
+      start_interval: 1s
+      retries: 30
 
 networks:
   mongors-network:

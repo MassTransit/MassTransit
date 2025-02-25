@@ -15,8 +15,6 @@
         {
             using RequestHandle<PingMessage> requestHandle = _requestClient.Create(new PingMessage());
 
-            requestHandle.UseExecute(context => context.SetAwaitAck(false));
-
             Response<PongMessage> response = await requestHandle.GetResponse<PongMessage>();
 
             Assert.That(response.Message.CorrelationId, Is.EqualTo(_ping.Result.Message.CorrelationId));
@@ -57,8 +55,6 @@
         {
             using RequestHandle<PingMessage> requestHandle = _requestClient.Create(new PingMessage());
 
-            requestHandle.UseExecute(context => context.SetAwaitAck(false));
-
             Response<PongMessage> response = await requestHandle.GetResponse<PongMessage>();
 
             Assert.That(response.Message.CorrelationId, Is.EqualTo(_ping.Result.Message.CorrelationId));
@@ -71,7 +67,9 @@
         {
             base.ConfigureRabbitMqBus(configurator);
 
-            configurator.UseRawJsonSerializer(RawSerializerOptions.All);
+            configurator.UseRawJsonSerializer();
+
+            configurator.AutoStart = true;
         }
 
         [OneTimeSetUp]
@@ -245,7 +243,7 @@
         [OneTimeSetUp]
         public async Task Setup()
         {
-            _clientFactory = await Bus.CreateReplyToClientFactory();
+            _clientFactory = Bus.CreateReplyToClientFactory();
 
             _requestClient = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, TestTimeout);
         }
@@ -315,7 +313,7 @@
         [OneTimeSetUp]
         public async Task Setup()
         {
-            _clientFactory = await Bus.ConnectClientFactory(TestTimeout);
+            _clientFactory = Bus.ConnectClientFactory(TestTimeout);
 
             _requestClient = _clientFactory.CreateRequestClient<PingMessage>(InputQueueAddress, TestTimeout);
 
@@ -447,7 +445,7 @@
         [OneTimeSetUp]
         public async Task Setup()
         {
-            _clientFactory = await Bus.CreateReplyToClientFactory();
+            _clientFactory = Bus.CreateReplyToClientFactory();
 
             _requestClient = _clientFactory.CreateRequestClient<PingMessage>(InputQueueAddress, TestTimeout);
         }

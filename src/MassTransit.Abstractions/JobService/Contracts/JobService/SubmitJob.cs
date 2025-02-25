@@ -1,13 +1,17 @@
-namespace MassTransit.Contracts.JobService
+namespace MassTransit.Contracts.JobService;
+
+using System;
+using System.Collections.Generic;
+
+
+public interface SubmitJob<out TJob>
+    where TJob : class
 {
-    using System;
+    Guid JobId { get; }
 
+    TJob Job { get; }
 
-    public interface SubmitJob<out TJob>
-        where TJob : class
-    {
-        Guid JobId { get; }
+    RecurringJobSchedule? Schedule { get; }
 
-        TJob Job { get; }
-    }
+    Dictionary<string, object>? Properties { get; }
 }

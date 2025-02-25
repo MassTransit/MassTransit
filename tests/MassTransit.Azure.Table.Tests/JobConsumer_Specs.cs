@@ -1,12 +1,15 @@
 namespace MassTransit.Azure.Table.Tests
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Contracts.JobService;
+    using global::Azure;
+    using global::Azure.Data.Tables;
+    using global::Azure.Data.Tables.Models;
     using JobConsumerTests;
-    using Microsoft.Azure.Cosmos.Table;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
@@ -60,16 +63,14 @@ namespace MassTransit.Azure.Table.Tests
                 .AddSingleton(provider =>
                 {
                     var connectionString = Configuration.StorageAccount;
-                    var storageAccount = CloudStorageAccount.Parse(connectionString);
+                    var storageAccount = new TableServiceClient(connectionString);
 
                     return storageAccount;
                 })
                 .AddSingleton(provider =>
                 {
-                    var storageAccount = provider.GetRequiredService<CloudStorageAccount>();
-
-                    var tableClient = storageAccount.CreateCloudTableClient();
-
+                    var storageAccount = provider.GetRequiredService<TableServiceClient>();
+                    Response<TableItem> tableClient = storageAccount.CreateTableIfNotExists(TableName);
                     return tableClient;
                 })
                 .AddHostedService<CreateTableHostedService>()
@@ -91,7 +92,7 @@ namespace MassTransit.Azure.Table.Tests
                     x.AddJobSagaStateMachines()
                         .AzureTableRepository(r =>
                         {
-                            r.ConnectionFactory(provider => provider.GetRequiredService<CloudTableClient>().GetTableReference(TableName));
+                            r.ConnectionFactory(provider => provider.GetRequiredService<TableServiceClient>().GetTableClient(TableName));
                         });
 
                     x.UsingInMemory((context, cfg) =>
@@ -110,7 +111,7 @@ namespace MassTransit.Azure.Table.Tests
 
                 IRequestClient<SubmitJob<OddJob>> client = harness.GetRequestClient<SubmitJob<OddJob>>();
 
-                Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new
+                MassTransit.Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new
                 {
                     JobId = jobId,
                     Job = new { Duration = TimeSpan.FromSeconds(1) }
@@ -162,26 +163,23 @@ namespace MassTransit.Azure.Table.Tests
             {
                 _logger.LogInformation("Creating table configuration in Azure Table Storage");
 
-                var table = _provider.GetRequiredService<CloudTableClient>().GetTableReference(TableName);
+                var table = _provider.GetRequiredService<TableServiceClient>().GetTableClient(TableName);
 
                 await table.CreateIfNotExistsAsync(cancellationToken);
 
-                var query = new TableQuery();
-                TableQuerySegment<DynamicTableEntity> segment = await table.ExecuteQuerySegmentedAsync(query, null, cancellationToken);
+                AsyncPageable<TableEntity> entities = table.QueryAsync<TableEntity>(cancellationToken: cancellationToken);
 
-                while (segment.Results.Count > 0)
+                await foreach (Page<TableEntity> page in table.QueryAsync<TableEntity>().AsPages())
                 {
-                    foreach (IGrouping<string, DynamicTableEntity> key in segment.Results.GroupBy(x => x.PartitionKey))
+                    foreach (IGrouping<string, TableEntity> group in page.Values.GroupBy(x => x.PartitionKey))
                     {
-                        var batchDeleteOperation = new TableBatchOperation();
+                        var batchDeleteOperations = new List<TableTransactionAction>();
 
-                        foreach (var row in key)
-                            batchDeleteOperation.Delete(row);
+                        foreach (var row in group)
+                            batchDeleteOperations.Add(new TableTransactionAction(TableTransactionActionType.Delete, row));
 
-                        await table.ExecuteBatchAsync(batchDeleteOperation, cancellationToken);
+                        await table.SubmitTransactionAsync(batchDeleteOperations, cancellationToken);
                     }
-
-                    segment = await table.ExecuteQuerySegmentedAsync(query, segment.ContinuationToken, cancellationToken);
                 }
             }
 

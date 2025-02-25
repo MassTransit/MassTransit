@@ -24,14 +24,15 @@ namespace MassTransit.SqlTransport.PostgreSql
         readonly string _deleteMessageSql;
         readonly string _deleteScheduledMessageSql;
         readonly string _moveMessageTypeSql;
-        readonly string _processMetricsSql;
         readonly string _publishSql;
         readonly string _purgeQueueSql;
         readonly string _receivePartitionedSql;
         readonly string _receiveSql;
         readonly string _renewLockSql;
         readonly string _sendSql;
+        readonly string _touchQueueSql;
         readonly string _unlockSql;
+        readonly string _deadLetterMessagesSql;
 
         public PostgresClientContext(PostgresDbConnectionContext context, CancellationToken cancellationToken)
             : base(context, cancellationToken)
@@ -44,15 +45,16 @@ namespace MassTransit.SqlTransport.PostgreSql
             _receivePartitionedSql = string.Format(SqlStatements.DbReceivePartitionedSql, _context.Schema);
             _sendSql = string.Format(SqlStatements.DbEnqueueSql, _context.Schema);
             _createTopicSubscriptionSql = string.Format(SqlStatements.DbCreateTopicSubscriptionSql, _context.Schema);
-            _processMetricsSql = string.Format(SqlStatements.DbProcessMetricsSql, _context.Schema);
             _publishSql = string.Format(SqlStatements.DbPublishSql, _context.Schema);
             _purgeQueueSql = string.Format(SqlStatements.DbPurgeQueueSql, _context.Schema);
+            _deadLetterMessagesSql = string.Format(SqlStatements.DbDeadLetterMessagesSql, _context.Schema);
             _createTopicSql = string.Format(SqlStatements.DbCreateTopicSql, _context.Schema);
             _createQueueSql = string.Format(SqlStatements.DbCreateQueueSql, _context.Schema);
             _deleteMessageSql = string.Format(SqlStatements.DbDeleteMessageSql, _context.Schema);
             _deleteScheduledMessageSql = string.Format(SqlStatements.DbDeleteScheduledMessageSql, _context.Schema);
             _moveMessageTypeSql = string.Format(SqlStatements.DbMoveMessageSql, _context.Schema);
             _renewLockSql = string.Format(SqlStatements.DbRenewLockSql, _context.Schema);
+            _touchQueueSql = string.Format(SqlStatements.DbTouchQueueSql, _context.Schema);
             _unlockSql = string.Format(SqlStatements.DbUnlockSql, _context.Schema);
         }
 
@@ -61,7 +63,8 @@ namespace MassTransit.SqlTransport.PostgreSql
             return _context.Query((x, t) => x.ExecuteScalarAsync<long>(_createQueueSql, new
             {
                 queue_name = queue.QueueName,
-                auto_delete = (int?)queue.AutoDeleteOnIdle?.TotalSeconds
+                auto_delete = (int?)queue.AutoDeleteOnIdle?.TotalSeconds,
+                max_delivery_count = queue.MaxDeliveryCount
             }, t), CancellationToken);
         }
 
@@ -136,8 +139,22 @@ namespace MassTransit.SqlTransport.PostgreSql
             }
             catch (PostgresException exception) when (exception.ErrorCode == 40001)
             {
-                return Array.Empty<SqlTransportMessage>();
+                return [];
             }
+        }
+
+        public override Task TouchQueue(string queueName)
+        {
+            return _context.Query((x, t) => x.ExecuteScalarAsync<int?>(_touchQueueSql, new { queue_name = queueName }), CancellationToken);
+        }
+
+        public override Task<int?> DeadLetterQueue(string queueName, int messageCount)
+        {
+            return _context.Query((x, t) => x.ExecuteScalarAsync<int?>(_deadLetterMessagesSql, new
+            {
+                queue_name = queueName,
+                message_count = messageCount
+            }), CancellationToken);
         }
 
         public override Task Send<T>(string queueName, SqlMessageSendContext<T> context)
@@ -146,6 +163,7 @@ namespace MassTransit.SqlTransport.PostgreSql
             var headersAsJson = headers.Any() ? JsonSerializer.Serialize(headers, SystemTextJsonMessageSerializer.Options) : null;
 
             Guid? schedulingTokenId = context.Headers.Get<Guid>(MessageHeaders.SchedulingTokenId);
+            DateTime? expirationTime = context.TimeToLive.HasValue ? DateTime.UtcNow + context.TimeToLive.Value : null;
 
             return _context.Query((x, t) => x.ExecuteScalarAsync<long?>(_sendSql, new
             {
@@ -166,6 +184,7 @@ namespace MassTransit.SqlTransport.PostgreSql
                 response_address = context.ResponseAddress,
                 fault_address = context.FaultAddress,
                 sent_time = context.SentTime,
+                expiration_time = expirationTime,
                 headers = new JsonParameter(headersAsJson),
                 host = new JsonParameter(HostInfoCache.HostInfoJson),
                 partition_key = context.PartitionKey,
@@ -181,6 +200,7 @@ namespace MassTransit.SqlTransport.PostgreSql
             var headersAsJson = headers.Any() ? JsonSerializer.Serialize(headers, SystemTextJsonMessageSerializer.Options) : null;
 
             Guid? schedulingTokenId = context.Headers.Get<Guid>(MessageHeaders.SchedulingTokenId);
+            DateTime? expirationTime = context.TimeToLive.HasValue ? DateTime.UtcNow + context.TimeToLive.Value : null;
 
             return _context.Query((x, t) => x.ExecuteScalarAsync<long?>(_publishSql, new
             {
@@ -201,6 +221,7 @@ namespace MassTransit.SqlTransport.PostgreSql
                 response_address = context.ResponseAddress,
                 fault_address = context.FaultAddress,
                 sent_time = context.SentTime,
+                expiration_time = expirationTime,
                 headers = new JsonParameter(headersAsJson),
                 host = new JsonParameter(HostInfoCache.HostInfoJson),
                 partition_key = context.PartitionKey,

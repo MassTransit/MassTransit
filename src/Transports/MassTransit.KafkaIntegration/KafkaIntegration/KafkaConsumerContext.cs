@@ -24,9 +24,10 @@ namespace MassTransit.KafkaIntegration
 
         public ILogContext LogContext => _hostConfiguration.ReceiveLogContext;
 
-        public IConsumer<byte[], byte[]> CreateConsumer(KafkaConsumerBuilderContext context, Action<IConsumer<byte[], byte[]>, Error> onError)
+        public IConsumer<byte[], byte[]> CreateConsumer(KafkaConsumerBuilderContext context, Action<IConsumer<byte[], byte[]>, Error> onError,
+            int consumerIndex)
         {
-            return _consumerBuilderFactory.Invoke()
+            return _consumerBuilderFactory.Invoke(consumerIndex)
                 .SetErrorHandler((c, e) => onError.Invoke(c, e))
                 .SetPartitionsLostHandler(context.OnPartitionLost)
                 .SetPartitionsAssignedHandler(context.OnAssigned)

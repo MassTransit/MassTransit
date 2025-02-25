@@ -1,3 +1,4 @@
+#nullable enable
 namespace MassTransit.DapperIntegration.Configuration
 {
     using System.Collections.Generic;
@@ -24,20 +25,21 @@ namespace MassTransit.DapperIntegration.Configuration
 
         public IsolationLevel IsolationLevel { get; set; }
 
+        public DatabaseContextFactory<TSaga>? ContextFactory { get; set; }
+
         public IEnumerable<ValidationResult> Validate()
         {
             if (string.IsNullOrWhiteSpace(_connectionString))
                 yield return this.Failure("ConnectionString", "must be specified");
         }
 
-        public void Register<T>(ISagaRepositoryRegistrationConfigurator<T> configurator)
-            where T : class, ISaga
+        public void Register(ISagaRepositoryRegistrationConfigurator<TSaga> configurator)
         {
-            configurator.TryAddSingleton(new DapperOptions<T>(_connectionString, IsolationLevel));
-            configurator.RegisterLoadSagaRepository<T, DapperSagaRepositoryContextFactory<T>>();
-            configurator.RegisterQuerySagaRepository<T, DapperSagaRepositoryContextFactory<T>>();
-            configurator
-                .RegisterSagaRepository<T, DatabaseContext<T>, SagaConsumeContextFactory<DatabaseContext<T>, T>, DapperSagaRepositoryContextFactory<T>>();
+            configurator.TryAddSingleton(new DapperOptions<TSaga>(_connectionString, IsolationLevel, ContextFactory));
+            configurator.RegisterLoadSagaRepository<TSaga, DapperSagaRepositoryContextFactory<TSaga>>();
+            configurator.RegisterQuerySagaRepository<TSaga, DapperSagaRepositoryContextFactory<TSaga>>();
+            configurator.RegisterSagaRepository<TSaga, DatabaseContext<TSaga>, SagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga>,
+                DapperSagaRepositoryContextFactory<TSaga>>();
         }
     }
 }

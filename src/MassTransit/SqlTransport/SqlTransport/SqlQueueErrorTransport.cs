@@ -18,7 +18,7 @@
         {
             void PreSend(SqlTransportMessage message, SendHeaders headers)
             {
-                headers.SetExceptionHeaders(context);
+                headers.CopyFrom(context.ExceptionHeaders);
 
                 if (message.ExpirationTime.HasValue)
                     message.ExpirationTime = DateTime.UtcNow + Defaults.ErrorQueueTimeToLive;

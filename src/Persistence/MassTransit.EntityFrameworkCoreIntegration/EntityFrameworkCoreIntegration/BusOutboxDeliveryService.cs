@@ -115,10 +115,11 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
                     try
                     {
-                        var outboxState = await dbContext.Set<OutboxState>()
+                        List<OutboxState> outboxStateList = await dbContext.Set<OutboxState>()
                             .FromSqlRaw(_getOutboxIdStatement)
                             .AsTracking()
-                            .SingleOrDefaultAsync(timeoutToken.Token).ConfigureAwait(false);
+                            .ToListAsync(timeoutToken.Token).ConfigureAwait(false);
+                        var outboxState = outboxStateList.SingleOrDefault();
 
                         if (outboxState == null)
                             return -1;

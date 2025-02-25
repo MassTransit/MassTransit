@@ -8,18 +8,17 @@
         ReceiveEndpointClientFactoryContext,
         IAsyncDisposable
     {
-        readonly HostReceiveEndpointHandle _receiveEndpointHandle;
+        readonly HostReceiveEndpointHandle _handle;
 
-        public HostReceiveEndpointClientFactoryContext(HostReceiveEndpointHandle receiveEndpointHandle, ReceiveEndpointReady receiveEndpointReady,
-            RequestTimeout defaultTimeout = default)
-            : base(receiveEndpointReady, defaultTimeout)
+        public HostReceiveEndpointClientFactoryContext(HostReceiveEndpointHandle handle, RequestTimeout defaultTimeout = default)
+            : base(handle, defaultTimeout)
         {
-            _receiveEndpointHandle = receiveEndpointHandle;
+            _handle = handle;
         }
 
         public async ValueTask DisposeAsync()
         {
-            await _receiveEndpointHandle.StopAsync().ConfigureAwait(false);
+            await _handle.StopAsync().ConfigureAwait(false);
         }
     }
 }

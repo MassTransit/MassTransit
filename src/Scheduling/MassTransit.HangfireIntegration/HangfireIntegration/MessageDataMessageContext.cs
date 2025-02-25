@@ -122,7 +122,7 @@ namespace MassTransit.HangfireIntegration
         public Headers Headers => _headers ??= GetHeaders();
         public HostInfo Host => _hostInfo ??= HostMetadataCache.Host;
 
-        public string[] SupportedMessageTypes => _messageData.MessageType?.Split(';').ToArray() ?? Array.Empty<string>();
+        public string[] SupportedMessageTypes => _messageData.MessageType?.Split(';').ToArray() ?? [];
 
         Headers GetHeaders()
         {

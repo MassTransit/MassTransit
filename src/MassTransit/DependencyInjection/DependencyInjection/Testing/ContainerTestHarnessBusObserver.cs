@@ -30,6 +30,8 @@ namespace MassTransit.DependencyInjection.Testing
 
         public Task PostStart(IBus bus, Task<BusReady> busReady)
         {
+            _harness.PostStart(bus);
+
             return Task.CompletedTask;
         }
 

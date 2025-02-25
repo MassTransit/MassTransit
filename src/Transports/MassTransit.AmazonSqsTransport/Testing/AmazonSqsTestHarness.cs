@@ -97,7 +97,7 @@
             return host.Settings;
         }
 
-        protected override IBusControl CreateBus()
+        protected override async Task<IBusControl> CreateBus()
         {
             return MassTransit.Bus.Factory.CreateUsingAmazonSqs(x =>
             {

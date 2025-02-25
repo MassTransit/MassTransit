@@ -6,16 +6,18 @@
     using System.Threading.Tasks;
     using Context;
     using RabbitMQ.Client;
+    using Serialization;
     using Transports;
 
 
     public sealed class RabbitMqReceiveContext :
         BaseReceiveContext,
         RabbitMqBasicConsumeContext,
-        TransportReceiveContext
+        TransportReceiveContext,
+        ITransportSequenceNumber
     {
-        public RabbitMqReceiveContext(string exchange, string routingKey, string consumerTag, ulong deliveryTag, byte[] body,
-            bool redelivered, IBasicProperties properties, RabbitMqReceiveEndpointContext receiveEndpointContext, params object[] payloads)
+        public RabbitMqReceiveContext(string exchange, string routingKey, string consumerTag, ulong deliveryTag, ReadOnlyMemory<byte> body,
+            bool redelivered, IReadOnlyBasicProperties properties, RabbitMqReceiveEndpointContext receiveEndpointContext, params object[] payloads)
             : base(redelivered, receiveEndpointContext, payloads)
         {
             Exchange = exchange;
@@ -24,18 +26,20 @@
             DeliveryTag = deliveryTag;
             Properties = properties;
 
-            Body = new BytesMessageBody(body);
+            Body = new MemoryMessageBody(body);
         }
 
         protected override IHeaderProvider HeaderProvider => new RabbitMqHeaderProvider(this);
 
         public override MessageBody Body { get; }
 
+        public ulong? SequenceNumber => DeliveryTag;
+
         public string ConsumerTag { get; }
         public ulong DeliveryTag { get; }
         public string Exchange { get; }
         public string RoutingKey { get; }
-        public IBasicProperties Properties { get; }
+        public IReadOnlyBasicProperties Properties { get; }
 
         public IDictionary<string, object> GetTransportProperties()
         {

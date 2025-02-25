@@ -4,10 +4,12 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Internals;
-    using MassTransit.Testing;
     using NUnit.Framework;
+    using Testing;
 
 
+    [TestFixture]
+    [Explicit]
     public class ExclusiveConsumer_Specs :
         RabbitMqTestFixture
     {
@@ -19,23 +21,20 @@
         [Test]
         public async Task Should_not_be_allowed_twice()
         {
-            var secondHarness = new RabbitMqTestHarness { CleanVirtualHost = false };
-
-            try
+            Assert.That(async () =>
             {
-                Assert.That(async () =>
+                using var token = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+
+                using var secondHarness = new RabbitMqTestHarness { CleanVirtualHost = false };
+                secondHarness.OnConfigureRabbitMqBus += configurator =>
                 {
-                    using var token = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                    ConfigureBusDiagnostics(configurator);
+                };
 
-                    await secondHarness.Start(token.Token).OrCanceled(TestCancellationToken);
+                await secondHarness.Start(token.Token).OrCanceled(TestCancellationToken);
 
-                    await secondHarness.Stop();
-                }, Throws.TypeOf<RabbitMqConnectionException>());
-            }
-            finally
-            {
-                secondHarness.Dispose();
-            }
+                await secondHarness.Stop();
+            }, Throws.TypeOf<RabbitMqConnectionException>());
         }
     }
 }

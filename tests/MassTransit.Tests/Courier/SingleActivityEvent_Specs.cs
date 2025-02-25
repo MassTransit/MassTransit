@@ -64,8 +64,10 @@
             Assert.That(context.GetVariable<string>("Variable"), Is.EqualTo("Knife"));
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
+        #pragma warning restore NUnit1032
         Guid _trackingNumber;
         string _originalValue;
 
@@ -152,8 +154,10 @@
             Assert.That(context.GetVariable<string>("Variable"), Is.EqualTo("Knife"));
         }
 
+        #pragma warning disable NUnit1032
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
+        #pragma warning restore NUnit1032
         Guid _trackingNumber;
         InMemoryTestHarness _harness;
         ActivityTestHarness<TestActivity, TestArguments, TestLog> _activity;
@@ -187,6 +191,8 @@
         public async Task Done()
         {
             await _harness.Stop();
+
+            _harness.Dispose();
         }
     }
 }

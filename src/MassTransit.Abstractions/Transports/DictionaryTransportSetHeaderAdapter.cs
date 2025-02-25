@@ -15,6 +15,8 @@ namespace MassTransit.Transports
             _options = options;
         }
 
+        public int? MaxHeaderLength { get; set; }
+
         public void Set(IDictionary<string, object> dictionary, in HeaderValue headerValue)
         {
             switch (headerValue.Value)
@@ -26,7 +28,8 @@ namespace MassTransit.Transports
 
                 default:
                     if (IsHeaderIncluded(headerValue.Key) && _converter.TryConvert(headerValue, out var result))
-                        dictionary[result.Key] = result.Value;
+                        dictionary[result.Key] = TrimHeaderIfLengthExceedsLimit(result.Value);
+
                     break;
             }
         }
@@ -43,9 +46,17 @@ namespace MassTransit.Transports
 
                 default:
                     if (IsHeaderIncluded(headerValue.Key) && _converter.TryConvert(headerValue, out var result))
-                        dictionary[result.Key] = result.Value;
+                        dictionary[result.Key] = TrimHeaderIfLengthExceedsLimit(result.Value);
                     break;
             }
+        }
+
+        object TrimHeaderIfLengthExceedsLimit(object value)
+        {
+            if (MaxHeaderLength.HasValue && value is string stringValue && stringValue.Length > MaxHeaderLength.Value)
+                value = stringValue.Substring(0, MaxHeaderLength.Value);
+
+            return value;
         }
 
         bool IsHeaderIncluded(string key)

@@ -108,6 +108,41 @@ namespace MassTransit.SqlTransport
             }
         }
 
+        public async Task Expired()
+        {
+            if (_locked == false)
+                return;
+
+            _activeTokenSource.Cancel();
+
+            try
+            {
+                if (_message.LockId.HasValue)
+                {
+                    var transportHeaders = SqlTransportMessage.DeserializeHeaders(_message.TransportHeaders);
+
+                    transportHeaders.Set(MessageHeaders.Reason, "expired");
+
+                    await _clientContext.MoveMessage(_message.LockId.Value, _message.MessageDeliveryId, _settings.QueueName, SqlQueueType.DeadLetterQueue,
+                        transportHeaders);
+
+                    _locked = false;
+
+                    if (_renewLockTask != null)
+                        await _renewLockTask.ConfigureAwait(false);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogContext.Warning?.Log(ex, "MoveMessage failed: {QueueName} {MessageDeliveryId} {LockId}", _settings.EntityName, _message.MessageDeliveryId,
+                    _message.LockId);
+            }
+            finally
+            {
+                _activeTokenSource.Dispose();
+            }
+        }
+
         public async Task Faulted(Exception exception)
         {
             if (_locked == false)

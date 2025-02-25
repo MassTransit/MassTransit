@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../signing.props"/>
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net8.0;net9.0</TargetFrameworks>
+    <RootNamespace>MassTransit</RootNamespace>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(IsWindows)' == 'true' ">
+    <TargetFrameworks>$(TargetFrameworks);net472</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>MassTransit.MessagePack</PackageId>
+    <Title>MassTransit.MessagePack</Title>
+    <PackageTags>MassTransit;MessagePack;MsgPack</PackageTags>
+    <Description>MassTransit MessagePack support; $(Description)</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MessagePack"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MassTransit.Abstractions\MassTransit.Abstractions.csproj"/>
+    <ProjectReference Include="..\MassTransit\MassTransit.csproj"/>
+  </ItemGroup>
+
+</Project>

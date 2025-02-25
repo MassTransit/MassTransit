@@ -1,7 +1,6 @@
 ﻿namespace MassTransit
 {
     using System;
-    using System.Threading.Tasks;
     using Clients;
 
 
@@ -82,29 +81,14 @@
         /// <summary>
         /// Connects a client factory to a host receive endpoint, using the bus as the send endpoint provider
         /// </summary>
-        /// <param name="receiveEndpoint"></param>
-        /// <param name="timeout"></param>
-        /// <returns></returns>
-        public static IClientFactory CreateClientFactory(this ReceiveEndpointReady receiveEndpoint, RequestTimeout timeout = default)
-        {
-            var context = new ReceiveEndpointClientFactoryContext(receiveEndpoint, timeout);
-
-            return new ClientFactory(context);
-        }
-
-        /// <summary>
-        /// Connects a client factory to a host receive endpoint, using the bus as the send endpoint provider
-        /// </summary>
         /// <param name="receiveEndpointHandle">
         /// A handle to the receive endpoint, which is stopped when the client factory is disposed
         /// </param>
         /// <param name="timeout"></param>
         /// <returns></returns>
-        public static async Task<IClientFactory> CreateClientFactory(this HostReceiveEndpointHandle receiveEndpointHandle, RequestTimeout timeout = default)
+        public static IClientFactory CreateClientFactory(this HostReceiveEndpointHandle receiveEndpointHandle, RequestTimeout timeout = default)
         {
-            var ready = await receiveEndpointHandle.Ready.ConfigureAwait(false);
-
-            var context = new HostReceiveEndpointClientFactoryContext(receiveEndpointHandle, ready, timeout);
+            var context = new HostReceiveEndpointClientFactoryContext(receiveEndpointHandle, timeout);
 
             return new ClientFactory(context);
         }
@@ -115,7 +99,7 @@
         /// <param name="connector">The host to connect the new receive endpoint</param>
         /// <param name="timeout">The default request timeout</param>
         /// <returns></returns>
-        public static Task<IClientFactory> CreateClientFactory(this IReceiveConnector connector, RequestTimeout timeout = default)
+        public static IClientFactory CreateClientFactory(this IReceiveConnector connector, RequestTimeout timeout = default)
         {
             var receiveEndpointHandle = connector.ConnectResponseEndpoint();
 
@@ -128,7 +112,7 @@
         /// <param name="connector">The host to connect the new receive endpoint</param>
         /// <param name="timeout">The default request timeout</param>
         /// <returns></returns>
-        public static Task<IClientFactory> ConnectClientFactory(this IReceiveConnector connector, RequestTimeout timeout = default)
+        public static IClientFactory ConnectClientFactory(this IReceiveConnector connector, RequestTimeout timeout = default)
         {
             var endpointDefinition = new TemporaryEndpointDefinition();
 

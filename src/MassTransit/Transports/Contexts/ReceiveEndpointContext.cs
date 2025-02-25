@@ -19,6 +19,7 @@ namespace MassTransit.Transports
         IProbeSite
     {
         TimeSpan? ConsumerStopTimeout { get; }
+        TimeSpan? StopTimeout { get; }
 
         Uri InputAddress { get; }
 

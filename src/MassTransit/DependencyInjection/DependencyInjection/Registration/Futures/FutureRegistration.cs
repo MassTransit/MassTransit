@@ -11,10 +11,12 @@ namespace MassTransit.DependencyInjection.Registration
         IFutureRegistration
         where TFuture : class, SagaStateMachine<FutureState>
     {
+        readonly IContainerSelector _selector;
         IFutureDefinition<TFuture> _definition;
 
-        public FutureRegistration()
+        public FutureRegistration(IContainerSelector selector)
         {
+            _selector = selector;
             IncludeInConfigureEndpoints = !Type.HasAttribute<ExcludeFromConfigureEndpointsAttribute>();
         }
 
@@ -40,8 +42,6 @@ namespace MassTransit.DependencyInjection.Registration
                 configurator.InputAddress.GetEndpointName(), TypeCache<TFuture>.ShortName);
 
             configurator.AddEndpointSpecification(sagaConfigurator);
-
-            IncludeInConfigureEndpoints = false;
         }
 
         public IFutureDefinition GetDefinition(IRegistrationContext context)
@@ -54,9 +54,9 @@ namespace MassTransit.DependencyInjection.Registration
             if (_definition != null)
                 return _definition;
 
-            _definition = provider.GetService<IFutureDefinition<TFuture>>() ?? new DefaultFutureDefinition<TFuture>();
+            _definition = _selector.GetDefinition<IFutureDefinition<TFuture>>(provider) ?? new DefaultFutureDefinition<TFuture>();
 
-            var endpointDefinition = provider.GetService<IEndpointDefinition<TFuture>>();
+            IEndpointDefinition<TFuture> endpointDefinition = _selector.GetEndpointDefinition<TFuture>(provider);
             if (endpointDefinition != null)
                 _definition.EndpointDefinition = endpointDefinition;
 

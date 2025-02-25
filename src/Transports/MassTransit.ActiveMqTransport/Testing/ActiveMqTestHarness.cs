@@ -20,14 +20,17 @@
         Uri _hostAddress;
         Uri _inputQueueAddress;
 
-        public ActiveMqTestHarness(string inputQueueName = null)
+        public ActiveMqTestHarness(string protocol = ActiveMqHostAddress.ActiveMqScheme, string inputQueueName = null)
         {
             Username = "admin";
             Password = "admin";
 
             InputQueueName = inputQueueName ?? "input_queue";
 
-            HostAddress = new Uri("activemq://localhost/");
+            if (protocol == ActiveMqHostAddress.AmqpScheme)
+                HostAddress = new Uri("amqp://localhost:5672");
+            else
+                HostAddress = new Uri("activemq://localhost:61616");
         }
 
         public Uri HostAddress
@@ -92,7 +95,10 @@
 
         public ActiveMqHostSettings GetHostSettings()
         {
-            var host = new ActiveMqHostConfigurator(HostAddress);
+            var address = HostAddress;
+            if (HostAddress.Scheme == ActiveMqHostAddress.AmqpScheme)
+                address = new UriBuilder(ActiveMqHostAddress.ActiveMqScheme, HostAddress.Host, HostAddress.Port).Uri;
+            var host = new ActiveMqHostConfigurator(address);
 
             ConfigureHostSettings(host);
 
@@ -155,7 +161,7 @@
                 .FirstOrDefault();
         }
 
-        protected override IBusControl CreateBus()
+        protected override async Task<IBusControl> CreateBus()
         {
             var busControl = MassTransit.Bus.Factory.CreateUsingActiveMq(x =>
             {
@@ -203,11 +209,17 @@
             }
         }
 
-        static void CleanUpQueue(ISession model, string queueName)
+        static void CleanUpQueue(ISession session, string queueName)
         {
-            model.DeleteDestination(SessionUtil.GetQueue(model, queueName));
-            model.DeleteDestination(SessionUtil.GetQueue(model, $"{queueName}_skipped"));
-            model.DeleteDestination(SessionUtil.GetQueue(model, $"{queueName}_error"));
+            DeleteDestination(session, queueName);
+            DeleteDestination(session, $"{queueName}_skipped");
+            DeleteDestination(session, $"{queueName}_error");
+        }
+
+        static void DeleteDestination(ISession session, string destinationName)
+        {
+            var destination = SessionUtil.GetQueue(session, destinationName);
+            session.DeleteDestination(destination);
         }
     }
 }

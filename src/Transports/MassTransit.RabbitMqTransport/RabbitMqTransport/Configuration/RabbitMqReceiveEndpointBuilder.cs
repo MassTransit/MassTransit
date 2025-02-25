@@ -4,6 +4,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using System.Collections.Generic;
     using MassTransit.Configuration;
     using Middleware;
+    using RabbitMQ.Client;
     using Topology;
     using Transports;
 
@@ -74,19 +75,16 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             var queueArguments = new Dictionary<string, object>(settings.QueueArguments);
 
-            var queueAutoDelete = settings.AutoDelete;
             if (settings.QueueExpiration.HasValue)
-            {
-                queueArguments["x-expires"] = (long)settings.QueueExpiration.Value.TotalMilliseconds;
-                queueAutoDelete = false;
-            }
+                queueArguments[Headers.XExpires] = (long)settings.QueueExpiration.Value.TotalMilliseconds;
 
             topologyBuilder.Exchange = topologyBuilder.ExchangeDeclare(settings.ExchangeName ?? settings.QueueName, settings.ExchangeType, settings.Durable,
                 settings.AutoDelete, settings.ExchangeArguments);
 
             if (settings.BindQueue)
             {
-                topologyBuilder.Queue = topologyBuilder.QueueDeclare(settings.QueueName, settings.Durable, queueAutoDelete, settings.Exclusive, queueArguments);
+                topologyBuilder.Queue = topologyBuilder.QueueDeclare(settings.QueueName, settings.Durable, settings.AutoDelete, settings.Exclusive,
+                    queueArguments);
 
                 topologyBuilder.QueueBind(topologyBuilder.Exchange, topologyBuilder.Queue, settings.RoutingKey, settings.BindingArguments);
             }

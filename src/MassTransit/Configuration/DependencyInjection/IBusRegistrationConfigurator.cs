@@ -26,7 +26,7 @@ namespace MassTransit
         /// <param name="busFactory"></param>
         /// <typeparam name="T"></typeparam>
         void SetBusFactory<T>(T busFactory)
-            where T : IRegistrationBusFactory;
+            where T : class, IRegistrationBusFactory;
 
         /// <summary>
         /// Add bus rider
@@ -47,6 +47,12 @@ namespace MassTransit
         /// </summary>
         /// <param name="callback">Callback invoked for each receive endpoint</param>
         void AddConfigureEndpointsCallback(ConfigureEndpointsProviderCallback callback);
+
+        /// <summary>
+        /// Override the default request client factory to enable advanced scenarios. This is typically not called by end-users.
+        /// </summary>
+        /// <param name="clientFactory"></param>
+        void SetRequestClientFactory(Func<IBus, RequestTimeout, IClientFactory> clientFactory);
     }
 
 

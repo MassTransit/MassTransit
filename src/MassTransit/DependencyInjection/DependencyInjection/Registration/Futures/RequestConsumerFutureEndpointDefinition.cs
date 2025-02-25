@@ -16,7 +16,7 @@ namespace MassTransit.DependencyInjection.Registration
 
         public bool ConfigureConsumeTopology => true;
 
-        public void Configure<T>(T configurator)
+        public void Configure<T>(T configurator, IRegistrationContext context)
             where T : IReceiveEndpointConfigurator
         {
         }

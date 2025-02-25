@@ -24,6 +24,11 @@ namespace MassTransit
         TimeSpan Timeout { get; }
 
         /// <summary>
+        /// If true, the requestId is cleared when Faulted is triggered
+        /// </summary>
+        bool ClearRequestIdOnFaulted { get; }
+
+        /// <summary>
         /// If specified, the TimeToLive is set on the outgoing request
         /// </summary>
         TimeSpan? TimeToLive { get; }

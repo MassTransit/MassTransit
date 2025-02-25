@@ -30,7 +30,7 @@ namespace MassTransit.Metadata
                 if ("dotnet".Equals(ProcessName, StringComparison.OrdinalIgnoreCase))
                     ProcessName = GetUsefulProcessName(ProcessName);
             }
-            catch (PlatformNotSupportedException)
+            catch (NotSupportedException)
             {
                 ProcessId = 0;
                 ProcessName = GetUsefulProcessName("UWP");

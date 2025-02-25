@@ -12,12 +12,12 @@ namespace MassTransit.DependencyInjection
         where TBus : class, IBus
     {
         public ScopedBusContextProvider(TBus bus, Bind<TBus, IClientFactory> clientFactory,
-            Bind<TBus, IScopedConsumeContextProvider> consumeContextProvider,
+            Bind<TBus, IScopedConsumeContextProvider> busConsumeContextProvider,
             IScopedConsumeContextProvider globalConsumeContextProvider,
             IServiceProvider provider)
         {
-            if (consumeContextProvider.Value.HasContext)
-                Context = new ConsumeContextScopedBusContext(consumeContextProvider.Value.GetContext(), clientFactory.Value);
+            if (busConsumeContextProvider.Value.HasContext)
+                Context = new ConsumeContextScopedBusContext(busConsumeContextProvider.Value.GetContext(), clientFactory.Value);
             else if (globalConsumeContextProvider.HasContext)
                 Context = new ConsumeContextScopedBusContext<TBus>(bus, globalConsumeContextProvider.GetContext(), clientFactory.Value, provider);
             else

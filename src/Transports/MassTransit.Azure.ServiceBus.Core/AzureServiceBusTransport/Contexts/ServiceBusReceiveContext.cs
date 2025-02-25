@@ -11,7 +11,8 @@
     public sealed class ServiceBusReceiveContext :
         BaseReceiveContext,
         ServiceBusMessageContext,
-        TransportReceiveContext
+        TransportReceiveContext,
+        ITransportSequenceNumber
     {
         readonly ServiceBusReceivedMessage _message;
 
@@ -41,6 +42,7 @@
 
         public string Label => _message.Subject;
 
+        ulong? ITransportSequenceNumber.SequenceNumber => (ulong)SequenceNumber;
         public long SequenceNumber => _message.SequenceNumber;
 
         public long EnqueuedSequenceNumber => _message.EnqueuedSequenceNumber;

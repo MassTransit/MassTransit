@@ -95,7 +95,7 @@ namespace MassTransit.KafkaIntegration
             }
 
             TaskUtil.Await(Task.WhenAll(partitions.Select(partition => LostAndDelete(partition))));
-            return Array.Empty<TopicPartitionOffset>();
+            return [];
         }
 
         public IEnumerable<TopicPartitionOffset> OnUnAssigned(IConsumer<byte[], byte[]> consumer, IEnumerable<TopicPartitionOffset> partitions)
@@ -112,7 +112,7 @@ namespace MassTransit.KafkaIntegration
             }
 
             TaskUtil.Await(Task.WhenAll(partitions.Select(partition => CloseAndDelete(partition))));
-            return Array.Empty<TopicPartitionOffset>();
+            return [];
         }
     }
 }

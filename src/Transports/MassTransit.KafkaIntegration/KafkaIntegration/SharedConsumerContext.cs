@@ -24,9 +24,10 @@ namespace MassTransit.KafkaIntegration
 
         public ILogContext LogContext => _context.LogContext;
 
-        public IConsumer<byte[], byte[]> CreateConsumer(KafkaConsumerBuilderContext context, Action<IConsumer<byte[], byte[]>, Error> onError)
+        public IConsumer<byte[], byte[]> CreateConsumer(KafkaConsumerBuilderContext context, Action<IConsumer<byte[], byte[]>, Error> onError,
+            int consumerIndex)
         {
-            return _context.CreateConsumer(context, onError);
+            return _context.CreateConsumer(context, onError, consumerIndex);
         }
     }
 }

@@ -21,7 +21,7 @@ namespace MassTransit.Configuration
 
         public virtual int? ConcurrentMessageLimit => default;
 
-        public void Configure<T>(T configurator)
+        public void Configure<T>(T configurator, IRegistrationContext context)
             where T : IReceiveEndpointConfigurator
         {
         }

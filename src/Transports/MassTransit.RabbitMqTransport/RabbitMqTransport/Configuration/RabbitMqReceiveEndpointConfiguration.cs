@@ -20,7 +20,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         readonly IRabbitMqEndpointConfiguration _endpointConfiguration;
         readonly IRabbitMqHostConfiguration _hostConfiguration;
         readonly Lazy<Uri> _inputAddress;
-        readonly IBuildPipeConfigurator<ModelContext> _modelConfigurator;
+        readonly IBuildPipeConfigurator<ChannelContext> _channelConfigurator;
         readonly RabbitMqReceiveSettings _settings;
 
         public RabbitMqReceiveEndpointConfiguration(IRabbitMqHostConfiguration hostConfiguration, RabbitMqReceiveSettings settings,
@@ -33,7 +33,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _endpointConfiguration = endpointConfiguration;
 
             _connectionConfigurator = new PipeConfigurator<ConnectionContext>();
-            _modelConfigurator = new PipeConfigurator<ModelContext>();
+            _channelConfigurator = new PipeConfigurator<ChannelContext>();
 
             _inputAddress = new Lazy<Uri>(FormatInputAddress);
 
@@ -61,23 +61,23 @@ namespace MassTransit.RabbitMqTransport.Configuration
         {
             var context = CreateRabbitMqReceiveEndpointContext();
 
-            _modelConfigurator.UseFilter(new ConfigureRabbitMqTopologyFilter<ReceiveSettings>(_settings, context.BrokerTopology));
+            _channelConfigurator.UseFilter(new ConfigureRabbitMqTopologyFilter<ReceiveSettings>(_settings, context.BrokerTopology));
 
             if (_hostConfiguration.DeployTopologyOnly)
-                _modelConfigurator.UseFilter(new TransportReadyFilter<ModelContext>(context));
+                _channelConfigurator.UseFilter(new TransportReadyFilter<ChannelContext>(context));
             else
             {
                 if (_settings.PurgeOnStartup)
-                    _modelConfigurator.UseFilter(new PurgeOnStartupFilter(_settings.QueueName));
+                    _channelConfigurator.UseFilter(new PurgeOnStartupFilter(_settings.QueueName));
 
-                _modelConfigurator.UseFilter(new PrefetchCountFilter(_settings.PrefetchCount));
-                _modelConfigurator.UseFilter(new ReceiveEndpointDependencyFilter<ModelContext>(context));
-                _modelConfigurator.UseFilter(new RabbitMqConsumerFilter(context));
+                _channelConfigurator.UseFilter(new PrefetchCountFilter(_settings.PrefetchCount));
+                _channelConfigurator.UseFilter(new ReceiveEndpointDependencyFilter<ChannelContext>(context));
+                _channelConfigurator.UseFilter(new RabbitMqConsumerFilter(context));
             }
 
-            IPipe<ModelContext> modelPipe = _modelConfigurator.Build();
+            IPipe<ChannelContext> channelPipe = _channelConfigurator.Build();
 
-            var transport = new ReceiveTransport<ModelContext>(_hostConfiguration, context, () => context.ModelContextSupervisor, modelPipe);
+            var transport = new ReceiveTransport<ChannelContext>(_hostConfiguration, context, () => context.ChannelContextSupervisor, channelPipe);
 
             if (IsBusEndpoint && _hostConfiguration.DeployPublishTopology)
             {
@@ -235,6 +235,21 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _settings.SetQuorumQueue(replicationFactor);
         }
 
+        public void SetDeliveryAcknowledgementTimeout(TimeSpan timeSpan)
+        {
+            if (timeSpan <= TimeSpan.Zero)
+                throw new ArgumentException("The RabbitMQ consumer timeout must be > 0");
+
+            SetQueueArgument("x-consumer-timeout", (long)timeSpan.TotalMilliseconds);
+        }
+
+        public void SetDeliveryAcknowledgementTimeout(int? d = null, int? h = null, int? m = null, int? s = null, int? ms = null)
+        {
+            var value = new TimeSpan(d ?? 0, h ?? 0, m ?? 0, s ?? 0, ms ?? 0);
+
+            SetDeliveryAcknowledgementTimeout(value);
+        }
+
         public void Bind(string exchangeName, Action<IRabbitMqExchangeToExchangeBindingConfigurator> callback)
         {
             if (exchangeName == null)
@@ -256,9 +271,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
             DeadLetterExchange = exchangeName;
         }
 
-        public void ConfigureModel(Action<IPipeConfigurator<ModelContext>> configure)
+        public void ConfigureChannel(Action<IPipeConfigurator<ChannelContext>> configure)
         {
-            configure?.Invoke(_modelConfigurator);
+            configure?.Invoke(_channelConfigurator);
         }
 
         public void ConfigureConnection(Action<IPipeConfigurator<ConnectionContext>> configure)

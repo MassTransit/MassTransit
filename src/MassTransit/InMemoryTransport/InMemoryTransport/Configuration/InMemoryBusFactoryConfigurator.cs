@@ -66,6 +66,13 @@ namespace MassTransit.InMemoryTransport.Configuration
             configure?.Invoke(_hostConfiguration.Configurator);
         }
 
+        public void Host(string virtualHost, Action<IInMemoryHostConfigurator>? configure)
+        {
+            _hostConfiguration.BaseAddress = new UriBuilder(_hostConfiguration.HostAddress) { Path = virtualHost }.Uri;
+
+            configure?.Invoke(_hostConfiguration.Configurator);
+        }
+
         public new IInMemoryPublishTopologyConfigurator PublishTopology => _busConfiguration.Topology.Publish;
 
         public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter? endpointNameFormatter,

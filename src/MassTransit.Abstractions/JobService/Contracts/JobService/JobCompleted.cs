@@ -21,19 +21,19 @@ namespace MassTransit.Contracts.JobService
         /// <summary>
         /// The arguments used to start the job
         /// </summary>
-        IDictionary<string, object> Job { get; }
+        Dictionary<string, object> Job { get; }
 
         /// <summary>
         /// The result of the job
         /// </summary>
-        IDictionary<string, object> Result { get; }
+        Dictionary<string, object> Result { get; }
     }
 
 
     /// <summary>
     /// Published when a job completes (separately from <see cref="JobCompleted"/>)
     /// </summary>
-    public interface JobCompleted<T>
+    public interface JobCompleted<out T>
         where T : class
     {
         Guid JobId { get; }
@@ -42,14 +42,11 @@ namespace MassTransit.Contracts.JobService
 
         TimeSpan Duration { get; }
 
-        /// <summary>
-        /// The arguments used to start the job
-        /// </summary>
-        IDictionary<string, object> Job { get; }
+        T Job { get; }
 
         /// <summary>
         /// The result of the job
         /// </summary>
-        IDictionary<string, object> Result { get; }
+        Dictionary<string, object> Result { get; }
     }
 }

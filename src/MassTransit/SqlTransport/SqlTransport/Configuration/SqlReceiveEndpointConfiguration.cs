@@ -97,6 +97,12 @@ namespace MassTransit.SqlTransport.Configuration
             if (_settings.PurgeOnStartup)
                 yield return this.Warning(_settings.QueueName, "Existing messages will be purged on service start");
 
+            if (_settings.MaintenanceBatchSize <= 0)
+                yield return this.Failure(_settings.QueueName, nameof(_settings.MaintenanceBatchSize), "Must be >= 1");
+
+            if (_settings.UnlockDelay.HasValue && _settings.UnlockDelay < TimeSpan.Zero)
+                yield return this.Failure(_settings.QueueName, nameof(_settings.UnlockDelay), "Must be > TimeSpan.Zero");
+
             foreach (var result in base.Validate())
                 yield return result.WithParentKey(_settings.QueueName);
         }
@@ -126,7 +132,7 @@ namespace MassTransit.SqlTransport.Configuration
             set => _settings.MaxLockDuration = value;
         }
 
-        public int MaxDeliveryCount
+        public int? MaxDeliveryCount
         {
             set => _settings.MaxDeliveryCount = value;
         }
@@ -134,6 +140,16 @@ namespace MassTransit.SqlTransport.Configuration
         public bool PurgeOnStartup
         {
             set => _settings.PurgeOnStartup = value;
+        }
+
+        public int MaintenanceBatchSize
+        {
+            set => _settings.MaintenanceBatchSize = value;
+        }
+
+        public bool DeadLetterExpiredMessages
+        {
+            set => _settings.DeadLetterExpiredMessages = value;
         }
 
         public void Subscribe(string topicName, Action<ISqlTopicSubscriptionConfigurator>? callback)
@@ -162,21 +178,10 @@ namespace MassTransit.SqlTransport.Configuration
 
         public void SetReceiveMode(SqlReceiveMode mode, int? concurrentDeliveryLimit = default)
         {
-            switch (mode)
-            {
-                case SqlReceiveMode.Normal:
-                case SqlReceiveMode.Partitioned:
-                case SqlReceiveMode.PartitionedOrdered:
-                    _settings.ReceiveMode = mode;
-                    break;
-                case SqlReceiveMode.PartitionedConcurrent:
-                case SqlReceiveMode.PartitionedOrderedConcurrent:
-                    _settings.ConcurrentDeliveryLimit = concurrentDeliveryLimit ?? _settings.ConcurrentDeliveryLimit;
-                    _settings.ReceiveMode = mode;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
-            }
+            if (concurrentDeliveryLimit != null)
+                _settings.ConcurrentDeliveryLimit = concurrentDeliveryLimit.Value;
+
+            _settings.ReceiveMode = mode;
         }
 
         public void ConfigureClient(Action<IPipeConfigurator<ClientContext>>? configure)

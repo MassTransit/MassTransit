@@ -10,10 +10,10 @@ namespace MassTransit.RabbitMqTransport
     {
         Uri NormalizeAddress(Uri address);
 
-        Task<ISendTransport> CreateSendTransport(RabbitMqReceiveEndpointContext receiveEndpointContext, IModelContextSupervisor modelContextSupervisor,
+        Task<ISendTransport> CreateSendTransport(RabbitMqReceiveEndpointContext receiveEndpointContext, IChannelContextSupervisor channelContextSupervisor,
             Uri address);
 
-        Task<ISendTransport> CreatePublishTransport<T>(RabbitMqReceiveEndpointContext receiveEndpointContext, IModelContextSupervisor modelContextSupervisor)
+        Task<ISendTransport> CreatePublishTransport<T>(RabbitMqReceiveEndpointContext receiveEndpointContext, IChannelContextSupervisor channelContextSupervisor)
             where T : class;
     }
 }

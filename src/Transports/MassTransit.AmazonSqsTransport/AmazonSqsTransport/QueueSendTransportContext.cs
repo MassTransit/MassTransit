@@ -56,7 +56,7 @@ namespace MassTransit.AmazonSqsTransport
 
         public override IEnumerable<IAgent> GetAgentHandles()
         {
-            return new IAgent[] { _supervisor };
+            return [_supervisor];
         }
 
         public Task<SendContext<T>> CreateSendContext<T>(ClientContext context, T message, IPipe<SendContext<T>> pipe,

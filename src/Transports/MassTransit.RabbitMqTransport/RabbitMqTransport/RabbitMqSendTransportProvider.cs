@@ -9,13 +9,13 @@ namespace MassTransit.RabbitMqTransport
         ISendTransportProvider
     {
         readonly IConnectionContextSupervisor _connectionContextSupervisor;
-        readonly IModelContextSupervisor _modelContextSupervisor;
+        readonly IChannelContextSupervisor _channelContextSupervisor;
         readonly RabbitMqReceiveEndpointContext _receiveEndpointContext;
 
         public RabbitMqSendTransportProvider(IConnectionContextSupervisor connectionContextSupervisor, RabbitMqReceiveEndpointContext receiveEndpointContext)
         {
             _connectionContextSupervisor = connectionContextSupervisor;
-            _modelContextSupervisor = receiveEndpointContext.ModelContextSupervisor;
+            _channelContextSupervisor = receiveEndpointContext.ChannelContextSupervisor;
             _receiveEndpointContext = receiveEndpointContext;
         }
 
@@ -26,7 +26,7 @@ namespace MassTransit.RabbitMqTransport
 
         public Task<ISendTransport> GetSendTransport(Uri address)
         {
-            return _connectionContextSupervisor.CreateSendTransport(_receiveEndpointContext,_modelContextSupervisor, address);
+            return _connectionContextSupervisor.CreateSendTransport(_receiveEndpointContext,_channelContextSupervisor, address);
         }
     }
 }

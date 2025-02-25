@@ -27,7 +27,7 @@
         }
 
         public Task<ISendTransport> CreateSendTransport(RabbitMqReceiveEndpointContext receiveEndpointContext,
-            IModelContextSupervisor modelContextSupervisor, Uri address)
+            IChannelContextSupervisor channelContextSupervisor, Uri address)
         {
             LogContext.SetCurrentIfNull(_hostConfiguration.LogContext);
 
@@ -41,11 +41,11 @@
 
             var configureTopology = new ConfigureRabbitMqTopologyFilter<SendSettings>(settings, brokerTopology);
 
-            return CreateSendTransport(receiveEndpointContext, modelContextSupervisor, configureTopology, settings.ExchangeName, endpointAddress);
+            return CreateSendTransport(receiveEndpointContext, channelContextSupervisor, configureTopology, settings.ExchangeName, endpointAddress);
         }
 
         public Task<ISendTransport> CreatePublishTransport<T>(RabbitMqReceiveEndpointContext receiveEndpointContext,
-            IModelContextSupervisor modelContextSupervisor)
+            IChannelContextSupervisor channelContextSupervisor)
             where T : class
         {
             LogContext.SetCurrentIfNull(_hostConfiguration.LogContext);
@@ -60,25 +60,25 @@
 
             var endpointAddress = settings.GetSendAddress(_hostConfiguration.HostAddress);
 
-            return CreateSendTransport(receiveEndpointContext, modelContextSupervisor, configureTopology, publishTopology.Exchange.ExchangeName,
+            return CreateSendTransport(receiveEndpointContext, channelContextSupervisor, configureTopology, publishTopology.Exchange.ExchangeName,
                 endpointAddress);
         }
 
-        Task<ISendTransport> CreateSendTransport(ReceiveEndpointContext receiveEndpointContext, IModelContextSupervisor modelContextSupervisor,
+        Task<ISendTransport> CreateSendTransport(ReceiveEndpointContext receiveEndpointContext, IChannelContextSupervisor channelContextSupervisor,
             ConfigureRabbitMqTopologyFilter<SendSettings> filter, string exchangeName, RabbitMqEndpointAddress endpointAddress)
         {
-            var supervisor = new ModelContextSupervisor(modelContextSupervisor);
+            var supervisor = new ChannelContextSupervisor(channelContextSupervisor);
 
             var delaySettings = endpointAddress.GetDelaySettings();
 
-            IPipe<ModelContext> delayPipe = new ConfigureRabbitMqTopologyFilter<DelaySettings>(delaySettings, delaySettings.GetBrokerTopology()).ToPipe();
+            IPipe<ChannelContext> delayPipe = new ConfigureRabbitMqTopologyFilter<DelaySettings>(delaySettings, delaySettings.GetBrokerTopology()).ToPipe();
 
             var sendTransportContext = new RabbitMqSendTransportContext(_hostConfiguration, receiveEndpointContext, supervisor, filter, exchangeName,
                 delayPipe, delaySettings.ExchangeName);
 
-            var transport = new SendTransport<ModelContext>(sendTransportContext);
+            var transport = new SendTransport<ChannelContext>(sendTransportContext);
 
-            modelContextSupervisor.AddSendAgent(transport);
+            channelContextSupervisor.AddSendAgent(transport);
 
             return Task.FromResult<ISendTransport>(transport);
         }

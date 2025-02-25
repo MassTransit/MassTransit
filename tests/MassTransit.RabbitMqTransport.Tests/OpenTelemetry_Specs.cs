@@ -25,9 +25,8 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_carry_the_baggage_with_newtonsoft()
         {
-            using var tracerProvider = CreateTraceProvider("order-api");
-
             var services = new ServiceCollection();
+            AddTraceListener(services, "order-api");
 
             await using var provider = services
                 .AddMassTransitTestHarness(x =>
@@ -76,9 +75,8 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_report_telemetry_to_jaeger()
         {
-            using var tracerProvider = CreateTraceProvider("order-api");
-
             var services = new ServiceCollection();
+            AddTraceListener(services, "order-api");
 
             await using var provider = services
                 .AddMassTransitTestHarness(x =>
@@ -125,9 +123,8 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_report_telemetry_to_jaeger_for_batch_consumer()
         {
-            using var tracerProvider = CreateTraceProvider("order-api");
-
             var services = new ServiceCollection();
+            AddTraceListener(services, "order-api");
 
             await using var provider = services
                 .AddMassTransitTestHarness(x =>
@@ -169,9 +166,8 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_report_telemetry_to_jaeger_for_routing_slip()
         {
-            using var tracerProvider = CreateTraceProvider("routing-api");
-
             var services = new ServiceCollection();
+            AddTraceListener(services, "routing-api");
 
             await using var provider = services
                 .AddMassTransitTestHarness(x =>
@@ -210,9 +206,8 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_report_telemetry_to_jaeger_from_mediator()
         {
-            using var tracerProvider = CreateTraceProvider("mediator");
-
             var services = new ServiceCollection();
+            AddTraceListener(services, "mediator");
 
             await using var provider = services
                 .AddMediator(x =>
@@ -238,9 +233,10 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_support_the_saga_harness()
         {
-            using var tracerProvider = CreateTraceProvider("saga-api");
+            var services = new ServiceCollection();
+            AddTraceListener(services, "saga-api");
 
-            await using var provider = new ServiceCollection()
+            await using var provider = services
                 .AddMassTransitTestHarness(x =>
                 {
                     x.SetKebabCaseEndpointNameFormatter();
@@ -287,26 +283,25 @@ namespace MassTransit.RabbitMqTransport.Tests
             });
         }
 
-        static TracerProvider CreateTraceProvider(string serviceName)
+        static void AddTraceListener(IServiceCollection services, string serviceName)
         {
-            return Sdk.CreateTracerProviderBuilder()
-                .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName))
-                .AddSource("MassTransit")
-                .AddJaegerExporter(o =>
-                {
-                    o.AgentHost = "localhost";
-                    o.AgentPort = 6831;
-                    o.MaxPayloadSizeInBytes = 4096;
-                    o.ExportProcessorType = ExportProcessorType.Batch;
-                    o.BatchExportProcessorOptions = new BatchExportProcessorOptions<System.Diagnostics.Activity>
+            services.AddOpenTelemetry()
+                .WithTracing(t => t.SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName))
+                    .AddSource(DiagnosticHeaders.DefaultListenerName)
+                    .AddJaegerExporter(o =>
                     {
-                        MaxQueueSize = 2048,
-                        ScheduledDelayMilliseconds = 5000,
-                        ExporterTimeoutMilliseconds = 30000,
-                        MaxExportBatchSize = 512,
-                    };
-                })
-                .Build();
+                        o.AgentHost = "localhost";
+                        o.AgentPort = 6831;
+                        o.MaxPayloadSizeInBytes = 4096;
+                        o.ExportProcessorType = ExportProcessorType.Batch;
+                        o.BatchExportProcessorOptions = new BatchExportProcessorOptions<System.Diagnostics.Activity>
+                        {
+                            MaxQueueSize = 2048,
+                            ScheduledDelayMilliseconds = 5000,
+                            ExporterTimeoutMilliseconds = 30000,
+                            MaxExportBatchSize = 512
+                        };
+                    }));
         }
 
 

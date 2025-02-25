@@ -10,11 +10,12 @@ namespace MassTransit.SqlTransport.Topology
         Queue,
         QueueHandle
     {
-        public QueueEntity(long id, string name, TimeSpan? autoDeleteOnIdle)
+        public QueueEntity(long id, string name, TimeSpan? autoDeleteOnIdle, int? maxDeliveryCount)
         {
             Id = id;
             QueueName = name;
             AutoDeleteOnIdle = autoDeleteOnIdle;
+            MaxDeliveryCount = maxDeliveryCount;
         }
 
         public static IEqualityComparer<QueueEntity> NameComparer { get; } = new NameEqualityComparer();
@@ -23,6 +24,7 @@ namespace MassTransit.SqlTransport.Topology
 
         public string QueueName { get; }
         public TimeSpan? AutoDeleteOnIdle { get; }
+        public int? MaxDeliveryCount { get;}
         public long Id { get; }
         public Queue Queue => this;
 

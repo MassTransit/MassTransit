@@ -6,7 +6,7 @@ namespace MassTransit.RabbitMqTransport.Topology
     public class RabbitMqEntityNameValidator :
         IEntityNameValidator
     {
-        static readonly Regex _regex = new Regex(@"^[A-Za-z0-9\-_\.:]+$", RegexOptions.Compiled);
+        static readonly Regex _regex = new Regex(@"^[\w\p{L}\-_\.:]+$", RegexOptions.Compiled);
 
         public static IEntityNameValidator Validator => Cached.EntityNameValidator;
 

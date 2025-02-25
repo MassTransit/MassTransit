@@ -1,11 +1,11 @@
 namespace MassTransit.AzureTable
 {
-    using Microsoft.Azure.Cosmos.Table;
+    using Azure.Data.Tables;
 
 
     public interface ICloudTableProvider<in TSaga>
         where TSaga : class, ISaga
     {
-        CloudTable GetCloudTable();
+        TableClient GetCloudTable();
     }
 }

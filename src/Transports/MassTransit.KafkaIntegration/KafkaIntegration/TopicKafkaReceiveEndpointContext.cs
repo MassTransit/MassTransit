@@ -31,8 +31,7 @@ namespace MassTransit.KafkaIntegration
             _receiveSetting = receiveSetting;
 
             _consumerContext = new Recycle<IConsumerContextSupervisor>(() =>
-                new ConsumerContextSupervisor(busInstance.HostConfiguration, hostConfiguration.ClientContextSupervisor,
-                    consumerBuilderFactory));
+                new ConsumerContextSupervisor(busInstance.HostConfiguration, hostConfiguration.ClientContextSupervisor, consumerBuilderFactory));
         }
 
         public string GroupId { get; }

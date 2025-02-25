@@ -47,7 +47,10 @@
         /// </summary>
         TimeSpan MaxLockDuration { get; }
 
-        int MaxDeliveryCount { get; }
+        /// <summary>
+        /// The maximum number of message delivery attempts by the transport before moving the message to the DLQ (defaults to 10)
+        /// </summary>
+        int? MaxDeliveryCount { get; }
 
         /// <summary>
         /// How often to poll for messages when no messages exist
@@ -58,5 +61,9 @@
         /// The amount of time, when a message is abandoned, before the message is available for redelivery
         /// </summary>
         TimeSpan? UnlockDelay { get; }
+
+        int MaintenanceBatchSize { get; }
+
+        bool DeadLetterExpiredMessages { get; }
     }
 }

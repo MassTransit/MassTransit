@@ -221,7 +221,12 @@
             get => _producer.DisableMessageTimestamp;
             set => _producer.DisableMessageTimestamp = value;
         }
-        public TimeSpan DeliveryDelay { get => _producer.DeliveryDelay; set => _producer.DeliveryDelay = value; }
+
+        public TimeSpan DeliveryDelay
+        {
+            get => _producer.DeliveryDelay;
+            set => _producer.DeliveryDelay = value;
+        }
 
         public event Action Used;
     }

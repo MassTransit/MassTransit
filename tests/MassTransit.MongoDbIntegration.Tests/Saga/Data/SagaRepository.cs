@@ -18,7 +18,7 @@
 
         public static Task DeleteSaga(Guid correlationId)
         {
-            return Instance.GetCollection<BsonDocument>("sagas").DeleteOneAsync(x => x["_id"] == correlationId);
+            return Instance.GetCollection<BsonDocument>("sagas").DeleteOneAsync(x => x["_id"].AsGuid == correlationId);
         }
 
         public static Task<SimpleSaga> GetSaga(Guid correlationId)
