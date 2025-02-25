@@ -83,8 +83,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                 catch (DbUpdateConcurrencyException)
                 {
                 }
-                catch (InvalidOperationException exception) when (exception.InnerException != null
-                                                                  && exception.InnerException.Message.Contains("concurrent update"))
+                catch (InvalidOperationException exception) when (IsTransientFailure(exception))
                 {
                 }
                 catch (Exception exception)
@@ -148,8 +147,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                     {
                         throw;
                     }
-                    catch (InvalidOperationException exception) when (exception.InnerException != null
-                                                                      && exception.InnerException.Message.Contains("concurrent update"))
+                    catch (InvalidOperationException exception) when (IsTransientFailure(exception))
                     {
                         throw;
                     }
@@ -185,6 +183,13 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
                 await scope.DisposeAsync().ConfigureAwait(false);
             }
+        }
+
+        static bool IsTransientFailure(Exception exception)
+        {
+            return exception.InnerException != null &&
+                (exception.InnerException.Message.Contains("concurrent update")
+                    || exception.InnerException.Message.Contains("transient failure"));
         }
 
         static async Task RemoveOutbox(TDbContext dbContext, OutboxState outboxState, CancellationToken cancellationToken)
