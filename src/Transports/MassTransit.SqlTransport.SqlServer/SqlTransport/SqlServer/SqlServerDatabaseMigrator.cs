@@ -4,6 +4,7 @@ namespace MassTransit.SqlTransport.SqlServer
     using System.Threading;
     using System.Threading.Tasks;
     using Dapper;
+    using Microsoft.Data.SqlClient;
     using Microsoft.Extensions.Logging;
 
 
@@ -1480,7 +1481,6 @@ BEGIN
     SELECT COUNT(*) FROM @DeletedMessages
 END";
 
-
         const string SqlFnRequeueMessages = @"
 CREATE OR ALTER PROCEDURE {0}.RequeueMessages
     @queueName nvarchar(256),
@@ -1996,28 +1996,53 @@ END
 
             _logger.LogDebug("Role {Role} granted access to schema {Schema}", options.Role, options.Schema);
 
-            if (string.IsNullOrWhiteSpace(options.Username))
+            var username = options.Username;
+            if (string.IsNullOrWhiteSpace(username))
+            {
+                var builder = new SqlConnectionStringBuilder(connection.Connection.ConnectionString);
+                if (builder.IntegratedSecurity)
+                {
+                #if NET6_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
+                    await using SqlCommand command = new("SELECT ORIGINAL_LOGIN()", connection.Connection);
+                #else
+                    using SqlCommand command = new("SELECT ORIGINAL_LOGIN()", connection.Connection);
+                #endif
+
+                    username = (await command.ExecuteScalarAsync())?.ToString();
+                }
+                else if (builder.Authentication == SqlAuthenticationMethod.ActiveDirectoryManagedIdentity)
+                {
+                #if NET6_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
+                    await using SqlCommand command = new("SELECT CURRENT_USER", connection.Connection);
+                #else
+                    using SqlCommand command = new("SELECT CURRENT_USER", connection.Connection);
+                #endif
+                    username = (await command.ExecuteScalarAsync())?.ToString();
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(username))
                 throw new ArgumentException("The SQL transport migrator requires a valid Username, but Username was not specified", nameof(options));
 
-            result = await connection.Connection.ExecuteScalarAsync<int?>(string.Format(RoleExistsSql, options.Username)).ConfigureAwait(false);
+            result = await connection.Connection.ExecuteScalarAsync<int?>(string.Format(RoleExistsSql, username)).ConfigureAwait(false);
             if (!result.HasValue)
             {
                 result = await connection.Connection
-                    .ExecuteScalarAsync<int?>(string.Format(CreateUserSql, options.Schema, options.Username))
+                    .ExecuteScalarAsync<int?>(string.Format(CreateUserSql, options.Schema, username))
                     .ConfigureAwait(false);
 
                 if (result is 1)
-                    _logger.LogDebug("User {Username} created", options.Username);
+                    _logger.LogDebug("User {Username} created", username);
             }
 
-            result = await connection.Connection.ExecuteScalarAsync<int?>(string.Format(IsRoleMemberSql, options.Role, options.Username)).ConfigureAwait(false);
+            result = await connection.Connection.ExecuteScalarAsync<int?>(string.Format(IsRoleMemberSql, options.Role, username)).ConfigureAwait(false);
             if (result is null or 0)
             {
                 await connection.Connection
-                    .ExecuteScalarAsync<int>(string.Format(AddRoleMemberSql, options.Database, options.Username, options.Role))
+                    .ExecuteScalarAsync<int>(string.Format(AddRoleMemberSql, options.Database, username, options.Role))
                     .ConfigureAwait(false);
 
-                _logger.LogDebug("User {Username} added to role {Role}", options.Username, options.Role);
+                _logger.LogDebug("User {Username} added to role {Role}", username, options.Role);
             }
         }
     }
