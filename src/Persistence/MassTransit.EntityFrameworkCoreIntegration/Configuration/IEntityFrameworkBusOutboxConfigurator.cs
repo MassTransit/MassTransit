@@ -16,5 +16,7 @@ namespace MassTransit
         /// Transport Send timeout when delivering messages to the transport
         /// </summary>
         TimeSpan MessageDeliveryTimeout { get; set; }
+
+        void UseBulkDeliveryService();
     }
 }

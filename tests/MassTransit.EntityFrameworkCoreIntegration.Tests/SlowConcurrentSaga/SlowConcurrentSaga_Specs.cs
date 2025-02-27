@@ -112,6 +112,12 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SlowConcurrentSaga
             {
                 throw new NotImplementedException();
             }
+
+            public void CreateBulkOutboxStatement(StringBuilder sb, string outboxStateSchema, string outboxStateTable, string[] outboxStateColumnNames, string outboxMessageSchema,
+                string outboxMessageTable, string[] outboxMessageColumnNames, int limit)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

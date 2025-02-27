@@ -54,6 +54,18 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             return sb.ToString();
         }
 
+        public string GetBulkOutboxStatement(DbContext context, int size)
+        {
+            var outboxStateSchemaTableColumnTrio = GetSchemaAndTableNameAndColumnName(context, typeof(OutboxState), nameof(OutboxState.OutboxId), nameof(OutboxState.Created));
+            var outboxMessageSchemaTableColumnTrio = GetSchemaAndTableNameAndColumnName(context, typeof(OutboxMessage), nameof(OutboxState.OutboxId));
+
+            var sb = new StringBuilder(128);
+            _formatter.CreateBulkOutboxStatement(sb, outboxStateSchemaTableColumnTrio.Schema, outboxStateSchemaTableColumnTrio.Table, outboxStateSchemaTableColumnTrio.ColumnNames,
+                outboxMessageSchemaTableColumnTrio.Schema, outboxMessageSchemaTableColumnTrio.Table, outboxMessageSchemaTableColumnTrio.ColumnNames, size);
+
+            return sb.ToString();
+        }
+
         string FormatLockStatement<T>(DbContext context, params string[] propertyNames)
             where T : class
         {

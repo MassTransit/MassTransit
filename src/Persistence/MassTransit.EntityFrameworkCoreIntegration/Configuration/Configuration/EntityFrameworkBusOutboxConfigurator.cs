@@ -32,6 +32,12 @@ namespace MassTransit.Configuration
         /// </summary>
         public TimeSpan MessageDeliveryTimeout { get; set; } = TimeSpan.FromSeconds(10);
 
+        public void UseBulkDeliveryService()
+        {
+            DisableDeliveryService();
+            _configurator.AddHostedService<BusOutboxBulkDeliveryService<TDbContext>>();
+        }
+
         public void DisableDeliveryService()
         {
             _configurator.RemoveHostedService<BusOutboxDeliveryService<TDbContext>>();

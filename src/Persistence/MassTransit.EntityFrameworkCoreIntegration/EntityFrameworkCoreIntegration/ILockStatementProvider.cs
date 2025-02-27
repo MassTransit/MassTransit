@@ -19,5 +19,7 @@
             where T : class;
 
         string GetOutboxStatement(DbContext context);
+
+        string GetBulkOutboxStatement(DbContext context, int size);
     }
 }

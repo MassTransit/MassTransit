@@ -38,6 +38,13 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             sb.AppendFormat(@"SELECT TOP 1 * FROM {0} WITH (UPDLOCK, ROWLOCK, READPAST) ORDER BY {1}", FormatTableName(schema, table), columnName);
         }
 
+        public void CreateBulkOutboxStatement(StringBuilder sb, string outboxStateSchema, string outboxStateTable, string[] outboxStateColumnNames,
+            string outboxMessageSchema,
+            string outboxMessageTable, string[] outboxMessageColumnNames, int limit)
+        {
+            throw new System.NotImplementedException();
+        }
+
         static string FormatTableName(string schema, string table)
         {
             return string.IsNullOrEmpty(schema) ? $"{table}" : $"[{schema}].{table}";

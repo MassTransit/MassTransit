@@ -29,6 +29,37 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             sb.AppendFormat(@"SELECT *, xmin FROM {0} ORDER BY ""{1}"" LIMIT 1 FOR UPDATE SKIP LOCKED", FormatTableName(schema, table), columnName);
         }
 
+        public void CreateBulkOutboxStatement(StringBuilder sb, string outboxStateSchema, string outboxStateTable, string[] outboxStateColumnNames,
+            string outboxMessageSchema, string outboxMessageTable, string[] outboxMessageColumnNames, int limit)
+        {
+            var stateTable = FormatTableName(outboxStateSchema, outboxStateTable);
+            var stateOutboxId = $"\"{outboxStateColumnNames[0]}\"";
+            var stateCreated = $"\"{outboxStateColumnNames[1]}\"";
+            var messagesTable = FormatTableName(outboxMessageSchema, outboxMessageTable);
+            var messagesOutboxId = $"\"{outboxMessageColumnNames[0]}\"";
+
+            var sql = $"""
+                WITH deleted_main AS (
+                	DELETE FROM {stateTable}
+                	WHERE {stateOutboxId} IN (
+                		SELECT {stateOutboxId} FROM {stateTable}
+                		ORDER BY {stateCreated}
+                		LIMIT {limit}
+                		for update skip locked
+                	)
+                	RETURNING {stateOutboxId}
+                ),
+                deleted_sub AS (
+                	DELETE FROM {messagesTable}
+                	WHERE {messagesOutboxId} IN (SELECT {stateOutboxId} FROM deleted_main)
+                	RETURNING *
+                )
+                SELECT * FROM deleted_sub;
+                """;
+
+            sb.Append(sql);
+        }
+
         static string FormatTableName(string schema, string table)
         {
             return string.IsNullOrEmpty(schema) ? $"\"{table}\"" : $"\"{schema}\".\"{table}\"";

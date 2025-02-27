@@ -24,5 +24,12 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         {
             sb.Append($@"SELECT * FROM ""{table}"" ORDER BY ""{columnName}"" LIMIT 1");
         }
+
+        public void CreateBulkOutboxStatement(StringBuilder sb, string outboxStateSchema, string outboxStateTable, string[] outboxStateColumnNames,
+            string outboxMessageSchema,
+            string outboxMessageTable, string[] outboxMessageColumnNames, int limit)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

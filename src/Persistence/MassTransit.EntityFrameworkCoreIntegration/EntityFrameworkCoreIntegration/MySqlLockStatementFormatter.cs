@@ -28,5 +28,12 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         {
             sb.AppendFormat(@"SELECT * FROM `{0}` ORDER BY `{1}` LIMIT 1 FOR UPDATE SKIP LOCKED", table, columnName);
         }
+
+        public void CreateBulkOutboxStatement(StringBuilder sb, string outboxStateSchema, string outboxStateTable, string[] outboxStateColumnNames,
+            string outboxMessageSchema,
+            string outboxMessageTable, string[] outboxMessageColumnNames, int limit)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }
