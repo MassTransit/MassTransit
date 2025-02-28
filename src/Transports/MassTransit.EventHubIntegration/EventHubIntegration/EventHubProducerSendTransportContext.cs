@@ -32,7 +32,7 @@ namespace MassTransit.EventHubIntegration
 
         public override IEnumerable<IAgent> GetAgentHandles()
         {
-            return new[] { _supervisor };
+            return [_supervisor];
         }
 
         public async Task<EventHubSendContext<T>> CreateContext<T>(T value, IPipe<EventHubSendContext<T>> pipe, CancellationToken cancellationToken,
@@ -97,7 +97,7 @@ namespace MassTransit.EventHubIntegration
 
             context.CancellationToken.ThrowIfCancellationRequested();
 
-            return producerContext.Produce(new[] { eventData }, options, context.CancellationToken);
+            return producerContext.Produce([eventData], options, context.CancellationToken);
         }
 
         public async Task Send<T>(ProducerContext producerContext, EventHubSendContext<T>[] sendContexts)
