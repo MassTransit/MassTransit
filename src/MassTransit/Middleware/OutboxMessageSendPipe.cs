@@ -51,6 +51,12 @@ namespace MassTransit.Middleware
             if (_message.ExpirationTime.HasValue)
                 context.TimeToLive = _message.ExpirationTime.Value.ToUniversalTime() - DateTime.UtcNow;
 
+            foreach (var headerValue in headers)
+            {
+                if (headerValue.Key.StartsWith("MT-"))
+                    context.Headers.Set(headerValue.Key, headerValue.Value);
+            }
+
             foreach (KeyValuePair<string, object> header in serializerContext.Headers.GetAll())
                 context.Headers.Set(header.Key, header.Value);
 

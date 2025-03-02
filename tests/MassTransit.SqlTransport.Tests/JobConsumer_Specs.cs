@@ -353,19 +353,8 @@ namespace MassTransit.DbTransport.Tests
 
                     _configuration.Configure(x, (context, cfg) =>
                     {
-                        cfg.UseDbMessageScheduler();
+                        cfg.UseSqlMessageScheduler();
                         cfg.UseJobSagaPartitionKeyFormatters();
-
-                        // js.OnConfigureEndpoint(endpointConfigurator =>
-                        // {
-                        //     if (endpointConfigurator is IDbReceiveEndpointConfigurator e)
-                        //     {
-                        //         e.SetReceiveMode(DbReceiveMode.Partitioned);
-                        //
-                        //         e.UseMessageRetry(r => r.Intervals(100, 200, 300, 500, 1000, 2000, 5000));
-                        //         e.UseInMemoryOutbox(context);
-                        //     }
-                        // });
 
                         cfg.ConfigureEndpoints(context);
                     });
