@@ -44,14 +44,7 @@ shorter time window is the one getting the priority flag). The problem
 is that w/o priorities the important message gets stuck behind the
 less important/urgent ones.
 
-The solution is to stop sharing a single queue, and instead establish
-a second queue. In MassTransit you would establish a second instance
-of IServiceBus and have it subscribe to the important/urgent
-message. Now you have two queues, one for the important things and one
-for the less urgent things. This helps with monitoring queue depths,
-error rates, etc. By placing each IServiceBus in its own Topshelf host
-/ process you further enhance each bus's ability to process messages, and
-isolate issues / downtime.
+The solution is to stop sharing a single queue, and instead establish a second queue. By adding another queue as a separate receive endpoint, you now have two queues, one for the important things and one for the less urgent things. This helps with monitoring queue depths, error rates, etc.
 
 #### Request client throws a timeout exception
 
