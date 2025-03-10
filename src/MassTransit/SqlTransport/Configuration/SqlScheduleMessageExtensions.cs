@@ -36,6 +36,21 @@
         }
 
         /// <summary>
+        /// Uses the SQL transport's built-in message scheduler
+        /// </summary>
+        /// <param name="configurator"></param>
+        [Obsolete("Use UseSqlMessageScheduler instead")]
+        public static void UseDelayedMessageScheduler(this ISqlBusFactoryConfigurator configurator)
+        {
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+
+            var pipeBuilderConfigurator = new SqlMessageSchedulerSpecification();
+
+            configurator.AddPrePipeSpecification(pipeBuilderConfigurator);
+        }
+
+        /// <summary>
         /// Add a <see cref="IMessageScheduler" /> to the container that uses the SQL Transport message enqueue time to schedule messages.
         /// </summary>
         /// <param name="configurator"></param>
@@ -43,7 +58,7 @@
         {
             configurator.TryAddScoped<IMessageScheduler>(provider =>
             {
-                var busInstance = provider.GetRequiredService<Bind<IBus,IBusInstance>>().Value;
+                var busInstance = provider.GetRequiredService<Bind<IBus, IBusInstance>>().Value;
                 var sendEndpointProvider = provider.GetRequiredService<ISendEndpointProvider>();
 
                 var hostConfiguration = busInstance.HostConfiguration as ISqlHostConfiguration
