@@ -5,6 +5,7 @@ namespace MassTransit.KafkaIntegration.Configuration
     using DependencyInjection;
     using MassTransit.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using UsageTracking;
 
 
     public class KafkaRegistrationRiderFactory :
@@ -27,6 +28,9 @@ namespace MassTransit.KafkaIntegration.Configuration
         public IBusInstanceSpecification CreateRider(IRiderRegistrationContext context)
         {
             var configurator = new KafkaFactoryConfigurator(_clientConfig ?? context.GetService<ClientConfig>() ?? new ClientConfig());
+
+            var usageTracker = context.GetService<IUsageTracker>();
+            usageTracker?.PreConfigureRider(configurator);
 
             _configure?.Invoke(context, configurator);
 

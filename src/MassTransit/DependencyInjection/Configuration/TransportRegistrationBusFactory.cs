@@ -6,6 +6,7 @@ namespace MassTransit.Configuration
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
     using Transports;
+    using UsageTracking;
 
 
     public abstract class TransportRegistrationBusFactory<TEndpointConfigurator> :
@@ -33,6 +34,9 @@ namespace MassTransit.Configuration
             var hostOptions = context.GetService<IOptions<MassTransitHostOptions>>()?.Value;
             _hostConfiguration.ConsumerStopTimeout = hostOptions?.ConsumerStopTimeout;
             _hostConfiguration.StopTimeout = hostOptions?.StopTimeout;
+
+            var usageTracker = context.GetService<IUsageTracker>();
+            usageTracker?.PreConfigureBus(configurator, context);
 
             ConnectBusObservers(context, configurator);
 

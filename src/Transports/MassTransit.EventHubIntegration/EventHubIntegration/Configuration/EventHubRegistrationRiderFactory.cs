@@ -3,6 +3,8 @@ namespace MassTransit.EventHubIntegration.Configuration
     using System;
     using DependencyInjection;
     using MassTransit.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
+    using UsageTracking;
 
 
     public class EventHubRegistrationRiderFactory :
@@ -18,6 +20,9 @@ namespace MassTransit.EventHubIntegration.Configuration
         public IBusInstanceSpecification CreateRider(IRiderRegistrationContext context)
         {
             var configurator = new EventHubFactoryConfigurator();
+
+            var usageTracker = context.GetService<IUsageTracker>();
+            usageTracker?.PreConfigureRider(configurator);
 
             _configure?.Invoke(context, configurator);
 

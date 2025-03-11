@@ -19,6 +19,7 @@
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" />
     <PackageReference Include="System.Threading.Tasks.Extensions" />
     <PackageReference Include="System.Memory" />
+    <PackageReference Include="System.Net.Http" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">

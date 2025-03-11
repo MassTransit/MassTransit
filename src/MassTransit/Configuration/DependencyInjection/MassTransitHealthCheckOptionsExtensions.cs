@@ -32,7 +32,7 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="callback"></param>
         /// <returns></returns>
-        public static IBusRegistrationConfigurator ConfigureHealthCheckOptions<T>(this IBusRegistrationConfigurator<T> configurator,
+        public static IBusRegistrationConfigurator<T> ConfigureHealthCheckOptions<T>(this IBusRegistrationConfigurator<T> configurator,
             Action<IHealthCheckOptionsConfigurator>? callback)
             where T : class, IBus
         {

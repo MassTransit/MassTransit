@@ -12,6 +12,7 @@ namespace MassTransit
     using Microsoft.Extensions.Options;
     using Monitoring;
     using Transports;
+    using UsageTracking;
 
 
     /// <summary>
@@ -35,6 +36,7 @@ namespace MassTransit
 
             AddHostedService(collection);
             AddInstrumentation(collection);
+            AddUsageTracker(collection);
 
             var configurator = new ServiceCollectionBusConfigurator(collection);
 
@@ -174,6 +176,12 @@ namespace MassTransit
         {
             collection.AddOptions<InstrumentationOptions>();
             collection.AddSingleton<IConfigureOptions<InstrumentationOptions>, ConfigureDefaultInstrumentationOptions>();
+        }
+
+        static void AddUsageTracker(IServiceCollection collection)
+        {
+            collection.AddOptions<UsageTelemetryOptions>();
+            collection.TryAddSingleton<IUsageTracker, UsageTracker>();
         }
 
         static void AddHostedService(IServiceCollection collection)

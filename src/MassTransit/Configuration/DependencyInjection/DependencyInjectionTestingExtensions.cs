@@ -77,6 +77,8 @@ namespace MassTransit
 
                 harnessConfigurator.SetInMemorySagaRepositoryProvider();
 
+                harnessConfigurator.AddSingleton<IConfigureOptions<UsageTelemetryOptions>, ConfigureTestHarnessUsageTelemetryOptions>();
+
                 configure?.Invoke(harnessConfigurator);
 
                 var addScheduler = false;
@@ -98,6 +100,17 @@ namespace MassTransit
                 }
             });
         }
+
+
+        class ConfigureTestHarnessUsageTelemetryOptions :
+            IConfigureOptions<UsageTelemetryOptions>
+        {
+            public void Configure(UsageTelemetryOptions options)
+            {
+                options.Enabled = false;
+            }
+        }
+
 
         /// <summary>
         /// Internally used by AddMassTransitTestHarness to add a console-based <see cref="ILogger"/> for unit testing
