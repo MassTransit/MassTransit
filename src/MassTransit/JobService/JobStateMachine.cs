@@ -446,7 +446,11 @@ namespace MassTransit
                 }
             }
 
-            var cronExpression = new CronExpression(context.Saga.CronExpression) { TimeZone = TimeZoneInfo.Utc };
+            var timeZone = TimeZoneInfo.Utc;
+            if (!string.IsNullOrWhiteSpace(context.Saga.TimeZoneId))
+                timeZone = TimeZoneUtil.FindTimeZoneById(context.Saga.TimeZoneId);
+
+            var cronExpression = new CronExpression(context.Saga.CronExpression) { TimeZone = timeZone };
 
             var now = DateTimeOffset.UtcNow;
 
