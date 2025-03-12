@@ -64,7 +64,10 @@ namespace MassTransit.AmazonSqsTransport
 
         public async Task Faulted(Exception exception)
         {
-            _activeTokenSource.Cancel();
+            if (_activeTokenSource?.IsCancellationRequested is false)
+            {
+                _activeTokenSource.Cancel();
+            }
 
             try
             {
