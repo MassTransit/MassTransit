@@ -15,11 +15,11 @@ namespace MassTransitBenchmark
 
         public ActiveMqOptionSet()
         {
-            _hostSettings = new ConfigurationHostSettings(new Uri("activemq://localhost"));
+            _hostSettings = new OpenWireHostSettings(new Uri("activemq://localhost"));
 
             Add<string>("h|host:", "The host name of the broker", x =>
             {
-                _hostSettings = new ConfigurationHostSettings(new Uri($"activemq://{x}"))
+                _hostSettings = new OpenWireHostSettings(new Uri($"activemq://{x}"))
                 {
                     Port = _hostSettings.Port,
                     Username = _hostSettings.Username,

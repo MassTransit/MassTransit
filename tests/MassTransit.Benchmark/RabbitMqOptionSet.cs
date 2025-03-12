@@ -104,6 +104,8 @@ namespace MassTransitBenchmark
         public TimeSpan ContinuationTimeout => TimeSpan.FromSeconds(20);
         public uint? MaxMessageSize { get; set; }
         public ICredentialsProvider CredentialsProvider { get; set; }
+        public uint? RequestedFrameMax { get; set; }
+
         public Task Refresh(ConnectionFactory connectionFactory)
         {
             return Task.CompletedTask;

@@ -76,7 +76,7 @@ namespace MassTransit.AmazonSqsTransport.Middleware
                 while (!IsStopping)
                     await algorithm.Run(ReceiveMessages, (m, c) => Handle(m, c), Stopping).ConfigureAwait(false);
             }
-            catch (OperationCanceledException exception) when (exception.CancellationToken == Stopping)
+            catch (OperationCanceledException) when (Stopping.IsCancellationRequested)
             {
             }
             catch (Exception exception)
@@ -127,8 +127,11 @@ namespace MassTransit.AmazonSqsTransport.Middleware
         {
             try
             {
-                return await _client.ReceiveMessages(_receiveSettings.EntityName, messageLimit, _receiveSettings.WaitTimeSeconds, cancellationToken)
+                IList<Message> messages = await _client
+                    .ReceiveMessages(_receiveSettings.EntityName, messageLimit, _receiveSettings.WaitTimeSeconds, cancellationToken)
                     .ConfigureAwait(false);
+
+                return messages;
             }
             catch (OperationCanceledException)
             {

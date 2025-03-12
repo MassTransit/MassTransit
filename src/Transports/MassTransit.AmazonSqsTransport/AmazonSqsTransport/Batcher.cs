@@ -20,7 +20,7 @@ namespace MassTransit.AmazonSqsTransport
         {
             _settings = settings ?? ClientContextBatchSettings.GetBatchSettings();
 
-            var channelOptions = new BoundedChannelOptions(_settings.MessageLimit)
+            var channelOptions = new BoundedChannelOptions(_settings.MessageLimit * 10)
             {
                 AllowSynchronousContinuations = false,
                 FullMode = BoundedChannelFullMode.Wait,

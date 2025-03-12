@@ -2,7 +2,9 @@ namespace MassTransitBenchmark.Latency
 {
     using System;
     using System.Threading.Tasks;
+    using BusOutbox;
     using MassTransit;
+    using Microsoft.Extensions.DependencyInjection;
 
 
     public class AmazonSqsMessageLatencyTransport :
@@ -10,9 +12,10 @@ namespace MassTransitBenchmark.Latency
     {
         readonly AmazonSqsHostSettings _hostSettings;
         readonly IMessageLatencySettings _settings;
-        IBusControl _busControl;
         Uri _targetAddress;
         ISendEndpoint _targetEndpoint;
+        ServiceProvider _provider;
+        AsyncServiceScope _scope;
 
         public AmazonSqsMessageLatencyTransport(AmazonSqsHostSettings hostSettings, IMessageLatencySettings settings)
         {
@@ -27,32 +30,45 @@ namespace MassTransitBenchmark.Latency
 
         public async Task Start(Action<IReceiveEndpointConfigurator> callback, IReportConsumerMetric reportConsumerMetric)
         {
-            _busControl = Bus.Factory.CreateUsingAmazonSqs(x =>
-            {
-                x.Host(_hostSettings);
-
-                x.ReceiveEndpoint("latency_consumer" + (_settings.Durable ? "" : "_express"), e =>
+            _provider = new ServiceCollection()
+                .AddTextLogger(Console.Out)
+                .AddSingleton(reportConsumerMetric)
+                .AddMassTransit(x =>
                 {
-                    e.Durable = _settings.Durable;
-                    e.PrefetchCount = _settings.PrefetchCount;
+                    x.AddConsumer<MessageLatencyConsumer>();
 
-                    if (_settings.ConcurrencyLimit > 0)
-                        e.ConcurrentMessageLimit = _settings.ConcurrencyLimit;
+                    x.UsingAmazonSqs((context, cfg) =>
+                    {
+                        cfg.Host(_hostSettings);
 
-                    callback(e);
+                        cfg.ReceiveEndpoint("latency_consumer" + (_settings.Durable ? "" : "_express"), e =>
+                        {
+                            e.Durable = _settings.Durable;
+                            e.PrefetchCount = _settings.PrefetchCount;
 
-                    _targetAddress = e.InputAddress;
-                });
-            });
+                            if (_settings.ConcurrencyLimit > 0)
+                                e.ConcurrentMessageLimit = _settings.ConcurrencyLimit;
 
-            await _busControl.StartAsync();
+                            callback(e);
 
-            _targetEndpoint = await _busControl.GetSendEndpoint(_targetAddress);
+                            _targetAddress = e.InputAddress;
+                        });
+                    });
+                })
+                .BuildServiceProvider(true);
+
+            await _provider.StartHostedServices();
+
+            _scope = _provider.CreateAsyncScope();
+
+            _targetEndpoint = await _scope.ServiceProvider.GetRequiredService<ISendEndpointProvider>().GetSendEndpoint(_targetAddress);
         }
 
         public async ValueTask DisposeAsync()
         {
-            await _busControl.StopAsync();
+            await _scope.DisposeAsync();
+
+            await _provider.StopHostedServices();
         }
     }
 }

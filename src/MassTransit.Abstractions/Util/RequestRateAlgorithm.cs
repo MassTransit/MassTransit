@@ -1,6 +1,7 @@
 namespace MassTransit.Util
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
@@ -37,7 +38,7 @@ namespace MassTransit.Util
         readonly SemaphoreSlim _requestSemaphore;
         readonly int _resultLimit;
         readonly SemaphoreSlim _resultSemaphore;
-        readonly Dictionary<long, Task> _tasks;
+        readonly ConcurrentDictionary<long, Task> _tasks;
 
         int _activeRequestCount;
         int _count;
@@ -72,9 +73,9 @@ namespace MassTransit.Util
 
             _resultSemaphore = new SemaphoreSlim(_concurrentResultLimit);
 
-            _tasks = new Dictionary<long, Task>(_resultLimit);
+            _tasks = new ConcurrentDictionary<long, Task>();
 
-            if (options.RequestRateLimit.HasValue && options.RequestRateInterval.HasValue)
+            if (options is { RequestRateLimit: not null, RequestRateInterval: not null })
             {
                 _rateLimit = options.RequestRateLimit.Value;
                 _rateLimitSemaphore = new SemaphoreSlim(_rateLimit);
@@ -104,14 +105,7 @@ namespace MassTransit.Util
         /// </summary>
         public int MaxActiveRequestCount => _maxRequestCount;
 
-        int ActiveResultCount
-        {
-            get
-            {
-                lock (_tasks)
-                    return _tasks.Count;
-            }
-        }
+        int ActiveResultCount => _tasks.Count;
 
         public void Dispose()
         {
@@ -205,13 +199,13 @@ namespace MassTransit.Util
             {
                 foreach (var result in results)
                 {
-                    await _resultSemaphore.WaitAsync(activeRequest.CancellationToken).ConfigureAwait(false);
+                    await _resultSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
 
                     async Task RunResultCallback()
                     {
                         try
                         {
-                            await resultCallback(result, activeRequest.CancellationToken).ConfigureAwait(false);
+                            await resultCallback(result, cancellationToken).ConfigureAwait(false);
                         }
                         finally
                         {
@@ -220,7 +214,7 @@ namespace MassTransit.Util
                         }
                     }
 
-                    Add(RunResultCallback());
+                    Add(Task.Run(() => RunResultCallback(), cancellationToken));
                     count++;
                 }
             }
@@ -255,7 +249,7 @@ namespace MassTransit.Util
             try
             {
                 for (var i = 0; i < requestCount; i++)
-                    tasks.Add(RunRequest(requestCallback, cancellationToken));
+                    tasks.Add(Task.Run(() => RunRequest(requestCallback, cancellationToken), cancellationToken));
             }
             catch (Exception)
             {
@@ -272,7 +266,7 @@ namespace MassTransit.Util
             try
             {
                 foreach (IGrouping<TKey, T> result in resultSets)
-                    resultTasks.Add(RunResultSet(result, resultCallback, orderCallback, cancellationToken));
+                    resultTasks.Add(Task.Run(() => RunResultSet(result, resultCallback, orderCallback, cancellationToken), cancellationToken));
             }
             catch (Exception)
             {
@@ -319,7 +313,7 @@ namespace MassTransit.Util
                         }
                     }
 
-                    Add(RunResultCallback());
+                    Add(Task.Run(() => RunResultCallback(), cancellationToken));
                     count++;
                 }
             }
@@ -506,22 +500,15 @@ namespace MassTransit.Util
 
             var id = Interlocked.Increment(ref _nextId);
 
-            lock (_tasks)
-                _tasks.Add(id, task);
-
-            task.ContinueWith(x => Remove(id), TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously);
+            if (_tasks.TryAdd(id, task))
+                task.ContinueWith(_ => Remove(id), TaskContinuationOptions.ExecuteSynchronously);
         }
 
         void Remove(long id)
         {
-            int remaining;
-            lock (_tasks)
-            {
-                _tasks.Remove(id);
+            _tasks.TryRemove(id, out _);
 
-                remaining = _tasks.Count;
-            }
-
+            var remaining = _tasks.Count;
             if (remaining > 0)
                 return;
 
