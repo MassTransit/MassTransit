@@ -97,9 +97,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                     {
                         await transaction.RollbackAsync(CancellationToken.None).ConfigureAwait(false);
                     }
-                    catch (Exception innerException)
+                    catch (Exception)
                     {
-                        LogContext.Warning?.Log(innerException, "Transaction rollback failed");
+                        //
                     }
 
                     throw;
