@@ -1791,12 +1791,19 @@
             Event(propertyExpression, x => x.Received);
 
             if (settings.Received == null)
+            {
                 Event(propertyExpression, x => x.AnyReceived);
+
+                var registration = GetEventRegistration(schedule.AnyReceived, typeof(TMessage));
+
+                registration.RegisterCorrelation(this);
+            }
             else
                 Event(propertyExpression, x => x.AnyReceived, x =>
                 {
                     settings.Received(x);
                 });
+
 
             DuringAny(
                 When(schedule.AnyReceived)
