@@ -206,6 +206,8 @@ public class UsageTracker :
             var maxDelay = TimeSpan.FromMinutes(30);
             if (delay > maxDelay)
                 delay = maxDelay;
+            if (delay < TimeSpan.FromSeconds(30))
+                delay = TimeSpan.FromSeconds(30);
 
             try
             {

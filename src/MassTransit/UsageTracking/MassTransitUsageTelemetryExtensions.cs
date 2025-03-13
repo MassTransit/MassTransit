@@ -40,8 +40,11 @@ static class MassTransitUsageTelemetryExtensions
         if (endpointName is null)
             return null;
 
-        if (endpointName.Contains("_bus_") || endpointName.StartsWith("instance-") || endpointName.StartsWith("instance_"))
+        if (endpointName.StartsWith("instance-") || endpointName.StartsWith("instance_"))
             return null;
+
+        if (endpointName.Contains("_bus_") || endpointName.Contains("-bus-"))
+            endpointName = "_bus_";
 
         var endpointUsage = new EndpointUsageTelemetry
         {
