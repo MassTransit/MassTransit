@@ -22,7 +22,7 @@ export default defineAppConfig({
         },
         footer: {
             credits: {
-                text: 'Copyright 2024 Chris Patterson',
+                text: 'Copyright 2025 Chris Patterson',
                 href: 'https://masstransit.io',
                 icon: 'IconMassTransit'
             },
