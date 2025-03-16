@@ -27,8 +27,10 @@ builder.Services.AddMassTransit(cfg =>
     cfg.AddSagaStateMachine<OrderStateMachine, OrderState>()
         .DynamoDbRepository(config =>
         {
-            config.TableName = "Orders"; // required
-            config.ContextFactory(provider => new DynamoDBContext(dynamoDbClient)); // required. Refer to AWS SDK docs for how to create a context.
+            // required
+            config.TableName = "Orders";
+             // required. Refer to AWS SDK docs for how to create a context.
+            config.ContextFactory(provider => new DynamoDBContext(dynamoDbClient));
         });
 });
 ```
