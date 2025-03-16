@@ -35,4 +35,12 @@ builder.Services.AddMassTransit(cfg =>
 });
 ```
 
+The code above configures the repository to store saga instances in a table named `Orders`.
+A `DynamoDBContext` must be created from an existing `AmazonDynamoDBClient` instance.
+For example, if a local dynamodb instance is used, the code creating a client could look like this:
+
+```csharp
+var dynamoDbClient = new AmazonDynamoDBClient(new AmazonDynamoDBConfig { ServiceURL = "http://localhost:4566" });
+```
+
 
