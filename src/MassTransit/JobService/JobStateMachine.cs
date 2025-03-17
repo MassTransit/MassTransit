@@ -720,7 +720,7 @@ namespace MassTransit
                         RetryAttempt = context.Saga.RetryAttempt,
                         Exceptions = context.Message.Exceptions,
                         Duration = context.Message.Timestamp - context.Saga.Started
-                    })
+                    }, (context, sendContext) => sendContext.RequestId = context.Saga.CorrelationId)
                 .Publish<JobSaga, JobAttemptFaulted, JobFaulted>(context => new JobFaultedEvent
                 {
                     JobId = context.Saga.CorrelationId,
@@ -760,7 +760,7 @@ namespace MassTransit
                         RetryAttempt = context.Saga.RetryAttempt,
                         Exceptions = context.Message.Exceptions?.FirstOrDefault(),
                         Duration = context.Message.Timestamp - context.Saga.Started
-                    })
+                    }, (context, sendContext) => sendContext.RequestId = context.Saga.CorrelationId)
                 .Publish<JobSaga, Fault<StartJobAttempt>, JobFaulted>(context => new JobFaultedEvent
                 {
                     JobId = context.Saga.CorrelationId,
