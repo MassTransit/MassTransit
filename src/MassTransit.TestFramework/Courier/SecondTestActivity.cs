@@ -10,7 +10,7 @@
     {
         public async Task<ExecutionResult> Execute(ExecuteContext<TestArguments> context)
         {
-            return context.CompletedWithVariables(new {ToBeRemoved = (string)null});
+            return context.Completed(x => x.SetVariables(new { ToBeRemoved = (string)null }));
         }
 
         public async Task<CompensationResult> Compensate(CompensateContext<TestLog> context)

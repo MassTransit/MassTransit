@@ -55,8 +55,11 @@ namespace MassTransit.Courier
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            return new CompensatedWithVariablesCompensationResult<TLog>(this, Publisher, _compensateLog, RoutingSlip,
-                RoutingSlipBuilder.GetObjectAsDictionary(values));
+            var result = new CompensatedCompensationResult<TLog>(this, Publisher, _compensateLog, RoutingSlip);
+
+            result.SetVariables(values);
+
+            return result;
         }
 
         CompensationResult CompensateContext.Compensated(IDictionary<string, object> variables)
@@ -64,7 +67,11 @@ namespace MassTransit.Courier
             if (variables == null)
                 throw new ArgumentNullException(nameof(variables));
 
-            return new CompensatedWithVariablesCompensationResult<TLog>(this, Publisher, _compensateLog, RoutingSlip, variables);
+            var result = new CompensatedCompensationResult<TLog>(this, Publisher, _compensateLog, RoutingSlip);
+
+            result.SetVariables(variables);
+
+            return result;
         }
 
         CompensationResult CompensateContext.Failed()

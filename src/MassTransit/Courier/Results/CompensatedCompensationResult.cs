@@ -27,6 +27,8 @@ namespace MassTransit.Courier.Results
             _duration = _compensateContext.Elapsed;
         }
 
+        protected IDictionary<string, object> Variables { get; private set; }
+
         public async Task Evaluate()
         {
             var builder = CreateRoutingSlipBuilder(_routingSlip);
@@ -62,7 +64,7 @@ namespace MassTransit.Courier.Results
 
         bool HasMoreCompensations(RoutingSlip routingSlip)
         {
-            return routingSlip.CompensateLogs != null && routingSlip.CompensateLogs.Count > 0;
+            return routingSlip.CompensateLogs is { Count: > 0 };
         }
 
         protected virtual void Build(RoutingSlipBuilder builder)
@@ -88,6 +90,29 @@ namespace MassTransit.Courier.Results
                     element = enumerator.Current;
                 }
             }
+        }
+
+        public void SetVariables(object variables)
+        {
+            Dictionary<string, object> dictionary = _compensateContext.SerializerContext.ToDictionary(variables);
+
+            SetVariables(dictionary);
+        }
+
+        public void SetVariables(IEnumerable<KeyValuePair<string, object>> variables)
+        {
+            foreach (KeyValuePair<string, object> value in variables)
+                SetVariable(value.Key, value.Value);
+        }
+
+        public void SetVariable(string key, object value)
+        {
+            Variables ??= new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+
+            if (value == null)
+                Variables.Remove(key);
+            else
+                Variables[key] = value;
         }
     }
 }

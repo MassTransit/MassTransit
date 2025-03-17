@@ -12,10 +12,16 @@
             if (context.Arguments.Value == null)
                 throw new ArgumentNullException(nameof(context.Arguments.Value));
 
-            return context.CompletedWithVariables<TestLog>(new {OriginalValue = context.Arguments.Value}, new
+            return context.Completed<TestLog>(new { OriginalValue = context.Arguments.Value }, x =>
             {
-                Value = "Hello, World!",
-                NullValue = (string)null
+                x.SetVariables(new
+                {
+                    Value = "Hello, World!",
+                    NullValue = (string)null
+                });
+
+                if (context.TryGetPayload(out MessageSchedulerContext _))
+                    x.Delay = TimeSpan.FromSeconds(1);
             });
         }
 

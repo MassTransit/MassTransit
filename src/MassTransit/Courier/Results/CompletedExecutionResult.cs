@@ -5,43 +5,48 @@ namespace MassTransit.Courier.Results
     using System.Linq;
     using System.Threading.Tasks;
     using Contracts;
+    using Middleware;
 
 
-    abstract class CompletedExecutionResult<TArguments> :
-        ExecutionResult
+    class CompletedExecutionResult<TArguments> :
+        BaseExecutionResult<TArguments>,
+        CompletedActivityOptions
         where TArguments : class
     {
-        protected CompletedExecutionResult(ExecuteContext<TArguments> context, IRoutingSlipEventPublisher publisher, Activity activity,
-            RoutingSlip routingSlip)
-            : this(context, publisher, activity, routingSlip, RoutingSlipBuilder.NoArguments)
+        readonly Uri _compensationAddress;
+        IDictionary<string, object> _data;
+
+        public CompletedExecutionResult(ExecuteContext<TArguments> context, IRoutingSlipEventPublisher publisher, Activity activity, RoutingSlip routingSlip,
+            Uri compensationAddress)
+            : base(context, publisher, activity, routingSlip)
         {
+            _compensationAddress = compensationAddress;
         }
 
-        protected CompletedExecutionResult(ExecuteContext<TArguments> context, IRoutingSlipEventPublisher publisher, Activity activity,
-            RoutingSlip routingSlip,
-            IDictionary<string, object> data)
+        public void SetLog<TLog>(TLog log)
+            where TLog : class
         {
-            Context = context;
-            Publisher = publisher;
-            Activity = activity;
-            RoutingSlip = routingSlip;
-            Data = data;
-            Duration = Context.Elapsed;
+            if (log == null)
+                return;
+
+            IEnumerable<KeyValuePair<string, object>> dictionary = Context.SerializerContext.ToDictionary(log);
+            SetLog(dictionary);
         }
 
-        protected RoutingSlip RoutingSlip { get; }
+        public void SetLog(object values)
+        {
+            IEnumerable<KeyValuePair<string, object>> objectAsDictionary = Context.SerializerContext.ToDictionary(values);
+            SetLog(objectAsDictionary);
+        }
 
-        protected IRoutingSlipEventPublisher Publisher { get; }
+        public void SetLog(IEnumerable<KeyValuePair<string, object>> values)
+        {
+            _data ??= new Dictionary<string, object>();
+            foreach (KeyValuePair<string, object> value in values)
+                _data[value.Key] = value.Value;
+        }
 
-        protected IDictionary<string, object> Data { get; }
-
-        protected ExecuteContext<TArguments> Context { get; }
-
-        protected Activity Activity { get; }
-
-        protected TimeSpan Duration { get; }
-
-        public async Task Evaluate()
+        public override async Task Evaluate()
         {
             var builder = CreateRoutingSlipBuilder(RoutingSlip);
 
@@ -53,9 +58,24 @@ namespace MassTransit.Courier.Results
 
             if (HasNextActivity(routingSlip))
             {
-                var endpoint = await Context.GetSendEndpoint(routingSlip.GetNextExecuteAddress()).ConfigureAwait(false);
+                if (Delay.HasValue)
+                {
+                    void AddForwarderAddress(ConsumeContext consumeContext, SendContext sendContext)
+                    {
+                        var forwarderAddress = consumeContext.ReceiveContext.InputAddress ?? consumeContext.DestinationAddress;
+                        if (forwarderAddress != null && forwarderAddress != Context.DestinationAddress)
+                            sendContext.Headers.Set(MessageHeaders.ForwarderAddress, forwarderAddress.ToString());
+                    }
 
-                await Context.Forward(endpoint, routingSlip).ConfigureAwait(false);
+                    await Context.ScheduleSend(routingSlip.GetNextExecuteAddress(), Delay.Value, routingSlip, new CopyContextPipe(Context, AddForwarderAddress))
+                        .ConfigureAwait(false);
+                }
+                else
+                {
+                    var endpoint = await Context.GetSendEndpoint(routingSlip.GetNextExecuteAddress()).ConfigureAwait(false);
+
+                    await Context.Forward(endpoint, routingSlip).ConfigureAwait(false);
+                }
             }
             else
             {
@@ -66,16 +86,10 @@ namespace MassTransit.Courier.Results
             }
         }
 
-        public virtual bool IsFaulted(out Exception exception)
-        {
-            exception = default;
-            return false;
-        }
-
         protected virtual Task PublishActivityEvents(RoutingSlip routingSlip, RoutingSlipBuilder builder)
         {
             return Publisher.PublishRoutingSlipActivityCompleted(Context.ActivityName, Context.ExecutionId, Context.Timestamp, Duration,
-                routingSlip.Variables, Activity.Arguments, Data);
+                routingSlip.Variables, Activity.Arguments, _data);
         }
 
         static bool HasNextActivity(RoutingSlip routingSlip)
@@ -86,11 +100,17 @@ namespace MassTransit.Courier.Results
         protected virtual void Build(RoutingSlipBuilder builder)
         {
             builder.AddActivityLog(Context.Host, Activity.Name, Context.ExecutionId, Context.Timestamp, Duration);
+
+            if (Variables?.Any() ?? false)
+                builder.SetVariables(Variables);
+
+            if (_compensationAddress != null && _data is not null && _data.Count > 0)
+                builder.AddCompensateLog(Context.ExecutionId, _compensationAddress, _data);
         }
 
         protected virtual RoutingSlipBuilder CreateRoutingSlipBuilder(RoutingSlip routingSlip)
         {
-            return new RoutingSlipBuilder(routingSlip, routingSlip.Itinerary.Skip(1), Enumerable.Empty<Activity>());
+            return new RoutingSlipBuilder(routingSlip, routingSlip.Itinerary.Skip(1), []);
         }
     }
 }

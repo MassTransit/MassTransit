@@ -24,6 +24,11 @@ namespace MassTransit.Middleware.Timeout
             return _context.Completed();
         }
 
+        public ExecutionResult Completed(ConfigureCompletedActivityOptionsCallback callback)
+        {
+            return _context.Completed(callback);
+        }
+
         public ExecutionResult CompletedWithVariables(IEnumerable<KeyValuePair<string, object>> variables)
         {
             return _context.CompletedWithVariables(variables);
@@ -40,10 +45,22 @@ namespace MassTransit.Middleware.Timeout
             return _context.Completed(log);
         }
 
+        public ExecutionResult Completed<TLog>(TLog log, ConfigureCompletedActivityOptionsCallback callback)
+            where TLog : class
+        {
+            return _context.Completed(log, callback);
+        }
+
         public ExecutionResult Completed<TLog>(object logValues)
             where TLog : class
         {
             return _context.Completed<TLog>(logValues);
+        }
+
+        public ExecutionResult Completed<TLog>(object logValues, ConfigureCompletedActivityOptionsCallback callback)
+            where TLog : class
+        {
+            return _context.Completed<TLog>(logValues, callback);
         }
 
         public ExecutionResult CompletedWithVariables<TLog>(TLog log, object variables)
@@ -111,6 +128,11 @@ namespace MassTransit.Middleware.Timeout
         public ExecutionResult Faulted(Exception exception)
         {
             return _context.Faulted(exception);
+        }
+
+        public ExecutionResult Faulted(Exception exception, ConfigureFaultedActivityOptionsCallback callback)
+        {
+            return _context.Faulted(exception, callback);
         }
 
         public ExecutionResult FaultedWithVariables(Exception exception, object variables)

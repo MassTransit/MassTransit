@@ -1,0 +1,3 @@
+namespace MassTransit;
+
+public delegate void ConfigureCompletedActivityOptionsCallback(CompletedActivityOptions options);

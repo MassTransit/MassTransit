@@ -318,13 +318,6 @@
             _activityLogs.Add(new RoutingSlipActivityLog(host, activityTrackingNumber, name, timestamp, duration));
         }
 
-        public void AddCompensateLog(Guid activityTrackingNumber, Uri compensateAddress, object logObject)
-        {
-            IDictionary<string, object> data = GetObjectAsDictionary(logObject);
-
-            _compensateLogs.Add(new RoutingSlipCompensateLog(activityTrackingNumber, compensateAddress, data));
-        }
-
         public void AddCompensateLog(Guid activityTrackingNumber, Uri compensateAddress, IDictionary<string, object> data)
         {
             _compensateLogs.Add(new RoutingSlipCompensateLog(activityTrackingNumber, compensateAddress, data));

@@ -88,6 +88,8 @@
         {
             base.ConfigureInMemoryBus(configurator);
 
+            configurator.UseDelayedMessageScheduler();
+
             configurator.ReceiveEndpoint("events", x =>
             {
                 _completed = Handled<RoutingSlipCompleted>(x);

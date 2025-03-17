@@ -2,7 +2,6 @@ namespace MassTransit.Courier
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using Context;
     using Contracts;
     using Results;
@@ -41,7 +40,16 @@ namespace MassTransit.Courier
 
         public ExecutionResult Completed()
         {
-            return new NextActivityExecutionResult<TArguments>(this, Publisher, _activity, RoutingSlip);
+            return new CompletedExecutionResult<TArguments>(this, Publisher, _activity, RoutingSlip, _compensationAddress);
+        }
+
+        public ExecutionResult Completed(ConfigureCompletedActivityOptionsCallback callback)
+        {
+            var result = new CompletedExecutionResult<TArguments>(this, Publisher, _activity, RoutingSlip, _compensationAddress);
+
+            callback(result);
+
+            return result;
         }
 
         public ExecutionResult Completed<TLog>(TLog log)
@@ -53,7 +61,29 @@ namespace MassTransit.Courier
             if (_compensationAddress == null)
                 throw new InvalidCompensationAddressException(_compensationAddress);
 
-            return new NextActivityExecutionResult<TArguments, TLog>(this, Publisher, _activity, RoutingSlip, _compensationAddress, log);
+            var result = new CompletedExecutionResult<TArguments>(this, Publisher, _activity, RoutingSlip, _compensationAddress);
+
+            result.SetLog(log);
+
+            return result;
+        }
+
+        public ExecutionResult Completed<TLog>(TLog log, ConfigureCompletedActivityOptionsCallback callback)
+            where TLog : class
+        {
+            if (log == null)
+                throw new ArgumentNullException(nameof(log));
+
+            if (_compensationAddress == null)
+                throw new InvalidCompensationAddressException(_compensationAddress);
+
+            var result = new CompletedExecutionResult<TArguments>(this, Publisher, _activity, RoutingSlip, _compensationAddress);
+
+            result.SetLog(log);
+
+            callback(result);
+
+            return result;
         }
 
         public ExecutionResult Completed<TLog>(object logValues)
@@ -65,8 +95,29 @@ namespace MassTransit.Courier
             if (_compensationAddress == null)
                 throw new InvalidCompensationAddressException(_compensationAddress);
 
-            return new NextActivityExecutionResult<TArguments, TLog>(this, Publisher, _activity, RoutingSlip, _compensationAddress,
-                RoutingSlipBuilder.GetObjectAsDictionary(logValues));
+            var result = new CompletedExecutionResult<TArguments>(this, Publisher, _activity, RoutingSlip, _compensationAddress);
+
+            result.SetLog(logValues);
+
+            return result;
+        }
+
+        public ExecutionResult Completed<TLog>(object logValues, ConfigureCompletedActivityOptionsCallback callback)
+            where TLog : class
+        {
+            if (logValues == null)
+                throw new ArgumentNullException(nameof(logValues));
+
+            if (_compensationAddress == null)
+                throw new InvalidCompensationAddressException(_compensationAddress);
+
+            var result = new CompletedExecutionResult<TArguments>(this, Publisher, _activity, RoutingSlip, _compensationAddress);
+
+            result.SetLog(logValues);
+
+            callback(result);
+
+            return result;
         }
 
         public ExecutionResult CompletedWithVariables(IEnumerable<KeyValuePair<string, object>> variables)
@@ -74,8 +125,11 @@ namespace MassTransit.Courier
             if (variables == null)
                 throw new ArgumentNullException(nameof(variables));
 
-            return new NextActivityWithVariablesExecutionResult<TArguments>(this, Publisher, _activity, RoutingSlip,
-                variables.ToDictionary(x => x.Key, x => x.Value));
+            var result = new CompletedExecutionResult<TArguments>(this, Publisher, _activity, RoutingSlip, _compensationAddress);
+
+            result.SetVariables(variables);
+
+            return result;
         }
 
         public ExecutionResult CompletedWithVariables(object variables)
@@ -83,8 +137,11 @@ namespace MassTransit.Courier
             if (variables == null)
                 throw new ArgumentNullException(nameof(variables));
 
-            return new NextActivityWithVariablesExecutionResult<TArguments>(this, Publisher, _activity, RoutingSlip,
-                RoutingSlipBuilder.GetObjectAsDictionary(variables));
+            var result = new CompletedExecutionResult<TArguments>(this, Publisher, _activity, RoutingSlip, _compensationAddress);
+
+            result.SetVariables(variables);
+
+            return result;
         }
 
         public ExecutionResult CompletedWithVariables<TLog>(TLog log, object variables)
@@ -99,9 +156,12 @@ namespace MassTransit.Courier
             if (_compensationAddress == null)
                 throw new InvalidCompensationAddressException(_compensationAddress);
 
-            return new NextActivityWithVariablesExecutionResult<TArguments, TLog>(this, Publisher, _activity, RoutingSlip, _compensationAddress,
-                log,
-                RoutingSlipBuilder.GetObjectAsDictionary(variables));
+            var result = new CompletedExecutionResult<TArguments>(this, Publisher, _activity, RoutingSlip, _compensationAddress);
+
+            result.SetLog(log);
+            result.SetVariables(variables);
+
+            return result;
         }
 
         public ExecutionResult CompletedWithVariables<TLog>(object logValues, object variables)
@@ -116,8 +176,12 @@ namespace MassTransit.Courier
             if (_compensationAddress == null)
                 throw new InvalidCompensationAddressException(_compensationAddress);
 
-            return new NextActivityWithVariablesExecutionResult<TArguments, TLog>(this, Publisher, _activity, RoutingSlip, _compensationAddress,
-                RoutingSlipBuilder.GetObjectAsDictionary(logValues), RoutingSlipBuilder.GetObjectAsDictionary(variables));
+            var result = new CompletedExecutionResult<TArguments>(this, Publisher, _activity, RoutingSlip, _compensationAddress);
+
+            result.SetLog(logValues);
+            result.SetVariables(variables);
+
+            return result;
         }
 
         public ExecutionResult CompletedWithVariables<TLog>(TLog log, IEnumerable<KeyValuePair<string, object>> variables)
@@ -132,9 +196,12 @@ namespace MassTransit.Courier
             if (_compensationAddress == null)
                 throw new InvalidCompensationAddressException(_compensationAddress);
 
-            return new NextActivityWithVariablesExecutionResult<TArguments, TLog>(this, Publisher, _activity, RoutingSlip, _compensationAddress,
-                log,
-                variables.ToDictionary(x => x.Key, x => x.Value));
+            var result = new CompletedExecutionResult<TArguments>(this, Publisher, _activity, RoutingSlip, _compensationAddress);
+
+            result.SetLog(log);
+            result.SetVariables(variables);
+
+            return result;
         }
 
         public ExecutionResult ReviseItinerary(Action<IItineraryBuilder> buildItinerary)
@@ -142,7 +209,7 @@ namespace MassTransit.Courier
             if (buildItinerary == null)
                 throw new ArgumentNullException(nameof(buildItinerary));
 
-            return new ReviseItineraryExecutionResult<TArguments>(this, Publisher, _activity, RoutingSlip, buildItinerary);
+            return new ReviseItineraryExecutionResult<TArguments>(this, Publisher, _activity, RoutingSlip, _compensationAddress, buildItinerary);
         }
 
         public ExecutionResult ReviseItinerary<TLog>(TLog log, Action<IItineraryBuilder> buildItinerary)
@@ -157,8 +224,11 @@ namespace MassTransit.Courier
             if (_compensationAddress == null)
                 throw new InvalidCompensationAddressException(_compensationAddress);
 
-            return new ReviseItineraryExecutionResult<TArguments, TLog>(this, Publisher, _activity, RoutingSlip, _compensationAddress, log,
-                buildItinerary);
+            var result = new ReviseItineraryExecutionResult<TArguments>(this, Publisher, _activity, RoutingSlip, _compensationAddress, buildItinerary);
+
+            result.SetLog(log);
+
+            return result;
         }
 
         public ExecutionResult ReviseItinerary<TLog>(TLog log, object variables, Action<IItineraryBuilder> buildItinerary)
@@ -176,9 +246,12 @@ namespace MassTransit.Courier
             if (_compensationAddress == null)
                 throw new InvalidCompensationAddressException(_compensationAddress);
 
-            return new ReviseItineraryWithVariablesExecutionResult<TArguments, TLog>(this, Publisher, _activity, RoutingSlip,
-                _compensationAddress,
-                log, RoutingSlipBuilder.GetObjectAsDictionary(variables), buildItinerary);
+            var result = new ReviseItineraryExecutionResult<TArguments>(this, Publisher, _activity, RoutingSlip, _compensationAddress, buildItinerary);
+
+            result.SetLog(log);
+            result.SetVariables(variables);
+
+            return result;
         }
 
         public ExecutionResult ReviseItinerary<TLog>(TLog log, IEnumerable<KeyValuePair<string, object>> variables, Action<IItineraryBuilder> buildItinerary)
@@ -196,14 +269,17 @@ namespace MassTransit.Courier
             if (_compensationAddress == null)
                 throw new InvalidCompensationAddressException(_compensationAddress);
 
-            return new ReviseItineraryWithVariablesExecutionResult<TArguments, TLog>(this, Publisher, _activity, RoutingSlip,
-                _compensationAddress,
-                log, variables.ToDictionary(x => x.Key, x => x.Value), buildItinerary);
+            var result = new ReviseItineraryExecutionResult<TArguments>(this, Publisher, _activity, RoutingSlip, _compensationAddress, buildItinerary);
+
+            result.SetLog(log);
+            result.SetVariables(variables);
+
+            return result;
         }
 
         public ExecutionResult Terminate()
         {
-            return new TerminateExecutionResult<TArguments>(this, Publisher, _activity, RoutingSlip);
+            return new TerminateExecutionResult<TArguments>(this, Publisher, _activity, RoutingSlip, _compensationAddress);
         }
 
         public ExecutionResult Terminate(object variables)
@@ -211,8 +287,11 @@ namespace MassTransit.Courier
             if (variables == null)
                 throw new ArgumentNullException(nameof(variables));
 
-            return new TerminateWithVariablesExecutionResult<TArguments>(this, Publisher, _activity, RoutingSlip,
-                RoutingSlipBuilder.GetObjectAsDictionary(variables));
+            var result = new TerminateExecutionResult<TArguments>(this, Publisher, _activity, RoutingSlip, _compensationAddress);
+
+            result.SetVariables(variables);
+
+            return result;
         }
 
         public ExecutionResult Terminate(IEnumerable<KeyValuePair<string, object>> variables)
@@ -220,8 +299,11 @@ namespace MassTransit.Courier
             if (variables == null)
                 throw new ArgumentNullException(nameof(variables));
 
-            return new TerminateWithVariablesExecutionResult<TArguments>(this, Publisher, _activity, RoutingSlip,
-                variables.ToDictionary(x => x.Key, x => x.Value));
+            var result = new TerminateExecutionResult<TArguments>(this, Publisher, _activity, RoutingSlip, _compensationAddress);
+
+            result.SetVariables(variables);
+
+            return result;
         }
 
         public ExecutionResult Faulted()
@@ -237,28 +319,36 @@ namespace MassTransit.Courier
             return new FaultedExecutionResult<TArguments>(this, Publisher, _activity, RoutingSlip, exception);
         }
 
-        public ExecutionResult FaultedWithVariables(Exception exception, object variables)
+        public ExecutionResult Faulted(Exception exception, ConfigureFaultedActivityOptionsCallback callback)
         {
             if (exception == null)
                 throw new ArgumentNullException(nameof(exception));
 
+            var result = new FaultedExecutionResult<TArguments>(this, Publisher, _activity, RoutingSlip, exception);
+
+            callback?.Invoke(result);
+
+            return result;
+        }
+
+        public ExecutionResult FaultedWithVariables(Exception exception, object variables)
+        {
+            if (exception == null)
+                throw new ArgumentNullException(nameof(exception));
             if (variables == null)
                 throw new ArgumentNullException(nameof(variables));
 
-            return new FaultedWithVariablesExecutionResult<TArguments>(this, Publisher, _activity, RoutingSlip, exception,
-                RoutingSlipBuilder.GetObjectAsDictionary(variables));
+            return Faulted(exception, x => x.SetVariables(variables));
         }
 
         public ExecutionResult FaultedWithVariables(Exception exception, IEnumerable<KeyValuePair<string, object>> variables)
         {
             if (exception == null)
                 throw new ArgumentNullException(nameof(exception));
-
             if (variables == null)
                 throw new ArgumentNullException(nameof(variables));
 
-            return new FaultedWithVariablesExecutionResult<TArguments>(this, Publisher, _activity, RoutingSlip, exception,
-                variables.ToDictionary(x => x.Key, x => x.Value));
+            return Faulted(exception, x => x.SetVariables(variables));
         }
     }
 }
