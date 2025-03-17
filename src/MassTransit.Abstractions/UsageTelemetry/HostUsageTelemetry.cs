@@ -6,4 +6,5 @@ public class HostUsageTelemetry
     public string? MassTransitVersion { get; set; }
     public string? OperatingSystemVersion { get; set; }
     public string? TimeZoneInfo { get; set; }
+    public string? CommitHash { get; set; }
 }

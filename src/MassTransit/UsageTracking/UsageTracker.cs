@@ -61,6 +61,7 @@ public class UsageTracker :
                     FrameworkVersion = HostMetadataCache.Host.FrameworkVersion,
                     OperatingSystemVersion = HostMetadataCache.Host.OperatingSystemVersion,
                     TimeZoneInfo = TimeZoneInfo.Local.ToString(),
+                    CommitHash = HostMetadataCache.GetCommitHash()
                 }
             };
         }

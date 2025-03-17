@@ -1,6 +1,7 @@
 namespace MassTransit.Metadata
 {
     using System;
+    using System.Reflection;
     using System.Runtime.InteropServices;
 
 
@@ -21,6 +22,21 @@ namespace MassTransit.Metadata
     #else
         public static bool IsNetFramework => _isNetFramework ??= RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework");
     #endif
+
+        public static string? GetCommitHash()
+        {
+            var assembly = typeof(IBus).Assembly;
+
+            var attribute = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+            if (attribute == null)
+                return null;
+
+            var splitIndex = attribute.InformationalVersion.IndexOf('+');
+            if (splitIndex > 0)
+                return attribute.InformationalVersion.Substring(splitIndex + 1);
+
+            return null;
+        }
 
 
         static class Cached
