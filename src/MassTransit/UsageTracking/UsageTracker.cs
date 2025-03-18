@@ -3,6 +3,7 @@ namespace MassTransit.UsageTracking;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net;
@@ -47,6 +48,9 @@ public class UsageTracker :
             else
                 LogContext.Warning?.Log("Unrecognized MASSTRANSIT_USAGE_TELEMETRY value: {Variable}. Should be true or false, 1 or 0", variable);
         }
+
+        if (Debugger.IsAttached)
+            _options.Enabled = false;
 
         if (_options.Enabled)
         {
