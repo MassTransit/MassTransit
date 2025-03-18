@@ -61,7 +61,8 @@ The example report below demonstrates the collected data. By default, only minim
     }
   ],
   "host": {
-    "time_zone_info": "(UTC-06:00) Central Time (Chicago)",
+     "commit_hash": "c0977e09482f7f5e3585c9a59e67941a89fd2963",
+     "time_zone_info": "(UTC-06:00) Central Time (Chicago)",
     "framework_version": "9.0.0",
     "mass_transit_version": "1.0.0.0",
     "operating_system_version": "Unix 14.7.2"
@@ -72,7 +73,7 @@ The example report below demonstrates the collected data. By default, only minim
 
 ## Reporting
 
-Usage telemetry is sent once, five minutes after the bus starts (or after all buses have started if you're using MultiBus). If the bus runs for less than five minutes, no data is reported. Telemetry is not captured or sent when using the test harness. Reporting is non-blocking and does not impact the startup or shutdown of MassTransit or your application. All reports are securely transmitted to an endpoint within the `masstransit.io` domain.
+Usage telemetry is sent once, five minutes after the bus starts (or after all buses have started if you're using MultiBus). If the bus runs for less than five minutes, no data is reported. Telemetry is not captured or sent when using the test harness or when debugging the application. Reporting is non-blocking and does not impact the startup or shutdown of MassTransit or your application. All reports are securely transmitted to an endpoint within the `masstransit.io` domain.
 
 ## Opt-Out
 
