@@ -10,6 +10,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
+    using RetryPolicies;
 
 
     /// <summary>
@@ -24,6 +25,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         readonly ILogger<InboxCleanupService<TDbContext>> _logger;
         readonly InboxCleanupServiceOptions _options;
         readonly IServiceProvider _provider;
+        readonly IRetryPolicy _retryPolicy;
 
         public InboxCleanupService(IOptions<InboxCleanupServiceOptions> options, ILogger<InboxCleanupService<TDbContext>> logger,
             IServiceProvider provider)
@@ -31,6 +33,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             _options = options.Value;
             _logger = logger;
             _provider = provider;
+
+            _retryPolicy = Retry.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -45,7 +49,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                     else
                         removed = 0;
 
-                    removed = await CleanUpInboxState(stoppingToken).ConfigureAwait(false);
+                    removed = await _retryPolicy.Retry(() => CleanUpInboxState(stoppingToken), stoppingToken).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException)
                 {

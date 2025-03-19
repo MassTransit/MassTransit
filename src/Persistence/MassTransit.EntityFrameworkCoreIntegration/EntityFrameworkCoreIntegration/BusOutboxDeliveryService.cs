@@ -16,6 +16,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
     using Microsoft.Extensions.Options;
     using Middleware;
     using Middleware.Outbox;
+    using RetryPolicies;
     using Serialization;
     using Util;
 
@@ -32,6 +33,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         readonly OutboxDeliveryServiceOptions _options;
         readonly Func<TDbContext, Guid, long, int, IAsyncEnumerable<OutboxMessage>> _outboxMessagesQuery;
         readonly IServiceProvider _provider;
+        readonly IRetryPolicy _retryPolicy;
 
         string _getOutboxIdStatement;
 
@@ -55,6 +57,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                     .OrderBy(x => x.SequenceNumber)
                     .Take(limit)
                     .AsNoTracking());
+
+            _retryPolicy = Retry.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -71,7 +75,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                 {
                     await _busControl.WaitForHealthStatus(BusHealthStatus.Healthy, stoppingToken).ConfigureAwait(false);
 
-                    var count = await algorithm.Run(DeliverOutbox, stoppingToken).ConfigureAwait(false);
+                    // ReSharper disable once AccessToDisposedClosure
+                    var count = await _retryPolicy.Retry(() => algorithm.Run(DeliverOutbox, stoppingToken), stoppingToken).ConfigureAwait(false);
                     if (count > 0)
                         continue;
 
