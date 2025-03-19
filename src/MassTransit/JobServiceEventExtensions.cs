@@ -36,12 +36,6 @@ namespace MassTransit
             return context.SerializerContext.DeserializeObject<TJob>(context.Message.Job);
         }
 
-        public static TResult? GetResult<TResult>(this ConsumeContext<JobCompleted> context)
-            where TResult : class
-        {
-            return context.SerializerContext.DeserializeObject<TResult>(context.Message.Result);
-        }
-
         public static TJob? GetJob<TJob>(this ConsumeContext<JobFaulted> context)
             where TJob : class
         {

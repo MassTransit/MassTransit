@@ -34,7 +34,9 @@ namespace MassTransit.JobService
                 Timestamp = context.Message.Timestamp,
                 Duration = context.Message.Duration,
                 Job = job,
-                Result = context.Message.Result,
+                JobProperties = context.Message.JobProperties,
+                InstanceProperties = context.Message.InstanceProperties,
+                JobTypeProperties = context.Message.JobTypeProperties,
             });
         }
 

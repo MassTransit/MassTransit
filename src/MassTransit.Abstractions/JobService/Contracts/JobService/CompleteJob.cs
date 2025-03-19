@@ -19,13 +19,14 @@ namespace MassTransit.Contracts.JobService
         Dictionary<string, object> Job { get; }
 
         /// <summary>
-        /// The result of the job
-        /// </summary>
-        Dictionary<string, object> Result { get; }
-
-        /// <summary>
         /// The JobTypeId, to ensure the proper job type is started
         /// </summary>
         Guid JobTypeId { get; }
+
+        Dictionary<string, object>? JobProperties { get; }
+
+        Dictionary<string, object>? InstanceProperties { get; }
+
+        Dictionary<string, object>? JobTypeProperties { get; }
     }
 }

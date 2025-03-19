@@ -1,6 +1,7 @@
 namespace MassTransit.Contracts.JobService
 {
     using System;
+    using System.Collections.Generic;
 
 
     public interface JobAttemptCompleted
@@ -10,5 +11,7 @@ namespace MassTransit.Contracts.JobService
         int RetryAttempt { get; }
         DateTime Timestamp { get; }
         TimeSpan Duration { get; }
+        Dictionary<string, object>? InstanceProperties { get; }
+        Dictionary<string, object>? JobTypeProperties { get; }
     }
 }

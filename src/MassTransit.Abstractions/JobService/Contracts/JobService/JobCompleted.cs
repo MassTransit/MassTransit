@@ -24,14 +24,24 @@ namespace MassTransit.Contracts.JobService
         Dictionary<string, object> Job { get; }
 
         /// <summary>
-        /// The result of the job
+        /// Properties specified for this job
         /// </summary>
-        Dictionary<string, object> Result { get; }
+        Dictionary<string, object>? JobProperties { get; }
+
+        /// <summary>
+        /// Properties of the instance that completed the job
+        /// </summary>
+        Dictionary<string, object>? InstanceProperties { get; }
+
+        /// <summary>
+        /// Properties related to the job type
+        /// </summary>
+        Dictionary<string, object>? JobTypeProperties { get; }
     }
 
 
     /// <summary>
-    /// Published when a job completes (separately from <see cref="JobCompleted"/>)
+    /// Published when a job completes (separately from <see cref="JobCompleted" />)
     /// </summary>
     public interface JobCompleted<out T>
         where T : class
@@ -45,8 +55,18 @@ namespace MassTransit.Contracts.JobService
         T Job { get; }
 
         /// <summary>
-        /// The result of the job
+        /// Properties specified for this job
         /// </summary>
-        Dictionary<string, object> Result { get; }
+        Dictionary<string, object>? JobProperties { get; }
+
+        /// <summary>
+        /// Properties of the instance that completed the job
+        /// </summary>
+        Dictionary<string, object>? InstanceProperties { get; }
+
+        /// <summary>
+        /// Properties related to the job type
+        /// </summary>
+        Dictionary<string, object>? JobTypeProperties { get; }
     }
 }

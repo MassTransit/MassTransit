@@ -696,14 +696,20 @@ namespace MassTransit
                         Job = context.Saga.Job,
                         JobTypeId = context.Saga.JobTypeId,
                         Timestamp = context.Message.Timestamp,
-                        Duration = context.Message.Timestamp - context.Saga.Started ?? TimeSpan.Zero
+                        Duration = context.Message.Timestamp - context.Saga.Started ?? TimeSpan.Zero,
+                        JobProperties = context.Saga.JobProperties,
+                        InstanceProperties = context.Message.InstanceProperties,
+                        JobTypeProperties = context.Message.JobTypeProperties
                     })
                 .Publish<JobSaga, JobAttemptCompleted, JobCompleted>(context => new JobCompletedEvent
                 {
                     JobId = context.Saga.CorrelationId,
                     Job = context.Saga.Job,
                     Timestamp = context.Message.Timestamp,
-                    Duration = context.Message.Duration
+                    Duration = context.Message.Duration,
+                    JobProperties = context.Saga.JobProperties,
+                    InstanceProperties = context.Message.InstanceProperties,
+                    JobTypeProperties = context.Message.JobTypeProperties
                 });
         }
 

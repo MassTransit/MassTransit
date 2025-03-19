@@ -131,7 +131,9 @@ public class ConsumeJobContext<TJob> :
             AttemptId = AttemptId,
             RetryAttempt = RetryAttempt,
             Timestamp = DateTime.UtcNow,
-            Duration = ElapsedTime
+            Duration = ElapsedTime,
+            InstanceProperties = _jobOptions.InstanceProperties,
+            JobTypeProperties = _jobOptions.JobTypeProperties
         }).ConfigureAwait(false);
     }
 

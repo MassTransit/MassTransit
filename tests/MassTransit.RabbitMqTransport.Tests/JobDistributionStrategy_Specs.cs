@@ -120,6 +120,12 @@ public class JobDistributionStrategy_Specs
         {
             Assert.That(await harness.Consumed.Any<JobCompleted<RegionalJob>>(x => x.Context.Message.Job.Region == "West"));
             Assert.That(await harness.Consumed.Any<JobCompleted<RegionalJob>>(x => x.Context.Message.Job.Region == "East"));
+
+            var completed = await harness.Consumed.SelectAsync<JobCompleted<RegionalJob>>(x => x.Context.Message.Job.Region == "East").FirstOrDefault();
+
+            Assert.That(completed, Is.Not.Null);
+            Assert.That(completed.Context.Message.JobProperties, Contains.Key("Region"));
+            Assert.That(completed.Context.Message.InstanceProperties, Contains.Key("Region"));
         }
 
         await harness.Stop();
