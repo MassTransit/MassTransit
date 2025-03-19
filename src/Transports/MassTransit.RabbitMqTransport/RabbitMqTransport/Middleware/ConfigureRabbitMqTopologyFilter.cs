@@ -81,8 +81,6 @@ public class ConfigureRabbitMqTopologyFilter<TSettings> :
                 .ConfigureAwait(false);
 
             RabbitMqLogMessages.DeclareQueue(queue, ok.ConsumerCount, ok.MessageCount);
-
-            await Task.Delay(10).ConfigureAwait(false);
         }
         catch (Exception exception)
         {
@@ -98,8 +96,6 @@ public class ConfigureRabbitMqTopologyFilter<TSettings> :
 
         await context.ExchangeBind(binding.Destination.ExchangeName, binding.Source.ExchangeName, binding.RoutingKey, binding.Arguments)
             .ConfigureAwait(false);
-
-        await Task.Delay(10).ConfigureAwait(false);
     }
 
     static async Task Bind(ChannelContext context, ExchangeToQueueBinding binding)
@@ -107,7 +103,5 @@ public class ConfigureRabbitMqTopologyFilter<TSettings> :
         RabbitMqLogMessages.BindToQueue(binding);
 
         await context.QueueBind(binding.Destination.QueueName, binding.Source.ExchangeName, binding.RoutingKey, binding.Arguments).ConfigureAwait(false);
-
-        await Task.Delay(10).ConfigureAwait(false);
     }
 }
