@@ -17,7 +17,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
 
             WaitTimeSeconds = 3;
             VisibilityTimeout = 30;
-            RedeliverVisibilityTimeout = 0;
+            RedeliverVisibilityTimeout = 1;
 
             ConcurrentDeliveryLimit = 1;
 
