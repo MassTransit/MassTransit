@@ -91,16 +91,12 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
         public override async Task RemoveOutboxMessages()
         {
-            List<OutboxMessage> messages = await _dbContext.Set<OutboxMessage>()
+            var count = await _dbContext.Set<OutboxMessage>()
                 .Where(x => x.InboxMessageId == MessageId && x.InboxConsumerId == ConsumerId)
-                .ToListAsync(CancellationToken).ConfigureAwait(false);
+                .ExecuteDeleteAsync(CancellationToken).ConfigureAwait(false);
 
-            _dbContext.RemoveRange(messages);
-
-            await _dbContext.SaveChangesAsync(CancellationToken).ConfigureAwait(false);
-
-            if (messages.Count > 0)
-                LogContext.Debug?.Log("Outbox removed {Count} messages: {MessageId}", messages.Count, MessageId);
+            if (count > 0)
+                LogContext.Debug?.Log("Outbox removed {Count} messages: {MessageId}", count, MessageId);
         }
 
         public override Task AddSend<T>(SendContext<T> context)

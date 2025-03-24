@@ -1,7 +1,6 @@
 namespace MassTransit.EntityFrameworkCoreIntegration
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -74,42 +73,26 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             {
                 await using var dbContext = scope.ServiceProvider.GetRequiredService<TDbContext>();
 
-                List<InboxState> inboxStates = await GetExpiredInboxStates(dbContext, cancellationToken);
+                using var queryTimeout = new CancellationTokenSource(_options.QueryTimeout);
+                using var queryToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, queryTimeout.Token);
 
-                if (inboxStates.Count == 0)
-                    return 0;
+                var removeTimestamp = DateTime.UtcNow - _options.DuplicateDetectionWindow;
 
-                dbContext.RemoveRange(inboxStates);
+                var count = await dbContext.Set<InboxState>()
+                    .Where(x => x.Delivered != null && x.Delivered.Value < removeTimestamp)
+                    .OrderBy(x => x.Delivered)
+                    .Take(_options.QueryMessageLimit)
+                    .ExecuteDeleteAsync(queryToken.Token).ConfigureAwait(false);
 
-                using var saveTimeout = new CancellationTokenSource(_options.QueryTimeout);
-                using var saveToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, saveTimeout.Token);
+                if (count > 0)
+                    _logger.LogDebug("Outbox Removed {Count} expired inbox messages", count);
 
-                var changed = await dbContext.SaveChangesAsync(cancellationToken);
-
-                _logger.LogDebug("Outbox Removed {Count} expired inbox messages", changed);
-
-                return changed;
+                return count;
             }
             finally
             {
                 await scope.DisposeAsync().ConfigureAwait(false);
             }
-        }
-
-        async Task<List<InboxState>> GetExpiredInboxStates(TDbContext dbContext, CancellationToken cancellationToken)
-        {
-            var messageLimit = _options.QueryMessageLimit;
-
-            var removeTimestamp = DateTime.UtcNow - _options.DuplicateDetectionWindow;
-
-            using var queryTimeout = new CancellationTokenSource(_options.QueryTimeout);
-            using var queryToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, queryTimeout.Token);
-
-            return await dbContext.Set<InboxState>()
-                .Where(x => x.Delivered != null && x.Delivered.Value < removeTimestamp)
-                .OrderBy(x => x.Delivered)
-                .Take(messageLimit)
-                .ToListAsync(queryToken.Token);
         }
     }
 }
