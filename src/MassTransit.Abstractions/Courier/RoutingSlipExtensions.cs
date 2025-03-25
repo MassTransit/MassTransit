@@ -41,5 +41,27 @@
         {
             return new RoutingSlipExecutor(source, source).Execute(routingSlip, cancellationToken);
         }
+
+        /// <summary>
+        /// Execute a routing slip via the <paramref name="sendEndpointProvider"/> and/or <paramref name="publishEndpoint"/> provided.
+        /// This method works with the bus outbox (from the transactional outbox).
+        /// </summary>
+        /// <param name="routingSlip"></param>
+        /// <param name="sendEndpointProvider"></param>
+        /// <param name="publishEndpoint"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public static Task Execute(this RoutingSlip routingSlip, ISendEndpointProvider sendEndpointProvider, IPublishEndpoint publishEndpoint,
+            CancellationToken cancellationToken = default)
+        {
+            if (routingSlip == null)
+                throw new ArgumentNullException(nameof(routingSlip));
+            if (sendEndpointProvider == null)
+                throw new ArgumentNullException(nameof(sendEndpointProvider));
+            if (publishEndpoint == null)
+                throw new ArgumentNullException(nameof(publishEndpoint));
+
+            return new RoutingSlipExecutor(sendEndpointProvider, publishEndpoint).Execute(routingSlip, cancellationToken);
+        }
     }
 }
