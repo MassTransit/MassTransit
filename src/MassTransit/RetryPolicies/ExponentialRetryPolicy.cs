@@ -57,7 +57,10 @@ namespace MassTransit.RetryPolicies
 
         public TimeSpan GetRetryInterval(int retryCount)
         {
-            return retryCount < _intervals.Length ? _intervals[retryCount] : _intervals[_intervals.Length - 1];
+            var interval = retryCount < _intervals.Length ? _intervals[retryCount] : _intervals[_intervals.Length - 1];
+            var jitter = new Random().NextDouble() * 0.5 + 0.75;
+
+            return TimeSpan.FromMilliseconds(interval.TotalMilliseconds * jitter);
         }
 
         IEnumerable<TimeSpan> CalculateIntervals()
