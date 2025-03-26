@@ -4,6 +4,7 @@ namespace MassTransit.Middleware.InMemoryOutbox
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Batching;
     using Context;
     using Util;
 
@@ -16,7 +17,7 @@ namespace MassTransit.Middleware.InMemoryOutbox
         readonly InMemoryOutboxMessageSchedulerContext _outboxSchedulerContext;
         readonly List<Func<Task>> _pendingActions;
 
-        public InMemoryOutboxConsumeContext(ConsumeContext context)
+        protected InMemoryOutboxConsumeContext(ConsumeContext context)
             : base(context)
         {
             CapturedContext = context;
@@ -26,7 +27,7 @@ namespace MassTransit.Middleware.InMemoryOutbox
             ReceiveContext = outboxReceiveContext;
             PublishEndpointProvider = outboxReceiveContext.PublishEndpointProvider;
 
-            _pendingActions = new List<Func<Task>>();
+            _pendingActions = [];
             _clearToSend = TaskUtil.GetTask<InMemoryOutboxConsumeContext>();
 
             if (context.TryGetPayload(out MessageSchedulerContext schedulerContext))
@@ -54,7 +55,7 @@ namespace MassTransit.Middleware.InMemoryOutbox
             }
         }
 
-        public async Task ExecutePendingActions(bool concurrentMessageDelivery)
+        public virtual async Task ExecutePendingActions(bool concurrentMessageDelivery)
         {
             _clearToSend.TrySetResult(this);
 
@@ -96,7 +97,7 @@ namespace MassTransit.Middleware.InMemoryOutbox
             }
         }
 
-        public async Task DiscardPendingActions()
+        public virtual async Task DiscardPendingActions()
         {
             lock (_pendingActions)
                 _pendingActions.Clear();
@@ -151,6 +152,49 @@ namespace MassTransit.Middleware.InMemoryOutbox
 
         public void Method3()
         {
+        }
+
+
+        public class Batch :
+            InMemoryOutboxConsumeContext,
+            ConsumeContext<Batch<T>>
+        {
+            readonly MessageBatch<T> _batch;
+            readonly List<InMemoryOutboxConsumeContext<T>> _messages;
+
+            public Batch(ConsumeContext<Batch<T>> context)
+                : base(context)
+            {
+                Batch<T> batch = context.Message;
+                _messages = batch.Select(x => new InMemoryOutboxConsumeContext<T>(x)).ToList();
+                _batch = new MessageBatch<T>(batch.FirstMessageReceived, batch.LastMessageReceived, batch.Mode, _messages);
+            }
+
+            public Batch<T> Message => _batch;
+
+            public Task NotifyConsumed(TimeSpan duration, string consumerType)
+            {
+                return NotifyConsumed(this, duration, consumerType);
+            }
+
+            public Task NotifyFaulted(TimeSpan duration, string consumerType, Exception exception)
+            {
+                return NotifyFaulted(this, duration, consumerType, exception);
+            }
+
+            public override async Task ExecutePendingActions(bool concurrentMessageDelivery)
+            {
+                await base.ExecutePendingActions(concurrentMessageDelivery).ConfigureAwait(false);
+
+                await Task.WhenAll(_messages.Select(x => x.ExecutePendingActions(concurrentMessageDelivery))).ConfigureAwait(false);
+            }
+
+            public override async Task DiscardPendingActions()
+            {
+                await base.DiscardPendingActions().ConfigureAwait(false);
+
+                await Task.WhenAll(_messages.Select(x => x.DiscardPendingActions())).ConfigureAwait(false);
+            }
         }
     }
 }

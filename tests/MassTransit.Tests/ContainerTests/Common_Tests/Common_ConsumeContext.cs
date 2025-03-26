@@ -214,7 +214,7 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
 
             var consumeContext = await ConsumeContext;
 
-            Assert.That(consumeContext.TryGetPayload(out InMemoryOutboxConsumeContext<Batch<PingMessage>> _), "Is ConsumerConsumeContext");
+            Assert.That(consumeContext.TryGetPayload(out InMemoryOutboxConsumeContext<PingMessage>.Batch _), "Is ConsumerConsumeContext");
 
             var publishEndpoint = await PublishEndpoint;
             var sendEndpointProvider = await SendEndpointProvider;
@@ -286,7 +286,7 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
 
             var consumeContext = await ConsumeContext;
 
-            Assert.That(consumeContext.TryGetPayload(out InMemoryOutboxConsumeContext<Batch<PingMessage>> _), "Is ConsumerConsumeContext");
+            Assert.That(consumeContext.TryGetPayload(out InMemoryOutboxConsumeContext<PingMessage>.Batch _), "Is ConsumerConsumeContext");
 
             var publishEndpoint = await PublishEndpoint;
             var sendEndpointProvider = await SendEndpointProvider;
@@ -358,7 +358,7 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
 
             var consumeContext = await ConsumeContext;
 
-            Assert.That(consumeContext.TryGetPayload(out InMemoryOutboxConsumeContext<Batch<PingMessage>> _), "Is ConsumerConsumeContext");
+            Assert.That(consumeContext.TryGetPayload(out InMemoryOutboxConsumeContext<PingMessage>.Batch _), "Is ConsumerConsumeContext");
 
             var publishEndpoint = await PublishEndpoint;
             var sendEndpointProvider = await SendEndpointProvider;
@@ -428,7 +428,7 @@ namespace MassTransit.Tests.ContainerTests.Common_Tests
 
             var consumeContext = await ConsumeContext;
 
-            Assert.That(consumeContext.TryGetPayload(out InMemoryOutboxConsumeContext<Batch<PingMessage>> _), "Is ConsumerConsumeContext");
+            Assert.That(consumeContext.TryGetPayload(out InMemoryOutboxConsumeContext<PingMessage>.Batch _), "Is ConsumerConsumeContext");
 
             var publishEndpoint = await PublishEndpoint;
             var sendEndpointProvider = await SendEndpointProvider;

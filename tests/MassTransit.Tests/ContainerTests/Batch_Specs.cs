@@ -28,15 +28,15 @@ namespace MassTransit.Tests.ContainerTests
 
             await harness.Start();
 
-            await harness.Bus.PublishBatch(new[] { new BatchItem(), new BatchItem() });
+            await harness.Bus.PublishBatch([new BatchItem(), new BatchItem()]);
 
             await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Take(2).Count(), Is.EqualTo(2));
 
-                Assert.That(await harness.GetConsumerHarness<TestBatchConsumer>().Consumed.Any<Batch<BatchItem>>(), Is.True);
+                Assert.That(await harness.GetConsumerHarness<TestBatchConsumer>().Consumed.Any<Batch<BatchItem>>());
 
-                Assert.That(await harness.Published.Any<BatchResult>(x => x.Context.Message is { Count: 2, Mode: BatchCompletionMode.Time }), Is.True);
+                Assert.That(await harness.Published.Any<BatchResult>(x => x.Context.Message is { Count: 2, Mode: BatchCompletionMode.Time }));
             });
         }
     }
@@ -65,16 +65,15 @@ namespace MassTransit.Tests.ContainerTests
 
             await harness.Start();
 
-            await harness.Bus.PublishBatch(new[] { new BatchItem(), new BatchItem() });
+            await harness.Bus.PublishBatch([new BatchItem(), new BatchItem()]);
 
             await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Take(2).Count(), Is.EqualTo(2));
 
-                Assert.That(await harness.GetConsumerHarness<TestOutboxBatchConsumer>().Consumed.Any<Batch<BatchItem>>(), Is.True);
+                Assert.That(await harness.GetConsumerHarness<TestOutboxBatchConsumer>().Consumed.Any<Batch<BatchItem>>());
 
-                Assert.That(await harness.Published.Any<BatchResult>(x => x.Context.Message.Count == 2 && x.Context.Message.Mode == BatchCompletionMode.Time),
-                    Is.True);
+                Assert.That(await harness.Published.Any<BatchResult>(x => x.Context.Message is { Count: 2, Mode: BatchCompletionMode.Time }));
             });
         }
 
@@ -98,16 +97,15 @@ namespace MassTransit.Tests.ContainerTests
 
             await harness.Start();
 
-            await harness.Bus.PublishBatch(new[] { new BatchItem(), new BatchItem() });
+            await harness.Bus.PublishBatch([new BatchItem(), new BatchItem()]);
 
             await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Take(2).Count(), Is.EqualTo(2));
 
-                Assert.That(await harness.GetConsumerHarness<TestRetryOutboxBatchConsumer>().Consumed.Any<Batch<BatchItem>>(), Is.True);
+                Assert.That(await harness.GetConsumerHarness<TestRetryOutboxBatchConsumer>().Consumed.Any<Batch<BatchItem>>());
 
-                Assert.That(await harness.Published.Any<BatchResult>(x => x.Context.Message.Count == 2 && x.Context.Message.Mode == BatchCompletionMode.Time),
-                    Is.True);
+                Assert.That(await harness.Published.Any<BatchResult>(x => x.Context.Message is { Count: 2, Mode: BatchCompletionMode.Time }));
             });
         }
 
@@ -125,16 +123,15 @@ namespace MassTransit.Tests.ContainerTests
 
             await harness.Start();
 
-            await harness.Bus.PublishBatch(new[] { new BatchItem(), new BatchItem() });
+            await harness.Bus.PublishBatch([new BatchItem(), new BatchItem()]);
 
             await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Take(2).Count(), Is.EqualTo(2));
 
-                Assert.That(await harness.GetConsumerHarness<TestOutboxBatchConsumer>().Consumed.Any<Batch<BatchItem>>(), Is.True);
+                Assert.That(await harness.GetConsumerHarness<TestOutboxBatchConsumer>().Consumed.Any<Batch<BatchItem>>());
 
-                Assert.That(await harness.Published.Any<BatchResult>(x => x.Context.Message.Count == 2 && x.Context.Message.Mode == BatchCompletionMode.Time),
-                    Is.True);
+                Assert.That(await harness.Published.Any<BatchResult>(x => x.Context.Message is { Count: 2, Mode: BatchCompletionMode.Time }));
             });
         }
 
@@ -204,18 +201,16 @@ namespace MassTransit.Tests.ContainerTests
 
             await harness.Start();
 
-            await harness.Bus.PublishBatch(new[] { new BatchItem(), new BatchItem(), new BatchItem(), new BatchItem(), new BatchItem(), new BatchItem() });
+            await harness.Bus.PublishBatch([new BatchItem(), new BatchItem(), new BatchItem(), new BatchItem(), new BatchItem(), new BatchItem()]);
 
             await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Take(5).Count(), Is.EqualTo(5));
 
-                Assert.That(await harness.GetConsumerHarness<TestBatchConsumer>().Consumed.Any<Batch<BatchItem>>(), Is.True);
+                Assert.That(await harness.GetConsumerHarness<TestBatchConsumer>().Consumed.Any<Batch<BatchItem>>());
 
-                Assert.That(await harness.Published.Any<BatchResult>(x => x.Context.Message.Count == 5 && x.Context.Message.Mode == BatchCompletionMode.Size),
-                    Is.True);
-                Assert.That(await harness.Published.Any<BatchResult>(x => x.Context.Message.Count == 1 && x.Context.Message.Mode == BatchCompletionMode.Time),
-                    Is.True);
+                Assert.That(await harness.Published.Any<BatchResult>(x => x.Context.Message is { Count: 5, Mode: BatchCompletionMode.Size }));
+                Assert.That(await harness.Published.Any<BatchResult>(x => x.Context.Message is { Count: 1, Mode: BatchCompletionMode.Time }));
             });
         }
     }
@@ -246,10 +241,9 @@ namespace MassTransit.Tests.ContainerTests
             {
                 Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Take(100).Count(), Is.EqualTo(100));
 
-                Assert.That(await harness.GetConsumerHarness<TestBatchConsumer>().Consumed.Any<Batch<BatchItem>>(), Is.True);
+                Assert.That(await harness.GetConsumerHarness<TestBatchConsumer>().Consumed.Any<Batch<BatchItem>>());
 
-                Assert.That(await harness.Published.Any<BatchResult>(x => x.Context.Message.Count == 100 && x.Context.Message.Mode == BatchCompletionMode.Size),
-                    Is.True);
+                Assert.That(await harness.Published.Any<BatchResult>(x => x.Context.Message is { Count: 100, Mode: BatchCompletionMode.Size }));
             });
         }
     }
@@ -273,16 +267,16 @@ namespace MassTransit.Tests.ContainerTests
 
             await harness.Start();
 
-            await harness.Bus.PublishBatch(new[] { new BatchItem(), new BatchItem(), new BatchItem(), new BatchItem(), new BatchItem(), new BatchItem() });
+            await harness.Bus.PublishBatch([new BatchItem(), new BatchItem(), new BatchItem(), new BatchItem(), new BatchItem(), new BatchItem()]);
 
             await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Take(5).Count(), Is.EqualTo(5));
 
-                Assert.That(await harness.GetConsumerHarness<TestBatchConsumer>().Consumed.Any<Batch<BatchItem>>(), Is.True);
+                Assert.That(await harness.GetConsumerHarness<TestBatchConsumer>().Consumed.Any<Batch<BatchItem>>());
 
-                Assert.That(await harness.Published.Any<BatchResult>(x => x.Context.Message is { Count: 5, Mode: BatchCompletionMode.Size }), Is.True);
-                Assert.That(await harness.Published.Any<BatchResult>(x => x.Context.Message is { Count: 1, Mode: BatchCompletionMode.Time }), Is.True);
+                Assert.That(await harness.Published.Any<BatchResult>(x => x.Context.Message is { Count: 5, Mode: BatchCompletionMode.Size }));
+                Assert.That(await harness.Published.Any<BatchResult>(x => x.Context.Message is { Count: 1, Mode: BatchCompletionMode.Time }));
             });
         }
     }
@@ -305,13 +299,13 @@ namespace MassTransit.Tests.ContainerTests
 
             await harness.Start();
 
-            await harness.Bus.PublishBatch(new[] { new BatchItem(), new BatchItem() });
+            await harness.Bus.PublishBatch([new BatchItem(), new BatchItem()]);
 
             await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Take(2).Count(), Is.EqualTo(2));
 
-                Assert.That(await harness.GetConsumerHarness<FailingBatchConsumer>().Consumed.Any<Batch<BatchItem>>(), Is.True);
+                Assert.That(await harness.GetConsumerHarness<FailingBatchConsumer>().Consumed.Any<Batch<BatchItem>>());
 
                 Assert.That(await harness.Published.SelectAsync<Fault<BatchItem>>().Take(2).Count(), Is.EqualTo(2));
             });
@@ -338,13 +332,13 @@ namespace MassTransit.Tests.ContainerTests
 
             await harness.Start();
 
-            await harness.Bus.PublishBatch(new[] { new BatchItem(), new BatchItem() });
+            await harness.Bus.PublishBatch([new BatchItem(), new BatchItem()]);
 
             await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Take(2).Count(), Is.EqualTo(2));
 
-                Assert.That(await harness.GetConsumerHarness<FailingBatchConsumer>().Consumed.Any<Batch<BatchItem>>(), Is.True);
+                Assert.That(await harness.GetConsumerHarness<FailingBatchConsumer>().Consumed.Any<Batch<BatchItem>>());
 
                 Assert.That(await harness.Published.SelectAsync<Fault<BatchItem>>().Take(2).Count(), Is.EqualTo(2));
             });
@@ -368,13 +362,13 @@ namespace MassTransit.Tests.ContainerTests
 
             await harness.Start();
 
-            await harness.Bus.PublishBatch(new[] { new BatchItem(), new BatchItem() });
+            await harness.Bus.PublishBatch([new BatchItem(), new BatchItem()]);
 
             await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Take(2).Count(), Is.EqualTo(2));
 
-                Assert.That(await harness.GetConsumerHarness<FailingBatchConsumer>().Consumed.Any<Batch<BatchItem>>(), Is.True);
+                Assert.That(await harness.GetConsumerHarness<FailingBatchConsumer>().Consumed.Any<Batch<BatchItem>>());
 
                 Assert.That(await harness.Published.SelectAsync<Fault<BatchItem>>().Take(2).Count(), Is.EqualTo(2));
             });
@@ -400,13 +394,13 @@ namespace MassTransit.Tests.ContainerTests
 
             await harness.Start();
 
-            await harness.Bus.PublishBatch(new[] { new BatchItem(), new BatchItem() });
+            await harness.Bus.PublishBatch([new BatchItem(), new BatchItem()]);
 
             await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Take(2).Count(), Is.EqualTo(2));
 
-                Assert.That(await harness.GetConsumerHarness<FailingBatchConsumer>().Consumed.Any<Batch<BatchItem>>(), Is.True);
+                Assert.That(await harness.GetConsumerHarness<FailingBatchConsumer>().Consumed.Any<Batch<BatchItem>>());
 
                 Assert.That(await harness.Published.SelectAsync<Fault<BatchItem>>().Take(2).Count(), Is.EqualTo(2));
             });
@@ -432,13 +426,13 @@ namespace MassTransit.Tests.ContainerTests
 
             await harness.Start();
 
-            await harness.Bus.PublishBatch(new[] { new BatchItem(), new BatchItem() });
+            await harness.Bus.PublishBatch([new BatchItem(), new BatchItem()]);
 
             await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Take(2).Count(), Is.EqualTo(2));
 
-                Assert.That(await harness.GetConsumerHarness<FailingBatchConsumer>().Consumed.Any<Batch<BatchItem>>(), Is.True);
+                Assert.That(await harness.GetConsumerHarness<FailingBatchConsumer>().Consumed.Any<Batch<BatchItem>>());
 
                 Assert.That(await harness.Published.SelectAsync<Fault<BatchItem>>().Take(2).Count(), Is.EqualTo(2));
             });
@@ -471,13 +465,13 @@ namespace MassTransit.Tests.ContainerTests
 
             await harness.Start();
 
-            await harness.Bus.PublishBatch(new[] { new BatchItem(), new BatchItem() });
+            await harness.Bus.PublishBatch([new BatchItem(), new BatchItem()]);
 
             await Assert.MultipleAsync(async () =>
             {
                 Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Take(2).Count(), Is.EqualTo(2));
 
-                Assert.That(await harness.GetConsumerHarness<FailingBatchConsumer>().Consumed.Any<Batch<BatchItem>>(), Is.True);
+                Assert.That(await harness.GetConsumerHarness<FailingBatchConsumer>().Consumed.Any<Batch<BatchItem>>());
 
                 Assert.That(await harness.Published.SelectAsync<Fault<BatchItem>>().Take(2).Count(), Is.EqualTo(2));
             });
@@ -512,9 +506,9 @@ namespace MassTransit.Tests.ContainerTests
             {
                 Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Count(), Is.EqualTo(1));
 
-                Assert.That(await harness.GetConsumerHarness<TestBatchConsumer>().Consumed.Any<Batch<BatchItem>>(), Is.True);
+                Assert.That(await harness.GetConsumerHarness<TestBatchConsumer>().Consumed.Any<Batch<BatchItem>>());
 
-                Assert.That(await harness.Published.Any<BatchResult>(x => x.Context.Message is { Count: 1, Mode: BatchCompletionMode.Time }), Is.True);
+                Assert.That(await harness.Published.Any<BatchResult>(x => x.Context.Message is { Count: 1, Mode: BatchCompletionMode.Time }));
             });
         }
     }
@@ -572,6 +566,58 @@ namespace MassTransit.Tests.ContainerTests
             Interlocked.Increment(ref _attempts);
 
             throw new IntentionalTestException("Failing Batch Consumer");
+        }
+    }
+
+
+    [TestFixture]
+    public class Batch_consumption_with_in_memory_outbox
+    {
+        [Test]
+        public async Task Should_use_outbox_in_inner_contexts()
+        {
+            await using var provider = new ServiceCollection()
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.AddConsumer<TestFailingOutboxBatchConsumer>();
+
+                    x.AddConfigureEndpointsCallback((context, _, cfg) => cfg.UseInMemoryOutbox(context));
+                })
+                .BuildServiceProvider(true);
+
+            var harness = provider.GetTestHarness();
+
+            await harness.Start();
+
+            await harness.Bus.PublishBatch([new BatchItem(), new BatchItem()]);
+
+            await Assert.MultipleAsync(async () =>
+            {
+                Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Take(2).Count(), Is.EqualTo(2));
+
+                Assert.That(await harness.GetConsumerHarness<TestFailingOutboxBatchConsumer>().Consumed.Any<Batch<BatchItem>>(x => x.Exception != null));
+
+                Assert.That(await harness.Published.Any<BatchResult>(), Is.False);
+            });
+        }
+
+
+        class TestFailingOutboxBatchConsumer :
+            IConsumer<Batch<BatchItem>>
+        {
+            public Task Consume(ConsumeContext<Batch<BatchItem>> context)
+            {
+                foreach (var innerContext in context.Message)
+                {
+                    innerContext.Publish(new BatchResult
+                    {
+                        Count = context.Message.Length,
+                        Mode = context.Message.Mode,
+                    });
+                }
+
+                throw new IntentionalTestException("Batch should not succeed");
+            }
         }
     }
 }

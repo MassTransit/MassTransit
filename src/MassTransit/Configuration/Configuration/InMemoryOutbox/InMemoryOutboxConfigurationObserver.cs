@@ -37,7 +37,7 @@
 
         public override void BatchConsumerConfigured<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, Batch<TMessage>> configurator)
         {
-            var specification = new InMemoryOutboxSpecification<Batch<TMessage>>(_setter);
+            var specification = new InMemoryOutboxSpecification<TMessage>.Batch(_setter);
 
             _configure?.Invoke(specification);
 
