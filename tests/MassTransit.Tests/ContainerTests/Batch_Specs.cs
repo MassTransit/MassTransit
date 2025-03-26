@@ -112,6 +112,38 @@ namespace MassTransit.Tests.ContainerTests
         }
 
         [Test]
+        public async Task Should_use_outbox_in_inner_contexts()
+        {
+            await using var provider = new ServiceCollection()
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.AddConsumer<TestFailingOutboxBatchConsumer>();
+
+                    x.AddConfigureEndpointsCallback((context, _, cfg) =>
+                    {
+                        cfg.UseMessageRetry(r => r.Immediate(2));
+                        cfg.UseInMemoryOutbox(context);
+                    });
+                })
+                .BuildServiceProvider(true);
+
+            var harness = provider.GetTestHarness();
+
+            await harness.Start();
+
+            await harness.Bus.PublishBatch(new[] { new BatchItem(), new BatchItem() });
+
+            await Assert.MultipleAsync(async () =>
+            {
+                Assert.That(await harness.Consumed.SelectAsync<BatchItem>().Take(2).Count(), Is.EqualTo(2));
+
+                Assert.That(await harness.GetConsumerHarness<TestFailingOutboxBatchConsumer>().Consumed.Any<Batch<BatchItem>>(), Is.True);
+
+                Assert.That(await harness.Published.Any<BatchResult>(), Is.False);
+            });
+        }
+
+        [Test]
         public async Task Should_deliver_the_batch_to_the_consumer_with_message()
         {
             await using var provider = new ServiceCollection()
@@ -180,6 +212,24 @@ namespace MassTransit.Tests.ContainerTests
                     throw new InvalidOperationException("Outbox context is not available at this point");
 
                 return Task.CompletedTask;
+            }
+        }
+
+        class TestFailingOutboxBatchConsumer :
+            IConsumer<Batch<BatchItem>>
+        {
+            public Task Consume(ConsumeContext<Batch<BatchItem>> context)
+            {
+                foreach (var innerContext in context.Message)
+                {
+                    innerContext.Publish(new BatchResult
+                    {
+                        Count = context.Message.Length,
+                        Mode = context.Message.Mode,
+                    });
+                }
+
+                throw new IntentionalTestException("Batch should not succeed");
             }
         }
     }

@@ -5,6 +5,7 @@ namespace MassTransit.Middleware.InMemoryOutbox
     using System.Linq;
     using System.Threading.Tasks;
     using Context;
+    using MassTransit.Batching;
     using Util;
 
 
@@ -13,7 +14,7 @@ namespace MassTransit.Middleware.InMemoryOutbox
         OutboxContext
     {
         readonly TaskCompletionSource<InMemoryOutboxConsumeContext> _clearToSend;
-        readonly InMemoryOutboxMessageSchedulerContext _outboxSchedulerContext;
+        readonly List<InMemoryOutboxMessageSchedulerContext> _outboxSchedulerContext;
         readonly List<Func<Task>> _pendingActions;
 
         public InMemoryOutboxConsumeContext(ConsumeContext context)
@@ -29,11 +30,14 @@ namespace MassTransit.Middleware.InMemoryOutbox
             _pendingActions = new List<Func<Task>>();
             _clearToSend = TaskUtil.GetTask<InMemoryOutboxConsumeContext>();
 
+            _outboxSchedulerContext = new List<InMemoryOutboxMessageSchedulerContext>();
             if (context.TryGetPayload(out MessageSchedulerContext schedulerContext))
             {
-                _outboxSchedulerContext = (InMemoryOutboxMessageSchedulerContext)context.AddOrUpdatePayload<MessageSchedulerContext>(
+                var outboxSchedulerContext = (InMemoryOutboxMessageSchedulerContext)context.AddOrUpdatePayload<MessageSchedulerContext>(
                     () => new InMemoryOutboxMessageSchedulerContext(context, schedulerContext.SchedulerFactory, _clearToSend.Task),
                     existing => new InMemoryOutboxMessageSchedulerContext(context, existing.SchedulerFactory, _clearToSend.Task));
+
+                _outboxSchedulerContext.Add(outboxSchedulerContext);
             }
         }
 
@@ -52,6 +56,11 @@ namespace MassTransit.Middleware.InMemoryOutbox
 
                 return Task.CompletedTask;
             }
+        }
+
+        internal void AddChildSchedulerContext(InMemoryOutboxMessageSchedulerContext outboxSchedulerContext)
+        {
+            _outboxSchedulerContext.Add(outboxSchedulerContext);
         }
 
         public async Task ExecutePendingActions(bool concurrentMessageDelivery)
@@ -87,7 +96,10 @@ namespace MassTransit.Middleware.InMemoryOutbox
             {
                 try
                 {
-                    await _outboxSchedulerContext.ExecutePendingActions().ConfigureAwait(false);
+                    foreach (var outboxSchedulerContext in _outboxSchedulerContext)
+                    {
+                        await outboxSchedulerContext.ExecutePendingActions().ConfigureAwait(false);
+                    }
                 }
                 catch (Exception e)
                 {
@@ -105,7 +117,10 @@ namespace MassTransit.Middleware.InMemoryOutbox
             {
                 try
                 {
-                    await _outboxSchedulerContext.CancelAllScheduledMessages().ConfigureAwait(false);
+                    foreach (var outboxSchedulerContext in _outboxSchedulerContext)
+                    {
+                        await outboxSchedulerContext.CancelAllScheduledMessages().ConfigureAwait(false);
+                    }
                 }
                 catch (Exception e)
                 {
@@ -152,5 +167,83 @@ namespace MassTransit.Middleware.InMemoryOutbox
         public void Method3()
         {
         }
+    }
+
+    public class InMemoryOutboxBatchConsumeContext<T> :
+        InMemoryOutboxConsumeContext,
+        ConsumeContext<Batch<T>>
+        where T : class
+    {
+        readonly MessageBatch<T> _batch;
+
+        public InMemoryOutboxBatchConsumeContext(ConsumeContext<Batch<T>> context)
+            : base(context)
+        {
+            var batch = context.Message;
+            var messages = batch.Select(x => new InMemoryOutboxBatchMessageConsumeContext<T>(this, x)).ToList();
+            _batch = new MessageBatch<T>(batch.FirstMessageReceived, batch.LastMessageReceived, batch.Mode, messages);
+        }
+
+        public Batch<T> Message => _batch;
+
+        public virtual Task NotifyConsumed(TimeSpan duration, string consumerType)
+        {
+            return NotifyConsumed(this, duration, consumerType);
+        }
+
+        public virtual Task NotifyFaulted(TimeSpan duration, string consumerType, Exception exception)
+        {
+            return NotifyFaulted(this, duration, consumerType, exception);
+        }
+
+        public void Method1()
+        {
+        }
+
+        public void Method2()
+        {
+        }
+
+        public void Method3()
+        {
+        }
+    }
+
+    public class InMemoryOutboxBatchMessageConsumeContext<T> :
+        ConsumeContextProxy<T>,
+        OutboxContext
+        where T : class
+    {
+        readonly InMemoryOutboxBatchConsumeContext<T> _batchContext;
+
+        public InMemoryOutboxBatchMessageConsumeContext(
+            InMemoryOutboxBatchConsumeContext<T> batchContext,
+            ConsumeContext<T> context)
+            : base(context)
+        {
+            _batchContext = batchContext;
+
+            var outboxReceiveContext = new InMemoryOutboxReceiveContext(this, context.ReceiveContext);
+
+            ReceiveContext = outboxReceiveContext;
+            PublishEndpointProvider = outboxReceiveContext.PublishEndpointProvider;
+
+            if (context.TryGetPayload(out MessageSchedulerContext schedulerContext))
+            {
+                var outboxSchedulerContext = (InMemoryOutboxMessageSchedulerContext)context.AddOrUpdatePayload<MessageSchedulerContext>(
+                    () => new InMemoryOutboxMessageSchedulerContext(context, schedulerContext.SchedulerFactory, _batchContext.ClearToSend),
+                    existing => new InMemoryOutboxMessageSchedulerContext(context, existing.SchedulerFactory, _batchContext.ClearToSend));
+
+                batchContext.AddChildSchedulerContext(outboxSchedulerContext);
+            }
+        }
+
+        public Task ClearToSend => _batchContext.ClearToSend;
+
+        public Task Add(Func<Task> method) => _batchContext.Add(method);
+
+        public Task DiscardPendingActions() => _batchContext.DiscardPendingActions();
+
+        public Task ExecutePendingActions(bool concurrentMessageDelivery) => _batchContext.ExecutePendingActions(concurrentMessageDelivery);
     }
 }
