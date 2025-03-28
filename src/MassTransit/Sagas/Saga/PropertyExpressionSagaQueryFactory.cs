@@ -41,11 +41,8 @@
 
         Expression<Func<TInstance, bool>> CreateExpression(TProperty propertyValue)
         {
-            var valueExpression = Expression.Constant(propertyValue, typeof(TProperty));
-            var binaryExpression = Expression.Equal(_propertyExpression.Body, valueExpression);
-            Expression<Func<TInstance, bool>> lambdaExpression = Expression.Lambda<Func<TInstance, bool>>(binaryExpression, _propertyExpression.Parameters);
-
-            return lambdaExpression;
+            Expression<Func<TProperty>> propertyValueLambda = () => propertyValue;
+            return Expression.Lambda<Func<TInstance, bool>>(Expression.Equal(_propertyExpression.Body, propertyValueLambda.Body), _propertyExpression.Parameters);
         }
     }
 }
