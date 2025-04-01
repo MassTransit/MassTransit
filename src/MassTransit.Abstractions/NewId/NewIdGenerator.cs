@@ -32,7 +32,7 @@
 
             var workerId = workerIdProvider.GetWorkerId(workerIndex);
 
-            _c = (workerId[0] << 24) | (workerId[1] << 16) | (workerId[2] << 8) | workerId[3];
+            _c = (workerId[2] << 24) | (workerId[3] << 16) | (workerId[4] << 8) | workerId[5];
 
             if (processIdProvider != null)
             {
@@ -40,7 +40,7 @@
                 _d = (processId[0] << 24) | (processId[1] << 16);
             }
             else
-                _d = (workerId[4] << 24) | (workerId[5] << 16);
+                _d = (workerId[0] << 24) | (workerId[1] << 16);
 
             _gb = (short)_c;
             _gc = (short)(_c >> 16);

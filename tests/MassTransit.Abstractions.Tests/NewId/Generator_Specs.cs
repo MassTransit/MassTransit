@@ -11,7 +11,7 @@
         [Test]
         public void Should_generate_known_guid()
         {
-            var expected = Guid.Parse("437f0b01-bf34-7d81-3cf0-74b719ec7596");
+            var expected = Guid.Parse("7d810b01-437f-bf34-3cf0-74b719ec7596");
             var tickProvider = new MockTickProvider(8410219332513447152);
             var networkProvider = new MockNetworkProvider(BitConverter.GetBytes(6857996259202924925));
             var generator = new NewIdGenerator(tickProvider, networkProvider);
@@ -27,7 +27,7 @@
         [Test]
         public void Should_generate_known_guid_batch()
         {
-            var exp = new string[] { "74b719ec-7596-3cf0-7d81-bf34437f0b01", "74b719ec-7596-3cf0-7d81-bf34437f0c01", "74b719ec-7596-3cf0-7d81-bf34437f0d01" };
+            var exp = new string[] { "74b719ec-7596-3cf0-bf34-437f7d810b01", "74b719ec-7596-3cf0-bf34-437f7d810c01", "74b719ec-7596-3cf0-bf34-437f7d810d01" };
             var tickProvider = new MockTickProvider(8410219332513447152);
             var networkProvider = new MockNetworkProvider(BitConverter.GetBytes(6857996259202924925));
             var generator = new NewIdGenerator(tickProvider, networkProvider);
@@ -48,7 +48,7 @@
         [Test]
         public void Should_generate_known_sequential_guid()
         {
-            var expected = Guid.Parse("74b719ec-7596-3cf0-7d81-bf34437f0b01");
+            var expected = Guid.Parse("74b719ec-7596-3cf0-bf34-437f7d810b01");
             var tickProvider = new MockTickProvider(8410219332513447152);
             var networkProvider = new MockNetworkProvider(BitConverter.GetBytes(6857996259202924925));
             var generator = new NewIdGenerator(tickProvider, networkProvider);
