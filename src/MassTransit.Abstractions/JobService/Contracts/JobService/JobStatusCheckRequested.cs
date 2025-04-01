@@ -12,5 +12,10 @@ namespace MassTransit.Contracts.JobService
         /// Identifies this attempt to run the job
         /// </summary>
         Guid AttemptId { get; }
+
+        /// <summary>
+        /// Include the jobId for partitioning if available
+        /// </summary>
+        Guid? JobId { get; }
     }
 }

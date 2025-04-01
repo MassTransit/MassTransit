@@ -159,7 +159,7 @@ namespace MassTransit.Configuration
 
             _busConfigurator.ReceiveEndpoint(_options.JobStateSagaEndpointName, e =>
             {
-                e.UseMessageRetry(r => r.Intervals(100, 1000, 2000, 5000));
+                e.UseMessageRetry(r => r.Exponential(20, TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(1)));
 
                 UseInMemoryOutbox(e);
 
@@ -207,7 +207,7 @@ namespace MassTransit.Configuration
 
             _busConfigurator.ReceiveEndpoint(_options.JobAttemptSagaEndpointName, e =>
             {
-                e.UseMessageRetry(r => r.Intervals(100, 1000, 2000, 5000));
+                e.UseMessageRetry(r => r.Exponential(20, TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(1)));
 
                 UseInMemoryOutbox(e);
 
@@ -217,18 +217,18 @@ namespace MassTransit.Configuration
 
                     var partition = new Partitioner(_options.SagaPartitionCount.Value, new Murmur3UnsafeHashGenerator());
 
-                    e.UsePartitioner<StartJobAttempt>(partition, p => p.Message.AttemptId);
-                    e.UsePartitioner<FinalizeJobAttempt>(partition, p => p.Message.AttemptId);
-                    e.UsePartitioner<CancelJobAttempt>(partition, p => p.Message.AttemptId);
-                    e.UsePartitioner<Fault<StartJob>>(partition, p => p.Message.Message.AttemptId);
+                    e.UsePartitioner<StartJobAttempt>(partition, p => p.Message.JobId);
+                    e.UsePartitioner<FinalizeJobAttempt>(partition, p => p.Message.JobId);
+                    e.UsePartitioner<CancelJobAttempt>(partition, p => p.Message.JobId);
+                    e.UsePartitioner<Fault<StartJob>>(partition, p => p.Message.Message.JobId);
 
-                    e.UsePartitioner<JobAttemptStarted>(partition, p => p.Message.AttemptId);
-                    e.UsePartitioner<JobAttemptCompleted>(partition, p => p.Message.AttemptId);
-                    e.UsePartitioner<JobAttemptCanceled>(partition, p => p.Message.AttemptId);
-                    e.UsePartitioner<JobAttemptFaulted>(partition, p => p.Message.AttemptId);
+                    e.UsePartitioner<JobAttemptStarted>(partition, p => p.Message.JobId);
+                    e.UsePartitioner<JobAttemptCompleted>(partition, p => p.Message.JobId);
+                    e.UsePartitioner<JobAttemptCanceled>(partition, p => p.Message.JobId);
+                    e.UsePartitioner<JobAttemptFaulted>(partition, p => p.Message.JobId);
 
-                    e.UsePartitioner<JobAttemptStatus>(partition, p => p.Message.AttemptId);
-                    e.UsePartitioner<JobStatusCheckRequested>(partition, p => p.Message.AttemptId);
+                    e.UsePartitioner<JobAttemptStatus>(partition, p => p.Message.JobId);
+                    e.UsePartitioner<JobStatusCheckRequested>(partition, p => p.Message.JobId ?? p.Message.AttemptId);
                 }
 
                 var stateMachine = new JobAttemptStateMachine();
@@ -242,7 +242,7 @@ namespace MassTransit.Configuration
 
             _busConfigurator.ReceiveEndpoint(_options.JobTypeSagaEndpointName, e =>
             {
-                e.UseMessageRetry(r => r.Intervals(100, 200, 300, 500, 1000, 2000, 5000));
+                e.UseMessageRetry(r => r.Exponential(20, TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(1)));
 
                 UseInMemoryOutbox(e);
 

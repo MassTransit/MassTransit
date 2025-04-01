@@ -163,6 +163,7 @@ namespace MassTransit
                                     .IfElse(context => context.Saga.NextStartDate.HasValue,
                                         start => start
                                             .SendJobSlotReleased(JobSlotDisposition.Faulted)
+                                            .FinalizeJobAttempts()
                                             .WaitForNextScheduledTime(this),
                                         noStart => noStart
                                             .TransitionTo(Faulted)
@@ -343,6 +344,7 @@ namespace MassTransit
                 When(JobSubmitted)
                     .If(context => context.IsScheduledJob() && context.CalculateNextStartDate(),
                         start => start
+                            .FinalizeJobAttempts()
                             .WaitForNextScheduledTime(this)
                     )
             );

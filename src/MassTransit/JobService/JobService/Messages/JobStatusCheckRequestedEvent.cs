@@ -9,4 +9,5 @@ public class JobStatusCheckRequestedEvent :
     JobStatusCheckRequested
 {
     public Guid AttemptId { get; set; }
+    public Guid? JobId { get; set; }
 }

@@ -268,7 +268,11 @@ namespace MassTransit
             JobAttemptStateMachine machine)
             where T : class
         {
-            return binder.Schedule(machine.StatusCheckRequested, x => new JobStatusCheckRequestedEvent { AttemptId = x.Saga.CorrelationId });
+            return binder.Schedule(machine.StatusCheckRequested, x => new JobStatusCheckRequestedEvent
+            {
+                AttemptId = x.Saga.CorrelationId,
+                JobId = x.Saga.JobId
+            });
         }
 
         public static EventActivityBinder<JobAttemptSaga, Fault<StartJob>> SendJobAttemptFaulted(

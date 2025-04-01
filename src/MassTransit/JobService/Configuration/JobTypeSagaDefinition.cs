@@ -1,5 +1,6 @@
 namespace MassTransit.Configuration
 {
+    using System;
     using Contracts.JobService;
     using JobService;
     using Microsoft.Extensions.DependencyInjection;
@@ -22,7 +23,7 @@ namespace MassTransit.Configuration
         protected override void ConfigureSaga(IReceiveEndpointConfigurator configurator, ISagaConfigurator<JobTypeSaga> sagaConfigurator,
             IRegistrationContext context)
         {
-            configurator.UseMessageRetry(r => r.Intervals(100, 500, 1000, 1000, 2000, 2000, 5000, 5000));
+            configurator.UseMessageRetry(r => r.Exponential(20, TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(1)));
 
             configurator.UseMessageScope(context);
 
