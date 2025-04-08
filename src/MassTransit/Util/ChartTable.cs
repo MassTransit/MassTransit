@@ -26,6 +26,9 @@ namespace MassTransit.Util
 
         public IEnumerable<ChartRow> GetRows()
         {
+            if (_lines.Count == 0)
+                yield break;
+
             var (low, high) = CalculateRange();
             var totalDuration = high - low;
 
