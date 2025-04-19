@@ -27,6 +27,7 @@ public class UsageTracker :
     IAsyncDisposable
 {
     readonly TimeSpan _httpClientTimeout = TimeSpan.FromSeconds(10);
+    readonly object _lock = new object();
     readonly UsageTelemetryOptions _options;
     readonly List<IUsageTelemetrySource> _usages;
     CancellationTokenSource? _cancellationTokenSource;
@@ -107,31 +108,34 @@ public class UsageTracker :
         if (!_options.Enabled || Telemetry is null)
             return;
 
-        _logContext ??= LogContext.Current;
-
-        var busName = nameof(IBus);
-
-        var selector = context.GetService<IContainerSelector>();
-        if (selector != null && selector.GetType().ClosesType(typeof(DependencyInjectionContainerRegistrar<>), out Type[] types))
-            busName = types[0].Name;
-
-        var busUsageTelemetry = new BusUsageTelemetry
+        lock (_lock)
         {
-            Name = busName,
-            Created = DateTimeOffset.Now.ToString("O"),
-            Endpoints = []
-        };
-        Telemetry.Bus ??= [];
-        Telemetry.Bus.Add(busUsageTelemetry);
+            _logContext ??= LogContext.Current;
 
-        var observer = new UsageTelemetryBusObserver(this, busUsageTelemetry);
-        configurator.ConnectBusObserver(observer);
+            var busName = nameof(IBus);
 
-        var endpointConfigurationObserver = new UsageTelemetryEndpointConfigurationObserver(busUsageTelemetry, Telemetry);
+            var selector = context.GetService<IContainerSelector>();
+            if (selector != null && selector.GetType().ClosesType(typeof(DependencyInjectionContainerRegistrar<>), out Type[] types))
+                busName = types[0].Name;
 
-        _ = configurator.ConnectEndpointConfigurationObserver(endpointConfigurationObserver);
+            var busUsageTelemetry = new BusUsageTelemetry
+            {
+                Name = busName,
+                Created = DateTimeOffset.Now.ToString("O"),
+                Endpoints = []
+            };
+            Telemetry.Bus ??= [];
+            Telemetry.Bus.Add(busUsageTelemetry);
 
-        _usages.Add(endpointConfigurationObserver);
+            var observer = new UsageTelemetryBusObserver(this, busUsageTelemetry);
+            configurator.ConnectBusObserver(observer);
+
+            var endpointConfigurationObserver = new UsageTelemetryEndpointConfigurationObserver(busUsageTelemetry, Telemetry);
+
+            _ = configurator.ConnectEndpointConfigurationObserver(endpointConfigurationObserver);
+
+            _usages.Add(endpointConfigurationObserver);
+        }
     }
 
     public void PreConfigureRider<T>(T configurator)
@@ -140,25 +144,28 @@ public class UsageTracker :
         if (!_options.Enabled || Telemetry is null)
             return;
 
-        _logContext ??= LogContext.Current;
-
-        var riderType = configurator.GetType().Name switch
+        lock (_lock)
         {
-            "EventHubFactoryConfigurator" => "EventHub",
-            "KafkaFactoryConfigurator" => "Kafka",
-            _ => configurator.GetType().Name
-        };
+            _logContext ??= LogContext.Current;
 
-        Telemetry.Rider ??= [];
-        var riderUsage = Telemetry.Rider.LastOrDefault(x => x.RiderType == riderType);
-        if (riderUsage == null)
-        {
-            riderUsage = new RiderUsageTelemetry
+            var riderType = configurator.GetType().Name switch
             {
-                RiderType = riderType,
-                Endpoints = []
+                "EventHubFactoryConfigurator" => "EventHub",
+                "KafkaFactoryConfigurator" => "Kafka",
+                _ => configurator.GetType().Name
             };
-            Telemetry.Rider.Add(riderUsage);
+
+            Telemetry.Rider ??= [];
+            var riderUsage = Telemetry.Rider.LastOrDefault(x => x.RiderType == riderType);
+            if (riderUsage == null)
+            {
+                riderUsage = new RiderUsageTelemetry
+                {
+                    RiderType = riderType,
+                    Endpoints = []
+                };
+                Telemetry.Rider.Add(riderUsage);
+            }
         }
     }
 
@@ -177,19 +184,22 @@ public class UsageTracker :
         if (!_options.Enabled || Telemetry is null)
             return;
 
-        _logContext ??= LogContext.Current;
+        lock (_lock)
+        {
+            _logContext ??= LogContext.Current;
 
-        busTelemetry.Started = DateTimeOffset.Now.ToString("O");
+            busTelemetry.Started = DateTimeOffset.Now.ToString("O");
 
-        if (Telemetry.Bus?.Any(x => x.Started is null) ?? true)
-            return;
+            if (Telemetry.Bus?.Any(x => x.Started is null) ?? true)
+                return;
 
-        _usages.ForEach(x => x.Update());
+            _usages.ForEach(x => x.Update());
 
-        if (_disposed)
-            return;
+            if (_disposed)
+                return;
 
-        _reportTask = Task.Run(() => ReportUsageTelemetry());
+            _reportTask ??= Task.Run(() => ReportUsageTelemetry());
+        }
     }
 
     async Task ReportUsageTelemetry()
@@ -227,16 +237,21 @@ public class UsageTracker :
                 return;
 
             CloudEnvironmentInfo? cloudEnvironment = await DetectCloudEnvironment();
-            if (cloudEnvironment.HasValue)
+
+            string json;
+            lock (_lock)
             {
-                Telemetry!.Host!.Cloud = cloudEnvironment.Value.Provider;
-                Telemetry!.Host!.Region = cloudEnvironment.Value.Region;
+                if (cloudEnvironment.HasValue)
+                {
+                    Telemetry!.Host!.Cloud = cloudEnvironment.Value.Provider;
+                    Telemetry!.Host!.Region = cloudEnvironment.Value.Region;
+                }
+
+                if (HostMetadataCache.IsRunningInContainer)
+                    Telemetry!.Host!.Container = HostMetadataCache.IsKubernetes ? "Kubernetes" : "Docker";
+
+                json = JsonSerializer.Serialize(Telemetry!, UsageTelemetrySerializerContext.Default.MassTransitUsageTelemetry);
             }
-
-            if (HostMetadataCache.IsRunningInContainer)
-                Telemetry!.Host!.Container = HostMetadataCache.IsKubernetes ? "Kubernetes" : "Docker";
-
-            var json = JsonSerializer.Serialize(Telemetry!, UsageTelemetrySerializerContext.Default.MassTransitUsageTelemetry);
 
             LogContext.Info?.Log("Usage Telemetry: {Telemetry}", json);
 
