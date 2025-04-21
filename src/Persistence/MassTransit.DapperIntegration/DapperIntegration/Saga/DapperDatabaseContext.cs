@@ -12,7 +12,7 @@ namespace MassTransit.DapperIntegration.Saga
 
 
     public class DapperDatabaseContext<TSaga> :
-        DatabaseContext<TSaga>
+        DatabaseContext<TSaga> where TSaga : class, ISaga
     {
         readonly SqlConnection _connection;
         readonly SemaphoreSlim _inUse;
@@ -25,8 +25,7 @@ namespace MassTransit.DapperIntegration.Saga
             _inUse = new SemaphoreSlim(1);
         }
 
-        public async Task InsertAsync<T>(T instance, CancellationToken cancellationToken)
-            where T : class, ISaga
+        public async Task InsertAsync(TSaga instance, CancellationToken cancellationToken)
         {
             await _inUse.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
@@ -39,8 +38,7 @@ namespace MassTransit.DapperIntegration.Saga
             }
         }
 
-        public async Task UpdateAsync<T>(T instance, CancellationToken cancellationToken)
-            where T : class, ISaga
+        public async Task UpdateAsync(TSaga instance, CancellationToken cancellationToken)
         {
             await _inUse.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
@@ -53,15 +51,14 @@ namespace MassTransit.DapperIntegration.Saga
             }
         }
 
-        public async Task DeleteAsync<T>(T instance, CancellationToken cancellationToken)
-            where T : class, ISaga
+        public async Task DeleteAsync(TSaga instance, CancellationToken cancellationToken)
         {
             var correlationId = instance?.CorrelationId ?? throw new ArgumentNullException(nameof(instance));
 
             await _inUse.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                await _connection.QueryAsync($"DELETE FROM {GetTableName<T>()} WHERE CorrelationId = @correlationId", new { correlationId }, _transaction)
+                await _connection.QueryAsync($"DELETE FROM {GetTableName()} WHERE CorrelationId = @correlationId", new { correlationId }, _transaction)
                     .ConfigureAwait(false);
             }
             finally
@@ -70,14 +67,13 @@ namespace MassTransit.DapperIntegration.Saga
             }
         }
 
-        public async Task<T> LoadAsync<T>(Guid correlationId, CancellationToken cancellationToken)
-            where T : class, ISaga
+        public async Task<TSaga> LoadAsync(Guid correlationId, CancellationToken cancellationToken)
         {
             await _inUse.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                return await _connection.QuerySingleOrDefaultAsync<T>(
-                    $"SELECT * FROM {GetTableName<T>()} WITH (UPDLOCK, ROWLOCK) WHERE CorrelationId = @correlationId",
+                return await _connection.QuerySingleOrDefaultAsync<TSaga>(
+                    $"SELECT * FROM {GetTableName()} WITH (UPDLOCK, ROWLOCK) WHERE CorrelationId = @correlationId",
                     new { correlationId }, _transaction).ConfigureAwait(false);
             }
             finally
@@ -86,17 +82,16 @@ namespace MassTransit.DapperIntegration.Saga
             }
         }
 
-        public async Task<IEnumerable<T>> QueryAsync<T>(Expression<Func<T, bool>> filterExpression, CancellationToken cancellationToken)
-            where T : class, ISaga
+        public async Task<IEnumerable<TSaga>> QueryAsync(Expression<Func<TSaga, bool>> filterExpression, CancellationToken cancellationToken)
         {
-            var tableName = GetTableName<T>();
+            var tableName = GetTableName();
 
             var (whereStatement, parameters) = WhereStatementHelper.GetWhereStatementAndParametersFromExpression(filterExpression);
 
             await _inUse.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                return await _connection.QueryAsync<T>($"SELECT * FROM {tableName} WITH (UPDLOCK, ROWLOCK) {whereStatement}", parameters, _transaction)
+                return await _connection.QueryAsync<TSaga>($"SELECT * FROM {tableName} WITH (UPDLOCK, ROWLOCK) {whereStatement}", parameters, _transaction)
                     .ConfigureAwait(false);
             }
             finally
@@ -119,9 +114,9 @@ namespace MassTransit.DapperIntegration.Saga
             return default;
         }
 
-        static string GetTableName<T>()
+        static string GetTableName()
         {
-            return typeof(T).GetCustomAttribute<TableAttribute>()?.Name ?? $"{typeof(T).Name}s";
+            return typeof(TSaga).GetCustomAttribute<TableAttribute>()?.Name ?? $"{typeof(TSaga).Name}s";
         }
     }
 }
