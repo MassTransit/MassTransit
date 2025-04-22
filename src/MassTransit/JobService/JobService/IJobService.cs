@@ -20,7 +20,7 @@
         /// <param name="jobPipe">The pipe which executes the job</param>
         /// <param name="jobOptions">The job options</param>
         /// <returns>The newly created job's handle</returns>
-        Task<JobHandle> StartJob<T>(ConsumeContext<StartJob> context, T job, IPipe<ConsumeContext<T>> jobPipe, JobOptions<T> jobOptions)
+        Task StartJob<T>(ConsumeContext<StartJob> context, T job, IPipe<ConsumeContext<T>> jobPipe, JobOptions<T> jobOptions)
             where T : class;
 
         /// <summary>

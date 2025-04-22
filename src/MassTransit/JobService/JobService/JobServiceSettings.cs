@@ -15,6 +15,11 @@ namespace MassTransit.JobService
 
         TimeSpan HeartbeatInterval { get; }
 
+        /// <summary>
+        /// Adjust the time delay before a rejected job is retried
+        /// </summary>
+        TimeSpan RejectedJobDelay { get; }
+
         Uri? InstanceAddress { get; }
 
         IReceiveEndpointConfigurator? InstanceEndpointConfigurator { get; }

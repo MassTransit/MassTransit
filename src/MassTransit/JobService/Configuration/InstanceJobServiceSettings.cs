@@ -24,6 +24,7 @@ namespace MassTransit.Configuration
         }
 
         public TimeSpan HeartbeatInterval => _options.HeartbeatInterval;
+        public TimeSpan RejectedJobDelay => _options.RejectedJobDelay;
 
         public Uri? InstanceAddress { get; set; }
         public IReceiveEndpointConfigurator? InstanceEndpointConfigurator { get; set; }

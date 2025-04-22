@@ -4,7 +4,6 @@ namespace MassTransit.DependencyInjection.Registration
     using System;
     using System.Collections.Generic;
     using Configuration;
-    using Internals;
     using JobService;
     using NewIdFormatters;
 
@@ -30,7 +29,7 @@ namespace MassTransit.DependencyInjection.Registration
                 Temporary = true
             };
 
-            IncludeInConfigureEndpoints = !Type.HasAttribute<ExcludeFromConfigureEndpointsAttribute>();
+            IncludeInConfigureEndpoints = true;
         }
 
         JobServiceSettings Settings => _settings.Value;

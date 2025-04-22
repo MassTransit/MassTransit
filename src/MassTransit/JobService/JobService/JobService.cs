@@ -19,6 +19,7 @@ public class JobService :
     readonly ConcurrentDictionary<Guid, JobHandle> _jobs;
     readonly Dictionary<Type, IJobTypeRegistration> _jobTypes;
     Timer _heartbeat;
+    bool _stopping;
 
     public JobService(JobServiceSettings settings)
     {
@@ -50,7 +51,7 @@ public class JobService :
         return false;
     }
 
-    public async Task<JobHandle> StartJob<T>(ConsumeContext<StartJob> context, T job, IPipe<ConsumeContext<T>> jobPipe, JobOptions<T> jobOptions)
+    public async Task StartJob<T>(ConsumeContext<StartJob> context, T job, IPipe<ConsumeContext<T>> jobPipe, JobOptions<T> jobOptions)
         where T : class
     {
         var startJob = context.Message;
@@ -60,49 +61,63 @@ public class JobService :
 
         var jobContext = new ConsumeJobContext<T>(context, InstanceAddress, job, jobOptions);
 
-        LogContext.Debug?.Log("Executing job: {JobType} {JobId} ({RetryAttempt})", TypeCache<T>.ShortName, startJob.JobId,
-            startJob.RetryAttempt);
+        if (_stopping)
+        {
+            LogContext.Debug?.Log("Rejecting job: {JobType} {JobId} ({RetryAttempt}) - Job Service is stopping", TypeCache<T>.ShortName, startJob.JobId,
+                startJob.RetryAttempt);
 
-        var jobTask = jobPipe.Send(jobContext);
+            await jobContext.NotifyFaulted(new JobServiceStoppingException(startJob.JobId), Settings.RejectedJobDelay);
+        }
+        else
+        {
+            LogContext.Debug?.Log("Executing job: {JobType} {JobId} ({RetryAttempt})", TypeCache<T>.ShortName, startJob.JobId,
+                startJob.RetryAttempt);
 
-        var jobHandle = new ConsumerJobHandle<T>(jobContext, jobTask, jobOptions.JobCancellationTimeout);
+            var jobTask = jobPipe.Send(jobContext);
 
-        Add(jobHandle);
+            var jobHandle = new ConsumerJobHandle<T>(jobContext, jobTask, jobOptions.JobCancellationTimeout);
 
-        return jobHandle;
+            Add(jobHandle);
+        }
     }
 
     public async Task Stop(IPublishEndpoint publishEndpoint)
     {
+        _stopping = true;
+
         if (_heartbeat != null)
         {
             _heartbeat.Dispose();
             _heartbeat = null;
         }
 
+        await Task.WhenAll(_jobTypes.Values.Select(x => x.PublishJobInstanceStopped(publishEndpoint))).ConfigureAwait(false);
+
         ICollection<JobHandle> pendingJobs = _jobs.Values;
-
-        foreach (var jobHandle in pendingJobs)
+        while (pendingJobs.Count > 0)
         {
-            if (!jobHandle.JobTask.IsCompleted)
+            async Task CancelJob(JobHandle jobHandle)
             {
-                try
+                if (!jobHandle.JobTask.IsCompleted)
                 {
-                    LogContext.Debug?.Log("Canceling job: {JobId}", jobHandle.JobId);
+                    try
+                    {
+                        LogContext.Debug?.Log("Canceling job: {JobId}", jobHandle.JobId);
 
-                    await jobHandle.Cancel(JobCancellationReasons.Shutdown).ConfigureAwait(false);
+                        await jobHandle.Cancel(JobCancellationReasons.Shutdown).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        LogContext.Error?.Log(ex, "Cancel job faulted: {JobId}", jobHandle.JobId);
+                    }
                 }
-                catch (Exception ex)
-                {
-                    LogContext.Error?.Log(ex, "Cancel job faulted: {JobId}", jobHandle.JobId);
-                }
+
+                if (TryRemoveJob(jobHandle.JobId, out _))
+                    await jobHandle.DisposeAsync().ConfigureAwait(false);
             }
 
-            if (TryRemoveJob(jobHandle.JobId, out _))
-                await jobHandle.DisposeAsync().ConfigureAwait(false);
+            await Task.WhenAll(pendingJobs.Select(jobHandle => Task.Run(() => CancelJob(jobHandle)))).ConfigureAwait(false);
         }
-
-        await Task.WhenAll(_jobTypes.Values.Select(x => x.PublishJobInstanceStopped(publishEndpoint))).ConfigureAwait(false);
     }
 
     public void RegisterJobType<T>(IReceiveEndpointConfigurator configurator, JobOptions<T> options, Guid jobTypeId, string jobTypeName)
