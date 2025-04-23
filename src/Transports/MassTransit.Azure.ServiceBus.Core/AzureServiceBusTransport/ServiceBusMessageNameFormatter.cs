@@ -9,11 +9,13 @@ namespace MassTransit.AzureServiceBusTransport
     {
         readonly IMessageNameFormatter _formatter;
 
-        public ServiceBusMessageNameFormatter(string namespaceSeparator = default)
+        public ServiceBusMessageNameFormatter(
+            string namespaceSeparator = null,
+            bool includeNamespace = true)
         {
             _formatter = string.IsNullOrWhiteSpace(namespaceSeparator)
-                ? new DefaultMessageNameFormatter("---", "--", "/", "-")
-                : new DefaultMessageNameFormatter("---", "--", namespaceSeparator, "-");
+                ? new DefaultMessageNameFormatter("---", "--", "/", "-", includeNamespace)
+                : new DefaultMessageNameFormatter("---", "--", namespaceSeparator, "-", includeNamespace);
         }
 
         public string GetMessageName(Type type)
