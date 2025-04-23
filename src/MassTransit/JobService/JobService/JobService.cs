@@ -93,8 +93,7 @@ public class JobService :
 
         await Task.WhenAll(_jobTypes.Values.Select(x => x.PublishJobInstanceStopped(publishEndpoint))).ConfigureAwait(false);
 
-        ICollection<JobHandle> pendingJobs = _jobs.Values;
-        while (pendingJobs.Count > 0)
+        while (_jobs.IsEmpty == false)
         {
             async Task CancelJob(JobHandle jobHandle)
             {
@@ -116,7 +115,7 @@ public class JobService :
                     await jobHandle.DisposeAsync().ConfigureAwait(false);
             }
 
-            await Task.WhenAll(pendingJobs.Select(jobHandle => Task.Run(() => CancelJob(jobHandle)))).ConfigureAwait(false);
+            await Task.WhenAll(_jobs.Values.Select(jobHandle => Task.Run(() => CancelJob(jobHandle)))).ConfigureAwait(false);
         }
     }
 
