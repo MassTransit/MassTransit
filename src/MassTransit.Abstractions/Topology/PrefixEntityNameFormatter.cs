@@ -5,23 +5,18 @@ namespace MassTransit
     {
         readonly IEntityNameFormatter _entityNameFormatter;
         readonly string _prefix;
-        readonly string _separator;
 
-        public PrefixEntityNameFormatter(
-            IEntityNameFormatter entityNameFormatter,
-            string prefix,
-            string separator = "")
+        public PrefixEntityNameFormatter(IEntityNameFormatter entityNameFormatter, string prefix)
         {
             _entityNameFormatter = entityNameFormatter;
             _prefix = prefix;
-            _separator = separator;
         }
 
         public string FormatEntityName<T>()
         {
             var name = _entityNameFormatter.FormatEntityName<T>();
 
-            return $"{_prefix}{_separator}{name}";
+            return $"{_prefix}{name}";
         }
     }
 }
