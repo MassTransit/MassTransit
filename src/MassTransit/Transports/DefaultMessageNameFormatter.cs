@@ -13,14 +13,20 @@ namespace MassTransit.Transports
         readonly string _genericTypeSeparator;
         readonly string _namespaceSeparator;
         readonly string _nestedTypeSeparator;
+        readonly bool _includeNamespace;
 
-        public DefaultMessageNameFormatter(string genericArgumentSeparator, string genericTypeSeparator,
-            string namespaceSeparator, string nestedTypeSeparator)
+        public DefaultMessageNameFormatter(
+            string genericArgumentSeparator,
+            string genericTypeSeparator,
+            string namespaceSeparator,
+            string nestedTypeSeparator,
+            bool includeNamespace = true)
         {
             _genericArgumentSeparator = genericArgumentSeparator;
             _genericTypeSeparator = genericTypeSeparator;
             _namespaceSeparator = namespaceSeparator;
             _nestedTypeSeparator = nestedTypeSeparator;
+            _includeNamespace = includeNamespace;
 
             _cache = new ConcurrentDictionary<Type, string>();
         }
@@ -46,7 +52,7 @@ namespace MassTransit.Transports
                 return "";
 
             var ns = type.Namespace;
-            if (ns != null)
+            if (ns != null && _includeNamespace)
             {
                 if (!ns.Equals(scope))
                 {
