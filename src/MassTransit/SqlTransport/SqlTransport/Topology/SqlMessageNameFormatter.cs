@@ -11,10 +11,15 @@ namespace MassTransit.SqlTransport.Topology
         readonly IMessageNameFormatter _formatter;
 
         public SqlMessageNameFormatter(string? namespaceSeparator = null)
+            : this(true, namespaceSeparator)
+        {
+        }
+
+        public SqlMessageNameFormatter(bool includeNamespace, string? namespaceSeparator = null)
         {
             _formatter = string.IsNullOrWhiteSpace(namespaceSeparator)
-                ? new DefaultMessageNameFormatter("::", "--", ":", "-")
-                : new DefaultMessageNameFormatter("::", "--", namespaceSeparator, "-");
+                ? new DefaultMessageNameFormatter("::", "--", ":", "-", includeNamespace)
+                : new DefaultMessageNameFormatter("::", "--", namespaceSeparator, "-", includeNamespace);
         }
 
         public string GetMessageName(Type type)

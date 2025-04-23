@@ -12,16 +12,24 @@ namespace MassTransit.AmazonSqsTransport
         readonly ConcurrentDictionary<Type, string> _cache;
         readonly string _genericArgumentSeparator;
         readonly string _genericTypeSeparator;
+        readonly bool _includeNamespace;
         readonly string _namespaceSeparator;
         readonly string _nestedTypeSeparator;
 
         public AmazonSqsMessageNameFormatter(string genericArgumentSeparator = null, string genericTypeSeparator = null,
             string namespaceSeparator = null, string nestedTypeSeparator = null)
+            : this(true, genericArgumentSeparator, genericTypeSeparator, namespaceSeparator, nestedTypeSeparator)
+        {
+        }
+
+        public AmazonSqsMessageNameFormatter(bool includeNamespace, string genericArgumentSeparator = null,
+            string genericTypeSeparator = null, string namespaceSeparator = null, string nestedTypeSeparator = null)
         {
             _genericArgumentSeparator = genericArgumentSeparator ?? "__";
             _genericTypeSeparator = genericTypeSeparator ?? "--";
             _namespaceSeparator = namespaceSeparator ?? "-";
             _nestedTypeSeparator = nestedTypeSeparator ?? "_";
+            _includeNamespace = includeNamespace;
 
             _cache = new ConcurrentDictionary<Type, string>();
         }
@@ -47,7 +55,7 @@ namespace MassTransit.AmazonSqsTransport
                 return "";
 
             var ns = type.Namespace?.Replace(".", _nestedTypeSeparator);
-            if (ns != null && !ns.Equals(scope))
+            if (ns != null && _includeNamespace && !ns.Equals(scope))
             {
                 sb.Append(ns);
                 sb.Append(_namespaceSeparator);

@@ -10,8 +10,13 @@ namespace MassTransit.RabbitMqTransport
         readonly IMessageNameFormatter _formatter;
 
         public RabbitMqMessageNameFormatter()
+            : this(true)
         {
-            _formatter = new DefaultMessageNameFormatter("::", "--", ":", "-");
+        }
+
+        public RabbitMqMessageNameFormatter(bool includeNamespace)
+        {
+            _formatter = new DefaultMessageNameFormatter("::", "--", ":", "-", includeNamespace);
         }
 
         public string GetMessageName(Type type)
