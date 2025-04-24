@@ -10,6 +10,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Configuration;
@@ -225,6 +226,16 @@ public class UsageTracker :
             if (_cancellationTokenSource.IsCancellationRequested && _options.ReportOnShutdown == false)
                 return;
 
+            CloudEnvironmentInfo? cloudEnvironment = await DetectCloudEnvironment();
+            if (cloudEnvironment.HasValue)
+            {
+                Telemetry!.Host!.Cloud = cloudEnvironment.Value.Provider;
+                Telemetry!.Host!.Region = cloudEnvironment.Value.Region;
+            }
+
+            if (HostMetadataCache.IsRunningInContainer)
+                Telemetry!.Host!.Container = HostMetadataCache.IsKubernetes ? "Kubernetes" : "Docker";
+
             var json = JsonSerializer.Serialize(Telemetry!, UsageTelemetrySerializerContext.Default.MassTransitUsageTelemetry);
 
             LogContext.Info?.Log("Usage Telemetry: {Telemetry}", json);
@@ -251,6 +262,57 @@ public class UsageTracker :
         catch (Exception exception)
         {
             LogContext.Warning?.Log(exception, "Failed to report usage telemetry");
+        }
+    }
+
+    static async Task<CloudEnvironmentInfo?> DetectCloudEnvironment()
+    {
+        var region = Environment.GetEnvironmentVariable("WEBSITE_REGION") ?? Environment.GetEnvironmentVariable("REGION_NAME");
+        if (!string.IsNullOrEmpty(region))
+            return new CloudEnvironmentInfo("Azure", region);
+
+        region = Environment.GetEnvironmentVariable("AWS_REGION") ?? Environment.GetEnvironmentVariable("AWS_DEFAULT_REGION");
+        if (!string.IsNullOrEmpty(region))
+            return new CloudEnvironmentInfo("AWS", region);
+
+        var gcpProject = Environment.GetEnvironmentVariable("GOOGLE_CLOUD_PROJECT");
+        if (!string.IsNullOrEmpty(gcpProject))
+        {
+            try
+            {
+                var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(2) };
+
+                httpClient.DefaultRequestHeaders.Clear();
+                httpClient.DefaultRequestHeaders.Add("Metadata-Flavor", "Google");
+                var zone = await httpClient.GetStringAsync("http://metadata.google.internal/computeMetadata/v1/instance/zone");
+                var match = Regex.Match(zone, @"zones/([a-z\-]+)");
+                if (match.Success)
+                {
+                    region = match.Groups[1].Value.Replace("-[a-z]$", "");
+                    return new CloudEnvironmentInfo("GCP", region);
+                }
+            }
+            catch
+            {
+                //
+            }
+
+            return new CloudEnvironmentInfo("GCP", "Unknown");
+        }
+
+        return null;
+    }
+
+
+    readonly struct CloudEnvironmentInfo
+    {
+        public readonly string Provider;
+        public readonly string Region;
+
+        public CloudEnvironmentInfo(string provider, string region)
+        {
+            Provider = provider;
+            Region = region;
         }
     }
 }

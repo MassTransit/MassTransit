@@ -1,6 +1,7 @@
 namespace MassTransit.Metadata
 {
     using System;
+    using System.IO;
     using System.Reflection;
     using System.Runtime.InteropServices;
 
@@ -8,6 +9,8 @@ namespace MassTransit.Metadata
     public static class HostMetadataCache
     {
         static bool? _isRunningInContainer;
+        static bool? _isRunningInKubernetes;
+
     #if !NETFRAMEWORK
         static bool? _isNetFramework;
     #endif
@@ -16,6 +19,10 @@ namespace MassTransit.Metadata
 
         public static bool IsRunningInContainer =>
             _isRunningInContainer ??= bool.TryParse(Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER"), out var inDocker) && inDocker;
+
+        public static bool IsKubernetes =>
+            _isRunningInKubernetes ??= Environment.GetEnvironmentVariable("KUBERNETES_SERVICE_HOST") != null
+                || Directory.Exists("/var/run/secrets/kubernetes.io");
 
     #if NETFRAMEWORK
         public static bool IsNetFramework => true;
@@ -37,12 +44,12 @@ namespace MassTransit.Metadata
 
             return null;
         }
+    }
 
 
-        static class Cached
-        {
-            internal static readonly HostInfo HostInfo = new BusHostInfo(true);
-            internal static readonly HostInfo EmptyHostInfo = new BusHostInfo();
-        }
+    static class Cached
+    {
+        internal static readonly HostInfo HostInfo = new BusHostInfo(true);
+        internal static readonly HostInfo EmptyHostInfo = new BusHostInfo();
     }
 }
