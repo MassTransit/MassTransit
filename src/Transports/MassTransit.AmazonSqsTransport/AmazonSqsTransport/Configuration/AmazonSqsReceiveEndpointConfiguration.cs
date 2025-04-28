@@ -15,6 +15,8 @@
         IAmazonSqsReceiveEndpointConfiguration,
         IAmazonSqsReceiveEndpointConfigurator
     {
+        static readonly TimeSpan MaxAllowedVisibilityTimeout = TimeSpan.FromHours(12);
+
         readonly IBuildPipeConfigurator<ClientContext> _clientConfigurator;
         readonly IBuildPipeConfigurator<ConnectionContext> _connectionConfigurator;
         readonly IAmazonSqsEndpointConfiguration _endpointConfiguration;
@@ -155,6 +157,11 @@
         public int RedeliverVisibilityTimeout
         {
             set => _settings.RedeliverVisibilityTimeout = value;
+        }
+
+        public TimeSpan MaxVisibilityTimeout
+        {
+            set => _settings.MaxVisibilityTimeout = value > MaxAllowedVisibilityTimeout ? MaxAllowedVisibilityTimeout : value;
         }
 
         public void Subscribe<T>(Action<IAmazonSqsTopicSubscriptionConfigurator> configure = null)

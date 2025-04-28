@@ -24,6 +24,15 @@
         int ConcurrentDeliveryLimit { set; }
 
         /// <summary>
+        /// Sets the maximum duration to extend the visibility timeout for a message.
+        /// Must not exceed 12 hours, as per
+        /// <see href="https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html"></see>.
+        /// If a value greater than 12 hours is provided, it will be clamped to <c>TimeSpan.FromHours(12)</c>.
+        /// Defaults to 12 hours.
+        /// </summary>
+        public TimeSpan MaxVisibilityTimeout { set; }
+
+        /// <summary>
         /// Bind an existing exchange for the message type to the receive endpoint by name
         /// </summary>
         /// <typeparam name="T"></typeparam>

@@ -18,6 +18,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
             WaitTimeSeconds = 3;
             VisibilityTimeout = 30;
             RedeliverVisibilityTimeout = 1;
+            MaxVisibilityTimeout = TimeSpan.FromHours(12);
 
             ConcurrentDeliveryLimit = 1;
 
@@ -39,6 +40,8 @@ namespace MassTransit.AmazonSqsTransport.Topology
         public int VisibilityTimeout { get; set; }
 
         public int RedeliverVisibilityTimeout { get; set; }
+
+        public TimeSpan MaxVisibilityTimeout { get; set; }
 
         public string QueueUrl { get; set; }
 
