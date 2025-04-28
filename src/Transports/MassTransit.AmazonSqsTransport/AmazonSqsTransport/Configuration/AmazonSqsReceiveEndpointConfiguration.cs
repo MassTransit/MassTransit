@@ -103,6 +103,12 @@
             if (_settings.PurgeOnStartup)
                 yield return this.Warning(queueName, "Existing messages in the queue will be purged on service start");
 
+            var visibilityTimeout = TimeSpan.FromSeconds(_settings.VisibilityTimeout);
+            if (_settings.MaxVisibilityTimeout < visibilityTimeout)
+            {
+                yield return this.Failure("MaxVisibilityTimeout", "Must be greater than or equal to VisibilityTimeout");
+            }
+
             foreach (var result in base.Validate())
                 yield return result.WithParentKey(queueName);
         }
