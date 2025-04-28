@@ -44,6 +44,8 @@
 
         int VisibilityTimeout { get; set; }
 
+        TimeSpan MaxVisibilityTimeout { get; set; }
+
         /// <summary>
         /// The number of seconds to wait before allowing SQS to redeliver the message when faults are returned back to SQS.
         /// </summary>

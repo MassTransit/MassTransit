@@ -12,7 +12,6 @@ namespace MassTransit.AmazonSqsTransport
     public class AmazonSqsReceiveLockContext :
         ReceiveLockContext
     {
-        static readonly TimeSpan MaxVisibilityTimeout = TimeSpan.FromHours(12);
         readonly CancellationTokenSource _activeTokenSource;
         readonly ClientContext _clientContext;
         readonly Uri _inputAddress;
@@ -142,9 +141,11 @@ namespace MassTransit.AmazonSqsTransport
 
                     await _clientContext.ChangeMessageVisibility(_settings.QueueUrl, _message.ReceiptHandle, visibilityTimeout).ConfigureAwait(false);
 
-                    // Max 12 hours, https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html
-                    if (DateTime.UtcNow - _startedAt.AddSeconds(visibilityTimeout) >= MaxVisibilityTimeout)
+                    if (DateTime.UtcNow - _startedAt.AddSeconds(visibilityTimeout) >= _settings.MaxVisibilityTimeout)
+                    {
+                        LogContext.Warning?.Log("Maximum visibility timeout {MaxVisibilityTimeout} for message {ReceiptHandle} exceeded.", _settings.MaxVisibilityTimeout, _message.ReceiptHandle);
                         break;
+                    }
 
                     delay = CalculateDelay(visibilityTimeout);
                 }
