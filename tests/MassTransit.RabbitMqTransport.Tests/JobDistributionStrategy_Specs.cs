@@ -205,6 +205,6 @@ public class JobDistributionStrategy_Specs
 
     public record RegionalJob
     {
-        public string Region { get; init; }
+        public string? Region { get; init; }
     }
 }

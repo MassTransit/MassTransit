@@ -124,7 +124,7 @@ namespace MassTransit.EventHubIntegration.Checkpoints
             _cancellationToken.ThrowIfCancellationRequested();
 
             LogContext.Debug?.Log("Partition: {PartitionId} updating checkpoint with offset: {Offset}", confirmation.Partition.PartitionId,
-                confirmation.Offset);
+                confirmation.OffsetString);
 
             try
             {
@@ -134,7 +134,7 @@ namespace MassTransit.EventHubIntegration.Checkpoints
             catch (Exception exception)
             {
                 LogContext.Error?.Log(exception, "Partition: {PartitionId} checkpoint failed with offset: {Offset}", confirmation.Partition,
-                    confirmation.Offset);
+                    confirmation.OffsetString);
                 confirmation.Faulted(exception);
                 return false;
             }

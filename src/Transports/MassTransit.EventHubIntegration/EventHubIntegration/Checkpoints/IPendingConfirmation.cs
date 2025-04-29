@@ -10,7 +10,7 @@ namespace MassTransit.EventHubIntegration.Checkpoints
     {
         PartitionContext Partition { get; }
 
-        long Offset { get; }
+        string OffsetString { get; }
 
         Task Confirmed { get; }
 

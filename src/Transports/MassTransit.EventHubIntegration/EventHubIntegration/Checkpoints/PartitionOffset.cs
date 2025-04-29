@@ -7,22 +7,22 @@ namespace MassTransit.EventHubIntegration.Checkpoints
     public readonly struct PartitionOffset
     {
         readonly string _partitionId;
-        readonly long _offset;
+        readonly string _offsetString;
 
-        PartitionOffset(string partitionId, long offset)
+        PartitionOffset(string partitionId, string offsetString)
         {
             _partitionId = partitionId;
-            _offset = offset;
+            _offsetString = offsetString;
         }
 
         public override string ToString()
         {
-            return $"{_partitionId}/{_offset}";
+            return $"{_partitionId}/{_offsetString}";
         }
 
         public static implicit operator PartitionOffset(in ProcessEventArgs args)
         {
-            return new PartitionOffset(args.Partition.PartitionId, args.Data.Offset);
+            return new PartitionOffset(args.Partition.PartitionId, args.Data.OffsetString);
         }
     }
 }
