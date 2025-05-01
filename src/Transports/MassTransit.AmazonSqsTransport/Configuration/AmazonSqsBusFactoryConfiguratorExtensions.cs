@@ -4,6 +4,7 @@ namespace MassTransit
     using System;
     using Amazon;
     using Amazon.Runtime;
+    using Amazon.Runtime.Credentials;
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
     using AmazonSqsTransport.Configuration;
@@ -67,7 +68,7 @@ namespace MassTransit
         {
             configurator.Host(endpoint.SystemName, h =>
             {
-                h.Credentials(FallbackCredentialsFactory.GetCredentials());
+                h.Credentials(DefaultAWSCredentialsIdentityResolver.GetCredentials());
 
                 configure?.Invoke(h);
             });

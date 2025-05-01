@@ -7,7 +7,6 @@ namespace MassTransit.AmazonSqsTransport
     using System.Threading.Tasks;
     using System.Xml.Schema;
     using Amazon.Auth.AccessControlPolicy;
-    using Amazon.Auth.AccessControlPolicy.ActionIdentifiers;
     using Amazon.SQS;
     using Amazon.SQS.Model;
 
@@ -20,6 +19,8 @@ namespace MassTransit.AmazonSqsTransport
         readonly IAmazonSQS _client;
         readonly SemaphoreSlim _updateSemaphore;
         bool _disposed;
+
+        const string SendMessageIAMActionName = "sqs:SendMessage";
 
         public QueueInfo(string entityName, string url, IDictionary<string, string> attributes, IAmazonSQS client, CancellationToken cancellationToken,
             bool existing)
@@ -91,7 +92,7 @@ namespace MassTransit.AmazonSqsTransport
 
                 #pragma warning disable 618
                 var statement = policy.Statements.FirstOrDefault(x => x.Effect == Statement.StatementEffect.Allow
-                    && x.Actions.Any(a => a.ActionName.Equals(SQSActionIdentifiers.SendMessage.ActionName, StringComparison.Ordinal))
+                    && x.Actions.Any(a => a.ActionName.Equals(SendMessageIAMActionName, StringComparison.Ordinal))
                     && x.Resources.Any(a => a.Id.Equals(sqsQueueArn, StringComparison.OrdinalIgnoreCase))
                     && x.Principals.Any(a => string.Equals(a.Provider, "Service", StringComparison.OrdinalIgnoreCase)
                         && a.Id.Equals("sns.amazonaws.com", StringComparison.OrdinalIgnoreCase)));
@@ -99,7 +100,7 @@ namespace MassTransit.AmazonSqsTransport
                 if (statement is null)
                 {
                     statement = new Statement(Statement.StatementEffect.Allow);
-                    statement.Actions.Add(SQSActionIdentifiers.SendMessage);
+                    statement.Actions.Add(SendMessageIAMActionName);
                     statement.Resources.Add(new Resource(sqsQueueArn));
                     statement.Principals.Add(new Principal("Service", "sns.amazonaws.com"));
                     policy.Statements.Add(statement);

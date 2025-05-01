@@ -106,7 +106,7 @@ namespace MassTransit.AmazonSqsTransport.Middleware
             if (IsStopping)
                 return;
 
-            var redelivered = message.Attributes.TryGetInt("ApproximateReceiveCount", out var receiveCount) && receiveCount > 1;
+            var redelivered = (message.Attributes != null && message.Attributes.TryGetInt("ApproximateReceiveCount", out var receiveCount) && receiveCount > 1);
 
             var context = new AmazonSqsReceiveContext(message, redelivered, _context, _client, _receiveSettings, _client.ConnectionContext);
             try
@@ -169,7 +169,7 @@ namespace MassTransit.AmazonSqsTransport.Middleware
 
             static byte[] MessageGroupIdProvider(Message message)
             {
-                return message.Attributes.TryGetValue(MessageSystemAttributeName.MessageGroupId, out var groupId) && !string.IsNullOrEmpty(groupId)
+                return message.Attributes != null && message.Attributes.TryGetValue(MessageSystemAttributeName.MessageGroupId, out var groupId) && !string.IsNullOrEmpty(groupId)
                     ? Encoding.UTF8.GetBytes(groupId)
                     : [];
             }

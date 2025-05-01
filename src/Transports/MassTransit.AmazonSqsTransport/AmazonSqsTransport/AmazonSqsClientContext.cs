@@ -164,7 +164,7 @@ namespace MassTransit.AmazonSqsTransport
 
             response.EnsureSuccessfulResponse();
 
-            return response.Messages;
+            return response.Messages ?? new List<Message>();
         }
 
         public Task<QueueInfo> GetQueueInfo(string queueName)

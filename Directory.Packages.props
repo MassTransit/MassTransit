@@ -5,10 +5,10 @@
   <ItemGroup>
     <PackageVersion Include="Apache.NMS.ActiveMQ" Version="2.1.1" />
     <PackageVersion Include="Apache.NMS.AMQP" Version="2.2.0" />
-    <PackageVersion Include="AWSSDK.DynamoDBv2" Version="3.7.407.2" />
-    <PackageVersion Include="AWSSDK.SimpleNotificationService" Version="3.7.400.141" />
-    <PackageVersion Include="AWSSDK.S3" Version="3.7.416.17" />
-    <PackageVersion Include="AWSSDK.SQS" Version="3.7.400.141" />
+    <PackageVersion Include="AWSSDK.DynamoDBv2" Version="4.0.0" />
+    <PackageVersion Include="AWSSDK.SimpleNotificationService" Version="4.0.0" />
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.0" />
+    <PackageVersion Include="AWSSDK.SQS" Version="4.0.0" />
     <PackageVersion Include="Azure.Data.Tables" Version="12.10.0" />
     <PackageVersion Include="Azure.Identity" Version="1.13.2" />
     <PackageVersion Include="Azure.Messaging.EventHubs.Processor" Version="5.12.1" />
