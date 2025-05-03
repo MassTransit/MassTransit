@@ -84,7 +84,7 @@ namespace MassTransit
                     sendContext.Headers.Set(MessageHeaders.ForwarderAddress, forwarderAddress.ToString());
             }
 
-            return endpoint.Send(message, new CopyContextPipe(context, AddForwarderAddress));
+            return endpoint.Send(message, new CopyContextPipe(context, AddForwarderAddress), context.CancellationToken);
         }
     }
 }
