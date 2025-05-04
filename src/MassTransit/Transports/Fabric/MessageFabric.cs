@@ -3,6 +3,8 @@
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
+    using InMemoryTransport;
     using Internals.GraphValidation;
     using Middleware;
 
@@ -13,17 +15,22 @@
         where T : class
         where TContext : class
     {
+        readonly InMemoryDelayProvider _delayProvider;
         readonly ConcurrentDictionary<string, IMessageExchange<T>> _exchanges;
         readonly MessageFabricObservable<TContext> _observers;
         readonly ConcurrentDictionary<string, IMessageQueue<TContext, T>> _queues;
+        IInMemoryDelayProvider _delayProvider1;
 
         public MessageFabric()
         {
             _observers = new MessageFabricObservable<TContext>();
+            _delayProvider = new InMemoryDelayProvider();
 
             _exchanges = new ConcurrentDictionary<string, IMessageExchange<T>>(StringComparer.OrdinalIgnoreCase);
             _queues = new ConcurrentDictionary<string, IMessageQueue<TContext, T>>(StringComparer.OrdinalIgnoreCase);
         }
+
+        public IInMemoryDelayProvider DelayProvider => _delayProvider;
 
         public void ExchangeDeclare(TContext context, string name, ExchangeType exchangeType)
         {
@@ -61,7 +68,7 @@
 
             _observers.QueueBindingCreated(context, source, destination);
 
-            sourceExchange.Connect(destinationQueue, default);
+            sourceExchange.Connect(destinationQueue, null);
         }
 
         public void Probe(ProbeContext context)
@@ -89,12 +96,19 @@
             return _observers.Connect(observer);
         }
 
+        protected override async Task StopSupervisor(StopSupervisorContext context)
+        {
+            await base.StopSupervisor(context).ConfigureAwait(false);
+
+            await _delayProvider.DisposeAsync().ConfigureAwait(false);
+        }
+
         IMessageQueue<TContext, T> GetOrAddQueue(TContext context, string name)
         {
             MessageQueue<TContext, T> created = null;
             IMessageQueue<TContext, T> queue = _queues.GetOrAdd(name, x =>
             {
-                created = new MessageQueue<TContext, T>(_observers, name);
+                created = new MessageQueue<TContext, T>(_observers, name, _delayProvider);
 
                 return created;
             });

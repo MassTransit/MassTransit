@@ -32,5 +32,11 @@ namespace MassTransit.InMemoryTransport.Configuration
 
             return CreateBus(configurator, context, _configure, specifications);
         }
+
+        protected override IBusInstance CreateBusInstance(IBusControl bus, IHost<IInMemoryReceiveEndpointConfigurator> host,
+            IHostConfiguration hostConfiguration, IBusRegistrationContext context)
+        {
+            return new InMemoryBusInstance(bus, host, hostConfiguration, context);
+        }
     }
 }

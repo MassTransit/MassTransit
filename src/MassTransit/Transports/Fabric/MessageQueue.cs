@@ -4,6 +4,7 @@ namespace MassTransit.Transports.Fabric
     using System;
     using System.Threading.Channels;
     using System.Threading.Tasks;
+    using InMemoryTransport;
     using Middleware;
 
 
@@ -14,14 +15,16 @@ namespace MassTransit.Transports.Fabric
         where TContext : class
     {
         readonly Channel<DeliveryContext<T>> _channel;
+        readonly IInMemoryDelayProvider _delayProvider;
         readonly Task _dispatcher;
         readonly QueueMetric _metrics;
         readonly IMessageFabricObserver<TContext> _observer;
         readonly MessageReceiverCollection<T> _receivers;
 
-        public MessageQueue(IMessageFabricObserver<TContext> observer, string name)
+        public MessageQueue(IMessageFabricObserver<TContext> observer, string name, IInMemoryDelayProvider delayProvider)
         {
             _observer = observer;
+            _delayProvider = delayProvider;
             Name = name;
 
             _receivers = new MessageReceiverCollection<T>(receivers => new RoundRobinReceiverLoadBalancer<T>(receivers));
@@ -102,7 +105,7 @@ namespace MassTransit.Transports.Fabric
                         _metrics.DelayedMessageCount.Add();
                         delayed = true;
 
-                        await Task.Delay(delay, Stopping).ConfigureAwait(false);
+                        await _delayProvider.Delay(delay, Stopping).ConfigureAwait(false);
                     }
 
                     await _channel.Writer.WriteAsync(context, Stopping).ConfigureAwait(false);

@@ -58,6 +58,8 @@ namespace MassTransit.InMemoryTransport
             return ReceiveEndpoints.Start(queueName);
         }
 
+        public IInMemoryDelayProvider DelayProvider => _hostConfiguration.TransportProvider.MessageFabric.DelayProvider;
+
         protected override void Probe(ProbeContext context)
         {
             context.Add("type", "InMemory");
@@ -68,7 +70,7 @@ namespace MassTransit.InMemoryTransport
 
         protected override IAgent[] GetAgentHandles()
         {
-            return new IAgent[] { _hostConfiguration.TransportProvider };
+            return [_hostConfiguration.TransportProvider];
         }
     }
 }

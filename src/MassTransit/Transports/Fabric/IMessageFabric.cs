@@ -1,5 +1,8 @@
 ﻿namespace MassTransit.Transports.Fabric
 {
+    using InMemoryTransport;
+
+
     public interface IMessageFabric<TContext, T> :
         IMessageFabricObserverConnector<TContext>,
         IAgent,
@@ -7,6 +10,8 @@
         where T : class
         where TContext : class
     {
+        IInMemoryDelayProvider DelayProvider { get; }
+
         void ExchangeDeclare(TContext context, string name, ExchangeType exchangeType);
 
         void ExchangeBind(TContext context, string source, string destination, string routingKey);

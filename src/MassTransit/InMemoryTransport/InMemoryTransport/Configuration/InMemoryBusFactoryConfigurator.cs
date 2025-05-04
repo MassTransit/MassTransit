@@ -22,11 +22,6 @@ namespace MassTransit.InMemoryTransport.Configuration
             busConfiguration.BusEndpointConfiguration.Consume.Configurator.AutoStart = true;
         }
 
-        public int TransportConcurrencyLimit
-        {
-            set => ConcurrentMessageLimit = value;
-        }
-
         public IReceiveEndpointConfiguration CreateBusEndpointConfiguration(Action<IReceiveEndpointConfigurator> configure)
         {
             var queueName = _busConfiguration.Topology.Consume.CreateTemporaryQueueName("bus");

@@ -15,8 +15,8 @@
         {
             var fabric = new MessageFabric<InMemoryTransportContext, InMemoryTransportMessage>();
 
-            fabric.ExchangeBind(null, "Namespace.A", "input-exchange", default);
-            fabric.ExchangeBind(null, "Namespace.B", "input-exchange", default);
+            fabric.ExchangeBind(null, "Namespace.A", "input-exchange", null);
+            fabric.ExchangeBind(null, "Namespace.B", "input-exchange", null);
             fabric.QueueBind(null, "input-exchange", "input-queue");
         }
 
@@ -25,12 +25,12 @@
         {
             var fabric = new MessageFabric<InMemoryTransportContext, InMemoryTransportMessage>();
 
-            fabric.ExchangeBind(null, "Namespace.A", "input-exchange", default);
-            fabric.ExchangeBind(null, "Namespace.B", "input-exchange", default);
+            fabric.ExchangeBind(null, "Namespace.A", "input-exchange", null);
+            fabric.ExchangeBind(null, "Namespace.B", "input-exchange", null);
 
-            fabric.ExchangeBind(null, "input-exchange", "output-exchange", default);
+            fabric.ExchangeBind(null, "input-exchange", "output-exchange", null);
 
-            Assert.That(() => fabric.ExchangeBind(null, "output-exchange", "Namespace.A", default), Throws.TypeOf<InvalidOperationException>());
+            Assert.That(() => fabric.ExchangeBind(null, "output-exchange", "Namespace.A", null), Throws.TypeOf<InvalidOperationException>());
         }
     }
 }

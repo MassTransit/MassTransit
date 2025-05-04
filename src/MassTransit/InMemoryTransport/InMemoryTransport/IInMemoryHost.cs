@@ -6,5 +6,6 @@
     public interface IInMemoryHost :
         IHost<IInMemoryReceiveEndpointConfigurator>
     {
+        IInMemoryDelayProvider DelayProvider { get; }
     }
 }
