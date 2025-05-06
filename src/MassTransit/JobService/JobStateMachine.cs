@@ -746,12 +746,13 @@ namespace MassTransit
                 .Then(context =>
                 {
                     context.Saga.Faulted = DateTime.UtcNow;
-                    context.Saga.Reason = reason ?? JobCancellationReasons.CancellationRequested;
+                    context.Saga.Reason = string.IsNullOrWhiteSpace(reason) ? JobCancellationReasons.CancellationRequested : reason;
                 })
                 .Publish<JobSaga, T, JobCanceled>(context => new JobCanceledEvent
                 {
                     JobId = context.Saga.CorrelationId,
-                    Timestamp = context.Saga.Faulted.Value
+                    Timestamp = context.Saga.Faulted.Value,
+                    Reason = context.Saga.Reason
                 });
         }
 

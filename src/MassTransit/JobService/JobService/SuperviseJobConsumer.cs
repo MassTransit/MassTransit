@@ -20,7 +20,11 @@ namespace MassTransit.JobService
         public async Task Consume(ConsumeContext<CancelJobAttempt> context)
         {
             if (_jobService.TryGetJob(context.Message.JobId, out var handle))
-                await handle.Cancel(JobCancellationReasons.CancellationRequested).ConfigureAwait(false);
+            {
+                var reason = string.IsNullOrWhiteSpace(context.Message.Reason) ? JobCancellationReasons.CancellationRequested : context.Message.Reason;
+
+                await handle.Cancel(reason).ConfigureAwait(false);
+            }
         }
 
         public Task Consume(ConsumeContext<GetJobAttemptStatus> context)

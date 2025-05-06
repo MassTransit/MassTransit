@@ -88,7 +88,7 @@ public class ConsumeJobContext<TJob> :
             JobId = JobId,
             AttemptId = AttemptId,
             Timestamp = DateTime.UtcNow,
-            Reason = _cancellationReason ?? JobCancellationReasons.ConsumerInitiated
+            Reason = string.IsNullOrWhiteSpace(_cancellationReason) ? JobCancellationReasons.ConsumerInitiated : _cancellationReason
         }).ConfigureAwait(false);
     }
 

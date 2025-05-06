@@ -10,4 +10,5 @@ public class JobCanceledEvent :
 {
     public Guid JobId { get; set; }
     public DateTime Timestamp { get; set; }
+    public string? Reason { get; set; }
 }

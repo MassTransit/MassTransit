@@ -4,7 +4,7 @@ namespace MassTransit.Contracts.JobService
 
 
     /// <summary>
-    /// Published when a job faults
+    /// Published when a job is canceled
     /// </summary>
     public interface JobCanceled
     {
@@ -17,5 +17,10 @@ namespace MassTransit.Contracts.JobService
         /// The time the job was cancelled
         /// </summary>
         DateTime Timestamp { get; }
+
+        /// <summary>
+        /// THe reason, if specified, the job was canceled
+        /// </summary>
+        string? Reason { get; }
     }
 }
