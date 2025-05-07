@@ -1,7 +1,9 @@
 namespace MassTransit.AmazonSqsTransport
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
     using Amazon.SimpleNotificationService;
@@ -64,19 +66,61 @@ namespace MassTransit.AmazonSqsTransport
                 Attributes = subscriptionAttributes
             };
 
-            SubscribeResponse response;
+            string subscriptionArn = null;
             try
             {
-                response = await _snsClient.SubscribeAsync(subscribeRequest, CancellationToken).ConfigureAwait(false);
+                var response = await _snsClient.SubscribeAsync(subscribeRequest, CancellationToken).ConfigureAwait(false);
 
                 response.EnsureSuccessfulResponse();
+
+                subscriptionArn = response.SubscriptionArn;
             }
             catch (InvalidParameterException exception) when (exception.Message.Contains("exists"))
             {
-                return false;
+                try
+                {
+                    var existingSubscriptions = await _snsClient.ListSubscriptionsByTopicAsync(topicInfo.Arn, CancellationToken).ConfigureAwait(false);
+                    existingSubscriptions.EnsureSuccessfulResponse();
+
+                    var existingSubscription = existingSubscriptions.Subscriptions.SingleOrDefault(x =>
+                        x.TopicArn == topicInfo.Arn && x.Endpoint == queueInfo.Arn && x.Protocol == "sqs");
+
+                    if (existingSubscription != null)
+                    {
+                        subscriptionArn = existingSubscription.SubscriptionArn;
+                        var attributes = await _snsClient.GetSubscriptionAttributesAsync(subscriptionArn, CancellationToken)
+                            .ConfigureAwait(false);
+
+                        if (attributes.HttpStatusCode is >= HttpStatusCode.OK and < HttpStatusCode.MultipleChoices)
+                        {
+                            foreach (var (name, value) in SubscriptionAttributesEqual(attributes.Attributes, subscriptionAttributes))
+                            {
+                                var request = new SetSubscriptionAttributesRequest
+                                {
+                                    AttributeName = name,
+                                    AttributeValue = value,
+                                    SubscriptionArn = subscriptionArn
+                                };
+
+                                var updated = await _snsClient.SetSubscriptionAttributesAsync(request, CancellationToken).ConfigureAwait(false);
+                                updated.EnsureSuccessfulResponse();
+
+                                LogContext.Debug?.Log("Updated subscription attribute: {SubscriptionArn} {Name}={Value}", subscriptionArn, name,
+                                    value);
+                            }
+                        }
+                    }
+                }
+                catch (Exception updateException)
+                {
+                    LogContext.Warning?.Log(updateException, "Failed to update subscription attributes: {SubscriptionArg}", subscriptionArn);
+                }
+
+                if (subscriptionArn == null)
+                    return false;
             }
 
-            queueInfo.SubscriptionArns.Add(response.SubscriptionArn);
+            queueInfo.SubscriptionArns.Add(subscriptionArn);
 
             var sqsQueueArn = queueInfo.Arn;
 
@@ -184,13 +228,6 @@ namespace MassTransit.AmazonSqsTransport
             response.EnsureSuccessfulResponse();
         }
 
-        public async Task<PublishRequest> CreatePublishRequest(string topicName, string body)
-        {
-            var topicInfo = await ConnectionContext.GetTopicByName(topicName).ConfigureAwait(false);
-
-            return new PublishRequest(topicInfo.Arn, body);
-        }
-
         async Task DeleteQueueSubscription(string subscriptionArn)
         {
             var unsubscribeRequest = new UnsubscribeRequest { SubscriptionArn = subscriptionArn };
@@ -198,6 +235,29 @@ namespace MassTransit.AmazonSqsTransport
             var response = await _snsClient.UnsubscribeAsync(unsubscribeRequest, CancellationToken.None).ConfigureAwait(false);
 
             response.EnsureSuccessfulResponse();
+        }
+
+        static IEnumerable<(string, string)> SubscriptionAttributesEqual(Dictionary<string, string> existingAttributes,
+            Dictionary<string, string> updatedAttributes)
+        {
+            if (updatedAttributes.TryGetValue("FilterPolicy", out var filterPolicy))
+            {
+                if (!existingAttributes.TryGetValue("FilterPolicy", out var existingFilterPolicy) || existingFilterPolicy != filterPolicy)
+                    yield return ("FilterPolicy", filterPolicy);
+            }
+
+            if (updatedAttributes.TryGetValue("FilterPolicyScope", out var filterPolicyScope))
+            {
+                if (!existingAttributes.TryGetValue("FilterPolicyScope", out var existingFilterPolicyScope) || existingFilterPolicyScope != filterPolicyScope)
+                    yield return ("FilterPolicyScope", filterPolicyScope);
+            }
+
+            if (updatedAttributes.TryGetValue("RawMessageDelivery", out var rawMessageDelivery))
+            {
+                if (!existingAttributes.TryGetValue("RawMessageDelivery", out var existingRawMessageDelivery)
+                    || existingRawMessageDelivery != rawMessageDelivery)
+                    yield return ("RawMessageDelivery", rawMessageDelivery);
+            }
         }
     }
 }

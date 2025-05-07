@@ -1,5 +1,3 @@
-version: '2.1'
-
 services:
   localstack:
     image: localstack/localstack:3.0.2
