@@ -2,6 +2,7 @@ namespace MassTransit.Serialization
 {
     using System;
     using System.IO;
+    using System.Runtime.InteropServices;
 
 
     public class MemoryMessageBody :
@@ -16,6 +17,11 @@ namespace MassTransit.Serialization
             _memory = memory;
         }
 
+        public MemoryMessageBody(in string base64String)
+        {
+            _memory = Convert.FromBase64String(base64String);
+        }
+
         public long? Length => _memory.Length;
 
         public Stream GetStream()
@@ -25,12 +31,14 @@ namespace MassTransit.Serialization
 
         public byte[] GetBytes()
         {
-            return _bytes ??= _memory.ToArray();
+            return _bytes ??= MemoryMarshal.TryGetArray(_memory, out ArraySegment<byte> bytes)
+                ? bytes.Array
+                : _memory.ToArray();
         }
 
         public string GetString()
         {
-            return _string ??= _memory.ToString();
+            return _string ??= Convert.ToBase64String(_memory.Span);
         }
     }
 }
