@@ -8,6 +8,7 @@ namespace MassTransit
     using Internals;
     using JobService.Messages;
     using JobService.Scheduling;
+    using Logging;
 
 
     public sealed class JobStateMachine :
@@ -638,7 +639,8 @@ namespace MassTransit
             return binder
                 .ClearJobState()
                 .Schedule(machine.JobSlotWaitElapsed, context => new JobSlotWaitElapsedEvent { JobId = context.Saga.CorrelationId },
-                    context => context.Saga.NextStartDate.Value.DateTime)
+                    context => context.Saga.NextStartDate.Value.DateTime,
+                    context => context.Headers.Set(DiagnosticHeaders.ActivityPropagation, "Link"))
                 .TransitionTo(machine.WaitingForSlot);
         }
 
