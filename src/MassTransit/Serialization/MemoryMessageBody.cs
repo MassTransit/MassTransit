@@ -17,11 +17,6 @@ namespace MassTransit.Serialization
             _memory = memory;
         }
 
-        public MemoryMessageBody(in string base64String)
-        {
-            _memory = Convert.FromBase64String(base64String);
-        }
-
         public long? Length => _memory.Length;
 
         public Stream GetStream()
