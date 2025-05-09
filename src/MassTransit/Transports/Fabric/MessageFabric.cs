@@ -19,7 +19,6 @@
         readonly ConcurrentDictionary<string, IMessageExchange<T>> _exchanges;
         readonly MessageFabricObservable<TContext> _observers;
         readonly ConcurrentDictionary<string, IMessageQueue<TContext, T>> _queues;
-        IInMemoryDelayProvider _delayProvider1;
 
         public MessageFabric()
         {
