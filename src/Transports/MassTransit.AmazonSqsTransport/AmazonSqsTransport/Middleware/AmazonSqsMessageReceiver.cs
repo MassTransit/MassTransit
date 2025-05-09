@@ -91,7 +91,7 @@ namespace MassTransit.AmazonSqsTransport.Middleware
 
             _receiveSettings.QueueUrl = queueInfo.Url;
 
-            if (queueInfo.Attributes.TryGetValue(QueueAttributeName.VisibilityTimeout, out var value)
+            if (queueInfo.Attributes != null && queueInfo.Attributes.TryGetValue(QueueAttributeName.VisibilityTimeout, out var value)
                 && int.TryParse(value, out var visibilityTimeout)
                 && visibilityTimeout != _receiveSettings.VisibilityTimeout)
             {
