@@ -290,7 +290,7 @@ namespace MassTransit.Tests
 
             Assert.That(jobState.Message.CurrentState, Is.EqualTo("Started"));
 
-            await harness.Bus.CancelJob(jobId);
+            await harness.Bus.CancelJob(jobId, "Custom Reason");
 
             await Assert.MultipleAsync(async () =>
             {
@@ -300,9 +300,13 @@ namespace MassTransit.Tests
 
             jobState = await stateClient.GetResponse<JobState>(new { JobId = jobId });
 
-            Assert.That(jobState.Message.CurrentState, Is.EqualTo("Canceled"));
-
             await harness.Stop();
+
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(jobState.Message.CurrentState, Is.EqualTo("Canceled"));
+                Assert.That(jobState.Message.Reason, Is.EqualTo("Custom Reason"));
+            }
         }
 
         [Test]

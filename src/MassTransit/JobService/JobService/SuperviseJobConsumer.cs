@@ -21,9 +21,7 @@ namespace MassTransit.JobService
         {
             if (_jobService.TryGetJob(context.Message.JobId, out var handle))
             {
-                var reason = string.IsNullOrWhiteSpace(context.Message.Reason) ? JobCancellationReasons.CancellationRequested : context.Message.Reason;
-
-                await handle.Cancel(reason).ConfigureAwait(false);
+                await handle.Cancel(context.Message.GetCancellationReason()).ConfigureAwait(false);
             }
         }
 
