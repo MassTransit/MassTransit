@@ -17,13 +17,21 @@
     <Title>MassTransit.DapperIntegration</Title>
     <PackageTags>MassTransit;Dapper</PackageTags>
     <Description>MassTransit Dapper persistence support; $(Description)</Description>
+    <Authors>Chris Patterson, Bryan Boettcher</Authors>
   </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>MassTransit.DapperIntegration.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
     <PackageReference Include="Dapper" />
     <PackageReference Include="dapper.contrib" />
     <PackageReference Include="Microsoft.Data.SqlClient" />
+    <PackageReference Include="Npgsql" />
   </ItemGroup>
 
 </Project>
