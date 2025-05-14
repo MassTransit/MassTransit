@@ -55,7 +55,7 @@
         /// Specify that the queue should be a quorum queue
         /// </summary>
         /// <param name="replicationFactor">
-        /// Optional, if specified must be greater than zero and less than the number of cluster nodes.
+        /// Optional, if specified must be greater than zero and less or equal to the number of cluster nodes.
         /// An odd value is recommended.
         /// </param>
         void SetQuorumQueue(int? replicationFactor = default);
