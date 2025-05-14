@@ -28,7 +28,7 @@ namespace MassTransit.AmazonSqsTransport
             entry.Id = entryId;
 
             return entry.Message.Length
-                + entry.MessageAttributes.Where(x => x.Value.DataType == "String").Sum(x => x.Key.Length + x.Value.StringValue.Length);
+                + (entry.MessageAttributes?.Where(x => x.Value.DataType == "String").Sum(x => x.Key.Length + x.Value.StringValue.Length)).GetValueOrDefault();
         }
 
         protected override async Task SendBatch(IList<BatchEntry<PublishBatchRequestEntry>> batch)

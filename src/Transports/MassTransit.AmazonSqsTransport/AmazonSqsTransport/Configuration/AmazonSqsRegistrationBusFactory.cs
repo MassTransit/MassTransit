@@ -4,6 +4,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration
     using System.Collections.Generic;
     using Amazon;
     using Amazon.Runtime;
+    using Amazon.Runtime.Credentials;
     using MassTransit.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
@@ -50,7 +51,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration
                         h.SecretKey(options.SecretKey);
                     }
                     else
-                        h.Credentials(FallbackCredentialsFactory.GetCredentials());
+                        h.Credentials(DefaultAWSCredentialsIdentityResolver.GetCredentials());
                 });
             }
 

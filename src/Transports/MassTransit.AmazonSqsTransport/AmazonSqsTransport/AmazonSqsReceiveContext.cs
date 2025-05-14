@@ -20,6 +20,8 @@
             : base(redelivered, context, settings, clientContext, connectionContext)
         {
             TransportMessage = message;
+            TransportMessage.MessageAttributes ??= new Dictionary<string, MessageAttributeValue>();
+            TransportMessage.Attributes ??= new Dictionary<string, string>();
 
             var messageBody = new SqsMessageBody(message);
 
@@ -40,13 +42,16 @@
         {
             var properties = new Lazy<Dictionary<string, object>>(() => new Dictionary<string, object>());
 
-            if (TransportMessage.Attributes.TryGetValue(MessageSystemAttributeName.MessageGroupId, out var messageGroupId)
-                && !string.IsNullOrWhiteSpace(messageGroupId))
-                properties.Value[AmazonSqsTransportPropertyNames.GroupId] = messageGroupId;
+            if (TransportMessage.Attributes != null)
+            {
+                if (TransportMessage.Attributes.TryGetValue(MessageSystemAttributeName.MessageGroupId, out var messageGroupId)
+                    && !string.IsNullOrWhiteSpace(messageGroupId))
+                    properties.Value[AmazonSqsTransportPropertyNames.GroupId] = messageGroupId;
 
-            if (TransportMessage.Attributes.TryGetValue(MessageSystemAttributeName.MessageDeduplicationId, out var messageDeduplicationId)
-                && !string.IsNullOrWhiteSpace(messageDeduplicationId))
-                properties.Value[AmazonSqsTransportPropertyNames.DeduplicationId] = messageDeduplicationId;
+                if (TransportMessage.Attributes.TryGetValue(MessageSystemAttributeName.MessageDeduplicationId, out var messageDeduplicationId)
+                    && !string.IsNullOrWhiteSpace(messageDeduplicationId))
+                    properties.Value[AmazonSqsTransportPropertyNames.DeduplicationId] = messageDeduplicationId;
+            }
 
             return properties.IsValueCreated ? properties.Value : null;
         }
