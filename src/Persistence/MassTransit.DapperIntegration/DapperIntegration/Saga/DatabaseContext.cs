@@ -1,3 +1,4 @@
+#nullable enable
 namespace MassTransit.DapperIntegration.Saga
 {
     using System;
@@ -5,26 +6,22 @@ namespace MassTransit.DapperIntegration.Saga
     using System.Linq.Expressions;
     using System.Threading;
     using System.Threading.Tasks;
-
-
+    
     public interface DatabaseContext<TSaga> :
         IAsyncDisposable
+        where TSaga : class, ISaga
     {
-        Task DeleteAsync<T>(T instance, CancellationToken cancellationToken)
-            where T : class, ISaga;
+        Task DeleteAsync(TSaga instance, CancellationToken cancellationToken = default);
 
-        Task<T> LoadAsync<T>(Guid correlationId, CancellationToken cancellationToken)
-            where T : class, ISaga;
+        Task<TSaga?> LoadAsync(Guid correlationId, CancellationToken cancellationToken = default);
 
-        Task<IEnumerable<T>> QueryAsync<T>(Expression<Func<T, bool>> filterExpression, CancellationToken cancellationToken)
-            where T : class, ISaga;
+        Task<IEnumerable<TSaga>> QueryAsync(Expression<Func<TSaga, bool>> filterExpression, CancellationToken cancellationToken = default);
 
-        Task InsertAsync<T>(T instance, CancellationToken cancellationToken = default)
-            where T : class, ISaga;
+        Task InsertAsync(TSaga instance, CancellationToken cancellationToken = default);
 
-        Task UpdateAsync<T>(T instance, CancellationToken cancellationToken = default)
-            where T : class, ISaga;
+        Task UpdateAsync(TSaga instance, CancellationToken cancellationToken = default);
 
-        void Commit();
+        Task CommitAsync(CancellationToken cancellationToken = default);
     }
 }
+#nullable restore

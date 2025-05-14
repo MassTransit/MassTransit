@@ -24,7 +24,7 @@ namespace MassTransit.DapperIntegration.Tests
             public Using_the_container_integration()
             {
                 _provider = new ServiceCollection()
-                    .AddMassTransit(ConfigureRegistration)
+                    .AddMassTransitTestHarness(ConfigureRegistration)
                     .AddScoped<PublishTestStartedActivity>().BuildServiceProvider();
             }
 
@@ -32,8 +32,8 @@ namespace MassTransit.DapperIntegration.Tests
             [Category("Flaky")]
             public async Task Should_work_as_expected()
             {
-                Task<ConsumeContext<TestStarted>> started = await ConnectPublishHandler<TestStarted>();
-                Task<ConsumeContext<TestUpdated>> updated = await ConnectPublishHandler<TestUpdated>();
+                var started = await ConnectPublishHandler<TestStarted>();
+                var updated = await ConnectPublishHandler<TestUpdated>();
 
                 var correlationId = NewId.NextGuid();
 
@@ -46,7 +46,6 @@ namespace MassTransit.DapperIntegration.Tests
                 await started;
 
                 var repository = _provider.GetRequiredService<ISagaRepository<TestInstance>>();
-
                 var machine = _provider.GetRequiredService<TestStateMachineSaga>();
 
                 Guid? sagaId = await repository.ShouldContainSagaInState(correlationId, machine, x => x.Active, TestTimeout);
@@ -64,19 +63,18 @@ namespace MassTransit.DapperIntegration.Tests
             [OneTimeSetUp]
             public async Task Setup()
             {
-                using (var connection = new SqlConnection(_connectionString))
-                {
-                    var sql = @"
-                if not exists (select * from sysobjects where name='TestInstances' and xtype='U')
-                CREATE TABLE TestInstances (
-                    CorrelationId uniqueidentifier NOT NULL,
-                    CONSTRAINT PK_TestInstances_CorrelationId PRIMARY KEY CLUSTERED (CorrelationId),
-                    [Key] nvarchar(max),
-                    CurrentState nvarchar(max)
-                );
-            ";
-                    connection.Execute(sql);
-                }
+                await using var connection = new SqlConnection(_connectionString);
+
+                var sql = @"IF NOT EXISTS (SELECT * FROM SYSOBJECTS WHERE Name='TestInstances' AND xtype='U')
+CREATE TABLE TestInstances (
+    CorrelationId UNIQUEIDENTIFIER NOT NULL,
+    Version INT NOT NULL,
+    [Key] NVARCHAR(MAX),
+    CurrentState NVARCHAR(MAX),
+
+    PRIMARY KEY CLUSTERED (CorrelationId)
+);";
+                await connection.ExecuteAsync(sql);
             }
 
             protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
@@ -86,25 +84,27 @@ namespace MassTransit.DapperIntegration.Tests
                 configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
                     .DapperRepository(_connectionString);
 
-                configurator.AddBus(provider => BusControl);
+                configurator.AddInMemoryInboxOutbox();
+                configurator.UsingInMemory((ctx, cfg) => cfg.ConfigureEndpoints(ctx));
             }
 
             protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
-                configurator.UseInMemoryOutbox();
                 configurator.ConfigureSaga<TestInstance>(_provider.GetRequiredService<IBusRegistrationContext>());
             }
         }
 
 
         public class TestInstance :
-            SagaStateMachineInstance
+            SagaStateMachineInstance, ISagaVersion
         {
             public string CurrentState { get; set; }
             public string Key { get; set; }
 
             [ExplicitKey]
             public Guid CorrelationId { get; set; }
+
+            public int Version { get; set; }
         }
 
 
@@ -119,7 +119,7 @@ namespace MassTransit.DapperIntegration.Tests
 
                 Initially(
                     When(Started)
-                        .Then(context => context.Instance.Key = context.Data.TestKey)
+                        .Then(context => context.Saga.Key = context.Message.TestKey)
                         .Activity(x => x.OfInstanceType<PublishTestStartedActivity>())
                         .TransitionTo(Active));
 
@@ -127,8 +127,8 @@ namespace MassTransit.DapperIntegration.Tests
                     When(Updated)
                         .Publish(context => new TestUpdated
                         {
-                            CorrelationId = context.Instance.CorrelationId,
-                            TestKey = context.Instance.Key
+                            CorrelationId = context.Saga.CorrelationId,
+                            TestKey = context.Saga.Key
                         })
                         .TransitionTo(Done)
                         .Finalize());
@@ -175,8 +175,8 @@ namespace MassTransit.DapperIntegration.Tests
             {
                 await _context.Publish(new TestStarted
                 {
-                    CorrelationId = context.Instance.CorrelationId,
-                    TestKey = context.Instance.Key
+                    CorrelationId = context.Saga.CorrelationId,
+                    TestKey = context.Saga.Key
                 }).ConfigureAwait(false);
 
                 await next.Execute(context).ConfigureAwait(false);
@@ -187,8 +187,8 @@ namespace MassTransit.DapperIntegration.Tests
             {
                 await _context.Publish(new TestStarted
                 {
-                    CorrelationId = context.Instance.CorrelationId,
-                    TestKey = context.Instance.Key
+                    CorrelationId = context.Saga.CorrelationId,
+                    TestKey = context.Saga.Key
                 }).ConfigureAwait(false);
 
                 await next.Execute(context).ConfigureAwait(false);
