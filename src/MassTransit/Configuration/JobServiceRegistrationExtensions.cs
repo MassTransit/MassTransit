@@ -54,5 +54,38 @@ namespace MassTransit
 
             return services;
         }
+
+        /// <summary>
+        /// Compares the <paramref name="name" /> to the known job saga endpoints and returns true if the name matches.
+        /// Use this inside an AddConfigureEndpointsCallback to avoid adding filters to the job saga endpoints.
+        /// </summary>
+        /// <param name="context">The registration context</param>
+        /// <param name="name">The endpoint name</param>
+        /// <returns>true if matched, otherwise false</returns>
+        public static bool IsJobServiceEndpoint(this IRegistrationContext context, string name)
+        {
+            var selector = context.GetRequiredService<IContainerSelector>();
+
+            var formatter = selector.GetEndpointNameFormatter(context);
+
+            IEndpointDefinition? endpointDefinition = selector.GetEndpointDefinition<JobSaga>(context);
+            if (string.Equals(endpointDefinition?.GetEndpointName(formatter), name, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            endpointDefinition = selector.GetEndpointDefinition<JobTypeSaga>(context);
+            if (string.Equals(endpointDefinition?.GetEndpointName(formatter), name, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            endpointDefinition = selector.GetEndpointDefinition<JobAttemptSaga>(context);
+            if (string.Equals(endpointDefinition?.GetEndpointName(formatter), name, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            if (string.Equals(formatter.Saga<JobTypeSaga>(), name, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(formatter.Saga<JobSaga>(), name, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(formatter.Saga<JobAttemptSaga>(), name, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            return false;
+        }
     }
 }
