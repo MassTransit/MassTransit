@@ -35,7 +35,15 @@ namespace MassTransit.DynamoDbIntegration.Saga
 
         public async Task<TSaga> Load(Guid correlationId)
         {
-            var value = await _database.LoadAsync<DynamoDbSaga>(_options.FormatSagaKey(correlationId), DynamoDbSaga.DefaultEntityType, _options.Config);
+            var value = await _database.LoadAsync<DynamoDbSaga>(_options.FormatSagaKey(correlationId), DynamoDbSaga.DefaultEntityType, new LoadConfig
+            {
+                ConsistentRead = _options.Config.ConsistentRead,
+                Conversion = _options.Config.Conversion,
+                IsEmptyStringValueEnabled = _options.Config.IsEmptyStringValueEnabled,
+                OverrideTableName = _options.Config.OverrideTableName,
+                RetrieveDateTimeInUtc = _options.Config.RetrieveDateTimeInUtc,
+                TableNamePrefix =   _options.Config.TableNamePrefix,
+            });
             return value == null
                 ? null
                 : JsonSerializer.Deserialize<TSaga>(value.Properties, SystemTextJsonMessageSerializer.Options);
@@ -52,7 +60,13 @@ namespace MassTransit.DynamoDbIntegration.Saga
 
                 var updateSaga = GetDynamoDbSaga(instance);
 
-                await _database.GetTargetTable<DynamoDbSaga>(_options.Config)
+                await _database.GetTargetTable<DynamoDbSaga>(new GetTargetTableConfig
+                {
+                    Conversion = _options.Config.Conversion,
+                    IsEmptyStringValueEnabled = _options.Config.IsEmptyStringValueEnabled,
+                    OverrideTableName = _options.Config.OverrideTableName,
+                    TableNamePrefix = _options.Config.TableNamePrefix
+                })
                     .UpdateItemAsync(updateSaga.ToDocument(), new Primitive(updateSaga.CorrelationId), new Primitive(DynamoDbSaga.DefaultEntityType),
                         operationConfig);
             }
@@ -68,7 +82,14 @@ namespace MassTransit.DynamoDbIntegration.Saga
 
         public Task Delete(SagaConsumeContext<TSaga> context)
         {
-            return _database.DeleteAsync(new DynamoDbSaga { CorrelationId = _options.FormatSagaKey(context.Saga.CorrelationId) }, _options.Config);
+            return _database.DeleteAsync(new DynamoDbSaga { CorrelationId = _options.FormatSagaKey(context.Saga.CorrelationId) }, new DeleteConfig
+            {
+                Conversion = _options.Config.Conversion,
+                IsEmptyStringValueEnabled = _options.Config.IsEmptyStringValueEnabled,
+                OverrideTableName = _options.Config.OverrideTableName,
+                SkipVersionCheck = _options.Config.SkipVersionCheck,
+                TableNamePrefix = _options.Config.TableNamePrefix
+            });
         }
 
         public void Dispose()
@@ -102,7 +123,13 @@ namespace MassTransit.DynamoDbIntegration.Saga
 
                 var operationConfig = BuildPutItemOperationConfig(addSaga.CorrelationId);
 
-                await _database.GetTargetTable<DynamoDbSaga>(_options.Config).PutItemAsync(addSaga.ToDocument(), operationConfig);
+                await _database.GetTargetTable<DynamoDbSaga>(new GetTargetTableConfig
+                {
+                    Conversion = _options.Config.Conversion,
+                    IsEmptyStringValueEnabled = _options.Config.IsEmptyStringValueEnabled,
+                    OverrideTableName = _options.Config.OverrideTableName,
+                    TableNamePrefix = _options.Config.TableNamePrefix,
+                }).PutItemAsync(addSaga.ToDocument(), operationConfig);
             }
             catch (ConditionalCheckFailedException)
             {

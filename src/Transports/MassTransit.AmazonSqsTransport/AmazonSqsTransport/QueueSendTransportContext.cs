@@ -78,7 +78,7 @@ namespace MassTransit.AmazonSqsTransport
 
             sendContext.CancellationToken.ThrowIfCancellationRequested();
 
-            var message = new SendMessageBatchRequestEntry("", context.Body.GetString()) { Id = sendContext.MessageId.ToString() };
+            var message = new SendMessageBatchRequestEntry("", context.Body.GetString()) { Id = sendContext.MessageId.ToString(), MessageAttributes = new Dictionary<string, MessageAttributeValue>() };
 
             _headerAdapter.Set(message.MessageAttributes, context.Headers);
             _headerAdapter.Set(message.MessageAttributes, MessageHeaders.ContentType, context.ContentType.ToString());

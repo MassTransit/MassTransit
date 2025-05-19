@@ -91,7 +91,7 @@ namespace MassTransit.AmazonSqsTransport.Middleware
 
             _receiveSettings.QueueUrl = queueInfo.Url;
 
-            if (queueInfo.Attributes.TryGetValue(QueueAttributeName.VisibilityTimeout, out var value)
+            if (queueInfo.Attributes != null && queueInfo.Attributes.TryGetValue(QueueAttributeName.VisibilityTimeout, out var value)
                 && int.TryParse(value, out var visibilityTimeout)
                 && visibilityTimeout != _receiveSettings.VisibilityTimeout)
             {
@@ -106,7 +106,7 @@ namespace MassTransit.AmazonSqsTransport.Middleware
             if (IsStopping)
                 return;
 
-            var redelivered = message.Attributes.TryGetInt("ApproximateReceiveCount", out var receiveCount) && receiveCount > 1;
+            var redelivered = (message.Attributes != null && message.Attributes.TryGetInt("ApproximateReceiveCount", out var receiveCount) && receiveCount > 1);
 
             var context = new AmazonSqsReceiveContext(message, redelivered, _context, _client, _receiveSettings, _client.ConnectionContext);
             try
@@ -169,7 +169,7 @@ namespace MassTransit.AmazonSqsTransport.Middleware
 
             static byte[] MessageGroupIdProvider(Message message)
             {
-                return message.Attributes.TryGetValue(MessageSystemAttributeName.MessageGroupId, out var groupId) && !string.IsNullOrEmpty(groupId)
+                return message.Attributes != null && message.Attributes.TryGetValue(MessageSystemAttributeName.MessageGroupId, out var groupId) && !string.IsNullOrEmpty(groupId)
                     ? Encoding.UTF8.GetBytes(groupId)
                     : [];
             }

@@ -147,23 +147,26 @@ namespace MassTransit.AmazonSqsTransport
 
                 var response = await _client.ListTopicsAsync(request, token).ConfigureAwait(false);
 
-                foreach (var topic in response.Topics)
+                if (response.Topics != null)
                 {
-                    var index = topic.TopicArn.LastIndexOf(":", StringComparison.OrdinalIgnoreCase);
-                    if (index < 0)
-                        continue;
-
-                    var topicName = topic.TopicArn.Substring(index + 1);
-
-                    await _cache.GetOrAdd(topicName, async key =>
+                    foreach (var topic in response.Topics)
                     {
-                        var topicInfo = new TopicInfo(topicName, topic.TopicArn, _client, _cancellationToken, true);
+                        var index = topic.TopicArn.LastIndexOf(":", StringComparison.OrdinalIgnoreCase);
+                        if (index < 0)
+                            continue;
 
-                        lock (_durableTopics)
-                            _durableTopics[topicInfo.EntityName] = topicInfo;
+                        var topicName = topic.TopicArn.Substring(index + 1);
 
-                        return topicInfo;
-                    }).ConfigureAwait(false);
+                        await _cache.GetOrAdd(topicName, async key =>
+                        {
+                            var topicInfo = new TopicInfo(topicName, topic.TopicArn, _client, _cancellationToken, true);
+
+                            lock (_durableTopics)
+                                _durableTopics[topicInfo.EntityName] = topicInfo;
+
+                            return topicInfo;
+                        }).ConfigureAwait(false);
+                    }
                 }
 
                 cursor = response.NextToken;

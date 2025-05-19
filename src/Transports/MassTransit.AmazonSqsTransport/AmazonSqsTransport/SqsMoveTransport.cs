@@ -32,19 +32,22 @@
 
             OneTimeContext<ConfigureTopologyContext<TSettings>> oneTimeContext = await _topologyFilter.Configure(clientContext).ConfigureAwait(false);
 
-            var message = new SendMessageBatchRequestEntry("", Encoding.UTF8.GetString(context.GetBody()));
+            var message = new SendMessageBatchRequestEntry("", Encoding.UTF8.GetString(context.GetBody())) { MessageAttributes = new Dictionary<string, MessageAttributeValue>() };
 
             if (context.TryGetPayload(out AmazonSqsMessageContext receiveContext))
             {
                 if (_isFifo)
                 {
-                    if (receiveContext.TransportMessage.Attributes.TryGetValue(MessageSystemAttributeName.MessageGroupId, out var messageGroupId)
-                        && !string.IsNullOrWhiteSpace(messageGroupId))
-                        message.MessageGroupId = messageGroupId;
-                    if (receiveContext.TransportMessage.Attributes.TryGetValue(MessageSystemAttributeName.MessageDeduplicationId,
-                            out var messageDeduplicationId)
-                        && !string.IsNullOrWhiteSpace(messageDeduplicationId))
-                        message.MessageDeduplicationId = messageDeduplicationId;
+                    if (receiveContext.TransportMessage.Attributes != null)
+                    {
+                        if (receiveContext.TransportMessage.Attributes.TryGetValue(MessageSystemAttributeName.MessageGroupId, out var messageGroupId)
+                            && !string.IsNullOrWhiteSpace(messageGroupId))
+                            message.MessageGroupId = messageGroupId;
+                        if (receiveContext.TransportMessage.Attributes.TryGetValue(MessageSystemAttributeName.MessageDeduplicationId,
+                                out var messageDeduplicationId)
+                            && !string.IsNullOrWhiteSpace(messageDeduplicationId))
+                            message.MessageDeduplicationId = messageDeduplicationId;
+                    }
                 }
 
                 CopyReceivedMessageHeaders(receiveContext, message.MessageAttributes);

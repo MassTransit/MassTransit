@@ -23,7 +23,7 @@
 
         public bool TryGetHeader(string key, out object value)
         {
-            if (_message.MessageAttributes.TryGetValue(key, out var val))
+            if (_message.MessageAttributes != null && _message.MessageAttributes.TryGetValue(key, out var val))
             {
                 value = val.StringValue;
                 return value != null;
@@ -43,7 +43,7 @@
 
             if (MessageHeaders.TransportSentTime.Equals(key, StringComparison.OrdinalIgnoreCase))
             {
-                if (_message.Attributes.TryGetValue(MessageSystemAttributeName.SentTimestamp, out var sentTimestamp))
+                if (_message.Attributes != null && _message.Attributes.TryGetValue(MessageSystemAttributeName.SentTimestamp, out var sentTimestamp))
                 {
                     if (long.TryParse(sentTimestamp, out var milliseconds))
                     {
@@ -62,10 +62,13 @@
             if (!TryGetHeader(MessageHeaders.MessageId, out _))
                 yield return new KeyValuePair<string, object>(MessageHeaders.MessageId, _message.MessageId);
 
-            foreach (KeyValuePair<string, object> header in _message.MessageAttributes
-                         .Where(x => x.Value.StringValue != null)
-                         .Select(x => new KeyValuePair<string, object>(x.Key, x.Value.StringValue)))
-                yield return header;
+            if (_message.MessageAttributes != null)
+            {
+                foreach (KeyValuePair<string, object> header in _message.MessageAttributes
+                             .Where(x => x.Value.StringValue != null)
+                             .Select(x => new KeyValuePair<string, object>(x.Key, x.Value.StringValue)))
+                    yield return header;
+            }
         }
     }
 }
