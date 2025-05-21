@@ -1,77 +1,150 @@
-﻿namespace MassTransit.DapperIntegration.Saga
+﻿#nullable enable
+namespace MassTransit.DapperIntegration.Saga
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using System.Linq;
     using System.Linq.Expressions;
+    using System.Reflection;
     using Internals;
-
-
+    
     public static class SqlExpressionVisitor
     {
-        public static List<(string, object)> CreateFromExpression(Expression node)
+        public static List<SqlPredicate> CreateFromExpression(Expression node, List<SqlPropertyMapping>? mappings = null)
         {
             switch (node.NodeType)
             {
                 case ExpressionType.Lambda:
-                    return LambdaVisit((LambdaExpression)node);
+                    return LambdaVisit((LambdaExpression)node, mappings);
                 case ExpressionType.AndAlso:
-                    return AndAlsoVisit((BinaryExpression)node);
+                    return AndAlsoVisit((BinaryExpression)node, mappings);
+                case ExpressionType.Not:
+                    return NegatedVisit((UnaryExpression)node, mappings);
+                case ExpressionType.NotEqual:
+                    return ComparisonVisit((BinaryExpression)node, "<>", mappings);
                 case ExpressionType.Equal:
-                    return EqualVisit((BinaryExpression)node);
+                    return ComparisonVisit((BinaryExpression)node, "=", mappings);
+                case ExpressionType.LessThan:
+                    return ComparisonVisit((BinaryExpression)node, "<", mappings);
+                case ExpressionType.LessThanOrEqual:
+                    return ComparisonVisit((BinaryExpression)node, "<=", mappings);
+                case ExpressionType.GreaterThan:
+                    return ComparisonVisit((BinaryExpression)node, ">", mappings);
+                case ExpressionType.GreaterThanOrEqual:
+                    return ComparisonVisit((BinaryExpression)node, ">=", mappings);
                 case ExpressionType.MemberAccess:
-                    return MemberAccessVisit((MemberExpression)node);
+                    return MemberAccessVisit((MemberExpression)node, mappings);
                 default:
                     throw new Exception("Node type not supported.");
             }
         }
 
-        static List<(string, object)> LambdaVisit(LambdaExpression node)
+        static List<SqlPredicate> LambdaVisit(LambdaExpression node, List<SqlPropertyMapping>? mappings)
         {
-            return CreateFromExpression(node.Body);
+            return CreateFromExpression(node.Body, mappings);
         }
 
-        static List<(string, object)> AndAlsoVisit(BinaryExpression node)
+        static List<SqlPredicate> AndAlsoVisit(BinaryExpression node, List<SqlPropertyMapping>? mappings)
         {
-            var result = new List<(string, object)>();
-            List<(string, object)> leftResult = CreateFromExpression(node.Left);
-            result.AddRange(leftResult);
+            var result = new List<SqlPredicate>();
 
-            List<(string, object)> rightResult = CreateFromExpression(node.Right);
-            result.AddRange(rightResult);
+            result.AddRange(CreateFromExpression(node.Left, mappings));
+            result.AddRange(CreateFromExpression(node.Right, mappings));
 
             return result;
         }
 
-        static List<(string, object)> EqualVisit(BinaryExpression node)
+        static List<SqlPredicate> ComparisonVisit(BinaryExpression node, string op, List<SqlPropertyMapping>? mappings)
         {
             var left = (MemberExpression)node.Left;
+            var name = MemberName(left.Member, mappings);
 
-            var name = left.Member.Name;
+            object? value;
 
-            object value;
             if (node.Right is ConstantExpression right)
                 value = right.Value;
             else
-            {
                 value = Expression.Lambda<Func<object>>(Expression.Convert(node.Right, typeof(object))).CompileFast().Invoke();
-            }
 
-            return new List<(string, object)> { (name, value) };
+            return [new(name, value, op)];
         }
 
-        static List<(string, object)> MemberAccessVisit(MemberExpression node)
+        static List<SqlPredicate> NegatedVisit(UnaryExpression node, List<SqlPropertyMapping>? mappings)
         {
-            var name = node.Member.Name;
-            object value;
+            var property = (MemberExpression) node.Operand;
+            var name = MemberName(property.Member, mappings);
+
+            if (node.Type != typeof(bool))
+                throw new InvalidOperationException("Negation is only supported for boolean properties");
+            
+            return [new(name, false)];
+        }
+
+        static List<SqlPredicate> MemberAccessVisit(MemberExpression node, List<SqlPropertyMapping>? mappings)
+        {
+            var name = MemberName(node.Member, mappings);
+            object? value;
 
             if (node.Type == typeof(bool))
-                value = true; // No support for Not yet.
+                value = true;
             else if (node.Type.IsValueType)
                 value = Activator.CreateInstance(node.Type);
             else
                 value = null;
 
-            return new List<(string, object)> { (name, value) };
+            return [new(name, value)];
+        }
+
+        static string MemberName(MemberInfo member, List<SqlPropertyMapping>? mappings)
+        {
+            var specificName = member.GetCustomAttribute<ColumnAttribute>()?.Name;
+            if (specificName is not null)
+                return specificName;
+
+            var prefixMatch = mappings?.Where(m => !m.Exact).FirstOrDefault(m =>
+                m.Property.Type == member.DeclaringType
+            );
+
+            if (prefixMatch is not null)
+                return string.Concat(prefixMatch.Name, member.Name);
+
+            if (member is PropertyInfo prop)
+            {
+                var exactMatch = mappings?.Where(m => m.Exact).FirstOrDefault(m =>
+                    m.Property.Type == prop.PropertyType &&
+                    m.Property.Member.DeclaringType == prop.DeclaringType &&
+                    m.Property.Member.Name == prop.Name
+                );
+
+                if (exactMatch is not null)
+                    return exactMatch.Name!;
+            }
+
+            return member.Name;
         }
     }
+
+    public class SqlPredicate
+    {
+        public SqlPredicate(string name, object? value, string @operator = "=")
+        {
+            Name = name;
+            Operator = @operator;
+            Value = value;
+        }
+
+        public string Name { get; set; }
+        public string Operator { get; set; }
+        public object? Value { get; set; }
+    }
+
+
+    public class SqlPropertyMapping
+    {
+        public MemberExpression Property { get; set; } = null!;
+        public string? Name { get; set; }
+        public bool Exact { get; set; }
+    }
 }
+#nullable restore
