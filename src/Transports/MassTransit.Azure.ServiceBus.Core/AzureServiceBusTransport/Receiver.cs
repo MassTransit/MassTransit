@@ -44,7 +44,7 @@
 
                 ServiceBusException { Reason: ServiceBusFailureReason.ServiceCommunicationProblem } => true,
                 ServiceBusException { Reason: ServiceBusFailureReason.MessagingEntityNotFound } => true,
-                ServiceBusException { Reason: ServiceBusFailureReason.MessagingEntityDisabled } => true,
+                ServiceBusException { Reason: ServiceBusFailureReason.MessagingEntityDisabled } => false,
 
                 ServiceBusException { IsTransient: true } => false,
 
@@ -66,6 +66,7 @@
                 case ObjectDisposedException { ObjectName: "$cbs" }:
                 case ServiceBusException { Reason: ServiceBusFailureReason.MessageLockLost }:
                 case ServiceBusException { Reason: ServiceBusFailureReason.SessionLockLost }:
+                case ServiceBusException { Reason: ServiceBusFailureReason.MessagingEntityDisabled }:
                     // don't log those
                     break;
                 default:
