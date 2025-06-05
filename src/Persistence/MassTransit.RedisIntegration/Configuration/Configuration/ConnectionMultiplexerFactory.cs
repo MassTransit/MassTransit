@@ -31,6 +31,7 @@ public class ConnectionMultiplexerFactory :
         IConnectionMultiplexer MultiplexerFactory(ConfigurationOptions configurationOptions)
         {
             LogContext.Debug?.Log("Creating Redis Connection Multiplexer: {Options}", configurationOptions.ToString(false));
+
             return ConnectionMultiplexer.Connect(configurationOptions);
         }
 
@@ -39,6 +40,18 @@ public class ConnectionMultiplexerFactory :
             return new Lazy<IConnectionMultiplexer>(() => MultiplexerFactory(x));
         }
 
-        return _connectionMultiplexers.GetOrAdd(configuration.ToString(false), ValueFactory(configuration)).Value;
+        var key = configuration.ToString(false);
+
+        Lazy<IConnectionMultiplexer> connection = _connectionMultiplexers.GetOrAdd(key, ValueFactory(configuration));
+        try
+        {
+            return connection.Value;
+        }
+        catch (Exception)
+        {
+            _connectionMultiplexers.TryRemove(key, out _);
+
+            throw;
+        }
     }
 }
