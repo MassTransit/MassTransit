@@ -1,4 +1,4 @@
-﻿namespace MassTransit.SignalR.Tests
+﻿namespace MassTransit.SignalR.Tests.Utils
 {
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.SignalR;
@@ -6,7 +6,8 @@
     using Testing;
 
 
-    public class DoubleScaleoutBackplaneTestFixture<THub> : MassTransitHubLifetimeTestFixture<THub>
+    public abstract class DoubleScaleoutBackplaneTestFixture<THub> :
+        MassTransitHubLifetimeTestFixture<THub>
         where THub : Hub
     {
         protected override BusTestHarness Harness { get; set; }

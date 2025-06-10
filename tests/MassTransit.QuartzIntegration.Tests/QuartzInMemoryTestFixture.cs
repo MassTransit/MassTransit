@@ -8,14 +8,14 @@
     using TestFramework;
 
 
-    public class QuartzInMemoryTestFixture :
+    public abstract class QuartzInMemoryTestFixture :
         InMemoryTestFixture
     {
         readonly Lazy<IMessageScheduler> _messageScheduler;
         QuartzTimeAdjustment _adjustment;
         ISchedulerFactory _schedulerFactory;
 
-        public QuartzInMemoryTestFixture()
+        protected QuartzInMemoryTestFixture()
         {
             QuartzAddress = new Uri("loopback://localhost/quartz");
 

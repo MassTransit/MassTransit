@@ -8,14 +8,14 @@ namespace MassTransit.Azure.Table.Tests
     using TestFramework;
 
 
-    public class AzureTableInMemoryTestFixture :
+    public abstract class AzureTableInMemoryTestFixture :
         InMemoryTestFixture
     {
         protected readonly string ConnectionString;
         protected readonly TableClient TestCloudTable;
         protected readonly string TestTableName;
 
-        public AzureTableInMemoryTestFixture()
+        protected AzureTableInMemoryTestFixture()
         {
             ConnectionString = Configuration.StorageAccount;
             TestTableName = "azuretabletests";

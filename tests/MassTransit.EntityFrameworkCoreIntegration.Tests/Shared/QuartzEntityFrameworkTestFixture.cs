@@ -6,12 +6,12 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Shared
     using NUnit.Framework;
 
 
-    public class QuartzEntityFrameworkTestFixture<TTestDbParameters, TDbContext>
+    public abstract class QuartzEntityFrameworkTestFixture<TTestDbParameters, TDbContext>
         : EntityFrameworkTestFixture<TTestDbParameters, TDbContext>
         where TTestDbParameters : ITestDbParameters, new()
         where TDbContext : DbContext
     {
-        public QuartzEntityFrameworkTestFixture()
+        protected QuartzEntityFrameworkTestFixture()
         {
             QuartzAddress = new Uri("loopback://localhost/quartz");
         }

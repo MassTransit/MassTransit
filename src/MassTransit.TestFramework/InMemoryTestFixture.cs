@@ -7,17 +7,17 @@ namespace MassTransit.TestFramework
     using Testing;
 
 
-    public class InMemoryTestFixture :
+    public abstract class InMemoryTestFixture :
         BusTestFixture
     {
         TestExecutionContext _fixtureContext;
 
-        public InMemoryTestFixture()
+        protected InMemoryTestFixture()
             : this(new InMemoryTestHarness())
         {
         }
 
-        public InMemoryTestFixture(InMemoryTestHarness harness)
+        protected InMemoryTestFixture(InMemoryTestHarness harness)
             : base(harness)
         {
             InMemoryTestHarness = harness;

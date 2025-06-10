@@ -23,6 +23,7 @@
   <ItemGroup>
     <PackageReference Include="Iesi.Collections" />
     <PackageReference Include="NHibernate" />
+    <PackageReference Include="System.Net.Http" />
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 

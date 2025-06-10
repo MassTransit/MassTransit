@@ -1,4 +1,4 @@
-﻿namespace MassTransit.SignalR.Tests
+﻿namespace MassTransit.SignalR.Tests.Utils
 {
     using System;
     using Consumers;
@@ -7,7 +7,6 @@
     using Microsoft.Extensions.Options;
     using OfficialFramework;
     using Testing;
-    using Utils;
 
 
     public abstract class MassTransitHubLifetimeTestFixture<THub>
@@ -44,10 +43,10 @@
             jsonOptions ??= new JsonHubProtocolOptions();
 
             var manager = new MassTransitHubLifetimeManager<THub>(
-                new HubLifetimeManagerOptions<THub> {ServerName = $"{_prefix}_{Guid.NewGuid():N}"},
+                new HubLifetimeManagerOptions<THub> { ServerName = $"{_prefix}_{Guid.NewGuid():N}" },
                 new BusHubLifetimeScopeProvider(Harness.Bus),
                 new MockHubProtocolResolver(
-                    new IHubProtocol[] {new JsonHubProtocol(Options.Create(jsonOptions)), new MessagePackHubProtocol(Options.Create(messagePackOptions))})
+                    new IHubProtocol[] { new JsonHubProtocol(Options.Create(jsonOptions)), new MessagePackHubProtocol(Options.Create(messagePackOptions)) })
             );
 
             return manager;

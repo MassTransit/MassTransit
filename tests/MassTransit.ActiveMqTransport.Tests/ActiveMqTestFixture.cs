@@ -8,17 +8,17 @@
     using Testing;
 
 
-    public class ActiveMqTestFixture :
+    public abstract class ActiveMqTestFixture :
         BusTestFixture
     {
         TestExecutionContext _fixtureContext;
 
-        public ActiveMqTestFixture(string protocol = ActiveMqHostAddress.ActiveMqScheme, string inputQueueName = null)
+        protected ActiveMqTestFixture(string protocol = ActiveMqHostAddress.ActiveMqScheme, string inputQueueName = null)
             : this(new ActiveMqTestHarness(protocol, inputQueueName))
         {
         }
 
-        public ActiveMqTestFixture(ActiveMqTestHarness harness)
+        protected ActiveMqTestFixture(ActiveMqTestHarness harness)
             : base(harness)
         {
             ActiveMqTestHarness = harness;

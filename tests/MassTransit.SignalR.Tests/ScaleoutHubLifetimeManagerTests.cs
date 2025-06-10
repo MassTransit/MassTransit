@@ -8,9 +8,11 @@
     using NUnit.Framework;
     using OfficialFramework;
     using Testing;
+    using Utils;
 
 
-    public class ScaleoutHubLifetimeManagerTests : DoubleScaleoutBackplaneTestFixture<MyHub>
+    public class ScaleoutHubLifetimeManagerTests :
+        DoubleScaleoutBackplaneTestFixture<MyHub>
     {
         async Task AssertMessageAsync(TestClient client)
         {

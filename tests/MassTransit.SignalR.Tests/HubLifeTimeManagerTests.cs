@@ -7,9 +7,11 @@
     using Microsoft.AspNetCore.SignalR.Protocol;
     using NUnit.Framework;
     using OfficialFramework;
+    using Utils;
 
 
-    public class HubLifeTimeManagerTests : SingleScaleoutBackplaneTestFixture<MyHub>
+    public class HubLifeTimeManagerTests :
+        SingleScaleoutBackplaneTestFixture<MyHub>
     {
         async Task AssertMessageAsync(TestClient client)
         {

@@ -7,15 +7,15 @@
 
 
     [TestFixture]
-    public class TwoScopeAzureServiceBusTestFixture :
+    public abstract class TwoScopeAzureServiceBusTestFixture :
         AzureServiceBusTestFixture
     {
-        public TwoScopeAzureServiceBusTestFixture(string scope)
+        protected TwoScopeAzureServiceBusTestFixture(string scope)
         {
             _secondServiceUri = AzureServiceBusEndpointUriCreator.Create(Configuration.ServiceNamespace, scope);
         }
 
-        public TwoScopeAzureServiceBusTestFixture()
+        protected TwoScopeAzureServiceBusTestFixture()
         {
             _secondServiceUri = AzureServiceBusEndpointUriCreator.Create(Configuration.ServiceNamespace, "MassTransit.Tests.SecondService");
         }

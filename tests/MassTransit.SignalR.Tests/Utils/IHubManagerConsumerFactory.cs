@@ -1,4 +1,4 @@
-﻿namespace MassTransit.SignalR.Tests
+﻿namespace MassTransit.SignalR.Tests.Utils
 {
     using Microsoft.AspNetCore.SignalR;
 

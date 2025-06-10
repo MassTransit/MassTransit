@@ -37,19 +37,6 @@ namespace MassTransit.Configuration
             _configureMarten = ConfigureOptions;
         }
 
-        [Obsolete("Use AddMarten to configure the connection. Visit https://masstransit.io/obsolete for details.")]
-        public void Connection(Func<NpgsqlConnection> connectionFactory, Action<StoreOptions> configure = null)
-        {
-            void ConfigureOptions(StoreOptions options)
-            {
-                options.Connection(connectionFactory);
-
-                configure?.Invoke(options);
-            }
-
-            _configureMarten = ConfigureOptions;
-        }
-
         public IEnumerable<ValidationResult> Validate()
         {
             yield break;

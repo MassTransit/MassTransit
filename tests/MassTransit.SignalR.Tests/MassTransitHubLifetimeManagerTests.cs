@@ -9,9 +9,11 @@
     using NUnit.Framework;
     using OfficialFramework;
     using Testing;
+    using Utils;
 
 
-    public class MassTransitHubLifetimeManagerTests : MassTransitHubLifetimeTestFixture<MyHub>
+    public class MassTransitHubLifetimeManagerTests :
+        MassTransitHubLifetimeTestFixture<MyHub>
     {
         protected override BusTestHarness Harness { get; set; }
 

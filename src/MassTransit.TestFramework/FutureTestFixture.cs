@@ -7,14 +7,14 @@ namespace MassTransit.TestFramework
     using Testing;
 
 
-    public class FutureTestFixture
+    public abstract class FutureTestFixture
     {
         readonly IFutureTestFixtureConfigurator _testFixtureConfigurator;
 
         protected ServiceProvider Provider;
         protected ITestHarness TestHarness;
 
-        public FutureTestFixture(IFutureTestFixtureConfigurator testFixtureConfigurator)
+        protected FutureTestFixture(IFutureTestFixtureConfigurator testFixtureConfigurator)
         {
             _testFixtureConfigurator = testFixtureConfigurator;
         }

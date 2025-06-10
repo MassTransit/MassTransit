@@ -2,25 +2,25 @@
 {
     using System;
     using System.Threading.Tasks;
-    using MassTransit.Testing;
     using NUnit.Framework;
     using NUnit.Framework.Internal;
     using RabbitMQ.Client;
     using TestFramework;
+    using Testing;
     using Transports;
 
 
-    public class RabbitMqTestFixture :
+    public abstract class RabbitMqTestFixture :
         BusTestFixture
     {
         TestExecutionContext _fixtureContext;
 
-        public RabbitMqTestFixture(Uri logicalHostAddress = null, string inputQueueName = null)
+        protected RabbitMqTestFixture(Uri logicalHostAddress = null, string inputQueueName = null)
             : this(new RabbitMqTestHarness(inputQueueName), logicalHostAddress)
         {
         }
 
-        public RabbitMqTestFixture(RabbitMqTestHarness harness, Uri logicalHostAddress = null)
+        protected RabbitMqTestFixture(RabbitMqTestHarness harness, Uri logicalHostAddress = null)
             : base(harness)
         {
             RabbitMqTestHarness = harness;

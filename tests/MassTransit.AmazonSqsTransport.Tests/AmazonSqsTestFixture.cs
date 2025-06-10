@@ -8,17 +8,17 @@
     using Testing;
 
 
-    public class AmazonSqsTestFixture :
+    public abstract class AmazonSqsTestFixture :
         BusTestFixture
     {
         TestExecutionContext _fixtureContext;
 
-        public AmazonSqsTestFixture()
+        protected AmazonSqsTestFixture()
             : this(new AmazonSqsTestHarness())
         {
         }
 
-        public AmazonSqsTestFixture(AmazonSqsTestHarness harness)
+        protected AmazonSqsTestFixture(AmazonSqsTestHarness harness)
             : base(harness)
         {
             AmazonSqsTestHarness = harness;

@@ -1,10 +1,9 @@
-﻿namespace MassTransit.SignalR.Tests
+﻿namespace MassTransit.SignalR.Tests.Utils
 {
     using System.Collections.Generic;
     using Consumers;
     using Microsoft.AspNetCore.SignalR;
     using Testing;
-    using Utils;
 
 
     public class SignalRBackplaneConsumersTestHarness<THub>
