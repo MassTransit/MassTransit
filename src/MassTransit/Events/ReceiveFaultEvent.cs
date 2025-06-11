@@ -23,8 +23,9 @@
             FaultMessageTypes = faultMessageTypes;
 
             var aggregateException = exception as AggregateException;
-            Exceptions = aggregateException?.InnerExceptions.Select(x => (ExceptionInfo)new FaultExceptionInfo(x)).ToArray()
-                ?? new ExceptionInfo[] { new FaultExceptionInfo(exception) };
+
+            Exceptions = aggregateException?.InnerExceptions.Select(ExceptionInfo (x) => new FaultExceptionInfo(x)).ToArray()
+                ?? [new FaultExceptionInfo(exception)];
         }
 
         public Guid FaultId { get; set; }

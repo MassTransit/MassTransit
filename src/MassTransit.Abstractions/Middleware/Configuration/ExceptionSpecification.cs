@@ -55,6 +55,23 @@ namespace MassTransit.Configuration
         {
             var baseException = exception.GetBaseException();
 
+            if (baseException is AggregateException aggregateException)
+            {
+                foreach (var innerException in aggregateException.InnerExceptions)
+                {
+                    var baseInnerException = innerException.GetBaseException();
+
+                    for (var i = 0; i < exceptionTypes.Length; i++)
+                    {
+                        if (exceptionTypes[i].IsInstanceOfType(innerException))
+                            return true;
+
+                        if (exceptionTypes[i].IsInstanceOfType(baseInnerException))
+                            return true;
+                    }
+                }
+            }
+
             for (var i = 0; i < exceptionTypes.Length; i++)
             {
                 if (exceptionTypes[i].IsInstanceOfType(exception))
@@ -74,6 +91,17 @@ namespace MassTransit.Configuration
                 return filter(ofT);
 
             var baseException = exception.GetBaseException();
+
+            if (baseException is AggregateException aggregateException)
+            {
+                foreach (var innerException in aggregateException.InnerExceptions)
+                {
+                    var baseInnerException = innerException.GetBaseException();
+
+                    if (baseInnerException is T innerExceptionOfT && filter(innerExceptionOfT))
+                        return true;
+                }
+            }
 
             return baseException is T exceptionOfT && filter(exceptionOfT);
         }
