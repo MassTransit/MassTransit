@@ -78,11 +78,11 @@
 
             public Guid RequestId { get; }
 
-            void IProbeSite.Probe(ProbeContext context)
+            public void Probe(ProbeContext context)
             {
             }
 
-            Task IPipe<SendContext<TRequest>>.Send(SendContext<TRequest> context)
+            public Task Send(SendContext<TRequest> context)
             {
                 context.RequestId = RequestId;
                 context.ResponseAddress = _responseAddress;

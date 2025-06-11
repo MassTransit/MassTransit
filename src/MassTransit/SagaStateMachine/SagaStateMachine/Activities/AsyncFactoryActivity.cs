@@ -36,7 +36,7 @@ namespace MassTransit.SagaStateMachine
         {
             IStateMachineActivity<TSaga> activity = await _activityFactory(context).ConfigureAwait(false);
 
-            await activity.Execute(context, new WidenBehavior<TSaga, T>(next, context)).ConfigureAwait(false);
+            await activity.Execute(context, next).ConfigureAwait(false);
         }
 
         async Task IStateMachineActivity<TSaga>.Faulted<TException>(BehaviorExceptionContext<TSaga, TException> context, IBehavior<TSaga> next)

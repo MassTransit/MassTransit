@@ -61,10 +61,11 @@ namespace MassTransit.SagaStateMachine
             await next.Faulted(context).ConfigureAwait(false);
         }
 
-        async Task IStateMachineActivity<TSaga>.Faulted<T, TOtherException>(BehaviorExceptionContext<TSaga, T, TOtherException> context,
-            IBehavior<TSaga, T> next)
+        public async Task Faulted<T, TOtherException>(BehaviorExceptionContext<TSaga, T, TOtherException> context, IBehavior<TSaga, T> next)
+            where T : class
+            where TOtherException : Exception
         {
-            if (context is BehaviorExceptionContext<TSaga, TException> exceptionContext)
+            if (context is BehaviorExceptionContext<TSaga, T, TException> exceptionContext)
             {
                 var serviceAddress = _serviceAddressProvider(exceptionContext);
 
@@ -93,7 +94,7 @@ namespace MassTransit.SagaStateMachine
             : base(request)
         {
             _messageFactory = messageFactory;
-            _serviceAddressProvider = context => request.Settings.ServiceAddress;
+            _serviceAddressProvider = _ => request.Settings.ServiceAddress;
         }
 
         public FaultedRequestActivity(Request<TInstance, TRequest, TResponse> request,

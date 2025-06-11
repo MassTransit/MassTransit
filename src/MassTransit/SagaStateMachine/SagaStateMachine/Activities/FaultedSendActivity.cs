@@ -41,8 +41,7 @@ namespace MassTransit.SagaStateMachine
             return next.Execute(context);
         }
 
-        public async Task Faulted<T>(BehaviorExceptionContext<TSaga, T> context,
-            IBehavior<TSaga> next)
+        public async Task Faulted<T>(BehaviorExceptionContext<TSaga, T> context, IBehavior<TSaga> next)
             where T : Exception
         {
             if (context is BehaviorExceptionContext<TSaga, TException> exceptionContext)
@@ -51,8 +50,7 @@ namespace MassTransit.SagaStateMachine
             await next.Faulted(context).ConfigureAwait(false);
         }
 
-        public async Task Faulted<T, TOtherException>(BehaviorExceptionContext<TSaga, T, TOtherException> context,
-            IBehavior<TSaga, T> next)
+        public async Task Faulted<T, TOtherException>(BehaviorExceptionContext<TSaga, T, TOtherException> context, IBehavior<TSaga, T> next)
             where T : class
             where TOtherException : Exception
         {
@@ -68,7 +66,7 @@ namespace MassTransit.SagaStateMachine
 
             var endpoint = await exceptionContext.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
-            await _messageFactory.Use(exceptionContext, (ctx, s) => endpoint.Send(s.Message, s.Pipe)).ConfigureAwait(false);
+            await _messageFactory.Use(exceptionContext, (_, s) => endpoint.Send(s.Message, s.Pipe)).ConfigureAwait(false);
         }
     }
 
@@ -105,8 +103,7 @@ namespace MassTransit.SagaStateMachine
             return next.Execute(context);
         }
 
-        public async Task Faulted<T>(BehaviorExceptionContext<TSaga, TData, T> context,
-            IBehavior<TSaga, TData> next)
+        public async Task Faulted<T>(BehaviorExceptionContext<TSaga, TData, T> context, IBehavior<TSaga, TData> next)
             where T : Exception
         {
             if (context is BehaviorExceptionContext<TSaga, TData, TException> exceptionContext)
@@ -115,7 +112,7 @@ namespace MassTransit.SagaStateMachine
 
                 var endpoint = await exceptionContext.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
-                await _messageFactory.Use(exceptionContext, (ctx, s) => endpoint.Send(s.Message, s.Pipe)).ConfigureAwait(false);
+                await _messageFactory.Use(exceptionContext, (_, s) => endpoint.Send(s.Message, s.Pipe)).ConfigureAwait(false);
             }
 
             await next.Faulted(context).ConfigureAwait(false);

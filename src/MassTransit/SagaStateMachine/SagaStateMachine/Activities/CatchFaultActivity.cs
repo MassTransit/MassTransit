@@ -68,7 +68,7 @@
             {
                 await _behavior.Faulted(exceptionContext).ConfigureAwait(false);
 
-                // if the compensate returns, we should go forward normally
+                // if the compensation returns, we should go forward normally
                 await next.Execute(context).ConfigureAwait(false);
             }
             else

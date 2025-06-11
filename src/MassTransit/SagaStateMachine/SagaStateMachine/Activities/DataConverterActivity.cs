@@ -18,7 +18,7 @@ namespace MassTransit.SagaStateMachine
 
         public void Accept(StateMachineVisitor visitor)
         {
-            visitor.Visit(this, x => _activity.Accept(visitor));
+            visitor.Visit(this, _ => _activity.Accept(visitor));
         }
 
         public void Probe(ProbeContext context)
@@ -34,12 +34,10 @@ namespace MassTransit.SagaStateMachine
         public Task Execute<T>(BehaviorContext<TSaga, T> context, IBehavior<TSaga, T> next)
             where T : class
         {
-            var dataContext = context as BehaviorContext<TSaga, TMessage>;
-            if (dataContext == null)
+            if (context is not BehaviorContext<TSaga, TMessage> dataContext)
                 throw new SagaStateMachineException("Expected Type " + typeof(TMessage).Name + " but was " + context.Message.GetType().Name);
 
-            var dataNext = next as IBehavior<TSaga, TMessage>;
-            if (dataNext == null)
+            if (next is not IBehavior<TSaga, TMessage> dataNext)
                 throw new SagaStateMachineException("The next behavior was not a valid type");
 
             return _activity.Execute(dataContext, dataNext);
@@ -55,12 +53,10 @@ namespace MassTransit.SagaStateMachine
             where T : class
             where TException : Exception
         {
-            var dataContext = context as BehaviorExceptionContext<TSaga, TMessage, TException>;
-            if (dataContext == null)
+            if (context is not BehaviorExceptionContext<TSaga, TMessage, TException> dataContext)
                 throw new SagaStateMachineException("Expected Type " + typeof(TMessage).Name + " but was " + context.Message.GetType().Name);
 
-            var dataNext = next as IBehavior<TSaga, TMessage>;
-            if (dataNext == null)
+            if (next is not IBehavior<TSaga, TMessage> dataNext)
                 throw new SagaStateMachineException("The next behavior was not a valid type");
 
             return _activity.Faulted(dataContext, dataNext);

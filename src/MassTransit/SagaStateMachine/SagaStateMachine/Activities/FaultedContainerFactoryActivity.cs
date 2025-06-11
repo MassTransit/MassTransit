@@ -26,30 +26,28 @@ namespace MassTransit.SagaStateMachine
             return next.Execute(context);
         }
 
-        public async Task Faulted<TOtherException>(BehaviorExceptionContext<TSaga, TOtherException> context, IBehavior<TSaga> next)
+        public Task Faulted<TOtherException>(BehaviorExceptionContext<TSaga, TOtherException> context, IBehavior<TSaga> next)
             where TOtherException : Exception
         {
             if (context is BehaviorExceptionContext<TSaga, TException> exceptionContext)
             {
                 var activity = context.GetServiceOrCreateInstance<TActivity>();
 
-                await activity.Faulted(exceptionContext, next).ConfigureAwait(false);
+                return activity.Faulted(exceptionContext, next);
             }
 
-            await next.Faulted(context).ConfigureAwait(false);
+            return next.Faulted(context);
         }
 
         public Task Faulted<T, TOtherException>(BehaviorExceptionContext<TSaga, T, TOtherException> context, IBehavior<TSaga, T> next)
             where T : class
             where TOtherException : Exception
         {
-            if (context is BehaviorExceptionContext<TSaga, TException> exceptionContext)
+            if (context is BehaviorExceptionContext<TSaga, T, TException> exceptionContext)
             {
                 var activity = context.GetServiceOrCreateInstance<TActivity>();
 
-                var widenBehavior = new WidenBehavior<TSaga, T>(next, context);
-
-                return activity.Faulted(exceptionContext, widenBehavior);
+                return activity.Faulted(exceptionContext, next);
             }
 
             return next.Faulted(context);

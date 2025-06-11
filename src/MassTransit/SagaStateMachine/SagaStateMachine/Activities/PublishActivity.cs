@@ -86,8 +86,7 @@ namespace MassTransit.SagaStateMachine
             await next.Execute(context).ConfigureAwait(false);
         }
 
-        public Task Faulted<TException>(BehaviorExceptionContext<TSaga, TMessage, TException> context,
-            IBehavior<TSaga, TMessage> next)
+        public Task Faulted<TException>(BehaviorExceptionContext<TSaga, TMessage, TException> context, IBehavior<TSaga, TMessage> next)
             where TException : Exception
         {
             return next.Faulted(context);

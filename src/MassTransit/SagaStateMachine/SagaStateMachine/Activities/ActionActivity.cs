@@ -25,19 +25,19 @@ namespace MassTransit.SagaStateMachine
             context.CreateScope("then");
         }
 
-        public async Task Execute(BehaviorContext<TSaga> context, IBehavior<TSaga> next)
+        public Task Execute(BehaviorContext<TSaga> context, IBehavior<TSaga> next)
         {
             _action(context);
 
-            await next.Execute(context).ConfigureAwait(false);
+            return next.Execute(context);
         }
 
-        public async Task Execute<TData>(BehaviorContext<TSaga, TData> context, IBehavior<TSaga, TData> next)
+        public Task Execute<TData>(BehaviorContext<TSaga, TData> context, IBehavior<TSaga, TData> next)
             where TData : class
         {
             _action(context);
 
-            await next.Execute(context).ConfigureAwait(false);
+            return next.Execute(context);
         }
 
         public Task Faulted<TException>(BehaviorExceptionContext<TSaga, TException> context, IBehavior<TSaga> next)
@@ -78,11 +78,11 @@ namespace MassTransit.SagaStateMachine
             context.CreateScope("then");
         }
 
-        public async Task Execute(BehaviorContext<TSaga, TMessage> context, IBehavior<TSaga, TMessage> next)
+        public Task Execute(BehaviorContext<TSaga, TMessage> context, IBehavior<TSaga, TMessage> next)
         {
             _action(context);
 
-            await next.Execute(context).ConfigureAwait(false);
+            return next.Execute(context);
         }
 
         public Task Faulted<TException>(BehaviorExceptionContext<TSaga, TMessage, TException> context, IBehavior<TSaga, TMessage> next)

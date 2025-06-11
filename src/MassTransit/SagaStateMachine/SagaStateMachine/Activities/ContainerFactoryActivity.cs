@@ -26,22 +26,24 @@
         {
             var activity = context.GetServiceOrCreateInstance<TActivity>();
 
-            var widenBehavior = new WidenBehavior<TSaga, T>(next, context);
-
-            return activity.Execute(context, widenBehavior);
+            return activity.Execute(context, next);
         }
 
         public Task Faulted<TException>(BehaviorExceptionContext<TSaga, TException> context, IBehavior<TSaga> next)
             where TException : Exception
         {
-            return next.Faulted(context);
+            var activity = context.GetServiceOrCreateInstance<TActivity>();
+
+            return activity.Faulted(context, next);
         }
 
         public Task Faulted<T, TException>(BehaviorExceptionContext<TSaga, T, TException> context, IBehavior<TSaga, T> next)
             where T : class
             where TException : Exception
         {
-            return next.Faulted(context);
+            var activity = context.GetServiceOrCreateInstance<TActivity>();
+
+            return activity.Faulted(context, next);
         }
 
         public void Probe(ProbeContext context)
@@ -72,7 +74,9 @@
         public Task Faulted<TException>(BehaviorExceptionContext<TSaga, TMessage, TException> context, IBehavior<TSaga, TMessage> next)
             where TException : Exception
         {
-            return next.Faulted(context);
+            var activity = context.GetServiceOrCreateInstance<TActivity>();
+
+            return activity.Faulted(context, next);
         }
 
         public void Accept(StateMachineVisitor visitor)

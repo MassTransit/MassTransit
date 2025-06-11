@@ -62,11 +62,11 @@
             return next.Faulted(context);
         }
 
-        async Task Execute(BehaviorContext<TInstance> context)
+        Task Execute(BehaviorContext<TInstance> context)
         {
             var serviceAddress = _serviceAddressProvider(context);
 
-            await _messageFactory.Use(context, (ctx, m) => SendRequest(ctx, m, serviceAddress)).ConfigureAwait(false);
+            return _messageFactory.Use(context, (ctx, m) => SendRequest(ctx, m, serviceAddress));
         }
     }
 

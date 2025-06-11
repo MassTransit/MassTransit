@@ -42,7 +42,7 @@ namespace MassTransit.SagaStateMachine
             }
 
             if (_request.Settings.ClearRequestIdOnFaulted || _completed)
-                _request.SetRequestId(context.Saga, default);
+                _request.SetRequestId(context.Saga, null);
 
             await next.Execute(context).ConfigureAwait(false);
         }

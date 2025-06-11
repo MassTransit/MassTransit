@@ -65,7 +65,7 @@
 
                     await schedulerContext.CancelScheduledSend(context.ReceiveContext.InputAddress, previousTokenId.Value).ConfigureAwait(false);
 
-                    _schedule.SetTokenId(context.Saga, default);
+                    _schedule.SetTokenId(context.Saga, null);
                 }
             }
         }

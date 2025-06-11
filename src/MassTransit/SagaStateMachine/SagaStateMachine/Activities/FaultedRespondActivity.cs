@@ -27,18 +27,19 @@ namespace MassTransit.SagaStateMachine
             context.CreateScope("respond-faulted");
         }
 
-        Task IStateMachineActivity<TSaga>.Execute(BehaviorContext<TSaga> context, IBehavior<TSaga> next)
+        public Task Execute(BehaviorContext<TSaga> context, IBehavior<TSaga> next)
         {
             return next.Execute(context);
         }
 
-        Task IStateMachineActivity<TSaga>.Execute<T>(BehaviorContext<TSaga, T> context, IBehavior<TSaga, T> next)
+        public Task Execute<T>(BehaviorContext<TSaga, T> context, IBehavior<TSaga, T> next)
+            where T : class
         {
             return next.Execute(context);
         }
 
-        async Task IStateMachineActivity<TSaga>.Faulted<T>(BehaviorExceptionContext<TSaga, T> context,
-            IBehavior<TSaga> next)
+        public async Task Faulted<T>(BehaviorExceptionContext<TSaga, T> context, IBehavior<TSaga> next)
+            where T : Exception
         {
             if (context is BehaviorExceptionContext<TSaga, TException> exceptionContext)
                 await _messageFactory.Use(exceptionContext, (ctx, s) => ctx.RespondAsync(s.Message, s.Pipe)).ConfigureAwait(false);
@@ -46,8 +47,9 @@ namespace MassTransit.SagaStateMachine
             await next.Faulted(context).ConfigureAwait(false);
         }
 
-        async Task IStateMachineActivity<TSaga>.Faulted<T, TOtherException>(BehaviorExceptionContext<TSaga, T, TOtherException> context,
-            IBehavior<TSaga, T> next)
+        public async Task Faulted<T, TOtherException>(BehaviorExceptionContext<TSaga, T, TOtherException> context, IBehavior<TSaga, T> next)
+            where T : class
+            where TOtherException : Exception
         {
             if (context is BehaviorExceptionContext<TSaga, TException> exceptionContext)
                 await _messageFactory.Use(exceptionContext, (ctx, s) => ctx.RespondAsync(s.Message, s.Pipe)).ConfigureAwait(false);
@@ -81,13 +83,13 @@ namespace MassTransit.SagaStateMachine
             context.CreateScope("respond-faulted");
         }
 
-        Task IStateMachineActivity<TSaga, TData>.Execute(BehaviorContext<TSaga, TData> context, IBehavior<TSaga, TData> next)
+        public Task Execute(BehaviorContext<TSaga, TData> context, IBehavior<TSaga, TData> next)
         {
             return next.Execute(context);
         }
 
-        async Task IStateMachineActivity<TSaga, TData>.Faulted<T>(BehaviorExceptionContext<TSaga, TData, T> context,
-            IBehavior<TSaga, TData> next)
+        public async Task Faulted<T>(BehaviorExceptionContext<TSaga, TData, T> context, IBehavior<TSaga, TData> next)
+            where T : Exception
         {
             if (context is BehaviorExceptionContext<TSaga, TData, TException> exceptionContext)
                 await _messageFactory.Use(exceptionContext, (ctx, s) => ctx.RespondAsync(s.Message, s.Pipe)).ConfigureAwait(false);

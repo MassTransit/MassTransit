@@ -65,7 +65,7 @@ namespace MassTransit.SagaStateMachine
                 return; // Homey don't play re-entry, at least not yet.
 
             if (currentState != null && !currentState.HasState(_toState))
-                await RaiseCurrentStateLeaveEvents(context, currentState).ConfigureAwait(false);
+                await RaiseCurrentStateLeaveEvents(context, currentState, _toState).ConfigureAwait(false);
 
             await RaiseBeforeEnterEvents(context, currentState, _toState).ConfigureAwait(false);
 
@@ -90,7 +90,7 @@ namespace MassTransit.SagaStateMachine
             }
         }
 
-        async Task RaiseBeforeEnterEvents(BehaviorContext<TSaga> context, State<TSaga> currentState, State<TSaga> toState)
+        static async Task RaiseBeforeEnterEvents(BehaviorContext<TSaga> context, State<TSaga> currentState, State<TSaga> toState)
         {
             State<TSaga> superState = toState.SuperState;
             if (superState != null && (currentState == null || !superState.HasState(currentState)))
@@ -103,7 +103,7 @@ namespace MassTransit.SagaStateMachine
             await toState.Raise(beforeContext).ConfigureAwait(false);
         }
 
-        async Task RaiseAfterLeaveEvents(BehaviorContext<TSaga> context, State<TSaga> fromState, State<TSaga> toState)
+        static async Task RaiseAfterLeaveEvents(BehaviorContext<TSaga> context, State<TSaga> fromState, State<TSaga> toState)
         {
             if (fromState.HasState(toState))
                 return;
@@ -116,13 +116,13 @@ namespace MassTransit.SagaStateMachine
                 await RaiseAfterLeaveEvents(context, superState, toState).ConfigureAwait(false);
         }
 
-        async Task RaiseCurrentStateLeaveEvents(BehaviorContext<TSaga> context, State<TSaga> fromState)
+        static async Task RaiseCurrentStateLeaveEvents(BehaviorContext<TSaga> context, State<TSaga> fromState, State<TSaga> toState)
         {
             BehaviorContext<TSaga> leaveContext = context.CreateProxy(fromState.Leave);
             await fromState.Raise(leaveContext).ConfigureAwait(false);
 
             State<TSaga> superState = fromState.SuperState;
-            while (superState != null && !superState.HasState(_toState))
+            while (superState != null && !superState.HasState(toState))
             {
                 BehaviorContext<TSaga> superStateLeaveContext = context.CreateProxy(superState.Leave);
                 await superState.Raise(superStateLeaveContext).ConfigureAwait(false);
