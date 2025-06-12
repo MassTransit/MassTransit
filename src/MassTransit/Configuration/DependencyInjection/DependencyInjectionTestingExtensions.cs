@@ -25,7 +25,7 @@ namespace MassTransit
     {
         /// <summary>
         /// AddMassTransit, including the test harness, to the container.
-        /// To specify a transport, add the appropriate UsingXxx method. If a transport is not specified, the
+        /// To specify a transport, add the appropriate UsingXxx method. If no transport is specified, the
         /// default in-memory transport will be used, and ConfigureEndpoints will be called.
         /// If MassTransit has already been configured, the existing bus configuration will be replaced with an in-memory
         /// configuration (by default, unless another UsingXxx transport method is specified), and saga repositories are
@@ -38,7 +38,7 @@ namespace MassTransit
 
         /// <summary>
         /// AddMassTransit, including the test harness, to the container.
-        /// To specify a transport, add the appropriate UsingXxx method. If a transport is not specified, the
+        /// To specify a transport, add the appropriate UsingXxx method. If no transport is specified, the
         /// default in-memory transport will be used, and ConfigureEndpoints will be called.
         /// If MassTransit has already been configured, the existing bus configuration will be replaced with an in-memory
         /// configuration (by default, unless another UsingXxx transport method is specified), and saga repositories are
@@ -134,7 +134,7 @@ namespace MassTransit
         /// <param name="includeDetails">If true, additional details from each span are shown</param>
         public static IServiceCollection AddTelemetryListener(this IServiceCollection services, bool includeDetails = false)
         {
-            return services.AddTelemetryListener(Console.Out);
+            return services.AddTelemetryListener(Console.Out, includeDetails);
         }
 
         /// <summary>
@@ -147,7 +147,7 @@ namespace MassTransit
         {
             var (methodName, className) = GetTestMethodInfo();
 
-            services.TryAddSingleton(provider => new TestActivityListener(textWriter, methodName, className, includeDetails));
+            services.TryAddSingleton(_ => new TestActivityListener(textWriter, methodName, className, includeDetails));
 
             return services;
         }
@@ -159,8 +159,8 @@ namespace MassTransit
         /// <param name="testTimeout">If specified, changes the test timeout</param>
         /// <param name="testInactivityTimeout">If specified, changes the test inactivity timeout</param>
         /// <returns></returns>
-        public static IBusRegistrationConfigurator SetTestTimeouts(this IBusRegistrationConfigurator configurator, TimeSpan? testTimeout = default,
-            TimeSpan? testInactivityTimeout = default)
+        public static IBusRegistrationConfigurator SetTestTimeouts(this IBusRegistrationConfigurator configurator, TimeSpan? testTimeout = null,
+            TimeSpan? testInactivityTimeout = null)
         {
             configurator.AddOptions<TestHarnessOptions>()
                 .Configure(options =>
@@ -243,7 +243,7 @@ namespace MassTransit
                     if (busInstance == null)
                         throw new ConfigurationException("No bus instances found");
 
-                    busInstances = new[] { busInstance };
+                    busInstances = [busInstance];
                 }
 
                 var testHarnessBusInstance = busInstances.FirstOrDefault(x => x is InMemoryTestHarnessBusInstance);
