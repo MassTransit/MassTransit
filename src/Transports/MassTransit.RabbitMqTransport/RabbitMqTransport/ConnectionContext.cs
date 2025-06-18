@@ -49,7 +49,8 @@
         /// </summary>
         /// <param name="cancellationToken"></param>
         /// <param name="concurrentMessageLimit"></param>
+        /// <param name="agent"></param>
         /// <returns></returns>
-        Task<ChannelContext> CreateChannelContext(CancellationToken cancellationToken, ushort? concurrentMessageLimit);
+        Task<ChannelContext> CreateChannelContext(CancellationToken cancellationToken, ushort? concurrentMessageLimit, IAgent agent);
     }
 }

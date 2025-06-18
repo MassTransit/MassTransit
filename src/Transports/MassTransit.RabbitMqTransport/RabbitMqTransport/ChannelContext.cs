@@ -1,5 +1,6 @@
 ﻿namespace MassTransit.RabbitMqTransport
 {
+    using System;
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
@@ -57,5 +58,7 @@
             string consumerTag, CancellationToken cancellationToken);
 
         Task BasicCancel(string consumerTag);
+
+        void NotifyFaulted(Exception exception, Uri inputAddress);
     }
 }

@@ -28,7 +28,8 @@
 
             Task HandleShutdown(object sender, ShutdownEventArgs args)
             {
-                _ = Task.Run(() => asyncContext.Stop(args.ReplyText));
+                Task.Run(() => asyncContext.Stop(args.ReplyText))
+                    .IgnoreUnobservedExceptions();
 
                 return Task.CompletedTask;
             }
@@ -80,10 +81,10 @@
 
         Task<ChannelContext> CreateChannel(IAsyncPipeContextAgent<ChannelContext> asyncContext, CancellationToken cancellationToken)
         {
-            static Task<ChannelContext> CreateChannelContext(ConnectionContext connectionContext, CancellationToken createCancellationToken,
+            Task<ChannelContext> CreateChannelContext(ConnectionContext connectionContext, CancellationToken createCancellationToken,
                 ushort? concurrentMessageLimit)
             {
-                return connectionContext.CreateChannelContext(createCancellationToken, concurrentMessageLimit);
+                return connectionContext.CreateChannelContext(createCancellationToken, concurrentMessageLimit, asyncContext);
             }
 
             return _supervisor.CreateAgent(asyncContext, (context, token) => CreateChannelContext(context, token, _concurrentMessageLimit), cancellationToken);

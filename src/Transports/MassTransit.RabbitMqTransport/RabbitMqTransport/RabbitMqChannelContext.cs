@@ -4,10 +4,12 @@
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using Internals;
     using MassTransit.Middleware;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
     using RabbitMQ.Client.Exceptions;
+    using Transports;
 
 
     public class RabbitMqChannelContext :
@@ -15,14 +17,16 @@
         ChannelContext,
         IAsyncDisposable
     {
+        readonly IAgent _agent;
         readonly IChannel _channel;
         readonly ConnectionContext _connectionContext;
 
-        public RabbitMqChannelContext(ConnectionContext connectionContext, IChannel channel, CancellationToken cancellationToken)
+        public RabbitMqChannelContext(ConnectionContext connectionContext, IChannel channel, IAgent agent, CancellationToken cancellationToken)
             : base(connectionContext)
         {
             _connectionContext = connectionContext;
             _channel = channel;
+            _agent = agent;
             CancellationToken = cancellationToken;
 
             _channel.ContinuationTimeout = _connectionContext.ContinuationTimeout;
@@ -132,6 +136,12 @@
         public async Task BasicCancel(string consumerTag)
         {
             await _channel.BasicCancelAsync(consumerTag, false, CancellationToken);
+        }
+
+        public void NotifyFaulted(Exception exception, Uri inputAddress)
+        {
+            Task.Run(() => _agent.Stop($"Unrecoverable exception on {inputAddress.GetEndpointName()}", CancellationToken.None), CancellationToken.None)
+                .IgnoreUnobservedExceptions();
         }
 
         public async ValueTask DisposeAsync()

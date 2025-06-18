@@ -109,28 +109,23 @@ namespace MassTransit.RabbitMqTransport
             }
             catch (OperationInterruptedException exception)
             {
-                LogContext.Debug?.Log(exception,
+                LogContext.Error?.Log(exception,
                     "Consumer Channel Shutdown: {InputAddress} - {ConsumerTag}, Concurrent Peak: {MaxConcurrentDeliveryCount}",
                     _context.InputAddress, _consumerTag, ConcurrentDeliveryCount);
 
-                // ReSharper disable once MethodSupportsCancellation
-                TrySetConsumeCanceled();
+                _channel.NotifyFaulted(exception, _context.InputAddress);
 
-                if (exception.ShutdownReason != null)
-                    await _channel.Channel.CloseAsync(exception.ShutdownReason, true, CancellationToken.None).ConfigureAwait(false);
-                else
-                    await _channel.Channel.CloseAsync(CancellationToken.None).ConfigureAwait(false);
+                TrySetConsumeException(exception);
             }
             catch (EndOfStreamException exception)
             {
-                LogContext.Debug?.Log(exception,
+                LogContext.Error?.Log(exception,
                     "Consumer Channel Shutdown: {InputAddress} - {ConsumerTag}, Concurrent Peak: {MaxConcurrentDeliveryCount}",
                     _context.InputAddress, _consumerTag, ConcurrentDeliveryCount);
 
-                // ReSharper disable once MethodSupportsCancellation
-                TrySetConsumeCanceled();
+                _channel.NotifyFaulted(exception, _context.InputAddress);
 
-                await _channel.Channel.CloseAsync(CancellationToken.None).ConfigureAwait(false);
+                TrySetConsumeException(exception);
             }
             catch (Exception exception)
             {

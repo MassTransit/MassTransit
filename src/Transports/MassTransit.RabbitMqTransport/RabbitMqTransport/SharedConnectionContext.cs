@@ -38,9 +38,9 @@
             return _context.CreateChannel(cancellationToken, concurrentMessageLimit1);
         }
 
-        public Task<ChannelContext> CreateChannelContext(CancellationToken cancellationToken, ushort? concurrentMessageLimit)
+        public Task<ChannelContext> CreateChannelContext(CancellationToken cancellationToken, ushort? concurrentMessageLimit, IAgent agent)
         {
-            return _context.CreateChannelContext(cancellationToken, concurrentMessageLimit);
+            return _context.CreateChannelContext(cancellationToken, concurrentMessageLimit, agent);
         }
     }
 }
