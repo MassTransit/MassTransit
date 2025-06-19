@@ -26,8 +26,6 @@ namespace MassTransit.Transports.Components
             _options = options;
 
             _logContext = LogContext.Current;
-
-            _state = new StartedKillSwitchState(this);
         }
 
         public Task PreExecute<TActivity, TArguments>(ExecuteActivityContext<TActivity, TArguments> context)
@@ -139,7 +137,7 @@ namespace MassTransit.Transports.Components
             _receiveEndpoint = ready.ReceiveEndpoint;
 
             _consumeConnectHandle ??= _receiveEndpoint.ConnectConsumeObserver(this);
-
+            Started(null);
             return Task.CompletedTask;
         }
 
