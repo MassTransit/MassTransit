@@ -26,6 +26,8 @@ namespace MassTransit.Transports.Components
             _options = options;
 
             _logContext = LogContext.Current;
+
+            _state = new StartedKillSwitchState(this);
         }
 
         public Task PreExecute<TActivity, TArguments>(ExecuteActivityContext<TActivity, TArguments> context)
