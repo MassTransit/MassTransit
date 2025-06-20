@@ -7,7 +7,6 @@ namespace MassTransit.MongoDbIntegration.Audit
     using MongoDB.Bson.Serialization.Serializers;
     using MongoDB.Driver;
 
-
     public class MongoDbAuditStore :
         IMessageAuditStore
     {
