@@ -138,7 +138,7 @@ namespace MassTransit.Transports.Components
         {
             _receiveEndpoint = ready.ReceiveEndpoint;
             
-            Started(null);
+            Started(_state);
             
             _consumeConnectHandle ??= _receiveEndpoint.ConnectConsumeObserver(this);   
             
