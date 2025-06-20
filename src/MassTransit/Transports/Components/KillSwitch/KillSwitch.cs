@@ -137,9 +137,11 @@ namespace MassTransit.Transports.Components
         public Task Ready(ReceiveEndpointReady ready)
         {
             _receiveEndpoint = ready.ReceiveEndpoint;
-
-            _consumeConnectHandle ??= _receiveEndpoint.ConnectConsumeObserver(this);
-
+            
+            Started(_state);
+            
+            _consumeConnectHandle ??= _receiveEndpoint.ConnectConsumeObserver(this);   
+            
             return Task.CompletedTask;
         }
 
