@@ -1,87 +1,93 @@
-namespace MassTransit.RabbitMqTransport.Tests
+namespace MassTransit.RabbitMqTransport.Tests;
+
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using NUnit.Framework;
+using TestFramework;
+using Testing;
+
+
+[Category("Flaky")]
+[TestFixture]
+public class Using_the_kill_switch_with_rabbitmq
 {
-    using System;
-    using System.Linq;
-    using System.Threading.Tasks;
-    using NUnit.Framework;
-    using TestFramework;
-    using Testing;
-
-
-    [Category("Flaky")]
-    [TestFixture]
-    public class KillSwitch_Specs :
-        RabbitMqTestFixture
+    [Test]
+    public async Task Should_be_degraded_after_too_many_exceptions()
     {
-        [Test]
-        public async Task Should_be_degraded_after_too_many_exceptions()
-        {
-            Assert.That(await BusControl.WaitForHealthStatus(BusHealthStatus.Healthy, TimeSpan.FromSeconds(10)), Is.EqualTo(BusHealthStatus.Healthy));
-
-            await Task.WhenAll(Enumerable.Range(0, 11).Select(x => Bus.Publish(new BadMessage())));
-
-            await Assert.MultipleAsync(async () =>
+        await using var provider = new ServiceCollection()
+            .ConfigureRabbitMqTestOptions(options =>
             {
-                Assert.That(await BusControl.WaitForHealthStatus(BusHealthStatus.Degraded, TimeSpan.FromSeconds(15)), Is.EqualTo(BusHealthStatus.Degraded));
-
-                Assert.That(await BusControl.WaitForHealthStatus(BusHealthStatus.Healthy, TimeSpan.FromSeconds(10)), Is.EqualTo(BusHealthStatus.Healthy));
-
-                Assert.That(await RabbitMqTestHarness.Consumed.SelectAsync<BadMessage>().Take(11).Count(), Is.EqualTo(11));
-            });
-
-            await Task.WhenAll(Enumerable.Range(0, 20).Select(x => Bus.Publish(new GoodMessage())));
-
-            await Task.Delay(1000);
-
-            Assert.That(await RabbitMqTestHarness.Consumed.SelectAsync<GoodMessage>().Take(20).Count(), Is.EqualTo(20));
-        }
-
-        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
-        {
-            configurator.UseKillSwitch(options => options
-                .SetActivationThreshold(10)
-                .SetTripThreshold(0.1)
-                .SetRestartTimeout(s: 1));
-        }
-
-        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
-        {
-            configurator.PurgeOnStartup = false;
-            configurator.PrefetchCount = 1;
-
-            configurator.Consumer<BadConsumer>();
-        }
-
-        public KillSwitch_Specs()
-        {
-            TestTimeout = TimeSpan.FromMinutes(1);
-            TestInactivityTimeout = TimeSpan.FromSeconds(10);
-        }
-
-
-        class BadConsumer :
-            IConsumer<BadMessage>,
-            IConsumer<GoodMessage>
-        {
-            public Task Consume(ConsumeContext<BadMessage> context)
+                options.CleanVirtualHost = true;
+                options.CreateVirtualHostIfNotExists = true;
+            })
+            .AddMassTransitTestHarness(x =>
             {
-                throw new IntentionalTestException("Trying to trigger the kill switch");
-            }
+                x.AddConsumer<MessageConsumer>();
 
-            public Task Consume(ConsumeContext<GoodMessage> context)
-            {
-                return Task.CompletedTask;
-            }
-        }
+                x.AddOptions<RabbitMqTransportOptions>()
+                    .Configure(options => options.VHost = "test");
 
+                x.SetTestTimeouts(testInactivityTimeout: TimeSpan.FromSeconds(10));
 
-        class GoodMessage
+                x.UsingRabbitMq((context, cfg) =>
+                {
+                    cfg.UseDelayedMessageScheduler();
+
+                    cfg.PrefetchCount = 20;
+                    cfg.ConcurrentMessageLimit = 1;
+
+                    cfg.UseKillSwitch(options => options
+                        .SetActivationThreshold(9)
+                        .SetTripThreshold(10)
+                        .SetRestartTimeout(s: 5));
+
+                    cfg.ConfigureEndpoints(context);
+                });
+            })
+            .BuildServiceProvider(true);
+
+        var harness = await provider.StartTestHarness();
+
+        var busControl = provider.GetRequiredService<IBusControl>();
+
+        Assert.That(await busControl.WaitForHealthStatus(BusHealthStatus.Healthy, TimeSpan.FromSeconds(5)), Is.EqualTo(BusHealthStatus.Healthy));
+
+        await harness.Bus.PublishBatch(Enumerable.Range(0, 20).Select(_ => new MessageA()));
+
+        await Assert.MultipleAsync(async () =>
         {
-        }
+            Assert.That(await busControl.WaitForHealthStatus(BusHealthStatus.Degraded, TimeSpan.FromSeconds(10)), Is.EqualTo(BusHealthStatus.Degraded));
+
+            Assert.That(await harness.Consumed.SelectAsync<MessageA>().Take(10).Count(), Is.EqualTo(10));
+
+            Assert.That(await busControl.WaitForHealthStatus(BusHealthStatus.Healthy, TimeSpan.FromSeconds(10)), Is.EqualTo(BusHealthStatus.Healthy));
+        });
+
+        Assert.That(await harness.Consumed.SelectAsync<MessageA>().Take(20).Count(), Is.EqualTo(20));
+    }
 
 
-        class BadMessage
+    public class MessageA
+    {
+    }
+
+
+    public class MessageAReceived
+    {
+    }
+
+
+    class MessageConsumer :
+        IConsumer<MessageA>
+    {
+        public Task Consume(ConsumeContext<MessageA> context)
         {
+            if (context.ReceiveContext.Redelivered)
+                return context.Publish(new MessageAReceived());
+
+            throw new IntentionalTestException("First time through, we want to explode");
         }
     }
 }
