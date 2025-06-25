@@ -1,48 +1,55 @@
-﻿namespace MassTransit.Saga
+﻿namespace MassTransit.Saga;
+
+using System;
+using System.Linq.Expressions;
+using System.Reflection;
+using Configuration;
+
+
+public class PropertyExpressionSagaQueryFactory<TInstance, TData, TProperty> :
+    ISagaQueryFactory<TInstance, TData>
+    where TInstance : class, SagaStateMachineInstance
+    where TData : class
 {
-    using System;
-    using System.Linq.Expressions;
-    using Configuration;
+    readonly Expression<Func<TInstance, TProperty>> _propertyExpression;
+    readonly PropertyInfo _propertyInfo;
+    readonly ISagaQueryPropertySelector<TData, TProperty> _selector;
 
-
-    public class PropertyExpressionSagaQueryFactory<TInstance, TData, TProperty> :
-        ISagaQueryFactory<TInstance, TData>
-        where TInstance : class, SagaStateMachineInstance
-        where TData : class
+    public PropertyExpressionSagaQueryFactory(Expression<Func<TInstance, TProperty>> propertyExpression,
+        ISagaQueryPropertySelector<TData, TProperty> selector)
     {
-        readonly Expression<Func<TInstance, TProperty>> _propertyExpression;
-        readonly ISagaQueryPropertySelector<TData, TProperty> _selector;
+        _propertyExpression = propertyExpression;
+        _selector = selector;
 
-        public PropertyExpressionSagaQueryFactory(Expression<Func<TInstance, TProperty>> propertyExpression,
-            ISagaQueryPropertySelector<TData, TProperty> selector)
+        _propertyInfo = typeof(PropertyExpressionPropertyValue<TProperty>).GetProperty(nameof(PropertyExpressionPropertyValue<TProperty>.Value));
+    }
+
+    public bool TryCreateQuery(ConsumeContext<TData> context, out ISagaQuery<TInstance> query)
+    {
+        if (_selector.TryGetProperty(context, out var propertyValue))
         {
-            _propertyExpression = propertyExpression;
-            _selector = selector;
+            Expression<Func<TInstance, bool>> filterExpression = CreateExpression(propertyValue);
+
+            query = new SagaQuery<TInstance>(filterExpression);
+            return true;
         }
 
-        bool ISagaQueryFactory<TInstance, TData>.TryCreateQuery(ConsumeContext<TData> context, out ISagaQuery<TInstance> query)
-        {
-            if (_selector.TryGetProperty(context, out var propertyValue))
-            {
-                Expression<Func<TInstance, bool>> filterExpression = CreateExpression(propertyValue);
+        query = null;
+        return false;
+    }
 
-                query = new SagaQuery<TInstance>(filterExpression);
-                return true;
-            }
+    public void Probe(ProbeContext context)
+    {
+        context.Add("property", _propertyExpression.ToString());
+    }
 
-            query = default;
-            return false;
-        }
+    Expression<Func<TInstance, bool>> CreateExpression(TProperty propertyValue)
+    {
+        var value = new PropertyExpressionPropertyValue<TProperty> { Value = propertyValue };
 
-        void IProbeSite.Probe(ProbeContext context)
-        {
-            context.Add("property", _propertyExpression.ToString());
-        }
+        var constantValue = Expression.Constant(value);
+        var memberAccess = Expression.MakeMemberAccess(constantValue, _propertyInfo);
 
-        Expression<Func<TInstance, bool>> CreateExpression(TProperty propertyValue)
-        {
-            Expression<Func<TProperty>> propertyValueLambda = () => propertyValue;
-            return Expression.Lambda<Func<TInstance, bool>>(Expression.Equal(_propertyExpression.Body, propertyValueLambda.Body), _propertyExpression.Parameters);
-        }
+        return Expression.Lambda<Func<TInstance, bool>>(Expression.Equal(_propertyExpression.Body, memberAccess), _propertyExpression.Parameters);
     }
 }
