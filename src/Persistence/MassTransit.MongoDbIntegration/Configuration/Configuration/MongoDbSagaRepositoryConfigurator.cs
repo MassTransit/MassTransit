@@ -25,6 +25,29 @@ namespace MassTransit.Configuration
                 cfg.AutoMap();
                 cfg.MapIdProperty(x => x.CorrelationId).EnsureGuidRepresentationSpecified();
                 cfg.MapProperty(x => x.Version).SetIgnoreIfDefault(false);
+
+                if (cfg is BsonClassMap<JobSaga> jobSaga)
+                {
+                    jobSaga.MapProperty(x => x.AttemptId).EnsureGuidRepresentationSpecified();
+                    jobSaga.MapProperty(x => x.IncompleteAttempts).EnsureListGuidRepresentationSpecified();
+                    jobSaga.MapProperty(x => x.JobRetryDelayToken).EnsureGuidRepresentationSpecified();
+                    jobSaga.MapProperty(x => x.JobSlotWaitToken).EnsureGuidRepresentationSpecified();
+                }
+
+                if (cfg is BsonClassMap<JobAttemptSaga> jobAttemptSaga)
+                {
+                    jobAttemptSaga.MapProperty(x => x.JobId).EnsureGuidRepresentationSpecified();
+                    jobAttemptSaga.MapProperty(x => x.StatusCheckTokenId).EnsureGuidRepresentationSpecified();
+                }
+
+                if (cfg is BsonClassMap<JobTypeSaga>)
+                {
+                    BsonClassMap.TryRegisterClassMap(new BsonClassMap<ActiveJob>(activeJob =>
+                    {
+                        activeJob.AutoMap();
+                        activeJob.MapProperty(x => x.JobId).EnsureGuidRepresentationSpecified();
+                    }));
+                }
             }));
         }
 

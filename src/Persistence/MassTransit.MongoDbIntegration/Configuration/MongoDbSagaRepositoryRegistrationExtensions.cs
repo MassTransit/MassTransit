@@ -109,7 +109,7 @@ namespace MassTransit
         /// Configure the Job Service saga state machines to use MongoDB
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="database">A ready to use MongoDB database</param>
+        /// <param name="database">Ready to use MongoDB database</param>
         /// <param name="configure"></param>
         /// <returns></returns>
         public static IJobSagaRegistrationConfigurator MongoDbRepository(this IJobSagaRegistrationConfigurator configurator, IMongoDatabase database,
@@ -158,7 +158,7 @@ namespace MassTransit
         /// Use the MongoDB saga repository for sagas configured by type (without a specific generic call to AddSaga/AddSagaStateMachine)
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="database">A ready to use MongoDB database</param>
+        /// <param name="database">Ready to use MongoDB database</param>
         /// <param name="configure"></param>
         public static void SetMongoDbSagaRepositoryProvider(this IRegistrationConfigurator configurator, IMongoDatabase database,
             Action<IMongoDbSagaRepositoryConfigurator> configure)
