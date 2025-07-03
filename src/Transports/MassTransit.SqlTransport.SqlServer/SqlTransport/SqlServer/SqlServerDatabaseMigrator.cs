@@ -1463,6 +1463,13 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+	DECLARE @Lock int
+	EXEC @Lock = sp_getapplock @Resource = '_MT_RemoveOrphanedMessages',
+							   @LockMode = 'Exclusive',
+							   @LockTimeout = 500
+	IF (@Lock < 0)
+	   RETURN;
+
     DECLARE @DeletedMessages TABLE (
         TransportMessageId uniqueidentifier INDEX DMIDX CLUSTERED
     );
