@@ -39,8 +39,11 @@ namespace MassTransit.AmazonSqsTransport
 
             Complete(batch, response.Successful.Select(x => x.Id));
 
-            foreach (var error in response.Failed)
-                Fail(batch, error.Id, error.Code, error.Message);
+            if (response.Failed != null)
+            {
+                foreach (var error in response.Failed)
+                    Fail(batch, error.Id, error.Code, error.Message);
+            }
         }
     }
 }
