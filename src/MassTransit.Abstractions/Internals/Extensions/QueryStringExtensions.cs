@@ -91,7 +91,7 @@
         /// <param name="address"></param>
         /// <param name="hostPath"></param>
         /// <param name="entityName"></param>
-        public static void ParseHostPathAndEntityName(this Uri address, out string? hostPath, out string? entityName)
+        public static void ParseHostPathAndEntityName(this Uri address, out string? hostPath, out string entityName)
         {
             var path = address.AbsolutePath;
 

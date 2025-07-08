@@ -11,8 +11,8 @@
     public class AmazonSqsTestHarness :
         BusTestHarness
     {
-        Uri _hostAddress;
-        Uri _inputQueueAddress;
+        Uri? _hostAddress;
+        Uri? _inputQueueAddress;
 
         public AmazonSqsTestHarness(string host, string accessKey, string secretKey)
         {
@@ -39,7 +39,7 @@
 
         public Uri HostAddress
         {
-            get => _hostAddress;
+            get => _hostAddress!;
             set
             {
                 _hostAddress = value;
@@ -49,16 +49,16 @@
 
         public string AccessKey { get; }
         public string SecretKey { get; }
-        public AmazonSQSConfig AmazonSqsConfig { get; private set; }
-        public AmazonSimpleNotificationServiceConfig AmazonSnsConfig { get; private set; }
+        public AmazonSQSConfig? AmazonSqsConfig { get; private set; }
+        public AmazonSimpleNotificationServiceConfig? AmazonSnsConfig { get; private set; }
         public override string InputQueueName { get; }
 
-        public override Uri InputQueueAddress => _inputQueueAddress;
+        public override Uri InputQueueAddress => _inputQueueAddress!;
 
-        public event Action<IAmazonSqsBusFactoryConfigurator> OnConfigureAmazonSqsBus;
-        public event Action<IAmazonSqsReceiveEndpointConfigurator> OnConfigureAmazonSqsReceiveEndpoint;
-        public event Action<IAmazonSqsHostConfigurator> OnConfigureAmazonSqsHost;
-        public event Action<IAmazonSQS, IAmazonSimpleNotificationService> OnCleanupVirtualHost;
+        public event Action<IAmazonSqsBusFactoryConfigurator>? OnConfigureAmazonSqsBus;
+        public event Action<IAmazonSqsReceiveEndpointConfigurator>? OnConfigureAmazonSqsReceiveEndpoint;
+        public event Action<IAmazonSqsHostConfigurator>? OnConfigureAmazonSqsHost;
+        public event Action<IAmazonSQS, IAmazonSimpleNotificationService>? OnCleanupVirtualHost;
 
         protected virtual void ConfigureAmazonSqsBus(IAmazonSqsBusFactoryConfigurator configurator)
         {

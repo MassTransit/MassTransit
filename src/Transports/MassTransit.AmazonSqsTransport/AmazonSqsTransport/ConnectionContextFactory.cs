@@ -49,12 +49,11 @@
                 if (supervisor.Stopping.IsCancellationRequested)
                     throw new AmazonSqsConnectionException($"The connection is stopping and cannot be used: {_hostConfiguration.HostAddress}");
 
-                IConnection connection = null;
                 try
                 {
                     TransportLogMessages.ConnectHost(_hostConfiguration.Settings.ToString());
 
-                    connection = _hostConfiguration.Settings.CreateConnection();
+                    var connection = _hostConfiguration.Settings.CreateConnection();
 
                     return new AmazonSqsConnectionContext(connection, _hostConfiguration, supervisor.Stopped);
                 }

@@ -18,7 +18,7 @@ namespace MassTransit.AmazonSqsTransport
         public static int SizeLimit { get; set; }
         public static TimeSpan Timeout { get; set; }
 
-        public static BatchSettings GetBatchSettings()
+        public static BatchSettings? GetBatchSettings()
         {
             return new SnsPublishBatchSettings(Math.Min(5, MessageLimit), BatchLimit, Math.Min(256 * 1024, SizeLimit), Timeout);
         }

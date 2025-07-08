@@ -9,6 +9,6 @@ namespace MassTransit.AmazonSqsTransport.Topology
         /// <summary>
         /// The exchange to which the message is published
         /// </summary>
-        QueueHandle Queue { get; }
+        QueueHandle? Queue { get; }
     }
 }

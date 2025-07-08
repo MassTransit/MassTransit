@@ -16,10 +16,10 @@ public class ConfigureAmazonSqsTopologyFilter<TSettings> :
     where TSettings : class
 {
     readonly BrokerTopology _brokerTopology;
-    readonly SqsReceiveEndpointContext _context;
+    readonly SqsReceiveEndpointContext? _context;
     readonly TSettings _settings;
 
-    public ConfigureAmazonSqsTopologyFilter(TSettings settings, BrokerTopology brokerTopology, SqsReceiveEndpointContext context = null)
+    public ConfigureAmazonSqsTopologyFilter(TSettings settings, BrokerTopology brokerTopology, SqsReceiveEndpointContext? context = null)
     {
         _settings = settings;
         _brokerTopology = brokerTopology;

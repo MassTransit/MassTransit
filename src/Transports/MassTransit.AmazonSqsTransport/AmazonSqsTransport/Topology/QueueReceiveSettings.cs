@@ -43,7 +43,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
 
         public TimeSpan MaxVisibilityTimeout { get; set; }
 
-        public string QueueUrl { get; set; }
+        public string? QueueUrl { get; set; }
 
         public Uri GetInputAddress(Uri hostAddress)
         {

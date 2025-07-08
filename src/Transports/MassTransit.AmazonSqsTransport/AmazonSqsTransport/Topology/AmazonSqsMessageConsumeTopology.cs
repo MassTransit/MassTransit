@@ -32,7 +32,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
                 specification.Apply(builder);
         }
 
-        public void Subscribe(Action<IAmazonSqsTopicSubscriptionConfigurator> configure = null)
+        public void Subscribe(Action<IAmazonSqsTopicSubscriptionConfigurator>? configure = null)
         {
             if (!IsBindableMessageType)
             {

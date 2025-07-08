@@ -12,7 +12,7 @@ namespace MassTransit
         /// <param name="groupId"></param>
         public static void SetGroupId(this SendContext context, string groupId)
         {
-            if (!context.TryGetPayload(out AmazonSqsSendContext sendContext))
+            if (!context.TryGetPayload(out AmazonSqsSendContext? sendContext))
                 throw new ArgumentException("The AmazonSqsSendContext was not available");
 
             sendContext.GroupId = groupId;
@@ -25,7 +25,7 @@ namespace MassTransit
         /// <param name="groupId"></param>
         public static bool TrySetGroupId(this SendContext context, string groupId)
         {
-            if (!context.TryGetPayload(out AmazonSqsSendContext sendContext))
+            if (!context.TryGetPayload(out AmazonSqsSendContext? sendContext))
                 return false;
 
             sendContext.GroupId = groupId;
@@ -39,7 +39,7 @@ namespace MassTransit
         /// <param name="deduplicationId"></param>
         public static void SetDeduplicationId(this SendContext context, string deduplicationId)
         {
-            if (!context.TryGetPayload(out AmazonSqsSendContext sendContext))
+            if (!context.TryGetPayload(out AmazonSqsSendContext? sendContext))
                 throw new ArgumentException("The AmazonSqsSendContext was not available");
 
             sendContext.DeduplicationId = deduplicationId;
@@ -52,7 +52,7 @@ namespace MassTransit
         /// <param name="deduplicationId"></param>
         public static bool TrySetDeduplicationId(this SendContext context, string deduplicationId)
         {
-            if (!context.TryGetPayload(out AmazonSqsSendContext sendContext))
+            if (!context.TryGetPayload(out AmazonSqsSendContext? sendContext))
                 return false;
 
             sendContext.DeduplicationId = deduplicationId;
@@ -66,7 +66,7 @@ namespace MassTransit
         /// <param name="delay"></param>
         public static void SetDelay(this SendContext context, TimeSpan delay)
         {
-            if (!context.TryGetPayload(out AmazonSqsSendContext sendContext))
+            if (!context.TryGetPayload(out AmazonSqsSendContext? sendContext))
                 throw new ArgumentException("The AmazonSqsSendContext was not available");
 
             sendContext.DelaySeconds = (int)delay.TotalSeconds;
@@ -79,7 +79,7 @@ namespace MassTransit
         /// <param name="delay"></param>
         public static bool TrySetDelay(this SendContext context, TimeSpan delay)
         {
-            if (!context.TryGetPayload(out AmazonSqsSendContext sendContext))
+            if (!context.TryGetPayload(out AmazonSqsSendContext? sendContext))
                 return false;
 
             sendContext.DelaySeconds = (int)delay.TotalSeconds;

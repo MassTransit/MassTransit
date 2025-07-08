@@ -9,7 +9,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
     {
         public static IEqualityComparer<AmazonSqsHostSettings> Default { get; } = new AmazonSqsHostEqualityComparer();
 
-        public bool Equals(AmazonSqsHostSettings x, AmazonSqsHostSettings y)
+        public bool Equals(AmazonSqsHostSettings? x, AmazonSqsHostSettings? y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -20,7 +20,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
             if (ReferenceEquals(y, null))
                 return false;
 
-            return string.Equals(x.Region.SystemName, y.Region.SystemName, StringComparison.OrdinalIgnoreCase);
+            return string.Equals(x.Region?.SystemName, y.Region?.SystemName, StringComparison.OrdinalIgnoreCase);
         }
 
         public int GetHashCode(AmazonSqsHostSettings obj)

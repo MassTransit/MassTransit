@@ -36,7 +36,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
 
         sealed class ConsumerEntityEqualityComparer : IEqualityComparer<TopicSubscriptionEntity>
         {
-            public bool Equals(TopicSubscriptionEntity x, TopicSubscriptionEntity y)
+            public bool Equals(TopicSubscriptionEntity? x, TopicSubscriptionEntity? y)
             {
                 if (ReferenceEquals(x, y))
                     return true;
@@ -68,7 +68,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
 
         sealed class NameEqualityComparer : IEqualityComparer<TopicSubscriptionEntity>
         {
-            public bool Equals(TopicSubscriptionEntity x, TopicSubscriptionEntity y)
+            public bool Equals(TopicSubscriptionEntity? x, TopicSubscriptionEntity? y)
             {
                 if (ReferenceEquals(x, y))
                     return true;

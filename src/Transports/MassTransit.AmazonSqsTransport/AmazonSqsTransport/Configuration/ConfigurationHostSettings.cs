@@ -12,15 +12,15 @@ namespace MassTransit.AmazonSqsTransport.Configuration
         AmazonSqsHostSettings
     {
         readonly Lazy<Uri> _hostAddress;
-        AWSCredentials _credentials;
-        ImmutableCredentials _immutableCredentials;
+        AWSCredentials? _credentials;
+        ImmutableCredentials? _immutableCredentials;
 
         public ConfigurationHostSettings()
         {
             _hostAddress = new Lazy<Uri>(FormatHostAddress);
         }
 
-        public AWSCredentials Credentials
+        public AWSCredentials? Credentials
         {
             get => _credentials;
             set
@@ -30,17 +30,17 @@ namespace MassTransit.AmazonSqsTransport.Configuration
             }
         }
 
-        public AmazonSQSConfig AmazonSqsConfig { get; set; }
+        public AmazonSQSConfig? AmazonSqsConfig { get; set; }
 
-        public AmazonSimpleNotificationServiceConfig AmazonSnsConfig { get; set; }
+        public AmazonSimpleNotificationServiceConfig? AmazonSnsConfig { get; set; }
 
-        public string Scope { get; set; }
+        public string? Scope { get; set; }
 
-        public RegionEndpoint Region { get; set; }
+        public RegionEndpoint? Region { get; set; }
         public string AccessKey => (_immutableCredentials ??= GetImmutableCredentials()).AccessKey;
         public string SecretKey => (_immutableCredentials ??= GetImmutableCredentials()).SecretKey;
 
-        public AllowTransportHeader AllowTransportHeader { get; set; }
+        public AllowTransportHeader? AllowTransportHeader { get; set; }
 
         public bool ScopeTopics { get; set; }
 
@@ -53,11 +53,17 @@ namespace MassTransit.AmazonSqsTransport.Configuration
 
         Uri FormatHostAddress()
         {
+            if (Region?.SystemName == null)
+                throw new ConfigurationException("The Region must be specified");
+
             return new AmazonSqsHostAddress(Region.SystemName, Scope);
         }
 
         public override string ToString()
         {
+            if (Region?.SystemName == null)
+                throw new ConfigurationException("The Region must be specified");
+
             return new UriBuilder
             {
                 Scheme = "https",

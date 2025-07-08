@@ -42,7 +42,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="configure"></param>
-        public static void ReceiveEndpoint(this IAmazonSqsBusFactoryConfigurator configurator, Action<IAmazonSqsReceiveEndpointConfigurator> configure = null)
+        public static void ReceiveEndpoint(this IAmazonSqsBusFactoryConfigurator configurator, Action<IAmazonSqsReceiveEndpointConfigurator>? configure = null)
         {
             configurator.ReceiveEndpoint(new TemporaryEndpointDefinition(), DefaultEndpointNameFormatter.Instance, configure);
         }
@@ -54,7 +54,7 @@ namespace MassTransit
         /// <param name="definition"></param>
         /// <param name="configure"></param>
         public static void ReceiveEndpoint(this IAmazonSqsBusFactoryConfigurator configurator, IEndpointDefinition definition,
-            Action<IAmazonSqsReceiveEndpointConfigurator> configure = null)
+            Action<IAmazonSqsReceiveEndpointConfigurator>? configure = null)
         {
             configurator.ReceiveEndpoint(definition, DefaultEndpointNameFormatter.Instance, configure);
         }

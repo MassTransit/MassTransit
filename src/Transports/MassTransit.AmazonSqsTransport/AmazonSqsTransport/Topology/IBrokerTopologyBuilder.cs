@@ -15,8 +15,8 @@ namespace MassTransit.AmazonSqsTransport.Topology
         /// <param name="topicSubscriptionAttributes"></param>
         /// <param name="tags"></param>
         /// <returns>An entity handle used to reference the topic in subsequent calls</returns>
-        TopicHandle CreateTopic(string name, bool durable, bool autoDelete, IDictionary<string, object> topicAttributes = null,
-            IDictionary<string, object> topicSubscriptionAttributes = null, IDictionary<string, string> tags = null);
+        TopicHandle CreateTopic(string name, bool durable, bool autoDelete, IDictionary<string, object>? topicAttributes = null,
+            IDictionary<string, object>? topicSubscriptionAttributes = null, IDictionary<string, string>? tags = null);
 
         /// <summary>
         /// Declares a queue
@@ -28,8 +28,8 @@ namespace MassTransit.AmazonSqsTransport.Topology
         /// <param name="queueSubscriptionAttributes"></param>
         /// <param name="tags"></param>
         /// <returns></returns>
-        QueueHandle CreateQueue(string name, bool durable, bool autoDelete, IDictionary<string, object> queueAttributes = null,
-            IDictionary<string, object> queueSubscriptionAttributes = null, IDictionary<string, string> tags = null);
+        QueueHandle CreateQueue(string name, bool durable, bool autoDelete, IDictionary<string, object>? queueAttributes = null,
+            IDictionary<string, object>? queueSubscriptionAttributes = null, IDictionary<string, string>? tags = null);
 
         /// <summary>
         /// Create a subscription on a topic to a queue

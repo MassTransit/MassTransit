@@ -9,7 +9,7 @@ namespace MassTransit.AmazonSqsTransport
     {
         readonly AllowTransportHeader _allowTransportHeader;
 
-        public SnsHeaderValueConverter(AllowTransportHeader allowTransportHeader = default)
+        public SnsHeaderValueConverter(AllowTransportHeader? allowTransportHeader = null)
         {
             _allowTransportHeader = allowTransportHeader ?? AlwaysCopy;
         }

@@ -4,7 +4,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
         BrokerTopologyBuilder,
         IReceiveEndpointBrokerTopologyBuilder
     {
-        public QueueHandle Queue { get; set; }
+        public QueueHandle? Queue { get; set; }
 
         public BrokerTopology BuildTopologyLayout()
         {

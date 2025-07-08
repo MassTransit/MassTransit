@@ -27,7 +27,7 @@
         /// </summary>
         /// <returns></returns>
         IAmazonSqsReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
-            Action<IAmazonSqsReceiveEndpointConfigurator> configure = null);
+            Action<IAmazonSqsReceiveEndpointConfigurator>? configure = null);
 
         /// <summary>
         /// Create a receive endpoint configuration for the default host
@@ -37,6 +37,6 @@
         /// <param name="configure"></param>
         /// <returns></returns>
         IAmazonSqsReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(QueueReceiveSettings settings,
-            IAmazonSqsEndpointConfiguration endpointConfiguration, Action<IAmazonSqsReceiveEndpointConfigurator> configure = null);
+            IAmazonSqsEndpointConfiguration endpointConfiguration, Action<IAmazonSqsReceiveEndpointConfigurator>? configure = null);
     }
 }

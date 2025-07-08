@@ -30,19 +30,16 @@ namespace MassTransit
 
         public readonly string Scheme;
         public readonly string Host;
-        public readonly string Scope;
 
+        public readonly string? Scope;
         public readonly string Name;
+
         public readonly bool AutoDelete;
         public readonly bool Durable;
         public readonly AddressType Type;
 
         public AmazonSqsEndpointAddress(Uri hostAddress, Uri address, AddressType type = AddressType.Queue)
         {
-            Scheme = default;
-            Host = default;
-            Scope = default;
-
             Durable = true;
             AutoDelete = false;
             Type = type;
@@ -91,16 +88,16 @@ namespace MassTransit
                         AutoDelete = result;
                         break;
 
-                    case TypeKey when _parseConverter.TryConvert(value, out var result):
+                    case TypeKey when value != null && _parseConverter.TryConvert(value, out var result):
                         Type = result;
                         break;
                 }
             }
 
             if (Type == AddressType.Queue)
-                AmazonSqsEntityNameValidator.Validator.ThrowIfInvalidEntityName(Name);
+                AmazonSqsEntityNameValidator.Validator.ThrowIfInvalidEntityName(Name!);
             else
-                AmazonSnsTopicNameValidator.Validator.ThrowIfInvalidEntityName(Name);
+                AmazonSnsTopicNameValidator.Validator.ThrowIfInvalidEntityName(Name!);
         }
 
         public AmazonSqsEndpointAddress(Uri hostAddress, string name, bool durable = true, bool autoDelete = false, AddressType type = AddressType.Queue)

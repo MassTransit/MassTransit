@@ -21,6 +21,6 @@
         /// </summary>
         /// <param name="topicName"></param>
         /// <param name="configure"></param>
-        void Bind(string topicName, Action<IAmazonSqsTopicSubscriptionConfigurator> configure = null);
+        void Bind(string topicName, Action<IAmazonSqsTopicSubscriptionConfigurator>? configure = null);
     }
 }

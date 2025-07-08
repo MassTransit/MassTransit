@@ -11,6 +11,6 @@ namespace MassTransit.AmazonSqsTransport.Topology
         /// <summary>
         /// A handle to the consuming queue
         /// </summary>
-        QueueHandle Queue { get; }
+        QueueHandle? Queue { get; }
     }
 }

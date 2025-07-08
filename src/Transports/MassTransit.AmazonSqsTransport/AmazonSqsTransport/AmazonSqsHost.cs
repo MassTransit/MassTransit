@@ -20,19 +20,19 @@
 
         public new IAmazonSqsBusTopology Topology { get; }
 
-        public override HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<IReceiveEndpointConfigurator> configureEndpoint = null)
+        public override HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter? endpointNameFormatter,
+            Action<IReceiveEndpointConfigurator>? configureEndpoint = null)
         {
             return ConnectReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
         }
 
-        public override HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint = null)
+        public override HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator>? configureEndpoint = null)
         {
             return ConnectReceiveEndpoint(queueName, configureEndpoint);
         }
 
-        public HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter = null,
-            Action<IAmazonSqsReceiveEndpointConfigurator> configureEndpoint = null)
+        public HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter? endpointNameFormatter = null,
+            Action<IAmazonSqsReceiveEndpointConfigurator>? configureEndpoint = null)
         {
             var queueName = definition.GetEndpointName(endpointNameFormatter ?? DefaultEndpointNameFormatter.Instance);
 
@@ -43,7 +43,7 @@
             });
         }
 
-        public HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IAmazonSqsReceiveEndpointConfigurator> configure = null)
+        public HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IAmazonSqsReceiveEndpointConfigurator>? configure = null)
         {
             LogContext.SetCurrentIfNull(_hostConfiguration.LogContext);
 

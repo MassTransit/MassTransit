@@ -30,13 +30,13 @@ namespace MassTransit.AmazonSqsTransport.Topology
         public override string ToString()
         {
             return string.Join(", ",
-                new[] {$"source: {Source.EntityName}", $"destination: {Destination.EntityName}"}.Where(x => !string.IsNullOrWhiteSpace(x)));
+                new[] { $"source: {Source.EntityName}", $"destination: {Destination.EntityName}" }.Where(x => !string.IsNullOrWhiteSpace(x)));
         }
 
 
         sealed class ConsumerEntityEqualityComparer : IEqualityComparer<QueueSubscriptionEntity>
         {
-            public bool Equals(QueueSubscriptionEntity x, QueueSubscriptionEntity y)
+            public bool Equals(QueueSubscriptionEntity? x, QueueSubscriptionEntity? y)
             {
                 if (ReferenceEquals(x, y))
                     return true;
@@ -68,7 +68,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
 
         sealed class NameEqualityComparer : IEqualityComparer<QueueSubscriptionEntity>
         {
-            public bool Equals(QueueSubscriptionEntity x, QueueSubscriptionEntity y)
+            public bool Equals(QueueSubscriptionEntity? x, QueueSubscriptionEntity? y)
             {
                 if (ReferenceEquals(x, y))
                     return true;

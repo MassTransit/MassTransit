@@ -27,7 +27,7 @@ namespace MassTransit.AmazonSqsTransport
 
             _cache = ClientContextCacheDefaults.CreateCache<string, TopicInfo>();
 
-            ResetLoadExistingTopics();
+            _loadExistingTopics = ResetLoadExistingTopics();
 
             _durableTopics = new Dictionary<string, TopicInfo>();
         }
@@ -59,7 +59,7 @@ namespace MassTransit.AmazonSqsTransport
                     return topicInfo;
             }
 
-            return await _cache.GetOrAdd(topic.EntityName, key => CreateMissingTopic(topic)).ConfigureAwait(false);
+            return await _cache.GetOrAdd(topic.EntityName, _ => CreateMissingTopic(topic)).ConfigureAwait(false);
         }
 
         public async Task<TopicInfo> GetByName(string entityName)
@@ -86,11 +86,9 @@ namespace MassTransit.AmazonSqsTransport
 
         async Task<TopicInfo> CreateMissingTopic(Topology.Topic topic)
         {
-            Dictionary<string, string> attributes = topic.TopicAttributes.ToDictionary(x => x.Key, x => x.Value.ToString());
-
             var request = new CreateTopicRequest(topic.EntityName)
             {
-                Attributes = attributes,
+                Attributes = topic.TopicAttributes.ToDictionary(x => x.Key, x => x.Value.ToString()),
                 Tags = topic.TopicTags.Select(x => new Tag
                 {
                     Key = x.Key,
@@ -108,7 +106,7 @@ namespace MassTransit.AmazonSqsTransport
 
             var missingTopic = new TopicInfo(topic.EntityName, createResponse.TopicArn, _client, _cancellationToken, false);
 
-            if (topic.Durable && topic.AutoDelete == false)
+            if (topic is { Durable: true, AutoDelete: false })
             {
                 lock (_durableTopics)
                     _durableTopics[missingTopic.EntityName] = missingTopic;
@@ -157,7 +155,7 @@ namespace MassTransit.AmazonSqsTransport
 
                         var topicName = topic.TopicArn.Substring(index + 1);
 
-                        await _cache.GetOrAdd(topicName, async key =>
+                        await _cache.GetOrAdd(topicName, async _ =>
                         {
                             var topicInfo = new TopicInfo(topicName, topic.TopicArn, _client, _cancellationToken, true);
 

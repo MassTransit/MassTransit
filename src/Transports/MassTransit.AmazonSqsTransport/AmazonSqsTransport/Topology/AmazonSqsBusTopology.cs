@@ -42,7 +42,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
             return _configuration.Send.GetSendSettings(endpointAddress);
         }
 
-        public Uri GetDestinationAddress(string topicName, Action<IAmazonSqsTopicConfigurator> configure = null)
+        public Uri GetDestinationAddress(string topicName, Action<IAmazonSqsTopicConfigurator>? configure = null)
         {
             var address = new AmazonSqsEndpointAddress(_hostConfiguration.HostAddress, new Uri($"topic:{topicName}"));
 
@@ -53,9 +53,9 @@ namespace MassTransit.AmazonSqsTransport.Topology
             return publishSettings.GetSendAddress(_hostConfiguration.HostAddress);
         }
 
-        public Uri GetDestinationAddress(Type messageType, Action<IAmazonSqsTopicConfigurator> configure = null)
+        public Uri GetDestinationAddress(Type messageType, Action<IAmazonSqsTopicConfigurator>? configure = null)
         {
-            var topicName = _messageNameFormatter.GetMessageName(messageType).ToString();
+            var topicName = _messageNameFormatter.GetMessageName(messageType);
             var isTemporary = MessageTypeCache.IsTemporaryMessageType(messageType);
             var address = new AmazonSqsEndpointAddress(_hostConfiguration.HostAddress, new Uri($"topic:{topicName}?temporary={isTemporary}"));
 

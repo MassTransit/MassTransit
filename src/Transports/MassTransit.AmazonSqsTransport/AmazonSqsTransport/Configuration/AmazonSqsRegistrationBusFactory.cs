@@ -3,7 +3,6 @@ namespace MassTransit.AmazonSqsTransport.Configuration
     using System;
     using System.Collections.Generic;
     using Amazon;
-    using Amazon.Runtime;
     using Amazon.Runtime.Credentials;
     using MassTransit.Configuration;
     using Microsoft.Extensions.DependencyInjection;
@@ -15,15 +14,15 @@ namespace MassTransit.AmazonSqsTransport.Configuration
         TransportRegistrationBusFactory<IAmazonSqsReceiveEndpointConfigurator>
     {
         readonly AmazonSqsBusConfiguration _busConfiguration;
-        readonly Action<IBusRegistrationContext, IAmazonSqsBusFactoryConfigurator> _configure;
+        readonly Action<IBusRegistrationContext, IAmazonSqsBusFactoryConfigurator>? _configure;
 
-        public AmazonSqsRegistrationBusFactory(Action<IBusRegistrationContext, IAmazonSqsBusFactoryConfigurator> configure)
+        public AmazonSqsRegistrationBusFactory(Action<IBusRegistrationContext, IAmazonSqsBusFactoryConfigurator>? configure)
             : this(new AmazonSqsBusConfiguration(new AmazonSqsTopologyConfiguration(AmazonSqsBusFactory.CreateMessageTopology())), configure)
         {
         }
 
         AmazonSqsRegistrationBusFactory(AmazonSqsBusConfiguration busConfiguration,
-            Action<IBusRegistrationContext, IAmazonSqsBusFactoryConfigurator> configure)
+            Action<IBusRegistrationContext, IAmazonSqsBusFactoryConfigurator>? configure)
             : base(busConfiguration.HostConfiguration)
         {
             _configure = configure;
@@ -43,12 +42,12 @@ namespace MassTransit.AmazonSqsTransport.Configuration
                 configurator.Host(regionEndpoint.SystemName, h =>
                 {
                     if (!string.IsNullOrWhiteSpace(options.Scope))
-                        h.Scope(options.Scope);
+                        h.Scope(options.Scope!);
 
                     if (!string.IsNullOrWhiteSpace(options.AccessKey) && !string.IsNullOrWhiteSpace(options.SecretKey))
                     {
-                        h.AccessKey(options.AccessKey);
-                        h.SecretKey(options.SecretKey);
+                        h.AccessKey(options.AccessKey!);
+                        h.SecretKey(options.SecretKey!);
                     }
                     else
                         h.Credentials(DefaultAWSCredentialsIdentityResolver.GetCredentials());

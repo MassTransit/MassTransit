@@ -26,12 +26,12 @@ namespace MassTransit.AmazonSqsTransport.Topology
 
         IAmazonSqsMessagePublishTopology<T> IAmazonSqsPublishTopology.GetMessageTopology<T>()
         {
-            return GetMessageTopology<T>() as IAmazonSqsMessagePublishTopology<T>;
+            return (GetMessageTopology<T>() as IAmazonSqsMessagePublishTopology<T>)!;
         }
 
         IAmazonSqsMessagePublishTopologyConfigurator IAmazonSqsPublishTopologyConfigurator.GetMessageTopology(Type messageType)
         {
-            return GetMessageTopology(messageType) as IAmazonSqsMessagePublishTopologyConfigurator;
+            return (GetMessageTopology(messageType) as IAmazonSqsMessagePublishTopologyConfigurator)!;
         }
 
         public BrokerTopology GetPublishBrokerTopology()
@@ -50,7 +50,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
 
         IAmazonSqsMessagePublishTopologyConfigurator<T> IAmazonSqsPublishTopologyConfigurator.GetMessageTopology<T>()
         {
-            return GetMessageTopology<T>() as IAmazonSqsMessagePublishTopologyConfigurator<T>;
+            return (GetMessageTopology<T>() as IAmazonSqsMessagePublishTopologyConfigurator<T>)!;
         }
 
         protected override IMessagePublishTopologyConfigurator CreateMessageTopology<T>()

@@ -16,14 +16,14 @@ namespace MassTransit.AmazonSqsTransport
         readonly string _namespaceSeparator;
         readonly string _nestedTypeSeparator;
 
-        public AmazonSqsMessageNameFormatter(string genericArgumentSeparator = null, string genericTypeSeparator = null,
-            string namespaceSeparator = null, string nestedTypeSeparator = null)
+        public AmazonSqsMessageNameFormatter(string? genericArgumentSeparator = null, string? genericTypeSeparator = null,
+            string? namespaceSeparator = null, string? nestedTypeSeparator = null)
             : this(true, genericArgumentSeparator, genericTypeSeparator, namespaceSeparator, nestedTypeSeparator)
         {
         }
 
-        public AmazonSqsMessageNameFormatter(bool includeNamespace, string genericArgumentSeparator = null,
-            string genericTypeSeparator = null, string namespaceSeparator = null, string nestedTypeSeparator = null)
+        public AmazonSqsMessageNameFormatter(bool includeNamespace, string? genericArgumentSeparator = null,
+            string? genericTypeSeparator = null, string? namespaceSeparator = null, string? nestedTypeSeparator = null)
         {
             _genericArgumentSeparator = genericArgumentSeparator ?? "__";
             _genericTypeSeparator = genericTypeSeparator ?? "--";
@@ -49,7 +49,7 @@ namespace MassTransit.AmazonSqsTransport
             return GetMessageName(sb, type, null);
         }
 
-        string GetMessageName(StringBuilder sb, Type type, string scope)
+        string GetMessageName(StringBuilder sb, Type type, string? scope)
         {
             if (type.IsGenericParameter)
                 return "";
@@ -61,7 +61,7 @@ namespace MassTransit.AmazonSqsTransport
                 sb.Append(_namespaceSeparator);
             }
 
-            if (type.IsNested)
+            if (type is { IsNested: true, DeclaringType: not null })
             {
                 GetMessageName(sb, type.DeclaringType, ns);
                 sb.Append(_nestedTypeSeparator);

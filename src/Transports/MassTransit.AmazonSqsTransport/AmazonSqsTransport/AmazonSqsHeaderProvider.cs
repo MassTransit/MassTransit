@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using Amazon.SQS;
     using Amazon.SQS.Model;
@@ -21,7 +22,7 @@
             _body = body;
         }
 
-        public bool TryGetHeader(string key, out object value)
+        public bool TryGetHeader(string key, [NotNullWhen(true)] out object? value)
         {
             if (_message.MessageAttributes != null && _message.MessageAttributes.TryGetValue(key, out var val))
             {

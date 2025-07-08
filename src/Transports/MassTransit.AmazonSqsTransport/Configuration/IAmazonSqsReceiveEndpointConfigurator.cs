@@ -36,7 +36,7 @@
         /// Bind an existing exchange for the message type to the receive endpoint by name
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        void Subscribe<T>(Action<IAmazonSqsTopicSubscriptionConfigurator> callback = null)
+        void Subscribe<T>(Action<IAmazonSqsTopicSubscriptionConfigurator>? callback = null)
             where T : class;
 
         /// <summary>
@@ -44,11 +44,11 @@
         /// </summary>
         /// <param name="topicName">The exchange name</param>
         /// <param name="callback">Configure the exchange and binding</param>
-        void Subscribe(string topicName, Action<IAmazonSqsTopicSubscriptionConfigurator> callback = default);
+        void Subscribe(string topicName, Action<IAmazonSqsTopicSubscriptionConfigurator>? callback = null);
 
-        void ConfigureClient(Action<IPipeConfigurator<ClientContext>> configure);
+        void ConfigureClient(Action<IPipeConfigurator<ClientContext>>? configure);
 
-        void ConfigureConnection(Action<IPipeConfigurator<ConnectionContext>> configure);
+        void ConfigureConnection(Action<IPipeConfigurator<ConnectionContext>>? configure);
 
         /// <summary>
         /// FIFO queues deliver messages to consumers partitioned by MessageGroupId, in SequenceNumber order. Calling this method will

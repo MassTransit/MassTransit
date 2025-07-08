@@ -17,7 +17,7 @@ namespace MassTransit
         /// <param name="topicName"></param>
         /// <param name="configure">Callback to configure exchange settings</param>
         /// <returns></returns>
-        Uri GetDestinationAddress(string topicName, Action<IAmazonSqsTopicConfigurator> configure = null);
+        Uri GetDestinationAddress(string topicName, Action<IAmazonSqsTopicConfigurator>? configure = null);
 
         /// <summary>
         /// Returns the destination address for the topic identified by the message type
@@ -25,7 +25,7 @@ namespace MassTransit
         /// <param name="messageType">The message type</param>
         /// <param name="configure">Callback to configure exchange settings</param>
         /// <returns></returns>
-        Uri GetDestinationAddress(Type messageType, Action<IAmazonSqsTopicConfigurator> configure = null);
+        Uri GetDestinationAddress(Type messageType, Action<IAmazonSqsTopicConfigurator>? configure = null);
 
         /// <summary>
         /// Returns the settings for sending to the specified address. Will parse any arguments

@@ -16,10 +16,6 @@ namespace MassTransit
 
         public AmazonSqsHostAddress(Uri address)
         {
-            Scheme = default;
-            Host = default;
-            Scope = default;
-
             var scheme = address.Scheme.ToLowerInvariant();
             switch (scheme)
             {
@@ -35,11 +31,11 @@ namespace MassTransit
             }
         }
 
-        public AmazonSqsHostAddress(string host, string scope)
+        public AmazonSqsHostAddress(string host, string? scope)
         {
             Scheme = AmazonSqsScheme;
             Host = host;
-            Scope = scope;
+            Scope = scope ?? "/";
         }
 
         static void ParseLeft(Uri address, out string scheme, out string host, out string scope)

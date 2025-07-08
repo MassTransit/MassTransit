@@ -8,8 +8,8 @@ namespace MassTransit.AmazonSqsTransport.Topology
         Topic,
         TopicHandle
     {
-        public TopicEntity(long id, string name, bool durable, bool autoDelete, IDictionary<string, object> topicAttributes = null,
-            IDictionary<string, object> topicSubscriptionAttributes = null, IDictionary<string, string> topicTags = null)
+        public TopicEntity(long id, string name, bool durable, bool autoDelete, IDictionary<string, object>? topicAttributes = null,
+            IDictionary<string, object>? topicSubscriptionAttributes = null, IDictionary<string, string>? topicTags = null)
         {
             Id = id;
             EntityName = name;
@@ -59,7 +59,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
 
         sealed class NameEqualityComparer : IEqualityComparer<TopicEntity>
         {
-            public bool Equals(TopicEntity x, TopicEntity y)
+            public bool Equals(TopicEntity? x, TopicEntity? y)
             {
                 if (ReferenceEquals(x, y))
                     return true;
@@ -86,7 +86,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
         sealed class TopicEntityEqualityComparer :
             IEqualityComparer<TopicEntity>
         {
-            public bool Equals(TopicEntity x, TopicEntity y)
+            public bool Equals(TopicEntity? x, TopicEntity? y)
             {
                 if (ReferenceEquals(x, y))
                     return true;

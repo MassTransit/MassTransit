@@ -2,7 +2,6 @@ namespace MassTransit.Internals
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
 
 
     public static class DictionaryExtensions
@@ -22,7 +21,7 @@ namespace MassTransit.Internals
         {
             var result = new Dictionary<string, TValue>(source.Count, StringComparer.OrdinalIgnoreCase);
 
-            foreach (IDictionary<string, TValue> dictionary in new[] { source }.Concat(others))
+            void UpdateDictionaryWithElements(IDictionary<string, TValue> dictionary)
             {
                 foreach (KeyValuePair<string, TValue> element in dictionary)
                 {
@@ -35,6 +34,11 @@ namespace MassTransit.Internals
                         result[element.Key] = element.Value;
                 }
             }
+
+            UpdateDictionaryWithElements(source);
+
+            foreach (IDictionary<string, TValue> dictionary in others)
+                UpdateDictionaryWithElements(dictionary);
 
             return result;
         }

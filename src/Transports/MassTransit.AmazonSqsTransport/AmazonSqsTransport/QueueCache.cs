@@ -14,7 +14,7 @@ namespace MassTransit.AmazonSqsTransport
     public class QueueCache :
         IAsyncDisposable
     {
-        static readonly List<string> AllAttributes = new List<string> { QueueAttributeName.All };
+        static readonly List<string> AllAttributes = [QueueAttributeName.All];
 
         readonly ICache<string, QueueInfo, ITimeToLiveCacheValue<QueueInfo>> _cache;
         readonly CancellationToken _cancellationToken;
@@ -55,7 +55,7 @@ namespace MassTransit.AmazonSqsTransport
                     return Task.FromResult(queueInfo);
             }
 
-            return _cache.GetOrAdd(queue.EntityName, async key =>
+            return _cache.GetOrAdd(queue.EntityName, async _ =>
             {
                 try
                 {
@@ -89,7 +89,7 @@ namespace MassTransit.AmazonSqsTransport
 
         async Task<QueueInfo> CreateMissingQueue(Queue queue)
         {
-            Dictionary<string, string> attributes = queue.QueueAttributes.ToDictionary(x => x.Key, x => x.Value.ToString());
+            Dictionary<string, string> attributes = queue.QueueAttributes.ToDictionary(x => x.Key, x => x.Value.ToString()!);
 
             if (AmazonSqsEndpointAddress.IsFifo(queue.EntityName) && !attributes.ContainsKey(QueueAttributeName.FifoQueue))
             {
@@ -112,9 +112,10 @@ namespace MassTransit.AmazonSqsTransport
 
             attributesResponse.EnsureSuccessfulResponse();
 
-            var missingQueue = new QueueInfo(queue.EntityName, createResponse.QueueUrl, attributesResponse.Attributes ?? new Dictionary<string, string>(), _client, _cancellationToken, false);
+            var missingQueue = new QueueInfo(queue.EntityName, createResponse.QueueUrl, attributesResponse.Attributes ?? new Dictionary<string, string>(),
+                _client, _cancellationToken, false);
 
-            if (queue.Durable && queue.AutoDelete == false)
+            if (queue is { Durable: true, AutoDelete: false })
             {
                 lock (_durableQueues)
                     _durableQueues[missingQueue.EntityName] = missingQueue;
@@ -133,7 +134,8 @@ namespace MassTransit.AmazonSqsTransport
 
             attributesResponse.EnsureSuccessfulResponse();
 
-            return new QueueInfo(queueName, urlResponse.QueueUrl, attributesResponse.Attributes ?? new Dictionary<string, string>(), _client, _cancellationToken, true);
+            return new QueueInfo(queueName, urlResponse.QueueUrl, attributesResponse.Attributes ?? new Dictionary<string, string>(), _client,
+                _cancellationToken, true);
         }
     }
 }

@@ -72,7 +72,7 @@ namespace MassTransit.AmazonSqsTransport
             {
                 await _visibilityTask.ConfigureAwait(false);
 
-                if (!_clientContext.CancellationToken.IsCancellationRequested)
+                if (!_clientContext.CancellationToken.IsCancellationRequested && _settings.QueueUrl != null)
                 {
                     await _clientContext.ChangeMessageVisibility(_settings.QueueUrl, _message.ReceiptHandle, _settings.RedeliverVisibilityTimeout)
                         .ConfigureAwait(false);
@@ -100,7 +100,7 @@ namespace MassTransit.AmazonSqsTransport
             }
             finally
             {
-                _activeTokenSource.Dispose();
+                _activeTokenSource?.Dispose();
             }
         }
 
@@ -139,11 +139,13 @@ namespace MassTransit.AmazonSqsTransport
                     if (_activeTokenSource.IsCancellationRequested)
                         break;
 
-                    await _clientContext.ChangeMessageVisibility(_settings.QueueUrl, _message.ReceiptHandle, visibilityTimeout).ConfigureAwait(false);
+                    if (_settings.QueueUrl != null)
+                        await _clientContext.ChangeMessageVisibility(_settings.QueueUrl, _message.ReceiptHandle, visibilityTimeout).ConfigureAwait(false);
 
                     if (DateTime.UtcNow - _startedAt.AddSeconds(visibilityTimeout) >= _settings.MaxVisibilityTimeout)
                     {
-                        LogContext.Warning?.Log("Maximum visibility timeout {MaxVisibilityTimeout} for message {ReceiptHandle} exceeded.", _settings.MaxVisibilityTimeout, _message.ReceiptHandle);
+                        LogContext.Warning?.Log("Maximum visibility timeout {MaxVisibilityTimeout} for message {ReceiptHandle} exceeded.",
+                            _settings.MaxVisibilityTimeout, _message.ReceiptHandle);
                         break;
                     }
 

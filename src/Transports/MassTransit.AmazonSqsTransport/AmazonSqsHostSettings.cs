@@ -14,7 +14,7 @@
         /// <summary>
         /// The AmazonSQS region to connect
         /// </summary>
-        RegionEndpoint Region { get; }
+        RegionEndpoint? Region { get; }
 
         /// <summary>
         /// The AccessKey for connecting to the host
@@ -27,7 +27,7 @@
         /// </summary>
         string SecretKey { get; }
 
-        AllowTransportHeader AllowTransportHeader { get; }
+        AllowTransportHeader? AllowTransportHeader { get; }
 
         /// <summary>
         /// If true, topics are named "{Scope}_{topicName}" when publishing messages

@@ -43,7 +43,7 @@
         public override Uri HostAddress => _hostConfiguration.HostAddress;
         public override Uri InputAddress => _inputAddress.Value;
 
-        public override ReceiveEndpointContext CreateReceiveEndpointContext()
+        public override ReceiveEndpointContext? CreateReceiveEndpointContext()
         {
             return CreateSqsReceiveEndpointContext();
         }
@@ -152,7 +152,7 @@
         public IDictionary<string, object> QueueSubscriptionAttributes => _settings.QueueSubscriptionAttributes;
         public IDictionary<string, string> QueueTags => _settings.QueueTags;
 
-        public void Subscribe(string topicName, Action<IAmazonSqsTopicSubscriptionConfigurator> configure = null)
+        public void Subscribe(string topicName, Action<IAmazonSqsTopicSubscriptionConfigurator>? configure = null)
         {
             if (topicName == null)
                 throw new ArgumentNullException(nameof(topicName));
@@ -170,18 +170,18 @@
             set => _settings.MaxVisibilityTimeout = value > MaxAllowedVisibilityTimeout ? MaxAllowedVisibilityTimeout : value;
         }
 
-        public void Subscribe<T>(Action<IAmazonSqsTopicSubscriptionConfigurator> configure = null)
+        public void Subscribe<T>(Action<IAmazonSqsTopicSubscriptionConfigurator>? configure = null)
             where T : class
         {
             _endpointConfiguration.Topology.Consume.GetMessageTopology<T>().Subscribe(configure);
         }
 
-        public void ConfigureClient(Action<IPipeConfigurator<ClientContext>> configure)
+        public void ConfigureClient(Action<IPipeConfigurator<ClientContext>>? configure)
         {
             configure?.Invoke(_clientConfigurator);
         }
 
-        public void ConfigureConnection(Action<IPipeConfigurator<ConnectionContext>> configure)
+        public void ConfigureConnection(Action<IPipeConfigurator<ConnectionContext>>? configure)
         {
             configure?.Invoke(_connectionConfigurator);
         }

@@ -44,18 +44,18 @@
         /// Sets the default config for the connection to AmazonSQS
         /// </summary>
         /// <param name="config"></param>
-        void Config(AmazonSQSConfig config);
+        void Config(AmazonSQSConfig? config);
 
         /// <summary>
         /// Sets the default config for the connection to AmazonSNS
         /// </summary>
         /// <param name="config"></param>
-        void Config(AmazonSimpleNotificationServiceConfig config);
+        void Config(AmazonSimpleNotificationServiceConfig? config);
 
         /// <summary>
         /// Specifies a method used to determine if a header should be copied to the transport message
         /// </summary>
         /// <param name="allowTransportHeader"></param>
-        void AllowTransportHeader(AllowTransportHeader allowTransportHeader);
+        void AllowTransportHeader(AllowTransportHeader? allowTransportHeader);
     }
 }

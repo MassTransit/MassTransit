@@ -9,8 +9,8 @@ namespace MassTransit.AmazonSqsTransport.Configuration
         IAmazonSqsTopicConfigurator,
         Topic
     {
-        public AmazonSqsTopicConfigurator(string topicName, bool durable = true, bool autoDelete = false, IDictionary<string, object> topicAttributes = null,
-            IDictionary<string, object> topicSubscriptionAttributes = null, IDictionary<string, string> topicTags = null)
+        public AmazonSqsTopicConfigurator(string topicName, bool durable = true, bool autoDelete = false, IDictionary<string, object>? topicAttributes = null,
+            IDictionary<string, object>? topicSubscriptionAttributes = null, IDictionary<string, string>? topicTags = null)
             : base(topicName, durable, autoDelete)
         {
             TopicAttributes = topicAttributes ?? new Dictionary<string, object>();
@@ -30,8 +30,8 @@ namespace MassTransit.AmazonSqsTransport.Configuration
 
         protected override AmazonSqsEndpointAddress.AddressType AddressType => AmazonSqsEndpointAddress.AddressType.Topic;
 
-        public IDictionary<string, object> TopicAttributes { get; private set; }
-        public IDictionary<string, object> TopicSubscriptionAttributes { get; private set; }
-        public IDictionary<string, string> TopicTags { get; private set; }
+        public IDictionary<string, object> TopicAttributes { get; }
+        public IDictionary<string, object> TopicSubscriptionAttributes { get; }
+        public IDictionary<string, string> TopicTags { get; }
     }
 }

@@ -9,8 +9,8 @@ namespace MassTransit.AmazonSqsTransport
     public class Connection :
         IConnection
     {
-        public Connection(AWSCredentials credentials, RegionEndpoint regionEndpoint = null, AmazonSQSConfig amazonSqsConfig = null,
-            AmazonSimpleNotificationServiceConfig amazonSnsConfig = null)
+        public Connection(AWSCredentials? credentials, RegionEndpoint? regionEndpoint = null, AmazonSQSConfig? amazonSqsConfig = null,
+            AmazonSimpleNotificationServiceConfig? amazonSnsConfig = null)
         {
             amazonSqsConfig ??= new AmazonSQSConfig { RegionEndpoint = regionEndpoint ?? RegionEndpoint.USEast1 };
             amazonSnsConfig ??= new AmazonSimpleNotificationServiceConfig { RegionEndpoint = regionEndpoint ?? RegionEndpoint.USEast1 };

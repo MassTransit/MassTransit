@@ -10,6 +10,7 @@ namespace MassTransit.AmazonSqsTransport
     using Amazon.SimpleNotificationService.Model;
     using Amazon.SQS;
     using Amazon.SQS.Model;
+    using Internals;
     using MassTransit.Middleware;
     using Topology;
     using Transports;
@@ -54,9 +55,8 @@ namespace MassTransit.AmazonSqsTransport
             var topicInfo = await ConnectionContext.GetTopic(topic).ConfigureAwait(false);
             var queueInfo = await ConnectionContext.GetQueue(queue).ConfigureAwait(false);
 
-            Dictionary<string, string> subscriptionAttributes = topic.TopicSubscriptionAttributes.Select(x => (x.Key, x.Value.ToString()))
-                .Concat(queue.QueueSubscriptionAttributes.Select(x => (x.Key, x.Value.ToString())))
-                .ToDictionary(x => x.Item1, x => x.Item2);
+            Dictionary<string, string> subscriptionAttributes = topic.TopicSubscriptionAttributes.MergeLeft(queue.QueueSubscriptionAttributes)
+                .ToDictionary(x => x.Key, x => x.Value.ToString()!);
 
             var subscribeRequest = new SubscribeRequest
             {
@@ -66,7 +66,7 @@ namespace MassTransit.AmazonSqsTransport
                 Attributes = subscriptionAttributes
             };
 
-            string subscriptionArn = null;
+            string? subscriptionArn = null;
             try
             {
                 var response = await _snsClient.SubscribeAsync(subscribeRequest, CancellationToken).ConfigureAwait(false);

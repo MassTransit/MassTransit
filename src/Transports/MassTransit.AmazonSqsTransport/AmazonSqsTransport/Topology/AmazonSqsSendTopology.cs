@@ -16,14 +16,14 @@
 
         public IEntityNameValidator EntityNameValidator { get; }
 
-        public Action<IAmazonSqsQueueConfigurator> ConfigureErrorSettings { get; set; }
-        public Action<IAmazonSqsQueueConfigurator> ConfigureDeadLetterSettings { get; set; }
+        public Action<IAmazonSqsQueueConfigurator>? ConfigureErrorSettings { get; set; }
+        public Action<IAmazonSqsQueueConfigurator>? ConfigureDeadLetterSettings { get; set; }
 
         IAmazonSqsMessageSendTopologyConfigurator<T> IAmazonSqsSendTopology.GetMessageTopology<T>()
         {
             IMessageSendTopologyConfigurator<T> configurator = base.GetMessageTopology<T>();
 
-            return configurator as IAmazonSqsMessageSendTopologyConfigurator<T>;
+            return (configurator as IAmazonSqsMessageSendTopologyConfigurator<T>)!;
         }
 
         public SendSettings GetSendSettings(AmazonSqsEndpointAddress address)

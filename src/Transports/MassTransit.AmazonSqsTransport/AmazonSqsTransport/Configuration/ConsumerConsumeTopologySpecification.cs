@@ -1,7 +1,6 @@
 namespace MassTransit.AmazonSqsTransport.Configuration
 {
     using System.Collections.Generic;
-    using System.Linq;
     using Internals;
     using Topology;
 
@@ -29,7 +28,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration
 
         public IEnumerable<ValidationResult> Validate()
         {
-            return Enumerable.Empty<ValidationResult>();
+            return [];
         }
 
         public void Apply(IReceiveEndpointBrokerTopologyBuilder builder)
@@ -40,7 +39,8 @@ namespace MassTransit.AmazonSqsTransport.Configuration
                 _publishTopology.TopicTags.MergeLeft(Tags));
 
 
-            var topicSubscriptionHandle = builder.CreateQueueSubscription(topicHandle, builder.Queue);
+            if (builder.Queue != null)
+                builder.CreateQueueSubscription(topicHandle, builder.Queue);
         }
     }
 }

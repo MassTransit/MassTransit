@@ -7,7 +7,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
         /// <summary>
         /// The queue to which messages are sent
         /// </summary>
-        public QueueHandle Queue { get; set; }
+        public QueueHandle? Queue { get; set; }
 
         public BrokerTopology BuildBrokerTopology()
         {

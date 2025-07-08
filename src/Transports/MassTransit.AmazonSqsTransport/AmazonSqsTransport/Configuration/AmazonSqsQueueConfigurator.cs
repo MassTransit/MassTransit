@@ -10,8 +10,9 @@ namespace MassTransit.AmazonSqsTransport.Configuration
         IAmazonSqsQueueConfigurator,
         Queue
     {
-        protected AmazonSqsQueueConfigurator(string queueName, bool durable = true, bool autoDelete = false, IDictionary<string, object> queueAttributes = null,
-            IDictionary<string, object> queueSubscriptionAttributes = null, IDictionary<string, string> queueTags = null)
+        protected AmazonSqsQueueConfigurator(string queueName, bool durable = true, bool autoDelete = false,
+            IDictionary<string, object>? queueAttributes = null,
+            IDictionary<string, object>? queueSubscriptionAttributes = null, IDictionary<string, string>? queueTags = null)
             : base(queueName, durable, autoDelete)
         {
             QueueAttributes = queueAttributes ?? new Dictionary<string, object>();
@@ -34,8 +35,8 @@ namespace MassTransit.AmazonSqsTransport.Configuration
 
         protected override AmazonSqsEndpointAddress.AddressType AddressType => AmazonSqsEndpointAddress.AddressType.Queue;
 
-        public IDictionary<string, object> QueueAttributes { get; set; }
-        public IDictionary<string, object> QueueSubscriptionAttributes { get; set; }
-        public IDictionary<string, string> QueueTags { get; set; }
+        public IDictionary<string, object> QueueAttributes { get; protected set; }
+        public IDictionary<string, object> QueueSubscriptionAttributes { get; protected set; }
+        public IDictionary<string, string> QueueTags { get; protected set; }
     }
 }

@@ -13,8 +13,8 @@ namespace MassTransit.AmazonSqsTransport.Configuration
     {
         readonly ConfigurationHostSettings _settings;
 
-        string _accessKey;
-        string _secretKey;
+        string? _accessKey;
+        string? _secretKey;
 
         public AmazonSqsHostConfigurator(Uri address)
         {
@@ -75,17 +75,17 @@ namespace MassTransit.AmazonSqsTransport.Configuration
             _settings.Credentials = credentials;
         }
 
-        public void Config(AmazonSQSConfig config)
+        public void Config(AmazonSQSConfig? config)
         {
             _settings.AmazonSqsConfig = config;
         }
 
-        public void Config(AmazonSimpleNotificationServiceConfig config)
+        public void Config(AmazonSimpleNotificationServiceConfig? config)
         {
             _settings.AmazonSnsConfig = config;
         }
 
-        public void AllowTransportHeader(AllowTransportHeader allowTransportHeader)
+        public void AllowTransportHeader(AllowTransportHeader? allowTransportHeader)
         {
             _settings.AllowTransportHeader = allowTransportHeader;
         }

@@ -30,8 +30,8 @@ namespace MassTransit.AmazonSqsTransport.Topology
             return Interlocked.Increment(ref _nextId);
         }
 
-        public TopicHandle CreateTopic(string name, bool durable, bool autoDelete, IDictionary<string, object> topicAttributes = null,
-            IDictionary<string, object> topicSubscriptionAttributes = null, IDictionary<string, string> tags = null)
+        public TopicHandle CreateTopic(string name, bool durable, bool autoDelete, IDictionary<string, object>? topicAttributes = null,
+            IDictionary<string, object>? topicSubscriptionAttributes = null, IDictionary<string, string>? tags = null)
         {
             var id = GetNextId();
 
@@ -40,8 +40,8 @@ namespace MassTransit.AmazonSqsTransport.Topology
             return Topics.GetOrAdd(topicEntity);
         }
 
-        public QueueHandle CreateQueue(string name, bool durable, bool autoDelete, IDictionary<string, object> queueAttributes = null,
-            IDictionary<string, object> queueSubscriptionAttributes = null, IDictionary<string, string> tags = null)
+        public QueueHandle CreateQueue(string name, bool durable, bool autoDelete, IDictionary<string, object>? queueAttributes = null,
+            IDictionary<string, object>? queueSubscriptionAttributes = null, IDictionary<string, string>? tags = null)
         {
             var id = GetNextId();
 

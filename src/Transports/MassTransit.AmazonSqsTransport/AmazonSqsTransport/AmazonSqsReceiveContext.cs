@@ -15,7 +15,7 @@
     {
         readonly AmazonSqsHeaderProvider _headerProvider;
 
-        public AmazonSqsReceiveContext(Message message, bool redelivered, SqsReceiveEndpointContext context, ClientContext clientContext,
+        public AmazonSqsReceiveContext(Message message, bool redelivered, SqsReceiveEndpointContext? context, ClientContext clientContext,
             ReceiveSettings settings, ConnectionContext connectionContext)
             : base(redelivered, context, settings, clientContext, connectionContext)
         {
@@ -53,7 +53,7 @@
                     properties.Value[AmazonSqsTransportPropertyNames.DeduplicationId] = messageDeduplicationId;
             }
 
-            return properties.IsValueCreated ? properties.Value : null;
+            return properties.IsValueCreated ? properties.Value : null!;
         }
     }
 }

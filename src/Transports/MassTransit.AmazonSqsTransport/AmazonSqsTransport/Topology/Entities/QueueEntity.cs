@@ -8,8 +8,8 @@ namespace MassTransit.AmazonSqsTransport.Topology
         Queue,
         QueueHandle
     {
-        public QueueEntity(long id, string name, bool durable, bool autoDelete, IDictionary<string, object> queueAttributes = null,
-            IDictionary<string, object> queueSubscriptionAttributes = null, IDictionary<string, string> queueTags = null)
+        public QueueEntity(long id, string name, bool durable, bool autoDelete, IDictionary<string, object>? queueAttributes = null,
+            IDictionary<string, object>? queueSubscriptionAttributes = null, IDictionary<string, string>? queueTags = null)
         {
             Id = id;
             EntityName = name;
@@ -52,7 +52,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
 
         sealed class QueueEntityEqualityComparer : IEqualityComparer<QueueEntity>
         {
-            public bool Equals(QueueEntity x, QueueEntity y)
+            public bool Equals(QueueEntity? x, QueueEntity? y)
             {
                 if (ReferenceEquals(x, y))
                     return true;
@@ -80,7 +80,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
 
         sealed class NameEqualityComparer : IEqualityComparer<QueueEntity>
         {
-            public bool Equals(QueueEntity x, QueueEntity y)
+            public bool Equals(QueueEntity? x, QueueEntity? y)
             {
                 if (ReferenceEquals(x, y))
                     return true;

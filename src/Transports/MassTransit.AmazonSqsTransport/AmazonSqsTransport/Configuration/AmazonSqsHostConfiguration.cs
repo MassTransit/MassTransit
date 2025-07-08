@@ -79,7 +79,7 @@
         }
 
         public IAmazonSqsReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
-            Action<IAmazonSqsReceiveEndpointConfigurator> configure)
+            Action<IAmazonSqsReceiveEndpointConfigurator>? configure)
         {
             var endpointConfiguration = _busConfiguration.CreateEndpointConfiguration();
 
@@ -89,7 +89,7 @@
         }
 
         public IAmazonSqsReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(QueueReceiveSettings settings,
-            IAmazonSqsEndpointConfiguration endpointConfiguration, Action<IAmazonSqsReceiveEndpointConfigurator> configure)
+            IAmazonSqsEndpointConfiguration endpointConfiguration, Action<IAmazonSqsReceiveEndpointConfigurator>? configure)
         {
             if (settings == null)
                 throw new ArgumentNullException(nameof(settings));
@@ -109,8 +109,8 @@
 
         IAmazonSqsBusTopology IAmazonSqsHostConfiguration.Topology => _busTopology;
 
-        public override void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<IAmazonSqsReceiveEndpointConfigurator> configureEndpoint = null)
+        public override void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter? endpointNameFormatter,
+            Action<IAmazonSqsReceiveEndpointConfigurator>? configureEndpoint = null)
         {
             var queueName = definition.GetEndpointName(endpointNameFormatter ?? DefaultEndpointNameFormatter.Instance);
 
@@ -121,13 +121,12 @@
             });
         }
 
-        public override void ReceiveEndpoint(string queueName, Action<IAmazonSqsReceiveEndpointConfigurator> configureEndpoint)
+        public override void ReceiveEndpoint(string queueName, Action<IAmazonSqsReceiveEndpointConfigurator>? configureEndpoint)
         {
             CreateReceiveEndpointConfiguration(queueName, configureEndpoint);
         }
 
-        public override IReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
-            Action<IReceiveEndpointConfigurator> configure = null)
+        public override IReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName, Action<IReceiveEndpointConfigurator>? configure)
         {
             return CreateReceiveEndpointConfiguration(queueName, configure);
         }

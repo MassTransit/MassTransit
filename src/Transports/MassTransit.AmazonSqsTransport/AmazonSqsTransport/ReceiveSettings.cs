@@ -51,7 +51,7 @@
         /// </summary>
         int RedeliverVisibilityTimeout { get; set; }
 
-        string QueueUrl { get; set; }
+        string? QueueUrl { get; set; }
 
         /// <summary>
         /// Get the input address for the transport on the specified host

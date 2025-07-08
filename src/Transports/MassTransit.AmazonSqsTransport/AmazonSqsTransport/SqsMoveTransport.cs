@@ -27,14 +27,14 @@
 
         protected async Task Move(ReceiveContext context, Action<SendMessageBatchRequestEntry, IDictionary<string, MessageAttributeValue>> preSend)
         {
-            if (!context.TryGetPayload(out ClientContext clientContext))
+            if (!context.TryGetPayload(out ClientContext? clientContext))
                 throw new ArgumentException("The ReceiveContext must contain a ClientContext (from Amazon SQS)", nameof(context));
 
             OneTimeContext<ConfigureTopologyContext<TSettings>> oneTimeContext = await _topologyFilter.Configure(clientContext).ConfigureAwait(false);
 
             var message = new SendMessageBatchRequestEntry("", Encoding.UTF8.GetString(context.GetBody())) { MessageAttributes = new Dictionary<string, MessageAttributeValue>() };
 
-            if (context.TryGetPayload(out AmazonSqsMessageContext receiveContext))
+            if (context.TryGetPayload(out AmazonSqsMessageContext? receiveContext))
             {
                 if (_isFifo)
                 {

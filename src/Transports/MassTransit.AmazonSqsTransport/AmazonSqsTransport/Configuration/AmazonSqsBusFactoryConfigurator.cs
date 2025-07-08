@@ -106,7 +106,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration
             _hostConfiguration.ReceiveEndpoint(queueName, configureEndpoint);
         }
 
-        public IReceiveEndpointConfiguration CreateBusEndpointConfiguration(Action<IReceiveEndpointConfigurator> configure)
+        public IReceiveEndpointConfiguration CreateBusEndpointConfiguration(Action<IReceiveEndpointConfigurator>? configure)
         {
             return _busConfiguration.HostConfiguration.CreateReceiveEndpointConfiguration(_settings, _busConfiguration.BusEndpointConfiguration, configure);
         }

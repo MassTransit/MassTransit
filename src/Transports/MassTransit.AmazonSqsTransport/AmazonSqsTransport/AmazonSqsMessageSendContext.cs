@@ -16,8 +16,8 @@
         {
         }
 
-        public string GroupId { get; set; }
-        public string DeduplicationId { get; set; }
+        public string? GroupId { get; set; }
+        public string? DeduplicationId { get; set; }
 
         public int? DelaySeconds
         {
@@ -37,9 +37,9 @@
             base.WritePropertiesTo(properties);
 
             if (!string.IsNullOrWhiteSpace(GroupId))
-                properties[AmazonSqsTransportPropertyNames.GroupId] = GroupId;
+                properties[AmazonSqsTransportPropertyNames.GroupId] = GroupId!;
             if (!string.IsNullOrWhiteSpace(DeduplicationId))
-                properties[AmazonSqsTransportPropertyNames.DeduplicationId] = DeduplicationId;
+                properties[AmazonSqsTransportPropertyNames.DeduplicationId] = DeduplicationId!;
         }
     }
 }
