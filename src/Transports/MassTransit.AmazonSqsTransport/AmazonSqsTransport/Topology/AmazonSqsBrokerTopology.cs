@@ -1,69 +1,68 @@
-namespace MassTransit.AmazonSqsTransport.Topology
+namespace MassTransit.AmazonSqsTransport.Topology;
+
+using System.Collections.Generic;
+using System.Linq;
+
+
+public class AmazonSqsBrokerTopology :
+    BrokerTopology
 {
-    using System.Collections.Generic;
-    using System.Linq;
-
-
-    public class AmazonSqsBrokerTopology :
-        BrokerTopology
+    public AmazonSqsBrokerTopology(IEnumerable<Topic> exchanges, IEnumerable<Queue> queues, IEnumerable<QueueSubscription> queueSubscriptions,
+        IEnumerable<TopicSubscription> topicSubscriptions)
     {
-        public AmazonSqsBrokerTopology(IEnumerable<Topic> exchanges, IEnumerable<Queue> queues, IEnumerable<QueueSubscription> queueSubscriptions,
-            IEnumerable<TopicSubscription> topicSubscriptions)
+        Topics = exchanges.ToArray();
+        Queues = queues.ToArray();
+        QueueSubscriptions = queueSubscriptions.ToArray();
+        TopicSubscriptions = topicSubscriptions.ToArray();
+    }
+
+    public Topic[] Topics { get; }
+    public Queue[] Queues { get; }
+    public QueueSubscription[] QueueSubscriptions { get; }
+    public TopicSubscription[] TopicSubscriptions { get; }
+
+    void IProbeSite.Probe(ProbeContext context)
+    {
+        foreach (var topic in Topics)
         {
-            Topics = exchanges.ToArray();
-            Queues = queues.ToArray();
-            QueueSubscriptions = queueSubscriptions.ToArray();
-            TopicSubscriptions = topicSubscriptions.ToArray();
+            var topicScope = context.CreateScope("topic");
+            topicScope.Set(new
+            {
+                Name = topic.EntityName,
+                topic.Durable,
+                topic.AutoDelete
+            });
         }
 
-        public Topic[] Topics { get; }
-        public Queue[] Queues { get; }
-        public QueueSubscription[] QueueSubscriptions { get; }
-        public TopicSubscription[] TopicSubscriptions { get; }
-
-        void IProbeSite.Probe(ProbeContext context)
+        foreach (var queue in Queues)
         {
-            foreach (var topic in Topics)
+            var queueScope = context.CreateScope("queue");
+            queueScope.Set(new
             {
-                var topicScope = context.CreateScope("topic");
-                topicScope.Set(new
-                {
-                    Name = topic.EntityName,
-                    topic.Durable,
-                    topic.AutoDelete
-                });
-            }
+                Name = queue.EntityName,
+                queue.Durable,
+                queue.AutoDelete
+            });
+        }
 
-            foreach (var queue in Queues)
+        foreach (var subscription in QueueSubscriptions)
+        {
+            var subscriptionScope = context.CreateScope("queueSubscription");
+            subscriptionScope.Set(new
             {
-                var queueScope = context.CreateScope("queue");
-                queueScope.Set(new
-                {
-                    Name = queue.EntityName,
-                    queue.Durable,
-                    queue.AutoDelete
-                });
-            }
+                Source = subscription.Source.EntityName,
+                Destination = subscription.Destination.EntityName
+            });
+        }
 
-            foreach (var subscription in QueueSubscriptions)
+        foreach (var subscription in TopicSubscriptions)
+        {
+            var subscriptionScope = context.CreateScope("topicSubscription");
+            subscriptionScope.Set(new
             {
-                var subscriptionScope = context.CreateScope("queueSubscription");
-                subscriptionScope.Set(new
-                {
-                    Source = subscription.Source.EntityName,
-                    Destination = subscription.Destination.EntityName
-                });
-            }
-
-            foreach (var subscription in TopicSubscriptions)
-            {
-                var subscriptionScope = context.CreateScope("topicSubscription");
-                subscriptionScope.Set(new
-                {
-                    Source = subscription.Source.EntityName,
-                    Destination = subscription.Destination.EntityName
-                });
-            }
+                Source = subscription.Source.EntityName,
+                Destination = subscription.Destination.EntityName
+            });
         }
     }
 }

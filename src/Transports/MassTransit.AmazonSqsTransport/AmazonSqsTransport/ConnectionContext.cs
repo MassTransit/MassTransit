@@ -1,34 +1,33 @@
-﻿namespace MassTransit.AmazonSqsTransport
+﻿namespace MassTransit.AmazonSqsTransport;
+
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Topology;
+
+
+public interface ConnectionContext :
+    PipeContext
 {
-    using System;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using Topology;
+    /// <summary>
+    /// The Amazon Connection
+    /// </summary>
+    IConnection Connection { get; }
 
+    /// <summary>
+    /// The Host Address for this connection
+    /// </summary>
+    Uri HostAddress { get; }
 
-    public interface ConnectionContext :
-        PipeContext
-    {
-        /// <summary>
-        /// The Amazon Connection
-        /// </summary>
-        IConnection Connection { get; }
+    IAmazonSqsBusTopology Topology { get; }
 
-        /// <summary>
-        /// The Host Address for this connection
-        /// </summary>
-        Uri HostAddress { get; }
+    Task<QueueInfo> GetQueue(Queue queue);
+    Task<QueueInfo> GetQueueByName(string name);
+    Task<bool> RemoveQueueByName(string name);
 
-        IAmazonSqsBusTopology Topology { get; }
+    Task<TopicInfo> GetTopic(Topic topic);
+    Task<TopicInfo> GetTopicByName(string name);
+    Task<bool> RemoveTopicByName(string name);
 
-        Task<QueueInfo> GetQueue(Queue queue);
-        Task<QueueInfo> GetQueueByName(string name);
-        Task<bool> RemoveQueueByName(string name);
-
-        Task<TopicInfo> GetTopic(Topic topic);
-        Task<TopicInfo> GetTopicByName(string name);
-        Task<bool> RemoveTopicByName(string name);
-
-        ClientContext CreateClientContext(CancellationToken cancellationToken);
-    }
+    ClientContext CreateClientContext(CancellationToken cancellationToken);
 }

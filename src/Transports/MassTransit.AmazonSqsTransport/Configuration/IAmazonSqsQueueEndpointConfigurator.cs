@@ -1,10 +1,9 @@
-﻿namespace MassTransit
-{
-    public interface IAmazonSqsQueueEndpointConfigurator :
-        IAmazonSqsQueueConfigurator
-    {
-        ushort WaitTimeSeconds { set; }
+﻿namespace MassTransit;
 
-        bool PurgeOnStartup { set; }
-    }
+public interface IAmazonSqsQueueEndpointConfigurator :
+    IAmazonSqsQueueConfigurator
+{
+    ushort WaitTimeSeconds { set; }
+
+    bool PurgeOnStartup { set; }
 }

@@ -1,55 +1,54 @@
-namespace MassTransit.AmazonSqsTransport
+namespace MassTransit.AmazonSqsTransport;
+
+using Amazon.SQS.Model;
+using Transports;
+
+
+public class SqsHeaderValueConverter :
+    IHeaderValueConverter<MessageAttributeValue>
 {
-    using Amazon.SQS.Model;
-    using Transports;
+    readonly AllowTransportHeader _allowTransportHeader;
 
-
-    public class SqsHeaderValueConverter :
-        IHeaderValueConverter<MessageAttributeValue>
+    public SqsHeaderValueConverter(AllowTransportHeader? allowTransportHeader = null)
     {
-        readonly AllowTransportHeader _allowTransportHeader;
+        _allowTransportHeader = allowTransportHeader ?? AlwaysCopy;
+    }
 
-        public SqsHeaderValueConverter(AllowTransportHeader? allowTransportHeader = null)
+    public bool TryConvert(HeaderValue headerValue, out HeaderValue<MessageAttributeValue> result)
+    {
+        if (headerValue.IsStringValue(out HeaderValue<string> stringValue) && _allowTransportHeader(stringValue))
         {
-            _allowTransportHeader = allowTransportHeader ?? AlwaysCopy;
-        }
-
-        public bool TryConvert(HeaderValue headerValue, out HeaderValue<MessageAttributeValue> result)
-        {
-            if (headerValue.IsStringValue(out HeaderValue<string> stringValue) && _allowTransportHeader(stringValue))
-            {
-                result = CreateMessageAttributeValue(stringValue);
-                return true;
-            }
-
-            result = default;
-            return false;
-        }
-
-        public bool TryConvert<T>(HeaderValue<T> headerValue, out HeaderValue<MessageAttributeValue> result)
-        {
-            if (headerValue.IsStringValue(out HeaderValue<string> stringValue) && _allowTransportHeader(stringValue))
-            {
-                result = CreateMessageAttributeValue(stringValue);
-                return true;
-            }
-
-            result = default;
-            return false;
-        }
-
-        static HeaderValue<MessageAttributeValue> CreateMessageAttributeValue(HeaderValue<string> stringValue)
-        {
-            return new HeaderValue<MessageAttributeValue>(stringValue.Key, new MessageAttributeValue
-            {
-                StringValue = stringValue.Value,
-                DataType = "String"
-            });
-        }
-
-        static bool AlwaysCopy(HeaderValue<string> headerValue)
-        {
+            result = CreateMessageAttributeValue(stringValue);
             return true;
         }
+
+        result = default;
+        return false;
+    }
+
+    public bool TryConvert<T>(HeaderValue<T> headerValue, out HeaderValue<MessageAttributeValue> result)
+    {
+        if (headerValue.IsStringValue(out HeaderValue<string> stringValue) && _allowTransportHeader(stringValue))
+        {
+            result = CreateMessageAttributeValue(stringValue);
+            return true;
+        }
+
+        result = default;
+        return false;
+    }
+
+    static HeaderValue<MessageAttributeValue> CreateMessageAttributeValue(HeaderValue<string> stringValue)
+    {
+        return new HeaderValue<MessageAttributeValue>(stringValue.Key, new MessageAttributeValue
+        {
+            StringValue = stringValue.Value,
+            DataType = "String"
+        });
+    }
+
+    static bool AlwaysCopy(HeaderValue<string> headerValue)
+    {
+        return true;
     }
 }

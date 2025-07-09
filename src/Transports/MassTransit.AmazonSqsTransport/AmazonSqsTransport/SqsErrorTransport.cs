@@ -1,33 +1,32 @@
-﻿namespace MassTransit.AmazonSqsTransport
+﻿namespace MassTransit.AmazonSqsTransport;
+
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Amazon.SQS.Model;
+using Middleware;
+using Transports;
+
+
+public class SqsErrorTransport :
+    SqsMoveTransport<ErrorSettings>,
+    IErrorTransport
 {
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using Amazon.SQS.Model;
-    using Middleware;
-    using Transports;
+    readonly ITransportSetHeaderAdapter<MessageAttributeValue> _headerAdapter;
 
-
-    public class SqsErrorTransport :
-        SqsMoveTransport<ErrorSettings>,
-        IErrorTransport
+    public SqsErrorTransport(string destination, ITransportSetHeaderAdapter<MessageAttributeValue> headerAdapter,
+        ConfigureAmazonSqsTopologyFilter<ErrorSettings> topologyFilter)
+        : base(destination, topologyFilter)
     {
-        readonly ITransportSetHeaderAdapter<MessageAttributeValue> _headerAdapter;
+        _headerAdapter = headerAdapter;
+    }
 
-        public SqsErrorTransport(string destination, ITransportSetHeaderAdapter<MessageAttributeValue> headerAdapter,
-            ConfigureAmazonSqsTopologyFilter<ErrorSettings> topologyFilter)
-            : base(destination, topologyFilter)
+    public Task Send(ExceptionReceiveContext context)
+    {
+        void PreSend(SendMessageBatchRequestEntry entry, IDictionary<string, MessageAttributeValue> headers)
         {
-            _headerAdapter = headerAdapter;
+            _headerAdapter.CopyFrom(headers, context.ExceptionHeaders);
         }
 
-        public Task Send(ExceptionReceiveContext context)
-        {
-            void PreSend(SendMessageBatchRequestEntry entry, IDictionary<string, MessageAttributeValue> headers)
-            {
-                _headerAdapter.CopyFrom(headers, context.ExceptionHeaders);
-            }
-
-            return Move(context, PreSend);
-        }
+        return Move(context, PreSend);
     }
 }

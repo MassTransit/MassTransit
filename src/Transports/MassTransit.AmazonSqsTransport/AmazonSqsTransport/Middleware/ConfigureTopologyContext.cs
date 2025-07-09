@@ -1,7 +1,6 @@
-namespace MassTransit.AmazonSqsTransport.Middleware
+namespace MassTransit.AmazonSqsTransport.Middleware;
+
+public interface ConfigureTopologyContext<T>
+    where T : class
 {
-    public interface ConfigureTopologyContext<T>
-        where T : class
-    {
-    }
 }

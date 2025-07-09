@@ -1,33 +1,32 @@
-﻿namespace MassTransit.AmazonSqsTransport
+﻿namespace MassTransit.AmazonSqsTransport;
+
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Amazon.SQS.Model;
+using Middleware;
+using Transports;
+
+
+public class SqsDeadLetterTransport :
+    SqsMoveTransport<DeadLetterSettings>,
+    IDeadLetterTransport
 {
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using Amazon.SQS.Model;
-    using Middleware;
-    using Transports;
+    readonly TransportSetHeaderAdapter<MessageAttributeValue> _headerAdapter;
 
-
-    public class SqsDeadLetterTransport :
-        SqsMoveTransport<DeadLetterSettings>,
-        IDeadLetterTransport
+    public SqsDeadLetterTransport(string destination, TransportSetHeaderAdapter<MessageAttributeValue> headerAdapter,
+        ConfigureAmazonSqsTopologyFilter<DeadLetterSettings> topologyFilter)
+        : base(destination, topologyFilter)
     {
-        readonly TransportSetHeaderAdapter<MessageAttributeValue> _headerAdapter;
+        _headerAdapter = headerAdapter;
+    }
 
-        public SqsDeadLetterTransport(string destination, TransportSetHeaderAdapter<MessageAttributeValue> headerAdapter,
-            ConfigureAmazonSqsTopologyFilter<DeadLetterSettings> topologyFilter)
-            : base(destination, topologyFilter)
+    public Task Send(ReceiveContext context, string reason)
+    {
+        void PreSend(SendMessageBatchRequestEntry entry, IDictionary<string, MessageAttributeValue> headers)
         {
-            _headerAdapter = headerAdapter;
+            _headerAdapter.Set(headers, MessageHeaders.Reason, reason ?? "Unspecified");
         }
 
-        public Task Send(ReceiveContext context, string reason)
-        {
-            void PreSend(SendMessageBatchRequestEntry entry, IDictionary<string, MessageAttributeValue> headers)
-            {
-                _headerAdapter.Set(headers, MessageHeaders.Reason, reason ?? "Unspecified");
-            }
-
-            return Move(context, PreSend);
-        }
+        return Move(context, PreSend);
     }
 }

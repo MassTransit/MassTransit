@@ -1,11 +1,10 @@
-﻿namespace MassTransit.AmazonSqsTransport
+﻿namespace MassTransit.AmazonSqsTransport;
+
+using Transports;
+
+
+public interface IAmazonSqsHost :
+    IHost<IAmazonSqsReceiveEndpointConfigurator>
 {
-    using Transports;
-
-
-    public interface IAmazonSqsHost :
-        IHost<IAmazonSqsReceiveEndpointConfigurator>
-    {
-        new IAmazonSqsBusTopology Topology { get; }
-    }
+    new IAmazonSqsBusTopology Topology { get; }
 }

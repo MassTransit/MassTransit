@@ -1,11 +1,10 @@
-﻿namespace MassTransit.AmazonSqsTransport.Configuration
+﻿namespace MassTransit.AmazonSqsTransport.Configuration;
+
+using MassTransit.Configuration;
+
+
+public interface IAmazonSqsEndpointConfiguration :
+    IEndpointConfiguration
 {
-    using MassTransit.Configuration;
-
-
-    public interface IAmazonSqsEndpointConfiguration :
-        IEndpointConfiguration
-    {
-        new IAmazonSqsTopologyConfiguration Topology { get; }
-    }
+    new IAmazonSqsTopologyConfiguration Topology { get; }
 }

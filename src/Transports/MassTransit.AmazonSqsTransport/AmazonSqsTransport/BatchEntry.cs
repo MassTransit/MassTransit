@@ -1,31 +1,30 @@
-namespace MassTransit.AmazonSqsTransport
+namespace MassTransit.AmazonSqsTransport;
+
+using System;
+using System.Threading.Tasks;
+
+
+public class BatchEntry<TEntry>
 {
-    using System;
-    using System.Threading.Tasks;
+    readonly TaskCompletionSource<bool> _completed;
 
-
-    public class BatchEntry<TEntry>
+    public BatchEntry(TEntry entry)
     {
-        readonly TaskCompletionSource<bool> _completed;
+        Entry = entry;
+        _completed = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+    }
 
-        public BatchEntry(TEntry entry)
-        {
-            Entry = entry;
-            _completed = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-        }
+    public TEntry Entry { get; }
 
-        public TEntry Entry { get; }
+    public Task Completed => _completed.Task;
 
-        public Task Completed => _completed.Task;
+    public void SetCompleted()
+    {
+        _completed.TrySetResult(true);
+    }
 
-        public void SetCompleted()
-        {
-            _completed.TrySetResult(true);
-        }
-
-        public void SetFaulted(Exception exception)
-        {
-            _completed.TrySetException(exception);
-        }
+    public void SetFaulted(Exception exception)
+    {
+        _completed.TrySetException(exception);
     }
 }

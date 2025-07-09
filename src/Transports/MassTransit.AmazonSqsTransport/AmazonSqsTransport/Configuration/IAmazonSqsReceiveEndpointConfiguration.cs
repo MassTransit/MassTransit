@@ -1,15 +1,14 @@
-﻿namespace MassTransit.AmazonSqsTransport.Configuration
+﻿namespace MassTransit.AmazonSqsTransport.Configuration;
+
+using MassTransit.Configuration;
+using Transports;
+
+
+public interface IAmazonSqsReceiveEndpointConfiguration :
+    IReceiveEndpointConfiguration,
+    IAmazonSqsEndpointConfiguration
 {
-    using MassTransit.Configuration;
-    using Transports;
+    ReceiveSettings Settings { get; }
 
-
-    public interface IAmazonSqsReceiveEndpointConfiguration :
-        IReceiveEndpointConfiguration,
-        IAmazonSqsEndpointConfiguration
-    {
-        ReceiveSettings Settings { get; }
-
-        void Build(IHost host);
-    }
+    void Build(IHost host);
 }

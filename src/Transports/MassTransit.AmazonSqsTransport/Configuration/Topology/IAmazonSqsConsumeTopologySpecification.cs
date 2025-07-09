@@ -1,11 +1,10 @@
-namespace MassTransit
+namespace MassTransit;
+
+using AmazonSqsTransport.Topology;
+
+
+public interface IAmazonSqsConsumeTopologySpecification :
+    ISpecification
 {
-    using AmazonSqsTransport.Topology;
-
-
-    public interface IAmazonSqsConsumeTopologySpecification :
-        ISpecification
-    {
-        void Apply(IReceiveEndpointBrokerTopologyBuilder builder);
-    }
+    void Apply(IReceiveEndpointBrokerTopologyBuilder builder);
 }

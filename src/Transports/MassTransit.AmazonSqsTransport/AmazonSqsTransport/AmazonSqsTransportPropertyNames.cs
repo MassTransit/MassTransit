@@ -1,8 +1,7 @@
-namespace MassTransit.AmazonSqsTransport
+namespace MassTransit.AmazonSqsTransport;
+
+static class AmazonSqsTransportPropertyNames
 {
-    static class AmazonSqsTransportPropertyNames
-    {
-        public const string GroupId = "SQS-GroupId";
-        public const string DeduplicationId = "SQS-DeduplicationId";
-    }
+    public const string GroupId = "SQS-GroupId";
+    public const string DeduplicationId = "SQS-DeduplicationId";
 }

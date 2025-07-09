@@ -1,75 +1,74 @@
-﻿namespace MassTransit.AmazonSqsTransport
+﻿namespace MassTransit.AmazonSqsTransport;
+
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using Amazon.SQS;
+using Amazon.SQS.Model;
+using Internals;
+using Transports;
+
+
+public class AmazonSqsHeaderProvider :
+    IHeaderProvider
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics.CodeAnalysis;
-    using System.Linq;
-    using Amazon.SQS;
-    using Amazon.SQS.Model;
-    using Internals;
-    using Transports;
+    readonly SqsMessageBody _body;
+    readonly Message _message;
 
-
-    public class AmazonSqsHeaderProvider :
-        IHeaderProvider
+    public AmazonSqsHeaderProvider(Message message, SqsMessageBody body)
     {
-        readonly SqsMessageBody _body;
-        readonly Message _message;
+        _message = message;
+        _body = body;
+    }
 
-        public AmazonSqsHeaderProvider(Message message, SqsMessageBody body)
+    public bool TryGetHeader(string key, [NotNullWhen(true)] out object? value)
+    {
+        if (_message.MessageAttributes != null && _message.MessageAttributes.TryGetValue(key, out var val))
         {
-            _message = message;
-            _body = body;
+            value = val.StringValue;
+            return value != null;
         }
 
-        public bool TryGetHeader(string key, [NotNullWhen(true)] out object? value)
+        if (nameof(Message.MessageId).Equals(key, StringComparison.OrdinalIgnoreCase))
         {
-            if (_message.MessageAttributes != null && _message.MessageAttributes.TryGetValue(key, out var val))
-            {
-                value = val.StringValue;
-                return value != null;
-            }
+            value = _message.MessageId;
+            return true;
+        }
 
-            if (nameof(Message.MessageId).Equals(key, StringComparison.OrdinalIgnoreCase))
-            {
-                value = _message.MessageId;
-                return true;
-            }
+        if ("TopicArn".Equals(key, StringComparison.OrdinalIgnoreCase))
+        {
+            value = _body.TopicArn;
+            return value != null;
+        }
 
-            if ("TopicArn".Equals(key, StringComparison.OrdinalIgnoreCase))
+        if (MessageHeaders.TransportSentTime.Equals(key, StringComparison.OrdinalIgnoreCase))
+        {
+            if (_message.Attributes != null && _message.Attributes.TryGetValue(MessageSystemAttributeName.SentTimestamp, out var sentTimestamp))
             {
-                value = _body.TopicArn;
-                return value != null;
-            }
-
-            if (MessageHeaders.TransportSentTime.Equals(key, StringComparison.OrdinalIgnoreCase))
-            {
-                if (_message.Attributes != null && _message.Attributes.TryGetValue(MessageSystemAttributeName.SentTimestamp, out var sentTimestamp))
+                if (long.TryParse(sentTimestamp, out var milliseconds))
                 {
-                    if (long.TryParse(sentTimestamp, out var milliseconds))
-                    {
-                        value = DateTimeConstants.Epoch + TimeSpan.FromMilliseconds(milliseconds);
-                        return true;
-                    }
+                    value = DateTimeConstants.Epoch + TimeSpan.FromMilliseconds(milliseconds);
+                    return true;
                 }
             }
-
-            value = null;
-            return false;
         }
 
-        public IEnumerable<KeyValuePair<string, object>> GetAll()
-        {
-            if (!TryGetHeader(MessageHeaders.MessageId, out _))
-                yield return new KeyValuePair<string, object>(MessageHeaders.MessageId, _message.MessageId);
+        value = null;
+        return false;
+    }
 
-            if (_message.MessageAttributes != null)
-            {
-                foreach (KeyValuePair<string, object> header in _message.MessageAttributes
-                             .Where(x => x.Value.StringValue != null)
-                             .Select(x => new KeyValuePair<string, object>(x.Key, x.Value.StringValue)))
-                    yield return header;
-            }
+    public IEnumerable<KeyValuePair<string, object>> GetAll()
+    {
+        if (!TryGetHeader(MessageHeaders.MessageId, out _))
+            yield return new KeyValuePair<string, object>(MessageHeaders.MessageId, _message.MessageId);
+
+        if (_message.MessageAttributes != null)
+        {
+            foreach (KeyValuePair<string, object> header in _message.MessageAttributes
+                         .Where(x => x.Value.StringValue != null)
+                         .Select(x => new KeyValuePair<string, object>(x.Key, x.Value.StringValue)))
+                yield return header;
         }
     }
 }

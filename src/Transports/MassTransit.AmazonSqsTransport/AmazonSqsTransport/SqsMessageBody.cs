@@ -1,4 +1,3 @@
-#nullable enable
 namespace MassTransit.AmazonSqsTransport;
 
 using System.Text.Json;

@@ -1,8 +1,7 @@
-namespace MassTransit
+namespace MassTransit;
+
+public interface IAmazonSqsMessageConsumeTopology<TMessage> :
+    IMessageConsumeTopology<TMessage>
+    where TMessage : class
 {
-    public interface IAmazonSqsMessageConsumeTopology<TMessage> :
-        IMessageConsumeTopology<TMessage>
-        where TMessage : class
-    {
-    }
 }

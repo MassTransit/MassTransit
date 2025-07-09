@@ -1,7 +1,6 @@
-namespace MassTransit
+namespace MassTransit;
+
+public interface IAmazonSqsQueueSubscriptionConfigurator :
+    IAmazonSqsQueueConfigurator
 {
-    public interface IAmazonSqsQueueSubscriptionConfigurator :
-        IAmazonSqsQueueConfigurator
-    {
-    }
 }

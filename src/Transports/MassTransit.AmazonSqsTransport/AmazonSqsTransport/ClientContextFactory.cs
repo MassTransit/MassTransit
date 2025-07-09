@@ -1,53 +1,52 @@
-﻿namespace MassTransit.AmazonSqsTransport
+﻿namespace MassTransit.AmazonSqsTransport;
+
+using System.Threading;
+using System.Threading.Tasks;
+using Agents;
+using Internals;
+
+
+public class ClientContextFactory :
+    IPipeContextFactory<ClientContext>
 {
-    using System.Threading;
-    using System.Threading.Tasks;
-    using Agents;
-    using Internals;
+    readonly IConnectionContextSupervisor _connectionContextSupervisor;
 
-
-    public class ClientContextFactory :
-        IPipeContextFactory<ClientContext>
+    public ClientContextFactory(IConnectionContextSupervisor connectionContextSupervisor)
     {
-        readonly IConnectionContextSupervisor _connectionContextSupervisor;
+        _connectionContextSupervisor = connectionContextSupervisor;
+    }
 
-        public ClientContextFactory(IConnectionContextSupervisor connectionContextSupervisor)
+    IPipeContextAgent<ClientContext> IPipeContextFactory<ClientContext>.CreateContext(ISupervisor supervisor)
+    {
+        IAsyncPipeContextAgent<ClientContext> asyncContext = supervisor.AddAsyncContext<ClientContext>();
+
+        CreateClientContext(asyncContext, supervisor.Stopped);
+
+        return asyncContext;
+    }
+
+    IActivePipeContextAgent<ClientContext> IPipeContextFactory<ClientContext>.CreateActiveContext(ISupervisor supervisor,
+        PipeContextHandle<ClientContext> context, CancellationToken cancellationToken)
+    {
+        return supervisor.AddActiveContext(context, CreateSharedClientContext(context.Context, cancellationToken));
+    }
+
+    static async Task<ClientContext> CreateSharedClientContext(Task<ClientContext> context, CancellationToken cancellationToken)
+    {
+        return context.IsCompletedSuccessfully()
+            ? new ScopeClientContext(context.Result, cancellationToken)
+            : new ScopeClientContext(await context.OrCanceled(cancellationToken).ConfigureAwait(false), cancellationToken);
+    }
+
+    void CreateClientContext(IAsyncPipeContextAgent<ClientContext> asyncContext, CancellationToken cancellationToken)
+    {
+        static Task<ClientContext> Create(ConnectionContext connectionContext, CancellationToken createCancellationToken)
         {
-            _connectionContextSupervisor = connectionContextSupervisor;
+            return Task.FromResult(connectionContext.CreateClientContext(createCancellationToken));
         }
-
-        IPipeContextAgent<ClientContext> IPipeContextFactory<ClientContext>.CreateContext(ISupervisor supervisor)
-        {
-            IAsyncPipeContextAgent<ClientContext> asyncContext = supervisor.AddAsyncContext<ClientContext>();
-
-            CreateClientContext(asyncContext, supervisor.Stopped);
-
-            return asyncContext;
-        }
-
-        IActivePipeContextAgent<ClientContext> IPipeContextFactory<ClientContext>.CreateActiveContext(ISupervisor supervisor,
-            PipeContextHandle<ClientContext> context, CancellationToken cancellationToken)
-        {
-            return supervisor.AddActiveContext(context, CreateSharedClientContext(context.Context, cancellationToken));
-        }
-
-        static async Task<ClientContext> CreateSharedClientContext(Task<ClientContext> context, CancellationToken cancellationToken)
-        {
-            return context.IsCompletedSuccessfully()
-                ? new ScopeClientContext(context.Result, cancellationToken)
-                : new ScopeClientContext(await context.OrCanceled(cancellationToken).ConfigureAwait(false), cancellationToken);
-        }
-
-        void CreateClientContext(IAsyncPipeContextAgent<ClientContext> asyncContext, CancellationToken cancellationToken)
-        {
-            static Task<ClientContext> Create(ConnectionContext connectionContext, CancellationToken createCancellationToken)
-            {
-                return Task.FromResult(connectionContext.CreateClientContext(createCancellationToken));
-            }
 
         #pragma warning disable CS4014
-            _connectionContextSupervisor.CreateAgent(asyncContext, Create, cancellationToken);
+        _connectionContextSupervisor.CreateAgent(asyncContext, Create, cancellationToken);
         #pragma warning restore CS4014
-        }
     }
 }

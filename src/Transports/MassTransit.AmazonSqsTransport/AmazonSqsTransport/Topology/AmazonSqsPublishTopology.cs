@@ -1,65 +1,64 @@
-namespace MassTransit.AmazonSqsTransport.Topology
+namespace MassTransit.AmazonSqsTransport.Topology;
+
+using System;
+using System.Collections.Generic;
+using MassTransit.Topology;
+
+
+public class AmazonSqsPublishTopology :
+    PublishTopology,
+    IAmazonSqsPublishTopologyConfigurator
 {
-    using System;
-    using System.Collections.Generic;
-    using MassTransit.Topology;
+    readonly IMessageTopology _messageTopology;
 
-
-    public class AmazonSqsPublishTopology :
-        PublishTopology,
-        IAmazonSqsPublishTopologyConfigurator
+    public AmazonSqsPublishTopology(IMessageTopology messageTopology)
     {
-        readonly IMessageTopology _messageTopology;
+        _messageTopology = messageTopology;
 
-        public AmazonSqsPublishTopology(IMessageTopology messageTopology)
+        TopicAttributes = new Dictionary<string, object>();
+        TopicSubscriptionAttributes = new Dictionary<string, object>();
+        TopicTags = new Dictionary<string, string>();
+    }
+
+    public IDictionary<string, object> TopicAttributes { get; private set; }
+    public IDictionary<string, object> TopicSubscriptionAttributes { get; private set; }
+    public IDictionary<string, string> TopicTags { get; private set; }
+
+    IAmazonSqsMessagePublishTopology<T> IAmazonSqsPublishTopology.GetMessageTopology<T>()
+    {
+        return (GetMessageTopology<T>() as IAmazonSqsMessagePublishTopology<T>)!;
+    }
+
+    IAmazonSqsMessagePublishTopologyConfigurator IAmazonSqsPublishTopologyConfigurator.GetMessageTopology(Type messageType)
+    {
+        return (GetMessageTopology(messageType) as IAmazonSqsMessagePublishTopologyConfigurator)!;
+    }
+
+    public BrokerTopology GetPublishBrokerTopology()
+    {
+        var builder = new PublishEndpointBrokerTopologyBuilder();
+
+        ForEachMessageType<IAmazonSqsMessagePublishTopology>(x =>
         {
-            _messageTopology = messageTopology;
+            x.Apply(builder);
 
-            TopicAttributes = new Dictionary<string, object>();
-            TopicSubscriptionAttributes = new Dictionary<string, object>();
-            TopicTags = new Dictionary<string, string>();
-        }
+            builder.Topic = null;
+        });
 
-        public IDictionary<string, object> TopicAttributes { get; private set; }
-        public IDictionary<string, object> TopicSubscriptionAttributes { get; private set; }
-        public IDictionary<string, string> TopicTags { get; private set; }
+        return builder.BuildBrokerTopology();
+    }
 
-        IAmazonSqsMessagePublishTopology<T> IAmazonSqsPublishTopology.GetMessageTopology<T>()
-        {
-            return (GetMessageTopology<T>() as IAmazonSqsMessagePublishTopology<T>)!;
-        }
+    IAmazonSqsMessagePublishTopologyConfigurator<T> IAmazonSqsPublishTopologyConfigurator.GetMessageTopology<T>()
+    {
+        return (GetMessageTopology<T>() as IAmazonSqsMessagePublishTopologyConfigurator<T>)!;
+    }
 
-        IAmazonSqsMessagePublishTopologyConfigurator IAmazonSqsPublishTopologyConfigurator.GetMessageTopology(Type messageType)
-        {
-            return (GetMessageTopology(messageType) as IAmazonSqsMessagePublishTopologyConfigurator)!;
-        }
+    protected override IMessagePublishTopologyConfigurator CreateMessageTopology<T>()
+    {
+        var messageTopology = new AmazonSqsMessagePublishTopology<T>(this, _messageTopology.GetMessageTopology<T>());
 
-        public BrokerTopology GetPublishBrokerTopology()
-        {
-            var builder = new PublishEndpointBrokerTopologyBuilder();
+        OnMessageTopologyCreated(messageTopology);
 
-            ForEachMessageType<IAmazonSqsMessagePublishTopology>(x =>
-            {
-                x.Apply(builder);
-
-                builder.Topic = null;
-            });
-
-            return builder.BuildBrokerTopology();
-        }
-
-        IAmazonSqsMessagePublishTopologyConfigurator<T> IAmazonSqsPublishTopologyConfigurator.GetMessageTopology<T>()
-        {
-            return (GetMessageTopology<T>() as IAmazonSqsMessagePublishTopologyConfigurator<T>)!;
-        }
-
-        protected override IMessagePublishTopologyConfigurator CreateMessageTopology<T>()
-        {
-            var messageTopology = new AmazonSqsMessagePublishTopology<T>(this, _messageTopology.GetMessageTopology<T>());
-
-            OnMessageTopologyCreated(messageTopology);
-
-            return messageTopology;
-        }
+        return messageTopology;
     }
 }

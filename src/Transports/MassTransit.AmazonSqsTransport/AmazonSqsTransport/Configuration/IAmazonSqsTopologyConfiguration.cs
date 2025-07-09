@@ -1,15 +1,14 @@
-﻿namespace MassTransit.AmazonSqsTransport.Configuration
+﻿namespace MassTransit.AmazonSqsTransport.Configuration;
+
+using MassTransit.Configuration;
+
+
+public interface IAmazonSqsTopologyConfiguration :
+    ITopologyConfiguration
 {
-    using MassTransit.Configuration;
+    new IAmazonSqsPublishTopologyConfigurator Publish { get; }
 
+    new IAmazonSqsSendTopologyConfigurator Send { get; }
 
-    public interface IAmazonSqsTopologyConfiguration :
-        ITopologyConfiguration
-    {
-        new IAmazonSqsPublishTopologyConfigurator Publish { get; }
-
-        new IAmazonSqsSendTopologyConfigurator Send { get; }
-
-        new IAmazonSqsConsumeTopologyConfigurator Consume { get; }
-    }
+    new IAmazonSqsConsumeTopologyConfigurator Consume { get; }
 }

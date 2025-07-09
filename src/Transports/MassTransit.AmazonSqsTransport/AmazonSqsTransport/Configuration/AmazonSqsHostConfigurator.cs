@@ -1,101 +1,100 @@
-namespace MassTransit.AmazonSqsTransport.Configuration
+namespace MassTransit.AmazonSqsTransport.Configuration;
+
+using System;
+using Amazon;
+using Amazon.Runtime;
+using Amazon.SimpleNotificationService;
+using Amazon.SQS;
+using Transports;
+
+
+public class AmazonSqsHostConfigurator :
+    IAmazonSqsHostConfigurator
 {
-    using System;
-    using Amazon;
-    using Amazon.Runtime;
-    using Amazon.SimpleNotificationService;
-    using Amazon.SQS;
-    using Transports;
+    readonly ConfigurationHostSettings _settings;
 
+    string? _accessKey;
+    string? _secretKey;
 
-    public class AmazonSqsHostConfigurator :
-        IAmazonSqsHostConfigurator
+    public AmazonSqsHostConfigurator(Uri address)
     {
-        readonly ConfigurationHostSettings _settings;
+        var hostAddress = new AmazonSqsHostAddress(address);
 
-        string? _accessKey;
-        string? _secretKey;
+        var regionEndpoint = RegionEndpoint.GetBySystemName(hostAddress.Host);
 
-        public AmazonSqsHostConfigurator(Uri address)
+        _settings = new ConfigurationHostSettings
         {
-            var hostAddress = new AmazonSqsHostAddress(address);
+            Scope = hostAddress.Scope,
+            Region = regionEndpoint,
+            AmazonSqsConfig = new AmazonSQSConfig { RegionEndpoint = regionEndpoint },
+            AmazonSnsConfig = new AmazonSimpleNotificationServiceConfig { RegionEndpoint = regionEndpoint }
+        };
 
-            var regionEndpoint = RegionEndpoint.GetBySystemName(hostAddress.Host);
+        if (!string.IsNullOrEmpty(address.UserInfo))
+        {
+            var parts = address.UserInfo.Split(':');
+            _accessKey = parts[0];
 
-            _settings = new ConfigurationHostSettings
+            if (parts.Length >= 2)
             {
-                Scope = hostAddress.Scope,
-                Region = regionEndpoint,
-                AmazonSqsConfig = new AmazonSQSConfig {RegionEndpoint = regionEndpoint},
-                AmazonSnsConfig = new AmazonSimpleNotificationServiceConfig {RegionEndpoint = regionEndpoint}
-            };
-
-            if (!string.IsNullOrEmpty(address.UserInfo))
-            {
-                string[] parts = address.UserInfo.Split(':');
-                _accessKey = parts[0];
-
-                if (parts.Length >= 2)
-                {
-                    _secretKey = parts[1];
-                    SetBasicCredentials();
-                }
+                _secretKey = parts[1];
+                SetBasicCredentials();
             }
         }
+    }
 
-        public AmazonSqsHostSettings Settings => _settings;
+    public AmazonSqsHostSettings Settings => _settings;
 
-        public void AccessKey(string accessKey)
-        {
-            _accessKey = accessKey;
-            SetBasicCredentials();
-        }
+    public void AccessKey(string accessKey)
+    {
+        _accessKey = accessKey;
+        SetBasicCredentials();
+    }
 
-        public void Scope(string scope, bool scopeTopics)
-        {
-            _settings.Scope = scope;
+    public void Scope(string scope, bool scopeTopics)
+    {
+        _settings.Scope = scope;
 
-            if (scopeTopics)
-                EnableScopedTopics();
-        }
+        if (scopeTopics)
+            EnableScopedTopics();
+    }
 
-        public void EnableScopedTopics()
-        {
-            _settings.ScopeTopics = true;
-        }
+    public void EnableScopedTopics()
+    {
+        _settings.ScopeTopics = true;
+    }
 
-        public void SecretKey(string secretKey)
-        {
-            _secretKey = secretKey;
-            SetBasicCredentials();
-        }
+    public void SecretKey(string secretKey)
+    {
+        _secretKey = secretKey;
+        SetBasicCredentials();
+    }
 
-        public void Credentials(AWSCredentials credentials)
-        {
-            _settings.Credentials = credentials;
-        }
+    public void Credentials(AWSCredentials credentials)
+    {
+        _settings.Credentials = credentials;
+    }
 
-        public void Config(AmazonSQSConfig? config)
-        {
-            _settings.AmazonSqsConfig = config;
-        }
+    public void Config(AmazonSQSConfig? config)
+    {
+        _settings.AmazonSqsConfig = config;
+    }
 
-        public void Config(AmazonSimpleNotificationServiceConfig? config)
-        {
-            _settings.AmazonSnsConfig = config;
-        }
+    public void Config(AmazonSimpleNotificationServiceConfig? config)
+    {
+        _settings.AmazonSnsConfig = config;
+    }
 
-        public void AllowTransportHeader(AllowTransportHeader? allowTransportHeader)
-        {
-            _settings.AllowTransportHeader = allowTransportHeader;
-        }
+    public void AllowTransportHeader(AllowTransportHeader? allowTransportHeader)
+    {
+        _settings.AllowTransportHeader = allowTransportHeader;
+    }
 
-        void SetBasicCredentials()
-        {
-            if (string.IsNullOrEmpty(_accessKey) || string.IsNullOrEmpty(_secretKey))
-                return;
+    void SetBasicCredentials()
+    {
+        if (string.IsNullOrEmpty(_accessKey) || string.IsNullOrEmpty(_secretKey))
+            return;
 
-            _settings.Credentials = new BasicAWSCredentials(_accessKey, _secretKey);
-        }
+        _settings.Credentials = new BasicAWSCredentials(_accessKey, _secretKey);
     }
 }

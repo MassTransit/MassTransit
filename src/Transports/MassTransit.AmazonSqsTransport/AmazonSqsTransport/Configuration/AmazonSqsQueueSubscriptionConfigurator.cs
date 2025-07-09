@@ -1,12 +1,11 @@
-namespace MassTransit.AmazonSqsTransport.Configuration
+namespace MassTransit.AmazonSqsTransport.Configuration;
+
+public class AmazonSqsQueueSubscriptionConfigurator :
+    AmazonSqsQueueConfigurator,
+    IAmazonSqsQueueSubscriptionConfigurator
 {
-    public class AmazonSqsQueueSubscriptionConfigurator :
-        AmazonSqsQueueConfigurator,
-        IAmazonSqsQueueSubscriptionConfigurator
+    protected AmazonSqsQueueSubscriptionConfigurator(string queueName, bool durable, bool autoDelete)
+        : base(queueName, durable, autoDelete)
     {
-        protected AmazonSqsQueueSubscriptionConfigurator(string queueName, bool durable, bool autoDelete)
-            : base(queueName, durable, autoDelete)
-        {
-        }
     }
 }

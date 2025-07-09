@@ -1,29 +1,27 @@
-#nullable enable
-namespace MassTransit.AmazonSqsTransport
+namespace MassTransit.AmazonSqsTransport;
+
+using System;
+using System.Threading.Tasks;
+using Transports;
+
+
+public class AmazonSqsPublishTransportProvider :
+    IPublishTransportProvider
 {
-    using System;
-    using System.Threading.Tasks;
-    using Transports;
+    readonly IClientContextSupervisor _clientContextSupervisor;
+    readonly IConnectionContextSupervisor _connectionContextSupervisor;
+    readonly SqsReceiveEndpointContext _context;
 
-
-    public class AmazonSqsPublishTransportProvider :
-        IPublishTransportProvider
+    public AmazonSqsPublishTransportProvider(IConnectionContextSupervisor connectionContextSupervisor, SqsReceiveEndpointContext context)
     {
-        readonly IClientContextSupervisor _clientContextSupervisor;
-        readonly IConnectionContextSupervisor _connectionContextSupervisor;
-        readonly SqsReceiveEndpointContext _context;
+        _connectionContextSupervisor = connectionContextSupervisor;
+        _context = context;
+        _clientContextSupervisor = context.ClientContextSupervisor;
+    }
 
-        public AmazonSqsPublishTransportProvider(IConnectionContextSupervisor connectionContextSupervisor, SqsReceiveEndpointContext context)
-        {
-            _connectionContextSupervisor = connectionContextSupervisor;
-            _context = context;
-            _clientContextSupervisor = context.ClientContextSupervisor;
-        }
-
-        public Task<ISendTransport> GetPublishTransport<T>(Uri? publishAddress)
-            where T : class
-        {
-            return _connectionContextSupervisor.CreatePublishTransport<T>(_context, _clientContextSupervisor);
-        }
+    public Task<ISendTransport> GetPublishTransport<T>(Uri? publishAddress)
+        where T : class
+    {
+        return _connectionContextSupervisor.CreatePublishTransport<T>(_context, _clientContextSupervisor);
     }
 }

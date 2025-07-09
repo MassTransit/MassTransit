@@ -1,89 +1,87 @@
-#nullable enable
-namespace MassTransit.AmazonSqsTransport.Topology
+namespace MassTransit.AmazonSqsTransport.Topology;
+
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using Configuration;
+using Internals;
+using MassTransit.Topology;
+
+
+public class AmazonSqsMessagePublishTopology<TMessage> :
+    MessagePublishTopology<TMessage>,
+    IAmazonSqsMessagePublishTopologyConfigurator<TMessage>
+    where TMessage : class
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics.CodeAnalysis;
-    using Configuration;
-    using Internals;
-    using MassTransit.Topology;
+    readonly AmazonSqsTopicConfigurator _amazonSqsTopic;
+    readonly IAmazonSqsPublishTopology _publishTopology;
 
-
-    public class AmazonSqsMessagePublishTopology<TMessage> :
-        MessagePublishTopology<TMessage>,
-        IAmazonSqsMessagePublishTopologyConfigurator<TMessage>
-        where TMessage : class
+    public AmazonSqsMessagePublishTopology(IAmazonSqsPublishTopology publishTopology, IMessageTopology<TMessage> messageTopology)
+        : base(publishTopology)
     {
-        readonly AmazonSqsTopicConfigurator _amazonSqsTopic;
-        readonly IAmazonSqsPublishTopology _publishTopology;
+        _publishTopology = publishTopology;
 
-        public AmazonSqsMessagePublishTopology(IAmazonSqsPublishTopology publishTopology, IMessageTopology<TMessage> messageTopology)
-            : base(publishTopology)
-        {
-            _publishTopology = publishTopology;
+        var topicName = messageTopology.EntityName;
 
-            var topicName = messageTopology.EntityName;
+        var temporary = MessageTypeCache<TMessage>.IsTemporaryMessageType;
 
-            var temporary = MessageTypeCache<TMessage>.IsTemporaryMessageType;
+        var durable = !temporary;
+        var autoDelete = temporary;
 
-            var durable = !temporary;
-            var autoDelete = temporary;
+        _amazonSqsTopic = new AmazonSqsTopicConfigurator(topicName, durable, autoDelete);
+    }
 
-            _amazonSqsTopic = new AmazonSqsTopicConfigurator(topicName, durable, autoDelete);
-        }
+    public Topic Topic => _amazonSqsTopic;
 
-        public Topic Topic => _amazonSqsTopic;
+    bool IAmazonSqsTopicConfigurator.Durable
+    {
+        set => _amazonSqsTopic.Durable = value;
+    }
 
-        bool IAmazonSqsTopicConfigurator.Durable
-        {
-            set => _amazonSqsTopic.Durable = value;
-        }
+    bool IAmazonSqsTopicConfigurator.AutoDelete
+    {
+        set => _amazonSqsTopic.AutoDelete = value;
+    }
 
-        bool IAmazonSqsTopicConfigurator.AutoDelete
-        {
-            set => _amazonSqsTopic.AutoDelete = value;
-        }
+    IDictionary<string, object> IAmazonSqsTopicConfigurator.TopicAttributes => _amazonSqsTopic.TopicAttributes;
+    IDictionary<string, object> IAmazonSqsTopicConfigurator.TopicSubscriptionAttributes => _amazonSqsTopic.TopicSubscriptionAttributes;
+    IDictionary<string, string> IAmazonSqsTopicConfigurator.TopicTags => _amazonSqsTopic.TopicTags;
 
-        IDictionary<string, object> IAmazonSqsTopicConfigurator.TopicAttributes => _amazonSqsTopic.TopicAttributes;
-        IDictionary<string, object> IAmazonSqsTopicConfigurator.TopicSubscriptionAttributes => _amazonSqsTopic.TopicSubscriptionAttributes;
-        IDictionary<string, string> IAmazonSqsTopicConfigurator.TopicTags => _amazonSqsTopic.TopicTags;
+    public AmazonSqsEndpointAddress GetEndpointAddress(Uri hostAddress)
+    {
+        return _amazonSqsTopic.GetEndpointAddress(hostAddress);
+    }
 
-        public AmazonSqsEndpointAddress GetEndpointAddress(Uri hostAddress)
-        {
-            return _amazonSqsTopic.GetEndpointAddress(hostAddress);
-        }
+    public override bool TryGetPublishAddress(Uri baseAddress, [NotNullWhen(true)] out Uri? publishAddress)
+    {
+        publishAddress = _amazonSqsTopic.GetEndpointAddress(baseAddress);
+        return true;
+    }
 
-        public override bool TryGetPublishAddress(Uri baseAddress, [NotNullWhen(true)] out Uri? publishAddress)
-        {
-            publishAddress = _amazonSqsTopic.GetEndpointAddress(baseAddress);
-            return true;
-        }
+    public void Apply(IPublishEndpointBrokerTopologyBuilder builder)
+    {
+        if (Exclude)
+            return;
 
-        public void Apply(IPublishEndpointBrokerTopologyBuilder builder)
-        {
-            if (Exclude)
-                return;
+        var topicHandle = builder.CreateTopic(_amazonSqsTopic.EntityName, _amazonSqsTopic.Durable, _amazonSqsTopic.AutoDelete,
+            _publishTopology.TopicAttributes.MergeLeft(_amazonSqsTopic.TopicAttributes),
+            _publishTopology.TopicSubscriptionAttributes.MergeLeft(_amazonSqsTopic.TopicSubscriptionAttributes),
+            _publishTopology.TopicTags.MergeLeft(_amazonSqsTopic.Tags));
 
-            var topicHandle = builder.CreateTopic(_amazonSqsTopic.EntityName, _amazonSqsTopic.Durable, _amazonSqsTopic.AutoDelete,
-                _publishTopology.TopicAttributes.MergeLeft(_amazonSqsTopic.TopicAttributes),
-                _publishTopology.TopicSubscriptionAttributes.MergeLeft(_amazonSqsTopic.TopicSubscriptionAttributes),
-                _publishTopology.TopicTags.MergeLeft(_amazonSqsTopic.Tags));
+        builder.Topic ??= topicHandle;
+    }
 
-            builder.Topic ??= topicHandle;
-        }
+    public PublishSettings GetPublishSettings(Uri hostAddress)
+    {
+        return new TopicPublishSettings(GetEndpointAddress(hostAddress));
+    }
 
-        public PublishSettings GetPublishSettings(Uri hostAddress)
-        {
-            return new TopicPublishSettings(GetEndpointAddress(hostAddress));
-        }
+    public BrokerTopology GetBrokerTopology()
+    {
+        var builder = new PublishEndpointBrokerTopologyBuilder();
 
-        public BrokerTopology GetBrokerTopology()
-        {
-            var builder = new PublishEndpointBrokerTopologyBuilder();
+        Apply(builder);
 
-            Apply(builder);
-
-            return builder.BuildBrokerTopology();
-        }
+        return builder.BuildBrokerTopology();
     }
 }

@@ -1,82 +1,81 @@
-namespace MassTransit.AmazonSqsTransport
+namespace MassTransit.AmazonSqsTransport;
+
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Configuration;
+using MassTransit.Middleware;
+using Topology;
+
+
+public class AmazonSqsConnectionContext :
+    BasePipeContext,
+    ConnectionContext,
+    IAsyncDisposable
 {
-    using System;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using Configuration;
-    using MassTransit.Middleware;
-    using Topology;
+    readonly IAmazonSqsHostConfiguration _hostConfiguration;
 
+    readonly QueueCache _queueCache;
+    readonly TopicCache _topicCache;
 
-    public class AmazonSqsConnectionContext :
-        BasePipeContext,
-        ConnectionContext,
-        IAsyncDisposable
+    public AmazonSqsConnectionContext(IConnection connection, IAmazonSqsHostConfiguration hostConfiguration, CancellationToken cancellationToken)
+        : base(cancellationToken)
     {
-        readonly IAmazonSqsHostConfiguration _hostConfiguration;
+        _hostConfiguration = hostConfiguration;
+        Connection = connection;
 
-        readonly QueueCache _queueCache;
-        readonly TopicCache _topicCache;
+        Topology = hostConfiguration.Topology;
 
-        public AmazonSqsConnectionContext(IConnection connection, IAmazonSqsHostConfiguration hostConfiguration, CancellationToken cancellationToken)
-            : base(cancellationToken)
-        {
-            _hostConfiguration = hostConfiguration;
-            Connection = connection;
+        _queueCache = new QueueCache(Connection.SqsClient, cancellationToken);
+        _topicCache = new TopicCache(Connection.SnsClient, cancellationToken);
+    }
 
-            Topology = hostConfiguration.Topology;
+    public IConnection Connection { get; }
+    public IAmazonSqsBusTopology Topology { get; }
 
-            _queueCache = new QueueCache(Connection.SqsClient, cancellationToken);
-            _topicCache = new TopicCache(Connection.SnsClient, cancellationToken);
-        }
+    public Uri HostAddress => _hostConfiguration.HostAddress;
 
-        public IConnection Connection { get; }
-        public IAmazonSqsBusTopology Topology { get; }
+    public Task<QueueInfo> GetQueue(Queue queue)
+    {
+        return _queueCache.Get(queue);
+    }
 
-        public Uri HostAddress => _hostConfiguration.HostAddress;
+    public Task<QueueInfo> GetQueueByName(string name)
+    {
+        return _queueCache.GetByName(name);
+    }
 
-        public Task<QueueInfo> GetQueue(Queue queue)
-        {
-            return _queueCache.Get(queue);
-        }
+    public Task<bool> RemoveQueueByName(string name)
+    {
+        return _queueCache.RemoveByName(name);
+    }
 
-        public Task<QueueInfo> GetQueueByName(string name)
-        {
-            return _queueCache.GetByName(name);
-        }
+    public Task<TopicInfo> GetTopic(Topic topic)
+    {
+        return _topicCache.Get(topic);
+    }
 
-        public Task<bool> RemoveQueueByName(string name)
-        {
-            return _queueCache.RemoveByName(name);
-        }
+    public Task<TopicInfo> GetTopicByName(string name)
+    {
+        return _topicCache.GetByName(name);
+    }
 
-        public Task<TopicInfo> GetTopic(Topic topic)
-        {
-            return _topicCache.Get(topic);
-        }
+    public Task<bool> RemoveTopicByName(string name)
+    {
+        return _topicCache.RemoveByName(name);
+    }
 
-        public Task<TopicInfo> GetTopicByName(string name)
-        {
-            return _topicCache.GetByName(name);
-        }
+    public ClientContext CreateClientContext(CancellationToken cancellationToken)
+    {
+        return new AmazonSqsClientContext(this, Connection.SqsClient, Connection.SnsClient, cancellationToken);
+    }
 
-        public Task<bool> RemoveTopicByName(string name)
-        {
-            return _topicCache.RemoveByName(name);
-        }
+    public async ValueTask DisposeAsync()
+    {
+        await _queueCache.DisposeAsync().ConfigureAwait(false);
 
-        public ClientContext CreateClientContext(CancellationToken cancellationToken)
-        {
-            return new AmazonSqsClientContext(this, Connection.SqsClient, Connection.SnsClient, cancellationToken);
-        }
+        await _topicCache.DisposeAsync().ConfigureAwait(false);
 
-        public async ValueTask DisposeAsync()
-        {
-            await _queueCache.DisposeAsync().ConfigureAwait(false);
-
-            await _topicCache.DisposeAsync().ConfigureAwait(false);
-
-            Connection?.Dispose();
-        }
+        Connection?.Dispose();
     }
 }

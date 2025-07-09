@@ -1,40 +1,39 @@
-namespace MassTransit.AmazonSqsTransport
+namespace MassTransit.AmazonSqsTransport;
+
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Amazon.SimpleNotificationService.Model;
+using Amazon.SQS.Model;
+using Topology;
+
+
+public interface ClientContext :
+    PipeContext
 {
-    using System.Collections.Generic;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using Amazon.SimpleNotificationService.Model;
-    using Amazon.SQS.Model;
-    using Topology;
+    ConnectionContext ConnectionContext { get; }
 
+    Task<TopicInfo> CreateTopic(Topology.Topic topic);
 
-    public interface ClientContext :
-        PipeContext
-    {
-        ConnectionContext ConnectionContext { get; }
+    Task<QueueInfo> CreateQueue(Queue queue);
 
-        Task<TopicInfo> CreateTopic(Topology.Topic topic);
+    Task<bool> CreateQueueSubscription(Topology.Topic topic, Queue queue);
 
-        Task<QueueInfo> CreateQueue(Queue queue);
+    Task DeleteTopic(Topology.Topic topic);
 
-        Task<bool> CreateQueueSubscription(Topology.Topic topic, Queue queue);
+    Task DeleteQueue(Queue queue);
 
-        Task DeleteTopic(Topology.Topic topic);
+    Task Publish(string topicName, PublishBatchRequestEntry request, CancellationToken cancellationToken = default);
 
-        Task DeleteQueue(Queue queue);
+    Task SendMessage(string queueName, SendMessageBatchRequestEntry request, CancellationToken cancellationToken);
 
-        Task Publish(string topicName, PublishBatchRequestEntry request, CancellationToken cancellationToken = default);
+    Task DeleteMessage(string queueUrl, string receiptHandle, CancellationToken cancellationToken = default);
 
-        Task SendMessage(string queueName, SendMessageBatchRequestEntry request, CancellationToken cancellationToken);
+    Task PurgeQueue(string queueName, CancellationToken cancellationToken);
 
-        Task DeleteMessage(string queueUrl, string receiptHandle, CancellationToken cancellationToken = default);
+    Task<IList<Message>> ReceiveMessages(string queueName, int messageLimit, int waitTime, CancellationToken cancellationToken);
 
-        Task PurgeQueue(string queueName, CancellationToken cancellationToken);
+    Task<QueueInfo> GetQueueInfo(string queueName);
 
-        Task<IList<Message>> ReceiveMessages(string queueName, int messageLimit, int waitTime, CancellationToken cancellationToken);
-
-        Task<QueueInfo> GetQueueInfo(string queueName);
-
-        Task ChangeMessageVisibility(string queueUrl, string receiptHandle, int seconds);
-    }
+    Task ChangeMessageVisibility(string queueUrl, string receiptHandle, int seconds);
 }

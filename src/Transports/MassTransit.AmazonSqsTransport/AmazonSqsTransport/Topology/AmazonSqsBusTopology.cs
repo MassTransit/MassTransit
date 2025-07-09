@@ -1,69 +1,68 @@
-namespace MassTransit.AmazonSqsTransport.Topology
+namespace MassTransit.AmazonSqsTransport.Topology;
+
+using System;
+using Configuration;
+using Transports;
+
+
+public class AmazonSqsBusTopology :
+    BusTopology,
+    IAmazonSqsBusTopology
 {
-    using System;
-    using Configuration;
-    using Transports;
+    readonly IAmazonSqsTopologyConfiguration _configuration;
+    readonly IAmazonSqsHostConfiguration _hostConfiguration;
+    readonly IMessageNameFormatter _messageNameFormatter;
 
-
-    public class AmazonSqsBusTopology :
-        BusTopology,
-        IAmazonSqsBusTopology
+    public AmazonSqsBusTopology(IAmazonSqsHostConfiguration hostConfiguration, IMessageNameFormatter messageNameFormatter,
+        IAmazonSqsTopologyConfiguration configuration)
+        : base(hostConfiguration, configuration)
     {
-        readonly IAmazonSqsTopologyConfiguration _configuration;
-        readonly IAmazonSqsHostConfiguration _hostConfiguration;
-        readonly IMessageNameFormatter _messageNameFormatter;
+        _hostConfiguration = hostConfiguration;
+        _messageNameFormatter = messageNameFormatter;
+        _configuration = configuration;
+    }
 
-        public AmazonSqsBusTopology(IAmazonSqsHostConfiguration hostConfiguration, IMessageNameFormatter messageNameFormatter,
-            IAmazonSqsTopologyConfiguration configuration)
-            : base(hostConfiguration, configuration)
-        {
-            _hostConfiguration = hostConfiguration;
-            _messageNameFormatter = messageNameFormatter;
-            _configuration = configuration;
-        }
+    IAmazonSqsPublishTopology IAmazonSqsBusTopology.PublishTopology => _configuration.Publish;
+    IAmazonSqsSendTopology IAmazonSqsBusTopology.SendTopology => _configuration.Send;
 
-        IAmazonSqsPublishTopology IAmazonSqsBusTopology.PublishTopology => _configuration.Publish;
-        IAmazonSqsSendTopology IAmazonSqsBusTopology.SendTopology => _configuration.Send;
+    IAmazonSqsMessagePublishTopology<T> IAmazonSqsBusTopology.Publish<T>()
+    {
+        return _configuration.Publish.GetMessageTopology<T>();
+    }
 
-        IAmazonSqsMessagePublishTopology<T> IAmazonSqsBusTopology.Publish<T>()
-        {
-            return _configuration.Publish.GetMessageTopology<T>();
-        }
+    IAmazonSqsMessageSendTopology<T> IAmazonSqsBusTopology.Send<T>()
+    {
+        return _configuration.Send.GetMessageTopology<T>();
+    }
 
-        IAmazonSqsMessageSendTopology<T> IAmazonSqsBusTopology.Send<T>()
-        {
-            return _configuration.Send.GetMessageTopology<T>();
-        }
+    public SendSettings GetSendSettings(Uri address)
+    {
+        var endpointAddress = new AmazonSqsEndpointAddress(_hostConfiguration.HostAddress, address);
 
-        public SendSettings GetSendSettings(Uri address)
-        {
-            var endpointAddress = new AmazonSqsEndpointAddress(_hostConfiguration.HostAddress, address);
+        return _configuration.Send.GetSendSettings(endpointAddress);
+    }
 
-            return _configuration.Send.GetSendSettings(endpointAddress);
-        }
+    public Uri GetDestinationAddress(string topicName, Action<IAmazonSqsTopicConfigurator>? configure = null)
+    {
+        var address = new AmazonSqsEndpointAddress(_hostConfiguration.HostAddress, new Uri($"topic:{topicName}"));
 
-        public Uri GetDestinationAddress(string topicName, Action<IAmazonSqsTopicConfigurator>? configure = null)
-        {
-            var address = new AmazonSqsEndpointAddress(_hostConfiguration.HostAddress, new Uri($"topic:{topicName}"));
+        var publishSettings = new TopicPublishSettings(address);
 
-            var publishSettings = new TopicPublishSettings(address);
+        configure?.Invoke(publishSettings);
 
-            configure?.Invoke(publishSettings);
+        return publishSettings.GetSendAddress(_hostConfiguration.HostAddress);
+    }
 
-            return publishSettings.GetSendAddress(_hostConfiguration.HostAddress);
-        }
+    public Uri GetDestinationAddress(Type messageType, Action<IAmazonSqsTopicConfigurator>? configure = null)
+    {
+        var topicName = _messageNameFormatter.GetMessageName(messageType);
+        var isTemporary = MessageTypeCache.IsTemporaryMessageType(messageType);
+        var address = new AmazonSqsEndpointAddress(_hostConfiguration.HostAddress, new Uri($"topic:{topicName}?temporary={isTemporary}"));
 
-        public Uri GetDestinationAddress(Type messageType, Action<IAmazonSqsTopicConfigurator>? configure = null)
-        {
-            var topicName = _messageNameFormatter.GetMessageName(messageType);
-            var isTemporary = MessageTypeCache.IsTemporaryMessageType(messageType);
-            var address = new AmazonSqsEndpointAddress(_hostConfiguration.HostAddress, new Uri($"topic:{topicName}?temporary={isTemporary}"));
+        var publishSettings = new TopicPublishSettings(address);
 
-            var publishSettings = new TopicPublishSettings(address);
+        configure?.Invoke(publishSettings);
 
-            configure?.Invoke(publishSettings);
-
-            return publishSettings.GetSendAddress(_hostConfiguration.HostAddress);
-        }
+        return publishSettings.GetSendAddress(_hostConfiguration.HostAddress);
     }
 }

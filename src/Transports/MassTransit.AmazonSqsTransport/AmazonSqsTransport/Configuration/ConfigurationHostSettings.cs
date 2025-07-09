@@ -1,79 +1,78 @@
-namespace MassTransit.AmazonSqsTransport.Configuration
+namespace MassTransit.AmazonSqsTransport.Configuration;
+
+using System;
+using Amazon;
+using Amazon.Runtime;
+using Amazon.SimpleNotificationService;
+using Amazon.SQS;
+using Transports;
+
+
+public class ConfigurationHostSettings :
+    AmazonSqsHostSettings
 {
-    using System;
-    using Amazon;
-    using Amazon.Runtime;
-    using Amazon.SimpleNotificationService;
-    using Amazon.SQS;
-    using Transports;
+    readonly Lazy<Uri> _hostAddress;
+    AWSCredentials? _credentials;
+    ImmutableCredentials? _immutableCredentials;
 
-
-    public class ConfigurationHostSettings :
-        AmazonSqsHostSettings
+    public ConfigurationHostSettings()
     {
-        readonly Lazy<Uri> _hostAddress;
-        AWSCredentials? _credentials;
-        ImmutableCredentials? _immutableCredentials;
+        _hostAddress = new Lazy<Uri>(FormatHostAddress);
+    }
 
-        public ConfigurationHostSettings()
+    public AWSCredentials? Credentials
+    {
+        get => _credentials;
+        set
         {
-            _hostAddress = new Lazy<Uri>(FormatHostAddress);
+            _credentials = value;
+            _immutableCredentials = null;
         }
+    }
 
-        public AWSCredentials? Credentials
+    public AmazonSQSConfig? AmazonSqsConfig { get; set; }
+
+    public AmazonSimpleNotificationServiceConfig? AmazonSnsConfig { get; set; }
+
+    public string? Scope { get; set; }
+
+    public RegionEndpoint? Region { get; set; }
+    public string AccessKey => (_immutableCredentials ??= GetImmutableCredentials()).AccessKey;
+    public string SecretKey => (_immutableCredentials ??= GetImmutableCredentials()).SecretKey;
+
+    public AllowTransportHeader? AllowTransportHeader { get; set; }
+
+    public bool ScopeTopics { get; set; }
+
+    public Uri HostAddress => _hostAddress.Value;
+
+    public IConnection CreateConnection()
+    {
+        return new Connection(Credentials, Region, AmazonSqsConfig, AmazonSnsConfig);
+    }
+
+    Uri FormatHostAddress()
+    {
+        if (Region?.SystemName == null)
+            throw new ConfigurationException("The Region must be specified");
+
+        return new AmazonSqsHostAddress(Region.SystemName, Scope);
+    }
+
+    public override string ToString()
+    {
+        if (Region?.SystemName == null)
+            throw new ConfigurationException("The Region must be specified");
+
+        return new UriBuilder
         {
-            get => _credentials;
-            set
-            {
-                _credentials = value;
-                _immutableCredentials = null;
-            }
-        }
+            Scheme = "https",
+            Host = Region.SystemName
+        }.Uri.ToString();
+    }
 
-        public AmazonSQSConfig? AmazonSqsConfig { get; set; }
-
-        public AmazonSimpleNotificationServiceConfig? AmazonSnsConfig { get; set; }
-
-        public string? Scope { get; set; }
-
-        public RegionEndpoint? Region { get; set; }
-        public string AccessKey => (_immutableCredentials ??= GetImmutableCredentials()).AccessKey;
-        public string SecretKey => (_immutableCredentials ??= GetImmutableCredentials()).SecretKey;
-
-        public AllowTransportHeader? AllowTransportHeader { get; set; }
-
-        public bool ScopeTopics { get; set; }
-
-        public Uri HostAddress => _hostAddress.Value;
-
-        public IConnection CreateConnection()
-        {
-            return new Connection(Credentials, Region, AmazonSqsConfig, AmazonSnsConfig);
-        }
-
-        Uri FormatHostAddress()
-        {
-            if (Region?.SystemName == null)
-                throw new ConfigurationException("The Region must be specified");
-
-            return new AmazonSqsHostAddress(Region.SystemName, Scope);
-        }
-
-        public override string ToString()
-        {
-            if (Region?.SystemName == null)
-                throw new ConfigurationException("The Region must be specified");
-
-            return new UriBuilder
-            {
-                Scheme = "https",
-                Host = Region.SystemName
-            }.Uri.ToString();
-        }
-
-        ImmutableCredentials GetImmutableCredentials()
-        {
-            return Credentials?.GetCredentials() ?? throw new ArgumentNullException(nameof(Credentials));
-        }
+    ImmutableCredentials GetImmutableCredentials()
+    {
+        return Credentials?.GetCredentials() ?? throw new ArgumentNullException(nameof(Credentials));
     }
 }

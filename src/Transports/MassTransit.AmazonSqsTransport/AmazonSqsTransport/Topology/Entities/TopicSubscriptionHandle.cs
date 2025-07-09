@@ -1,11 +1,10 @@
-namespace MassTransit.AmazonSqsTransport.Topology
+namespace MassTransit.AmazonSqsTransport.Topology;
+
+using MassTransit.Topology;
+
+
+public interface TopicSubscriptionHandle :
+    EntityHandle
 {
-    using MassTransit.Topology;
-
-
-    public interface TopicSubscriptionHandle :
-        EntityHandle
-    {
-        TopicSubscription TopicSubscription { get; }
-    }
+    TopicSubscription TopicSubscription { get; }
 }

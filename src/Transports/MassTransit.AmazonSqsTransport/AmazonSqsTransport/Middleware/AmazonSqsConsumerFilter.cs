@@ -1,48 +1,47 @@
-namespace MassTransit.AmazonSqsTransport.Middleware
+namespace MassTransit.AmazonSqsTransport.Middleware;
+
+using System.Threading.Tasks;
+using Transports;
+
+
+/// <summary>
+/// A filter that uses the model context to create a basic consumer and connect it to the model
+/// </summary>
+public class AmazonSqsConsumerFilter :
+    IFilter<ClientContext>
 {
-    using System.Threading.Tasks;
-    using Transports;
+    readonly SqsReceiveEndpointContext _context;
 
-
-    /// <summary>
-    /// A filter that uses the model context to create a basic consumer and connect it to the model
-    /// </summary>
-    public class AmazonSqsConsumerFilter :
-        IFilter<ClientContext>
+    public AmazonSqsConsumerFilter(SqsReceiveEndpointContext context)
     {
-        readonly SqsReceiveEndpointContext _context;
+        _context = context;
+    }
 
-        public AmazonSqsConsumerFilter(SqsReceiveEndpointContext context)
+    void IProbeSite.Probe(ProbeContext context)
+    {
+    }
+
+    async Task IFilter<ClientContext>.Send(ClientContext context, IPipe<ClientContext> next)
+    {
+        var receiver = new AmazonSqsMessageReceiver(context, _context);
+
+        await receiver.Ready.ConfigureAwait(false);
+
+        _context.AddConsumeAgent(receiver);
+
+        await _context.TransportObservers.NotifyReady(_context.InputAddress).ConfigureAwait(false);
+
+        try
         {
-            _context = context;
+            await receiver.Completed.ConfigureAwait(false);
         }
-
-        void IProbeSite.Probe(ProbeContext context)
+        finally
         {
-        }
+            DeliveryMetrics metrics = receiver;
 
-        async Task IFilter<ClientContext>.Send(ClientContext context, IPipe<ClientContext> next)
-        {
-            var receiver = new AmazonSqsMessageReceiver(context, _context);
+            await _context.TransportObservers.NotifyCompleted(_context.InputAddress, metrics).ConfigureAwait(false);
 
-            await receiver.Ready.ConfigureAwait(false);
-
-            _context.AddConsumeAgent(receiver);
-
-            await _context.TransportObservers.NotifyReady(_context.InputAddress).ConfigureAwait(false);
-
-            try
-            {
-                await receiver.Completed.ConfigureAwait(false);
-            }
-            finally
-            {
-                DeliveryMetrics metrics = receiver;
-
-                await _context.TransportObservers.NotifyCompleted(_context.InputAddress, metrics).ConfigureAwait(false);
-
-                _context.LogConsumerCompleted(metrics.DeliveryCount, metrics.ConcurrentDeliveryCount);
-            }
+            _context.LogConsumerCompleted(metrics.DeliveryCount, metrics.ConcurrentDeliveryCount);
         }
     }
 }

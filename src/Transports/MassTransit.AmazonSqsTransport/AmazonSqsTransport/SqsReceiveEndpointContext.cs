@@ -1,14 +1,13 @@
-﻿namespace MassTransit.AmazonSqsTransport
+﻿namespace MassTransit.AmazonSqsTransport;
+
+using Topology;
+using Transports;
+
+
+public interface SqsReceiveEndpointContext :
+    ReceiveEndpointContext
 {
-    using Topology;
-    using Transports;
+    BrokerTopology BrokerTopology { get; }
 
-
-    public interface SqsReceiveEndpointContext :
-        ReceiveEndpointContext
-    {
-        BrokerTopology BrokerTopology { get; }
-
-        IClientContextSupervisor ClientContextSupervisor { get; }
-    }
+    IClientContextSupervisor ClientContextSupervisor { get; }
 }

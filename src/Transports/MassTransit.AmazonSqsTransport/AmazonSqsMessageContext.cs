@@ -1,13 +1,12 @@
-﻿namespace MassTransit
+﻿namespace MassTransit;
+
+using System.Collections.Generic;
+using Amazon.SQS.Model;
+
+
+public interface AmazonSqsMessageContext
 {
-    using System.Collections.Generic;
-    using Amazon.SQS.Model;
+    Message TransportMessage { get; }
 
-
-    public interface AmazonSqsMessageContext
-    {
-        Message TransportMessage { get; }
-
-        Dictionary<string, MessageAttributeValue> Attributes { get; }
-    }
+    Dictionary<string, MessageAttributeValue> Attributes { get; }
 }

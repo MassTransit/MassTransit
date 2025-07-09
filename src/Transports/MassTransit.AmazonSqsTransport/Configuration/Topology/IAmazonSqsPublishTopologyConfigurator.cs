@@ -1,15 +1,14 @@
-﻿namespace MassTransit
+﻿namespace MassTransit;
+
+using System;
+
+
+public interface IAmazonSqsPublishTopologyConfigurator :
+    IPublishTopologyConfigurator,
+    IAmazonSqsPublishTopology
 {
-    using System;
+    new IAmazonSqsMessagePublishTopologyConfigurator<T> GetMessageTopology<T>()
+        where T : class;
 
-
-    public interface IAmazonSqsPublishTopologyConfigurator :
-        IPublishTopologyConfigurator,
-        IAmazonSqsPublishTopology
-    {
-        new IAmazonSqsMessagePublishTopologyConfigurator<T> GetMessageTopology<T>()
-            where T : class;
-
-        new IAmazonSqsMessagePublishTopologyConfigurator GetMessageTopology(Type messageType);
-    }
+    new IAmazonSqsMessagePublishTopologyConfigurator GetMessageTopology(Type messageType);
 }

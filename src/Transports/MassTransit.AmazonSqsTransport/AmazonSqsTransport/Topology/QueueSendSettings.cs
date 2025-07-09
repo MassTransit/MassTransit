@@ -1,39 +1,38 @@
-namespace MassTransit.AmazonSqsTransport.Topology
+namespace MassTransit.AmazonSqsTransport.Topology;
+
+using System.Collections.Generic;
+using Configuration;
+
+
+public class QueueSendSettings :
+    AmazonSqsQueueConfigurator,
+    SendSettings
 {
-    using System.Collections.Generic;
-    using Configuration;
-
-
-    public class QueueSendSettings :
-        AmazonSqsQueueConfigurator,
-        SendSettings
+    public QueueSendSettings(AmazonSqsEndpointAddress address)
+        : base(address.Name, address.Durable, address.AutoDelete)
     {
-        public QueueSendSettings(AmazonSqsEndpointAddress address)
-            : base(address.Name, address.Durable, address.AutoDelete)
-        {
-        }
+    }
 
-        public BrokerTopology GetBrokerTopology()
-        {
-            var builder = new SendEndpointBrokerTopologyBuilder();
+    public BrokerTopology GetBrokerTopology()
+    {
+        var builder = new SendEndpointBrokerTopologyBuilder();
 
-            builder.Queue = builder.CreateQueue(EntityName, Durable, AutoDelete);
+        builder.Queue = builder.CreateQueue(EntityName, Durable, AutoDelete);
 
-            return builder.BuildBrokerTopology();
-        }
+        return builder.BuildBrokerTopology();
+    }
 
-        IEnumerable<string> GetSettingStrings()
-        {
-            if (Durable)
-                yield return "durable";
+    IEnumerable<string> GetSettingStrings()
+    {
+        if (Durable)
+            yield return "durable";
 
-            if (AutoDelete)
-                yield return "auto-delete";
-        }
+        if (AutoDelete)
+            yield return "auto-delete";
+    }
 
-        public override string ToString()
-        {
-            return string.Join(", ", GetSettingStrings());
-        }
+    public override string ToString()
+    {
+        return string.Join(", ", GetSettingStrings());
     }
 }

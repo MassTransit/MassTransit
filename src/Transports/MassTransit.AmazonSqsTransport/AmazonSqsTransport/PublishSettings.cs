@@ -1,7 +1,6 @@
-﻿namespace MassTransit.AmazonSqsTransport
+﻿namespace MassTransit.AmazonSqsTransport;
+
+public interface PublishSettings :
+    EntitySettings
 {
-    public interface PublishSettings :
-        EntitySettings
-    {
-    }
 }

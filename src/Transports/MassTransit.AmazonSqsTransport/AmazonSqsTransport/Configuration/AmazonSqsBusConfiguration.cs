@@ -1,39 +1,38 @@
-﻿namespace MassTransit.AmazonSqsTransport.Configuration
+﻿namespace MassTransit.AmazonSqsTransport.Configuration;
+
+using MassTransit.Configuration;
+using Observables;
+
+
+public class AmazonSqsBusConfiguration :
+    AmazonSqsEndpointConfiguration,
+    IAmazonSqsBusConfiguration
 {
-    using MassTransit.Configuration;
-    using Observables;
+    readonly BusObservable _busObservers;
 
-
-    public class AmazonSqsBusConfiguration :
-        AmazonSqsEndpointConfiguration,
-        IAmazonSqsBusConfiguration
+    public AmazonSqsBusConfiguration(IAmazonSqsTopologyConfiguration topologyConfiguration)
+        : base(topologyConfiguration)
     {
-        readonly BusObservable _busObservers;
+        HostConfiguration = new AmazonSqsHostConfiguration(this, topologyConfiguration);
+        BusEndpointConfiguration = CreateEndpointConfiguration(true);
 
-        public AmazonSqsBusConfiguration(IAmazonSqsTopologyConfiguration topologyConfiguration)
-            : base(topologyConfiguration)
-        {
-            HostConfiguration = new AmazonSqsHostConfiguration(this, topologyConfiguration);
-            BusEndpointConfiguration = CreateEndpointConfiguration(true);
+        _busObservers = new BusObservable();
+    }
 
-            _busObservers = new BusObservable();
-        }
+    IHostConfiguration IBusConfiguration.HostConfiguration => HostConfiguration;
+    IEndpointConfiguration IBusConfiguration.BusEndpointConfiguration => BusEndpointConfiguration;
+    IBusObserver IBusConfiguration.BusObservers => _busObservers;
 
-        IHostConfiguration IBusConfiguration.HostConfiguration => HostConfiguration;
-        IEndpointConfiguration IBusConfiguration.BusEndpointConfiguration => BusEndpointConfiguration;
-        IBusObserver IBusConfiguration.BusObservers => _busObservers;
+    public IAmazonSqsEndpointConfiguration BusEndpointConfiguration { get; }
+    public IAmazonSqsHostConfiguration HostConfiguration { get; }
 
-        public IAmazonSqsEndpointConfiguration BusEndpointConfiguration { get; }
-        public IAmazonSqsHostConfiguration HostConfiguration { get; }
+    public ConnectHandle ConnectBusObserver(IBusObserver observer)
+    {
+        return _busObservers.Connect(observer);
+    }
 
-        public ConnectHandle ConnectBusObserver(IBusObserver observer)
-        {
-            return _busObservers.Connect(observer);
-        }
-
-        public ConnectHandle ConnectEndpointConfigurationObserver(IEndpointConfigurationObserver observer)
-        {
-            return HostConfiguration.ConnectEndpointConfigurationObserver(observer);
-        }
+    public ConnectHandle ConnectEndpointConfigurationObserver(IEndpointConfigurationObserver observer)
+    {
+        return HostConfiguration.ConnectEndpointConfigurationObserver(observer);
     }
 }
