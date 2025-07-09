@@ -5,18 +5,18 @@
   <ItemGroup>
     <PackageVersion Include="Apache.NMS.ActiveMQ" Version="2.1.1" />
     <PackageVersion Include="Apache.NMS.AMQP" Version="2.2.0" />
-    <PackageVersion Include="AWSSDK.DynamoDBv2" Version="4.0.0" />
-    <PackageVersion Include="AWSSDK.SimpleNotificationService" Version="4.0.0" />
-    <PackageVersion Include="AWSSDK.S3" Version="4.0.0" />
-    <PackageVersion Include="AWSSDK.SQS" Version="4.0.0" />
+    <PackageVersion Include="AWSSDK.DynamoDBv2" Version="4.0.2.1" />
+    <PackageVersion Include="AWSSDK.SimpleNotificationService" Version="4.0.0.12" />
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.4.1" />
+    <PackageVersion Include="AWSSDK.SQS" Version="4.0.0.13" />
     <PackageVersion Include="Azure.Data.Tables" Version="12.11.0" />
-    <PackageVersion Include="Azure.Identity" Version="1.14.0" />
+    <PackageVersion Include="Azure.Identity" Version="1.14.1" />
     <PackageVersion Include="Azure.Messaging.EventHubs.Processor" Version="5.12.2" />
     <PackageVersion Include="Azure.Messaging.ServiceBus" Version="7.20.1" />
     <PackageVersion Include="Azure.Storage.Blobs" Version="12.24.1" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.13.11" />
-    <PackageVersion Include="Confluent.Kafka" Version="2.10.1" />
-    <PackageVersion Include="Confluent.SchemaRegistry.Serdes.Avro" Version="2.10.1" />
+    <PackageVersion Include="Confluent.Kafka" Version="2.11.0" />
+    <PackageVersion Include="Confluent.SchemaRegistry.Serdes.Avro" Version="2.11.0" />
     <PackageVersion Include="coverlet.collector" Version="3.1.2" />
     <PackageVersion Include="Dapper" Version="2.1.66" />
     <PackageVersion Include="dapper.contrib" Version="2.0.78" />
@@ -27,7 +27,7 @@
     <PackageVersion Include="Hangfire.MemoryStorage" Version="1.8.1.2" />
     <PackageVersion Include="Iesi.Collections" Version="4.1.1" />
     <PackageVersion Include="Ionic.Zlib.Core" Version="1.0.0" />
-    <PackageVersion Include="Marten" Version="8.3.0" />
+    <PackageVersion Include="Marten" Version="8.3.1" />
     <PackageVersion Include="MathNet.Numerics" Version="5.0.0" />
     <PackageVersion Include="MediatR" Version="12.2.0" />
     <PackageVersion Include="MessagePack" Version="3.1.4" />
@@ -36,7 +36,7 @@
     <PackageVersion Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="9.0.0" />
     <PackageVersion Include="Microsoft.Azure.Cosmos" Version="3.52.0" />
     <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions.EventHubs" Version="6.5.2" />
-    <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="5.16.6" />
+    <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="5.17.0" />
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.11.0" />
     <PackageVersion Include="Microsoft.Data.SqlClient" Version="5.2.3" />
@@ -97,7 +97,7 @@
     <PackageVersion Include="System.Net.Http" Version="4.3.4" />
     <PackageVersion Include="System.Reflection.Emit" Version="4.7.0" />
     <PackageVersion Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
-    <PackageVersion Include="System.Text.Json" Version="8.0.5" Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))" />
+    <PackageVersion Include="System.Text.Json" Version="8.0.6" Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))" />
     <PackageVersion Include="System.Text.Json" Version="9.0.0" Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))" />
     <PackageVersion Include="System.Threading.Channels" Version="8.0.0" Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))" />
     <PackageVersion Include="System.Threading.Channels" Version="9.0.0" Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))" />
