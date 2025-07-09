@@ -29,7 +29,7 @@ namespace MassTransit.RetryPolicies
 
         public int RetryCount { get; }
 
-        public virtual TimeSpan? Delay => default;
+        public virtual TimeSpan? Delay => null;
 
         Type RetryContext.ContextType => typeof(TContext);
 

@@ -43,6 +43,9 @@ namespace MassTransit.Context
         public TContext CreateNext<TContext>(RetryContext retryContext)
             where TContext : class, ConsumeRetryContext
         {
+            if (retryContext is RetryContext<CompensateContext<TLog>> compensateRetryContext && _existingResult != null)
+                compensateRetryContext.Context.Result = _existingResult;
+
             return new RetryCompensateContext<TLog>(_context, _retryPolicy, retryContext) as TContext;
         }
 

@@ -35,7 +35,7 @@ abstract class BaseExecutionResult<TArguments> :
 
     public virtual bool IsFaulted(out Exception exception)
     {
-        exception = default;
+        exception = null;
         return false;
     }
 

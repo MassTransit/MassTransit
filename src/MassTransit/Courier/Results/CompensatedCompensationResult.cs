@@ -58,7 +58,7 @@ namespace MassTransit.Courier.Results
 
         public bool IsFailed(out Exception exception)
         {
-            exception = default;
+            exception = null;
             return false;
         }
 
