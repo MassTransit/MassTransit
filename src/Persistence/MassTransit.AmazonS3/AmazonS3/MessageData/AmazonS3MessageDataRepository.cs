@@ -1,151 +1,149 @@
-namespace MassTransit.AmazonS3.MessageData
+namespace MassTransit.AmazonS3.MessageData;
+
+using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+using Amazon.S3;
+using Amazon.S3.Model;
+using Amazon.S3.Transfer;
+using Amazon.S3.Util;
+using Util;
+
+
+public class AmazonS3MessageDataRepository :
+    IMessageDataRepository,
+    IBusObserver
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using Amazon.S3;
-    using Amazon.S3.Model;
-    using Amazon.S3.Transfer;
-    using Amazon.S3.Util;
-    using Util;
+    const string RuleName = "s3-messagedata-rule";
+    readonly string _bucket;
+    readonly IAmazonS3 _s3Client;
 
-
-    public class AmazonS3MessageDataRepository :
-        IMessageDataRepository,
-        IBusObserver
+    public AmazonS3MessageDataRepository(string bucket)
+        : this(new AmazonS3Client(), bucket)
     {
-        const string RuleName = "s3-messagedata-rule";
-        readonly string _bucket;
-        readonly IAmazonS3 _s3Client;
+    }
 
-        public AmazonS3MessageDataRepository(string bucket)
-            : this(new AmazonS3Client(), bucket)
-        {
-        }
+    public AmazonS3MessageDataRepository(AmazonS3Config config, string bucket)
+        : this(new AmazonS3Client(config), bucket)
+    {
+    }
 
-        public AmazonS3MessageDataRepository(AmazonS3Config config, string bucket)
-            : this(new AmazonS3Client(config), bucket)
-        {
-        }
+    public AmazonS3MessageDataRepository(IAmazonS3 client, string bucket)
+    {
+        _s3Client = client;
+        _bucket = bucket;
+    }
 
-        public AmazonS3MessageDataRepository(IAmazonS3 client, string bucket)
-        {
-            _s3Client = client;
-            _bucket = bucket;
-        }
+    public void PostCreate(IBus bus)
+    {
+    }
 
-        public void PostCreate(IBus bus)
-        {
-        }
+    public void CreateFaulted(Exception exception)
+    {
+    }
 
-        public void CreateFaulted(Exception exception)
-        {
-        }
+    public Task PreStop(IBus bus)
+    {
+        return Task.CompletedTask;
+    }
 
-        public Task PreStop(IBus bus)
-        {
-            return Task.CompletedTask;
-        }
+    public Task PostStart(IBus bus, Task<BusReady> busReady)
+    {
+        return Task.CompletedTask;
+    }
 
-        public Task PostStart(IBus bus, Task<BusReady> busReady)
-        {
-            return Task.CompletedTask;
-        }
+    public Task StartFaulted(IBus bus, Exception exception)
+    {
+        return Task.CompletedTask;
+    }
 
-        public Task StartFaulted(IBus bus, Exception exception)
+    public async Task PreStart(IBus bus)
+    {
+        try
         {
-            return Task.CompletedTask;
-        }
-
-        public async Task PreStart(IBus bus)
-        {
-            try
+            var bucketExists = await AmazonS3Util.DoesS3BucketExistV2Async(_s3Client, _bucket);
+            if (!bucketExists)
             {
-                var bucketExists = await AmazonS3Util.DoesS3BucketExistV2Async(_s3Client, _bucket);
-                if (!bucketExists)
+                try
                 {
-                    try
-                    {
-                        await _s3Client.PutBucketAsync(new PutBucketRequest
-                        {
-                            BucketName = _bucket,
-                            UseClientRegion = true
-                        });
-                    }
-                    catch (AmazonS3Exception exception)
-                    {
-                        LogContext.Warning?.Log(exception, "Amazon S3 Bucket does not exist: {Address}", _bucket);
-                    }
-                }
-
-                if (MessageDataDefaults.TimeToLive != null && MessageDataDefaults.TimeToLive.Value.Days > 0)
-                {
-                    // Do no delete life cycle rule if TimeToLive is not available. Allow user to create rule in S3 console.
-                    await _s3Client.DeleteLifecycleConfigurationAsync(_bucket);
-                    await _s3Client.PutLifecycleConfigurationAsync(new PutLifecycleConfigurationRequest
+                    await _s3Client.PutBucketAsync(new PutBucketRequest
                     {
                         BucketName = _bucket,
-                        Configuration = new LifecycleConfiguration
-                        {
-                            Rules = new List<LifecycleRule>
-                            {
-                                new LifecycleRule
-                                {
-                                    Id = RuleName,
-                                    Expiration = new LifecycleRuleExpiration { Days = MessageDataDefaults.TimeToLive.Value.Days }
-                                }
-                            }
-                        }
-                    });
+                        UseClientRegion = true
+                    }).ConfigureAwait(false);
+                }
+                catch (AmazonS3Exception exception)
+                {
+                    LogContext.Warning?.Log(exception, "Amazon S3 Bucket does not exist: {Address}", _bucket);
                 }
             }
-            catch (Exception exception)
+
+            if (MessageDataDefaults.TimeToLive != null && MessageDataDefaults.TimeToLive.Value.Days > 0)
             {
-                LogContext.Error?.Log(exception, "S3 Storage failure.");
+                // Do no delete life cycle rule if TimeToLive is not available. Allow user to create rule in the S3 console.
+                await _s3Client.DeleteLifecycleConfigurationAsync(_bucket).ConfigureAwait(false);
+                await _s3Client.PutLifecycleConfigurationAsync(new PutLifecycleConfigurationRequest
+                {
+                    BucketName = _bucket,
+                    Configuration = new LifecycleConfiguration
+                    {
+                        Rules =
+                        [
+                            new LifecycleRule
+                            {
+                                Id = RuleName,
+                                Expiration = new LifecycleRuleExpiration { Days = MessageDataDefaults.TimeToLive.Value.Days }
+                            }
+                        ]
+                    }
+                }).ConfigureAwait(false);
             }
         }
-
-        public Task PostStop(IBus bus)
+        catch (Exception exception)
         {
-            return Task.CompletedTask;
+            LogContext.Error?.Log(exception, "S3 Storage failure.");
         }
+    }
 
-        public Task StopFaulted(IBus bus, Exception exception)
-        {
-            return Task.CompletedTask;
-        }
+    public Task PostStop(IBus bus)
+    {
+        return Task.CompletedTask;
+    }
 
-        public async Task<Stream> Get(Uri address, CancellationToken cancellationToken = new CancellationToken())
-        {
-            var filePath = ParseFilePath(address);
-            var transferUtility = new TransferUtility(_s3Client);
-            return await transferUtility.OpenStreamAsync(_bucket, filePath, cancellationToken);
-        }
+    public Task StopFaulted(IBus bus, Exception exception)
+    {
+        return Task.CompletedTask;
+    }
 
-        public async Task<Uri> Put(Stream stream, TimeSpan? timeToLive = null, CancellationToken cancellationToken = new CancellationToken())
-        {
-            var filePath = FormatUtil.Formatter.Format(NewId.Next().ToSequentialGuid().ToByteArray());
-            var transferUtility = new TransferUtility(_s3Client);
-            await transferUtility.UploadAsync(stream, _bucket, filePath, cancellationToken);
-            return new Uri($"urn:file:{filePath.Replace(Path.DirectorySeparatorChar, ':')}");
-        }
+    public async Task<Stream> Get(Uri address, CancellationToken cancellationToken = default)
+    {
+        var filePath = ParseFilePath(address);
+        var transferUtility = new TransferUtility(_s3Client);
+        return await transferUtility.OpenStreamAsync(_bucket, filePath, cancellationToken).ConfigureAwait(false);
+    }
 
-        static string ParseFilePath(Uri address)
-        {
-            if (address.Scheme != "urn")
-                throw new ArgumentException("The address must be a urn");
+    public async Task<Uri> Put(Stream stream, TimeSpan? timeToLive = null, CancellationToken cancellationToken = default)
+    {
+        var filePath = FormatUtil.Formatter.Format(NewId.Next().ToSequentialGuid().ToByteArray());
+        var transferUtility = new TransferUtility(_s3Client);
+        await transferUtility.UploadAsync(stream, _bucket, filePath, cancellationToken).ConfigureAwait(false);
+        return new Uri($"urn:file:{filePath.Replace(Path.DirectorySeparatorChar, ':')}");
+    }
 
-            var parts = address.Segments[0].Split(':');
-            if (parts[0] != "file")
-                throw new ArgumentException("The address must be a urn:file");
+    static string ParseFilePath(Uri address)
+    {
+        if (address.Scheme != "urn")
+            throw new ArgumentException("The address must be a urn");
 
-            var length = parts.Length - 1;
-            var elements = new string[length];
-            Array.Copy(parts, 1, elements, 0, length);
+        var parts = address.Segments[0].Split(':');
+        if (parts[0] != "file")
+            throw new ArgumentException("The address must be a urn:file");
 
-            return Path.Combine(elements);
-        }
+        var length = parts.Length - 1;
+        var elements = new string[length];
+        Array.Copy(parts, 1, elements, 0, length);
+
+        return Path.Combine(elements);
     }
 }

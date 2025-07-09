@@ -12,6 +12,7 @@
 
   <PropertyGroup>
     <RootNamespace>MassTransit</RootNamespace>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <PropertyGroup>
