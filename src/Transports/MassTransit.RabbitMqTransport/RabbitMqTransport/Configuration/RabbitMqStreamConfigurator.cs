@@ -70,4 +70,9 @@ public class RabbitMqStreamConfigurator :
     {
         _settings.ConsumeArguments[Headers.XStreamOffset] = "last";
     }
+
+    public string Reference
+    {
+        set => _settings.ConsumeArguments["name"] = value;
+    }
 }

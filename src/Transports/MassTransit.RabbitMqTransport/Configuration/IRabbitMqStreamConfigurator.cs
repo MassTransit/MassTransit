@@ -47,4 +47,10 @@ public interface IRabbitMqStreamConfigurator
     /// Begin consuming messages from the last message in the stream
     /// </summary>
     void FromLast();
+
+    /// <summary>
+    /// Consumer reference name.
+    /// Used to identify the consumer server side when storing the messages offset.
+    /// </summary>
+    string Reference { set; }
 }
