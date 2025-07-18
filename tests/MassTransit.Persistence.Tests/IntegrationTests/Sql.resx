@@ -1,0 +1,412 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="MySql_CreateJobTables" xml:space="preserve">
+    <value>CREATE TABLE `JobAttempts` (
+    `CorrelationId` BINARY(16) NOT NULL,
+    `CurrentState` INT NOT NULL,
+    `JobId` CHAR(36) NOT NULL,    
+    `Started` DATETIME NULL,
+    `Faulted` DATETIME NULL,
+    `StatusCheckTokenId` CHAR(36) NULL,    
+    `RetryAttempt` INT NOT NULL,
+    `ServiceAddress` VARCHAR(1000) NULL,
+    `InstanceAddress` VARCHAR(1000) NULL,
+    PRIMARY KEY (`CorrelationId`)
+) ENGINE=InnoDB;
+
+CREATE TABLE `JobTypes` (
+    `CorrelationId` BINARY(16) NOT NULL,
+    `Name` VARCHAR(255) NOT NULL,
+    `CurrentState` INT NOT NULL,
+    `ActiveJobCount` INT NOT NULL,
+    `ConcurrentJobLimit` INT NOT NULL,
+    `OverrideJobLimit` INT NULL,
+    `OverrideLimitExpiration` DATETIME NULL,
+    `GlobalConcurrentJobLimit` INT NULL,
+    `ActiveJobs` TEXT NULL,
+    `Instances` TEXT NULL,
+    `Properties` TEXT NULL,      
+    PRIMARY KEY (`CorrelationId`)
+) ENGINE=InnoDB;
+
+CREATE TABLE `Jobs` (
+    `CorrelationId` BINARY(16) NOT NULL,
+    `CurrentState` INT NOT NULL,    
+    `Completed` DATETIME NULL,
+    `Faulted` DATETIME NULL,
+    `Started` DATETIME NULL,
+    `Submitted` DATETIME NULL,    
+    `EndDate` DATETIME NULL,
+    `NextStartDate` DATETIME NULL,
+    `StartDate` DATETIME NULL,    
+    `AttemptId` CHAR(36) NOT NULL,
+    `JobTypeId` CHAR(36) NOT NULL,
+    `JobRetryDelayToken` CHAR(36) NULL,
+    `JobSlotWaitToken` CHAR(36) NULL,    
+    `RetryAttempt` INT NOT NULL,
+    `LastProgressLimit` BIGINT NULL,
+    `LastProgressSequenceNumber` BIGINT NULL,
+    `LastProgressValue` BIGINT NULL,
+    `CronExpression` VARCHAR(255) NULL,
+    `Reason` TEXT NULL,
+    `TimeZoneId` VARCHAR(100) NULL,    
+    `Duration` TIME NULL,
+    `JobTimeout` TIME NULL,
+    `ServiceAddress` VARCHAR(1000) NULL,    
+    `IncompleteAttempts` TEXT NULL,    
+    `Job` TEXT NULL,
+    `JobProperties` TEXT NULL,
+    `JobState` TEXT NULL,    
+    PRIMARY KEY (`CorrelationId`)
+) ENGINE=InnoDB;</value>
+  </data>
+  <data name="MySql_CreateMessageDataTables" xml:space="preserve">
+    <value>CREATE TABLE `MessageData` (
+    `Id` BINARY(16) NOT NULL PRIMARY KEY,
+    `Created` DATETIME NOT NULL,
+    `Expires` DATETIME NOT NULL,
+    `Data` LONGBLOB NOT NULL
+) ENGINE=InnoDB;</value>
+  </data>
+  <data name="MySql_CreateSagaTables" xml:space="preserve">
+    <value>CREATE TABLE OptimisticSagas (
+    `CorrelationId` BINARY(16) NOT NULL,
+    `RowVersion` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `CurrentState` VARCHAR(20),
+    `Name` TEXT,
+    
+    PRIMARY KEY (`CorrelationId`)
+);
+
+CREATE TABLE `PessimisticSagas` (
+    `CorrelationId` BINARY(16) NOT NULL,
+    `CurrentState` VARCHAR(20),
+    `Name` TEXT,
+    
+    PRIMARY KEY (`CorrelationId`)
+);</value>
+  </data>
+  <data name="MySql_DropJobTables" xml:space="preserve">
+    <value>DROP TABLE IF EXISTS Jobs;
+DROP TABLE IF EXISTS JobTypes;
+DROP TABLE IF EXISTS JobAttempts;</value>
+  </data>
+  <data name="MySql_DropMessageDataTables" xml:space="preserve">
+    <value>DROP TABLE IF EXISTS MessageData;</value>
+  </data>
+  <data name="MySql_DropSagaTables" xml:space="preserve">
+    <value>DROP TABLE IF EXISTS OptimisticSagas;
+DROP TABLE IF EXISTS PessimisticSagas;</value>
+  </data>
+  <data name="Postgres_CreateJobTables" xml:space="preserve">
+    <value>CREATE TABLE IF NOT EXISTS JobAttempts (
+    CorrelationId UUID NOT NULL,
+    CurrentState INTEGER NOT NULL,
+    JobId UUID NOT NULL,    
+    Started TIMESTAMP NULL,
+    Faulted TIMESTAMP NULL,
+    StatusCheckTokenId UUID NULL,    
+    RetryAttempt INTEGER NOT NULL,
+    ServiceAddress VARCHAR(1000) NULL,
+    InstanceAddress VARCHAR(1000) NULL,
+    PRIMARY KEY (CorrelationId)
+);
+
+CREATE TABLE IF NOT EXISTS JobTypes (
+    CorrelationId UUID NOT NULL,
+    Name VARCHAR(255) NOT NULL,
+    CurrentState INTEGER NOT NULL,
+    ActiveJobCount INTEGER NOT NULL,
+    ConcurrentJobLimit INTEGER NOT NULL,
+    OverrideJobLimit INTEGER NULL,
+    OverrideLimitExpiration TIMESTAMP NULL,
+    GlobalConcurrentJobLimit INTEGER NULL,
+    ActiveJobs JSONB NULL,
+    Instances JSONB NULL,
+    Properties JSONB NULL,      
+    PRIMARY KEY (CorrelationId)
+);
+
+CREATE TABLE IF NOT EXISTS Jobs (
+    CorrelationId UUID NOT NULL,
+    CurrentState INTEGER NOT NULL,    
+    Completed TIMESTAMP NULL,
+    Faulted TIMESTAMP NULL,
+    Started TIMESTAMP NULL,
+    Submitted TIMESTAMP NULL,    
+    EndDate TIMESTAMPTZ NULL,
+    NextStartDate TIMESTAMPTZ NULL,
+    StartDate TIMESTAMPTZ NULL,    
+    AttemptId UUID NOT NULL,
+    JobTypeId UUID NOT NULL,
+    JobRetryDelayToken UUID NULL,
+    JobSlotWaitToken UUID NULL,    
+    RetryAttempt INTEGER NOT NULL,
+    LastProgressLimit BIGINT NULL,
+    LastProgressSequenceNumber BIGINT NULL,
+    LastProgressValue BIGINT NULL,
+    CronExpression VARCHAR(255) NULL,
+    Reason TEXT NULL,
+    TimeZoneId VARCHAR(100) NULL,    
+    Duration INTERVAL NULL,
+    JobTimeout INTERVAL NULL,
+    ServiceAddress VARCHAR(1000) NULL,    
+    IncompleteAttempts JSONB NULL,    
+    Job JSONB NULL,
+    JobProperties JSONB NULL,
+    JobState JSONB NULL,    
+    PRIMARY KEY (CorrelationId)
+);</value>
+  </data>
+  <data name="Postgres_CreateMessageDataTables" xml:space="preserve">
+    <value>CREATE TABLE MessageData (
+    Id UUID NOT NULL PRIMARY KEY,
+    Created TIMESTAMP NOT NULL,
+    Expires TIMESTAMP NOT NULL,
+    Data BYTEA NOT NULL
+);</value>
+  </data>
+  <data name="Postgres_CreateSagaTables" xml:space="preserve">
+    <value>CREATE TABLE IF NOT EXISTS OptimisticSagas (
+    CorrelationId UUID NOT NULL,
+    CurrentState VARCHAR(20),
+    Name TEXT,
+    
+    PRIMARY KEY (CorrelationId)
+);
+
+CREATE TABLE IF NOT EXISTS PessimisticSagas (
+    CorrelationId UUID NOT NULL,
+    CurrentState VARCHAR(20),
+    Name TEXT,
+    
+    PRIMARY KEY (CorrelationId)
+);</value>
+  </data>
+  <data name="Postgres_DropJobTables" xml:space="preserve">
+    <value>DROP TABLE IF EXISTS Jobs, JobAttempts, JobTypes;</value>
+  </data>
+  <data name="Postgres_DropMessageDataTables" xml:space="preserve">
+    <value>DROP TABLE IF EXISTS MessageData CASCADE;</value>
+  </data>
+  <data name="Postgres_DropSagaTables" xml:space="preserve">
+    <value>DROP TABLE IF EXISTS OptimisticSagas, PessimisticSagas;</value>
+  </data>
+  <data name="SqlServer_CreateJobTables" xml:space="preserve">
+    <value>CREATE TABLE [dbo].[Jobs] (
+    [CorrelationId] UNIQUEIDENTIFIER NOT NULL,
+    [CurrentState] INT NOT NULL,    
+    [Completed] DATETIME NULL,
+    [Faulted] DATETIME NULL,
+    [Started] DATETIME NULL,
+    [Submitted] DATETIME NULL,    
+    [EndDate] DATETIMEOFFSET NULL,
+    [NextStartDate] DATETIMEOFFSET NULL,
+    [StartDate] DATETIMEOFFSET NULL,    
+    [AttemptId] UNIQUEIDENTIFIER NOT NULL,
+    [JobTypeId] UNIQUEIDENTIFIER NOT NULL,
+    [JobRetryDelayToken] UNIQUEIDENTIFIER NULL,
+    [JobSlotWaitToken] UNIQUEIDENTIFIER NULL,    
+    [RetryAttempt] INT NOT NULL,
+    [LastProgressLimit] BIGINT NULL,
+    [LastProgressSequenceNumber] BIGINT NULL,
+    [LastProgressValue] BIGINT NULL,
+    [CronExpression] NVARCHAR(255) NULL,
+    [Reason] NVARCHAR(MAX) NULL,
+    [TimeZoneId] NVARCHAR(100) NULL,    
+    [Duration] TIME NULL,
+    [JobTimeout] TIME NULL,
+    [ServiceAddress] NVARCHAR(1000) NULL,    
+    [IncompleteAttempts] VARCHAR(MAX) NULL,    
+    [Job] VARCHAR(MAX) NULL,
+    [JobProperties] VARCHAR(MAX) NULL,
+    [JobState] VARCHAR(MAX) NULL,    
+    PRIMARY KEY CLUSTERED ([CorrelationId] ASC)
+);
+
+CREATE TABLE [dbo].[JobAttempts] (
+    [CorrelationId] UNIQUEIDENTIFIER NOT NULL,
+    [CurrentState] INT NOT NULL,
+    [JobId] UNIQUEIDENTIFIER NOT NULL,    
+    [Started] DATETIME NULL,
+    [Faulted] DATETIME NULL,
+    [StatusCheckTokenId] UNIQUEIDENTIFIER NULL,    
+    [RetryAttempt] INT NOT NULL,
+    [ServiceAddress] NVARCHAR(1000) NULL,
+    [InstanceAddress] NVARCHAR(1000) NULL,                
+    PRIMARY KEY CLUSTERED ([CorrelationId] ASC)
+);
+
+CREATE TABLE [dbo].[JobTypes] (
+    [CorrelationId] UNIQUEIDENTIFIER NOT NULL,
+    [Name] NVARCHAR(255) NOT NULL,
+    [CurrentState] INT NOT NULL,
+    [ActiveJobCount] INT NOT NULL,
+    [ConcurrentJobLimit] INT NOT NULL,
+    [OverrideJobLimit] INT NULL,
+    [OverrideLimitExpiration] DATETIME NULL,
+    [GlobalConcurrentJobLimit] INT NULL,
+    [ActiveJobs] VARCHAR(MAX) NULL,
+    [Instances] VARCHAR(MAX) NULL,
+    [Properties] VARCHAR(MAX) NULL,      
+    PRIMARY KEY CLUSTERED ([CorrelationId] ASC)
+);</value>
+  </data>
+  <data name="SqlServer_CreateMessageDataTables" xml:space="preserve">
+    <value>CREATE TABLE [MessageData] (
+    [Id] UNIQUEIDENTIFIER NOT NULL PRIMARY KEY,
+    [Created] DATETIMEOFFSET NOT NULL,
+    [Expires] DATETIMEOFFSET NOT NULL,
+    [Data] VARBINARY(MAX) NOT NULL
+);</value>
+  </data>
+  <data name="SqlServer_CreateSagaTables" xml:space="preserve">
+    <value>CREATE TABLE [dbo].[OptimisticSagas] (
+    [CorrelationId] UNIQUEIDENTIFIER NOT NULL,
+    [RowVersion] ROWVERSION,
+    [CurrentState] VARCHAR(20),
+
+    [Name] NVARCHAR(MAX),
+    
+    PRIMARY KEY CLUSTERED ([CorrelationId])
+);
+
+CREATE TABLE [dbo].[PessimisticSagas] (
+    [CorrelationId] UNIQUEIDENTIFIER NOT NULL,
+    [CurrentState] VARCHAR(20),
+
+    [Name] NVARCHAR(MAX),
+    
+    PRIMARY KEY CLUSTERED ([CorrelationId])
+);</value>
+  </data>
+  <data name="SqlServer_DropJobTables" xml:space="preserve">
+    <value>DROP TABLE IF EXISTS [dbo].[Jobs];
+DROP TABLE IF EXISTS [dbo].[JobAttempts];
+DROP TABLE IF EXISTS [dbo].[JobTypes];</value>
+  </data>
+  <data name="SqlServer_DropMessageDataTables" xml:space="preserve">
+    <value>DROP TABLE IF EXISTS MessageData;</value>
+  </data>
+  <data name="SqlServer_DropSagaTables" xml:space="preserve">
+    <value>DROP TABLE IF EXISTS [dbo].[OptimisticSagas];
+DROP TABLE IF EXISTS [dbo].[PessimisticSagas];</value>
+  </data>
+</root>

@@ -9,7 +9,7 @@ namespace MassTransit
     public static class MessageDataConfiguratorExtensions
     {
         /// <summary>
-        /// Enable the loading of message data for the any message type that includes a MessageData property.
+        /// Enable the loading of message data for any message type that includes a MessageData property.
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="repository"></param>
@@ -24,7 +24,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Enable the loading of message data for the any message type that includes a MessageData property.
+        /// Enable the loading of message data for any message type that includes a MessageData property.
         /// </summary>
         /// <param name="configurator">The bus factory configurator.</param>
         /// <param name="selector">
