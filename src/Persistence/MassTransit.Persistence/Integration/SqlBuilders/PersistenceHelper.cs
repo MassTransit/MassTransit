@@ -1,6 +1,5 @@
 ﻿namespace MassTransit.Persistence.Integration.SqlBuilders
 {
-    using System.Collections;
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Reflection;
     using Saga;
@@ -116,106 +115,5 @@
                 ? nameValue
                 : null;
         }
-    }
-
-
-    public class ModelPropertyCollection : IEnumerable<ModelProperty>
-    {
-        readonly List<ModelProperty> _properties = new();
-        ModelPropertyCollection() { }
-
-        public static ModelPropertyCollection FromProperties(IEnumerable<(string columnName, string propertyName)> properties)
-        {
-            var collection = new ModelPropertyCollection();
-            var duplicates = new HashSet<ModelProperty>(ModelProperty.ColumnNameComparer);
-
-            foreach (var property in properties)
-            {
-                var isId = property.propertyName.Equals(nameof(ISaga.CorrelationId), StringComparison.OrdinalIgnoreCase);
-
-                var modelProperty = new ModelProperty(
-                    property.columnName,
-                    property.propertyName
-                );
-
-                if (!duplicates.Add(modelProperty))
-                    continue;
-                
-                if (isId)
-                    collection._properties.Insert(0, modelProperty);
-                else
-                    collection._properties.Add(modelProperty);
-            }
-
-            return collection;
-        }
-
-        public void Remove(string propertyName)
-            => _properties.RemoveAll(p => p.PropertyName.Equals(propertyName, StringComparison.OrdinalIgnoreCase));
-
-        public IEnumerator<ModelProperty> GetEnumerator() => _properties.GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-    }
-
-
-    public class ModelProperty : IEquatable<ModelProperty>
-    {
-        sealed class ColumnNameEqualityComparer : IEqualityComparer<ModelProperty>
-        {
-            public bool Equals(ModelProperty? x, ModelProperty? y)
-            {
-                if (ReferenceEquals(x, y))
-                    return true;
-                if (x is null)
-                    return false;
-                if (y is null)
-                    return false;
-                if (x.GetType() != y.GetType())
-                    return false;
-                return string.Equals(x.ColumnName, y.ColumnName, StringComparison.OrdinalIgnoreCase);
-            }
-
-            public int GetHashCode(ModelProperty obj)
-            {
-                return StringComparer.OrdinalIgnoreCase.GetHashCode(obj.ColumnName);
-            }
-        }
-        
-        public static IEqualityComparer<ModelProperty> ColumnNameComparer { get; } = new ColumnNameEqualityComparer();
-
-        public bool Equals(ModelProperty? other)
-        {
-            if (other is null)
-                return false;
-            if (ReferenceEquals(this, other))
-                return true;
-            return string.Equals(ColumnName, other.ColumnName, StringComparison.OrdinalIgnoreCase);
-        }
-
-        public override bool Equals(object? obj)
-        {
-            if (obj is null)
-                return false;
-            if (ReferenceEquals(this, obj))
-                return true;
-            if (obj.GetType() != GetType())
-                return false;
-            return Equals((ModelProperty)obj);
-        }
-
-        public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(ColumnName);
-
-        public static bool operator ==(ModelProperty? left, ModelProperty? right) => Equals(left, right);
-
-        public static bool operator !=(ModelProperty? left, ModelProperty? right) => !Equals(left, right);
-
-        public ModelProperty(string columnName, string propertyName)
-        {
-            ColumnName = columnName;
-            PropertyName = propertyName;
-        }
-
-        public string ColumnName { get; private set; }
-        public string PropertyName { get; private set; }
     }
 }
