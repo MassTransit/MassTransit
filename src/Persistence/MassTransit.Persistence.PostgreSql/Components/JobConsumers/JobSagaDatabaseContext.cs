@@ -13,70 +13,8 @@
         public JobSagaDatabaseContext(string connectionString, IsolationLevel isolationLevel)
             : base(connectionString, "Jobs", nameof(ISaga.CorrelationId), isolationLevel)
         {
-        }
-
-        protected override string BuildInsertSql()
-        {
-            return @$"
-INSERT INTO {TableName} 
-    (CorrelationId, CurrentState, Completed, Faulted, Started, Submitted,
-    EndDate, NextStartDate, StartDate, AttemptId, JobTypeId, JobRetryDelayToken,
-    JobSlotWaitToken, RetryAttempt, LastProgressLimit, LastProgressSequenceNumber,
-    LastProgressValue, CronExpression, Reason, TimeZoneId, Duration, JobTimeout,
-    ServiceAddress, IncompleteAttempts, Job, JobProperties, JobState) 
-VALUES
-    (@correlationid, @currentstate, @completed, @faulted, @started, @submitted,
-    @enddate, @nextstartdate, @startdate, @attemptid, @jobtypeid, @jobretrydelaytoken,
-    @jobslotwaittoken, @retryattempt, @lastprogresslimit, @lastprogresssequencenumber,
-    @lastprogressvalue, @cronexpression, @reason, @timezoneid, @duration, @jobtimeout,
-    @serviceaddress, @incompleteattempts, @job, @jobproperties, @jobstate);
-";
-        }
-
-        protected override string BuildUpdateSql()
-        {
-            return $@"
-UPDATE {TableName}
-SET
-	CurrentState = @currentstate,
-    Completed = @completed,
-	Faulted = @faulted,
-	Started = @started,
-	Submitted = @submitted,
-	EndDate = @enddate,
-	NextStartDate = @nextstartdate,
-	StartDate = @startdate,
-	AttemptId = @attemptid,
-	JobTypeId = @jobtypeid,
-	JobRetryDelayToken = @jobretrydelaytoken,
-	JobSlotWaitToken = @jobslotwaittoken,
-	RetryAttempt = @retryattempt,
-	LastProgressLimit = @lastprogresslimit,
-	LastProgressSequenceNumber = @lastprogresssequencenumber,
-	LastProgressValue = @lastprogressvalue,
-	CronExpression = @cronexpression,
-	Reason = @reason,
-	TimeZoneId = @timezoneid,
-	Duration = @duration,
-	JobTimeout = @jobtimeout,
-	ServiceAddress = @serviceaddress,
-	IncompleteAttempts = @incompleteattempts,
-	Job = @job,
-	JobProperties = @jobproperties,
-	JobState = @jobstate
-WHERE
-    CorrelationId = @correlationid;
-";
-        }
-
-        protected override string BuildDeleteSql()
-        {
-            return $@"DELETE FROM {TableName} WHERE CorrelationId = @correlationid;";
-        }
-
-        protected override string BuildLoadSql()
-        {
-            return $@"SELECT * FROM {TableName} WHERE CorrelationId = @correlationid FOR UPDATE;";
+            Ignore(m => m.RowVersion);
+            Ignore(m => m.Version);
         }
 
         protected override string BuildQuerySql(Expression<Func<JobSaga, bool>> filterExpression, Action<string, object?> parameterCallback)

@@ -8,7 +8,7 @@
 
     public static class SqlExpressionVisitor
     {
-        public static List<SqlPredicate> CreateFromExpression(Expression node, List<SqlPropertyMapping>? mappings = null)
+        public static List<SqlPredicate> CreateFromExpression(Expression node, List<ModelPropertyMapping>? mappings = null)
         {
             switch (node.NodeType)
             {
@@ -37,12 +37,12 @@
             }
         }
 
-        static List<SqlPredicate> LambdaVisit(LambdaExpression node, List<SqlPropertyMapping>? mappings)
+        static List<SqlPredicate> LambdaVisit(LambdaExpression node, List<ModelPropertyMapping>? mappings)
         {
             return CreateFromExpression(node.Body, mappings);
         }
 
-        static List<SqlPredicate> AndAlsoVisit(BinaryExpression node, List<SqlPropertyMapping>? mappings)
+        static List<SqlPredicate> AndAlsoVisit(BinaryExpression node, List<ModelPropertyMapping>? mappings)
         {
             var result = new List<SqlPredicate>();
 
@@ -52,7 +52,7 @@
             return result;
         }
 
-        static List<SqlPredicate> ComparisonVisit(BinaryExpression node, string op, List<SqlPropertyMapping>? mappings)
+        static List<SqlPredicate> ComparisonVisit(BinaryExpression node, string op, List<ModelPropertyMapping>? mappings)
         {
             var left = (MemberExpression)node.Left;
             var name = MemberName(left.Member, mappings);
@@ -67,7 +67,7 @@
             return [new SqlPredicate(name, value, op)];
         }
 
-        static List<SqlPredicate> NegatedVisit(UnaryExpression node, List<SqlPropertyMapping>? mappings)
+        static List<SqlPredicate> NegatedVisit(UnaryExpression node, List<ModelPropertyMapping>? mappings)
         {
             var property = (MemberExpression)node.Operand;
             var name = MemberName(property.Member, mappings);
@@ -78,7 +78,7 @@
             return [new SqlPredicate(name, false)];
         }
 
-        static List<SqlPredicate> MemberAccessVisit(MemberExpression node, List<SqlPropertyMapping>? mappings)
+        static List<SqlPredicate> MemberAccessVisit(MemberExpression node, List<ModelPropertyMapping>? mappings)
         {
             var name = MemberName(node.Member, mappings);
             object? value;
@@ -93,13 +93,13 @@
             return [new SqlPredicate(name, value)];
         }
 
-        static string MemberName(MemberInfo member, List<SqlPropertyMapping>? mappings)
+        static string MemberName(MemberInfo member, List<ModelPropertyMapping>? mappings)
         {
             var specificName = member.GetCustomAttribute<ColumnAttribute>()?.Name;
             if (specificName is not null)
                 return specificName;
 
-            var prefixMatch = mappings?.Where(m => !m.Exact).FirstOrDefault(m =>
+            var prefixMatch = mappings?.Where(m => !m.IsExact).FirstOrDefault(m =>
                 m.Property.Type == member.DeclaringType
             );
 
@@ -108,7 +108,7 @@
 
             if (member is PropertyInfo prop)
             {
-                var exactMatch = mappings?.Where(m => m.Exact).FirstOrDefault(m =>
+                var exactMatch = mappings?.Where(m => m.IsExact).FirstOrDefault(m =>
                     m.Property.Type == prop.PropertyType &&
                     m.Property.Member.DeclaringType == prop.DeclaringType &&
                     m.Property.Member.Name == prop.Name
@@ -138,10 +138,21 @@
     }
 
 
-    public class SqlPropertyMapping
+    public class ModelPropertyMapping
     {
+        bool _isExact;
         public MemberExpression Property { get; set; } = null!;
         public string? Name { get; set; }
-        public bool Exact { get; set; }
+        public PropertyMappingBehavior Behavior { get; set; }
+
+        public bool IsExact => Behavior == PropertyMappingBehavior.RequireExact;
+    }
+
+
+    public enum PropertyMappingBehavior
+    {
+        RequireExact,
+        PrefixOnly,
+        IgnoreProperty
     }
 }

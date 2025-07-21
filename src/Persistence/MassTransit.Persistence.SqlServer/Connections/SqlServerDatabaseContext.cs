@@ -91,7 +91,8 @@
                     .ConfigureAwait(false);
 
                 writerAdapter(parameters, command.Parameters);
-                await OnParametersWritten(command, cancellationToken);
+                await OnParametersWritten(command, cancellationToken)
+                    .ConfigureAwait(false);
 
                 var rows = await command.ExecuteNonQueryAsync(cancellationToken)
                     .ConfigureAwait(false);

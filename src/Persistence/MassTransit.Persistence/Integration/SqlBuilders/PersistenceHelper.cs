@@ -67,7 +67,7 @@
             return GetColumnName(type, property);
         }
 
-        public static string GetColumnName(Type type, PropertyInfo property, List<SqlPropertyMapping>? mappings = null)
+        public static string GetColumnName(Type type, PropertyInfo property, List<ModelPropertyMapping>? mappings = null)
         {
             var name = property.Name;
             var mapping = mappings?.FirstOrDefault(m => m.Property.Member.Name == name);
@@ -81,12 +81,15 @@
             return columnAttribute.Name;
         }
 
-        public static ModelPropertyCollection BuildProperties(Type modelType, List<SqlPropertyMapping> mappings)
+        public static ModelPropertyCollection BuildProperties(Type modelType, List<ModelPropertyMapping> mappings)
         {
-            var properties = (from prop in modelType.GetProperties()
+            var properties = (
+                from prop in modelType.GetProperties()
                 let columnName = GetColumnName(modelType, prop, mappings)
                 let propertyName = NormalizeName(prop.Name)
-                select (columnName, propertyName));
+                where ! mappings.Any(m => m.Behavior == PropertyMappingBehavior.IgnoreProperty && m.Property.Member == prop)
+                select (columnName, propertyName)
+            );
 
             return ModelPropertyCollection.FromProperties(properties);
         }

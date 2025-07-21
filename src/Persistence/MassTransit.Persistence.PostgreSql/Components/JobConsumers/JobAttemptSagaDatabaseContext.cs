@@ -13,48 +13,10 @@
         public JobAttemptSagaDatabaseContext(string connectionString, IsolationLevel isolationLevel)
             : base(connectionString, "JobAttempts", nameof(ISaga.CorrelationId), isolationLevel)
         {
+            Ignore(m => m.RowVersion);
+            Ignore(m => m.Version);
         }
-
-        protected override string BuildInsertSql()
-        {
-            return @$"
-INSERT INTO {TableName} 
-    (CorrelationId, CurrentState, JobId, Started, Faulted,
-    StatusCheckTokenId, RetryAttempt, ServiceAddress, InstanceAddress) 
-VALUES
-    (@correlationid, @currentstate, @jobid, @started, @faulted,
-    @statuschecktokenid, @retryattempt, @serviceaddress, @instanceaddress);
-";
-        }
-
-        protected override string BuildUpdateSql()
-        {
-            return $@"
-UPDATE {TableName}
-SET
-    CurrentState = @currentstate,
-    JobId = @jobid,
-    Started = @started,
-    Faulted = @faulted,
-    StatusCheckTokenId = @statuschecktokenid,
-    RetryAttempt = @retryattempt,
-    ServiceAddress = @serviceaddress,
-    InstanceAddress = @instanceaddress
-WHERE
-    CorrelationId = @correlationid;
-";
-        }
-
-        protected override string BuildDeleteSql()
-        {
-            return $@"DELETE FROM {TableName} WHERE CorrelationId = @correlationid;";
-        }
-
-        protected override string BuildLoadSql()
-        {
-            return $@"SELECT * FROM {TableName} WHERE CorrelationId = @correlationid FOR UPDATE;";
-        }
-
+        
         protected override string BuildQuerySql(Expression<Func<JobAttemptSaga, bool>> filterExpression, Action<string, object?> parameterCallback)
         {
             throw new NotSupportedException("JobConsumers do not support querying");

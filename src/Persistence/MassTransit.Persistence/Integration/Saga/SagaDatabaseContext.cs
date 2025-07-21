@@ -17,7 +17,7 @@ namespace MassTransit.Persistence.Integration.Saga
         protected static readonly ValueTask CompletedTask = default;
 #endif
 
-        protected readonly List<SqlPropertyMapping> Mappings = new();
+        protected readonly List<ModelPropertyMapping> Mappings = new();
         protected readonly Type ModelType = typeof(TSaga);
 
         public async Task<TSaga?> LoadAsync(Guid correlationId, CancellationToken cancellationToken)
@@ -140,17 +140,68 @@ namespace MassTransit.Persistence.Integration.Saga
 
         protected internal abstract string BuildDeleteSql();
 
+        /// <summary>
+        /// Maps nested objects in the saga to prefixed columns.  The default SQL builder uses the
+        /// name of the property, and an embedded object may end up with the wrong identifier in
+        /// the generated SQL.  This solves the problem of `saga.User.Id == 5` being interpreted as
+        /// "WHERE Id = 5" in SQL, when it should be something like "WHERE User_Id = 5".
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// class OrderSaga
+        /// {
+        ///   public Guid CorrelationId { get; set; }
+        ///   public UserModel? User { get; set; }
+        /// }
+        ///
+        /// class UserModel
+        /// {
+        ///   public int Id { get; set; }
+        ///   public string Name { get; set; }
+        /// }
+        ///
+        /// CREATE TABLE Orders
+        /// (
+        ///    CorrelationId UNIQUEIDENTIFIER,
+        ///    User_Id INT,
+        ///    User_Name VARCHAR(50)
+        /// );
+        ///
+        /// MapPrefix(m => m.User, "User_");
+        ///
+        /// // with this correlation expression:
+        /// CorrelateBy((s, c) => s.User_Id == c.Message.UserId);
+        ///
+        /// // builds this SQL:
+        /// // WHERE User_Id = @userid
+        /// </code>
+        /// </example>
         protected void MapPrefix<TProperty>(Expression<Func<TSaga, TProperty>> mappingExpression, string? prefixName = null)
         {
-            MapCore(mappingExpression, prefixName, false);
+            MapCore(mappingExpression, prefixName, PropertyMappingBehavior.PrefixOnly);
         }
 
+        /// <summary>
+        /// Similar to <seealso cref="MapPrefix{TProperty}"/>, MapProperty will specify an explicit
+        /// 1:1 mapping of property to SQL.  Prefixes are used for all properties of a nested model,
+        /// whereas Property refers to a single property. 
+        /// </summary>
+        /// <remarks>If you're getting to these, you should probably just use EF if you can.</remarks>
         protected void MapProperty<TProperty>(Expression<Func<TSaga, TProperty>> mappingExpression, string targetName)
         {
-            MapCore(mappingExpression, targetName, true);
+            MapCore(mappingExpression, targetName, PropertyMappingBehavior.RequireExact);
         }
 
-        void MapCore<TModel, TProperty>(Expression<Func<TModel, TProperty>> mappingExpression, string? name, bool exact)
+        /// <summary>
+        /// Tells the underlying SQL builder to ignore this model property entirely.  Prevent it from
+        /// being mapped to/from.
+        /// </summary>
+        protected void Ignore<TProperty>(Expression<Func<TSaga, TProperty>> mappingExpression)
+        {
+            MapCore(mappingExpression, null, PropertyMappingBehavior.IgnoreProperty);
+        }
+
+        void MapCore<TModel, TProperty>(Expression<Func<TModel, TProperty>> mappingExpression, string? name, PropertyMappingBehavior behavior)
         {
             if (mappingExpression.NodeType != ExpressionType.Lambda)
                 throw new InvalidOperationException("Expression must be a lambda");
@@ -159,11 +210,11 @@ namespace MassTransit.Persistence.Integration.Saga
             if (body is null)
                 throw new InvalidOperationException("Expression must only be a property (x => x.Foo.Bar)");
 
-            Mappings.Add(new SqlPropertyMapping
+            Mappings.Add(new ModelPropertyMapping
             {
                 Property = body,
                 Name = name ?? body.Member.Name,
-                Exact = exact
+                Behavior = behavior
             });
         }
     }

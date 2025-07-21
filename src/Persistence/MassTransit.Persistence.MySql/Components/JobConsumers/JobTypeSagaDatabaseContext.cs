@@ -12,50 +12,10 @@
         public JobTypeSagaDatabaseContext(string connectionString, IsolationLevel isolationLevel)
             : base(connectionString, "JobTypes", nameof(ISaga.CorrelationId), isolationLevel)
         {
+            Ignore(m => m.RowVersion);
+            Ignore(m => m.Version);
         }
-
-        protected override string BuildInsertSql()
-        {
-            return @$"
-INSERT INTO {TableName} 
-    (`CorrelationId`, `Name`, `CurrentState`, `ActiveJobCount`, `ConcurrentJobLimit`, `OverrideJobLimit`,
-    `OverrideLimitExpiration`, `GlobalConcurrentJobLimit`, `ActiveJobs`, `Instances`, `Properties`) 
-VALUES
-    (@correlationid, @name, @currentstate, @activejobcount, @concurrentjoblimit, @overridejoblimit,
-    @overridelimitexpiration, @globalconcurrentjoblimit, @activejobs, @instances, @properties);
-";
-        }
-
-        protected override string BuildUpdateSql()
-        {
-            return $@"
-UPDATE {TableName}
-SET
-	`Name` = @name,
-	`CurrentState` = @currentstate,
-	`ActiveJobCount` = @activejobcount,
-	`ConcurrentJobLimit` = @concurrentjoblimit,
-	`OverrideJobLimit` = @overridejoblimit,
-	`OverrideLimitExpiration` = @overridelimitexpiration,
-	`GlobalConcurrentJobLimit` = @globalconcurrentjoblimit,
-	`ActiveJobs` = @activejobs,
-	`Instances` = @instances,
-	`Properties` = @properties
-WHERE
-    `CorrelationId` = @correlationid;
-";
-        }
-
-        protected override string BuildDeleteSql()
-        {
-            return $@"DELETE FROM {TableName} WHERE `CorrelationId` = @correlationid;";
-        }
-
-        protected override string BuildLoadSql()
-        {
-            return $@"SELECT * FROM {TableName} WHERE `CorrelationId` = @correlationid FOR UPDATE;";
-        }
-
+        
         protected override string BuildQuerySql(Expression<Func<JobTypeSaga, bool>> filterExpression, Action<string, object?> parameterCallback)
         {
             throw new NotSupportedException("JobConsumers do not support querying");
