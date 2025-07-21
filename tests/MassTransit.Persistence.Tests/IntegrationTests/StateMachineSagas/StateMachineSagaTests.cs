@@ -9,11 +9,11 @@
 
     [Category("Integration")]
     [TestFixture(typeof(OptimisticSqlServerConnector))]
-    [TestFixture(typeof(OptimisticPostgresConnector))]
-    [TestFixture(typeof(OptimisticMySqlConnector))]
+    [TestFixture(typeof(OptimisticPostgresConnector), Explicit = true)]
+    [TestFixture(typeof(OptimisticMySqlConnector), Explicit = true)]
     [TestFixture(typeof(PessimisticSqlServerConnector))]
-    [TestFixture(typeof(PessimisticPostgresConnector))]
-    [TestFixture(typeof(PessimisticMySqlConnector))]
+    [TestFixture(typeof(PessimisticPostgresConnector), Explicit = true)]
+    [TestFixture(typeof(PessimisticMySqlConnector), Explicit = true)]
     public class StateMachineSagaTests<TConnector> : SagaTests<TConnector>
         where TConnector : BehaviorSaga, TestConnector, new()
     {

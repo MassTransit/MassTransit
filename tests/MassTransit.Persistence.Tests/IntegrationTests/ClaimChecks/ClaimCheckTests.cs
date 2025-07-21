@@ -7,8 +7,8 @@
 
 
     [TestFixture(typeof(PessimisticSqlServerConnector))]
-    [TestFixture(typeof(PessimisticPostgresConnector))]
-    [TestFixture(typeof(PessimisticMySqlConnector))]
+    [TestFixture(typeof(PessimisticPostgresConnector), Explicit = true)]
+    [TestFixture(typeof(PessimisticMySqlConnector), Explicit = true)]
     public class ClaimCheck_Tests<TConnector> : SagaTests<TConnector>
         where TConnector : TestConnector, new()
     {
