@@ -43,7 +43,8 @@ public class PublishBatcher :
 
         response.EnsureSuccessfulResponse();
 
-        Complete(batch, response.Successful.Select(x => x.Id));
+        if (response.Successful != null)
+            Complete(batch, response.Successful.Select(x => x.Id));
 
         if (response.Failed != null)
         {
