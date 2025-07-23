@@ -4,6 +4,7 @@
     {
         using System;
         using System.Threading.Tasks;
+        using MassTransit.Configuration;
         using NUnit.Framework;
         using TestFramework;
         using TestFramework.Messages;
@@ -18,14 +19,13 @@
             {
                 var observer = GetObserver();
 
-                using (var observerHandle = Bus.ConnectReceiveObserver(observer))
-                {
-                    await InputQueueSendEndpoint.Send(new PingMessage());
+                using var observerHandle = Bus.ConnectReceiveObserver(observer);
 
-                    Tuple<ConsumeContext, string> context = await observer.PostConsumed;
+                await InputQueueSendEndpoint.Send(new PingMessage());
 
-                    Assert.That(context.Item2, Is.EqualTo(TypeCache<MessageHandler<PingMessage>>.ShortName));
-                }
+                Tuple<ConsumeContext, string> context = await observer.PostConsumed;
+
+                Assert.That(context.Item2, Is.EqualTo(TypeCache<MessageHandler<PingMessage>>.ShortName));
             }
 
             [Test]
@@ -33,7 +33,7 @@
             {
                 var observer = GetObserver();
 
-                var observerHandle = Bus.ConnectReceiveObserver(observer);
+                using var observerHandle = Bus.ConnectReceiveObserver(observer);
 
                 await InputQueueSendEndpoint.Send(new PingMessage());
 
@@ -45,7 +45,7 @@
             {
                 var observer = GetObserver();
 
-                var observerHandle = Bus.ConnectReceiveObserver(observer);
+                using var observerHandle = Bus.ConnectReceiveObserver(observer);
 
                 await InputQueueSendEndpoint.Send(new PingMessage());
 
@@ -115,7 +115,7 @@
             {
                 var observer = GetObserver();
 
-                var observerHandle = Bus.ConnectReceiveObserver(observer);
+                using var observerHandle = Bus.ConnectReceiveObserver(observer);
 
                 await InputQueueSendEndpoint.Send(new PingMessage());
 
@@ -123,11 +123,11 @@
             }
 
             [Test]
-            public async Task Should_call_the_receive_fault_notification()
+            public async Task Should_call_the_consume_fault_notification()
             {
                 var observer = GetObserver();
 
-                var observerHandle = Bus.ConnectReceiveObserver(observer);
+                using var observerHandle = Bus.ConnectReceiveObserver(observer);
 
                 await InputQueueSendEndpoint.Send(new PingMessage());
 
@@ -142,10 +142,66 @@
 
             protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
-                Handler<PingMessage>(configurator, x =>
+                Handler<PingMessage>(configurator, _ => throw new IntentionalTestException());
+            }
+        }
+
+
+        [TestFixture]
+        public class Receiving_messages_at_the_endpoint_with_faulty_middleware :
+            InMemoryTestFixture
+        {
+            [Test]
+            public async Task Should_call_the_pre_receive_notification()
+            {
+                var observer = GetObserver();
+
+                using var observerHandle = Bus.ConnectReceiveObserver(observer);
+
+                await InputQueueSendEndpoint.Send(new PingMessage());
+
+                await observer.PreReceived;
+            }
+
+            [Test]
+            public async Task Should_call_the_receive_fault_notification()
+            {
+                var observer = GetObserver();
+
+                using var observerHandle = Bus.ConnectReceiveObserver(observer);
+
+                await InputQueueSendEndpoint.Send(new PingMessage());
+
+                await observer.ReceiveFaulted;
+            }
+
+            ReceiveObserver GetObserver()
+            {
+                return new ReceiveObserver(GetTask<ReceiveContext>(), GetTask<ReceiveContext>(), GetTask<Tuple<ReceiveContext, Exception>>(),
+                    GetTask<Tuple<ConsumeContext, string>>(), GetTask<ConsumeContext>());
+            }
+
+            protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+            {
+                configurator.AddPrePipeSpecification(new FilterPipeSpecification<ConsumeContext>(new BadFilter()));
+
+                Handler<PingMessage>(configurator, _ => Task.CompletedTask);
+            }
+
+
+            class BadFilter :
+                IFilter<ConsumeContext>
+            {
+                public async Task Send(ConsumeContext context, IPipe<ConsumeContext> next)
                 {
-                    throw new IntentionalTestException();
-                });
+                    await next.Send(context);
+
+                    throw new IntentionalTestException("Failed to delete message simulation");
+                }
+
+                public void Probe(ProbeContext context)
+                {
+                }
             }
         }
 
@@ -193,18 +249,21 @@
             public async Task PostConsume<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
                 where T : class
             {
-                _postConsume.TrySetResult(Tuple.Create<ConsumeContext, string>(context, consumerType));
+                if(!_postConsume.TrySetResult(Tuple.Create<ConsumeContext, string>(context, consumerType)))
+                    LogContext.Warning?.Log("PostConsume was already set");
             }
 
             public async Task ConsumeFault<T>(ConsumeContext<T> context, TimeSpan elapsed, string consumerType, Exception exception)
                 where T : class
             {
-                _consumeFault.TrySetResult(context);
+                if(!_consumeFault.TrySetResult(context))
+                    LogContext.Warning?.Log("ConsumeFault was already set: {Exception}", exception);
             }
 
             public async Task ReceiveFault(ReceiveContext context, Exception exception)
             {
-                _receiveFault.TrySetResult(Tuple.Create(context, exception));
+                if(!_receiveFault.TrySetResult(Tuple.Create(context, exception)))
+                    LogContext.Warning?.Log("ReceiveFault was already set: {Exception}", exception);;
             }
         }
     }

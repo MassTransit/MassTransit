@@ -9,7 +9,8 @@ namespace MassTransit.Middleware
     {
         public async Task Send(ExceptionReceiveContext context, IPipe<ExceptionReceiveContext> next)
         {
-            await context.NotifyFaulted(context.Exception).ConfigureAwait(false);
+            if (!context.IsFaulted)
+                await context.NotifyFaulted(context.Exception).ConfigureAwait(false);
 
             context.Exception.Rethrow();
         }

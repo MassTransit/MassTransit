@@ -13,12 +13,12 @@ namespace MassTransit.Middleware
     public class GenerateFaultFilter :
         IFilter<ExceptionReceiveContext>
     {
-        void IProbeSite.Probe(ProbeContext context)
+        public void Probe(ProbeContext context)
         {
             context.CreateFilterScope("generateFault");
         }
 
-        async Task IFilter<ExceptionReceiveContext>.Send(ExceptionReceiveContext context, IPipe<ExceptionReceiveContext> next)
+        public async Task Send(ExceptionReceiveContext context, IPipe<ExceptionReceiveContext> next)
         {
             if (!context.IsFaulted)
             {
