@@ -215,6 +215,7 @@ namespace MassTransit
                             .WaitForJobSlot(this),
                         other => other
                             .PublishJobCanceled(x => x.GetCancellationReason())
+                            .ClearNextStartDate()
                             .TransitionTo(Canceled)
                     )
             );
@@ -266,6 +267,7 @@ namespace MassTransit
             During([WaitingForSlot, WaitingToRetry],
                 When(CancelJob)
                     .Unschedule(JobSlotWaitElapsed)
+                    .ClearNextStartDate()
                     .PublishJobCanceled(x => x.GetCancellationReason())
                     .TransitionTo(Canceled)
             );
@@ -284,10 +286,13 @@ namespace MassTransit
 
             During(CancellationPending,
                 When(JobSlotAllocated)
+                    .ClearNextStartDate()
                     .TransitionTo(Canceled),
                 When(JobSlotUnavailable)
+                    .ClearNextStartDate()
                     .TransitionTo(Canceled),
                 When(AllocateJobSlotFaulted)
+                    .ClearNextStartDate()
                     .TransitionTo(Canceled)
             );
 
@@ -533,6 +538,15 @@ namespace MassTransit
                 }
 
                 SetJobProperties(context);
+            });
+        }
+
+        public static EventActivityBinder<JobSaga, T> ClearNextStartDate<T>(this EventActivityBinder<JobSaga, T> binder)
+            where T : class
+        {
+            return binder.Then(context =>
+            {
+                context.Saga.NextStartDate = null;
             });
         }
 

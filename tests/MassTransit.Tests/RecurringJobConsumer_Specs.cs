@@ -47,6 +47,53 @@ public class Configuring_a_recurring_job_consumer
     }
 
     [Test]
+    public async Task Should_support_cancellation_and_continuation_of_the_job()
+    {
+        await using var provider = new ServiceCollection()
+            .AddMassTransitTestHarness(x =>
+            {
+                x.SetKebabCaseEndpointNameFormatter();
+
+                x.AddConsumer<RecurringJobConsumer>();
+
+                x.AddJobSagaStateMachines(options => options.SlotWaitTime = TimeSpan.FromSeconds(1));
+                x.SetTestTimeouts(testInactivityTimeout: TimeSpan.FromSeconds(10));
+
+                x.UsingInMemory((context, cfg) =>
+                {
+                    cfg.UseDelayedMessageScheduler();
+
+                    cfg.ConfigureEndpoints(context);
+                });
+            })
+            .BuildServiceProvider(true);
+
+        var harness = await provider.StartTestHarness();
+        try
+        {
+            var client = harness.GetRequestClient<SubmitJob<RecurringJobMessage>>();
+
+            var jobId = await client.AddOrUpdateRecurringJob(nameof(RecurringJobConsumer), new RecurringJobMessage(), x => x.Every(seconds: 5),
+                harness.CancellationToken);
+
+            Assert.That(await harness.Published.SelectAsync<JobCompleted<RecurringJobMessage>>().Take(1).Count(), Is.EqualTo(1));
+
+            await harness.Bus.CancelRecurringJob<RecurringJobMessage>(nameof(RecurringJobConsumer), "Not right now");
+
+            Assert.That(await harness.Published.SelectAsync<JobCanceled>(x => x.Context.Message.JobId == jobId).Take(1).Count(), Is.EqualTo(1));
+
+            await client.AddOrUpdateRecurringJob(nameof(RecurringJobConsumer), new RecurringJobMessage(), x => x.Every(seconds: 5),
+                harness.CancellationToken);
+
+            Assert.That(await harness.Published.SelectAsync<JobCompleted<RecurringJobMessage>>().Take(2).Count(), Is.EqualTo(2));
+        }
+        finally
+        {
+            await harness.Stop();
+        }
+    }
+
+    [Test]
     public async Task Should_support_reconfiguration_of_the_job()
     {
         await using var provider = new ServiceCollection()
