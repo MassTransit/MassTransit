@@ -22,7 +22,7 @@ public class Using_redelivery_with_an_activity
                 x.AddConsumer<ClaimRewardEventConsumer>();
                 x.AddExecuteActivity<ValidateClaimedRewardActivity, ValidateClaimedRewardArguments>();
 
-                x.AddConfigureEndpointsCallback((context, name, cfg) =>
+                x.AddConfigureEndpointsCallback((_, _, cfg) =>
                 {
                     cfg.UseDelayedRedelivery(r => r.Interval(redeliveryCount, 100));
                 });
@@ -118,9 +118,9 @@ public sealed class ValidateClaimedRewardArguments
 {
     public Guid SubmissionId { get; set; }
 
-    public string CustomerGuid { get; set; }
+    public string? CustomerGuid { get; set; }
 
-    public string RewardId { get; set; }
+    public string? RewardId { get; set; }
 }
 
 
