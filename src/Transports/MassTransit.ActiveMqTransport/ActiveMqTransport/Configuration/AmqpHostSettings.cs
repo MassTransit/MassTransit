@@ -18,5 +18,7 @@ namespace MassTransit.ActiveMqTransport.Configuration
         public override string Scheme => HostScheme;
 
         public override string NmsScheme => "amqp";
+
+        public override string FailoverConnectionSettingPrefix => "failover.";
     }
 }

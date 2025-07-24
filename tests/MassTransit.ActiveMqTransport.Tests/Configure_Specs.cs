@@ -122,10 +122,12 @@ namespace MassTransit.ActiveMqTransport.Tests
                 FailoverHosts = new[] { "failover1", "failover2" },
             };
             settings.TransportOptions.Add("reconnectAttempts", "-1");
+            settings.TransportOptions.Add("transport.maxReconnectAttempts", "5");
+            settings.TransportOptions.Add("transport.sendBufferSize", "10");
 
             Assert.That(settings.BrokerAddress,
                 Is.EqualTo(new Uri(
-                    "activemq:failover:(tcp://failover1:61616/?wireFormat.tightEncodingEnabled=true,tcp://failover2:61616/?wireFormat.tightEncodingEnabled=true)?transport.reconnectAttempts=-1")));
+                    "activemq:failover:(tcp://failover1:61616/?wireFormat.tightEncodingEnabled=true&transport.sendBufferSize=10,tcp://failover2:61616/?wireFormat.tightEncodingEnabled=true&transport.sendBufferSize=10)?transport.reconnectAttempts=-1&transport.maxReconnectAttempts=5")));
         }
 
         [Test]
@@ -137,9 +139,12 @@ namespace MassTransit.ActiveMqTransport.Tests
                 FailoverHosts = new[] { "failover1", "failover2" },
             };
             settings.TransportOptions.Add("reconnectAttempts", "-1");
+            settings.TransportOptions.Add("failover.maxReconnectAttempts", "5");
+            settings.TransportOptions.Add("transport.sendBufferSize", "10");
+            
 
             Assert.That(settings.BrokerAddress,
-                Is.EqualTo(new Uri("failover:(amqp://failover1:61616/?,amqp://failover2:61616/?)?transport.reconnectAttempts=-1")));
+                Is.EqualTo(new Uri("failover:(amqp://failover1:61616/?transport.sendBufferSize=10,amqp://failover2:61616/?transport.sendBufferSize=10)?failover.reconnectAttempts=-1&failover.maxReconnectAttempts=5")));
         }
 
         [Test]
