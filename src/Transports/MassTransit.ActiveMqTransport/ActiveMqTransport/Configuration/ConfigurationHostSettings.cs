@@ -73,6 +73,8 @@ namespace MassTransit.ActiveMqTransport.Configuration
 
         public abstract string NmsScheme { get; }
 
+        public abstract string FailoverConnectionSettingPrefix { get; }
+
         public string Host { get; }
         public int Port { get; set; }
         public string Username { get; set; }
@@ -112,7 +114,7 @@ namespace MassTransit.ActiveMqTransport.Configuration
                         }.Uri.ToString()
                     ));
                 //filter failover parameters only. Apache.NMS.ActiveMQ requires prefix "transport." for failover parameters
-                var failoverQueryPart = GetQueryString(kv => IsFailoverArgument(kv.Key), "transport.");
+                var failoverQueryPart = GetQueryString(kv => IsFailoverArgument(kv.Key), FailoverConnectionSettingPrefix);
                 return new Uri($"{FailoverScheme}:({failoverPart}){failoverQueryPart}");
             }
 
@@ -126,7 +128,14 @@ namespace MassTransit.ActiveMqTransport.Configuration
             if (TransportOptions.Count == 0)
                 return "";
 
-            var queryString = string.Join("&", TransportOptions.Where(predicate).Select(pair => $"{prefix}{pair.Key}={pair.Value}"));
+            var queryString = string.Join("&", TransportOptions.Where(predicate).Select(pair =>
+            {
+                if (pair.Key.StartsWith(prefix, StringComparison.InvariantCulture))
+                {
+                    return $"{pair.Key}={pair.Value}";
+                }
+                return $"{prefix}{pair.Key}={pair.Value}";
+            }));
 
             return $"?{queryString}";
         }
@@ -143,7 +152,7 @@ namespace MassTransit.ActiveMqTransport.Configuration
 
         static bool IsFailoverArgument(string key)
         {
-            return key.StartsWith("nested.", StringComparison.OrdinalIgnoreCase) || _failoverArguments.Contains(key);
+            return key.StartsWith("nested.", StringComparison.OrdinalIgnoreCase) || _failoverArguments.Any(f => key.EndsWith(f, StringComparison.InvariantCulture));
         }
     }
 }

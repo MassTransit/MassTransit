@@ -19,5 +19,7 @@ namespace MassTransit.ActiveMqTransport.Configuration
         public override string FailoverScheme => $"{NmsScheme}:failover";
 
         public override string Scheme => $"{NmsScheme}:{HostScheme}";
+
+        public override string FailoverConnectionSettingPrefix => "transport.";
     }
 }
