@@ -9,5 +9,6 @@ namespace MassTransit.EventHubIntegration
     {
         ILogContext LogContext { get; }
         EventProcessorClient GetClient(ProcessorClientBuilderContext context);
+        void ReleaseClient(ProcessorClientBuilderContext processorLockContext);
     }
 }

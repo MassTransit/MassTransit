@@ -3,6 +3,7 @@ namespace MassTransit.EventHubIntegration
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Azure.Messaging.EventHubs;
     using Azure.Messaging.EventHubs.Processor;
     using Checkpoints;
     using Util;
@@ -23,11 +24,18 @@ namespace MassTransit.EventHubIntegration
             _receiveSettings = receiveSettings;
             _pending = new PendingConfirmationCollection(cancellationToken);
             _data = new SingleThreadedDictionary<string, PartitionCheckpointData>(StringComparer.Ordinal);
+
+            Client = context.GetClient(this);
         }
+
+        public EventProcessorClient Client { get; }
 
         public ValueTask DisposeAsync()
         {
+            _context.ReleaseClient(this);
+
             _pending.Dispose();
+
             return default;
         }
 

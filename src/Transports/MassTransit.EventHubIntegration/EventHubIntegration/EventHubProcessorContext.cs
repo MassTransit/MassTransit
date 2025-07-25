@@ -14,10 +14,11 @@ namespace MassTransit.EventHubIntegration
         BasePipeContext,
         ProcessorContext
     {
-        readonly IHostConfiguration _hostConfiguration;
         readonly EventProcessorClient _client;
-        readonly Func<PartitionInitializingEventArgs, Task> _partitionInitializingHandler;
+        readonly IHostConfiguration _hostConfiguration;
         readonly Func<PartitionClosingEventArgs, Task> _partitionClosingHandler;
+        readonly Func<PartitionInitializingEventArgs, Task> _partitionInitializingHandler;
+        Action _releaseClient;
 
         public EventHubProcessorContext(IHostConfiguration hostConfiguration,
             EventProcessorClient client, Func<PartitionInitializingEventArgs, Task> partitionInitializingHandler,
@@ -25,7 +26,9 @@ namespace MassTransit.EventHubIntegration
             : base(cancellationToken)
         {
             _hostConfiguration = hostConfiguration;
+
             _client = client;
+
             _partitionInitializingHandler = partitionInitializingHandler;
             _partitionClosingHandler = partitionClosingHandler;
         }
@@ -34,20 +37,48 @@ namespace MassTransit.EventHubIntegration
 
         public EventProcessorClient GetClient(ProcessorClientBuilderContext context)
         {
-            _client.PartitionInitializingAsync += async args =>
-            {
-                await context.OnPartitionInitializing(args).ConfigureAwait(false);
-                if (_partitionInitializingHandler != null)
-                    await _partitionInitializingHandler(args).ConfigureAwait(false);
-            };
-            _client.PartitionClosingAsync += async args =>
-            {
-                if (_partitionClosingHandler != null)
-                    await _partitionClosingHandler(args).ConfigureAwait(false);
+            if (_releaseClient != null)
+                throw new InvalidOperationException("The client has already been configured and will throw an exception if it is used again");
 
-                await context.OnPartitionClosing(args).ConfigureAwait(false);
+            Func<PartitionInitializingEventArgs, Task> OnPartitionInitializingAsync()
+            {
+                return async args =>
+                {
+                    await context.OnPartitionInitializing(args).ConfigureAwait(false);
+                    if (_partitionInitializingHandler != null)
+                        await _partitionInitializingHandler(args).ConfigureAwait(false);
+                };
+            }
+
+            _client.PartitionInitializingAsync += OnPartitionInitializingAsync();
+
+            Func<PartitionClosingEventArgs, Task> OnPartitionClosingAsync()
+            {
+                return async args =>
+                {
+                    if (_partitionClosingHandler != null)
+                        await _partitionClosingHandler(args).ConfigureAwait(false);
+
+                    await context.OnPartitionClosing(args).ConfigureAwait(false);
+                };
+            }
+
+            _client.PartitionClosingAsync += OnPartitionClosingAsync();
+
+            _releaseClient = () =>
+            {
+                _client.PartitionClosingAsync -= OnPartitionClosingAsync();
+                _client.PartitionInitializingAsync -= OnPartitionInitializingAsync();
+
+                _releaseClient = null;
             };
+
             return _client;
+        }
+
+        public void ReleaseClient(ProcessorClientBuilderContext processorLockContext)
+        {
+            _releaseClient?.Invoke();
         }
     }
 }

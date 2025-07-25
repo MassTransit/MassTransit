@@ -31,8 +31,8 @@ namespace MassTransit.EventHubIntegration
             _partitionInitializingHandler = partitionInitializingHandler;
         }
 
-        public IActivePipeContextAgent<ProcessorContext> CreateActiveContext(ISupervisor supervisor,
-            PipeContextHandle<ProcessorContext> context, CancellationToken cancellationToken = new CancellationToken())
+        public IActivePipeContextAgent<ProcessorContext> CreateActiveContext(ISupervisor supervisor, PipeContextHandle<ProcessorContext> context,
+            CancellationToken cancellationToken)
         {
             return supervisor.AddActiveContext(context, CreateSharedConnection(context.Context, cancellationToken));
         }
@@ -59,12 +59,15 @@ namespace MassTransit.EventHubIntegration
             Task<ProcessorContext> Create(ConnectionContext connectionContext, CancellationToken createCancellationToken)
             {
                 var client = _clientFactory();
-                ProcessorContext context = new EventHubProcessorContext(_hostConfiguration,
-                    client, _partitionInitializingHandler, _partitionClosingHandler, createCancellationToken);
+
+                ProcessorContext context = new EventHubProcessorContext(_hostConfiguration, client, _partitionInitializingHandler, _partitionClosingHandler,
+                    createCancellationToken);
                 return Task.FromResult(context);
             }
 
+            #pragma warning disable CS4014
             _contextSupervisor.CreateAgent(asyncContext, Create, cancellationToken);
+            #pragma warning restore CS4014
         }
     }
 }

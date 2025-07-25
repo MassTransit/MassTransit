@@ -17,7 +17,8 @@ namespace MassTransit.EventHubIntegration.Middleware
         public async Task Send(ProcessorContext context, IPipe<ProcessorContext> next)
         {
             var receiveSettings = _context.GetPayload<ReceiveSettings>();
-            IEventHubDataReceiver receiver = new EventHubDataReceiver(receiveSettings, _context, context);
+
+            var receiver = new EventHubDataReceiver(receiveSettings, _context, context);
 
             await receiver.Ready.ConfigureAwait(false);
 

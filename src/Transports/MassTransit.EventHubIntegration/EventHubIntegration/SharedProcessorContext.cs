@@ -27,5 +27,10 @@ namespace MassTransit.EventHubIntegration
         {
             return _context.GetClient(context);
         }
+
+        public void ReleaseClient(ProcessorClientBuilderContext processorLockContext)
+        {
+            _context.ReleaseClient(processorLockContext);
+        }
     }
 }

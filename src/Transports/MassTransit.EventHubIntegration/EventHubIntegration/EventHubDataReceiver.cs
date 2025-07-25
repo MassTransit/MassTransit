@@ -37,7 +37,7 @@
                 receiveSettings.ConcurrentMessageLimit,
                 receiveSettings.ConcurrentDeliveryLimit);
 
-            _client = processorContext.GetClient(lockContext);
+            _client = lockContext.Client;
             _lockContext = lockContext;
 
             _client.ProcessErrorAsync += HandleError;
