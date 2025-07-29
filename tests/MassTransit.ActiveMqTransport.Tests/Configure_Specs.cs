@@ -136,7 +136,7 @@ namespace MassTransit.ActiveMqTransport.Tests
             var settings = new AmqpHostSettings(new Uri($"{ActiveMqHostAddress.AmqpScheme}://fake-host"))
             {
                 Port = 61616,
-                FailoverHosts = new[] { "failover1", "failover2" },
+                FailoverHosts = new[] { "failover1", "failover2:5672" },
             };
             settings.TransportOptions.Add("reconnectAttempts", "-1");
             settings.TransportOptions.Add("failover.maxReconnectAttempts", "5");
@@ -144,7 +144,7 @@ namespace MassTransit.ActiveMqTransport.Tests
             
 
             Assert.That(settings.BrokerAddress,
-                Is.EqualTo(new Uri("failover:(amqp://failover1:61616/?transport.sendBufferSize=10,amqp://failover2:61616/?transport.sendBufferSize=10)?failover.reconnectAttempts=-1&failover.maxReconnectAttempts=5")));
+                Is.EqualTo(new Uri("failover:(amqp://failover1:61616/?transport.sendBufferSize=10,amqp://failover2:5672/?transport.sendBufferSize=10)?failover.reconnectAttempts=-1&failover.maxReconnectAttempts=5")));
         }
 
         [Test]

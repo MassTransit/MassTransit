@@ -2,6 +2,7 @@ namespace MassTransit.ActiveMqTransport.Configuration
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using Apache.NMS;
 
@@ -108,8 +109,8 @@ namespace MassTransit.ActiveMqTransport.Configuration
                     .Select(failoverHost => new UriBuilder
                         {
                             Scheme = HostScheme,
-                            Host = failoverHost,
-                            Port = Port,
+                            Host = GetHostName(failoverHost),
+                            Port = GetPort(failoverHost, Port),
                             Query = failoverServerPart
                         }.Uri.ToString()
                     ));
@@ -153,6 +154,32 @@ namespace MassTransit.ActiveMqTransport.Configuration
         static bool IsFailoverArgument(string key)
         {
             return key.StartsWith("nested.", StringComparison.OrdinalIgnoreCase) || _failoverArguments.Any(f => key.EndsWith(f, StringComparison.InvariantCulture));
+        }
+
+        int GetPort(string host, int defaultPort)
+        {
+            //Parse the port from the host if it is specified, otherwise return the default port
+            if (string.IsNullOrEmpty(host))
+            {
+                return defaultPort;
+            }
+            var hostPort = host.Split(':');
+            if (hostPort.Length > 1 && int.TryParse(hostPort[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out int port))
+            {
+                return port;
+            }
+            return defaultPort;
+        }
+
+        string GetHostName(string failoverHost)
+        {
+            if (string.IsNullOrEmpty(failoverHost))
+            {
+                throw new ArgumentNullException(nameof(failoverHost));
+            }
+
+            var hostPort = failoverHost.Split(':');
+            return hostPort[0];
         }
     }
 }
