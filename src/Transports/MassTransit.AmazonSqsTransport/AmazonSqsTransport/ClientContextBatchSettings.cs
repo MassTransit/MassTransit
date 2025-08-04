@@ -5,9 +5,11 @@ using System;
 
 public static class ClientContextBatchSettings
 {
+    const int MaxMessageLimit = 10;
+
     static ClientContextBatchSettings()
     {
-        MessageLimit = 10;
+        MessageLimit = MaxMessageLimit;
         BatchLimit = 10;
         SizeLimit = 128 * 1024;
         Timeout = TimeSpan.FromMilliseconds(1);
@@ -20,7 +22,7 @@ public static class ClientContextBatchSettings
 
     public static BatchSettings GetBatchSettings()
     {
-        return new ClientBatchSettings(Math.Min(10, MessageLimit), BatchLimit, SizeLimit, Timeout);
+        return new ClientBatchSettings(Math.Min(MaxMessageLimit, MessageLimit), BatchLimit, SizeLimit, Timeout);
     }
 
 

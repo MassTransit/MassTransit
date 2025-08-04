@@ -5,9 +5,11 @@ using System;
 
 public static class PublishBatchSettings
 {
+    const int MaxMessageLimit = 10;
+
     static PublishBatchSettings()
     {
-        MessageLimit = 5;
+        MessageLimit = MaxMessageLimit;
         BatchLimit = 5;
         SizeLimit = 128 * 1024;
         Timeout = TimeSpan.FromMilliseconds(1);
@@ -18,9 +20,9 @@ public static class PublishBatchSettings
     public static int SizeLimit { get; set; }
     public static TimeSpan Timeout { get; set; }
 
-    public static BatchSettings? GetBatchSettings()
+    public static BatchSettings GetBatchSettings()
     {
-        return new SnsPublishBatchSettings(Math.Min(5, MessageLimit), BatchLimit, Math.Min(256 * 1024, SizeLimit), Timeout);
+        return new SnsPublishBatchSettings(Math.Min(MaxMessageLimit, MessageLimit), BatchLimit, Math.Min(256 * 1024, SizeLimit), Timeout);
     }
 
 
