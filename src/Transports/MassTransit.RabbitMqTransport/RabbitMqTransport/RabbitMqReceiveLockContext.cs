@@ -41,10 +41,7 @@ namespace MassTransit.RabbitMqTransport
         public async Task Faulted(Exception exception)
         {
             if (_channel.Channel.IsClosed)
-            {
-                throw new OperationInterruptedException(
-                    new ShutdownEventArgs(ShutdownInitiator.Peer, 491, $"Channel is already closed: {_channel.Channel.CloseReason}"));
-            }
+                return;
 
             try
             {

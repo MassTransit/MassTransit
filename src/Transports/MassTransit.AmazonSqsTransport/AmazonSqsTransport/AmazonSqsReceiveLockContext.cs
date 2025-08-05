@@ -84,17 +84,14 @@ public class AmazonSqsReceiveLockContext :
         catch (MessageNotInflightException)
         {
             _locked = false;
-            throw;
         }
         catch (ReceiptHandleIsInvalidException)
         {
             _locked = false;
-            throw;
         }
         catch (Exception ex)
         {
-            LogContext.Error?.Log(ex, "ChangeMessageVisibility failed: {ReceiptHandle}, Original Exception: {Exception}",
-                _message.ReceiptHandle, exception);
+            LogContext.Error?.Log(ex, "ChangeMessageVisibility failed: {ReceiptHandle}, Original Exception: {Exception}", _message.ReceiptHandle, exception);
         }
         finally
         {
