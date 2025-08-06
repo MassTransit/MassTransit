@@ -1,0 +1,62 @@
+﻿# Compose file for test resources
+#
+# MSSQL will require a new, empty database to be created.
+# The expected name is "MassTransitUnitTests_v12_2015"
+
+services:
+  postgres:
+    image: postgres:14.18-bookworm
+    environment:
+      POSTGRES_USER: sa
+      POSTGRES_PASSWORD: Password12!
+      POSTGRES_DB: masstransit
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - 5432:5432
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2G
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: Y
+      MSSQL_SA_PASSWORD: Password12!    
+    ports:
+      - 1433:1433
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2G
+    volumes:
+      - mssql_data:/var/opt/mssql
+
+  mysql:
+    image: mysql:oraclelinux9
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: true
+      MYSQL_DATABASE: masstransit
+      MYSQL_USER: sa
+      MYSQL_PASSWORD: Password12!
+    ports:
+      - 3306:3306
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2G
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  pg_data:
+  mssql_data:
+  mysql_data:
