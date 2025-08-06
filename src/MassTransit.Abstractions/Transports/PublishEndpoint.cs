@@ -105,7 +105,7 @@ namespace MassTransit.Transports
             return PublishEndpointProvider.GetPublishSendEndpoint<T>();
         }
 
-        Task PublishInternal<T>(CancellationToken cancellationToken, T message, IPipe<PublishContext<T>>? pipe = default)
+        Task PublishInternal<T>(CancellationToken cancellationToken, T message, IPipe<PublishContext<T>>? pipe = null)
             where T : class
         {
             Task<ISendEndpoint> sendEndpointTask = GetPublishSendEndpoint<T>();
@@ -131,7 +131,7 @@ namespace MassTransit.Transports
             return PublishAsync();
         }
 
-        Task PublishInternal<T>(CancellationToken cancellationToken, object values, IPipe<PublishContext<T>>? pipe = default)
+        Task PublishInternal<T>(CancellationToken cancellationToken, object values, IPipe<PublishContext<T>>? pipe = null)
             where T : class
         {
             Task<ISendEndpoint> sendEndpointTask = GetPublishSendEndpoint<T>();

@@ -38,7 +38,7 @@ namespace MassTransit.SagaStateMachine
             where T : Exception
         {
             if (context is BehaviorExceptionContext<TSaga, TException> exceptionContext)
-                await _messageFactory.Use(exceptionContext, (ctx, s) => ctx.Publish(s.Message, s.Pipe)).ConfigureAwait(false);
+                await _messageFactory.Use(exceptionContext, (ctx, s) => ctx.Publish(s.Message, s.Pipe, ctx.CancellationToken)).ConfigureAwait(false);
 
             await next.Faulted(context).ConfigureAwait(false);
         }
@@ -49,7 +49,7 @@ namespace MassTransit.SagaStateMachine
             where TOtherException : Exception
         {
             if (context is BehaviorExceptionContext<TSaga, T, TException> exceptionContext)
-                await _messageFactory.Use(exceptionContext, (ctx, s) => ctx.Publish(s.Message, s.Pipe)).ConfigureAwait(false);
+                await _messageFactory.Use(exceptionContext, (ctx, s) => ctx.Publish(s.Message, s.Pipe, ctx.CancellationToken)).ConfigureAwait(false);
 
             await next.Faulted(context).ConfigureAwait(false);
         }
@@ -95,7 +95,7 @@ namespace MassTransit.SagaStateMachine
             where T : Exception
         {
             if (context is BehaviorExceptionContext<TSaga, TData, TException> exceptionContext)
-                await _messageFactory.Use(exceptionContext, (ctx, s) => ctx.Publish(s.Message, s.Pipe)).ConfigureAwait(false);
+                await _messageFactory.Use(exceptionContext, (ctx, s) => ctx.Publish(s.Message, s.Pipe, ctx.CancellationToken)).ConfigureAwait(false);
 
             await next.Faulted(context).ConfigureAwait(false);
         }

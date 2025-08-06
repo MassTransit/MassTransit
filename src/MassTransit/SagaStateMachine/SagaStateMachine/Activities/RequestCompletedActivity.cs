@@ -34,7 +34,7 @@ namespace MassTransit.SagaStateMachine
                 InVar.Timestamp,
                 PayloadType = MessageTypeCache<TMessage>.MessageTypeNames,
                 Payload = context.Message
-            }).ConfigureAwait(false);
+            }, context.CancellationToken).ConfigureAwait(false);
 
             await next.Execute(context).ConfigureAwait(false);
         }
@@ -85,7 +85,7 @@ namespace MassTransit.SagaStateMachine
                 InVar.Timestamp,
                 PayloadType = MessageTypeCache<TResponse>.MessageTypeNames,
                 Payload = _messageFactory(context)
-            }).ConfigureAwait(false);
+            }, context.CancellationToken).ConfigureAwait(false);
 
             await next.Execute(context).ConfigureAwait(false);
         }

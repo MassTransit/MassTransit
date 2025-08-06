@@ -11,8 +11,8 @@ namespace MassTransit.SagaStateMachine
         where TResponse : class
         where TMessage : class
     {
-        readonly Request<TSaga, TRequest, TResponse> _request;
         readonly bool _completed;
+        readonly Request<TSaga, TRequest, TResponse> _request;
 
         public CancelRequestTimeoutActivity(Request<TSaga, TRequest, TResponse> request, bool completed)
         {
@@ -36,7 +36,10 @@ namespace MassTransit.SagaStateMachine
             if (requestId.HasValue && _request.Settings.Timeout > TimeSpan.Zero)
             {
                 if (context.TryGetPayload(out MessageSchedulerContext schedulerContext))
-                    await schedulerContext.CancelScheduledSend(context.ReceiveContext.InputAddress, requestId.Value).ConfigureAwait(false);
+                {
+                    await schedulerContext.CancelScheduledSend(context.ReceiveContext.InputAddress, requestId.Value, context.CancellationToken)
+                        .ConfigureAwait(false);
+                }
                 else
                     throw new ConfigurationException("A scheduler was not available to cancel the scheduled request timeout");
             }

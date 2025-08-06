@@ -63,7 +63,7 @@
 
             var endpoint = await context.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
-            await _messageFactory.Use(context, (ctx, s) => endpoint.Send(s.Message, s.Pipe)).ConfigureAwait(false);
+            await _messageFactory.Use(context, (ctx, s) => endpoint.Send(s.Message, s.Pipe, ctx.CancellationToken)).ConfigureAwait(false);
         }
     }
 
@@ -100,7 +100,7 @@
 
             var endpoint = await context.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
-            await _messageFactory.Use(context, (ctx, s) => endpoint.Send(s.Message, s.Pipe)).ConfigureAwait(false);
+            await _messageFactory.Use(context, (ctx, s) => endpoint.Send(s.Message, s.Pipe, ctx.CancellationToken)).ConfigureAwait(false);
 
             await next.Execute(context).ConfigureAwait(false);
         }

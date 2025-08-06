@@ -37,7 +37,7 @@ namespace MassTransit.SagaStateMachine
                 context.ExpirationTime,
                 PayloadType = MessageTypeCache<TMessage>.MessageTypeNames,
                 Payload = context.Message
-            }).ConfigureAwait(false);
+            }, context.CancellationToken).ConfigureAwait(false);
 
             await next.Execute(context).ConfigureAwait(false);
         }

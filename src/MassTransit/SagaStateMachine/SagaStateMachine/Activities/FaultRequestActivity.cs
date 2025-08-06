@@ -29,7 +29,7 @@ namespace MassTransit.SagaStateMachine
 
                 var dummyMessage = new FaultedEvent();
 
-                await endpoint.Send(dummyMessage, pipe).ConfigureAwait(false);
+                await endpoint.Send(dummyMessage, pipe, context.CancellationToken).ConfigureAwait(false);
             }
 
             await next.Execute(context).ConfigureAwait(false);

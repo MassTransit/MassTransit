@@ -66,7 +66,7 @@ namespace MassTransit.SagaStateMachine
 
             var endpoint = await exceptionContext.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
-            await _messageFactory.Use(exceptionContext, (_, s) => endpoint.Send(s.Message, s.Pipe)).ConfigureAwait(false);
+            await _messageFactory.Use(exceptionContext, (ctx, s) => endpoint.Send(s.Message, s.Pipe, ctx.CancellationToken)).ConfigureAwait(false);
         }
     }
 
@@ -112,7 +112,7 @@ namespace MassTransit.SagaStateMachine
 
                 var endpoint = await exceptionContext.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
-                await _messageFactory.Use(exceptionContext, (_, s) => endpoint.Send(s.Message, s.Pipe)).ConfigureAwait(false);
+                await _messageFactory.Use(exceptionContext, (ctx, s) => endpoint.Send(s.Message, s.Pipe, ctx.CancellationToken)).ConfigureAwait(false);
             }
 
             await next.Faulted(context).ConfigureAwait(false);

@@ -25,9 +25,9 @@
 
             var endpoint = serviceAddress != null
                 ? await context.GetSendEndpoint(serviceAddress).ConfigureAwait(false)
-                : await context.ReceiveContext.PublishEndpointProvider.GetPublishEndpoint<TRequest>(context, default);
+                : await context.ReceiveContext.PublishEndpointProvider.GetPublishEndpoint<TRequest>(context, null);
 
-            await endpoint.Send(sendTuple.Message, pipe).ConfigureAwait(false);
+            await endpoint.Send(sendTuple.Message, pipe, context.CancellationToken).ConfigureAwait(false);
 
             _request.SetRequestId(context.Saga, requestId);
 
@@ -40,7 +40,7 @@
                     new TimeoutExpired<TRequest>(now, expirationTime, context.Saga.CorrelationId, pipe.RequestId, sendTuple.Message);
 
                 if (context.TryGetPayload(out MessageSchedulerContext schedulerContext))
-                    await schedulerContext.ScheduleSend(expirationTime, message).ConfigureAwait(false);
+                    await schedulerContext.ScheduleSend(expirationTime, message, context.CancellationToken).ConfigureAwait(false);
                 else
                     throw new ConfigurationException("A request timeout was specified but no message scheduler was specified or available");
             }

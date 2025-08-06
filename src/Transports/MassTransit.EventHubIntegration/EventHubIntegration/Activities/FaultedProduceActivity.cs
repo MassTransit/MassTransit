@@ -68,7 +68,7 @@ namespace MassTransit.EventHubIntegration.Activities
                 {
                     var producer = await ctx.GetProducer(ctx, _nameProvider(ctx)).ConfigureAwait(false);
 
-                    await producer.Produce(s.Message, s.Pipe).ConfigureAwait(false);
+                    await producer.Produce(s.Message, s.Pipe, ctx.CancellationToken).ConfigureAwait(false);
                 });
             }
 
@@ -119,7 +119,7 @@ namespace MassTransit.EventHubIntegration.Activities
                 {
                     var producer = await ctx.GetProducer(ctx, _nameProvider(ctx)).ConfigureAwait(false);
 
-                    await producer.Produce(s.Message, s.Pipe).ConfigureAwait(false);
+                    await producer.Produce(s.Message, s.Pipe, ctx.CancellationToken).ConfigureAwait(false);
                 }).ConfigureAwait(false);
             }
 

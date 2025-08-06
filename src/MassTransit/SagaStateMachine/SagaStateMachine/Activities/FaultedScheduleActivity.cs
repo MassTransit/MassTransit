@@ -70,7 +70,8 @@
             var schedulerContext = context.GetPayload<MessageSchedulerContext>();
 
             ScheduledMessage<TMessage> message = await _messageFactory
-                .Use(exceptionContext, (ctx, s) => schedulerContext.ScheduleSend(_timeProvider(ctx), s.Message, s.Pipe)).ConfigureAwait(false);
+                .Use(exceptionContext, (ctx, s) => schedulerContext.ScheduleSend(_timeProvider(ctx), s.Message, s.Pipe, ctx.CancellationToken))
+                .ConfigureAwait(false);
 
             _schedule?.SetTokenId(context.Saga, message.TokenId);
 
@@ -128,7 +129,8 @@
                 var schedulerContext = context.GetPayload<MessageSchedulerContext>();
 
                 ScheduledMessage<TMessage> message = await _messageFactory
-                    .Use(exceptionContext, (ctx, s) => schedulerContext.ScheduleSend(_timeProvider(ctx), s.Message, s.Pipe)).ConfigureAwait(false);
+                    .Use(exceptionContext, (ctx, s) => schedulerContext.ScheduleSend(_timeProvider(ctx), s.Message, s.Pipe, ctx.CancellationToken))
+                    .ConfigureAwait(false);
 
                 _schedule?.SetTokenId(context.Saga, message.TokenId);
 

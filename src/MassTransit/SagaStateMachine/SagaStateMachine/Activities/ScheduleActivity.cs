@@ -66,7 +66,7 @@
             var schedulerContext = context.GetPayload<MessageSchedulerContext>();
 
             ScheduledMessage<TMessage> message = await _messageFactory
-                .Use(context, (ctx, s) => schedulerContext.ScheduleSend(_timeProvider(ctx), s.Message, s.Pipe)).ConfigureAwait(false);
+                .Use(context, (ctx, s) => schedulerContext.ScheduleSend(_timeProvider(ctx), s.Message, s.Pipe, ctx.CancellationToken)).ConfigureAwait(false);
 
             _schedule?.SetTokenId(context.Saga, message.TokenId);
 
@@ -74,7 +74,10 @@
             {
                 Guid? messageTokenId = context.GetSchedulingTokenId();
                 if (!messageTokenId.HasValue || previousTokenId.Value != messageTokenId.Value)
-                    await schedulerContext.CancelScheduledSend(context.ReceiveContext.InputAddress, previousTokenId.Value).ConfigureAwait(false);
+                {
+                    await schedulerContext.CancelScheduledSend(context.ReceiveContext.InputAddress, previousTokenId.Value, context.CancellationToken)
+                        .ConfigureAwait(false);
+                }
             }
         }
     }
@@ -115,7 +118,7 @@
             var schedulerContext = context.GetPayload<MessageSchedulerContext>();
 
             ScheduledMessage<T> message = await _messageFactory
-                .Use(context, (ctx, s) => schedulerContext.ScheduleSend(_timeProvider(ctx), s.Message, s.Pipe)).ConfigureAwait(false);
+                .Use(context, (ctx, s) => schedulerContext.ScheduleSend(_timeProvider(ctx), s.Message, s.Pipe, ctx.CancellationToken)).ConfigureAwait(false);
 
             _schedule?.SetTokenId(context.Saga, message.TokenId);
 
@@ -123,7 +126,10 @@
             {
                 Guid? messageTokenId = context.GetSchedulingTokenId();
                 if (!messageTokenId.HasValue || previousTokenId.Value != messageTokenId.Value)
-                    await schedulerContext.CancelScheduledSend(context.ReceiveContext.InputAddress, previousTokenId.Value).ConfigureAwait(false);
+                {
+                    await schedulerContext.CancelScheduledSend(context.ReceiveContext.InputAddress, previousTokenId.Value, context.CancellationToken)
+                        .ConfigureAwait(false);
+                }
             }
 
             await next.Execute(context).ConfigureAwait(false);

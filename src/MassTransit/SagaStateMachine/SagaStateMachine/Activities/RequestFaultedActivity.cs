@@ -44,7 +44,7 @@ namespace MassTransit.SagaStateMachine
                     payload.Host,
                     payload.Exceptions
                 }
-            }).ConfigureAwait(false);
+            }, context.CancellationToken).ConfigureAwait(false);
 
             await next.Execute(context).ConfigureAwait(false);
         }

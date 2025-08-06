@@ -65,7 +65,7 @@ namespace MassTransit.SagaStateMachine
         {
             Task<SendTuple<T>> message = factory.GetMessage();
 
-            return new ContextMessageFactory<TContext, T>(context => message);
+            return new ContextMessageFactory<TContext, T>(_ => message);
         }
     }
 }

@@ -28,7 +28,7 @@ namespace MassTransit.SagaStateMachine
 
         public async Task Execute(BehaviorContext<TSaga> context, IBehavior<TSaga> next)
         {
-            await _messageFactory.Use(context, (ctx, s) => ctx.Publish(s.Message, s.Pipe)).ConfigureAwait(false);
+            await _messageFactory.Use(context, (ctx, s) => ctx.Publish(s.Message, s.Pipe, ctx.CancellationToken)).ConfigureAwait(false);
 
             await next.Execute(context).ConfigureAwait(false);
         }
@@ -36,7 +36,7 @@ namespace MassTransit.SagaStateMachine
         public async Task Execute<T>(BehaviorContext<TSaga, T> context, IBehavior<TSaga, T> next)
             where T : class
         {
-            await _messageFactory.Use(context, (ctx, s) => ctx.Publish(s.Message, s.Pipe)).ConfigureAwait(false);
+            await _messageFactory.Use(context, (ctx, s) => ctx.Publish(s.Message, s.Pipe, ctx.CancellationToken)).ConfigureAwait(false);
 
             await next.Execute(context).ConfigureAwait(false);
         }
@@ -81,7 +81,7 @@ namespace MassTransit.SagaStateMachine
 
         public async Task Execute(BehaviorContext<TSaga, TMessage> context, IBehavior<TSaga, TMessage> next)
         {
-            await _messageFactory.Use(context, (ctx, s) => ctx.Publish(s.Message, s.Pipe)).ConfigureAwait(false);
+            await _messageFactory.Use(context, (ctx, s) => ctx.Publish(s.Message, s.Pipe, ctx.CancellationToken)).ConfigureAwait(false);
 
             await next.Execute(context).ConfigureAwait(false);
         }

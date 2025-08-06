@@ -56,7 +56,7 @@ namespace MassTransit.Futures
             {
                 var pipe = new FutureRequestPipe<TRequest>(s.Pipe, context.ReceiveContext.InputAddress, context.Saga.CorrelationId);
 
-                await endpoint.Send(s.Message, pipe, context.CancellationToken).ConfigureAwait(false);
+                await endpoint.Send(s.Message, pipe, ctx.CancellationToken).ConfigureAwait(false);
 
                 if (PendingRequestIdProvider != null)
                 {

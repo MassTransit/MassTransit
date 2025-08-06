@@ -63,7 +63,8 @@
                 {
                     var schedulerContext = context.GetPayload<MessageSchedulerContext>();
 
-                    await schedulerContext.CancelScheduledSend(context.ReceiveContext.InputAddress, previousTokenId.Value).ConfigureAwait(false);
+                    await schedulerContext.CancelScheduledSend(context.ReceiveContext.InputAddress, previousTokenId.Value, context.CancellationToken)
+                        .ConfigureAwait(false);
 
                     _schedule.SetTokenId(context.Saga, null);
                 }
