@@ -148,8 +148,6 @@ namespace MassTransit.Transports
                         {
                             if (retryContext == null)
                                 await NotifyFaulted(exception).ConfigureAwait(false);
-
-                            throw;
                         }
                         catch (Exception exception)
                         {
