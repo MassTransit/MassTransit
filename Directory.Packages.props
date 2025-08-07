@@ -5,15 +5,15 @@
   <ItemGroup>
     <PackageVersion Include="Apache.NMS.ActiveMQ" Version="2.1.1" />
     <PackageVersion Include="Apache.NMS.AMQP" Version="2.2.0" />
-    <PackageVersion Include="AWSSDK.DynamoDBv2" Version="4.0.2.1" />
-    <PackageVersion Include="AWSSDK.SimpleNotificationService" Version="4.0.0.12" />
-    <PackageVersion Include="AWSSDK.S3" Version="4.0.4.1" />
-    <PackageVersion Include="AWSSDK.SQS" Version="4.0.0.13" />
+    <PackageVersion Include="AWSSDK.DynamoDBv2" Version="4.0.3.4" />
+    <PackageVersion Include="AWSSDK.SimpleNotificationService" Version="4.0.0.18" />
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.6.4" />
+    <PackageVersion Include="AWSSDK.SQS" Version="4.0.0.19" />
     <PackageVersion Include="Azure.Data.Tables" Version="12.11.0" />
-    <PackageVersion Include="Azure.Identity" Version="1.14.1" />
+    <PackageVersion Include="Azure.Identity" Version="1.14.2" />
     <PackageVersion Include="Azure.Messaging.EventHubs.Processor" Version="5.12.2" />
     <PackageVersion Include="Azure.Messaging.ServiceBus" Version="7.20.1" />
-    <PackageVersion Include="Azure.Storage.Blobs" Version="12.24.1" />
+    <PackageVersion Include="Azure.Storage.Blobs" Version="12.25.0" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.13.11" />
     <PackageVersion Include="Confluent.Kafka" Version="2.11.0" />
     <PackageVersion Include="Confluent.SchemaRegistry.Serdes.Avro" Version="2.11.0" />
@@ -27,14 +27,14 @@
     <PackageVersion Include="Hangfire.MemoryStorage" Version="1.8.1.2" />
     <PackageVersion Include="Iesi.Collections" Version="4.1.1" />
     <PackageVersion Include="Ionic.Zlib.Core" Version="1.0.0" />
-    <PackageVersion Include="Marten" Version="8.3.1" />
+    <PackageVersion Include="Marten" Version="8.6.0" />
     <PackageVersion Include="MathNet.Numerics" Version="5.0.0" />
     <PackageVersion Include="MediatR" Version="12.2.0" />
     <PackageVersion Include="MessagePack" Version="3.1.4" />
     <PackageVersion Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.23.0" />
     <PackageVersion Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
     <PackageVersion Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="9.0.0" />
-    <PackageVersion Include="Microsoft.Azure.Cosmos" Version="3.52.0" />
+    <PackageVersion Include="Microsoft.Azure.Cosmos" Version="3.52.1" />
     <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions.EventHubs" Version="6.5.2" />
     <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="5.17.0" />
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
@@ -67,7 +67,7 @@
     <PackageVersion Include="Microsoft.Extensions.Options" Version="8.0.0" Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="9.0.0" Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
-    <PackageVersion Include="MongoDB.Driver" Version="3.4.0" />
+    <PackageVersion Include="MongoDB.Driver" Version="3.4.2" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="Newtonsoft.Json.Bson" Version="1.0.3" />
     <PackageVersion Include="NHibernate" Version="5.5.2" />
@@ -83,13 +83,13 @@
     <PackageVersion Include="OpenTelemetry.Exporter.Jaeger" Version="1.5.1" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.9.0" />
     <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.12.0" />
-    <PackageVersion Include="Quartz" Version="3.14.0" />
-    <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.14.0" />
+    <PackageVersion Include="Quartz" Version="3.15.0" />
+    <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.15.0" />
     <PackageVersion Include="QuikGraph" Version="2.5.0" />
     <PackageVersion Include="QuikGraph.Graphviz" Version="2.5.0" />
     <PackageVersion Include="RabbitMQ.Client" Version="7.1.2" />
     <PackageVersion Include="SharpZipLib" Version="1.4.2" />
-    <PackageVersion Include="StackExchange.Redis" Version="2.8.41" />
+    <PackageVersion Include="StackExchange.Redis" Version="2.8.58" />
     <PackageVersion Include="System.Data.SQLite" Version="1.0.119" />
     <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="8.0.1" Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))" />
     <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="9.0.0" Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))" />
