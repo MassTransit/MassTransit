@@ -11,7 +11,7 @@ public static class ClientContextBatchSettings
     {
         MessageLimit = MaxMessageLimit;
         BatchLimit = 10;
-        SizeLimit = 128 * 1024;
+        SizeLimit = 240 * 1024;
         Timeout = TimeSpan.FromMilliseconds(1);
     }
 

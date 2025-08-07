@@ -10,8 +10,8 @@ public static class PublishBatchSettings
     static PublishBatchSettings()
     {
         MessageLimit = MaxMessageLimit;
-        BatchLimit = 5;
-        SizeLimit = 128 * 1024;
+        BatchLimit = 10;
+        SizeLimit = 240 * 1024;
         Timeout = TimeSpan.FromMilliseconds(1);
     }
 
