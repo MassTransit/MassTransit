@@ -177,12 +177,12 @@ namespace MassTransit
 
             During(Completed,
                 When(AttemptCompleted)
+                    .FinalizeJobAttempts()
                     .NotifyJobCompleted(),
                 When(AttemptStarted)
                     .Then(context => context.Saga.Started = context.Message.Timestamp)
                     .PublishJobStarted(),
                 When(JobCompleted)
-                    .FinalizeJobAttempts()
                     .IfElse(context => context.IsScheduledJob(),
                         scheduled => scheduled
                             .DetermineNextStartDate()
@@ -338,7 +338,7 @@ namespace MassTransit
                     .Finalize());
 
 
-            // Update recurring jobs, otherwise we're just going to any subsequent duplicate job submissions with a warning
+            // Update recurring jobs, otherwise ignore any duplicate job submissions with a warning
             DuringAny(
                 When(JobSubmitted)
                     .IfElse(context => context.IsScheduledJob(), x => x.UpdateRecurringJob(),
@@ -584,7 +584,6 @@ namespace MassTransit
                     context.Saga.RetryAttempt++;
                 })
                 .RequestJobSlot(machine);
-            ;
         }
 
         public static EventActivityBinder<JobSaga, T> ClearJobState<T>(this EventActivityBinder<JobSaga, T> binder)
