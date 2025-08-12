@@ -85,7 +85,7 @@ namespace MassTransit
                     .SendJobAttemptStartTimeout()
                     .TransitionTo(Faulted));
 
-            During(Initial, Starting, Running,
+            During(Starting, Running,
                 When(AttemptStarted)
                     .Then(context =>
                     {
