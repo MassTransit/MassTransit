@@ -4,12 +4,8 @@ namespace MassTransit.Context
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Events;
-    using Metadata;
-    using Middleware;
     using Transports;
 
 
@@ -253,22 +249,10 @@ namespace MassTransit.Context
             return RespondInternalAsync();
         }
 
-        protected virtual async Task GenerateFault<T>(ConsumeContext<T> context, Exception exception)
+        protected virtual Task GenerateFault<T>(ConsumeContext<T> context, Exception exception)
             where T : class
         {
-            if (context.ReceiveContext.PublishFaults || context.FaultAddress != null || context.ResponseAddress != null)
-            {
-                Fault<T> fault = new FaultEvent<T>(context.Message, context.MessageId, HostMetadataCache.Host, exception,
-                    context.SupportedMessageTypes.ToArray());
-
-                var faultPipe = new FaultPipe<T>(context);
-
-                var faultContext = InternalOutboxExtensions.SkipOutbox(context);
-
-                var faultEndpoint = await faultContext.GetFaultEndpoint<T>().ConfigureAwait(false);
-
-                await faultEndpoint.Send(fault, faultPipe, context.CancellationToken).ConfigureAwait(false);
-            }
+            return context.GenerateFault(exception);
         }
 
         Task ConsumeTask(Task task)
@@ -283,42 +267,6 @@ namespace MassTransit.Context
             var publishSendEndpoint = await base.GetPublishSendEndpoint<T>().ConfigureAwait(false);
 
             return new ConsumeSendEndpoint(publishSendEndpoint, this);
-        }
-
-
-        class FaultPipe<T> :
-            IPipe<SendContext<Fault<T>>>
-            where T : class
-        {
-            readonly ConsumeContext<T> _context;
-
-            public FaultPipe(ConsumeContext<T> context)
-            {
-                _context = context;
-            }
-
-            public Task Send(SendContext<Fault<T>> context)
-            {
-                context.TransferConsumeContextHeaders(_context);
-
-                context.CorrelationId = _context.CorrelationId;
-                context.RequestId = _context.RequestId;
-
-                if (_context.TryGetPayload(out ConsumeRetryContext? consumeRetryContext) && consumeRetryContext.RetryCount > 0)
-                    context.Headers.Set(MessageHeaders.FaultRetryCount, consumeRetryContext.RetryCount);
-                else if (_context.TryGetPayload(out RetryContext? retryContext) && retryContext.RetryCount > 0)
-                    context.Headers.Set(MessageHeaders.FaultRetryCount, retryContext.RetryCount);
-
-                var redeliveryCount = _context.Headers.Get<int>(MessageHeaders.RedeliveryCount);
-                if (redeliveryCount.HasValue)
-                    context.Headers.Set(MessageHeaders.FaultRedeliveryCount, redeliveryCount);
-
-                return Task.CompletedTask;
-            }
-
-            public void Probe(ProbeContext context)
-            {
-            }
         }
     }
 }

@@ -49,7 +49,11 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_detect_the_faulted_job()
         {
-            await using var provider = SetupServiceCollection(x => x.AddConsumer<OddJobFaultConsumer>());
+            await using var provider = SetupServiceCollection(x =>
+            {
+                x.AddConsumer<OddJobFaultConsumer>();
+                x.AddScoped<ICustomDependency, CustomDependency>();
+            });
 
             var harness = provider.GetTestHarness();
 
@@ -125,6 +129,7 @@ namespace MassTransit.Tests
                     x.UsingInMemory((context, cfg) =>
                     {
                         cfg.UseDelayedMessageScheduler();
+                        cfg.UseMessageRetry(r => r.Immediate(2));
 
                         var options = new ServiceInstanceOptions()
                             .SetEndpointNameFormatter(context.GetService<IEndpointNameFormatter>() ??

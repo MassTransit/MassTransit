@@ -12,13 +12,11 @@ namespace MassTransit.JobService
         IConsumer<CompleteJob>
         where TJob : class
     {
-        readonly string _jobConsumerTypeName;
         readonly Guid _jobTypeId;
 
-        public FinalizeJobConsumer(Guid jobTypeId, string jobConsumerTypeName)
+        public FinalizeJobConsumer(Guid jobTypeId)
         {
             _jobTypeId = jobTypeId;
-            _jobConsumerTypeName = jobConsumerTypeName;
         }
 
         public Task Consume(ConsumeContext<CompleteJob> context)
@@ -50,7 +48,7 @@ namespace MassTransit.JobService
 
             var jobContext = new FaultJobContext<TJob>(context, job);
 
-            return jobContext.NotifyFaulted(message.Duration ?? TimeSpan.Zero, _jobConsumerTypeName, new ExceptionInfoException(message.Exceptions));
+            return jobContext.GenerateFault(new ExceptionInfoException(message.Exceptions));
         }
     }
 }
