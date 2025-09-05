@@ -44,8 +44,6 @@ namespace MassTransit.Configuration
 
         public virtual void Configure(Action<IMongoDbOutboxConfigurator>? configure)
         {
-            configure?.Invoke(this);
-
             if (ProviderClientFactory == null)
                 throw new ConfigurationException("ClientFactory must be specified");
 
@@ -68,6 +66,8 @@ namespace MassTransit.Configuration
 
             _configurator.TryAddSingleton(ProviderClientFactory);
             _configurator.TryAddScoped<MongoDbContext, TransactionMongoDbContext>();
+
+            configure?.Invoke(this);
         }
 
         void RegisterCollectionFactory<T>()
