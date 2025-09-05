@@ -16,6 +16,7 @@ namespace MassTransit.Configuration
         IMongoDbOutboxConfigurator
     {
         readonly IBusRegistrationConfigurator _configurator;
+        bool _enableInboxCleanupService = true;
 
         public MongoDbOutboxConfigurator(IBusRegistrationConfigurator configurator)
         {
@@ -32,7 +33,7 @@ namespace MassTransit.Configuration
 
         public void DisableInboxCleanupService()
         {
-            _configurator.RemoveHostedService<InboxCleanupService>();
+            _enableInboxCleanupService = false;
         }
 
         public virtual void UseBusOutbox(Action<IMongoDbBusOutboxConfigurator>? configure = null)
@@ -44,12 +45,18 @@ namespace MassTransit.Configuration
 
         public virtual void Configure(Action<IMongoDbOutboxConfigurator>? configure)
         {
+            configure?.Invoke(this);
+
             if (ProviderClientFactory == null)
                 throw new ConfigurationException("ClientFactory must be specified");
 
             _configurator.TryAddScoped<IOutboxContextFactory<MongoDbContext>, MongoDbOutboxContextFactory>();
 
-            _configurator.AddHostedService<InboxCleanupService>();
+            if(_enableInboxCleanupService)
+            {
+                _configurator.AddHostedService<InboxCleanupService>();
+            }
+            
             _configurator.AddOptions<InboxCleanupServiceOptions>().Configure(options =>
             {
                 options.DuplicateDetectionWindow = DuplicateDetectionWindow;
@@ -66,8 +73,6 @@ namespace MassTransit.Configuration
 
             _configurator.TryAddSingleton(ProviderClientFactory);
             _configurator.TryAddScoped<MongoDbContext, TransactionMongoDbContext>();
-
-            configure?.Invoke(this);
         }
 
         void RegisterCollectionFactory<T>()
