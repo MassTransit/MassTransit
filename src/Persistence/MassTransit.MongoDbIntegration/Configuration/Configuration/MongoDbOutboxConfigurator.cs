@@ -55,15 +55,15 @@ namespace MassTransit.Configuration
             if(_enableInboxCleanupService)
             {
                 _configurator.AddHostedService<InboxCleanupService>();
+
+                _configurator.AddOptions<InboxCleanupServiceOptions>().Configure(options =>
+                {
+                    options.DuplicateDetectionWindow = DuplicateDetectionWindow;
+                    options.QueryMessageLimit = QueryMessageLimit;
+                    options.QueryDelay = QueryDelay;
+                    options.QueryTimeout = QueryTimeout;
+                });
             }
-            
-            _configurator.AddOptions<InboxCleanupServiceOptions>().Configure(options =>
-            {
-                options.DuplicateDetectionWindow = DuplicateDetectionWindow;
-                options.QueryMessageLimit = QueryMessageLimit;
-                options.QueryDelay = QueryDelay;
-                options.QueryTimeout = QueryTimeout;
-            });
 
             RegisterClassMaps();
 
