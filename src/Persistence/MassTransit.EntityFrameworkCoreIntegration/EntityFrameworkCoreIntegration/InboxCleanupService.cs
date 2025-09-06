@@ -22,11 +22,11 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         where TDbContext : DbContext
     {
         readonly ILogger<InboxCleanupService<TDbContext>> _logger;
-        readonly InboxCleanupServiceOptions _options;
+        readonly InboxCleanupServiceOptions<TDbContext> _options;
         readonly IServiceProvider _provider;
         readonly IRetryPolicy _retryPolicy;
 
-        public InboxCleanupService(IOptions<InboxCleanupServiceOptions> options, ILogger<InboxCleanupService<TDbContext>> logger,
+        public InboxCleanupService(IOptions<InboxCleanupServiceOptions<TDbContext>> options, ILogger<InboxCleanupService<TDbContext>> logger,
             IServiceProvider provider)
         {
             _options = options.Value;

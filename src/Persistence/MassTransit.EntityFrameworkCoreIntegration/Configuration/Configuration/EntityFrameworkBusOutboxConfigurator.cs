@@ -15,11 +15,14 @@ namespace MassTransit.Configuration
     {
         readonly IBusRegistrationConfigurator _configurator;
         readonly EntityFrameworkOutboxConfigurator<TDbContext> _outboxConfigurator;
+        bool _registerOutboxDeliveryService;
 
         public EntityFrameworkBusOutboxConfigurator(IBusRegistrationConfigurator configurator, EntityFrameworkOutboxConfigurator<TDbContext> outboxConfigurator)
         {
             _outboxConfigurator = outboxConfigurator;
             _configurator = configurator;
+
+            _registerOutboxDeliveryService = true;
         }
 
         /// <summary>
@@ -34,26 +37,29 @@ namespace MassTransit.Configuration
 
         public void DisableDeliveryService()
         {
-            _configurator.RemoveHostedService<BusOutboxDeliveryService<TDbContext>>();
+            _registerOutboxDeliveryService = false;
         }
 
         public virtual void Configure(Action<IEntityFrameworkBusOutboxConfigurator>? configure)
         {
-            _configurator.AddHostedService<BusOutboxDeliveryService<TDbContext>>();
+            configure?.Invoke(this);
+
             _configurator.ReplaceScoped<IScopedBusContextProvider<IBus>, EntityFrameworkScopedBusContextProvider<IBus, TDbContext>>();
             _configurator.AddSingleton<IBusOutboxNotification, BusOutboxNotification>();
 
-            _configurator.AddOptions<OutboxDeliveryServiceOptions>()
-                .Configure(options =>
-                {
-                    options.QueryDelay = _outboxConfigurator.QueryDelay;
-                    options.QueryMessageLimit = _outboxConfigurator.QueryMessageLimit;
-                    options.QueryTimeout = _outboxConfigurator.QueryTimeout;
-                    options.MessageDeliveryLimit = MessageDeliveryLimit;
-                    options.MessageDeliveryTimeout = MessageDeliveryTimeout;
-                });
-
-            configure?.Invoke(this);
+            if (_registerOutboxDeliveryService)
+            {
+                _configurator.AddHostedService<BusOutboxDeliveryService<TDbContext>>();
+                _configurator.AddOptions<OutboxDeliveryServiceOptions>()
+                    .Configure(options =>
+                    {
+                        options.QueryDelay = _outboxConfigurator.QueryDelay;
+                        options.QueryMessageLimit = _outboxConfigurator.QueryMessageLimit;
+                        options.QueryTimeout = _outboxConfigurator.QueryTimeout;
+                        options.MessageDeliveryLimit = MessageDeliveryLimit;
+                        options.MessageDeliveryTimeout = MessageDeliveryTimeout;
+                    });
+            }
         }
     }
 }

@@ -16,10 +16,13 @@ namespace MassTransit.Configuration
         IMongoDbOutboxConfigurator
     {
         readonly IBusRegistrationConfigurator _configurator;
+        bool _registerInboxCleanupService;
 
         public MongoDbOutboxConfigurator(IBusRegistrationConfigurator configurator)
         {
             _configurator = configurator;
+
+            _registerInboxCleanupService = true;
         }
 
         public TimeSpan DuplicateDetectionWindow { get; set; } = TimeSpan.FromMinutes(30);
@@ -32,7 +35,7 @@ namespace MassTransit.Configuration
 
         public void DisableInboxCleanupService()
         {
-            _configurator.RemoveHostedService<InboxCleanupService>();
+            _registerInboxCleanupService = false;
         }
 
         public virtual void UseBusOutbox(Action<IMongoDbBusOutboxConfigurator>? configure = null)
@@ -51,14 +54,17 @@ namespace MassTransit.Configuration
 
             _configurator.TryAddScoped<IOutboxContextFactory<MongoDbContext>, MongoDbOutboxContextFactory>();
 
-            _configurator.AddHostedService<InboxCleanupService>();
-            _configurator.AddOptions<InboxCleanupServiceOptions>().Configure(options =>
+            if (_registerInboxCleanupService)
             {
-                options.DuplicateDetectionWindow = DuplicateDetectionWindow;
-                options.QueryMessageLimit = QueryMessageLimit;
-                options.QueryDelay = QueryDelay;
-                options.QueryTimeout = QueryTimeout;
-            });
+                _configurator.AddHostedService<InboxCleanupService>();
+                _configurator.AddOptions<InboxCleanupServiceOptions>().Configure(options =>
+                {
+                    options.DuplicateDetectionWindow = DuplicateDetectionWindow;
+                    options.QueryMessageLimit = QueryMessageLimit;
+                    options.QueryDelay = QueryDelay;
+                    options.QueryTimeout = QueryTimeout;
+                });
+            }
 
             RegisterClassMaps();
 

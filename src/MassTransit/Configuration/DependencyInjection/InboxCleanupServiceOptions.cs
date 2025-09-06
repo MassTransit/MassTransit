@@ -25,4 +25,11 @@ namespace MassTransit
         /// </summary>
         public TimeSpan QueryDelay { get; set; } = TimeSpan.FromSeconds(10);
     }
+
+
+    public class InboxCleanupServiceOptions<T> :
+        InboxCleanupServiceOptions
+        where T : class
+    {
+    }
 }

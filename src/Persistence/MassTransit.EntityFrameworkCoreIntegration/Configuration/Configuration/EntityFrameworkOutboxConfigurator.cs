@@ -17,6 +17,7 @@ namespace MassTransit.Configuration
         readonly IBusRegistrationConfigurator _configurator;
         IsolationLevel _isolationLevel;
         ILockStatementProvider _lockStatementProvider;
+        bool _registerInboxCleanupService;
 
         public EntityFrameworkOutboxConfigurator(IBusRegistrationConfigurator configurator)
         {
@@ -24,6 +25,7 @@ namespace MassTransit.Configuration
 
             _lockStatementProvider = new SqlServerLockStatementProvider();
             _isolationLevel = IsolationLevel.RepeatableRead;
+            _registerInboxCleanupService = true;
         }
 
         public TimeSpan DuplicateDetectionWindow { get; set; } = TimeSpan.FromMinutes(30);
@@ -46,7 +48,7 @@ namespace MassTransit.Configuration
 
         public void DisableInboxCleanupService()
         {
-            _configurator.RemoveHostedService<InboxCleanupService<TDbContext>>();
+            _registerInboxCleanupService = false;
         }
 
         public virtual void UseBusOutbox(Action<IEntityFrameworkBusOutboxConfigurator>? configure = null)
@@ -58,23 +60,26 @@ namespace MassTransit.Configuration
 
         public virtual void Configure(Action<IEntityFrameworkOutboxConfigurator>? configure)
         {
+            configure?.Invoke(this);
+
             _configurator.TryAddScoped<IOutboxContextFactory<TDbContext>, EntityFrameworkOutboxContextFactory<TDbContext>>();
-            _configurator.AddOptions<EntityFrameworkOutboxOptions>().Configure(options =>
+            _configurator.AddOptions<EntityFrameworkOutboxOptions<TDbContext>>().Configure(options =>
             {
                 options.IsolationLevel = _isolationLevel;
                 options.LockStatementProvider = _lockStatementProvider;
             });
 
-            _configurator.AddHostedService<InboxCleanupService<TDbContext>>();
-            _configurator.AddOptions<InboxCleanupServiceOptions>().Configure(options =>
+            if (_registerInboxCleanupService)
             {
-                options.DuplicateDetectionWindow = DuplicateDetectionWindow;
-                options.QueryMessageLimit = QueryMessageLimit;
-                options.QueryDelay = QueryDelay;
-                options.QueryTimeout = QueryTimeout;
-            });
-
-            configure?.Invoke(this);
+                _configurator.AddHostedService<InboxCleanupService<TDbContext>>();
+                _configurator.AddOptions<InboxCleanupServiceOptions<TDbContext>>().Configure(options =>
+                {
+                    options.DuplicateDetectionWindow = DuplicateDetectionWindow;
+                    options.QueryMessageLimit = QueryMessageLimit;
+                    options.QueryDelay = QueryDelay;
+                    options.QueryTimeout = QueryTimeout;
+                });
+            }
         }
     }
 }

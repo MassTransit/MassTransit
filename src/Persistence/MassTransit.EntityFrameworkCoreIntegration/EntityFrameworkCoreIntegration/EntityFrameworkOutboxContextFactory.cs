@@ -22,7 +22,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         readonly IServiceProvider _provider;
         string _lockStatement;
 
-        public EntityFrameworkOutboxContextFactory(TDbContext dbContext, IServiceProvider provider, IOptions<EntityFrameworkOutboxOptions> options)
+        public EntityFrameworkOutboxContextFactory(TDbContext dbContext, IServiceProvider provider, IOptions<EntityFrameworkOutboxOptions<TDbContext>> options)
         {
             _dbContext = dbContext;
             _provider = provider;

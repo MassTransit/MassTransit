@@ -38,7 +38,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         string _getOutboxIdStatement;
 
         public BusOutboxDeliveryService(IBusControl busControl, IOptions<OutboxDeliveryServiceOptions> options,
-            IOptions<EntityFrameworkOutboxOptions> outboxOptions, IBusOutboxNotification notification,
+            IOptions<EntityFrameworkOutboxOptions<TDbContext>> outboxOptions, IBusOutboxNotification notification,
             ILogger<BusOutboxDeliveryService<TDbContext>> logger, IServiceProvider provider)
         {
             _busControl = busControl;
