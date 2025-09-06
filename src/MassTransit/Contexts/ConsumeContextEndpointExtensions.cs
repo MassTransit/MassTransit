@@ -12,7 +12,7 @@ namespace MassTransit
     public static class ConsumeContextEndpointExtensions
     {
         /// <summary>
-        /// Returns the endpoint for a fault, either directly to the requester, or published
+        /// Returns the endpoint for a fault, either directly to the requester or published
         /// </summary>
         /// <param name="context"></param>
         /// <typeparam name="T">The message type</typeparam>
@@ -26,14 +26,14 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Returns the endpoint for a fault, either directly to the requester, or published
+        /// Returns the endpoint for a fault, either directly to the requester or published
         /// </summary>
         /// <param name="context"></param>
         /// <param name="faultAddress"></param>
         /// <param name="requestId"></param>
         /// <typeparam name="T">The response type</typeparam>
         /// <returns></returns>
-        public static Task<ISendEndpoint> GetFaultEndpoint<T>(this ConsumeContext context, Uri faultAddress, Guid? requestId = default)
+        public static Task<ISendEndpoint> GetFaultEndpoint<T>(this ConsumeContext context, Uri faultAddress, Guid? requestId = null)
             where T : class
         {
             var destinationAddress = faultAddress ?? context.FaultAddress ?? context.ResponseAddress;
@@ -42,7 +42,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Returns the endpoint for a receive fault, either directly to the requester, or published
+        /// Returns the endpoint for a <see cref="ReceiveFault"/>, either directly to the requester or published
         /// </summary>
         /// <param name="context"></param>
         /// <param name="consumeContext"></param>
@@ -56,7 +56,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Returns the endpoint for a response, either directly to the requester, or published
+        /// Returns the endpoint for a response, either directly to the requester or published
         /// </summary>
         /// <param name="context"></param>
         /// <typeparam name="T"></typeparam>
@@ -68,21 +68,21 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Returns the endpoint for a response, either directly to the requester, or published
+        /// Returns the endpoint for a response, either directly to the requester or published
         /// </summary>
         /// <param name="context"></param>
         /// <param name="responseAddress"></param>
         /// <param name="requestId"></param>
         /// <typeparam name="T">The response type</typeparam>
         /// <returns></returns>
-        public static Task<ISendEndpoint> GetResponseEndpoint<T>(this ConsumeContext context, Uri responseAddress, Guid? requestId = default)
+        public static Task<ISendEndpoint> GetResponseEndpoint<T>(this ConsumeContext context, Uri responseAddress, Guid? requestId = null)
             where T : class
         {
             return GetEndpoint<T>(context.ReceiveContext, context, responseAddress ?? context.ResponseAddress, requestId ?? context.RequestId);
         }
 
         /// <summary>
-        /// Returns the endpoint for a response, either directly to the requester, or published
+        /// Returns the endpoint for a response, either directly to the requester or published
         /// </summary>
         /// <param name="receiveContext"></param>
         /// <param name="consumeContext"></param>
@@ -177,9 +177,9 @@ namespace MassTransit
                 context.CorrelationId = _context.CorrelationId;
                 context.RequestId = _context.RequestId;
 
-                if (_context.TryGetPayload(out ConsumeRetryContext? consumeRetryContext) && consumeRetryContext.RetryCount > 0)
+                if (_context.TryGetPayload(out ConsumeRetryContext consumeRetryContext) && consumeRetryContext.RetryCount > 0)
                     context.Headers.Set(MessageHeaders.FaultRetryCount, consumeRetryContext.RetryCount);
-                else if (_context.TryGetPayload(out RetryContext? retryContext) && retryContext.RetryCount > 0)
+                else if (_context.TryGetPayload(out RetryContext retryContext) && retryContext.RetryCount > 0)
                     context.Headers.Set(MessageHeaders.FaultRetryCount, retryContext.RetryCount);
 
                 var redeliveryCount = _context.Headers.Get<int>(MessageHeaders.RedeliveryCount);
