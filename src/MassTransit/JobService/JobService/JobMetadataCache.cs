@@ -13,11 +13,22 @@ namespace MassTransit.JobService
         {
             var key = GenerateJobTypeName(queueName);
 
-            using var hasher = MD5.Create();
+            if (CryptoConfig.AllowOnlyFipsAlgorithms)
+            {
+                using var hasher = SHA256.Create();
 
-            var data = hasher.ComputeHash(Encoding.UTF8.GetBytes(key));
+                var data = hasher.ComputeHash(Encoding.UTF8.GetBytes(key));
 
-            return new Guid(data);
+                return new Guid(new ReadOnlySpan<byte>(data, 0, 16).ToArray());
+            }
+            else
+            {
+                using var hasher = MD5.Create();
+
+                var data = hasher.ComputeHash(Encoding.UTF8.GetBytes(key));
+
+                return new Guid(data);
+            }
         }
 
         public static string GenerateJobTypeName(string queueName)
@@ -39,11 +50,22 @@ namespace MassTransit.JobService
         {
             var key = GenerateJobTypeName(jobName);
 
-            using var hasher = MD5.Create();
+            if (CryptoConfig.AllowOnlyFipsAlgorithms)
+            {
+                using var hasher = SHA256.Create();
 
-            var data = hasher.ComputeHash(Encoding.UTF8.GetBytes(key));
+                var data = hasher.ComputeHash(Encoding.UTF8.GetBytes(key));
 
-            return new Guid(data);
+                return new Guid(new ReadOnlySpan<byte>(data, 0, 16).ToArray());
+            }
+            else
+            {
+                using var hasher = MD5.Create();
+
+                var data = hasher.ComputeHash(Encoding.UTF8.GetBytes(key));
+
+                return new Guid(data);
+            }
         }
 
         public static string GenerateJobTypeName(string jobName)
