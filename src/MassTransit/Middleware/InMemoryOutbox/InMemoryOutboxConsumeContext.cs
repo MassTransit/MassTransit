@@ -14,8 +14,8 @@ namespace MassTransit.Middleware.InMemoryOutbox
         OutboxContext
     {
         readonly TaskCompletionSource<InMemoryOutboxConsumeContext> _clearToSend;
+        readonly InMemoryOutboxDeferredMethodCollection _deferredMethods;
         readonly InMemoryOutboxMessageSchedulerContext _outboxSchedulerContext;
-        readonly List<Func<Task>> _pendingActions;
 
         protected InMemoryOutboxConsumeContext(ConsumeContext context)
             : base(context)
@@ -27,8 +27,9 @@ namespace MassTransit.Middleware.InMemoryOutbox
             ReceiveContext = outboxReceiveContext;
             PublishEndpointProvider = outboxReceiveContext.PublishEndpointProvider;
 
-            _pendingActions = [];
             _clearToSend = TaskUtil.GetTask<InMemoryOutboxConsumeContext>();
+
+            _deferredMethods = new InMemoryOutboxDeferredMethodCollection(_clearToSend.Task);
 
             if (context.TryGetPayload(out MessageSchedulerContext schedulerContext))
             {
@@ -44,45 +45,14 @@ namespace MassTransit.Middleware.InMemoryOutbox
 
         public Task Add(Func<Task> method)
         {
-            if (_clearToSend.Task.IsCompleted)
-                return method();
-
-            lock (_pendingActions)
-            {
-                _pendingActions.Add(method);
-
-                return Task.CompletedTask;
-            }
+            return _deferredMethods.Add(method);
         }
 
         public virtual async Task ExecutePendingActions(bool concurrentMessageDelivery)
         {
             _clearToSend.TrySetResult(this);
 
-            Func<Task>[] pendingActions;
-            lock (_pendingActions)
-                pendingActions = _pendingActions.ToArray();
-
-            if (pendingActions.Length > 0)
-            {
-                if (concurrentMessageDelivery)
-                {
-                    var collection = new PendingTaskCollection(pendingActions.Length);
-
-                    collection.Add(pendingActions.Select(action => action()));
-
-                    await collection.Completed().ConfigureAwait(false);
-                }
-                else
-                {
-                    foreach (Func<Task> action in pendingActions)
-                    {
-                        var task = action();
-                        if (task != null)
-                            await task.ConfigureAwait(false);
-                    }
-                }
-            }
+            await _deferredMethods.Execute(concurrentMessageDelivery).ConfigureAwait(false);
 
             if (_outboxSchedulerContext != null)
             {
@@ -99,8 +69,7 @@ namespace MassTransit.Middleware.InMemoryOutbox
 
         public virtual async Task DiscardPendingActions()
         {
-            lock (_pendingActions)
-                _pendingActions.Clear();
+            await _deferredMethods.Discard().ConfigureAwait(false);
 
             if (_outboxSchedulerContext != null)
             {

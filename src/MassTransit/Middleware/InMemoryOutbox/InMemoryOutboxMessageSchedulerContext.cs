@@ -10,7 +10,7 @@
     public class InMemoryOutboxMessageSchedulerContext :
         MessageSchedulerContext
     {
-        readonly List<Func<Task>> _cancelMessages;
+        readonly InMemoryOutboxDeferredMethodCollection _cancelMessages;
         readonly Task _clearToSend;
         readonly Uri _inputAddress;
         readonly object _listLock = new object();
@@ -26,8 +26,8 @@
 
             _scheduler = new Lazy<IMessageScheduler>(() => schedulerFactory(consumeContext));
 
-            _scheduledMessages = new List<ScheduledMessage>();
-            _cancelMessages = new List<Func<Task>>();
+            _scheduledMessages = [];
+            _cancelMessages = new InMemoryOutboxDeferredMethodCollection();
         }
 
         public MessageSchedulerFactory SchedulerFactory { get; }
@@ -422,20 +422,7 @@
 
         public Task ExecutePendingActions()
         {
-            Func<Task>[] cancelMessages;
-            lock (_listLock)
-            {
-                if (_cancelMessages.Count == 0)
-                    return Task.CompletedTask;
-
-                cancelMessages = _cancelMessages.ToArray();
-            }
-
-            var tasks = new PendingTaskCollection(cancelMessages.Length);
-            foreach (Func<Task> cancel in cancelMessages)
-                tasks.Add(cancel());
-
-            return tasks.Completed();
+            return _cancelMessages.Execute(true);
         }
     }
 }

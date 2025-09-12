@@ -1,6 +1,7 @@
 namespace MassTransit.Tests.ContainerTests
 {
     using System;
+    using System.Diagnostics;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -49,6 +50,7 @@ namespace MassTransit.Tests.ContainerTests
         public async Task Should_deliver_the_batch_to_the_consumer()
         {
             await using var provider = new ServiceCollection()
+                .AddTelemetryListener()
                 .AddMassTransitTestHarness(x =>
                 {
                     x.AddConsumer<TestOutboxBatchConsumer>();
@@ -141,6 +143,8 @@ namespace MassTransit.Tests.ContainerTests
         {
             public Task Consume(ConsumeContext<Batch<BatchItem>> context)
             {
+                using var activity = new Activity("TestOutboxBatchConsumer").Start();
+
                 if (context.TryGetPayload<InMemoryOutboxConsumeContext>(out _))
                 {
                     context.Respond(new BatchResult
