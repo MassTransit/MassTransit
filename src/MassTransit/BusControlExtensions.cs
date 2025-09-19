@@ -91,7 +91,9 @@
             if (bus == null)
                 throw new ArgumentNullException(nameof(bus));
 
-            await bus.StartAsync(cancellationToken).ConfigureAwait(false);
+            var busHandle = await bus.StartAsync(cancellationToken).ConfigureAwait(false);
+
+            await busHandle.Ready.ConfigureAwait(false);
 
             await bus.StopAsync(cancellationToken).ConfigureAwait(false);
         }
