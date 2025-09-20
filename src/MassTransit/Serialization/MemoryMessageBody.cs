@@ -30,7 +30,11 @@ namespace MassTransit.Serialization
 
         public string GetString()
         {
-            return _string ??= _memory.ToString();
+        #if !NET6_0_OR_GREATER && !NETSTANDARD2_1
+            return _string ??= MessageDefaults.Encoding.GetString(GetBytes());
+        #else
+            return _string ??= MessageDefaults.Encoding.GetString(_memory.Span);
+        #endif
         }
     }
 }
