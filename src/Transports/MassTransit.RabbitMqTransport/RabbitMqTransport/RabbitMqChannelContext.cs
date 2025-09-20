@@ -54,6 +54,10 @@
                     {
                         throw new MessageReturnedException("The message was returned by RabbitMQ", exception);
                     }
+                    catch (PublishException exception)
+                    {
+                        throw new RabbitMqConnectionException("BasicPublishAsync failed", exception);
+                    }
                 }
 
                 return awaitAck ? WaitAck() : Task.CompletedTask;

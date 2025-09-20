@@ -185,16 +185,12 @@ namespace MassTransit.RabbitMqTransport
             {
                 if (header.Value == null)
                 {
-                    if (dictionary.ContainsKey(header.Key))
-                        dictionary.Remove(header.Key);
+                    dictionary.Remove(header.Key);
 
                     continue;
                 }
 
-                if (header.Key == RabbitMqHeaders.Exchange
-                    || header.Key == RabbitMqHeaders.RoutingKey
-                    || header.Key == RabbitMqHeaders.DeliveryTag
-                    || header.Key == RabbitMqHeaders.ConsumerTag)
+                if (header.Key is RabbitMqHeaders.Exchange or RabbitMqHeaders.RoutingKey or RabbitMqHeaders.DeliveryTag or RabbitMqHeaders.ConsumerTag)
                     continue;
 
                 if (dictionary.ContainsKey(header.Key))
