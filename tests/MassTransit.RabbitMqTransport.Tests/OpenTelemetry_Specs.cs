@@ -73,6 +73,108 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
 
         [Test]
+        public async Task Should_carry_excess_baggage_with_newtonsoft()
+        {
+            var services = new ServiceCollection();
+            AddTraceListener(services, "order-api");
+
+            await using var provider = services
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.AddConsumer<MonitoredSubmitOrderConsumer>();
+
+                    x.UsingRabbitMq((context, cfg) =>
+                    {
+                        cfg.UseNewtonsoftJsonSerializer();
+
+                        cfg.ConfigureEndpoints(context);
+                    });
+                })
+                .BuildServiceProvider(true);
+
+            var harness = provider.GetTestHarness();
+
+            await harness.Start();
+
+            IRequestClient<SubmitOrder> client = harness.GetRequestClient<SubmitOrder>();
+
+            await harness.Bus.Publish(new PingMessage());
+
+            StartedActivity? activity = LogContext.Current?.StartGenericActivity("api process");
+
+            activity?.Activity.SetBaggage("MyBag", "IsFull");
+            activity?.Activity.SetBaggage("MyBag", "IsEmpty");
+            activity?.Activity.SetBaggage("MyBag", "IsHalfFull");
+
+            Response<OrderSubmitted> response = await client.GetResponse<OrderSubmitted>(new
+            {
+                OrderId = InVar.Id,
+                OrderNumber = "123"
+            });
+
+            activity?.Stop();
+
+            await Assert.MultipleAsync(async () =>
+            {
+                Assert.That(await harness.Sent.Any<OrderSubmitted>(), Is.True);
+
+                Assert.That(await harness.Consumed.Any<SubmitOrder>(), Is.True);
+
+                Assert.That(response.Headers.Get<string>("BaggageValue"), Is.EqualTo("IsHalfFull"));
+            });
+        }
+
+        [Test]
+        public async Task Should_carry_excess_baggage()
+        {
+            var services = new ServiceCollection();
+            AddTraceListener(services, "order-api");
+
+            await using var provider = services
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.AddConsumer<MonitoredSubmitOrderConsumer>();
+
+                    x.UsingRabbitMq((context, cfg) =>
+                    {
+                        cfg.ConfigureEndpoints(context);
+                    });
+                })
+                .BuildServiceProvider(true);
+
+            var harness = provider.GetTestHarness();
+
+            await harness.Start();
+
+            IRequestClient<SubmitOrder> client = harness.GetRequestClient<SubmitOrder>();
+
+            await harness.Bus.Publish(new PingMessage());
+
+            StartedActivity? activity = LogContext.Current?.StartGenericActivity("api process");
+
+            activity?.Activity.SetBaggage("MyBag", "IsFull");
+            activity?.Activity.SetBaggage("MyBag", "IsEmpty");
+            activity?.Activity.SetBaggage("MyBag", "IsHalfFull");
+
+            Response<OrderSubmitted> response = await client.GetResponse<OrderSubmitted>(new
+            {
+                OrderId = InVar.Id,
+                OrderNumber = "123"
+            });
+
+            activity?.Stop();
+
+            await Assert.MultipleAsync(async () =>
+            {
+                Assert.That(await harness.Sent.Any<OrderSubmitted>(), Is.True);
+
+                Assert.That(await harness.Consumed.Any<SubmitOrder>(), Is.True);
+
+                Assert.That(response.Headers.Get<string>("BaggageValue"), Is.EqualTo("IsHalfFull"));
+            });
+        }
+
+        [Test]
         public async Task Should_report_telemetry_to_jaeger()
         {
             var services = new ServiceCollection();
@@ -373,6 +475,8 @@ namespace MassTransit.RabbitMqTransport.Tests
             public Task Consume(ConsumeContext<SubmitOrder> context)
             {
                 var value = System.Diagnostics.Activity.Current?.GetBaggageItem("MyBag");
+
+                LogContext.Debug?.Log("Body: {Body}", context.ReceiveContext.Body.GetString());
 
                 return context.RespondAsync<OrderSubmitted>(context.Message, x =>
                 {

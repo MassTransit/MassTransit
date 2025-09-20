@@ -217,7 +217,7 @@ namespace MassTransit.Logging
 
             activity.Start();
 
-            IList<KeyValuePair<string, string?>>? baggage = null;
+            List<KeyValuePair<string, string?>>? baggage = null;
             foreach (KeyValuePair<string, string?> pair in activity.Baggage)
             {
                 if (pair.Key.Equals(DiagnosticHeaders.Messaging.ConversationId) || pair.Key.Equals(DiagnosticHeaders.CorrelationId))
@@ -226,7 +226,7 @@ namespace MassTransit.Logging
                 if (string.IsNullOrWhiteSpace(pair.Value))
                     continue;
 
-                baggage ??= new List<KeyValuePair<string, string?>>();
+                baggage ??= new List<KeyValuePair<string, string?>>(1);
                 baggage.Add(pair);
             }
 
