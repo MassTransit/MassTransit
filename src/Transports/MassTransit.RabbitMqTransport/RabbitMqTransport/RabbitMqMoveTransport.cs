@@ -33,7 +33,8 @@ public class RabbitMqMoveTransport<TSettings>
                 new ShutdownEventArgs(ShutdownInitiator.Peer, 491, $"Channel is already closed: {channelContext.Channel.CloseReason}"));
         }
 
-        OneTimeContext<ConfigureTopologyContext<TSettings>> oneTimeContext = await _topologyFilter.Configure(channelContext).ConfigureAwait(false);
+        OneTimeContext<ConfigureTopologyContext<TSettings>> oneTimeContext =
+            await _topologyFilter.Configure(channelContext, context.CancellationToken).ConfigureAwait(false);
 
         BasicProperties properties;
         var routingKey = "";
@@ -59,7 +60,7 @@ public class RabbitMqMoveTransport<TSettings>
 
         try
         {
-            await channelContext.BasicPublishAsync(_exchange, routingKey, true, properties, body, true).ConfigureAwait(false);
+            await channelContext.BasicPublishAsync(_exchange, routingKey, true, properties, body, true, context.CancellationToken).ConfigureAwait(false);
         }
         catch (Exception)
         {

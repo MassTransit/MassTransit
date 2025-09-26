@@ -103,8 +103,9 @@ namespace MassTransit.RabbitMqTransport
                 if (IsStopping)
                     return;
 
-                await Dispatch(deliveryTag, context,
-                        _receiveSettings.NoAck ? NoLockReceiveContext.Instance : new RabbitMqReceiveLockContext(_channel, deliveryTag))
+                await Dispatch(deliveryTag, context, _receiveSettings.NoAck
+                        ? NoLockReceiveContext.Instance
+                        : new RabbitMqReceiveLockContext(_channel, deliveryTag, context.CancellationToken))
                     .ConfigureAwait(false);
             }
             catch (OperationInterruptedException exception)
@@ -151,7 +152,7 @@ namespace MassTransit.RabbitMqTransport
             try
             {
                 if (IsGracefulShutdown && _channel.Channel.IsOpen)
-                    await _channel.BasicCancel(_consumerTag).ConfigureAwait(false);
+                    await _channel.BasicCancel(_consumerTag, context.CancellationToken).ConfigureAwait(false);
             }
             catch (Exception exception)
             {

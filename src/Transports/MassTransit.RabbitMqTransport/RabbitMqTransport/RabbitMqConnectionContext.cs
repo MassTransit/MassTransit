@@ -45,18 +45,16 @@ namespace MassTransit.RabbitMqTransport
 
         public IRabbitMqBusTopology Topology { get; }
 
-        public async Task<IChannel> CreateChannel(CancellationToken cancellationToken, ushort? concurrentMessageLimit)
+        public async Task<IChannel> CreateChannel(ushort? concurrentMessageLimit, CancellationToken cancellationToken)
         {
-            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
-
             var options = new CreateChannelOptions(PublisherConfirmation, PublisherConfirmation, consumerDispatchConcurrency: concurrentMessageLimit);
 
-            return await Connection.CreateChannelAsync(options, tokenSource.Token).ConfigureAwait(false);
+            return await Connection.CreateChannelAsync(options, cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task<ChannelContext> CreateChannelContext(CancellationToken cancellationToken, ushort? concurrentMessageLimit, IAgent agent)
+        public async Task<ChannelContext> CreateChannelContext(IAgent agent, ushort? concurrentMessageLimit, CancellationToken cancellationToken)
         {
-            var channel = await CreateChannel(cancellationToken, concurrentMessageLimit).ConfigureAwait(false);
+            var channel = await CreateChannel(concurrentMessageLimit, cancellationToken).ConfigureAwait(false);
 
             return new RabbitMqChannelContext(this, channel, agent, cancellationToken);
         }

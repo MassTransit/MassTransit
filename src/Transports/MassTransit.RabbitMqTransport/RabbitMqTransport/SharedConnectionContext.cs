@@ -10,18 +10,22 @@
 
     public class SharedConnectionContext :
         ProxyPipeContext,
-        ConnectionContext
+        ConnectionContext,
+        IDisposable
     {
+        readonly CancellationToken _cancellationToken;
         readonly ConnectionContext _context;
+        CancellationTokenSource _tokenSource;
 
         public SharedConnectionContext(ConnectionContext context, CancellationToken cancellationToken)
             : base(context)
         {
             _context = context;
-            CancellationToken = cancellationToken;
+            _cancellationToken = cancellationToken;
+            _tokenSource = CancellationTokenSource.CreateLinkedTokenSource(context.CancellationToken, cancellationToken);
         }
 
-        public override CancellationToken CancellationToken { get; }
+        public override CancellationToken CancellationToken => _tokenSource?.Token ?? _cancellationToken;
 
         public IConnection Connection => _context.Connection;
         public string Description => _context.Description;
@@ -33,14 +37,25 @@
         public TimeSpan StopTimeout => _context.StopTimeout;
         public IRabbitMqBusTopology Topology => _context.Topology;
 
-        public Task<IChannel> CreateChannel(CancellationToken cancellationToken, ushort? concurrentMessageLimit1)
+        public async Task<IChannel> CreateChannel(ushort? concurrentMessageLimit, CancellationToken cancellationToken)
         {
-            return _context.CreateChannel(cancellationToken, concurrentMessageLimit1);
+            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+            return await _context.CreateChannel(concurrentMessageLimit, tokenSource.Token).ConfigureAwait(false);
         }
 
-        public Task<ChannelContext> CreateChannelContext(CancellationToken cancellationToken, ushort? concurrentMessageLimit, IAgent agent)
+        public async Task<ChannelContext> CreateChannelContext(IAgent agent, ushort? concurrentMessageLimit, CancellationToken cancellationToken)
         {
-            return _context.CreateChannelContext(cancellationToken, concurrentMessageLimit, agent);
+            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+            return await _context.CreateChannelContext(agent, concurrentMessageLimit, tokenSource.Token).ConfigureAwait(false);
+        }
+
+        public void Dispose()
+        {
+            var tokenSource = _tokenSource;
+            _tokenSource = null;
+            tokenSource.Dispose();
         }
     }
 }

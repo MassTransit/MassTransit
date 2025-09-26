@@ -42,15 +42,15 @@
         /// Create a channel on the connection
         /// </summary>
         /// <returns></returns>
-        Task<IChannel> CreateChannel(CancellationToken cancellationToken, ushort? concurrentMessageLimit1);
+        Task<IChannel> CreateChannel(ushort? concurrentMessageLimit, CancellationToken cancellationToken);
 
         /// <summary>
         /// Create a channel, and return the <see cref="ChannelContext" />.
         /// </summary>
-        /// <param name="cancellationToken"></param>
-        /// <param name="concurrentMessageLimit"></param>
         /// <param name="agent"></param>
+        /// <param name="concurrentMessageLimit"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<ChannelContext> CreateChannelContext(CancellationToken cancellationToken, ushort? concurrentMessageLimit, IAgent agent);
+        Task<ChannelContext> CreateChannelContext(IAgent agent, ushort? concurrentMessageLimit, CancellationToken cancellationToken);
     }
 }

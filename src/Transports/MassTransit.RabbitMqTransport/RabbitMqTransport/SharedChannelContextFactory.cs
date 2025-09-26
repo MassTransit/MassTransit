@@ -8,17 +8,17 @@ namespace MassTransit.RabbitMqTransport
     using RabbitMQ.Client.Events;
 
 
-    public class ScopeChannelContextFactory :
+    public class SharedChannelContextFactory :
         IPipeContextFactory<ChannelContext>
     {
         readonly IChannelContextSupervisor _supervisor;
 
-        public ScopeChannelContextFactory(IChannelContextSupervisor supervisor)
+        public SharedChannelContextFactory(IChannelContextSupervisor supervisor)
         {
             _supervisor = supervisor;
         }
 
-        IPipeContextAgent<ChannelContext> IPipeContextFactory<ChannelContext>.CreateContext(ISupervisor supervisor)
+        public IPipeContextAgent<ChannelContext> CreateContext(ISupervisor supervisor)
         {
             IAsyncPipeContextAgent<ChannelContext> asyncContext = supervisor.AddAsyncContext<ChannelContext>();
 
@@ -40,7 +40,7 @@ namespace MassTransit.RabbitMqTransport
             return asyncContext;
         }
 
-        IActivePipeContextAgent<ChannelContext> IPipeContextFactory<ChannelContext>.CreateActiveContext(ISupervisor supervisor,
+        public IActivePipeContextAgent<ChannelContext> CreateActiveContext(ISupervisor supervisor,
             PipeContextHandle<ChannelContext> context, CancellationToken cancellationToken)
         {
             return supervisor.AddActiveContext(context, CreateSharedChannel(context.Context, cancellationToken));

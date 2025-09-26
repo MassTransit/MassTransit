@@ -26,7 +26,7 @@
             _connectionFactory = new Lazy<ConnectionFactory>(() => _hostConfiguration.Settings.GetConnectionFactory());
         }
 
-        IPipeContextAgent<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateContext(ISupervisor supervisor)
+        public IPipeContextAgent<ConnectionContext> CreateContext(ISupervisor supervisor)
         {
             Task<ConnectionContext> context = Task.Run(() => CreateConnection(supervisor), supervisor.Stopped);
 
@@ -62,15 +62,15 @@
             return contextHandle;
         }
 
-        IActivePipeContextAgent<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateActiveContext(ISupervisor supervisor,
-            PipeContextHandle<ConnectionContext> context, CancellationToken cancellationToken)
+        public IActivePipeContextAgent<ConnectionContext> CreateActiveContext(ISupervisor supervisor, PipeContextHandle<ConnectionContext> context,
+            CancellationToken cancellationToken)
         {
             return supervisor.AddActiveContext(context, CreateSharedConnection(context.Context, cancellationToken));
         }
 
         static async Task<ConnectionContext> CreateSharedConnection(Task<ConnectionContext> context, CancellationToken cancellationToken)
         {
-            return context.IsCompletedSuccessfully()
+            return context.Status == TaskStatus.RanToCompletion
                 ? new SharedConnectionContext(context.Result, cancellationToken)
                 : new SharedConnectionContext(await context.OrCanceled(cancellationToken).ConfigureAwait(false), cancellationToken);
         }
@@ -96,7 +96,7 @@
                 }
                 else
                 {
-                    var hostNames = new List<string>(1) { _hostConfiguration.Settings.Host };
+                    List<string> hostNames = [_hostConfiguration.Settings.Host];
 
                     connection = await _connectionFactory.Value.CreateConnectionAsync(hostNames, _hostConfiguration.Settings.ClientProvidedName)
                         .ConfigureAwait(false);

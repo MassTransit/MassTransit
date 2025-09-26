@@ -16,15 +16,15 @@ namespace MassTransit.RabbitMqTransport.Middleware
             _prefetchCount = prefetchCount;
         }
 
-        void IProbeSite.Probe(ProbeContext context)
+        public void Probe(ProbeContext context)
         {
             var scope = context.CreateFilterScope("prefetchCount");
             scope.Add("prefetchCount", _prefetchCount);
         }
 
-        async Task IFilter<ChannelContext>.Send(ChannelContext context, IPipe<ChannelContext> next)
+        public async Task Send(ChannelContext context, IPipe<ChannelContext> next)
         {
-            await context.BasicQos(0, _prefetchCount, false).ConfigureAwait(false);
+            await context.BasicQos(0, _prefetchCount, false, context.CancellationToken).ConfigureAwait(false);
 
             await next.Send(context).ConfigureAwait(false);
         }

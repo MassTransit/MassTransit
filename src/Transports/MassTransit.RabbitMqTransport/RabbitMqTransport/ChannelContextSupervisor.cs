@@ -14,7 +14,7 @@ namespace MassTransit.RabbitMqTransport
         }
 
         public ChannelContextSupervisor(IChannelContextSupervisor channelContextSupervisor)
-            : base(new ScopeChannelContextFactory(channelContextSupervisor))
+            : base(new SharedChannelContextFactory(channelContextSupervisor))
         {
             channelContextSupervisor.AddSendAgent(this);
         }

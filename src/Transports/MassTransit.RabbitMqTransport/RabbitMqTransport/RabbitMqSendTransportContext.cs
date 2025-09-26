@@ -79,8 +79,7 @@ namespace MassTransit.RabbitMqTransport
             return sendContext;
         }
 
-        public override async Task<SendContext<T>> CreateSendContext<T>(T message, IPipe<SendContext<T>> pipe,
-            CancellationToken cancellationToken)
+        public override async Task<SendContext<T>> CreateSendContext<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
             where T : class
         {
             var properties = new BasicProperties();
@@ -106,7 +105,7 @@ namespace MassTransit.RabbitMqTransport
             sendContext.CancellationToken.ThrowIfCancellationRequested();
 
             OneTimeContext<ConfigureTopologyContext<SendSettings>> oneTimeContext =
-                await _configureTopologyFilter.Configure(transportContext).ConfigureAwait(false);
+                await _configureTopologyFilter.Configure(transportContext, sendContext.CancellationToken).ConfigureAwait(false);
 
             sendContext.CancellationToken.ThrowIfCancellationRequested();
 
@@ -162,7 +161,7 @@ namespace MassTransit.RabbitMqTransport
             }
 
             var publishTask = transportContext.BasicPublishAsync(exchange, routingKey, context.Mandatory, context.BasicProperties, body,
-                context.AwaitAck);
+                context.AwaitAck, sendContext.CancellationToken);
 
             try
             {

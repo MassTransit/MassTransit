@@ -10,92 +10,134 @@
 
     public class SharedChannelContext :
         ProxyPipeContext,
-        ChannelContext
+        ChannelContext,
+        IDisposable
     {
+        readonly CancellationToken _cancellationToken;
         readonly ChannelContext _context;
+        CancellationTokenSource _tokenSource;
 
         public SharedChannelContext(ChannelContext context, CancellationToken cancellationToken)
             : base(context)
         {
             _context = context;
-            CancellationToken = cancellationToken;
+            _cancellationToken = cancellationToken;
+            _tokenSource = CancellationTokenSource.CreateLinkedTokenSource(context.CancellationToken, cancellationToken);
         }
 
-        public override CancellationToken CancellationToken { get; }
+        public override CancellationToken CancellationToken => _tokenSource?.Token ?? _cancellationToken;
 
         public IChannel Channel => _context.Channel;
 
-        ConnectionContext ChannelContext.ConnectionContext => _context.ConnectionContext;
+        public ConnectionContext ConnectionContext => _context.ConnectionContext;
 
-        Task ChannelContext.BasicPublishAsync(string exchange, string routingKey, bool mandatory, BasicProperties basicProperties, byte[] body, bool awaitAck)
+        public async Task BasicPublishAsync(string exchange, string routingKey, bool mandatory, BasicProperties basicProperties, byte[] body, bool awaitAck,
+            CancellationToken cancellationToken)
         {
-            return _context.BasicPublishAsync(exchange, routingKey, mandatory, basicProperties, body, awaitAck);
+            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+            await _context.BasicPublishAsync(exchange, routingKey, mandatory, basicProperties, body, awaitAck, tokenSource.Token).ConfigureAwait(false);
         }
 
-        Task ChannelContext.ExchangeBind(string destination, string source, string routingKey, IDictionary<string, object> arguments)
+        public async Task ExchangeBind(string destination, string source, string routingKey, IDictionary<string, object> arguments,
+            CancellationToken cancellationToken)
         {
-            return _context.ExchangeBind(destination, source, routingKey, arguments);
+            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+            await _context.ExchangeBind(destination, source, routingKey, arguments, tokenSource.Token).ConfigureAwait(false);
         }
 
-        Task ChannelContext.ExchangeDeclare(string exchange, string type, bool durable, bool autoDelete, IDictionary<string, object> arguments)
+        public async Task ExchangeDeclare(string exchange, string type, bool durable, bool autoDelete, IDictionary<string, object> arguments,
+            CancellationToken cancellationToken)
         {
-            return _context.ExchangeDeclare(exchange, type, durable, autoDelete, arguments);
+            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+            await _context.ExchangeDeclare(exchange, type, durable, autoDelete, arguments, tokenSource.Token).ConfigureAwait(false);
         }
 
-        public Task ExchangeDeclarePassive(string exchange)
+        public async Task ExchangeDeclarePassive(string exchange, CancellationToken cancellationToken)
         {
-            return _context.ExchangeDeclarePassive(exchange);
+            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+            await _context.ExchangeDeclarePassive(exchange, tokenSource.Token).ConfigureAwait(false);
         }
 
-        Task ChannelContext.QueueBind(string queue, string exchange, string routingKey, IDictionary<string, object> arguments)
+        public async Task QueueBind(string queue, string exchange, string routingKey, IDictionary<string, object> arguments,
+            CancellationToken cancellationToken)
         {
-            return _context.QueueBind(queue, exchange, routingKey, arguments);
+            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+            await _context.QueueBind(queue, exchange, routingKey, arguments, tokenSource.Token).ConfigureAwait(false);
         }
 
-        Task<QueueDeclareOk> ChannelContext.QueueDeclare(string queue, bool durable, bool exclusive, bool autoDelete, IDictionary<string, object> arguments)
+        public async Task<QueueDeclareOk> QueueDeclare(string queue, bool durable, bool exclusive, bool autoDelete, IDictionary<string, object> arguments,
+            CancellationToken cancellationToken)
         {
-            return _context.QueueDeclare(queue, durable, exclusive, autoDelete, arguments);
+            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+            return await _context.QueueDeclare(queue, durable, exclusive, autoDelete, arguments, tokenSource.Token).ConfigureAwait(false);
         }
 
-        Task<QueueDeclareOk> ChannelContext.QueueDeclarePassive(string queue)
+        public async Task<QueueDeclareOk> QueueDeclarePassive(string queue, CancellationToken cancellationToken)
         {
-            return _context.QueueDeclarePassive(queue);
+            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+            return await _context.QueueDeclarePassive(queue, tokenSource.Token).ConfigureAwait(false);
         }
 
-        Task<uint> ChannelContext.QueuePurge(string queue)
+        public async Task<uint> QueuePurge(string queue, CancellationToken cancellationToken)
         {
-            return _context.QueuePurge(queue);
+            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+            return await _context.QueuePurge(queue, tokenSource.Token).ConfigureAwait(false);
         }
 
-        Task ChannelContext.BasicQos(uint prefetchSize, ushort prefetchCount, bool global)
+        public async Task BasicQos(uint prefetchSize, ushort prefetchCount, bool global, CancellationToken cancellationToken)
         {
-            return _context.BasicQos(prefetchSize, prefetchCount, global);
+            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+            await _context.BasicQos(prefetchSize, prefetchCount, global, tokenSource.Token).ConfigureAwait(false);
         }
 
-        ValueTask ChannelContext.BasicAck(ulong deliveryTag, bool multiple)
+        public async ValueTask BasicAck(ulong deliveryTag, bool multiple, CancellationToken cancellationToken)
         {
-            return _context.BasicAck(deliveryTag, multiple);
+            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+            await _context.BasicAck(deliveryTag, multiple, tokenSource.Token).ConfigureAwait(false);
         }
 
-        Task ChannelContext.BasicNack(ulong deliveryTag, bool multiple, bool requeue)
+        public async Task BasicNack(ulong deliveryTag, bool multiple, bool requeue, CancellationToken cancellationToken)
         {
-            return _context.BasicNack(deliveryTag, multiple, requeue);
+            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+            await _context.BasicNack(deliveryTag, multiple, requeue, tokenSource.Token).ConfigureAwait(false);
         }
 
-        public Task<string> BasicConsume(string queue, bool noAck, bool exclusive, IDictionary<string, object> arguments, IAsyncBasicConsumer consumer,
+        public async Task<string> BasicConsume(string queue, bool noAck, bool exclusive, IDictionary<string, object> arguments, IAsyncBasicConsumer consumer,
             string consumerTag, CancellationToken cancellationToken)
         {
-            return _context.BasicConsume(queue, noAck, exclusive, arguments, consumer, consumerTag, cancellationToken);
+            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+            return await _context.BasicConsume(queue, noAck, exclusive, arguments, consumer, consumerTag, tokenSource.Token).ConfigureAwait(false);
         }
 
-        public Task BasicCancel(string consumerTag)
+        public async Task BasicCancel(string consumerTag, CancellationToken cancellationToken)
         {
-            return _context.BasicCancel(consumerTag);
+            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+            await _context.BasicCancel(consumerTag, tokenSource.Token).ConfigureAwait(false);
         }
 
         public void NotifyFaulted(Exception exception, Uri contextInputAddress)
         {
             _context.NotifyFaulted(exception, contextInputAddress);
+        }
+
+        public void Dispose()
+        {
+            var tokenSource = _tokenSource;
+            _tokenSource = null;
+            tokenSource.Dispose();
         }
     }
 }
