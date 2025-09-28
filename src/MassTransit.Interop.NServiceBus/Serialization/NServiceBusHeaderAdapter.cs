@@ -30,22 +30,22 @@ namespace MassTransit.Serialization
 
         public Guid? MessageId => _messageId ??= _headers.Get<Guid>(NServiceBusMessageHeaders.MessageId);
 
-        public Guid? RequestId { get; } = default;
+        public Guid? RequestId { get; } = null;
 
         public Guid? CorrelationId => _correlationId ??= _headers.Get<Guid>(NServiceBusMessageHeaders.CorrelationId);
         public Guid? ConversationId => _conversationId ??= _headers.Get<Guid>(NServiceBusMessageHeaders.ConversationId);
 
-        public Guid? InitiatorId { get; } = default;
+        public Guid? InitiatorId { get; } = null;
 
-        public DateTime? ExpirationTime { get; }
+        public DateTime? ExpirationTime { get; } = null;
 
         public Uri SourceAddress => _sourceAddress ??= GetEndpointAddress(NServiceBusMessageHeaders.OriginatingEndpoint);
 
-        public Uri DestinationAddress { get; } = default;
+        public Uri DestinationAddress { get; } = null;
 
         public Uri ResponseAddress => _responseAddress ??= GetEndpointAddress(NServiceBusMessageHeaders.ReplyToAddress);
 
-        public Uri FaultAddress { get; } = default;
+        public Uri FaultAddress { get; } = null;
 
         public DateTime? SentTime => _sentTime ??= GetSentTime();
 
@@ -57,22 +57,22 @@ namespace MassTransit.Serialization
         {
             var endpoint = _headers.Get<string>(key);
             return string.IsNullOrWhiteSpace(endpoint)
-                ? default
-                : new Uri($"queue:{endpoint}");
+                ? null
+                : new Uri($"queue:{endpoint}?bind=false");
         }
 
         DateTime? GetSentTime()
         {
             var timeSent = _headers.Get<string>(NServiceBusMessageHeaders.TimeSent);
             if (string.IsNullOrWhiteSpace(timeSent))
-                return default;
+                return null;
 
             if (timeSent.Length >= 28)
                 timeSent = timeSent.Substring(0, 19) + '.' + timeSent.Substring(20, 6);
 
             return DateTime.TryParse(timeSent, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out var value)
                 ? value
-                : default(DateTime?);
+                : null;
         }
 
         IEnumerable<string> GetMessageTypes()
@@ -81,7 +81,7 @@ namespace MassTransit.Serialization
             if (string.IsNullOrWhiteSpace(enclosedMessageTypes))
                 yield break;
 
-            string[] typeNames = enclosedMessageTypes.Split(new[] {';'}, StringSplitOptions.RemoveEmptyEntries);
+            string[] typeNames = enclosedMessageTypes.Split([';'], StringSplitOptions.RemoveEmptyEntries);
             foreach (var typeName in typeNames)
             {
                 var messageType = Type.GetType(typeName);
@@ -111,13 +111,13 @@ namespace MassTransit.Serialization
             }
 
             public string MachineName { get; }
-            public string ProcessName => default;
-            public int ProcessId => default;
-            public string Assembly => default;
-            public string AssemblyVersion => default;
-            public string FrameworkVersion => default;
+            public string ProcessName => null;
+            public int ProcessId => 0;
+            public string Assembly => null;
+            public string AssemblyVersion => null;
+            public string FrameworkVersion => null;
             public string MassTransitVersion { get; }
-            public string OperatingSystemVersion => default;
+            public string OperatingSystemVersion => null;
         }
 
 
@@ -169,7 +169,7 @@ namespace MassTransit.Serialization
                 return _headers.TryGetHeader(key, out value);
             }
 
-            public T Get<T>(string key, T defaultValue = default)
+            public T Get<T>(string key, T defaultValue = null)
                 where T : class
             {
                 return _headers.Get(key, defaultValue);
