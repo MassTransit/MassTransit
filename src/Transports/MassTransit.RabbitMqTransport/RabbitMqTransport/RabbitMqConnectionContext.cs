@@ -49,7 +49,11 @@ namespace MassTransit.RabbitMqTransport
         {
             var options = new CreateChannelOptions(PublisherConfirmation, PublisherConfirmation, consumerDispatchConcurrency: concurrentMessageLimit);
 
-            return await Connection.CreateChannelAsync(options, cancellationToken).ConfigureAwait(false);
+            var channel = await Connection.CreateChannelAsync(options, cancellationToken).ConfigureAwait(false);
+
+            channel.ContinuationTimeout = ContinuationTimeout;
+
+            return channel;
         }
 
         public async Task<ChannelContext> CreateChannelContext(IAgent agent, ushort? concurrentMessageLimit, CancellationToken cancellationToken)

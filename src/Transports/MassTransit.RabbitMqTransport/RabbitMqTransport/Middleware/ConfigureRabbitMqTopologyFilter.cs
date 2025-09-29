@@ -40,6 +40,13 @@ public class ConfigureRabbitMqTopologyFilter<TSettings> :
         }
     }
 
+    public void Probe(ProbeContext context)
+    {
+        var scope = context.CreateFilterScope("configureTopology");
+
+        _brokerTopology.Probe(scope);
+    }
+
     public async Task<OneTimeContext<ConfigureTopologyContext<TSettings>>> Configure(ChannelContext context, CancellationToken cancellationToken)
     {
         return await context.OneTimeSetup<ConfigureTopologyContext<TSettings>>(() =>
@@ -47,13 +54,6 @@ public class ConfigureRabbitMqTopologyFilter<TSettings> :
             context.GetOrAddPayload(() => _settings);
             return ConfigureTopology(context, cancellationToken);
         }).ConfigureAwait(false);
-    }
-
-    public void Probe(ProbeContext context)
-    {
-        var scope = context.CreateFilterScope("configureTopology");
-
-        _brokerTopology.Probe(scope);
     }
 
     async Task ConfigureTopology(ChannelContext context, CancellationToken cancellationToken)
@@ -71,7 +71,8 @@ public class ConfigureRabbitMqTopologyFilter<TSettings> :
     {
         RabbitMqLogMessages.DeclareExchange(exchange);
 
-        return context.ExchangeDeclare(exchange.ExchangeName, exchange.ExchangeType, exchange.Durable, exchange.AutoDelete, exchange.ExchangeArguments, cancellationToken);
+        return context.ExchangeDeclare(exchange.ExchangeName, exchange.ExchangeType, exchange.Durable, exchange.AutoDelete, exchange.ExchangeArguments,
+            cancellationToken);
     }
 
     static async Task Declare(ChannelContext context, Queue queue, CancellationToken cancellationToken)
@@ -103,6 +104,7 @@ public class ConfigureRabbitMqTopologyFilter<TSettings> :
     {
         RabbitMqLogMessages.BindToQueue(binding);
 
-        await context.QueueBind(binding.Destination.QueueName, binding.Source.ExchangeName, binding.RoutingKey, binding.Arguments, cancellationToken).ConfigureAwait(false);
+        await context.QueueBind(binding.Destination.QueueName, binding.Source.ExchangeName, binding.RoutingKey, binding.Arguments, cancellationToken)
+            .ConfigureAwait(false);
     }
 }

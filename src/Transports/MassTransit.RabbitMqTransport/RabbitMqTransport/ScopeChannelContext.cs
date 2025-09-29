@@ -135,9 +135,8 @@ namespace MassTransit.RabbitMqTransport
 
         public void Dispose()
         {
-            var tokenSource = _tokenSource;
+            _tokenSource?.Dispose();
             _tokenSource = null;
-            tokenSource.Dispose();
         }
     }
 }

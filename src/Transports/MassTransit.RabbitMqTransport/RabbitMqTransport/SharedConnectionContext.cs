@@ -22,6 +22,7 @@
         {
             _context = context;
             _cancellationToken = cancellationToken;
+
             _tokenSource = CancellationTokenSource.CreateLinkedTokenSource(context.CancellationToken, cancellationToken);
         }
 
@@ -53,9 +54,8 @@
 
         public void Dispose()
         {
-            var tokenSource = _tokenSource;
+            _tokenSource?.Dispose();
             _tokenSource = null;
-            tokenSource.Dispose();
         }
     }
 }

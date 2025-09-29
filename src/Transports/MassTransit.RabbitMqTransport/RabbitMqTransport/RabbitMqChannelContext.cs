@@ -27,13 +27,11 @@
         {
             ConnectionContext = connectionContext;
 
-            _cancellationToken = cancellationToken;
-            _tokenSource = CancellationTokenSource.CreateLinkedTokenSource(connectionContext.CancellationToken, cancellationToken);
-
             _channel = channel;
             _agent = agent;
 
-            _channel.ContinuationTimeout = ConnectionContext.ContinuationTimeout;
+            _cancellationToken = cancellationToken;
+            _tokenSource = CancellationTokenSource.CreateLinkedTokenSource(connectionContext.CancellationToken, cancellationToken);
         }
 
         public override CancellationToken CancellationToken => _tokenSource?.Token ?? _cancellationToken;
@@ -162,9 +160,8 @@
 
             await _channel.Cleanup(200, message, CancellationToken).ConfigureAwait(false);
 
-            var tokenSource = _tokenSource;
+            _tokenSource?.Dispose();
             _tokenSource = null;
-            tokenSource.Dispose();
         }
     }
 }
