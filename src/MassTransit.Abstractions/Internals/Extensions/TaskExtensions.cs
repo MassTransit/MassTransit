@@ -195,19 +195,14 @@ namespace MassTransit.Internals
         public static void IgnoreUnobservedExceptions(this Task task)
         {
             if (task.IsCompleted)
+                _ = task.Exception;
+            else
             {
-                if (task.IsFaulted)
+                task.ContinueWith(t =>
                 {
-                    var _ = task.Exception;
-                }
-
-                return;
+                    t.Exception?.Handle(_ => true);
+                }, TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
             }
-
-            task.ContinueWith(t =>
-            {
-                var _ = t.Exception;
-            }, TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
         }
 
         public static void TrySetFromTask<T>(this TaskCompletionSource<T> source, Task task, T value)

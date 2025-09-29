@@ -1,298 +1,299 @@
-﻿namespace MassTransit.Clients
+﻿#nullable enable
+namespace MassTransit.Clients;
+
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Configuration;
+using Internals;
+using Util;
+
+
+public class ClientRequestHandle<TRequest> :
+    RequestHandle<TRequest>,
+    IPipe<SendContext<TRequest>>
+    where TRequest : class
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using Configuration;
-    using Internals;
-    using Util;
+    public delegate Task<TRequest> SendRequestCallback(Guid requestId, IPipe<SendContext<TRequest>> pipe, CancellationToken cancellationToken);
 
 
-    public class ClientRequestHandle<TRequest> :
-        RequestHandle<TRequest>,
-        IPipe<SendContext<TRequest>>
-        where TRequest : class
+    readonly List<string> _accept;
+    readonly CancellationToken _cancellationToken;
+    readonly CancellationTokenSource _cancellationTokenSource;
+    readonly ClientFactoryContext _context;
+    readonly TaskCompletionSource<TRequest> _message;
+    readonly IBuildPipeConfigurator<SendContext<TRequest>> _pipeConfigurator;
+    readonly TaskCompletionSource<bool> _readyToSend;
+    readonly CancellationTokenRegistration _registration;
+    readonly Dictionary<Type, HandlerConnectHandle> _responseHandlers;
+    readonly Task _send;
+    readonly TaskCompletionSource<SendContext<TRequest>> _sendContext;
+    readonly SendRequestCallback _sendRequestCallback;
+    readonly TaskScheduler _taskScheduler;
+    int _faultedOrCanceled;
+    Timer? _timeoutTimer;
+    RequestTimeout _timeToLive;
+
+    public ClientRequestHandle(ClientFactoryContext context, SendRequestCallback sendRequestCallback, CancellationToken cancellationToken = default,
+        RequestTimeout timeout = default, Guid? requestId = null, TaskScheduler? taskScheduler = null)
     {
-        public delegate Task<TRequest> SendRequestCallback(Guid requestId, IPipe<SendContext<TRequest>> pipe, CancellationToken cancellationToken);
+        _context = context;
+        _sendRequestCallback = sendRequestCallback;
+        _cancellationToken = cancellationToken;
 
+        var requestTimeout = timeout.HasValue ? timeout : _context.DefaultTimeout.HasValue ? _context.DefaultTimeout.Value : RequestTimeout.Default;
+        _timeToLive = requestTimeout;
 
-        readonly List<string> _accept;
-        readonly CancellationToken _cancellationToken;
-        readonly CancellationTokenSource _cancellationTokenSource;
-        readonly ClientFactoryContext _context;
-        readonly TaskCompletionSource<TRequest> _message;
-        readonly IBuildPipeConfigurator<SendContext<TRequest>> _pipeConfigurator;
-        readonly TaskCompletionSource<bool> _readyToSend;
-        readonly Dictionary<Type, HandlerConnectHandle> _responseHandlers;
-        readonly Task _send;
-        readonly TaskCompletionSource<SendContext<TRequest>> _sendContext;
-        readonly SendRequestCallback _sendRequestCallback;
-        readonly TaskScheduler _taskScheduler;
-        int _faultedOrCanceled;
-        CancellationTokenRegistration _registration;
-        Timer _timeoutTimer;
-        RequestTimeout _timeToLive;
+        RequestId = requestId ?? NewId.NextGuid();
 
-        public ClientRequestHandle(ClientFactoryContext context, SendRequestCallback sendRequestCallback, CancellationToken cancellationToken = default,
-            RequestTimeout timeout = default, Guid? requestId = default, TaskScheduler taskScheduler = default)
+        _taskScheduler = taskScheduler ??
+            (SynchronizationContext.Current == null
+                ? TaskScheduler.Default
+                : TaskScheduler.FromCurrentSynchronizationContext());
+
+        _message = new TaskCompletionSource<TRequest>();
+        _pipeConfigurator = new PipeConfigurator<SendContext<TRequest>>();
+        _sendContext = TaskUtil.GetTask<SendContext<TRequest>>();
+        _readyToSend = TaskUtil.GetTask<bool>();
+        _cancellationTokenSource = new CancellationTokenSource();
+        _responseHandlers = new Dictionary<Type, HandlerConnectHandle>();
+        _accept = [];
+
+        if (cancellationToken.CanBeCanceled)
+            _registration = cancellationToken.Register(Cancel);
+
+        _send = SendRequest();
+
+        HandleFault();
+    }
+
+    public async Task Send(SendContext<TRequest> context)
+    {
+        await _readyToSend.Task.ConfigureAwait(false);
+
+        context.RequestId = RequestId;
+        context.ResponseAddress = _context.ResponseAddress;
+
+        context.Headers.Set(MessageHeaders.Request.Accept, _accept);
+
+        if (_timeToLive.HasValue)
+            context.TimeToLive ??= _timeToLive.Value;
+
+        IPipe<SendContext<TRequest>> pipe = _pipeConfigurator.Build();
+
+        if (pipe.IsNotEmpty())
+            await pipe.Send(context).ConfigureAwait(false);
+
+        _timeoutTimer = new Timer(TimeoutExpired, this, (long)_timeToLive.Value.TotalMilliseconds, Timeout.Infinite);
+
+        _sendContext.TrySetResult(context);
+    }
+
+    public void Probe(ProbeContext context)
+    {
+    }
+
+    public Guid RequestId { get; }
+
+    public RequestTimeout TimeToLive
+    {
+        set => _timeToLive = value;
+    }
+
+    public void Cancel()
+    {
+        if (Interlocked.CompareExchange(ref _faultedOrCanceled, 1, 0) != 0)
+            return;
+
+        Task.Factory.StartNew(CancelAndDispose, CancellationToken.None, TaskCreationOptions.None, _taskScheduler);
+    }
+
+    public void AddPipeSpecification(IPipeSpecification<SendContext<TRequest>> specification)
+    {
+        _pipeConfigurator.AddPipeSpecification(specification);
+    }
+
+    public Task<Response<T>> GetResponse<T>(bool readyToSend)
+        where T : class
+    {
+        Task<Response<T>> response = Response<T>();
+
+        AcceptResponse<T>();
+
+        if (readyToSend)
+            _readyToSend.TrySetResult(true);
+
+        return response;
+    }
+
+    public void Dispose()
+    {
+        if (Interlocked.CompareExchange(ref _faultedOrCanceled, 1, 0) == 0)
+            CancelAndDispose();
+    }
+
+    public Task<TRequest> Message => _message.Task;
+
+    void AcceptResponse<T>()
+        where T : class
+    {
+        _accept.Add(MessageUrn.ForTypeString<T>());
+    }
+
+    async Task SendRequest()
+    {
+        try
         {
-            _context = context;
-            _sendRequestCallback = sendRequestCallback;
-            _cancellationToken = cancellationToken;
+            var message = await _sendRequestCallback(RequestId, this, _cancellationTokenSource.Token).ConfigureAwait(false);
 
-            var requestTimeout = timeout.HasValue ? timeout : _context.DefaultTimeout.HasValue ? _context.DefaultTimeout.Value : RequestTimeout.Default;
-            _timeToLive = requestTimeout;
+            _message.TrySetResult(message);
+        }
+        catch (RequestException exception)
+        {
+            Fail(exception);
 
-            RequestId = requestId ?? NewId.NextGuid();
+            throw;
+        }
+        catch (OperationCanceledException exception)
+        {
+            if (_sendContext.Task.IsFaulted)
+                await _sendContext.Task.ConfigureAwait(false);
 
-            _taskScheduler = taskScheduler ??
-                (SynchronizationContext.Current == null
-                    ? TaskScheduler.Default
-                    : TaskScheduler.FromCurrentSynchronizationContext());
+            var requestException = new RequestCanceledException(RequestId.ToString("D"), exception, exception.CancellationToken);
 
-            _message = new TaskCompletionSource<TRequest>();
-            _pipeConfigurator = new PipeConfigurator<SendContext<TRequest>>();
-            _sendContext = TaskUtil.GetTask<SendContext<TRequest>>();
-            _readyToSend = TaskUtil.GetTask<bool>();
-            _cancellationTokenSource = new CancellationTokenSource();
-            _responseHandlers = new Dictionary<Type, HandlerConnectHandle>();
-            _accept = new List<string>();
+            Fail(requestException);
 
-            if (cancellationToken != default && cancellationToken.CanBeCanceled)
-                _registration = cancellationToken.Register(Cancel);
+            throw requestException;
+        }
+        catch (Exception exception)
+        {
+            Fail(exception);
 
-            _timeoutTimer = new Timer(TimeoutExpired, this, (long)_timeToLive.Value.TotalMilliseconds, -1L);
+            throw new RequestException($"An exception occurred while processing the {typeof(TRequest).Name} request", exception);
+        }
+    }
 
-            _send = SendRequest();
+    Task<Response<T>> Response<T>(MessageHandler<T>? handler = null, Action<IHandlerConfigurator<T>>? configure = null)
+        where T : class
+    {
+        if (_responseHandlers.ContainsKey(typeof(T)))
+            throw new RequestException($"Only one handler of type {TypeCache<T>.ShortName} can be registered");
 
-            HandleFault();
+        var configurator = new ResponseHandlerConfigurator<T>(_taskScheduler, handler, _send);
+
+        configure?.Invoke(configurator);
+
+        if (_cancellationToken.IsCancellationRequested)
+            return TaskUtil.Cancelled<Response<T>>();
+
+        HandlerConnectHandle<T> handle = configurator.Connect(_context, RequestId);
+
+        _responseHandlers.Add(typeof(T), handle);
+
+        return handle.Task;
+    }
+
+    void HandleFault()
+    {
+        if (_cancellationToken.IsCancellationRequested)
+            return;
+
+        Task MessageHandler(ConsumeContext<Fault<TRequest>> context)
+        {
+            return FaultHandler(context);
         }
 
-        async Task IPipe<SendContext<TRequest>>.Send(SendContext<TRequest> context)
-        {
-            await _readyToSend.Task.ConfigureAwait(false);
+        var connectHandle = _context.ConnectRequestHandler(RequestId, MessageHandler, new PipeConfigurator<ConsumeContext<Fault<TRequest>>>());
 
-            context.RequestId = RequestId;
-            context.ResponseAddress = _context.ResponseAddress;
+        var handle = new FaultHandlerConnectHandle(connectHandle);
 
-            context.Headers.Set(MessageHeaders.Request.Accept, _accept);
+        _responseHandlers.Add(typeof(Fault<TRequest>), handle);
+    }
 
-            if (_timeToLive.HasValue)
-                context.TimeToLive ??= _timeToLive.Value;
+    Task FaultHandler(ConsumeContext<Fault<TRequest>> context)
+    {
+        Fail(context.Message);
 
-            IPipe<SendContext<TRequest>> pipe = _pipeConfigurator.Build();
+        return Task.CompletedTask;
+    }
 
-            if (pipe.IsNotEmpty())
-                await pipe.Send(context).ConfigureAwait(false);
+    void Fail(Fault message)
+    {
+        Fail(new RequestFaultException(TypeCache<TRequest>.ShortName, message));
+    }
 
-            _sendContext.TrySetResult(context);
-        }
+    void Fail(Exception exception)
+    {
+        if (Interlocked.CompareExchange(ref _faultedOrCanceled, 1, 0) != 0)
+            return;
 
-        void IProbeSite.Probe(ProbeContext context)
-        {
-        }
-
-        public Guid RequestId { get; }
-
-        public RequestTimeout TimeToLive
-        {
-            set => _timeToLive = value;
-        }
-
-        public void Cancel()
-        {
-            if (Interlocked.CompareExchange(ref _faultedOrCanceled, 1, 0) != 0)
-                return;
-
-            Task.Factory.StartNew(CancelAndDispose, CancellationToken.None, TaskCreationOptions.None, _taskScheduler);
-        }
-
-        void IPipeConfigurator<SendContext<TRequest>>.AddPipeSpecification(IPipeSpecification<SendContext<TRequest>> specification)
-        {
-            _pipeConfigurator.AddPipeSpecification(specification);
-        }
-
-        Task<Response<T>> RequestHandle.GetResponse<T>(bool readyToSend)
-        {
-            Task<Response<T>> response = Response<T>();
-
-            AcceptResponse<T>();
-
-            if (readyToSend)
-                _readyToSend.TrySetResult(true);
-
-            return response;
-        }
-
-        public void Dispose()
-        {
-            if (Interlocked.CompareExchange(ref _faultedOrCanceled, 1, 0) == 0)
-                CancelAndDispose();
-        }
-
-        Task<TRequest> RequestHandle<TRequest>.Message => _message.Task;
-
-        void AcceptResponse<T>()
-            where T : class
-        {
-            _accept.Add(MessageUrn.ForTypeString<T>());
-        }
-
-        async Task SendRequest()
-        {
-            try
-            {
-                var message = await _sendRequestCallback(RequestId, this, _cancellationTokenSource.Token).ConfigureAwait(false);
-
-                _message.TrySetResult(message);
-            }
-            catch (RequestException exception)
-            {
-                Fail(exception);
-
-                throw;
-            }
-            catch (OperationCanceledException exception)
-            {
-                if (_sendContext.Task.IsFaulted)
-                    await _sendContext.Task.ConfigureAwait(false);
-
-                var requestException = new RequestCanceledException(RequestId.ToString("D"), exception, exception.CancellationToken);
-
-                Fail(requestException);
-
-                throw requestException;
-            }
-            catch (Exception exception)
-            {
-                Fail(exception);
-
-                throw new RequestException($"An exception occurred while processing the {typeof(TRequest).Name} request", exception);
-            }
-        }
-
-        Task<Response<T>> Response<T>(MessageHandler<T> handler = null, Action<IHandlerConfigurator<T>> configure = null)
-            where T : class
-        {
-            if (_responseHandlers.ContainsKey(typeof(T)))
-                throw new RequestException($"Only one handler of type {TypeCache<T>.ShortName} can be registered");
-
-            var configurator = new ResponseHandlerConfigurator<T>(_taskScheduler, handler, _send);
-
-            configure?.Invoke(configurator);
-
-            if (_cancellationToken.IsCancellationRequested)
-                return TaskUtil.Cancelled<Response<T>>();
-
-            HandlerConnectHandle<T> handle = configurator.Connect(_context, RequestId);
-
-            _responseHandlers.Add(typeof(T), handle);
-
-            return handle.Task;
-        }
-
-        void HandleFault()
-        {
-            if (_cancellationToken.IsCancellationRequested)
-                return;
-
-            Task MessageHandler(ConsumeContext<Fault<TRequest>> context)
-            {
-                return FaultHandler(context);
-            }
-
-            var connectHandle = _context.ConnectRequestHandler(RequestId, MessageHandler, new PipeConfigurator<ConsumeContext<Fault<TRequest>>>());
-
-            var handle = new FaultHandlerConnectHandle(connectHandle);
-
-            _responseHandlers.Add(typeof(Fault<TRequest>), handle);
-        }
-
-        Task FaultHandler(ConsumeContext<Fault<TRequest>> context)
-        {
-            Fail(context.Message);
-
-            return Task.CompletedTask;
-        }
-
-        void Fail(Fault message)
-        {
-            Fail(new RequestFaultException(TypeCache<TRequest>.ShortName, message));
-        }
-
-        void Fail(Exception exception)
-        {
-            if (Interlocked.CompareExchange(ref _faultedOrCanceled, 1, 0) != 0)
-                return;
-
-            void HandleFail()
-            {
-                _registration.Dispose();
-
-                DisposeTimer();
-
-                _readyToSend.TrySetException(exception);
-
-                var wasSet = _sendContext.TrySetException(exception);
-
-                _message.TrySetException(exception);
-                _message.Task.IgnoreUnobservedExceptions();
-
-                foreach (var handle in _responseHandlers.Values)
-                {
-                    handle.TrySetException(exception);
-                    handle.Disconnect();
-                }
-
-                if (wasSet)
-                    _cancellationTokenSource.Cancel();
-            }
-
-            Task.Factory.StartNew(HandleFail, CancellationToken.None, TaskCreationOptions.None, _taskScheduler);
-        }
-
-        void CancelAndDispose()
+        void HandleFail()
         {
             _registration.Dispose();
 
             DisposeTimer();
 
-            _cancellationTokenSource.Cancel();
+            _readyToSend.TrySetException(exception);
 
-            var cancellationToken = _cancellationToken.IsCancellationRequested ? _cancellationToken : _cancellationTokenSource.Token;
+            var wasSet = _sendContext.TrySetException(exception);
 
-            _readyToSend.TrySetCanceled(cancellationToken);
-
-            _sendContext.TrySetCanceled(cancellationToken);
-
-            _message.TrySetCanceled();
+            _message.TrySetException(exception);
+            _message.Task.IgnoreUnobservedExceptions();
 
             foreach (var handle in _responseHandlers.Values)
             {
-                handle.TrySetCanceled(cancellationToken);
+                handle.TrySetException(exception);
                 handle.Disconnect();
             }
+
+            if (wasSet)
+                _cancellationTokenSource.Cancel();
         }
 
-        void TimeoutExpired(object state)
+        Task.Factory.StartNew(HandleFail, CancellationToken.None, TaskCreationOptions.None, _taskScheduler);
+    }
+
+    void CancelAndDispose()
+    {
+        _registration.Dispose();
+
+        DisposeTimer();
+
+        _cancellationTokenSource.Cancel();
+
+        var cancellationToken = _cancellationToken.IsCancellationRequested ? _cancellationToken : _cancellationTokenSource.Token;
+
+        _readyToSend.TrySetCanceled(cancellationToken);
+
+        _sendContext.TrySetCanceled(cancellationToken);
+
+        _message.TrySetCanceled();
+
+        foreach (var handle in _responseHandlers.Values)
         {
-            var timeoutException = new RequestTimeoutException(RequestId.ToString());
-
-            Fail(timeoutException);
+            handle.TrySetCanceled(cancellationToken);
+            handle.Disconnect();
         }
+    }
 
-        void DisposeTimer()
+    void TimeoutExpired(object? state)
+    {
+        var timeoutException = new RequestTimeoutException(RequestId.ToString());
+
+        Fail(timeoutException);
+    }
+
+    void DisposeTimer()
+    {
+        try
         {
-            try
-            {
-                _timeoutTimer?.Dispose();
-            }
-            catch (ObjectDisposedException)
-            {
-            }
-
-            _timeoutTimer = null;
+            _timeoutTimer?.Dispose();
         }
+        catch (ObjectDisposedException)
+        {
+        }
+
+        _timeoutTimer = null;
     }
 }
