@@ -31,13 +31,28 @@ namespace MassTransit.AzureServiceBusTransport
             if (IsStopping)
                 return;
 
-            MessageLockContext lockContext = new ServiceBusSessionMessageLockContext(messageSession, message);
-            MessageSessionContext sessionContext = new ServiceBusMessageSessionContext(messageSession);
+            MessageLockContext lockContext = new ServiceBusSessionMessageLockContext(messageSession, message, cancellationToken);
+            MessageSessionContext sessionContext = new ServiceBusMessageSessionContext(messageSession, cancellationToken);
             var context = new ServiceBusReceiveContext(message, _context, lockContext, _clientContext, sessionContext);
 
+            CancellationTokenSource cancellationTokenSource = null;
+            CancellationTokenRegistration timeoutRegistration = default;
             CancellationTokenRegistration registration = default;
             if (cancellationToken.CanBeCanceled)
-                registration = cancellationToken.Register(context.Cancel);
+            {
+                void Callback()
+                {
+                    if (_context.ConsumerStopTimeout.HasValue)
+                    {
+                        cancellationTokenSource = new CancellationTokenSource(_context.ConsumerStopTimeout.Value);
+                        timeoutRegistration = cancellationTokenSource.Token.Register(context.Cancel);
+                    }
+                    else
+                        context.Cancel();
+                }
+
+                registration = cancellationToken.Register(Callback);
+            }
 
             try
             {
@@ -49,7 +64,11 @@ namespace MassTransit.AzureServiceBusTransport
             }
             finally
             {
+                timeoutRegistration.Dispose();
                 registration.Dispose();
+
+                cancellationTokenSource?.Dispose();
+
                 context.Dispose();
             }
         }

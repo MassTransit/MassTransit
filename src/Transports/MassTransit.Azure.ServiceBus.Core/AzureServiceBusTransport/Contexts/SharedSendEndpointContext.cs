@@ -9,36 +9,53 @@ namespace MassTransit.AzureServiceBusTransport
 
     public class SharedSendEndpointContext :
         ProxyPipeContext,
-        SendEndpointContext
+        SendEndpointContext,
+        IDisposable
     {
+        readonly CancellationToken _cancellationToken;
         readonly SendEndpointContext _context;
+        CancellationTokenSource _tokenSource;
 
         public SharedSendEndpointContext(SendEndpointContext context, CancellationToken cancellationToken)
             : base(context)
         {
-            CancellationToken = cancellationToken;
             _context = context;
+
+            _cancellationToken = cancellationToken;
+            _tokenSource = CancellationTokenSource.CreateLinkedTokenSource(context.CancellationToken, cancellationToken);
         }
 
-        public override CancellationToken CancellationToken { get; }
+        public void Dispose()
+        {
+            _tokenSource?.Dispose();
+            _tokenSource = null;
+        }
+
+        public override CancellationToken CancellationToken => _tokenSource?.Token ?? _cancellationToken;
 
         public ConnectionContext ConnectionContext => _context.ConnectionContext;
 
-        string SendEndpointContext.EntityPath => _context.EntityPath;
+        public string EntityPath => _context.EntityPath;
 
-        Task SendEndpointContext.Send(ServiceBusMessage message)
+        public async Task Send(ServiceBusMessage message, CancellationToken cancellationToken)
         {
-            return _context.Send(message);
+            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+            await _context.Send(message, tokenSource.Token).ConfigureAwait(false);
         }
 
-        Task<long> SendEndpointContext.ScheduleSend(ServiceBusMessage message, DateTime scheduleEnqueueTimeUtc)
+        public async Task<long> ScheduleSend(ServiceBusMessage message, DateTime scheduleEnqueueTimeUtc, CancellationToken cancellationToken)
         {
-            return _context.ScheduleSend(message, scheduleEnqueueTimeUtc);
+            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+            return await _context.ScheduleSend(message, scheduleEnqueueTimeUtc, tokenSource.Token).ConfigureAwait(false);
         }
 
-        Task SendEndpointContext.CancelScheduledSend(long sequenceNumber)
+        public async Task CancelScheduledSend(long sequenceNumber, CancellationToken cancellationToken)
         {
-            return _context.CancelScheduledSend(sequenceNumber);
+            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+            await _context.CancelScheduledSend(sequenceNumber, tokenSource.Token).ConfigureAwait(false);
         }
     }
 }

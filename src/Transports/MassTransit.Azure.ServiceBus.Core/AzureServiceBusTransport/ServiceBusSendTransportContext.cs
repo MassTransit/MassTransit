@@ -85,7 +85,7 @@ namespace MassTransit.AzureServiceBusTransport
 
             if (IsCancelScheduledSend(context, out var tokenId, out var sequenceNumber))
             {
-                await CancelScheduledSend(sendEndpointContext, tokenId, sequenceNumber).ConfigureAwait(false);
+                await CancelScheduledSend(sendEndpointContext, tokenId, sequenceNumber, sendContext.CancellationToken).ConfigureAwait(false);
 
                 return;
             }
@@ -99,7 +99,7 @@ namespace MassTransit.AzureServiceBusTransport
 
             var message = CreateMessage(context);
 
-            await sendEndpointContext.Send(message).ConfigureAwait(false);
+            await sendEndpointContext.Send(message, context.CancellationToken).ConfigureAwait(false);
         }
 
         static async Task<bool> ScheduleSend<T>(SendEndpointContext clientContext, AzureServiceBusSendContext<T> context)
@@ -121,7 +121,7 @@ namespace MassTransit.AzureServiceBusTransport
 
                 var message = CreateMessage(context);
 
-                var sequenceNumber = await clientContext.ScheduleSend(message, enqueueTimeUtc).ConfigureAwait(false);
+                var sequenceNumber = await clientContext.ScheduleSend(message, enqueueTimeUtc, context.CancellationToken).ConfigureAwait(false);
 
                 context.SetScheduledMessageId(sequenceNumber);
 
@@ -137,11 +137,11 @@ namespace MassTransit.AzureServiceBusTransport
             }
         }
 
-        async Task CancelScheduledSend(SendEndpointContext clientContext, Guid tokenId, long sequenceNumber)
+        async Task CancelScheduledSend(SendEndpointContext clientContext, Guid tokenId, long sequenceNumber, CancellationToken cancellationToken)
         {
             try
             {
-                await clientContext.CancelScheduledSend(sequenceNumber).ConfigureAwait(false);
+                await clientContext.CancelScheduledSend(sequenceNumber, cancellationToken).ConfigureAwait(false);
 
                 MassTransit.LogContext.Debug?.Log("CANCEL {DestinationAddress} {TokenId}", EntityName, tokenId);
             }
@@ -167,8 +167,8 @@ namespace MassTransit.AzureServiceBusTransport
                     return true;
             }
 
-            tokenId = default;
-            sequenceNumber = default;
+            tokenId = Guid.Empty;
+            sequenceNumber = 0;
             return false;
         }
 

@@ -10,18 +10,25 @@
 
     public class SharedConnectionContext :
         ProxyPipeContext,
-        ConnectionContext
+        ConnectionContext,
+        IDisposable
     {
+        readonly CancellationToken _cancellationToken;
         readonly ConnectionContext _context;
+        CancellationTokenSource _tokenSource;
 
         public SharedConnectionContext(ConnectionContext context, CancellationToken cancellationToken)
             : base(context)
         {
             _context = context;
-            CancellationToken = cancellationToken;
+
+            _cancellationToken = cancellationToken;
+            _tokenSource = CancellationTokenSource.CreateLinkedTokenSource(context.CancellationToken, cancellationToken);
         }
 
-        public override CancellationToken CancellationToken { get; }
+        public override CancellationToken CancellationToken => _tokenSource?.Token ?? _cancellationToken;
+
+        public Uri Endpoint => _context.Endpoint;
 
         public ServiceBusProcessor CreateQueueProcessor(ReceiveSettings settings)
         {
@@ -48,27 +55,39 @@
             return _context.CreateMessageSender(entityPath);
         }
 
-        public Task<QueueProperties> CreateQueue(CreateQueueOptions createQueueOptions)
+        public Task<QueueProperties> CreateQueue(CreateQueueOptions createQueueOptions, CancellationToken cancellationToken)
         {
-            return _context.CreateQueue(createQueueOptions);
+            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+            return _context.CreateQueue(createQueueOptions, tokenSource.Token);
         }
 
-        public Task<TopicProperties> CreateTopic(CreateTopicOptions createTopicOptions)
+        public Task<TopicProperties> CreateTopic(CreateTopicOptions createTopicOptions, CancellationToken cancellationToken)
         {
-            return _context.CreateTopic(createTopicOptions);
+            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+            return _context.CreateTopic(createTopicOptions, tokenSource.Token);
         }
 
         public Task<SubscriptionProperties> CreateTopicSubscription(CreateSubscriptionOptions createSubscriptionOptions, CreateRuleOptions rule,
-            RuleFilter filter)
+            RuleFilter filter, CancellationToken cancellationToken)
         {
-            return _context.CreateTopicSubscription(createSubscriptionOptions, rule, filter);
+            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+            return _context.CreateTopicSubscription(createSubscriptionOptions, rule, filter, tokenSource.Token);
         }
 
-        public Task DeleteTopicSubscription(CreateSubscriptionOptions subscriptionOptions)
+        public Task DeleteTopicSubscription(CreateSubscriptionOptions subscriptionOptions, CancellationToken cancellationToken)
         {
-            return _context.DeleteTopicSubscription(subscriptionOptions);
+            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+            return _context.DeleteTopicSubscription(subscriptionOptions, tokenSource.Token);
         }
 
-        Uri ConnectionContext.Endpoint => _context.Endpoint;
+        public void Dispose()
+        {
+            _tokenSource?.Dispose();
+            _tokenSource = null;
+        }
     }
 }

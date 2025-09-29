@@ -67,6 +67,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
             configurator.UseInMemoryOutbox();
+            configurator.RequiresSession = true;
 
             var context = _provider.GetRequiredService<IBusRegistrationContext>();
 

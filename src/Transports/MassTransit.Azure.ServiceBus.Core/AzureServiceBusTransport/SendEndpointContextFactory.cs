@@ -4,19 +4,21 @@ namespace MassTransit.AzureServiceBusTransport
     using System.Threading.Tasks;
     using Agents;
     using Internals;
+    using Middleware;
 
 
     public class SendEndpointContextFactory :
         IPipeContextFactory<SendEndpointContext>
     {
-        readonly IPipe<SendEndpointContext> _pipe;
+        readonly ConfigureServiceBusTopologyFilter<SendSettings> _configureTopologyFilter;
         readonly SendSettings _settings;
         readonly IConnectionContextSupervisor _supervisor;
 
-        public SendEndpointContextFactory(IConnectionContextSupervisor supervisor, IPipe<SendEndpointContext> pipe, SendSettings settings)
+        public SendEndpointContextFactory(IConnectionContextSupervisor supervisor, ConfigureServiceBusTopologyFilter<SendSettings> configureTopologyFilter,
+            SendSettings settings)
         {
             _supervisor = supervisor;
-            _pipe = pipe;
+            _configureTopologyFilter = configureTopologyFilter;
             _settings = settings;
         }
 
@@ -43,13 +45,14 @@ namespace MassTransit.AzureServiceBusTransport
 
                 var sendEndpointContext = new MessageSendEndpointContext(context, messageSender);
 
-                if (_pipe.IsNotEmpty())
-                    await _pipe.Send(sendEndpointContext).ConfigureAwait(false);
+                await _configureTopologyFilter.Configure(sendEndpointContext, createCancellationToken).ConfigureAwait(false);
 
                 return sendEndpointContext;
             }
 
+            #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             _supervisor.CreateAgent(asyncContext, Create, cancellationToken);
+            #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
 
         static async Task<SendEndpointContext> CreateSharedContext(Task<SendEndpointContext> context, CancellationToken cancellationToken)

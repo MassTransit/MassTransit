@@ -42,7 +42,7 @@ namespace MassTransit.AzureServiceBusTransport.Middleware
 
         static Task Delete(ConnectionContext context, QueueSubscription subscription)
         {
-            return context.DeleteTopicSubscription(subscription.Subscription.CreateSubscriptionOptions);
+            return context.DeleteTopicSubscription(subscription.Subscription.CreateSubscriptionOptions, context.CancellationToken);
         }
     }
 }

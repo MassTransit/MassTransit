@@ -113,8 +113,8 @@
             if (IsStopping)
                 return;
 
-            MessageLockContext lockContext = new ServiceBusMessageLockContext(messageReceiver, message);
-            var context = new ServiceBusReceiveContext(message, _context, lockContext, _clientContext);
+            MessageLockContext lockContext = new ServiceBusMessageLockContext(messageReceiver, message, cancellationToken);
+            var context = new ServiceBusReceiveContext(message, _context, cancellationToken, lockContext, _clientContext);
 
             CancellationTokenSource cancellationTokenSource = null;
             CancellationTokenRegistration timeoutRegistration = default;

@@ -28,6 +28,8 @@
 
         public override MessageBody Body { get; }
 
+        ulong? ITransportSequenceNumber.SequenceNumber => (ulong)SequenceNumber;
+
         public string MessageId => _message.MessageId;
 
         public string CorrelationId => _message.CorrelationId;
@@ -41,8 +43,6 @@
         public int DeliveryCount => _message.DeliveryCount;
 
         public string Label => _message.Subject;
-
-        ulong? ITransportSequenceNumber.SequenceNumber => (ulong)SequenceNumber;
         public long SequenceNumber => _message.SequenceNumber;
 
         public long EnqueuedSequenceNumber => _message.EnqueuedSequenceNumber;
@@ -85,7 +85,7 @@
 
         protected override ContentType GetContentType()
         {
-            ContentType contentType = default;
+            ContentType contentType = null;
             if (!string.IsNullOrWhiteSpace(_message.ContentType))
                 contentType = ConvertToContentType(_message.ContentType);
 

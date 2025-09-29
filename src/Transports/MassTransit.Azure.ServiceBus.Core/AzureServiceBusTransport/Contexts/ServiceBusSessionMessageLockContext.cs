@@ -2,6 +2,7 @@ namespace MassTransit.AzureServiceBusTransport
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
     using Azure.Messaging.ServiceBus;
     using Util;
@@ -10,21 +11,24 @@ namespace MassTransit.AzureServiceBusTransport
     public class ServiceBusSessionMessageLockContext :
         MessageLockContext
     {
+        readonly CancellationToken _cancellationToken;
         readonly ServiceBusReceivedMessage _message;
         readonly ProcessSessionMessageEventArgs _session;
         bool _deadLettered;
 
-        public ServiceBusSessionMessageLockContext(ProcessSessionMessageEventArgs session, ServiceBusReceivedMessage message)
+        public ServiceBusSessionMessageLockContext(ProcessSessionMessageEventArgs session, ServiceBusReceivedMessage message,
+            CancellationToken cancellationToken)
         {
             _session = session;
             _message = message;
+            _cancellationToken = cancellationToken;
         }
 
         public Task Complete()
         {
             return _deadLettered
                 ? Task.CompletedTask
-                : _session.CompleteMessageAsync(_message);
+                : _session.CompleteMessageAsync(_message, _cancellationToken);
         }
 
         public Task Abandon(Exception exception)
@@ -34,7 +38,7 @@ namespace MassTransit.AzureServiceBusTransport
 
             (Dictionary<string, object> dictionary, _) = ExceptionUtil.GetExceptionHeaderDetail(exception, ServiceBusSendTransportContext.Adapter);
 
-            return _session.AbandonMessageAsync(_message, dictionary);
+            return _session.AbandonMessageAsync(_message, dictionary, _cancellationToken);
         }
 
         public async Task DeadLetter()
@@ -43,7 +47,7 @@ namespace MassTransit.AzureServiceBusTransport
 
             var headers = new Dictionary<string, object> { { MessageHeaders.Reason, reason } };
 
-            await _session.DeadLetterMessageAsync(_message, headers, reason).ConfigureAwait(false);
+            await _session.DeadLetterMessageAsync(_message, headers, reason, cancellationToken: _cancellationToken).ConfigureAwait(false);
 
             _deadLettered = true;
         }
@@ -54,7 +58,7 @@ namespace MassTransit.AzureServiceBusTransport
 
             (Dictionary<string, object> dictionary, var message) = ExceptionUtil.GetExceptionHeaderDetail(exception, ServiceBusSendTransportContext.Adapter);
 
-            await _session.DeadLetterMessageAsync(_message, dictionary, reason, message).ConfigureAwait(false);
+            await _session.DeadLetterMessageAsync(_message, dictionary, reason, message, _cancellationToken).ConfigureAwait(false);
 
             _deadLettered = true;
         }

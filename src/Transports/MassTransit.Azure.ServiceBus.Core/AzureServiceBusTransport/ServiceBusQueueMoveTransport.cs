@@ -53,7 +53,7 @@
 
                 preSend(message, sendHeaders);
 
-                await clientContext.Send(message).ConfigureAwait(false);
+                await clientContext.Send(message, clientContext.CancellationToken).ConfigureAwait(false);
             });
 
             return _sendEndpointContext.Supervisor.Send(clientPipe, context.CancellationToken);

@@ -1,6 +1,7 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Azure.Messaging.ServiceBus;
     using MassTransit.Middleware;
@@ -22,19 +23,19 @@ namespace MassTransit.AzureServiceBusTransport
 
         public string EntityPath => _client.EntityPath;
 
-        public Task Send(ServiceBusMessage message)
+        public Task Send(ServiceBusMessage message, CancellationToken cancellationToken)
         {
-            return _client.SendMessageAsync(message);
+            return _client.SendMessageAsync(message, cancellationToken);
         }
 
-        public Task<long> ScheduleSend(ServiceBusMessage message, DateTime scheduleEnqueueTimeUtc)
+        public Task<long> ScheduleSend(ServiceBusMessage message, DateTime scheduleEnqueueTimeUtc, CancellationToken cancellationToken)
         {
-            return _client.ScheduleMessageAsync(message, scheduleEnqueueTimeUtc);
+            return _client.ScheduleMessageAsync(message, scheduleEnqueueTimeUtc, cancellationToken);
         }
 
-        public Task CancelScheduledSend(long sequenceNumber)
+        public Task CancelScheduledSend(long sequenceNumber, CancellationToken cancellationToken)
         {
-            return _client.CancelScheduledMessageAsync(sequenceNumber);
+            return _client.CancelScheduledMessageAsync(sequenceNumber, cancellationToken);
         }
     }
 }

@@ -67,7 +67,7 @@ namespace MassTransit.AzureServiceBusTransport
 
             var configureTopology = new ConfigureServiceBusTopologyFilter<SendSettings>(settings, settings.GetBrokerTopology(), false);
 
-            var contextFactory = new SendEndpointContextFactory(this, configureTopology.ToPipe<SendEndpointContext>(), settings);
+            var contextFactory = new SendEndpointContextFactory(this, configureTopology, settings);
 
             return new SendEndpointContextSupervisor(contextFactory);
         }
