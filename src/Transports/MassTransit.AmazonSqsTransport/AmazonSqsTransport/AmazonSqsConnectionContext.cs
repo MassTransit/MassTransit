@@ -26,7 +26,7 @@ public class AmazonSqsConnectionContext :
 
         Topology = hostConfiguration.Topology;
 
-        _queueCache = new QueueCache(Connection.SqsClient, cancellationToken);
+        _queueCache = new QueueCache(Connection.SqsClient);
         _topicCache = new TopicCache(Connection.SnsClient, cancellationToken);
     }
 
@@ -35,14 +35,14 @@ public class AmazonSqsConnectionContext :
 
     public Uri HostAddress => _hostConfiguration.HostAddress;
 
-    public Task<QueueInfo> GetQueue(Queue queue)
+    public Task<QueueInfo> GetQueue(Queue queue, CancellationToken cancellationToken)
     {
-        return _queueCache.Get(queue);
+        return _queueCache.Get(queue, cancellationToken);
     }
 
-    public Task<QueueInfo> GetQueueByName(string name)
+    public Task<QueueInfo> GetQueueByName(string name, CancellationToken cancellationToken)
     {
-        return _queueCache.GetByName(name);
+        return _queueCache.GetByName(name, cancellationToken);
     }
 
     public Task<bool> RemoveQueueByName(string name)
@@ -50,14 +50,14 @@ public class AmazonSqsConnectionContext :
         return _queueCache.RemoveByName(name);
     }
 
-    public Task<TopicInfo> GetTopic(Topic topic)
+    public Task<TopicInfo> GetTopic(Topic topic, CancellationToken cancellationToken)
     {
-        return _topicCache.Get(topic);
+        return _topicCache.Get(topic, cancellationToken);
     }
 
-    public Task<TopicInfo> GetTopicByName(string name)
+    public Task<TopicInfo> GetTopicByName(string name, CancellationToken cancellationToken)
     {
-        return _topicCache.GetByName(name);
+        return _topicCache.GetByName(name, cancellationToken);
     }
 
     public Task<bool> RemoveTopicByName(string name)

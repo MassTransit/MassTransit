@@ -3,6 +3,7 @@ namespace MassTransit.AmazonSqsTransport.Middleware;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Topology;
 
@@ -28,7 +29,7 @@ public class ConfigureAmazonSqsTopologyFilter<TSettings> :
 
     public async Task Send(ClientContext context, IPipe<ClientContext> next)
     {
-        OneTimeContext<ConfigureTopologyContext<TSettings>> oneTimeContext = await Configure(context);
+        OneTimeContext<ConfigureTopologyContext<TSettings>> oneTimeContext = await Configure(context, context.CancellationToken);
 
         try
         {
@@ -49,7 +50,7 @@ public class ConfigureAmazonSqsTopologyFilter<TSettings> :
         _brokerTopology.Probe(scope);
     }
 
-    public async Task<OneTimeContext<ConfigureTopologyContext<TSettings>>> Configure(ClientContext context)
+    public async Task<OneTimeContext<ConfigureTopologyContext<TSettings>>> Configure(ClientContext context, CancellationToken cancellationToken)
     {
         return await context.OneTimeSetup<ConfigureTopologyContext<TSettings>>(() =>
         {
@@ -58,20 +59,20 @@ public class ConfigureAmazonSqsTopologyFilter<TSettings> :
             if (_context != null && AnyAutoDelete())
                 _context.AddSendAgent(new RemoveAmazonSqsTopologyAgent(context, _brokerTopology));
 
-            return ConfigureTopology(context);
+            return ConfigureTopology(context, cancellationToken);
         }).ConfigureAwait(false);
     }
 
-    async Task ConfigureTopology(ClientContext context)
+    async Task ConfigureTopology(ClientContext context, CancellationToken cancellationToken)
     {
-        IEnumerable<Task<TopicInfo>> topics = _brokerTopology.Topics.Select(topic => Declare(context, topic));
+        IEnumerable<Task<TopicInfo>> topics = _brokerTopology.Topics.Select(topic => Declare(context, topic, cancellationToken));
 
-        IEnumerable<Task<QueueInfo>> queues = _brokerTopology.Queues.Select(queue => Declare(context, queue));
+        IEnumerable<Task<QueueInfo>> queues = _brokerTopology.Queues.Select(queue => Declare(context, queue, cancellationToken));
 
         await Task.WhenAll(topics).ConfigureAwait(false);
         await Task.WhenAll(queues).ConfigureAwait(false);
 
-        IEnumerable<Task> subscriptions = _brokerTopology.QueueSubscriptions.Select(subscription => Declare(context, subscription));
+        IEnumerable<Task> subscriptions = _brokerTopology.QueueSubscriptions.Select(subscription => Declare(context, subscription, cancellationToken));
         await Task.WhenAll(subscriptions).ConfigureAwait(false);
     }
 
@@ -80,9 +81,9 @@ public class ConfigureAmazonSqsTopologyFilter<TSettings> :
         return _brokerTopology.Topics.Any(x => x.AutoDelete) || _brokerTopology.Queues.Any(x => x.AutoDelete);
     }
 
-    static async Task<TopicInfo> Declare(ClientContext context, Topic topic)
+    static async Task<TopicInfo> Declare(ClientContext context, Topic topic, CancellationToken cancellationToken)
     {
-        var topicInfo = await context.CreateTopic(topic).ConfigureAwait(false);
+        var topicInfo = await context.CreateTopic(topic, cancellationToken).ConfigureAwait(false);
 
         if (topicInfo.Existing)
         {
@@ -91,23 +92,23 @@ public class ConfigureAmazonSqsTopologyFilter<TSettings> :
         }
 
         // Why? I don't know, but damn, it takes two times, or it doesn't catch properly
-        topicInfo = await context.CreateTopic(topic).ConfigureAwait(false);
+        topicInfo = await context.CreateTopic(topic, cancellationToken).ConfigureAwait(false);
 
         LogContext.Debug?.Log("Created topic {Topic} {TopicArn}", topicInfo.EntityName, topicInfo.Arn);
 
         return topicInfo;
     }
 
-    static async Task Declare(ClientContext context, QueueSubscription subscription)
+    static async Task Declare(ClientContext context, QueueSubscription subscription, CancellationToken cancellationToken)
     {
-        var created = await context.CreateQueueSubscription(subscription.Source, subscription.Destination).ConfigureAwait(false);
+        var created = await context.CreateQueueSubscription(subscription.Source, subscription.Destination, cancellationToken).ConfigureAwait(false);
         LogContext.Debug?.Log(created ? "Created subscription {Topic} to {Queue}" : "Existing subscription {Topic} to {Queue}",
             subscription.Source, subscription.Destination);
     }
 
-    static async Task<QueueInfo> Declare(ClientContext context, Queue queue)
+    static async Task<QueueInfo> Declare(ClientContext context, Queue queue, CancellationToken cancellationToken)
     {
-        var queueInfo = await context.CreateQueue(queue).ConfigureAwait(false);
+        var queueInfo = await context.CreateQueue(queue, cancellationToken).ConfigureAwait(false);
         if (queueInfo.Existing)
         {
             LogContext.Debug?.Log("Existing queue {Queue} {QueueArn} {QueueUrl}", queueInfo.EntityName, queueInfo.Arn, queueInfo.Url);
@@ -115,7 +116,7 @@ public class ConfigureAmazonSqsTopologyFilter<TSettings> :
         }
 
         // Why? I don't know, but damn, it takes two times, or it doesn't catch properly
-        queueInfo = await context.CreateQueue(queue).ConfigureAwait(false);
+        queueInfo = await context.CreateQueue(queue, cancellationToken).ConfigureAwait(false);
 
         LogContext.Debug?.Log("Created queue {Queue} {QueueArn} {QueueUrl}", queueInfo.EntityName, queueInfo.Arn, queueInfo.Url);
 

@@ -1,5 +1,6 @@
 namespace MassTransit.AmazonSqsTransport;
 
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,78 +12,113 @@ using Topology;
 
 public class ScopeClientContext :
     ScopePipeContext,
-    ClientContext
+    ClientContext,
+    IDisposable
 {
+    readonly CancellationToken _cancellationToken;
     readonly ClientContext _context;
+    CancellationTokenSource? _tokenSource;
 
     public ScopeClientContext(ClientContext context, CancellationToken cancellationToken)
         : base(context)
     {
         _context = context;
-        CancellationToken = cancellationToken;
+
+        _cancellationToken = cancellationToken;
+        _tokenSource = CancellationTokenSource.CreateLinkedTokenSource(context.CancellationToken, cancellationToken);
     }
 
-    public override CancellationToken CancellationToken { get; }
+    public override CancellationToken CancellationToken => _tokenSource?.Token ?? _cancellationToken;
 
     public ConnectionContext ConnectionContext => _context.ConnectionContext;
 
-    public Task<TopicInfo> CreateTopic(Topology.Topic topic)
+    public async Task<TopicInfo> CreateTopic(Topology.Topic topic, CancellationToken cancellationToken)
     {
-        return _context.CreateTopic(topic);
+        using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+        return await _context.CreateTopic(topic, tokenSource.Token).ConfigureAwait(false);
     }
 
-    public Task<QueueInfo> CreateQueue(Queue queue)
+    public async Task<QueueInfo> CreateQueue(Queue queue, CancellationToken cancellationToken)
     {
-        return _context.CreateQueue(queue);
+        using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+        return await _context.CreateQueue(queue, tokenSource.Token).ConfigureAwait(false);
     }
 
-    public Task<bool> CreateQueueSubscription(Topology.Topic topic, Queue queue)
+    public async Task<bool> CreateQueueSubscription(Topology.Topic topic, Queue queue, CancellationToken cancellationToken)
     {
-        return _context.CreateQueueSubscription(topic, queue);
+        using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+        return await _context.CreateQueueSubscription(topic, queue, tokenSource.Token).ConfigureAwait(false);
     }
 
-    public Task DeleteTopic(Topology.Topic topic)
+    public async Task DeleteTopic(Topology.Topic topic, CancellationToken cancellationToken)
     {
-        return _context.DeleteTopic(topic);
+        using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+        await _context.DeleteTopic(topic, tokenSource.Token).ConfigureAwait(false);
     }
 
-    public Task DeleteQueue(Queue queue)
+    public async Task DeleteQueue(Queue queue, CancellationToken cancellationToken)
     {
-        return _context.DeleteQueue(queue);
+        using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+        await _context.DeleteQueue(queue, tokenSource.Token).ConfigureAwait(false);
     }
 
-    public Task Publish(string topicName, PublishBatchRequestEntry request, CancellationToken cancellationToken = default)
+    public async Task Publish(string topicName, PublishBatchRequestEntry request, CancellationToken cancellationToken = default)
     {
-        return _context.Publish(topicName, request, cancellationToken);
+        using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+        await _context.Publish(topicName, request, tokenSource.Token).ConfigureAwait(false);
     }
 
-    public Task SendMessage(string queueName, SendMessageBatchRequestEntry request, CancellationToken cancellationToken)
+    public async Task SendMessage(string queueName, SendMessageBatchRequestEntry request, CancellationToken cancellationToken)
     {
-        return _context.SendMessage(queueName, request, cancellationToken);
+        using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+        await _context.SendMessage(queueName, request, tokenSource.Token).ConfigureAwait(false);
     }
 
-    public Task DeleteMessage(string queueUrl, string receiptHandle, CancellationToken cancellationToken)
+    public async Task DeleteMessage(string queueUrl, string receiptHandle, CancellationToken cancellationToken)
     {
-        return _context.DeleteMessage(queueUrl, receiptHandle, cancellationToken);
+        using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+        await _context.DeleteMessage(queueUrl, receiptHandle, tokenSource.Token).ConfigureAwait(false);
     }
 
-    public Task PurgeQueue(string queueName, CancellationToken cancellationToken)
+    public async Task PurgeQueue(string queueName, CancellationToken cancellationToken)
     {
-        return _context.PurgeQueue(queueName, cancellationToken);
+        using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+        await _context.PurgeQueue(queueName, tokenSource.Token).ConfigureAwait(false);
     }
 
-    public Task<IList<Message>> ReceiveMessages(string queueName, int messageLimit, int waitTime, CancellationToken cancellationToken)
+    public async Task<IList<Message>> ReceiveMessages(string queueName, int messageLimit, int waitTime, CancellationToken cancellationToken)
     {
-        return _context.ReceiveMessages(queueName, messageLimit, waitTime, cancellationToken);
+        using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+        return await _context.ReceiveMessages(queueName, messageLimit, waitTime, tokenSource.Token).ConfigureAwait(false);
     }
 
-    public Task<QueueInfo> GetQueueInfo(string queueName)
+    public async Task<QueueInfo> GetQueueInfo(string queueName, CancellationToken cancellationToken)
     {
-        return _context.GetQueueInfo(queueName);
+        using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+        return await _context.GetQueueInfo(queueName, tokenSource.Token).ConfigureAwait(false);
     }
 
-    public Task ChangeMessageVisibility(string queueUrl, string receiptHandle, int seconds)
+    public async Task ChangeMessageVisibility(string queueUrl, string receiptHandle, int seconds, CancellationToken cancellationToken)
     {
-        return _context.ChangeMessageVisibility(queueUrl, receiptHandle, seconds);
+        using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+        await _context.ChangeMessageVisibility(queueUrl, receiptHandle, seconds, tokenSource.Token).ConfigureAwait(false);
+    }
+
+    public void Dispose()
+    {
+        _tokenSource?.Dispose();
+        _tokenSource = null;
     }
 }

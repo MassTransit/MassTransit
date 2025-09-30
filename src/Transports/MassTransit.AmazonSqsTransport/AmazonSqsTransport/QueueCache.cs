@@ -17,14 +17,12 @@ public class QueueCache :
     static readonly List<string> AllAttributes = [QueueAttributeName.All];
 
     readonly ICache<string, QueueInfo, ITimeToLiveCacheValue<QueueInfo>> _cache;
-    readonly CancellationToken _cancellationToken;
     readonly IAmazonSQS _client;
     readonly IDictionary<string, QueueInfo> _durableQueues;
 
-    public QueueCache(IAmazonSQS client, CancellationToken cancellationToken)
+    public QueueCache(IAmazonSQS client)
     {
         _client = client;
-        _cancellationToken = cancellationToken;
 
         _cache = ClientContextCacheDefaults.CreateCache<string, QueueInfo>();
 
@@ -47,7 +45,7 @@ public class QueueCache :
         await _cache.Clear().ConfigureAwait(false);
     }
 
-    public Task<QueueInfo> Get(Queue queue)
+    public Task<QueueInfo> Get(Queue queue, CancellationToken cancellationToken)
     {
         lock (_durableQueues)
         {
@@ -59,16 +57,16 @@ public class QueueCache :
         {
             try
             {
-                return await GetExistingQueue(queue.EntityName).ConfigureAwait(false);
+                return await GetExistingQueue(queue.EntityName, cancellationToken).ConfigureAwait(false);
             }
             catch (QueueDoesNotExistException)
             {
-                return await CreateMissingQueue(queue).ConfigureAwait(false);
+                return await CreateMissingQueue(queue, cancellationToken).ConfigureAwait(false);
             }
         });
     }
 
-    public Task<QueueInfo> GetByName(string entityName)
+    public Task<QueueInfo> GetByName(string entityName, CancellationToken cancellationToken)
     {
         lock (_durableQueues)
         {
@@ -76,7 +74,7 @@ public class QueueCache :
                 return Task.FromResult(queueInfo);
         }
 
-        return _cache.GetOrAdd(entityName, queueName => GetExistingQueue(queueName));
+        return _cache.GetOrAdd(entityName, queueName => GetExistingQueue(queueName, cancellationToken));
     }
 
     public Task<bool> RemoveByName(string entityName)
@@ -87,7 +85,7 @@ public class QueueCache :
         return _cache.Remove(entityName);
     }
 
-    async Task<QueueInfo> CreateMissingQueue(Queue queue)
+    async Task<QueueInfo> CreateMissingQueue(Queue queue, CancellationToken cancellationToken)
     {
         Dictionary<string, string> attributes = queue.QueueAttributes.ToDictionary(x => x.Key, x => x.Value.ToString()!);
 
@@ -104,16 +102,16 @@ public class QueueCache :
             Tags = queue.QueueTags.ToDictionary(x => x.Key, x => x.Value)
         };
 
-        var createResponse = await _client.CreateQueueAsync(request, _cancellationToken).ConfigureAwait(false);
+        var createResponse = await _client.CreateQueueAsync(request, cancellationToken).ConfigureAwait(false);
 
         createResponse.EnsureSuccessfulResponse();
 
-        var attributesResponse = await _client.GetQueueAttributesAsync(createResponse.QueueUrl, AllAttributes, _cancellationToken).ConfigureAwait(false);
+        var attributesResponse = await _client.GetQueueAttributesAsync(createResponse.QueueUrl, AllAttributes, cancellationToken).ConfigureAwait(false);
 
         attributesResponse.EnsureSuccessfulResponse();
 
         var missingQueue = new QueueInfo(queue.EntityName, createResponse.QueueUrl, attributesResponse.Attributes ?? new Dictionary<string, string>(),
-            _client, _cancellationToken, false);
+            _client, cancellationToken, false);
 
         if (queue is { Durable: true, AutoDelete: false })
         {
@@ -124,17 +122,17 @@ public class QueueCache :
         return missingQueue;
     }
 
-    async Task<QueueInfo> GetExistingQueue(string queueName)
+    async Task<QueueInfo> GetExistingQueue(string queueName, CancellationToken cancellationToken)
     {
-        var urlResponse = await _client.GetQueueUrlAsync(queueName, _cancellationToken).ConfigureAwait(false);
+        var urlResponse = await _client.GetQueueUrlAsync(queueName, cancellationToken).ConfigureAwait(false);
 
         urlResponse.EnsureSuccessfulResponse();
 
-        var attributesResponse = await _client.GetQueueAttributesAsync(urlResponse.QueueUrl, AllAttributes, _cancellationToken).ConfigureAwait(false);
+        var attributesResponse = await _client.GetQueueAttributesAsync(urlResponse.QueueUrl, AllAttributes, cancellationToken).ConfigureAwait(false);
 
         attributesResponse.EnsureSuccessfulResponse();
 
         return new QueueInfo(queueName, urlResponse.QueueUrl, attributesResponse.Attributes ?? new Dictionary<string, string>(), _client,
-            _cancellationToken, true);
+            cancellationToken, true);
     }
 }

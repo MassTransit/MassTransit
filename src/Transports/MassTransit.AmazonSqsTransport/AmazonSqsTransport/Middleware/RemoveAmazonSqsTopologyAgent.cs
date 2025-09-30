@@ -3,6 +3,7 @@ namespace MassTransit.AmazonSqsTransport.Middleware;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using MassTransit.Middleware;
 using Topology;
@@ -26,7 +27,7 @@ public sealed class RemoveAmazonSqsTopologyAgent :
     {
         try
         {
-            await DeleteAutoDelete(_context).ConfigureAwait(false);
+            await DeleteAutoDelete(_context, context.CancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -36,26 +37,26 @@ public sealed class RemoveAmazonSqsTopologyAgent :
         await base.StopAgent(context);
     }
 
-    async Task DeleteAutoDelete(ClientContext context)
+    async Task DeleteAutoDelete(ClientContext context, CancellationToken cancellationToken)
     {
-        IEnumerable<Task> topics = _brokerTopology.Topics.Where(x => x.AutoDelete).Select(topic => Delete(context, topic));
+        IEnumerable<Task> topics = _brokerTopology.Topics.Where(x => x.AutoDelete).Select(topic => Delete(context, topic, cancellationToken));
 
-        IEnumerable<Task> queues = _brokerTopology.Queues.Where(x => x.AutoDelete).Select(queue => Delete(context, queue));
+        IEnumerable<Task> queues = _brokerTopology.Queues.Where(x => x.AutoDelete).Select(queue => Delete(context, queue, cancellationToken));
 
         await Task.WhenAll(topics.Concat(queues)).ConfigureAwait(false);
     }
 
-    static Task Delete(ClientContext context, Topic topic)
+    static Task Delete(ClientContext context, Topic topic, CancellationToken cancellationToken)
     {
         LogContext.Debug?.Log("Delete topic {Topic}", topic);
 
-        return context.DeleteTopic(topic);
+        return context.DeleteTopic(topic, cancellationToken);
     }
 
-    static Task Delete(ClientContext context, Queue queue)
+    static Task Delete(ClientContext context, Queue queue, CancellationToken cancellationToken)
     {
         LogContext.Debug?.Log("Delete queue {Queue}", queue);
 
-        return context.DeleteQueue(queue);
+        return context.DeleteQueue(queue, cancellationToken);
     }
 }

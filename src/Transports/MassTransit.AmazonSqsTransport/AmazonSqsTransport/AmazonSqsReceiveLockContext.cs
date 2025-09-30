@@ -14,6 +14,7 @@ public class AmazonSqsReceiveLockContext :
 {
     readonly CancellationTokenSource _activeTokenSource;
     readonly ClientContext _clientContext;
+    readonly CancellationToken _cancellationToken;
     readonly Uri _inputAddress;
     readonly Message _message;
 
@@ -22,13 +23,15 @@ public class AmazonSqsReceiveLockContext :
     readonly Task _visibilityTask;
     bool _locked;
 
-    public AmazonSqsReceiveLockContext(Uri inputAddress, Message message, ReceiveSettings settings, ClientContext clientContext)
+    public AmazonSqsReceiveLockContext(Uri inputAddress, Message message, ReceiveSettings settings, ClientContext clientContext,
+        CancellationToken cancellationToken)
     {
         _startedAt = DateTime.UtcNow;
         _inputAddress = inputAddress;
         _message = message;
         _settings = settings;
         _clientContext = clientContext;
+        _cancellationToken = cancellationToken;
         _activeTokenSource = new CancellationTokenSource();
         _locked = true;
 
@@ -41,7 +44,7 @@ public class AmazonSqsReceiveLockContext :
 
         try
         {
-            await _clientContext.DeleteMessage(_settings.EntityName, _message.ReceiptHandle).ConfigureAwait(false);
+            await _clientContext.DeleteMessage(_settings.EntityName, _message.ReceiptHandle, _cancellationToken).ConfigureAwait(false);
 
             await _visibilityTask.ConfigureAwait(false);
         }
@@ -72,8 +75,8 @@ public class AmazonSqsReceiveLockContext :
 
             if (!_clientContext.CancellationToken.IsCancellationRequested && _settings.QueueUrl != null)
             {
-                await _clientContext.ChangeMessageVisibility(_settings.QueueUrl, _message.ReceiptHandle, _settings.RedeliverVisibilityTimeout)
-                    .ConfigureAwait(false);
+                await _clientContext.ChangeMessageVisibility(_settings.QueueUrl, _message.ReceiptHandle, _settings.RedeliverVisibilityTimeout,
+                    _cancellationToken).ConfigureAwait(false);
             }
 
             _locked = false;
@@ -135,7 +138,9 @@ public class AmazonSqsReceiveLockContext :
                     break;
 
                 if (_settings.QueueUrl != null)
-                    await _clientContext.ChangeMessageVisibility(_settings.QueueUrl, _message.ReceiptHandle, visibilityTimeout).ConfigureAwait(false);
+                    await _clientContext
+                        .ChangeMessageVisibility(_settings.QueueUrl, _message.ReceiptHandle, visibilityTimeout, _cancellationToken)
+                        .ConfigureAwait(false);
 
                 if (DateTime.UtcNow - _startedAt.AddSeconds(visibilityTimeout) >= _settings.MaxVisibilityTimeout)
                 {

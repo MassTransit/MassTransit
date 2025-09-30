@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Amazon.SimpleNotificationService;
 using Amazon.SimpleNotificationService.Model;
+using Internals;
 using Internals.Caching;
 
 
@@ -48,10 +49,10 @@ public class TopicCache :
         await _cache.Clear().ConfigureAwait(false);
     }
 
-    public async Task<TopicInfo> Get(Topology.Topic topic)
+    public async Task<TopicInfo> Get(Topology.Topic topic, CancellationToken cancellationToken)
     {
         if (!_topicsLoaded)
-            await LoadExistingTopics().ConfigureAwait(false);
+            await LoadExistingTopics().OrCanceled(cancellationToken).ConfigureAwait(false);
 
         lock (_durableTopics)
         {
@@ -59,13 +60,13 @@ public class TopicCache :
                 return topicInfo;
         }
 
-        return await _cache.GetOrAdd(topic.EntityName, _ => CreateMissingTopic(topic)).ConfigureAwait(false);
+        return await _cache.GetOrAdd(topic.EntityName, _ => CreateMissingTopic(topic, cancellationToken)).ConfigureAwait(false);
     }
 
-    public async Task<TopicInfo> GetByName(string entityName)
+    public async Task<TopicInfo> GetByName(string entityName, CancellationToken cancellationToken)
     {
         if (!_topicsLoaded)
-            await LoadExistingTopics().ConfigureAwait(false);
+            await LoadExistingTopics().OrCanceled(cancellationToken).ConfigureAwait(false);
 
         lock (_durableTopics)
         {
@@ -84,7 +85,7 @@ public class TopicCache :
         return _cache.Remove(entityName);
     }
 
-    async Task<TopicInfo> CreateMissingTopic(Topology.Topic topic)
+    async Task<TopicInfo> CreateMissingTopic(Topology.Topic topic, CancellationToken cancellationToken)
     {
         var request = new CreateTopicRequest(topic.EntityName)
         {
@@ -96,15 +97,15 @@ public class TopicCache :
             }).ToList()
         };
 
-        var createResponse = await _client.CreateTopicAsync(request, _cancellationToken).ConfigureAwait(false);
+        var createResponse = await _client.CreateTopicAsync(request, cancellationToken).ConfigureAwait(false);
 
         createResponse.EnsureSuccessfulResponse();
 
-        var attributesResponse = await _client.GetTopicAttributesAsync(createResponse.TopicArn, _cancellationToken).ConfigureAwait(false);
+        var attributesResponse = await _client.GetTopicAttributesAsync(createResponse.TopicArn, cancellationToken).ConfigureAwait(false);
 
         attributesResponse.EnsureSuccessfulResponse();
 
-        var missingTopic = new TopicInfo(topic.EntityName, createResponse.TopicArn, _client, _cancellationToken, false);
+        var missingTopic = new TopicInfo(topic.EntityName, createResponse.TopicArn, _client, cancellationToken, false);
 
         if (topic is { Durable: true, AutoDelete: false })
         {
@@ -136,14 +137,14 @@ public class TopicCache :
         return result;
     }
 
-    async Task LoadExistingTopicsLazy(CancellationToken token)
+    async Task LoadExistingTopicsLazy(CancellationToken cancellationToken)
     {
         var cursor = string.Empty;
         do
         {
             var request = new ListTopicsRequest { NextToken = cursor };
 
-            var response = await _client.ListTopicsAsync(request, token).ConfigureAwait(false);
+            var response = await _client.ListTopicsAsync(request, cancellationToken).ConfigureAwait(false);
 
             if (response.Topics != null)
             {
@@ -169,7 +170,7 @@ public class TopicCache :
 
             cursor = response.NextToken;
         }
-        while (!string.IsNullOrEmpty(cursor) && !token.IsCancellationRequested);
+        while (!string.IsNullOrEmpty(cursor) && !cancellationToken.IsCancellationRequested);
 
         _topicsLoaded = true;
     }

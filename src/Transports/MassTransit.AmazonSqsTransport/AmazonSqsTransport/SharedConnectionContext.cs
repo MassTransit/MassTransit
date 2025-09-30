@@ -9,31 +9,40 @@ using Topology;
 
 public class SharedConnectionContext :
     ProxyPipeContext,
-    ConnectionContext
+    ConnectionContext,
+    IDisposable
 {
+    readonly CancellationToken _cancellationToken;
     readonly ConnectionContext _context;
+    CancellationTokenSource? _tokenSource;
 
     public SharedConnectionContext(ConnectionContext context, CancellationToken cancellationToken)
         : base(context)
     {
         _context = context;
-        CancellationToken = cancellationToken;
+
+        _cancellationToken = cancellationToken;
+        _tokenSource = CancellationTokenSource.CreateLinkedTokenSource(context.CancellationToken, cancellationToken);
     }
 
-    public override CancellationToken CancellationToken { get; }
+    public override CancellationToken CancellationToken => _tokenSource?.Token ?? _cancellationToken;
 
-    IConnection ConnectionContext.Connection => _context.Connection;
+    public IConnection Connection => _context.Connection;
     public Uri HostAddress => _context.HostAddress;
     public IAmazonSqsBusTopology Topology => _context.Topology;
 
-    public Task<QueueInfo> GetQueue(Queue queue)
+    public async Task<QueueInfo> GetQueue(Queue queue, CancellationToken cancellationToken)
     {
-        return _context.GetQueue(queue);
+        using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+        return await _context.GetQueue(queue, tokenSource.Token).ConfigureAwait(false);
     }
 
-    public Task<QueueInfo> GetQueueByName(string name)
+    public async Task<QueueInfo> GetQueueByName(string name, CancellationToken cancellationToken)
     {
-        return _context.GetQueueByName(name);
+        using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+        return await _context.GetQueueByName(name, tokenSource.Token).ConfigureAwait(false);
     }
 
     public Task<bool> RemoveQueueByName(string name)
@@ -41,14 +50,18 @@ public class SharedConnectionContext :
         return _context.RemoveQueueByName(name);
     }
 
-    public Task<TopicInfo> GetTopic(Topic topic)
+    public async Task<TopicInfo> GetTopic(Topic topic, CancellationToken cancellationToken)
     {
-        return _context.GetTopic(topic);
+        using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+        return await _context.GetTopic(topic, tokenSource.Token).ConfigureAwait(false);
     }
 
-    public Task<TopicInfo> GetTopicByName(string name)
+    public async Task<TopicInfo> GetTopicByName(string name, CancellationToken cancellationToken)
     {
-        return _context.GetTopicByName(name);
+        using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+        return await _context.GetTopicByName(name, tokenSource.Token).ConfigureAwait(false);
     }
 
     public Task<bool> RemoveTopicByName(string name)
@@ -59,5 +72,11 @@ public class SharedConnectionContext :
     public ClientContext CreateClientContext(CancellationToken cancellationToken)
     {
         return _context.CreateClientContext(cancellationToken);
+    }
+
+    public void Dispose()
+    {
+        _tokenSource?.Dispose();
+        _tokenSource = null;
     }
 }

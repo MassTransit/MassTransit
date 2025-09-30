@@ -21,12 +21,12 @@ public interface ConnectionContext :
 
     IAmazonSqsBusTopology Topology { get; }
 
-    Task<QueueInfo> GetQueue(Queue queue);
-    Task<QueueInfo> GetQueueByName(string name);
+    Task<QueueInfo> GetQueue(Queue queue, CancellationToken cancellationToken);
+    Task<QueueInfo> GetQueueByName(string name, CancellationToken cancellationToken);
     Task<bool> RemoveQueueByName(string name);
 
-    Task<TopicInfo> GetTopic(Topic topic);
-    Task<TopicInfo> GetTopicByName(string name);
+    Task<TopicInfo> GetTopic(Topic topic, CancellationToken cancellationToken);
+    Task<TopicInfo> GetTopicByName(string name, CancellationToken cancellationToken);
     Task<bool> RemoveTopicByName(string name);
 
     ClientContext CreateClientContext(CancellationToken cancellationToken);
