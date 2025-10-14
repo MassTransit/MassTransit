@@ -132,7 +132,7 @@ namespace MassTransit
 
         public virtual string SanitizeName(string name)
         {
-            return name;
+            return string.IsNullOrWhiteSpace(Prefix) ? name : Prefix + name;
         }
 
         public static string GetTemporaryQueueName(string tag)
@@ -287,7 +287,7 @@ namespace MassTransit
                 ? string.Join(JoinSeparator ?? "", TypeCache.GetShortName(type).Split(_removeChars))
                 : type.Name;
 
-            return string.IsNullOrWhiteSpace(Prefix) ? name : Prefix + name;
+            return name;
         }
     }
 }

@@ -80,7 +80,8 @@ namespace MassTransit
 
         public override string SanitizeName(string name)
         {
-            return _pattern.Replace(name, m => _separator + m.Value).ToLowerInvariant();
+            var sanitizedName = _pattern.Replace(name, m => _separator + m.Value).ToLowerInvariant();
+            return string.IsNullOrWhiteSpace(Prefix) ? sanitizedName : Prefix + sanitizedName;
         }
     }
 }
