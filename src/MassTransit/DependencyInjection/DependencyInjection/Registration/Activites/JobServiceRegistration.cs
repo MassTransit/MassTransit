@@ -25,6 +25,7 @@ namespace MassTransit.DependencyInjection.Registration
 
             _endpointConfigurator = new EndpointRegistrationConfigurator<JobService>
             {
+                Name = "Instance",
                 InstanceId = NewId.Next().ToString(ZBase32Formatter.LowerCase),
                 Temporary = true
             };

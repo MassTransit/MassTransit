@@ -3,7 +3,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
     using System;
     using System.Threading.Tasks;
     using Contracts.JobService;
-    using global::Azure;
     using JobConsumerTests;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
@@ -59,7 +58,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
             IRequestClient<SubmitJob<OddJob>> client = harness.GetRequestClient<SubmitJob<OddJob>>();
 
-            MassTransit.Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new
+            Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new
             {
                 JobId = jobId,
                 Job = new { Duration = TimeSpan.FromSeconds(10) }
@@ -93,7 +92,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
             IRequestClient<SubmitJob<OddJob>> client = harness.GetRequestClient<SubmitJob<OddJob>>();
 
-            MassTransit.Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new
+            Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new
             {
                 JobId = jobId,
                 Job = new { Duration = TimeSpan.FromSeconds(10) }
@@ -111,7 +110,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
             IRequestClient<GetJobState> stateClient = harness.GetRequestClient<GetJobState>();
 
-            MassTransit.Response<JobState> jobState = await stateClient.GetResponse<JobState>(new { JobId = jobId });
+            Response<JobState> jobState = await stateClient.GetResponse<JobState>(new { JobId = jobId });
 
             Assert.That(jobState.Message.CurrentState, Is.EqualTo("Started"));
 
@@ -141,7 +140,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
             IRequestClient<SubmitJob<OddJob>> client = harness.GetRequestClient<SubmitJob<OddJob>>();
 
-            MassTransit.Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new
+            Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new
             {
                 JobId = jobId,
                 Job = new { Duration = TimeSpan.FromSeconds(10) }
@@ -188,7 +187,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
             IRequestClient<SubmitJob<OddJob>> client = harness.GetRequestClient<SubmitJob<OddJob>>();
 
-            MassTransit.Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new
+            Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new
             {
                 JobId = previousJobId,
                 Job = new { Duration = TimeSpan.FromSeconds(10) }
@@ -232,7 +231,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
             IRequestClient<SubmitJob<OddJob>> client = harness.GetRequestClient<SubmitJob<OddJob>>();
 
-            MassTransit.Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new
+            Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new
             {
                 JobId = jobId,
                 Job = new { Duration = TimeSpan.FromSeconds(1) }
@@ -314,7 +313,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
                     x.AddJobSagaStateMachines();
                     x.SetJobConsumerOptions(options => options.HeartbeatInterval = TimeSpan.FromSeconds(10))
-                        .Endpoint(e => e.PrefetchCount = 100);
+                        .Endpoint(e =>
+                        {
+                            e.Name = "Prefix-Instance";
+                            e.PrefetchCount = 100;
+                        });
 
                     x.UsingTestAzureServiceBus();
                 })

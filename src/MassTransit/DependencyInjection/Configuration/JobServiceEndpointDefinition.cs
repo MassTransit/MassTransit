@@ -1,8 +1,7 @@
+#nullable enable
 namespace MassTransit.Configuration
 {
-    using System.Text;
     using JobService;
-    using NewIdFormatters;
 
 
     public class JobServiceEndpointDefinition :
@@ -10,25 +9,20 @@ namespace MassTransit.Configuration
     {
         readonly InstanceJobServiceSettings _jobServiceSettings;
         readonly IEndpointSettings<IEndpointDefinition<JobService>> _settings;
+        string? _endpointName;
 
         public JobServiceEndpointDefinition(IEndpointSettings<IEndpointDefinition<JobService>> settings, InstanceJobServiceSettings jobServiceSettings)
         {
             _settings = settings;
             _jobServiceSettings = jobServiceSettings;
-
-            var instanceId = NewId.Next();
-
-            InstanceName = instanceId.ToString(ZBase32Formatter.LowerCase);
         }
-
-        string InstanceName { get; }
 
         public bool IsTemporary => true;
         public int? PrefetchCount => _settings.PrefetchCount;
         public int? ConcurrentMessageLimit => _settings.ConcurrentMessageLimit;
         public bool ConfigureConsumeTopology => _settings.ConfigureConsumeTopology;
 
-        public void Configure<T>(T configurator, IRegistrationContext context)
+        public void Configure<T>(T configurator, IRegistrationContext? context)
             where T : IReceiveEndpointConfigurator
         {
             _jobServiceSettings.ApplyConfiguration(configurator);
@@ -38,13 +32,14 @@ namespace MassTransit.Configuration
 
         public string GetEndpointName(IEndpointNameFormatter formatter)
         {
-            var sb = new StringBuilder(InstanceName.Length + 9);
+            string FormatName()
+            {
+                return _settings.Name ?? "Instance";
+            }
 
-            sb.Append("Instance");
-            sb.Append('_');
-            sb.Append(InstanceName);
-
-            return formatter.SanitizeName(sb.ToString());
+            return _endpointName ??= string.IsNullOrWhiteSpace(_settings.InstanceId)
+                ? formatter.SanitizeName(FormatName())
+                : formatter.SanitizeName(FormatName() + formatter.Separator + _settings.InstanceId);
         }
     }
 }
