@@ -29,8 +29,9 @@ namespace MassTransit.Configuration
 
         public string GetEndpointName(IEndpointNameFormatter formatter)
         {
-            var sb = new StringBuilder(InstanceName.Length + 9);
+            var sb = new StringBuilder(InstanceName.Length + formatter.Prefix.Length + 9);
 
+            sb.Append(formatter.Prefix);
             sb.Append("Instance");
             sb.Append('_');
             sb.Append(InstanceName);
