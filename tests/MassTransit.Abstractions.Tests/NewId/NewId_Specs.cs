@@ -167,6 +167,38 @@
         }
 
         [Test]
+        public void Should_be_using_the_correct_algorithm()
+        {
+            NewId.SetTickProvider(new StopwatchTickProvider());
+
+            var first = NewId.NextGuid();
+            Guid[] next = NewId.NextGuid(3);
+
+            for (var i = 0; i < next.Length - 1; i++)
+            {
+                Assert.That(next[i].ToString().Substring(0, 4), Is.EqualTo(first.ToString().Substring(0, 4)));
+                Assert.That(next[i].ToString().Substring(6), Is.EqualTo(first.ToString().Substring(6)));
+                Assert.That(int.Parse(next[i].ToString().Substring(4, 2)), Is.EqualTo(i));
+            }
+        }
+
+        [Test]
+        public void Should_be_using_the_correct_algorithm_for_sequential_guids()
+        {
+            NewId.SetTickProvider(new StopwatchTickProvider());
+
+            var first = NewId.NextSequentialGuid();
+            var next = new Guid[3];
+            NewId.NextSequentialGuid(next, 0, 3);
+
+            for (var i = 0; i < next.Length - 1; i++)
+            {
+                Assert.That(next[i].ToString().Substring(0,32), Is.EqualTo(first.ToString().Substring(0,32)));
+                Assert.That(int.Parse(next[i].ToString().Substring(32,2)), Is.EqualTo(i));
+            }
+        }
+
+        [Test]
         [Explicit]
         public void Should_generate_unique_identifiers_with_each_invocation()
         {

@@ -6,16 +6,15 @@ namespace MassTransit
     using NewIdFormatters;
     using NewIdProviders;
 #if NET6_0_OR_GREATER
-    using System.Diagnostics;
     using System.Runtime.Intrinsics.X86;
     using System.Runtime.Intrinsics;
     using System.Runtime.InteropServices;
 #endif
 
+    // We need to target netstandard2.0, so keep using ref parameter.
+    // CS9191: The 'ref' modifier for argument 2 corresponding to 'in' parameter is equivalent to 'in'. Consider using 'in' instead.
+    #pragma warning disable CS9191
 
-// We need to target netstandard2.0, so keep using ref parameter.
-// CS9191: The 'ref' modifier for argument 2 corresponding to 'in' parameter is equivalent to 'in'. Consider using 'in' instead.
-#pragma warning disable CS9191
 
     /// <summary>
     /// A NewId is a type that fits into the same space as a Guid/Uuid/unique identifier,
@@ -30,10 +29,10 @@ namespace MassTransit
     {
         public static readonly NewId Empty = new NewId(0, 0, 0, 0);
 
-        static readonly INewIdFormatter BraceFormatter = new DashedHexFormatter('{', '}');
-        static readonly INewIdFormatter DashedHexFormatter = new DashedHexFormatter();
-        static readonly INewIdFormatter HexFormatter = new HexFormatter();
-        static readonly INewIdFormatter ParenFormatter = new DashedHexFormatter('(', ')');
+        static readonly DashedHexFormatter BraceFormatter = new DashedHexFormatter('{', '}');
+        static readonly DashedHexFormatter DashedHexFormatter = new DashedHexFormatter();
+        static readonly HexFormatter HexFormatter = new HexFormatter();
+        static readonly DashedHexFormatter ParenFormatter = new DashedHexFormatter('(', ')');
 
         static INewIdGenerator? _generator;
         static ITickProvider? _tickProvider;
@@ -477,7 +476,7 @@ namespace MassTransit
         {
             var ids = new Guid[count];
 
-            _getGenerator().NextSequentialGuid(ids, 0, count);
+            _getGenerator().NextGuid(ids, 0, count);
 
             return ids;
         }
@@ -491,7 +490,7 @@ namespace MassTransit
         /// <returns></returns>
         public static ArraySegment<Guid> NextGuid(Guid[] ids, int index, int count)
         {
-            return _getGenerator().NextSequentialGuid(ids, index, count);
+            return _getGenerator().NextGuid(ids, index, count);
         }
 
         /// <summary>
@@ -510,6 +509,30 @@ namespace MassTransit
         public static Guid NextSequentialGuid()
         {
             return _getGenerator().NextSequentialGuid();
+        }
+
+        /// <summary>
+        /// Generate an array of NewIds
+        /// </summary>
+        /// <param name="count">The number of NewIds to generate</param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Guid[] NextSequentialGuid(int count)
+        {
+            var ids = new Guid[count];
+
+            _getGenerator().NextSequentialGuid(ids, 0, count);
+
+            return ids;
+        }
+
+        /// <summary>
+        /// Generate an array of NewIds, and return it as a Guid in sequential format
+        /// </summary>
+        /// <returns></returns>
+        public static ArraySegment<Guid> NextSequentialGuid(Guid[] ids, int index, int count)
+        {
+            return _getGenerator().NextSequentialGuid(ids, index, count);
         }
 
     #if NET6_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER

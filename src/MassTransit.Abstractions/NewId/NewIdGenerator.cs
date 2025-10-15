@@ -92,14 +92,14 @@
             // swapping high and low byte, because SQL-server is doing the wrong ordering otherwise
             var sequenceSwapped = ((sequence << 8) | ((sequence >> 8) & 0x00FF)) & 0xFFFF;
 
-#if NET6_0_OR_GREATER
+        #if NET6_0_OR_GREATER
             if (Ssse3.IsSupported && BitConverter.IsLittleEndian)
             {
                 var vec = Vector128.Create((int)a, b, _c, _d | sequenceSwapped);
                 var result = Ssse3.Shuffle(vec.AsByte(), Vector128.Create((byte)12, 13, 14, 15, 8, 9, 10, 11, 5, 4, 3, 2, 1, 0, 7, 6));
                 return Unsafe.As<Vector128<byte>, Guid>(ref result);
             }
-#endif
+        #endif
 
             var d = (byte)(b >> 8);
             var e = (byte)b;
@@ -128,9 +128,9 @@
             var sequence = _sequence++;
 
             var a = _a;
-#if NET6_0_OR_GREATER
+        #if NET6_0_OR_GREATER
             var v = _b;
-#endif
+        #endif
             var b = (short)(_b >> 16);
             var c = (short)_b;
 
@@ -140,14 +140,14 @@
             // swapping high and low byte, because SQL-server is doing the wrong ordering otherwise
             var sequenceSwapped = ((sequence << 8) | ((sequence >> 8) & 0x00FF)) & 0xFFFF;
 
-#if NET6_0_OR_GREATER
+        #if NET6_0_OR_GREATER
             if (Ssse3.IsSupported && BitConverter.IsLittleEndian)
             {
                 var vec = Vector128.Create((int)a, v, _c, _d | sequenceSwapped);
                 var result = Ssse3.Shuffle(vec.AsByte(), Vector128.Create((byte)0, 1, 2, 3, 6, 7, 4, 5, 11, 10, 9, 8, 15, 14, 13, 12));
                 return Unsafe.As<Vector128<byte>, Guid>(ref result);
             }
-#endif
+        #endif
 
             var d = (byte)(_gc >> 8);
             var e = (byte)_gc;
@@ -190,6 +190,81 @@
             return new ArraySegment<NewId>(ids, index, count);
         }
 
+        public ArraySegment<Guid> NextGuid(Guid[] ids, int index, int count)
+        {
+            if (index + count > ids.Length)
+                throw new ArgumentOutOfRangeException(nameof(count));
+
+            var ticks = _tickProvider.Ticks;
+
+            var a = _a;
+            var b = _b;
+
+            var lockTaken = false;
+            _spinLock.Enter(ref lockTaken);
+
+            if (ticks > _lastTick)
+                UpdateTimestamp(ticks);
+
+            var d = (byte)(b >> 8);
+            var e = (byte)b;
+            var f = (byte)(a >> 24);
+            var g = (byte)(a >> 16);
+            var h = (byte)(a >> 8);
+            var i = (byte)a;
+            var j = (byte)(b >> 24);
+            var k = (byte)(b >> 16);
+
+            var limit = index + count;
+            for (var offset = index; offset < limit; offset++)
+            {
+                if (_sequence == 65535) // we are about to rollover, so we need to increment ticks
+                {
+                    UpdateTimestamp(_lastTick + 1);
+
+                    if (a != _a)
+                    {
+                        a = _a;
+                        f = (byte)(a >> 24);
+                        g = (byte)(a >> 16);
+                        h = (byte)(a >> 8);
+                        i = (byte)a;
+                    }
+
+                    if (b != _b)
+                    {
+                        b = _b;
+                        d = (byte)(b >> 8);
+                        e = (byte)b;
+                        j = (byte)(b >> 24);
+                        k = (byte)(b >> 16);
+                    }
+                }
+
+                var sequence = _sequence++;
+
+                // swapping high and low byte, because SQL-server is doing the wrong ordering otherwise
+                var sequenceSwapped = ((sequence << 8) | ((sequence >> 8) & 0x00FF)) & 0xFFFF;
+
+            #if NET6_0_OR_GREATER
+                if (Ssse3.IsSupported && BitConverter.IsLittleEndian)
+                {
+                    var vec = Vector128.Create((int)a, b, _c, _d | sequenceSwapped);
+                    var result = Ssse3.Shuffle(vec.AsByte(), Vector128.Create((byte)12, 13, 14, 15, 8, 9, 10, 11, 5, 4, 3, 2, 1, 0, 7, 6));
+                    ids[offset] = Unsafe.As<Vector128<byte>, Guid>(ref result);
+                    continue;
+                }
+            #endif
+
+                ids[offset] = new Guid(_d | sequenceSwapped, _gb, _gc, d, e, f, g, h, i, j, k);
+            }
+
+            if (lockTaken)
+                _spinLock.Exit();
+
+            return new ArraySegment<Guid>(ids, index, count);
+        }
+
         public ArraySegment<Guid> NextSequentialGuid(Guid[] ids, int index, int count)
         {
             if (index + count > ids.Length)
@@ -197,9 +272,9 @@
 
             var ticks = _tickProvider.Ticks;
 
-#if NET6_0_OR_GREATER
+        #if NET6_0_OR_GREATER
             var v = _b;
-#endif
+        #endif
             var a = _a;
             var b = (short)(_b >> 16);
             var c = (short)_b;
@@ -222,9 +297,9 @@
                 {
                     UpdateTimestamp(_lastTick + 1);
 
-#if NET6_0_OR_GREATER
+                #if NET6_0_OR_GREATER
                     v = _b;
-#endif
+                #endif
                     a = _a;
                     b = (short)(_b >> 16);
                     c = (short)_b;
@@ -235,7 +310,7 @@
                 // swapping high and low byte, because SQL-server is doing the wrong ordering otherwise
                 var sequenceSwapped = ((sequence << 8) | ((sequence >> 8) & 0x00FF)) & 0xFFFF;
 
-#if NET6_0_OR_GREATER
+            #if NET6_0_OR_GREATER
                 if (Ssse3.IsSupported && BitConverter.IsLittleEndian)
                 {
                     var vec = Vector128.Create((int)a, v, _c, _d | sequenceSwapped);
@@ -243,7 +318,7 @@
                     ids[offset] = Unsafe.As<Vector128<byte>, Guid>(ref result);
                     continue;
                 }
-#endif
+            #endif
 
                 var h = (byte)((_d | sequenceSwapped) >> 24);
                 var i = (byte)((_d | sequenceSwapped) >> 16);

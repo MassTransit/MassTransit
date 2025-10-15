@@ -11,6 +11,8 @@ namespace MassTransit
 
         Guid NextGuid();
 
+        ArraySegment<Guid> NextGuid(Guid[] ids, int index, int count);
+
         ArraySegment<Guid> NextSequentialGuid(Guid[] ids, int index, int count);
 
         Guid NextSequentialGuid();
