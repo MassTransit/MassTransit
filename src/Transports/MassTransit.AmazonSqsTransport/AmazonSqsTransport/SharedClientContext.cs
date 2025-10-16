@@ -1,6 +1,5 @@
 ﻿namespace MassTransit.AmazonSqsTransport;
 
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,23 +11,19 @@ using Topology;
 
 public class SharedClientContext :
     ProxyPipeContext,
-    ClientContext,
-    IDisposable
+    ClientContext
 {
-    readonly CancellationToken _cancellationToken;
     readonly ClientContext _context;
-    CancellationTokenSource? _tokenSource;
 
     public SharedClientContext(ClientContext context, CancellationToken cancellationToken)
         : base(context)
     {
         _context = context;
 
-        _cancellationToken = cancellationToken;
-        _tokenSource = CancellationTokenSource.CreateLinkedTokenSource(context.CancellationToken, cancellationToken);
+        CancellationToken = cancellationToken;
     }
 
-    public override CancellationToken CancellationToken => _tokenSource?.Token ?? _cancellationToken;
+    public override CancellationToken CancellationToken { get; }
 
     public ConnectionContext ConnectionContext => _context.ConnectionContext;
 
@@ -114,11 +109,5 @@ public class SharedClientContext :
         using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
 
         await _context.ChangeMessageVisibility(queueUrl, receiptHandle, seconds, tokenSource.Token).ConfigureAwait(false);
-    }
-
-    public void Dispose()
-    {
-        _tokenSource?.Dispose();
-        _tokenSource = null;
     }
 }

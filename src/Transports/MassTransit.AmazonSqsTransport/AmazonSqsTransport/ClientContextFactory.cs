@@ -16,7 +16,7 @@ public class ClientContextFactory :
         _connectionContextSupervisor = connectionContextSupervisor;
     }
 
-    IPipeContextAgent<ClientContext> IPipeContextFactory<ClientContext>.CreateContext(ISupervisor supervisor)
+    public IPipeContextAgent<ClientContext> CreateContext(ISupervisor supervisor)
     {
         IAsyncPipeContextAgent<ClientContext> asyncContext = supervisor.AddAsyncContext<ClientContext>();
 
@@ -25,7 +25,7 @@ public class ClientContextFactory :
         return asyncContext;
     }
 
-    IActivePipeContextAgent<ClientContext> IPipeContextFactory<ClientContext>.CreateActiveContext(ISupervisor supervisor,
+    public IActivePipeContextAgent<ClientContext> CreateActiveContext(ISupervisor supervisor,
         PipeContextHandle<ClientContext> context, CancellationToken cancellationToken)
     {
         return supervisor.AddActiveContext(context, CreateSharedClientContext(context.Context, cancellationToken));

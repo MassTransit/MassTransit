@@ -9,23 +9,19 @@ using Topology;
 
 public class SharedConnectionContext :
     ProxyPipeContext,
-    ConnectionContext,
-    IDisposable
+    ConnectionContext
 {
-    readonly CancellationToken _cancellationToken;
     readonly ConnectionContext _context;
-    CancellationTokenSource? _tokenSource;
 
     public SharedConnectionContext(ConnectionContext context, CancellationToken cancellationToken)
         : base(context)
     {
         _context = context;
 
-        _cancellationToken = cancellationToken;
-        _tokenSource = CancellationTokenSource.CreateLinkedTokenSource(context.CancellationToken, cancellationToken);
+        CancellationToken = cancellationToken;
     }
 
-    public override CancellationToken CancellationToken => _tokenSource?.Token ?? _cancellationToken;
+    public override CancellationToken CancellationToken { get; }
 
     public IConnection Connection => _context.Connection;
     public Uri HostAddress => _context.HostAddress;
@@ -72,11 +68,5 @@ public class SharedConnectionContext :
     public ClientContext CreateClientContext(CancellationToken cancellationToken)
     {
         return _context.CreateClientContext(cancellationToken);
-    }
-
-    public void Dispose()
-    {
-        _tokenSource?.Dispose();
-        _tokenSource = null;
     }
 }

@@ -9,29 +9,19 @@ namespace MassTransit.AzureServiceBusTransport
 
     public class SharedSendEndpointContext :
         ProxyPipeContext,
-        SendEndpointContext,
-        IDisposable
+        SendEndpointContext
     {
-        readonly CancellationToken _cancellationToken;
         readonly SendEndpointContext _context;
-        CancellationTokenSource _tokenSource;
 
         public SharedSendEndpointContext(SendEndpointContext context, CancellationToken cancellationToken)
             : base(context)
         {
             _context = context;
 
-            _cancellationToken = cancellationToken;
-            _tokenSource = CancellationTokenSource.CreateLinkedTokenSource(context.CancellationToken, cancellationToken);
+            CancellationToken = cancellationToken;
         }
 
-        public void Dispose()
-        {
-            _tokenSource?.Dispose();
-            _tokenSource = null;
-        }
-
-        public override CancellationToken CancellationToken => _tokenSource?.Token ?? _cancellationToken;
+        public override CancellationToken CancellationToken { get; }
 
         public ConnectionContext ConnectionContext => _context.ConnectionContext;
 
