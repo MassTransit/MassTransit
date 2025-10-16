@@ -51,7 +51,7 @@ public sealed class AmazonSqsMessageReceiver :
 
     async Task Consume()
     {
-        await GetQueueAttributes(_context.CancellationToken).ConfigureAwait(false);
+        await GetQueueAttributes(Stopping).ConfigureAwait(false);
 
         using var algorithm = new RequestRateAlgorithm(new RequestRateAlgorithmOptions
         {
@@ -64,7 +64,7 @@ public sealed class AmazonSqsMessageReceiver :
 
         Task Handle(Message message, CancellationToken cancellationToken)
         {
-            var lockContext = new AmazonSqsReceiveLockContext(_context.InputAddress, message, _receiveSettings, _client, cancellationToken);
+            var lockContext = new AmazonSqsReceiveLockContext(_context.InputAddress, message, _receiveSettings, _client, Stopped);
 
             return _receiveSettings.IsOrdered
                 ? _executorPool.Run(message, () => HandleMessage(message, lockContext), cancellationToken)

@@ -22,7 +22,7 @@ public class ConnectionContextFactory :
 
     public IPipeContextAgent<ConnectionContext> CreateContext(ISupervisor supervisor)
     {
-        Task<ConnectionContext> context = Task.Run(() => CreateConnection(supervisor), supervisor.Stopping);
+        Task<ConnectionContext> context = Task.Run(() => CreateConnection(supervisor), supervisor.Stopped);
 
         IPipeContextAgent<ConnectionContext> contextHandle = supervisor.AddContext(context);
 
