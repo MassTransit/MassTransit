@@ -18,7 +18,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.TransactionConfigurat
         {
             var configurator = new EntityFrameworkSagaRepositoryConfigurator<SimpleSaga>();
             
-            Assert.DoesNotThrow(() => configurator.ConfigureTransaction(false),
+            Assert.DoesNotThrow(() => configurator.SetOptimisticConcurrency(false),
                 "ConfigureTransaction(false) should not throw");
         }
 
@@ -27,7 +27,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.TransactionConfigurat
         {
             var configurator = new EntityFrameworkSagaRepositoryConfigurator<SimpleSaga>();
             
-            Assert.DoesNotThrow(() => configurator.ConfigureTransaction(true),
+            Assert.DoesNotThrow(() => configurator.SetOptimisticConcurrency(true),
                 "ConfigureTransaction(true) should not throw");
         }
 
@@ -37,9 +37,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.TransactionConfigurat
             var configurator = new EntityFrameworkSagaRepositoryConfigurator<SimpleSaga>();
             
             Assert.DoesNotThrow(() => {
-                configurator.ConfigureTransaction(false);
-                configurator.ConfigureTransaction(true);
-                configurator.ConfigureTransaction(false);
+                configurator.SetOptimisticConcurrency(false);
+                configurator.SetOptimisticConcurrency(true);
+                configurator.SetOptimisticConcurrency(false);
             }, "Multiple ConfigureTransaction calls should not throw");
         }
 
@@ -50,7 +50,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.TransactionConfigurat
             
             Assert.DoesNotThrow(() => {
                 configurator.ConcurrencyMode = ConcurrencyMode.Optimistic;
-                configurator.ConfigureTransaction(false);
+                configurator.SetOptimisticConcurrency(false);
                 configurator.IsolationLevel = IsolationLevel.ReadCommitted;
             }, "Fluent configuration with transaction setting should work");
         }

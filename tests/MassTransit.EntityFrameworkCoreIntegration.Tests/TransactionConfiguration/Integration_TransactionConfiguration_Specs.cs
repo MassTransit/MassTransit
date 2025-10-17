@@ -42,27 +42,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.TransactionConfigurat
         }
 
         [Test]
-        public async Task Should_work_with_pessimistic_repository_and_transactions_disabled()
-        {
-            var sagaId = NewId.NextGuid();
-            var message = new InitiateSimpleSaga(sagaId);
-
-            await InputQueueSendEndpoint.Send(message);
-
-            Guid? foundId = await _sagaRepositoryPessimisticNoTransaction.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
-
-            Assert.That(foundId, Is.Not.Null, "Saga should be created successfully with pessimistic repository and no transactions");
-
-            var nextMessage = new CompleteSimpleSaga { CorrelationId = sagaId };
-
-            await InputQueueSendEndpoint.Send(nextMessage);
-
-            foundId = await _sagaRepositoryPessimisticNoTransaction.Value.ShouldContainSaga(x => x.CorrelationId == sagaId && x.Completed, TestTimeout);
-
-            Assert.That(foundId, Is.Not.Null, "Saga should be completed successfully with pessimistic repository and no transactions");
-        }
-
-        [Test]
         public async Task Should_work_with_optimistic_repository_and_transactions_enabled()
         {
             var sagaId = NewId.NextGuid();
@@ -132,7 +111,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.TransactionConfigurat
         }
 
         readonly Lazy<ISagaRepository<SimpleSaga>> _sagaRepositoryOptimisticNoTransaction;
-        readonly Lazy<ISagaRepository<SimpleSaga>> _sagaRepositoryPessimisticNoTransaction;
         readonly Lazy<ISagaRepository<SimpleSaga>> _sagaRepositoryOptimisticWithTransaction;
         readonly Lazy<ISagaRepository<SimpleSaga>> _sagaRepositoryPessimisticWithTransaction;
 
@@ -143,11 +121,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.TransactionConfigurat
                     () => new SimpleSagaContextFactory().CreateDbContext(DbContextOptionsBuilder),
                     null, false));
 
-            _sagaRepositoryPessimisticNoTransaction = new Lazy<ISagaRepository<SimpleSaga>>(() =>
-                EntityFrameworkSagaRepository<SimpleSaga>.CreatePessimistic(
-                    () => new SimpleSagaContextFactory().CreateDbContext(DbContextOptionsBuilder),
-                    RawSqlLockStatements, null, false));
-
             _sagaRepositoryOptimisticWithTransaction = new Lazy<ISagaRepository<SimpleSaga>>(() =>
                 EntityFrameworkSagaRepository<SimpleSaga>.CreateOptimistic(
                     () => new SimpleSagaContextFactory().CreateDbContext(DbContextOptionsBuilder),
@@ -156,7 +129,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.TransactionConfigurat
             _sagaRepositoryPessimisticWithTransaction = new Lazy<ISagaRepository<SimpleSaga>>(() =>
                 EntityFrameworkSagaRepository<SimpleSaga>.CreatePessimistic(
                     () => new SimpleSagaContextFactory().CreateDbContext(DbContextOptionsBuilder),
-                    RawSqlLockStatements, null, true));
+                    RawSqlLockStatements, null));
         }
 
         [OneTimeSetUp]

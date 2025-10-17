@@ -162,12 +162,13 @@ namespace MassTransit.Configuration
 
             var queryExecutor = new PessimisticLoadQueryExecutor<TSaga>(statementProvider, _queryCustomization);
 
-            return new PessimisticSagaRepositoryLockStrategy<TSaga>(queryExecutor, _isolationLevel, _isTransactionEnabled);
+            return new PessimisticSagaRepositoryLockStrategy<TSaga>(queryExecutor, _isolationLevel);
         }
 
-        public void ConfigureTransaction(bool isEnabled)
+        public void SetOptimisticConcurrency(bool useTransaction = true)
         {
-            _isTransactionEnabled = isEnabled;
+            _concurrencyMode = ConcurrencyMode.Optimistic;
+            _isTransactionEnabled = useTransaction;
         }
     }
 }

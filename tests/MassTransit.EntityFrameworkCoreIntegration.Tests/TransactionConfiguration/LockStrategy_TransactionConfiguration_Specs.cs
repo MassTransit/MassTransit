@@ -71,7 +71,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.TransactionConfigurat
         {
             var queryExecutor = new PessimisticLoadQueryExecutor<SimpleSaga>(RawSqlLockStatements, null);
             var lockStrategy = new PessimisticSagaRepositoryLockStrategy<SimpleSaga>(
-                queryExecutor, IsolationLevel.Serializable, true);
+                queryExecutor, IsolationLevel.Serializable);
 
             Assert.That(lockStrategy.IsTransactionEnabled, Is.True,
                 "PessimisticSagaRepositoryLockStrategy should have transactions enabled by default");
@@ -80,27 +80,14 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.TransactionConfigurat
         }
 
         [Test]
-        public void PessimisticLockStrategy_Should_Allow_Transaction_Disabled()
-        {
-            var queryExecutor = new PessimisticLoadQueryExecutor<SimpleSaga>(RawSqlLockStatements, null);
-            var lockStrategy = new PessimisticSagaRepositoryLockStrategy<SimpleSaga>(
-                queryExecutor, IsolationLevel.Serializable, false);
-
-            Assert.That(lockStrategy.IsTransactionEnabled, Is.False,
-                "PessimisticSagaRepositoryLockStrategy should allow transactions to be disabled");
-            Assert.That(lockStrategy.IsolationLevel, Is.EqualTo(IsolationLevel.Serializable),
-                "IsolationLevel should be preserved when transactions are disabled");
-        }
-
-        [Test]
         public void PessimisticLockStrategy_Should_Support_Different_Isolation_Levels()
         {
             var queryExecutor = new PessimisticLoadQueryExecutor<SimpleSaga>(RawSqlLockStatements, null);
             
             var lockStrategyReadCommitted = new PessimisticSagaRepositoryLockStrategy<SimpleSaga>(
-                queryExecutor, IsolationLevel.ReadCommitted, false);
+                queryExecutor, IsolationLevel.ReadCommitted);
             var lockStrategyRepeatableRead = new PessimisticSagaRepositoryLockStrategy<SimpleSaga>(
-                queryExecutor, IsolationLevel.RepeatableRead, false);
+                queryExecutor, IsolationLevel.RepeatableRead);
 
             Assert.That(lockStrategyReadCommitted.IsTransactionEnabled, Is.False,
                 "Transaction setting should be preserved regardless of isolation level");
@@ -122,7 +109,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.TransactionConfigurat
 
             var pessimisticExecutor = new PessimisticLoadQueryExecutor<SimpleSaga>(RawSqlLockStatements, customization);
             var pessimisticLockStrategy = new PessimisticSagaRepositoryLockStrategy<SimpleSaga>(
-                pessimisticExecutor, IsolationLevel.Serializable, false);
+                pessimisticExecutor, IsolationLevel.Serializable);
 
             Assert.That(optimisticLockStrategy.IsTransactionEnabled, Is.False);
             Assert.That(pessimisticLockStrategy.IsTransactionEnabled, Is.False);

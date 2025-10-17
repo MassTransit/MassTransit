@@ -28,20 +28,20 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
         public static ISagaRepository<TSaga> CreatePessimistic(ISagaDbContextFactory<TSaga> dbContextFactory,
             ILockStatementProvider lockStatementProvider = null,
-            Func<IQueryable<TSaga>, IQueryable<TSaga>> queryCustomization = null, bool isTransactionEnabled = true)
+            Func<IQueryable<TSaga>, IQueryable<TSaga>> queryCustomization = null)
         {
             var statementProvider = lockStatementProvider ?? new SqlServerLockStatementProvider();
 
             var queryExecutor = new PessimisticLoadQueryExecutor<TSaga>(statementProvider, queryCustomization);
-            var lockStrategy = new PessimisticSagaRepositoryLockStrategy<TSaga>(queryExecutor, IsolationLevel.Serializable, isTransactionEnabled);
+            var lockStrategy = new PessimisticSagaRepositoryLockStrategy<TSaga>(queryExecutor, IsolationLevel.Serializable);
 
             return CreateRepository(dbContextFactory, lockStrategy);
         }
 
         public static ISagaRepository<TSaga> CreatePessimistic(Func<DbContext> dbContextFactory, ILockStatementProvider lockStatementProvider = null,
-            Func<IQueryable<TSaga>, IQueryable<TSaga>> queryCustomization = null, bool isTransactionEnabled = true)
+            Func<IQueryable<TSaga>, IQueryable<TSaga>> queryCustomization = null)
         {
-            return CreatePessimistic(new DelegateSagaDbContextFactory<TSaga>(dbContextFactory), lockStatementProvider, queryCustomization, isTransactionEnabled);
+            return CreatePessimistic(new DelegateSagaDbContextFactory<TSaga>(dbContextFactory), lockStatementProvider, queryCustomization);
         }
 
         static ISagaRepository<TSaga> CreateRepository(ISagaDbContextFactory<TSaga> dbContextFactory, ISagaRepositoryLockStrategy<TSaga> lockStrategy)

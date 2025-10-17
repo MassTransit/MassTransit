@@ -44,9 +44,13 @@ namespace MassTransit
             where TContext : DbContext;
 
         /// <summary>
-        /// Configure whether to use transactions. By default, transactions are enabled.
+        /// Configures the saga to use optimistic concurrency, with optional transaction support.
         /// </summary>
-        void ConfigureTransaction(bool isEnabled);
+        /// <param name="useTransaction">
+        /// If <c>true</c>, operations on the saga will be executed within a transaction; 
+        /// if <c>false</c>, no transaction will be used.
+        /// </param>
+        void SetOptimisticConcurrency(bool useTransaction = true);
     }
 
 

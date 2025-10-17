@@ -15,17 +15,19 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
     {
         readonly ILoadQueryExecutor<TSaga> _executor;
 
-        public PessimisticSagaRepositoryLockStrategy(ILoadQueryExecutor<TSaga> executor, IsolationLevel isolationLevel, bool isTransactionEnabled)
+        public PessimisticSagaRepositoryLockStrategy(ILoadQueryExecutor<TSaga> executor, IsolationLevel isolationLevel)
         {
             _executor = executor;
 
             IsolationLevel = isolationLevel;
-            IsTransactionEnabled = isTransactionEnabled;
         }
 
         public IsolationLevel IsolationLevel { get; }
 
-        public bool IsTransactionEnabled { get; }
+        /// <summary>
+        /// Pessimistic concurrency always uses transactions as locks require transaction scope.
+        /// </summary>
+        public bool IsTransactionEnabled => true;
 
         public Task<TSaga> Load(DbContext context, Guid correlationId, CancellationToken cancellationToken)
         {
