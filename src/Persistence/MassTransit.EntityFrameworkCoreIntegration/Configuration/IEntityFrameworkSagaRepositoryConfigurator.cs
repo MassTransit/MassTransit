@@ -42,6 +42,11 @@ namespace MassTransit
         /// <typeparam name="TContext"></typeparam>
         void ExistingDbContext<TContext>()
             where TContext : DbContext;
+
+        /// <summary>
+        /// Configure whether to use transactions. By default, transactions are enabled.
+        /// </summary>
+        void ConfigureTransaction(bool isEnabled);
     }
 
 
@@ -54,10 +59,5 @@ namespace MassTransit
         /// </summary>
         /// <param name="queryCustomization"></param>
         void CustomizeQuery(Func<IQueryable<TSaga>, IQueryable<TSaga>> queryCustomization);
-
-        /// <summary>
-        /// Configure whether to use transactions. By default, transactions are enabled.
-        /// </summary>
-        void ConfigureTransaction(bool isEnabled);
     }
 }
