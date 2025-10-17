@@ -89,9 +89,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.TransactionConfigurat
             var lockStrategyRepeatableRead = new PessimisticSagaRepositoryLockStrategy<SimpleSaga>(
                 queryExecutor, IsolationLevel.RepeatableRead);
 
-            Assert.That(lockStrategyReadCommitted.IsTransactionEnabled, Is.False,
+            Assert.That(lockStrategyReadCommitted.IsTransactionEnabled, Is.True,
                 "Transaction setting should be preserved regardless of isolation level");
-            Assert.That(lockStrategyRepeatableRead.IsTransactionEnabled, Is.False,
+            Assert.That(lockStrategyRepeatableRead.IsTransactionEnabled, Is.True,
                 "Transaction setting should be preserved regardless of isolation level");
             
             Assert.That(lockStrategyReadCommitted.IsolationLevel, Is.EqualTo(IsolationLevel.ReadCommitted));
@@ -112,7 +112,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.TransactionConfigurat
                 pessimisticExecutor, IsolationLevel.Serializable);
 
             Assert.That(optimisticLockStrategy.IsTransactionEnabled, Is.False);
-            Assert.That(pessimisticLockStrategy.IsTransactionEnabled, Is.False);
+            Assert.That(pessimisticLockStrategy.IsTransactionEnabled, Is.True);
             
             // Verify strategies were created successfully with customization
             Assert.That(optimisticLockStrategy, Is.Not.Null);
