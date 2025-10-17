@@ -1,13 +1,13 @@
 namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 {
+    using MassTransit.Saga;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Storage;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using MassTransit.Saga;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Storage;
 
 
     public class EntityFrameworkSagaRepositoryContextFactory<TSaga> :
@@ -161,6 +161,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 
         Task WithinTransaction(DbContext context, CancellationToken cancellationToken, Func<Task> callback)
         {
+            if (!_lockStrategy.IsTransactionEnabled)
+                return callback();
+
             async Task<bool> Create()
             {
                 await callback().ConfigureAwait(false);

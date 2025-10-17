@@ -15,14 +15,17 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
     {
         readonly ILoadQueryExecutor<TSaga> _executor;
 
-        public PessimisticSagaRepositoryLockStrategy(ILoadQueryExecutor<TSaga> executor, IsolationLevel isolationLevel)
+        public PessimisticSagaRepositoryLockStrategy(ILoadQueryExecutor<TSaga> executor, IsolationLevel isolationLevel, bool isTransactionEnabled)
         {
             _executor = executor;
 
             IsolationLevel = isolationLevel;
+            IsTransactionEnabled = isTransactionEnabled;
         }
 
         public IsolationLevel IsolationLevel { get; }
+
+        public bool IsTransactionEnabled { get; }
 
         public Task<TSaga> Load(DbContext context, Guid correlationId, CancellationToken cancellationToken)
         {

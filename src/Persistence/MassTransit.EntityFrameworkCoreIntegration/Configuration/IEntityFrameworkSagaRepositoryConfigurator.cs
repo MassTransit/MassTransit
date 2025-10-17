@@ -1,10 +1,10 @@
 namespace MassTransit
 {
+    using EntityFrameworkCoreIntegration;
+    using Microsoft.EntityFrameworkCore;
     using System;
     using System.Data;
     using System.Linq;
-    using EntityFrameworkCoreIntegration;
-    using Microsoft.EntityFrameworkCore;
 
 
     public interface IEntityFrameworkSagaRepositoryConfigurator
@@ -54,5 +54,10 @@ namespace MassTransit
         /// </summary>
         /// <param name="queryCustomization"></param>
         void CustomizeQuery(Func<IQueryable<TSaga>, IQueryable<TSaga>> queryCustomization);
+
+        /// <summary>
+        /// Configure whether to use transactions. By default, transactions are enabled.
+        /// </summary>
+        void ConfigureTransaction(bool isEnabled);
     }
 }
