@@ -1,11 +1,11 @@
 namespace MassTransit.EntityFrameworkCoreIntegration
 {
+    using Microsoft.EntityFrameworkCore;
+    using Saga;
     using System;
     using System.Data;
     using System.Threading;
     using System.Threading.Tasks;
-    using Microsoft.EntityFrameworkCore;
-    using Saga;
 
 
     public interface ISagaRepositoryLockStrategy<TSaga>
@@ -16,5 +16,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         Task<TSaga> Load(DbContext context, Guid correlationId, CancellationToken cancellationToken);
 
         Task<SagaLockContext<TSaga>> CreateLockContext(DbContext context, ISagaQuery<TSaga> query, CancellationToken cancellationToken);
+
+        bool IsTransactionEnabled { get; }
     }
 }

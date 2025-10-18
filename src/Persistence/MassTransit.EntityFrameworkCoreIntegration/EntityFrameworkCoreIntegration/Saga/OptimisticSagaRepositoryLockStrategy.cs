@@ -16,15 +16,18 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
         readonly Func<IQueryable<TSaga>, IQueryable<TSaga>> _queryCustomization;
 
         public OptimisticSagaRepositoryLockStrategy(ILoadQueryExecutor<TSaga> executor, Func<IQueryable<TSaga>, IQueryable<TSaga>> queryCustomization,
-            IsolationLevel isolationLevel)
+            IsolationLevel isolationLevel, bool isTransactionEnabled)
         {
             _executor = executor;
             _queryCustomization = queryCustomization;
 
             IsolationLevel = isolationLevel;
+            IsTransactionEnabled = isTransactionEnabled;
         }
 
         public IsolationLevel IsolationLevel { get; }
+
+        public bool IsTransactionEnabled { get; }
 
         public Task<TSaga> Load(DbContext context, Guid correlationId, CancellationToken cancellationToken)
         {

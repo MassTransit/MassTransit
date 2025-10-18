@@ -12,18 +12,18 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         where TSaga : class, ISaga
     {
         public static ISagaRepository<TSaga> CreateOptimistic(ISagaDbContextFactory<TSaga> dbContextFactory,
-            Func<IQueryable<TSaga>, IQueryable<TSaga>> queryCustomization = null)
+            Func<IQueryable<TSaga>, IQueryable<TSaga>> queryCustomization = null, bool isTransactionEnabled = true)
         {
             var queryExecutor = new OptimisticLoadQueryExecutor<TSaga>(queryCustomization);
-            var lockStrategy = new OptimisticSagaRepositoryLockStrategy<TSaga>(queryExecutor, queryCustomization, IsolationLevel.ReadCommitted);
+            var lockStrategy = new OptimisticSagaRepositoryLockStrategy<TSaga>(queryExecutor, queryCustomization, IsolationLevel.ReadCommitted, isTransactionEnabled);
 
             return CreateRepository(dbContextFactory, lockStrategy);
         }
 
         public static ISagaRepository<TSaga> CreateOptimistic(Func<DbContext> dbContextFactory,
-            Func<IQueryable<TSaga>, IQueryable<TSaga>> queryCustomization = null)
+            Func<IQueryable<TSaga>, IQueryable<TSaga>> queryCustomization = null, bool isTransactionEnabled = true)
         {
-            return CreateOptimistic(new DelegateSagaDbContextFactory<TSaga>(dbContextFactory), queryCustomization);
+            return CreateOptimistic(new DelegateSagaDbContextFactory<TSaga>(dbContextFactory), queryCustomization, isTransactionEnabled);
         }
 
         public static ISagaRepository<TSaga> CreatePessimistic(ISagaDbContextFactory<TSaga> dbContextFactory,

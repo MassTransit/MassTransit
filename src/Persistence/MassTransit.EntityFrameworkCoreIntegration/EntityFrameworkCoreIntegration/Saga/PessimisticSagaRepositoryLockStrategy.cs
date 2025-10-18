@@ -24,6 +24,11 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 
         public IsolationLevel IsolationLevel { get; }
 
+        /// <summary>
+        /// Pessimistic concurrency always uses transactions as locks require transaction scope.
+        /// </summary>
+        public bool IsTransactionEnabled => true;
+
         public Task<TSaga> Load(DbContext context, Guid correlationId, CancellationToken cancellationToken)
         {
             return _executor.Load(context, correlationId, cancellationToken);

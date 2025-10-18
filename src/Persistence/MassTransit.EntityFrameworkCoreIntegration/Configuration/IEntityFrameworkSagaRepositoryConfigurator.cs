@@ -1,10 +1,10 @@
 namespace MassTransit
 {
+    using EntityFrameworkCoreIntegration;
+    using Microsoft.EntityFrameworkCore;
     using System;
     using System.Data;
     using System.Linq;
-    using EntityFrameworkCoreIntegration;
-    using Microsoft.EntityFrameworkCore;
 
 
     public interface IEntityFrameworkSagaRepositoryConfigurator
@@ -42,6 +42,15 @@ namespace MassTransit
         /// <typeparam name="TContext"></typeparam>
         void ExistingDbContext<TContext>()
             where TContext : DbContext;
+
+        /// <summary>
+        /// Configures the saga to use optimistic concurrency, with optional transaction support.
+        /// </summary>
+        /// <param name="useTransaction">
+        /// If <c>true</c>, operations on the saga will be executed within a transaction; 
+        /// if <c>false</c>, no transaction will be used.
+        /// </param>
+        void SetOptimisticConcurrency(bool useTransaction = true);
     }
 
 

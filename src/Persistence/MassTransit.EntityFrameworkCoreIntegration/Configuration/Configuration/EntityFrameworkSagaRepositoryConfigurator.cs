@@ -25,6 +25,7 @@ namespace MassTransit.Configuration
         IsolationLevel _isolationLevel;
         ILockStatementProvider _lockStatementProvider;
         Func<IQueryable<TSaga>, IQueryable<TSaga>> _queryCustomization;
+        bool _isTransactionEnabled = true;
 
         public EntityFrameworkSagaRepositoryConfigurator()
         {
@@ -152,7 +153,7 @@ namespace MassTransit.Configuration
         {
             var queryExecutor = new OptimisticLoadQueryExecutor<TSaga>(_queryCustomization);
 
-            return new OptimisticSagaRepositoryLockStrategy<TSaga>(queryExecutor, _queryCustomization, _isolationLevel);
+            return new OptimisticSagaRepositoryLockStrategy<TSaga>(queryExecutor, _queryCustomization, _isolationLevel, _isTransactionEnabled);
         }
 
         ISagaRepositoryLockStrategy<TSaga> CreatePessimisticLockStrategy()
@@ -162,6 +163,12 @@ namespace MassTransit.Configuration
             var queryExecutor = new PessimisticLoadQueryExecutor<TSaga>(statementProvider, _queryCustomization);
 
             return new PessimisticSagaRepositoryLockStrategy<TSaga>(queryExecutor, _isolationLevel);
+        }
+
+        public void SetOptimisticConcurrency(bool useTransaction = true)
+        {
+            _concurrencyMode = ConcurrencyMode.Optimistic;
+            _isTransactionEnabled = useTransaction;
         }
     }
 }
