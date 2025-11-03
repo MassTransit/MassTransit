@@ -1,5 +1,10 @@
 # Announcing MassTransit v9
 
+## UPDATED November 3, 2025
+
+**[Massient, Inc.](https://massient.com) is a new company created by MassTransit's founder, Chris Patterson. License information and pricing is now available,
+and website updates will continue as details are added.**
+
 ## A New Era for Enterprise Messaging
 
 For over a decade, MassTransit has been the leading open-source .NET messaging framework, trusted by thousands developers and enterprises worldwide to build
@@ -8,7 +13,7 @@ logistics, and seamlessly integrated with cloud platforms like Microsoft Azure, 
 MassTransit has evolved into a cornerstone of modern event-driven architectures. Today, we’re excited to share an important milestone!
 
 ::alert{type="info"}
-Update - post announcement Q&A added [below](#qa) (updated again, 2025-04-03 9:30AM CDT)
+Update — post-announcement Q&A added [below](#qa) (updated again, 2025-04-03 9:30AM CDT)
 ::
 
 ### We are transitioning to a commercial model.
@@ -91,23 +96,20 @@ Understandably the most asked question, and with good reason. Pricing will be re
 and subscription-based. The best pricing will be for annual subscriptions (equivalent to ten monthly payments), but monthly subscriptions will be available as
 well.
 
-The price target for small/medium-sized business is $400 USD/month, or $4000 USD/year (direct billed, payable via invoice, bank transfer or credit card). For
-large organizations with multiple teams or complex "enterprise-level" procurement policies, the price target is closer to $1200 USD/month, or $12000 USD/year.
+Pricing is now available at [Massient](https://massient.com).
 
-_We will consider a top-line revenue threshold so that small and pre-revenue startup companies can use MassTransit v9 at a significantly reduced cost (similar to
-what other solutions have adopted)_.
+~~The price target for small/medium-sized business is $400 USD/month, or $4000 USD/year (direct billed, payable via invoice, bank transfer, or credit card). For
+large organizations with multiple teams or complex "enterprise-level" procurement policies, the price target is closer to $1200 USD/month, or $12000 USD/year.~~
 
-These price targets would include standard email-based support with a 72-hour response time. Shorter SLA's may be available, but with a price surcharge.
+~~_We will consider a top-line revenue threshold so that small and pre-revenue startup companies can use MassTransit v9 at a significantly reduced cost (similar to
+what other solutions have adopted)_.~~
 
-There will be no cost to install the packages and use them for local development purposes (evaluation), a temporary license will be generated and the software
-will run unlicensed for a short evaluation period.
+~~These price targets would include standard email-based support with a 72-hour response time. Shorter SLA's may be available, but with a price surcharge.~~
 
-There are no plans at this time to offer any sort of "ala carte" pricing for individual components, transports, etc.
+~~There will be no cost to install the packages and use them for local development purposes (evaluation), a temporary license will be generated and the software
+will run unlicensed for a short evaluation period.~~
 
-::alert{type="warning"}
-To be clear, these are price targets, not finalized prices. It's important to set expectations early rather than encourage speculation. And we will continue to
-listen to feedback and make adjustments.
-::
+~~There are no plans at this time to offer any sort of "ala carte" pricing for individual components, transports, etc.~~
 
 ### What about consultants/agencies using MT in customer solutions?
 
@@ -118,7 +120,7 @@ native APIs, your customer is paying you money to write code that is _not_ busin
 bite you. It's why many consulting companies use MassTransit – reduced time to value. Developers focus on business value, not infrastructure.
 
 To that end, the goal is to provide a way for consultants to build and deploy applications using MassTransit without forcing customers to understand and manage
-the license. We'll work through the details, but the general structure would be an ISV could license MassTransit, and deploy client applications with a valid
+the license. We'll work through the details, but the general structure would be an ISV could license MassTransit and deploy client applications with a valid
 license. Since license checks are tied to the deployment (vs an expiration date), the software would continue to run without interruption. Updates to that
 application would require a valid license at the time of the update's deployment.
 
@@ -135,8 +137,10 @@ Patches and updates to v8 through at least the end of 2026. That's 1.75 years fr
 
 ### Will there be a free license for non-profits?
 
-Applications for a non-profit license may be considered on a case-by-case basis, but not initially. Details about special pricing for not-for-profit
-organizations may be announced at a future date. As stated above, v8 will remain open source and continue to receive patches/updates at least through 2026.
+Details for non-profits are covered in the [FAQ](https://massient.com/#faq) on the Massient, Inc. website.
+
+~~Applications for a non-profit license may be considered on a case-by-case basis, but not initially. Details about special pricing for not-for-profit
+organizations may be announced at a future date. As stated above, v8 will remain open source and continue to receive patches/updates at least through 2026.~~
 
 ### Will licensing be complex, seat-based, etc.?
 
@@ -155,7 +159,7 @@ production environments will continue to run without interruption or degradation
 
 ### Will the v9 code be open source?
 
-Probably. I expect tha the v9 code will become the main branch in the existing repository, with v8 being a separate branch/codebase. NuGet packages will be
+Probably. I expect that the v9 code will become the main branch in the existing repository, with v8 being a separate branch/codebase. NuGet packages will be
 built and deployed as they are today, via [NuGet](https://www.nuget.org/packages/MassTransit/). To ease upgrades, the packages will be published with the same
 names, namespaces, etc. so that applications will compiled in v9 the same as they did in v8. At least, that's the way I see it right now.
 
