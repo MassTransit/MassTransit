@@ -31,8 +31,8 @@ namespace MassTransit.AzureServiceBusTransport
             if (IsStopping)
                 return;
 
-            MessageLockContext lockContext = new ServiceBusSessionMessageLockContext(messageSession, message, cancellationToken);
-            MessageSessionContext sessionContext = new ServiceBusMessageSessionContext(messageSession, cancellationToken);
+            MessageLockContext lockContext = new ServiceBusSessionMessageLockContext(messageSession, message, Stopped);
+            MessageSessionContext sessionContext = new ServiceBusMessageSessionContext(messageSession, Stopped);
             var context = new ServiceBusReceiveContext(message, _context, lockContext, _clientContext, sessionContext);
 
             CancellationTokenSource cancellationTokenSource = null;
