@@ -36,9 +36,9 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Restore NuGet packages
         run: dotnet restore
@@ -57,9 +57,9 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Unit Tests
         run: dotnet test -c Release -f net9.0 --logger GitHubActions --filter Category!=Flaky
@@ -85,9 +85,9 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Test ActiveMQ
         run: dotnet test -c Release --logger GitHubActions --filter Category!=Flaky
@@ -119,9 +119,9 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Test Database Transport
         run: dotnet test -c Release --logger GitHubActions --filter "Category!=Flaky&Category!=Integration"
@@ -137,9 +137,9 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Test Azure Service Bus
         env:
@@ -163,9 +163,9 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Test RabbitMQ
         run: dotnet test -c Release --logger GitHubActions --filter Category!=Flaky
@@ -186,9 +186,9 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Test SQS
         run: dotnet test -c Release --logger GitHubActions --filter Category!=Flaky
@@ -202,9 +202,9 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Spin up test environment
         run: |
@@ -231,9 +231,9 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Test CosmosDB
         env:
@@ -261,9 +261,9 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Test Dapper
         run: dotnet test -c Release --logger GitHubActions --filter "Category!=Flaky&Category!=Integration"
@@ -295,9 +295,9 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Test EntityFrameworkCore
         run: dotnet test -c Release --logger GitHubActions --filter "Category!=Flaky&Category!=Integration"
@@ -323,9 +323,9 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Test Marten
         run: dotnet test -c Release --logger GitHubActions --filter Category!=Flaky
@@ -339,9 +339,9 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Spin up test environment
         run: |
@@ -365,9 +365,9 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Test NHibernate
         run: dotnet test -c Release --logger GitHubActions --filter Category!=Flaky
@@ -387,9 +387,9 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Test Redis
         run: dotnet test -c Release --logger GitHubActions --filter Category!=Flaky
@@ -409,9 +409,9 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Test Valkey
         run: dotnet test -c Release --logger GitHubActions --filter Category!=Flaky
@@ -425,9 +425,9 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Test Hangfire
         run: dotnet test -c Release --logger GitHubActions --filter Category!=Flaky
@@ -441,9 +441,9 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Test Quartz
         run: dotnet test -c Release --logger GitHubActions --filter Category!=Flaky
@@ -456,9 +456,9 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Spin up test environment
         run: |
@@ -484,9 +484,9 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Spin up test environment
         run: |
@@ -511,9 +511,9 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Test SignalR
         run: dotnet test -c Release --logger GitHubActions --filter Category!=Flaky
@@ -574,9 +574,9 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Build and Pack Solution
         run: |

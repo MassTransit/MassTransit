@@ -5,6 +5,7 @@ namespace MassTransit.Internals
     using System.Threading.Tasks;
 
 
+    #if !NET10_0_OR_GREATER
     public static class AsyncEnumerableExtensions
     {
         public static async Task<IList<TElement>> ToListAsync<TElement>(this IAsyncEnumerable<TElement> elements)
@@ -27,4 +28,5 @@ namespace MassTransit.Internals
             return elementsList;
         }
     }
+    #endif
 }
