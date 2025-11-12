@@ -3,8 +3,8 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="Apache.NMS.ActiveMQ" Version="2.1.1" />
-    <PackageVersion Include="Apache.NMS.AMQP" Version="2.2.0" />
+    <PackageVersion Include="Apache.NMS.ActiveMQ" Version="2.2.0" />
+    <PackageVersion Include="Apache.NMS.AMQP" Version="2.4.0" />
     <PackageVersion Include="AWSSDK.DynamoDBv2" Version="4.0.6.3" />
     <PackageVersion Include="AWSSDK.SimpleNotificationService" Version="4.0.1.3" />
     <PackageVersion Include="AWSSDK.S3" Version="4.0.7.4" />
