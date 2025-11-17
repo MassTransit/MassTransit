@@ -16,8 +16,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
         [Test]
         public async Task Should_fault_when_failed_to_start()
         {
-            using var tracerProvider = TraceConfig.CreateTraceProvider("ef-core-tests");
-
             await using var provider = CreateServiceProvider();
 
             var harness = provider.GetTestHarness();
@@ -41,8 +39,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
         [Test]
         public async Task Should_only_publish_one_fault()
         {
-            using var tracerProvider = TraceConfig.CreateTraceProvider("ef-core-tests");
-
             await using var provider = CreateServiceProvider();
 
             var harness = provider.GetTestHarness();
@@ -99,8 +95,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
         [Test]
         public async Task Should_start_successfully_with_middleware()
         {
-            using var tracerProvider = TraceConfig.CreateTraceProvider("ef-core-tests");
-
             await using var provider = CreateServiceProvider();
 
             var harness = provider.GetTestHarness();
@@ -123,8 +117,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
         [Explicit]
         public async Task Should_start_with_delay_successfully()
         {
-            using var tracerProvider = TraceConfig.CreateTraceProvider("ef-core-tests");
-
             await using var provider = CreateServiceProvider(x =>
             {
                 x.UsingInMemory((context, cfg) =>
@@ -148,7 +140,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
 
                 var startTime = DateTime.UtcNow;
 
-                Response<StartupComplete> complete = await client.GetResponse<StartupComplete>(new Start() { Delay = TimeSpan.FromSeconds(3) },
+                Response<StartupComplete> complete = await client.GetResponse<StartupComplete>(new Start { Delay = TimeSpan.FromSeconds(3) },
                     harness.CancellationToken);
 
                 var endTime = DateTime.UtcNow;
@@ -172,6 +164,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
             });
 
             services
+                .AddTelemetryListener()
                 .AddHostedService<MigrationHostedService<ResponsibleDbContext>>()
                 .AddMassTransitTestHarness(x =>
                 {
@@ -242,11 +235,11 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
                 Initially(
                     When(Started, x => x.Data.FailToStart)
                         .Then(context => throw new IntentionalTestException()),
-                    When(Started, x => x.Data.FailToStart == false && x.Data.Delay.HasValue == false)
+                    When(Started, x => !x.Data.FailToStart && !x.Data.Delay.HasValue)
                         .Respond(new StartupComplete())
                         .Activity(x => x.OfType<ReliableStateMachineActivity>())
                         .TransitionTo(Running),
-                    When(Started, x => x.Data.FailToStart == false && x.Data.Delay.HasValue)
+                    When(Started, x => !x.Data.FailToStart && x.Data.Delay.HasValue)
                         .Then(context =>
                         {
                             context.Saga.RequestId = context.RequestId;

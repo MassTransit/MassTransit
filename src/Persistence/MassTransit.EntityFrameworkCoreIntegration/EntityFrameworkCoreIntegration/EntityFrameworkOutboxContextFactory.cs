@@ -3,6 +3,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.Diagnostics;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -40,6 +41,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             async Task<bool> Execute()
             {
                 var lockId = NewId.NextGuid();
+
+                var timer = Stopwatch.StartNew();
 
                 await using var transaction = await _dbContext.Database.BeginTransactionAsync(_isolationLevel, context.CancellationToken)
                     .ConfigureAwait(false);
@@ -82,12 +85,30 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
                         await next.Send(outboxContext).ConfigureAwait(false);
 
-                        await _dbContext.SaveChangesAsync().ConfigureAwait(false);
+                        try
+                        {
+                            await _dbContext.SaveChangesAsync().ConfigureAwait(false);
+                        }
+                        catch (Exception exception)
+                        {
+                            await context.NotifyFaulted(timer.Elapsed, TypeCache<T>.ShortName, exception).ConfigureAwait(false);
+
+                            throw;
+                        }
 
                         continueProcessing = outboxContext.ContinueProcessing;
                     }
 
-                    await transaction.CommitAsync(context.CancellationToken).ConfigureAwait(false);
+                    try
+                    {
+                        await transaction.CommitAsync(context.CancellationToken).ConfigureAwait(false);
+                    }
+                    catch (Exception exception)
+                    {
+                        await context.NotifyFaulted(timer.Elapsed, TypeCache<T>.ShortName, exception).ConfigureAwait(false);
+
+                        throw;
+                    }
 
                     return continueProcessing;
                 }

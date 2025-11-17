@@ -1,6 +1,7 @@
 namespace MassTransit.MongoDbIntegration.Outbox
 {
     using System;
+    using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
     using Middleware;
@@ -32,6 +33,8 @@ namespace MassTransit.MongoDbIntegration.Outbox
 
             async Task<bool> Execute()
             {
+                var timer = Stopwatch.StartNew();
+
                 await _dbContext.BeginTransaction(context.CancellationToken).ConfigureAwait(false);
 
                 try
@@ -74,22 +77,36 @@ namespace MassTransit.MongoDbIntegration.Outbox
 
                         inboxState.Version++;
 
-                        FilterDefinition<InboxState> updateFilter = builder.Eq(x => x.MessageId, messageId) & builder.Eq(x => x.ConsumerId, options.ConsumerId)
-                            & builder.Lt(x => x.Version, inboxState.Version);
+                        try
+                        {
+                            FilterDefinition<InboxState> updateFilter = builder.Eq(x => x.MessageId, messageId)
+                                & builder.Eq(x => x.ConsumerId, options.ConsumerId)
+                                & builder.Lt(x => x.Version, inboxState.Version);
 
-                        await inboxStateCollection.FindOneAndReplace(updateFilter, inboxState, context.CancellationToken).ConfigureAwait(false);
+                            await inboxStateCollection.FindOneAndReplace(updateFilter, inboxState, context.CancellationToken).ConfigureAwait(false);
+                        }
+                        catch (Exception exception)
+                        {
+                            await context.NotifyFaulted(timer.Elapsed, TypeCache<T>.ShortName, exception).ConfigureAwait(false);
+
+                            throw;
+                        }
 
                         continueProcessing = outboxContext.ContinueProcessing;
                     }
 
-                    await _dbContext.CommitTransaction(context.CancellationToken).ConfigureAwait(false);
+                    try
+                    {
+                        await _dbContext.CommitTransaction(context.CancellationToken).ConfigureAwait(false);
+                    }
+                    catch (Exception exception)
+                    {
+                        await context.NotifyFaulted(timer.Elapsed, TypeCache<T>.ShortName, exception).ConfigureAwait(false);
+
+                        throw;
+                    }
 
                     return continueProcessing;
-                }
-                catch (MongoCommandException)
-                {
-                    await AbortTransaction().ConfigureAwait(false);
-                    throw;
                 }
                 catch (Exception)
                 {
