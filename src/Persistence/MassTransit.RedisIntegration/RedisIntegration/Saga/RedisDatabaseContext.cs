@@ -113,7 +113,8 @@ namespace MassTransit.RedisIntegration.Saga
 
         Task Put(string instance, Guid correlationId)
         {
-            return _database.StringSetAsync(_options.FormatSagaKey(correlationId), instance, _options.Expiry);
+            return _database.StringSetAsync(_options.FormatSagaKey(correlationId), instance,
+                _options.Expiry.HasValue ? new Expiration(_options.Expiry.Value) : Expiration.Default);
         }
 
         Task Delete(Guid correlationId)
