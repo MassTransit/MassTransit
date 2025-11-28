@@ -1,0 +1,2001 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "MassTransit is a message-based distributed application framework for .NET http://masstransit-project.com.\r\n\r\nMassTransit supports OpenTelemetry metric capture, which provides useful observability into the bus, endpoints, consumers, and messages.\r\n\r\nThis dashboard shows the messages published and sent using MassTransit framework with Azure Application Insights.",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 51,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 58,
+      "panels": [],
+      "title": "General",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${ds}"
+      },
+      "description": "Events are objects published and broadcasted to be picked up by all consumers that are listening to that event type. It means that something has happened. (e.g.: UserUpdated)",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 1
+      },
+      "id": 55,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "11.6.3",
+      "targets": [
+        {
+          "azureLogAnalytics": {
+            "dashboardTime": true,
+            "query": "customMetrics\n| where name == \"masstransit.messages.published\"\n| extend message_type = coalesce(tostring(customDimensions[\"message_type\"]), \"Unknown\")\n| extend app = coalesce(tostring(customDimensions[\"app\"]), \"Unknown\")\n| extend domain = coalesce(tostring(customDimensions[\"domain\"]), \"Unknown\")\n| summarize Value = sum(value) by bin(timestamp, 1h), app, domain, message_type\n| order by timestamp desc\n| project timestamp, app, domain, message_type, Value",
+            "resources": [
+              "/subscriptions/${sub}/resourceGroups/${rg}/providers/microsoft.insights/components/${res}"
+            ],
+            "resultFormat": "table",
+            "timeColumn": "timestamp"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Log Analytics",
+          "refId": "A"
+        }
+      ],
+      "title": "Messages Published (Events)",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${ds}"
+      },
+      "description": "Commands are objects sent direct to an endpoint and will be picked up by the first consumer that implements it. It means that something must be performed after receiving that message.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 1
+      },
+      "id": 66,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "11.6.3",
+      "targets": [
+        {
+          "azureLogAnalytics": {
+            "dashboardTime": true,
+            "query": "customMetrics\n| where name == \"masstransit.messages.sent\"\n| extend message_type = coalesce(tostring(customDimensions[\"message_type\"]), \"Unknown\")\n| extend app = coalesce(tostring(customDimensions[\"app\"]), \"Unknown\")\n| extend domain = coalesce(tostring(customDimensions[\"domain\"]), \"Unknown\")\n| summarize Value = sum(value) by bin(timestamp, 1h), app, domain, message_type\n| order by timestamp desc\n| project timestamp, app, domain, message_type, Value",
+            "resources": [
+              "/subscriptions/${sub}/resourceGroups/${rg}/providers/microsoft.insights/components/${res}"
+            ],
+            "resultFormat": "table",
+            "timeColumn": "timestamp"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Log Analytics",
+          "refId": "A"
+        }
+      ],
+      "title": "Messages Sent (Commands)",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${ds}"
+      },
+      "description": "Number of bus instances",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 6,
+        "x": 0,
+        "y": 11
+      },
+      "id": 52,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.3",
+      "targets": [
+        {
+          "azureMonitor": {
+            "aggregation": "Average",
+            "allowedTimeGrainsMs": [
+              60000,
+              300000,
+              900000,
+              1800000,
+              3600000,
+              21600000,
+              43200000,
+              86400000
+            ],
+            "customNamespace": "Azure.ApplicationInsights",
+            "dimensionFilters": [],
+            "metricName": "messaging.masstransit.bus",
+            "metricNamespace": "microsoft.insights/components",
+            "region": "centralus",
+            "resources": [
+              {
+                "metricNamespace": "microsoft.insights/components",
+                "region": "centralus",
+                "resourceGroup": "${rg}",
+                "resourceName": "${res}",
+                "subscription": "${sub}"
+              }
+            ],
+            "timeGrain": "auto"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Monitor",
+          "refId": "A",
+          "subscription": "${sub}"
+        }
+      ],
+      "title": "Bus instances",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${ds}"
+      },
+      "description": "Total number of messages consumed",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 18,
+        "x": 6,
+        "y": 11
+      },
+      "id": 56,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "11.6.3",
+      "targets": [
+        {
+          "azureLogAnalytics": {
+            "dashboardTime": true,
+            "query": "customMetrics\n| where name == \"masstransit.messages.consumed\"\n| extend message_type = coalesce(tostring(customDimensions[\"message_type\"]), \"Unknown\")\n| extend consumer_type = coalesce(tostring(customDimensions[\"consumer_type\"]), \"Unknown\")\n| extend app = coalesce(tostring(customDimensions[\"app\"]), \"Unknown\")\n| extend domain = coalesce(tostring(customDimensions[\"domain\"]), \"Unknown\")\n| summarize Value = sum(value) by bin(timestamp, 1h), app, consumer_type, domain, message_type\n| order by timestamp desc\n| project timestamp, app, consumer_type, domain, message_type, Value",
+            "resources": [
+              "/subscriptions/${sub}/resourceGroups/${rg}/providers/microsoft.insights/components/${res}"
+            ],
+            "resultFormat": "table",
+            "timeColumn": "timestamp"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Log Analytics",
+          "refId": "A"
+        }
+      ],
+      "title": "Messages Consumed",
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 21
+      },
+      "id": 37,
+      "panels": [],
+      "title": "Producers",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${ds}"
+      },
+      "description": "Total number of messages published (one to many events)",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 0,
+        "y": 22
+      },
+      "id": 43,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.3",
+      "targets": [
+        {
+          "azureMonitor": {
+            "aggregation": "Total",
+            "allowedTimeGrainsMs": [
+              60000,
+              300000,
+              900000,
+              1800000,
+              3600000,
+              21600000,
+              43200000,
+              86400000
+            ],
+            "customNamespace": "Azure.ApplicationInsights",
+            "dimensionFilters": [],
+            "metricName": "masstransit.messages.published",
+            "metricNamespace": "microsoft.insights/components",
+            "region": "centralus",
+            "resources": [
+              {
+                "metricNamespace": "microsoft.insights/components",
+                "region": "centralus",
+                "resourceGroup": "${rg}",
+                "resourceName": "${res}",
+                "subscription": "${sub}"
+              }
+            ],
+            "timeGrain": "auto"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Monitor",
+          "refId": "A",
+          "subscription": "${sub}"
+        }
+      ],
+      "title": "Publish Total",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${ds}"
+      },
+      "description": "Rate of messages published per second",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 6,
+        "y": 22
+      },
+      "id": 64,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.3",
+      "targets": [
+        {
+          "azureMonitor": {
+            "aggregation": "Average",
+            "allowedTimeGrainsMs": [
+              60000,
+              300000,
+              900000,
+              1800000,
+              3600000,
+              21600000,
+              43200000,
+              86400000
+            ],
+            "customNamespace": "Azure.ApplicationInsights",
+            "dimensionFilters": [],
+            "metricName": "masstransit.messages.published",
+            "metricNamespace": "microsoft.insights/components",
+            "region": "centralus",
+            "resources": [
+              {
+                "metricNamespace": "microsoft.insights/components",
+                "region": "centralus",
+                "resourceGroup": "${rg}",
+                "resourceName": "${res}",
+                "subscription": "${sub}"
+              }
+            ],
+            "timeGrain": "auto"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Monitor",
+          "refId": "A",
+          "subscription": "${sub}"
+        }
+      ],
+      "title": "Publish Rate",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${ds}"
+      },
+      "description": "Total number of message publish faults",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 12,
+        "y": 22
+      },
+      "id": 48,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.3",
+      "targets": [
+        {
+          "azureMonitor": {
+            "aggregation": "Average",
+            "allowedTimeGrainsMs": [
+              60000,
+              300000,
+              900000,
+              1800000,
+              3600000,
+              21600000,
+              43200000,
+              86400000
+            ],
+            "customNamespace": "Azure.ApplicationInsights",
+            "dimensionFilters": [],
+            "metricName": "masstransit.messages.published",
+            "metricNamespace": "microsoft.web/sites",
+            "region": "centralus",
+            "resources": [
+              {
+                "metricNamespace": "Microsoft.Web/sites",
+                "region": "centralus",
+                "resourceGroup": "${rg}",
+                "resourceName": "${appServiceName}",
+                "subscription": "${sub}"
+              }
+            ],
+            "timeGrain": "auto"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Monitor",
+          "refId": "A",
+          "subscription": "${sub}"
+        }
+      ],
+      "title": "Publish Fault Total",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${ds}"
+      },
+      "description": "Rate of message publish faults per second",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 22
+      },
+      "id": 63,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.3",
+      "targets": [
+        {
+          "azureMonitor": {
+            "aggregation": "Average",
+            "allowedTimeGrainsMs": [
+              60000,
+              300000,
+              900000,
+              1800000,
+              3600000,
+              21600000,
+              43200000,
+              86400000
+            ],
+            "customNamespace": "Azure.ApplicationInsights",
+            "dimensionFilters": [],
+            "metricName": "masstransit.messages.published",
+            "metricNamespace": "microsoft.web/sites",
+            "region": "centralus",
+            "resources": [
+              {
+                "metricNamespace": "Microsoft.Web/sites",
+                "region": "centralus",
+                "resourceGroup": "${rg}",
+                "resourceName": "${appServiceName}",
+                "subscription": "${sub}"
+              }
+            ],
+            "timeGrain": "auto"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Monitor",
+          "refId": "A",
+          "subscription": "${sub}"
+        }
+      ],
+      "title": "Publish Fault Rate",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${ds}"
+      },
+      "description": "Total number of messages sent (one to one commands)",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 0,
+        "y": 30
+      },
+      "id": 44,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.3",
+      "targets": [
+        {
+          "azureMonitor": {
+            "aggregation": "Total",
+            "allowedTimeGrainsMs": [
+              60000,
+              300000,
+              900000,
+              1800000,
+              3600000,
+              21600000,
+              43200000,
+              86400000
+            ],
+            "customNamespace": "Azure.ApplicationInsights",
+            "dimensionFilters": [],
+            "metricName": "masstransit.messages.sent",
+            "metricNamespace": "microsoft.insights/components",
+            "region": "centralus",
+            "resources": [
+              {
+                "metricNamespace": "microsoft.insights/components",
+                "region": "centralus",
+                "resourceGroup": "${rg}",
+                "resourceName": "${res}",
+                "subscription": "${sub}"
+              }
+            ],
+            "timeGrain": "auto"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Monitor",
+          "refId": "A",
+          "subscription": "${sub}"
+        }
+      ],
+      "title": "Send Total",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${ds}"
+      },
+      "description": "Rate of messages sent per second",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 6,
+        "y": 30
+      },
+      "id": 61,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.3",
+      "targets": [
+        {
+          "azureMonitor": {
+            "aggregation": "Average",
+            "allowedTimeGrainsMs": [
+              60000,
+              300000,
+              900000,
+              1800000,
+              3600000,
+              21600000,
+              43200000,
+              86400000
+            ],
+            "customNamespace": "Azure.ApplicationInsights",
+            "dimensionFilters": [],
+            "metricName": "masstransit.messages.sent",
+            "metricNamespace": "microsoft.insights/components",
+            "region": "centralus",
+            "resources": [
+              {
+                "metricNamespace": "microsoft.insights/components",
+                "region": "centralus",
+                "resourceGroup": "${rg}",
+                "resourceName": "${res}",
+                "subscription": "${sub}"
+              }
+            ],
+            "timeGrain": "auto"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Monitor",
+          "refId": "A",
+          "subscription": "${sub}"
+        }
+      ],
+      "title": "Send Rate",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${ds}"
+      },
+      "description": "Total number of message send faults",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 12,
+        "y": 30
+      },
+      "id": 50,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.3",
+      "targets": [
+        {
+          "azureMonitor": {
+            "aggregation": "Average",
+            "allowedTimeGrainsMs": [
+              60000,
+              300000,
+              900000,
+              1800000,
+              3600000,
+              21600000,
+              43200000,
+              86400000
+            ],
+            "customNamespace": "Azure.ApplicationInsights",
+            "dimensionFilters": [],
+            "metricName": "masstransit.messages.sent",
+            "metricNamespace": "microsoft.web/sites",
+            "region": "centralus",
+            "resources": [
+              {
+                "metricNamespace": "Microsoft.Web/sites",
+                "region": "centralus",
+                "resourceGroup": "${rg}",
+                "resourceName": "${appServiceName}",
+                "subscription": "${sub}"
+              }
+            ],
+            "timeGrain": "auto"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Monitor",
+          "refId": "A",
+          "subscription": "${sub}"
+        }
+      ],
+      "title": "Send Fault Total",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${ds}"
+      },
+      "description": "Rate of message send faults per second",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 30
+      },
+      "id": 62,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.3",
+      "targets": [
+        {
+          "azureMonitor": {
+            "aggregation": "Average",
+            "allowedTimeGrainsMs": [
+              60000,
+              300000,
+              900000,
+              1800000,
+              3600000,
+              21600000,
+              43200000,
+              86400000
+            ],
+            "customNamespace": "Azure.ApplicationInsights",
+            "dimensionFilters": [],
+            "metricName": "masstransit.messages.sent",
+            "metricNamespace": "microsoft.web/sites",
+            "region": "centralus",
+            "resources": [
+              {
+                "metricNamespace": "Microsoft.Web/sites",
+                "region": "centralus",
+                "resourceGroup": "${rg}",
+                "resourceName": "${appServiceName}",
+                "subscription": "${sub}"
+              }
+            ],
+            "timeGrain": "auto"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Monitor",
+          "refId": "A",
+          "subscription": "${sub}"
+        }
+      ],
+      "title": "Send Fault Rate",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 38
+      },
+      "id": 18,
+      "panels": [],
+      "title": "Consumers",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${ds}"
+      },
+      "description": "Total number of messages consumed",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 0,
+        "y": 39
+      },
+      "id": 31,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.3",
+      "targets": [
+        {
+          "azureMonitor": {
+            "aggregation": "Total",
+            "allowedTimeGrainsMs": [
+              60000,
+              300000,
+              900000,
+              1800000,
+              3600000,
+              21600000,
+              43200000,
+              86400000
+            ],
+            "customNamespace": "Azure.ApplicationInsights",
+            "dimensionFilters": [],
+            "metricName": "masstransit.messages.consumed",
+            "metricNamespace": "microsoft.insights/components",
+            "region": "centralus",
+            "resources": [
+              {
+                "metricNamespace": "microsoft.insights/components",
+                "region": "centralus",
+                "resourceGroup": "${rg}",
+                "resourceName": "${res}",
+                "subscription": "${sub}"
+              }
+            ],
+            "timeGrain": "auto"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Monitor",
+          "refId": "A",
+          "subscription": "${sub}"
+        }
+      ],
+      "title": "Consume Total",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${ds}"
+      },
+      "description": "Rate of messages consumed per second",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 6,
+        "y": 39
+      },
+      "id": 65,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.3",
+      "targets": [
+        {
+          "azureMonitor": {
+            "aggregation": "Average",
+            "allowedTimeGrainsMs": [
+              60000,
+              300000,
+              900000,
+              1800000,
+              3600000,
+              21600000,
+              43200000,
+              86400000
+            ],
+            "customNamespace": "Azure.ApplicationInsights",
+            "dimensionFilters": [],
+            "metricName": "masstransit.messages.consumed",
+            "metricNamespace": "microsoft.insights/components",
+            "region": "centralus",
+            "resources": [
+              {
+                "metricNamespace": "microsoft.insights/components",
+                "region": "centralus",
+                "resourceGroup": "${rg}",
+                "resourceName": "${res}",
+                "subscription": "${sub}"
+              }
+            ],
+            "timeGrain": "auto"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Monitor",
+          "refId": "A",
+          "subscription": "${sub}"
+        }
+      ],
+      "title": "Consume Rate",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${ds}"
+      },
+      "description": "Total number of message consume faults",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 12,
+        "y": 39
+      },
+      "id": 38,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.3",
+      "targets": [
+        {
+          "azureMonitor": {
+            "aggregation": "Average",
+            "allowedTimeGrainsMs": [
+              60000,
+              300000,
+              900000,
+              1800000,
+              3600000,
+              21600000,
+              43200000,
+              86400000
+            ],
+            "customNamespace": "Azure.ApplicationInsights",
+            "dimensionFilters": [],
+            "metricName": "masstransit.messages.consumed.failed",
+            "metricNamespace": "microsoft.web/sites",
+            "region": "centralus",
+            "resources": [
+              {
+                "metricNamespace": "Microsoft.Web/sites",
+                "region": "centralus",
+                "resourceGroup": "${rg}",
+                "resourceName": "${appServiceName}",
+                "subscription": "${sub}"
+              }
+            ],
+            "timeGrain": "auto"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Monitor",
+          "refId": "A",
+          "subscription": "${sub}"
+        }
+      ],
+      "title": "Consume Fault Total",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${ds}"
+      },
+      "description": "Rate of message consume faults per second",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 39
+      },
+      "id": 60,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.6.3",
+      "targets": [
+        {
+          "azureMonitor": {
+            "aggregation": "Average",
+            "allowedTimeGrainsMs": [
+              60000,
+              300000,
+              900000,
+              1800000,
+              3600000,
+              21600000,
+              43200000,
+              86400000
+            ],
+            "customNamespace": "Azure.ApplicationInsights",
+            "dimensionFilters": [],
+            "metricName": "masstransit.messages.consumed.failed",
+            "metricNamespace": "microsoft.web/sites",
+            "region": "centralus",
+            "resources": [
+              {
+                "metricNamespace": "Microsoft.Web/sites",
+                "region": "centralus",
+                "resourceGroup": "${rg}",
+                "resourceName": "${appServiceName}",
+                "subscription": "${sub}"
+              }
+            ],
+            "timeGrain": "auto"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Monitor",
+          "refId": "A",
+          "subscription": "${sub}"
+        }
+      ],
+      "title": "Consume Fault Rate",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${ds}"
+      },
+      "description": "Elapsed time spent consuming a message, in milliseconds.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line+area"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "transparent",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 5000
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 0,
+        "y": 47
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max",
+            "p95"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.6.3",
+      "targets": [
+        {
+          "azureMonitor": {
+            "aggregation": "Average",
+            "allowedTimeGrainsMs": [
+              60000,
+              300000,
+              900000,
+              1800000,
+              3600000,
+              21600000,
+              43200000,
+              86400000
+            ],
+            "customNamespace": "Azure.ApplicationInsights",
+            "dimensionFilters": [],
+            "metricName": "messaging.masstransit.consume.duration",
+            "metricNamespace": "microsoft.insights/components",
+            "region": "centralus",
+            "resources": [
+              {
+                "metricNamespace": "microsoft.insights/components",
+                "region": "centralus",
+                "resourceGroup": "${rg}",
+                "resourceName": "${res}",
+                "subscription": "${sub}"
+              }
+            ],
+            "timeGrain": "auto"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Monitor",
+          "refId": "A",
+          "subscription": "${sub}"
+        }
+      ],
+      "title": "Consume Duration (ms)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "${ds}"
+      },
+      "description": "Elapsed time between when the message was sent and when it was consumed, in milliseconds.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line+area"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "transparent",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 62000
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 12,
+        "y": 47
+      },
+      "id": 8,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max",
+            "p95"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.6.3",
+      "targets": [
+        {
+          "azureMonitor": {
+            "aggregation": "Average",
+            "allowedTimeGrainsMs": [
+              60000,
+              300000,
+              900000,
+              1800000,
+              3600000,
+              21600000,
+              43200000,
+              86400000
+            ],
+            "customNamespace": "Azure.ApplicationInsights",
+            "dimensionFilters": [],
+            "metricName": "messaging.masstransit.delivery.duration",
+            "metricNamespace": "microsoft.insights/components",
+            "region": "centralus",
+            "resources": [
+              {
+                "metricNamespace": "microsoft.insights/components",
+                "region": "centralus",
+                "resourceGroup": "${rg}",
+                "resourceName": "${res}",
+                "subscription": "${sub}"
+              }
+            ],
+            "timeGrain": "auto"
+          },
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "${ds}"
+          },
+          "queryType": "Azure Monitor",
+          "refId": "A",
+          "subscription": "${sub}"
+        }
+      ],
+      "title": "Delivery Duration (ms)",
+      "type": "timeseries"
+    }
+  ],
+  "preload": false,
+  "refresh": "5s",
+  "schemaVersion": 41,
+  "tags": [
+    "MassTransit",
+    "Event Driven Architecture",
+    "Azure Monitor"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "Azure Monitor",
+          "value": "azure-monitor-oob"
+        },
+        "includeAll": false,
+        "label": "Datasource",
+        "name": "ds",
+        "options": [],
+        "query": "grafana-azure-monitor-datasource",
+        "refresh": 1,
+        "regex": "",
+        "type": "datasource"
+      },
+      {
+        "current": {
+          "text": "Microsoft Azure Sponsorship",
+          "value": "ec557d8a-5d68-4230-90c1-34bf43a48a6e"
+        },
+        "datasource": {
+          "uid": "${ds}"
+        },
+        "definition": "Subscriptions()",
+        "includeAll": false,
+        "label": "Subscription",
+        "name": "sub",
+        "options": [],
+        "query": "Subscriptions()",
+        "refresh": 1,
+        "regex": "",
+        "sort": 5,
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "EasyLinkMDLocalDebugging",
+          "value": "EasyLinkMDLocalDebugging"
+        },
+        "datasource": {
+          "uid": "${ds}"
+        },
+        "definition": "ResourceGroups($sub)",
+        "includeAll": false,
+        "label": "Resource Group",
+        "name": "rg",
+        "options": [],
+        "query": "ResourceGroups($sub)",
+        "refresh": 1,
+        "regex": "",
+        "sort": 5,
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "microsoft.insights/components",
+          "value": "microsoft.insights/components"
+        },
+        "datasource": {
+          "uid": "${ds}"
+        },
+        "definition": "Namespaces($sub, $rg)",
+        "hide": 2,
+        "includeAll": false,
+        "label": "Namespace",
+        "name": "ns",
+        "options": [],
+        "query": "Namespaces($sub, $rg)",
+        "refresh": 1,
+        "regex": "([mM](icrosoft)\\.[iI](nsights)/(components))",
+        "sort": 5,
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "easylinkmd-api-debug",
+          "value": "easylinkmd-api-debug"
+        },
+        "datasource": {
+          "uid": "${ds}"
+        },
+        "definition": "ResourceNames($sub, $rg, $ns)",
+        "includeAll": false,
+        "label": "Resource",
+        "name": "res",
+        "options": [],
+        "query": "ResourceNames($sub, $rg, $ns)",
+        "refresh": 1,
+        "regex": "",
+        "sort": 5,
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "easylinkmd-api-debug",
+          "value": "easylinkmd-api-debug"
+        },
+        "label": "App Service Name",
+        "name": "appServiceName",
+        "options": [
+          {
+            "selected": true,
+            "text": "easylinkmd-api-debug",
+            "value": "easylinkmd-api-debug"
+          }
+        ],
+        "query": "easylinkmd-api-debug",
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "text": "0a033e8b-a777-41f2-b1f3-9269a059874e",
+          "value": "0a033e8b-a777-41f2-b1f3-9269a059874e"
+        },
+        "datasource": {
+          "type": "grafana-azure-monitor-datasource",
+          "uid": "${ds}"
+        },
+        "definition": "resources\n| project tenantId",
+        "hide": 2,
+        "includeAll": false,
+        "label": "tenantId",
+        "name": "tenant",
+        "options": [],
+        "query": {
+          "azureLogAnalytics": {
+            "query": "",
+            "resource": ""
+          },
+          "azureResourceGraph": {
+            "query": "Resources\r\n|project tenantId"
+          },
+          "queryType": "Azure Resource Graph",
+          "refId": "A",
+          "subscriptions": [
+            "$sub"
+          ]
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 5,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-5m",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "MassTransit - Messages Monitoring For Azure Monitor",
+  "uid": "masstransit-messages-azure-monitor",
+  "version": 1
+}
