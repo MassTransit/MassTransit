@@ -150,7 +150,7 @@ public interface ISomeService
 ```
 
 ```csharp
-services.AddMassTransit<IThirdBus>(x =>
+services.AddMassTransit<IThirdBus, ThirdBus>(x =>
 {
     x.UsingRabbitMq((context, cfg) =>
     {
