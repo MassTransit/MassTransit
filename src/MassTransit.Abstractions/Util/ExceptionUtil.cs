@@ -8,22 +8,29 @@ namespace MassTransit.Util
 
     public static class ExceptionUtil
     {
+        static readonly Regex _trim;
         static readonly Regex _cleanup;
 
         static ExceptionUtil()
         {
             const string awaiter = @"at System\.Runtime\.CompilerServices\.TaskAwaiter.*";
             const string exception = @"at System\.Runtime\.ExceptionServices\.ExceptionDispatchInfo.*";
+            const string dependency = @"at MassTransit\.DependencyInjection.*";
 
-            _cleanup = new Regex(@"\n\s+(" + string.Join("|", awaiter, exception) + ")+",
-                RegexOptions.Multiline | RegexOptions.Compiled);
+            _cleanup = new Regex(@"\n\s+(" + string.Join("|", awaiter, exception, dependency) + ")+", RegexOptions.Multiline | RegexOptions.Compiled);
+            _trim = new Regex(@"in\s.*MassTransit.*\.cs.*$", RegexOptions.Multiline | RegexOptions.Compiled);
         }
 
         public static string GetMessage(Exception exception)
         {
             try
             {
-                return exception.Message ?? $"An exception of type {exception.GetType()} was thrown but the message was null.";
+                var exceptionMessage = exception.Message ?? $"An exception of type {exception.GetType()} was thrown but the message was null.";
+
+                if (exceptionMessage.Length > 2048)
+                    exceptionMessage = exceptionMessage.Substring(0, 2048);
+
+                return exceptionMessage;
             }
             catch
             {
@@ -37,7 +44,13 @@ namespace MassTransit.Util
             if (string.IsNullOrWhiteSpace(stackTrace))
                 return "";
 
-            return _cleanup.Replace(stackTrace, "");
+            stackTrace = _cleanup.Replace(stackTrace, "");
+            stackTrace = _trim.Replace(stackTrace, "");
+
+            if (stackTrace.Length > 2048)
+                stackTrace = stackTrace.Substring(0, 2048);
+
+            return stackTrace;
         }
 
         [Obsolete("This method is obsolete and will be removed in a future version.")]
