@@ -121,7 +121,7 @@ public class AmazonSqsReceiveLockContext :
 
         var delay = CalculateDelay(visibilityTimeout);
 
-        visibilityTimeout = Math.Min(60, visibilityTimeout);
+        visibilityTimeout = Math.Min(_settings.VisibilityTimeoutExtension, visibilityTimeout);
 
         while (_locked && !_activeTokenSource.IsCancellationRequested)
         {
