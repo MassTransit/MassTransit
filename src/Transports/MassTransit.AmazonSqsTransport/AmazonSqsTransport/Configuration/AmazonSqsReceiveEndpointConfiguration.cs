@@ -107,11 +107,11 @@ public class AmazonSqsReceiveEndpointConfiguration :
         if (_settings.MaxVisibilityTimeout < visibilityTimeout)
             yield return this.Failure("MaxVisibilityTimeout", "Must be greater than or equal to VisibilityTimeout");
         
-        if (_settings.VisibilityTimeoutExtension < 0)
-            yield return this.Failure("VisibilityTimeoutExtension", "must be >= 0 (values less than 60 will be set to 60)");
+        if (_settings.MaxVisibilityTimeoutRenewal < 0)
+            yield return this.Failure("MaxVisibilityTimeoutRenewal", "must be >= 0 (values less than 60 will be set to 60)");
 
-        if (_settings.VisibilityTimeoutExtension > 43200)
-            yield return this.Failure("VisibilityTimeoutExtension", "must be <= 43200 seconds (12 hours per AWS SQS limits)");
+        if (_settings.MaxVisibilityTimeoutRenewal > 43200)
+            yield return this.Failure("MaxVisibilityTimeoutRenewal", "must be <= 43200 seconds (12 hours per AWS SQS limits)");
 
         foreach (var result in base.Validate())
             yield return result.WithParentKey(queueName);
@@ -174,9 +174,9 @@ public class AmazonSqsReceiveEndpointConfiguration :
         set => _settings.MaxVisibilityTimeout = value > MaxAllowedVisibilityTimeout ? MaxAllowedVisibilityTimeout : value;
     }
 
-    public int VisibilityTimeoutExtension
+    public int MaxVisibilityTimeoutRenewal
     {
-        set => _settings.VisibilityTimeoutExtension = value < 60 ? 60 : value;
+        set => _settings.MaxVisibilityTimeoutRenewal = value < 60 ? 60 : value;
     }
 
     public void Subscribe<T>(Action<IAmazonSqsTopicSubscriptionConfigurator>? configure = null)

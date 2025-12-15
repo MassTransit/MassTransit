@@ -38,7 +38,7 @@ public interface IAmazonSqsReceiveEndpointConfigurator :
     /// Defaults to 60 seconds.
     /// See <see href="https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_ChangeMessageVisibility.html">ChangeMessageVisibility</see>.
     /// </summary>
-    int VisibilityTimeoutExtension { set; }
+    int MaxVisibilityTimeoutRenewal { set; }
 
     /// <summary>
     /// Bind an existing exchange for the message type to the receive endpoint by name
