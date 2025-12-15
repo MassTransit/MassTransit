@@ -19,6 +19,7 @@ public class QueueReceiveSettings :
         VisibilityTimeout = 30;
         RedeliverVisibilityTimeout = 1;
         MaxVisibilityTimeout = TimeSpan.FromHours(12);
+        MaxVisibilityTimeoutRenewal = 60;
 
         ConcurrentDeliveryLimit = 1;
 
@@ -42,6 +43,8 @@ public class QueueReceiveSettings :
     public int RedeliverVisibilityTimeout { get; set; }
 
     public TimeSpan MaxVisibilityTimeout { get; set; }
+
+    public int MaxVisibilityTimeoutRenewal { get; set; }
 
     public string? QueueUrl { get; set; }
 

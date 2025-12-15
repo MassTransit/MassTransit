@@ -33,6 +33,14 @@ public interface IAmazonSqsReceiveEndpointConfigurator :
     public TimeSpan MaxVisibilityTimeout { set; }
 
     /// <summary>
+    /// Sets the number of seconds to extend the visibility timeout when renewing message visibility during processing.
+    /// Values less than 60 will be set to 60 seconds (AWS SQS minimum for ChangeMessageVisibility).
+    /// Defaults to 60 seconds.
+    /// See <see href="https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_ChangeMessageVisibility.html">ChangeMessageVisibility</see>.
+    /// </summary>
+    int MaxVisibilityTimeoutRenewal { set; }
+
+    /// <summary>
     /// Bind an existing exchange for the message type to the receive endpoint by name
     /// </summary>
     /// <typeparam name="T"></typeparam>
