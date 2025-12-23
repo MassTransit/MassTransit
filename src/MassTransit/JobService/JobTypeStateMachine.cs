@@ -99,15 +99,24 @@ namespace MassTransit
             {
                 if (context.Saga.OverrideLimitExpiration.Value <= DateTime.Now)
                 {
-                    context.Saga.OverrideLimitExpiration = default;
-                    context.Saga.OverrideJobLimit = default;
+                    context.Saga.OverrideLimitExpiration = null;
+                    context.Saga.OverrideJobLimit = null;
                 }
             }
 
             var jobId = context.Message.JobId;
 
-            if (context.Saga.ActiveJobs.Any(x => x.JobId == jobId))
-                return false;
+            var activeJob = context.Saga.ActiveJobs.FirstOrDefault(x => x.JobId == jobId);
+            if (activeJob != null)
+            {
+                await context.RespondAsync<JobSlotAllocated>(new JobSlotAllocatedResponse
+                {
+                    JobId = jobId,
+                    InstanceAddress = activeJob.InstanceAddress,
+                });
+
+                return true; // duplicate assignment just acknowledge and let state machine sort it out
+            }
 
             var timestamp = DateTime.UtcNow;
 
@@ -122,7 +131,7 @@ namespace MassTransit
 
             var strategy = context.GetJobDistributionStrategyOrUseDefault();
 
-            var activeJob = await strategy.IsJobSlotAvailable(context, context.Saga).ConfigureAwait(false);
+            activeJob = await strategy.IsJobSlotAvailable(context, context.Saga).ConfigureAwait(false);
             if (activeJob == null)
                 return false;
 

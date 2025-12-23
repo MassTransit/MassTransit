@@ -154,7 +154,10 @@ namespace MassTransit
 
             During(Faulted,
                 Ignore(StatusCheckRequested.Received),
-                Ignore(AttemptFaulted));
+                Ignore(AttemptStatus),
+                Ignore(AttemptFaulted),
+                Ignore(AttemptCompleted),
+                Ignore(AttemptCanceled));
 
             During([Initial, Faulted, CheckingStatus, Suspect],
                 When(FinalizeJobAttempt)
@@ -207,7 +210,7 @@ namespace MassTransit
 
             return context.Saga.RetryAttempt < settings.SuspectJobRetryCount
                 ? settings.SuspectJobRetryDelay ?? settings.SlotWaitTime
-                : default(TimeSpan?);
+                : null;
         }
 
         static Uri GetJobSagaAddress(this SagaConsumeContext<JobAttemptSaga> context)

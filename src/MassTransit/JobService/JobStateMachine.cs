@@ -39,9 +39,9 @@ namespace MassTransit
             Event(() => GetJobState, x =>
             {
                 x.ReadOnly = true;
-                x.OnMissingInstance(i => i.ExecuteAsync(context => context.RespondAsync<JobState>(new
+                x.OnMissingInstance(i => i.ExecuteAsync(context => context.RespondAsync<JobState>(new JobStateResponse
                 {
-                    context.Message.JobId,
+                    JobId = context.Message.JobId,
                     CurrentState = "NotFound"
                 })));
             });
@@ -93,7 +93,10 @@ namespace MassTransit
                 When(JobSlotUnavailable)
                     .WaitForJobSlot(this),
                 When(AllocateJobSlotFaulted)
-                    .WaitForJobSlot(this)
+                    .WaitForJobSlot(this),
+                Ignore(AttemptStarted),
+                Ignore(AttemptCompleted),
+                Ignore(AttemptCanceled)
             );
 
             During(WaitingForSlot,
@@ -107,7 +110,10 @@ namespace MassTransit
                                 context.Saga.RetryAttempt = 0;
                             })
                     )
-                    .RequestJobSlot(this)
+                    .RequestJobSlot(this),
+                Ignore(AttemptStarted),
+                Ignore(AttemptCompleted),
+                Ignore(AttemptCanceled)
             );
 
             During(StartingJobAttempt,
@@ -119,11 +125,15 @@ namespace MassTransit
                         context.Saga.Reason = context.Message.Exceptions.FirstOrDefault()?.Message;
                     })
                     .NotifyJobFaulted()
-                    .TransitionTo(Faulted)
+                    .TransitionTo(Faulted),
+                Ignore(JobSlotAllocated),
+                Ignore(JobSlotUnavailable)
             );
 
             During(Started, Completed, Faulted,
-                Ignore(StartJobAttemptFaulted)
+                Ignore(StartJobAttemptFaulted),
+                Ignore(JobSlotAllocated),
+                Ignore(JobSlotUnavailable)
             );
 
             During(StartingJobAttempt, Started,
