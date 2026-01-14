@@ -26,8 +26,11 @@ public class SendBatcher :
     {
         entry.Id = entryId;
 
-        return entry.MessageBody.Length
-            + entry.MessageAttributes.Where(x => x.Value.DataType == "String").Sum(x => x.Key.Length + x.Value.StringValue.Length);
+        var encoding = MessageDefaults.Encoding;
+
+        return encoding.GetByteCount(entry.MessageBody)
+            + (entry.MessageAttributes?.Where(x => x.Value.DataType == "String")
+                .Sum(x => encoding.GetByteCount(x.Key) + encoding.GetByteCount(x.Value.StringValue))).GetValueOrDefault();
     }
 
     protected override async Task SendBatch(IList<BatchEntry<SendMessageBatchRequestEntry>> batch)
