@@ -44,8 +44,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
                 x.Handle<OperationInterruptedException>(exception => exception.ChannelShouldBeClosed());
                 x.Handle<NotSupportedException>(exception => exception.Message.Contains("Pipelining of requests forbidden"));
 
-                x.Ignore<AuthenticationFailureException>();
-
                 x.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
             });
 
