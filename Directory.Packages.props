@@ -5,9 +5,9 @@
   <ItemGroup>
     <PackageVersion Include="Apache.NMS.ActiveMQ" Version="2.2.0" />
     <PackageVersion Include="Apache.NMS.AMQP" Version="2.4.0" />
-    <PackageVersion Include="AWSSDK.DynamoDBv2" Version="4.0.13" />
+    <PackageVersion Include="AWSSDK.DynamoDBv2" Version="4.0.14" />
     <PackageVersion Include="AWSSDK.SimpleNotificationService" Version="4.0.2.16" />
-    <PackageVersion Include="AWSSDK.S3" Version="4.0.18.1" />
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.18.3" />
     <PackageVersion Include="AWSSDK.SQS" Version="4.0.2.14" />
     <PackageVersion Include="Azure.Data.Tables" Version="12.11.0" />
     <PackageVersion Include="Azure.Identity" Version="1.17.1" />
@@ -15,26 +15,26 @@
     <PackageVersion Include="Azure.Messaging.ServiceBus" Version="7.20.1" />
     <PackageVersion Include="Azure.Storage.Blobs" Version="12.26.0" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.13.11" />
-    <PackageVersion Include="Confluent.Kafka" Version="2.12.0" />
-    <PackageVersion Include="Confluent.SchemaRegistry.Serdes.Avro" Version="2.12.0" />
+    <PackageVersion Include="Confluent.Kafka" Version="2.13.0" />
+    <PackageVersion Include="Confluent.SchemaRegistry.Serdes.Avro" Version="2.13.0" />
     <PackageVersion Include="coverlet.collector" Version="3.1.2" />
     <PackageVersion Include="Dapper" Version="2.1.66" />
     <PackageVersion Include="dapper.contrib" Version="2.0.78" />
     <PackageVersion Include="EntityFramework" Version="6.5.1" />
     <PackageVersion Include="Google.Protobuf" Version="3.31.1" />
-    <PackageVersion Include="Hangfire.AspNetCore" Version="1.8.22" />
-    <PackageVersion Include="Hangfire.Core" Version="1.8.22" />
+    <PackageVersion Include="Hangfire.AspNetCore" Version="1.8.23" />
+    <PackageVersion Include="Hangfire.Core" Version="1.8.23" />
     <PackageVersion Include="Hangfire.MemoryStorage" Version="1.8.1.2" />
     <PackageVersion Include="Iesi.Collections" Version="4.1.1" />
     <PackageVersion Include="Ionic.Zlib.Core" Version="1.0.0" />
-    <PackageVersion Include="Marten" Version="8.16.1" />
+    <PackageVersion Include="Marten" Version="8.20.0" />
     <PackageVersion Include="MathNet.Numerics" Version="5.0.0" />
     <PackageVersion Include="MediatR" Version="12.2.0" />
     <PackageVersion Include="MessagePack" Version="3.1.4" />
     <PackageVersion Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.23.0" />
     <PackageVersion Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
     <PackageVersion Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="9.0.0" />
-    <PackageVersion Include="Microsoft.Azure.Cosmos" Version="3.55.0" />
+    <PackageVersion Include="Microsoft.Azure.Cosmos" Version="3.57.0" />
     <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions.EventHubs" Version="6.5.3" />
     <PackageVersion Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="5.17.0" />
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
@@ -83,7 +83,7 @@
     <PackageVersion Include="Microsoft.Extensions.Options" Version="9.0.0" Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0')) AND !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net10.0'))" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.0" Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net10.0'))" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
-    <PackageVersion Include="MongoDB.Driver" Version="3.5.1" />
+    <PackageVersion Include="MongoDB.Driver" Version="3.6.0" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageVersion Include="Newtonsoft.Json.Bson" Version="1.0.3" />
     <PackageVersion Include="NHibernate" Version="5.6.0" />
@@ -105,7 +105,7 @@
     <PackageVersion Include="QuikGraph.Graphviz" Version="2.5.0" />
     <PackageVersion Include="RabbitMQ.Client" Version="7.2.0" />
     <PackageVersion Include="SharpZipLib" Version="1.4.2" />
-    <PackageVersion Include="StackExchange.Redis" Version="2.10.1" />
+    <PackageVersion Include="StackExchange.Redis" Version="2.10.14" />
     <PackageVersion Include="System.Data.SqlClient" Version="4.9.0" />
     <PackageVersion Include="System.Data.SQLite" Version="1.0.119" />
     <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="8.0.1" Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))" />
