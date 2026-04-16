@@ -15,7 +15,7 @@ namespace MassTransit.MongoDbIntegration.Saga
 
         public static ISagaRepository<TSaga> Create(string connectionString, string database, string? collectionName = null)
         {
-            var mongoDatabase = new MongoClient(connectionString).GetDatabase(database);
+            var mongoDatabase = MongoDbLibraryInfo.CreateClient(connectionString).GetDatabase(database);
 
             return Create(mongoDatabase, collectionName);
         }
