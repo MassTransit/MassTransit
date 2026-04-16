@@ -25,4 +25,8 @@
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="MassTransit.MongoDbIntegration.Tests" />
+  </ItemGroup>
+
 </Project>
