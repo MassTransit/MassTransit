@@ -4,25 +4,17 @@ namespace MassTransit.MongoDbIntegration
     using MongoDB.Driver.Core.Configuration;
 
 
-    static class MongoDbLibraryInfo
+    public static class MongoClientSettingsExtensions
     {
         static readonly string _version =
-            typeof(MongoDbLibraryInfo).Assembly.GetName().Version?.ToString() ?? "unknown";
+            typeof(MongoClientSettingsExtensions).Assembly.GetName().Version?.ToString() ?? "unknown";
 
         static readonly LibraryInfo _libraryInfo = new LibraryInfo("MassTransit", _version);
 
-        internal static MongoClient CreateClient(string connectionString)
+        public static MongoClientSettings WithMassTransitLibraryInfo(this MongoClientSettings settings)
         {
-            var settings = MongoClientSettings.FromConnectionString(connectionString);
             settings.LibraryInfo = _libraryInfo;
-            return new MongoClient(settings);
-        }
-
-        internal static MongoClient CreateClient(MongoUrl mongoUrl)
-        {
-            var settings = MongoClientSettings.FromUrl(mongoUrl);
-            settings.LibraryInfo = _libraryInfo;
-            return new MongoClient(settings);
+            return settings;
         }
     }
 }

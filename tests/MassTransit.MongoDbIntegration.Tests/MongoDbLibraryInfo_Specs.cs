@@ -5,24 +5,34 @@ namespace MassTransit.MongoDbIntegration.Tests
 
 
     [TestFixture]
-    public class MongoDbLibraryInfo_Specs
+    public class MongoClientSettingsExtensions_Specs
     {
         [Test]
-        public void Should_set_library_info_on_connection_string_client()
+        public void Should_set_library_info_from_connection_string()
         {
-            var client = MongoDbLibraryInfo.CreateClient("mongodb://127.0.0.1");
-            Assert.That(client.Settings.LibraryInfo, Is.Not.Null);
-            Assert.That(client.Settings.LibraryInfo.Name, Is.EqualTo("MassTransit"));
-            Assert.That(client.Settings.LibraryInfo.Version, Is.Not.Null.And.Not.Empty);
+            var settings = MongoClientSettings.FromConnectionString("mongodb://127.0.0.1")
+                .WithMassTransitLibraryInfo();
+            Assert.That(settings.LibraryInfo, Is.Not.Null);
+            Assert.That(settings.LibraryInfo.Name, Is.EqualTo("MassTransit"));
+            Assert.That(settings.LibraryInfo.Version, Is.Not.Null.And.Not.Empty);
         }
 
         [Test]
-        public void Should_set_library_info_on_mongo_url_client()
+        public void Should_set_library_info_from_mongo_url()
         {
-            var client = MongoDbLibraryInfo.CreateClient(new MongoUrl("mongodb://127.0.0.1"));
-            Assert.That(client.Settings.LibraryInfo, Is.Not.Null);
-            Assert.That(client.Settings.LibraryInfo.Name, Is.EqualTo("MassTransit"));
-            Assert.That(client.Settings.LibraryInfo.Version, Is.Not.Null.And.Not.Empty);
+            var settings = MongoClientSettings.FromUrl(new MongoUrl("mongodb://127.0.0.1"))
+                .WithMassTransitLibraryInfo();
+            Assert.That(settings.LibraryInfo, Is.Not.Null);
+            Assert.That(settings.LibraryInfo.Name, Is.EqualTo("MassTransit"));
+            Assert.That(settings.LibraryInfo.Version, Is.Not.Null.And.Not.Empty);
+        }
+
+        [Test]
+        public void Should_return_same_settings_instance()
+        {
+            var settings = MongoClientSettings.FromConnectionString("mongodb://127.0.0.1");
+            var result = settings.WithMassTransitLibraryInfo();
+            Assert.That(result, Is.SameAs(settings));
         }
     }
 }

@@ -36,7 +36,7 @@ namespace MassTransit.Configuration
 
                 ClientFactory(_ =>
                 {
-                    var mongoClient = MongoDbLibraryInfo.CreateClient(mongoUrl);
+                    var mongoClient = new MongoClient(MongoClientSettings.FromUrl(mongoUrl).WithMassTransitLibraryInfo());
 
                     return mongoClient;
                 });

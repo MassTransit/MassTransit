@@ -17,7 +17,7 @@
         readonly IMessageDataResolver _resolver;
 
         public MongoDbMessageDataRepository(string connectionString, string database)
-            : this(new MessageDataResolver(), new GridFSBucket(MongoDbLibraryInfo.CreateClient(connectionString).GetDatabase(database)), new NewIdFileNameGenerator())
+            : this(new MessageDataResolver(), new GridFSBucket(new MongoClient(MongoClientSettings.FromConnectionString(connectionString).WithMassTransitLibraryInfo()).GetDatabase(database)), new NewIdFileNameGenerator())
         {
         }
 

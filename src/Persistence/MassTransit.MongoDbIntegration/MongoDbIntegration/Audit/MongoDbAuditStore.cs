@@ -39,7 +39,7 @@ namespace MassTransit.MongoDbIntegration.Audit
         }
 
         public MongoDbAuditStore(string connectionString, string database, string collectionName)
-            : this(MongoDbLibraryInfo.CreateClient(connectionString).GetDatabase(database), collectionName)
+            : this(new MongoClient(MongoClientSettings.FromConnectionString(connectionString).WithMassTransitLibraryInfo()).GetDatabase(database), collectionName)
         {
         }
 
