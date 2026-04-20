@@ -172,11 +172,14 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                         ? await executionStrategy.ExecuteAsync(() => Execute()).ConfigureAwait(false)
                         : await Execute().ConfigureAwait(false);
 
-                    if (executeResult < 0)
+                    // executeResult < 0: no outbox found (nothing to do)
+                    // executeResult == 0: outbox locked but no messages delivered (likely send fault or poison message).
+                    //   Break so the outer loop falls through to WaitForDelivery(QueryDelay), rather than re-locking
+                    //   the same outbox immediately and spinning on the same poison message.
+                    if (executeResult <= 0)
                         break;
 
-                    if (executeResult > 0)
-                        messageCount += executeResult;
+                    messageCount += executeResult;
                 }
 
                 return messageCount;
@@ -275,6 +278,17 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                         sentSequenceNumber = message.SequenceNumber;
 
                         LogContext.Debug?.Log("Outbox Sent: {OutboxId} {SequenceNumber} {MessageId}", message.OutboxId, sentSequenceNumber, message.MessageId);
+                    }
+                    catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                    {
+                        throw;
+                    }
+                    catch (OperationCanceledException ex)
+                    {
+                        LogContext.Warning?.Log(ex,
+                            "Outbox Send Timeout after {Timeout}: {OutboxId} {SequenceNumber} {MessageId}",
+                            _options.MessageDeliveryTimeout, message.OutboxId, message.SequenceNumber, message.MessageId);
+                        break;
                     }
                     catch (Exception ex)
                     {

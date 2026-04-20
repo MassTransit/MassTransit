@@ -274,6 +274,17 @@ namespace MassTransit.MongoDbIntegration
 
                         LogContext.Debug?.Log("Outbox Sent: {OutboxId} {SequenceNumber} {MessageId}", message.OutboxId, sentSequenceNumber, message.MessageId);
                     }
+                    catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                    {
+                        throw;
+                    }
+                    catch (OperationCanceledException ex)
+                    {
+                        LogContext.Warning?.Log(ex,
+                            "Outbox Send Timeout after {Timeout}: {OutboxId} {SequenceNumber} {MessageId}",
+                            _options.MessageDeliveryTimeout, message.OutboxId, message.SequenceNumber, message.MessageId);
+                        break;
+                    }
                     catch (Exception ex)
                     {
                         LogContext.Warning?.Log(ex, "Outbox Send Fault: {OutboxId} {SequenceNumber} {MessageId}", message.OutboxId, message.SequenceNumber,
@@ -299,7 +310,7 @@ namespace MassTransit.MongoDbIntegration
                 LogContext.Debug?.Log("Outbox Delivered: {OutboxId} {Delivered}", outboxState.OutboxId, outboxState.Delivered);
             }
 
-            return true;
+            return sentSequenceNumber > 0;
         }
 
         static async Task AbortTransaction(MongoDbContext dbContext)
