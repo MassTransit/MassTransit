@@ -340,6 +340,76 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
         }
 
         [Test]
+        public async Task Should_not_spin_when_send_repeatedly_fails()
+        {
+            // Regression test for https://github.com/MassTransit/MassTransit/discussions/5768
+            // Before the fix, a send that always threw caused DeliverOutbox to spin at maximum speed:
+            // the inner while-loop had no exit path for executeResult == 0, so the worker re-locked the
+            // same outbox and retried the same poison message until process restart. After the fix the
+            // worker breaks out of the inner loop on zero-progress and backs off via WaitForDelivery(QueryDelay).
+            var failingFilter = new FailingSendFilter();
+
+            await using var provider = new ServiceCollection()
+                .AddBusOutboxServices()
+                .AddTelemetryListener()
+                .AddMassTransitTestHarness(x =>
+                {
+                    x.SetTestTimeouts(testInactivityTimeout: TimeSpan.FromSeconds(10));
+
+                    x.AddEntityFrameworkOutbox<ReliableDbContext>(o =>
+                    {
+                        o.QueryDelay = TimeSpan.FromMilliseconds(500);
+
+                        o.UseBusOutbox(bo =>
+                        {
+                            bo.MessageDeliveryLimit = 10;
+                        });
+                    });
+
+                    x.AddConsumer<PingConsumer>();
+
+                    x.UsingInMemory((context, cfg) =>
+                    {
+                        cfg.ConfigureSend(s => s.UseFilter(failingFilter));
+                        cfg.ConfigureEndpoints(context);
+                    });
+                })
+                .BuildServiceProvider(true);
+
+            var harness = provider.GetTestHarness();
+            await harness.Start();
+
+            try
+            {
+                {
+                    await using var dbContext = harness.Scope.ServiceProvider.GetRequiredService<ReliableDbContext>();
+
+                    var publishEndpoint = harness.Scope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
+
+                    await publishEndpoint.Publish(new PingMessage());
+
+                    await dbContext.SaveChangesAsync(harness.CancellationToken);
+                }
+
+                // Two seconds of wall clock: with the fix the worker wakes at most once per QueryDelay (500ms)
+                // plus startup, so the filter should be invoked on the order of 4-6 times. Without the fix,
+                // the inner DeliverOutbox while-loop spins as fast as the DB can service transactions and
+                // produces dozens-to-hundreds of attempts in the same window.
+                await Task.Delay(TimeSpan.FromSeconds(2), harness.CancellationToken);
+
+                var attempts = failingFilter.AttemptCount;
+
+                Assert.That(attempts, Is.GreaterThan(0), "The outbox delivery service never attempted to send");
+                Assert.That(attempts, Is.LessThan(30),
+                    $"BusOutboxDeliveryService attempted send {attempts} times in 2s — indicates infinite retry loop (see discussion #5768)");
+            }
+            finally
+            {
+                await harness.Stop();
+            }
+        }
+
+        [Test]
         [Explicit]
         public async Task Fill_up_the_outbox()
         {
@@ -539,6 +609,25 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.ReliableMessaging
             public Task Consume(ConsumeContext<PingMessage> context)
             {
                 return Task.CompletedTask;
+            }
+        }
+
+
+        class FailingSendFilter :
+            IFilter<SendContext>
+        {
+            int _count;
+
+            public int AttemptCount => Volatile.Read(ref _count);
+
+            public Task Send(SendContext context, IPipe<SendContext> next)
+            {
+                Interlocked.Increment(ref _count);
+                throw new InvalidOperationException("Simulated send failure for BusOutboxDeliveryService regression test");
+            }
+
+            public void Probe(ProbeContext context)
+            {
             }
         }
     }
