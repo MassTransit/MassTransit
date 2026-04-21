@@ -139,7 +139,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                         {
                             await RemoveOutbox(dbContext, outboxState, cancellationToken).ConfigureAwait(false);
 
-                            continueProcessing = 0;
+                            // cleanup counts as progress so the outer loop keeps draining delivered outboxes
+                            // without falling through to WaitForDelivery; distinct from a zero-progress send fault.
+                            continueProcessing = 1;
                         }
                         else
                             continueProcessing = await DeliverOutboxMessages(dbContext, outboxState, cancellationToken).ConfigureAwait(false);
@@ -173,9 +175,10 @@ namespace MassTransit.EntityFrameworkCoreIntegration
                         : await Execute().ConfigureAwait(false);
 
                     // executeResult < 0: no outbox found (nothing to do)
-                    // executeResult == 0: outbox locked but no messages delivered (likely send fault or poison message).
-                    //   Break so the outer loop falls through to WaitForDelivery(QueryDelay), rather than re-locking
-                    //   the same outbox immediately and spinning on the same poison message.
+                    // executeResult == 0: pending outbox locked but no messages delivered (send fault or poison
+                    //   message). Break so the outer loop falls through to WaitForDelivery(QueryDelay), rather than
+                    //   re-locking the same outbox immediately and spinning on the same poison message.
+                    // executeResult > 0: progress (messages delivered, or delivered-outbox cleanup). Continue.
                     if (executeResult <= 0)
                         break;
 
