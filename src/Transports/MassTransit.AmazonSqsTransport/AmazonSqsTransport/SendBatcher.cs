@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Text;
 using Amazon.SQS;
 using Amazon.SQS.Model;
 
@@ -26,8 +27,8 @@ public class SendBatcher :
     {
         entry.Id = entryId;
 
-        return entry.MessageBody.Length
-            + entry.MessageAttributes.Where(x => x.Value.DataType == "String").Sum(x => x.Key.Length + x.Value.StringValue.Length);
+        return Encoding.UTF8.GetByteCount(entry.MessageBody)
+            + entry.MessageAttributes.Where(x => x.Value.DataType == "String").Sum(x => Encoding.UTF8.GetByteCount(x.Key) + Encoding.UTF8.GetByteCount(x.Value.StringValue));
     }
 
     protected override async Task SendBatch(IList<BatchEntry<SendMessageBatchRequestEntry>> batch)
