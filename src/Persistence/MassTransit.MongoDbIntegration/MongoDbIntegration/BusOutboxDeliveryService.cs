@@ -66,9 +66,12 @@ namespace MassTransit.MongoDbIntegration
         {
             List<Guid> outboxIds = (await GetOutboxes(_options.QueryMessageLimit, cancellationToken).ConfigureAwait(false)).ToList();
 
-            await Task.WhenAll(outboxIds.Select(outboxId => DeliverOutbox(outboxId, cancellationToken))).ConfigureAwait(false);
+            // Count outboxes that actually made progress (messages sent or delivered-cleanup).
+            // Returning outboxIds.Count would treat a poison outbox as "work done" and keep the outer loop
+            // re-entering without honoring WaitForDelivery(QueryDelay).
+            bool[] results = await Task.WhenAll(outboxIds.Select(outboxId => DeliverOutbox(outboxId, cancellationToken))).ConfigureAwait(false);
 
-            return outboxIds.Count;
+            return results.Count(r => r);
         }
 
         async Task<IEnumerable<Guid>> GetOutboxes(int resultLimit, CancellationToken cancellationToken)
@@ -98,7 +101,7 @@ namespace MassTransit.MongoDbIntegration
             }
         }
 
-        async Task DeliverOutbox(Guid outboxId, CancellationToken cancellationToken)
+        async Task<bool> DeliverOutbox(Guid outboxId, CancellationToken cancellationToken)
         {
             var scope = _provider.CreateAsyncScope();
 
@@ -109,6 +112,8 @@ namespace MassTransit.MongoDbIntegration
 
             FilterDefinitionBuilder<OutboxState> builder = Builders<OutboxState>.Filter;
             FilterDefinition<OutboxState> filter = builder.Eq(x => x.OutboxId, outboxId);
+
+            var madeProgress = false;
 
             try
             {
@@ -144,11 +149,17 @@ namespace MassTransit.MongoDbIntegration
                             {
                                 await RemoveOutbox(messageCollection, stateCollection, outboxState, cancellationToken).ConfigureAwait(false);
 
+                                // cleanup counts as progress so ProcessOutboxes doesn't treat this sweep as idle
+                                madeProgress = true;
                                 continueProcessing = false;
                             }
                             else
                             {
                                 continueProcessing = await DeliverOutboxMessages(messageCollection, outboxState, cancellationToken).ConfigureAwait(false);
+
+                                // continueProcessing reflects sentSequenceNumber > 0 so it doubles as a progress signal
+                                if (continueProcessing)
+                                    madeProgress = true;
 
                                 outboxState.Version++;
 
@@ -194,6 +205,8 @@ namespace MassTransit.MongoDbIntegration
             {
                 await scope.DisposeAsync().ConfigureAwait(false);
             }
+
+            return madeProgress;
         }
 
         static async Task RemoveOutbox(MongoDbCollectionContext<OutboxMessage> messageCollection, MongoDbCollectionContext<OutboxState> stateCollection,
@@ -274,6 +287,17 @@ namespace MassTransit.MongoDbIntegration
 
                         LogContext.Debug?.Log("Outbox Sent: {OutboxId} {SequenceNumber} {MessageId}", message.OutboxId, sentSequenceNumber, message.MessageId);
                     }
+                    catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                    {
+                        throw;
+                    }
+                    catch (OperationCanceledException ex)
+                    {
+                        LogContext.Warning?.Log(ex,
+                            "Outbox Send Timeout after {Timeout}: {OutboxId} {SequenceNumber} {MessageId}",
+                            _options.MessageDeliveryTimeout, message.OutboxId, message.SequenceNumber, message.MessageId);
+                        break;
+                    }
                     catch (Exception ex)
                     {
                         LogContext.Warning?.Log(ex, "Outbox Send Fault: {OutboxId} {SequenceNumber} {MessageId}", message.OutboxId, message.SequenceNumber,
@@ -299,7 +323,7 @@ namespace MassTransit.MongoDbIntegration
                 LogContext.Debug?.Log("Outbox Delivered: {OutboxId} {Delivered}", outboxState.OutboxId, outboxState.Delivered);
             }
 
-            return true;
+            return sentSequenceNumber > 0;
         }
 
         static async Task AbortTransaction(MongoDbContext dbContext)
