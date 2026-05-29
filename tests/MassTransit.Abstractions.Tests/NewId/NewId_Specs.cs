@@ -177,7 +177,7 @@
             for (var i = 0; i < next.Length - 1; i++)
             {
                 Assert.That(next[i].ToString().Substring(0, 4), Is.EqualTo(first.ToString().Substring(0, 4)));
-                Assert.That(next[i].ToString().Substring(6), Is.EqualTo(first.ToString().Substring(6)));
+                Assert.That(next[i].ToString().Substring(6), Is.EqualTo(next[i + 1].ToString().Substring(6)));
                 Assert.That(int.Parse(next[i].ToString().Substring(4, 2)), Is.EqualTo(i));
             }
         }
@@ -193,7 +193,9 @@
 
             for (var i = 0; i < next.Length - 1; i++)
             {
-                Assert.That(next[i].ToString().Substring(0,32), Is.EqualTo(first.ToString().Substring(0,32)));
+                Assert.That(next[i].ToString().Substring(0,14), Is.EqualTo(first.ToString().Substring(0, 14)));
+                Assert.That(next[i].ToString().Substring(19,13), Is.EqualTo(first.ToString().Substring(19, 13)));
+                Assert.That(next[i].ToString().Substring(0,32), Is.EqualTo(next[i+1].ToString().Substring(0,32)));
                 Assert.That(int.Parse(next[i].ToString().Substring(32,2)), Is.EqualTo(i));
             }
         }

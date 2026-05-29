@@ -197,14 +197,14 @@
 
             var ticks = _tickProvider.Ticks;
 
-            var a = _a;
-            var b = _b;
-
             var lockTaken = false;
             _spinLock.Enter(ref lockTaken);
 
             if (ticks > _lastTick)
                 UpdateTimestamp(ticks);
+
+            var a = _a;
+            var b = _b;
 
             var d = (byte)(b >> 8);
             var e = (byte)b;
@@ -272,18 +272,18 @@
 
             var ticks = _tickProvider.Ticks;
 
+            var lockTaken = false;
+            _spinLock.Enter(ref lockTaken);
+
+            if (ticks > _lastTick)
+                UpdateTimestamp(ticks);
+
         #if NET6_0_OR_GREATER
             var v = _b;
         #endif
             var a = _a;
             var b = (short)(_b >> 16);
             var c = (short)_b;
-
-            var lockTaken = false;
-            _spinLock.Enter(ref lockTaken);
-
-            if (ticks > _lastTick)
-                UpdateTimestamp(ticks);
 
             var d = (byte)(_gc >> 8);
             var e = (byte)_gc;
