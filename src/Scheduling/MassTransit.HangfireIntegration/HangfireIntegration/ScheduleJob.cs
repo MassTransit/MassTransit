@@ -73,7 +73,7 @@ namespace MassTransit.HangfireIntegration
             catch (Exception ex)
             {
                 LogContext.Error?.Log(ex, "Failed to send scheduled message: {JobId}, created at: {CreatedAt}, destination: {DestinationAddress}",
-                    performContext.BackgroundJob.Id, messageData.Destination, performContext.BackgroundJob.CreatedAt);
+                    performContext.BackgroundJob.Id, performContext.BackgroundJob.CreatedAt, messageData.Destination);
 
                 throw new JobPerformanceException("Job Execution exception", ex);
             }
