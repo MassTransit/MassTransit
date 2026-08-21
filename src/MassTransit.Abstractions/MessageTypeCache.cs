@@ -5,6 +5,7 @@ namespace MassTransit
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using System.Runtime.CompilerServices;
     using Internals;
     using Metadata;
 
@@ -187,7 +188,7 @@ namespace MassTransit
 
         /// <summary>
         /// Returns true if the specified type is an allowed message type, i.e.
-        /// that it doesn't come from the .Net core assemblies or is without a namespace,
+        /// that it doesn't come from the .Net core assemblies or is compiler generated,
         /// amongst others.
         /// </summary>
         /// <returns>True if the message can be sent, otherwise false</returns>
@@ -204,17 +205,22 @@ namespace MassTransit
                     return false;
                 }
 
-                _invalidMessageTypeReason = $"Messages types must have a valid namespace: {TypeCache<T>.ShortName}";
-                return false;
+                if (type.HasAttribute<CompilerGeneratedAttribute>())
+                {
+                    _invalidMessageTypeReason = $"Message types must not be compiler generated types: {TypeCache<T>.ShortName}";
+                    return false;
+                }
             }
-
-            if (type is { Name: "JsonObject", Namespace: "System.Text.Json.Nodes" })
-                return true;
-
-            if (ns == "System" || ns.StartsWith("System."))
+            else
             {
-                _invalidMessageTypeReason = $"Messages types must not be in the System namespace: {TypeCache<T>.ShortName}";
-                return false;
+                if (type is { Name: "JsonObject", Namespace: "System.Text.Json.Nodes" })
+                    return true;
+
+                if (ns == "System" || ns.StartsWith("System."))
+                {
+                    _invalidMessageTypeReason = $"Messages types must not be in the System namespace: {TypeCache<T>.ShortName}";
+                    return false;
+                }
             }
 
             if (typeof(object).Assembly.Equals(type.Assembly))
