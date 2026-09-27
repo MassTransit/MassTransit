@@ -58,7 +58,6 @@
         public LocatingAnExistingSaga()
         {
             var redis = ConnectionMultiplexer.Connect("127.0.0.1");
-            redis.PreserveAsyncOrder = false;
 
             _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => RedisSagaRepository<SimpleSaga>.Create(_ => redis, () => redis.GetDatabase()));
         }
@@ -118,7 +117,6 @@
         public LocatingAnExistingSagaWithoutOptimism()
         {
             var redis = ConnectionMultiplexer.Connect("127.0.0.1");
-            redis.PreserveAsyncOrder = false;
 
             _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => RedisSagaRepository<SimpleSaga>.Create(_ => redis, () => redis.GetDatabase(), false));
         }
@@ -178,7 +176,6 @@
         public LocatingAnExistingSagaWithKeyPrefix()
         {
             var redis = ConnectionMultiplexer.Connect("127.0.0.1");
-            redis.PreserveAsyncOrder = false;
 
             _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() =>
                 RedisSagaRepository<SimpleSaga>.Create(_ => redis, () => redis.GetDatabase(), keyPrefix: "test"));

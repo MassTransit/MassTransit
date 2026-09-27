@@ -43,26 +43,6 @@ namespace MassTransit.AmazonSqsTransport.Tests
             services.AddOpenTelemetry()
                 .WithTracing(t => t.SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("order-api"))
                     .AddSource(DiagnosticHeaders.DefaultListenerName)
-                    .AddJaegerExporter(o =>
-                    {
-                        o.AgentHost = "localhost";
-                        o.AgentPort = 6831;
-
-                        // Examples for the rest of the options, defaults unless otherwise specified
-                        // Omitting Process Tags example as Resource API is recommended for additional tags
-                        o.MaxPayloadSizeInBytes = 4096;
-
-                        // Using Batch Exporter (which is default)
-                        // The other option is ExportProcessorType.Simple
-                        o.ExportProcessorType = ExportProcessorType.Batch;
-                        o.BatchExportProcessorOptions = new BatchExportProcessorOptions<Activity>
-                        {
-                            MaxQueueSize = 2048,
-                            ScheduledDelayMilliseconds = 5000,
-                            ExporterTimeoutMilliseconds = 30000,
-                            MaxExportBatchSize = 512
-                        };
-                    })
                     .Build());
 
             await using var provider = services

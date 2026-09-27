@@ -389,21 +389,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             services.AddOpenTelemetry()
                 .WithTracing(t => t.SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName))
-                    .AddSource(DiagnosticHeaders.DefaultListenerName)
-                    .AddJaegerExporter(o =>
-                    {
-                        o.AgentHost = "localhost";
-                        o.AgentPort = 6831;
-                        o.MaxPayloadSizeInBytes = 4096;
-                        o.ExportProcessorType = ExportProcessorType.Batch;
-                        o.BatchExportProcessorOptions = new BatchExportProcessorOptions<System.Diagnostics.Activity>
-                        {
-                            MaxQueueSize = 2048,
-                            ScheduledDelayMilliseconds = 5000,
-                            ExporterTimeoutMilliseconds = 30000,
-                            MaxExportBatchSize = 512
-                        };
-                    }));
+                    .AddSource(DiagnosticHeaders.DefaultListenerName));
         }
 
 

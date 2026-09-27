@@ -2,10 +2,12 @@
 {
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text.Json;
     using System.Threading.Tasks;
+    using MongoDB.Bson.IO;
     using MongoDbIntegration.Audit;
-    using Newtonsoft.Json;
     using NUnit.Framework;
+    using Serialization;
     using Testing;
     using static MongoDbAuditStoreFixture;
 
@@ -29,7 +31,8 @@
         [Test]
         public void Message_payload_matches_sent_message()
         {
-            Assert.That(JsonConvert.DeserializeObject<A>(_auditDocument.Message).Data, Is.EqualTo(_sent.Context.Message.Data));
+            Assert.That(JsonSerializer.Deserialize<A>(_auditDocument.Message, SystemTextJsonMessageSerializer.Options).Data,
+                Is.EqualTo(_sent.Context.Message.Data));
         }
 
         [Test]
@@ -91,7 +94,9 @@
         [Test]
         public void Message_payload_matches_sent_message()
         {
-            Assert.That(JsonConvert.DeserializeObject<A>(_auditDocument.Message).Data, Is.EqualTo(_consumed.Context.Message.Data));
+            Assert.That(JsonSerializer.Deserialize<A>(_auditDocument.Message, SystemTextJsonMessageSerializer.Options).Data, Is.EqualTo(_consumed.Context
+                .Message
+                .Data));
         }
 
         [Test]
