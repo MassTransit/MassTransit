@@ -99,8 +99,8 @@
     <PackageVersion Include="OpenTelemetry.Exporter.Jaeger" Version="1.5.1" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.9.0" />
     <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.12.0" />
-    <PackageVersion Include="Quartz" Version="3.18.1" />
-    <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.18.1" />
+    <PackageVersion Include="Quartz" Version="[3.22.0, 4.0)" />
+    <PackageVersion Include="Quartz.Extensions.Hosting" Version="[3.22.0, 4.0)" />
     <PackageVersion Include="QuikGraph" Version="2.5.0" />
     <PackageVersion Include="QuikGraph.Graphviz" Version="2.5.0" />
     <PackageVersion Include="RabbitMQ.Client" Version="7.2.1" />
