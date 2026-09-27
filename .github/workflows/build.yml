@@ -1,6 +1,6 @@
 name: MassTransit
 env:
-  MASSTRANSIT_VERSION: 8.5.10
+  MASSTRANSIT_VERSION: 8.5.11
 on:
   push:
     paths:
