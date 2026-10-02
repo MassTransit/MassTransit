@@ -104,7 +104,7 @@ namespace MassTransit.Courier.Results
             if (Variables?.Any() ?? false)
                 builder.SetVariables(Variables);
 
-            if (_compensationAddress != null && _data is not null && _data.Count > 0)
+            if (_compensationAddress != null && _data is not null)
                 builder.AddCompensateLog(Context.ExecutionId, _compensationAddress, _data);
         }
 
