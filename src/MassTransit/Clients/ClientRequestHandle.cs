@@ -31,6 +31,7 @@ public class ClientRequestHandle<TRequest> :
     readonly TaskCompletionSource<SendContext<TRequest>> _sendContext;
     readonly SendRequestCallback _sendRequestCallback;
     readonly TaskScheduler _taskScheduler;
+    readonly RequestTimeout _timeout;
     int _faultedOrCanceled;
     Timer? _timeoutTimer;
     RequestTimeout _timeToLive;
@@ -43,6 +44,7 @@ public class ClientRequestHandle<TRequest> :
         _cancellationToken = cancellationToken;
 
         var requestTimeout = timeout.HasValue ? timeout : _context.DefaultTimeout.HasValue ? _context.DefaultTimeout.Value : RequestTimeout.Default;
+        _timeout = requestTimeout;
         _timeToLive = requestTimeout;
 
         RequestId = requestId ?? NewId.NextGuid();
@@ -85,7 +87,7 @@ public class ClientRequestHandle<TRequest> :
         if (pipe.IsNotEmpty())
             await pipe.Send(context).ConfigureAwait(false);
 
-        _timeoutTimer = new Timer(TimeoutExpired, this, (long)_timeToLive.Value.TotalMilliseconds, Timeout.Infinite);
+        _timeoutTimer = new Timer(TimeoutExpired, this, (long)_timeout.Value.TotalMilliseconds, Timeout.Infinite);
 
         _sendContext.TrySetResult(context);
     }
