@@ -69,6 +69,8 @@ namespace MassTransit.Courier.Results
 
         protected virtual void Build(RoutingSlipBuilder builder)
         {
+            if (Variables?.Any() ?? false)
+                builder.SetVariables(Variables);
         }
 
         protected virtual RoutingSlipBuilder CreateRoutingSlipBuilder(RoutingSlip routingSlip)
