@@ -38,6 +38,9 @@ namespace MassTransit.RabbitMqTransport
 
             _receiveSettings = channel.GetPayload<ReceiveSettings>();
 
+            _channel.Channel.ChannelShutdownAsync += HandleChannelShutdown;
+            _ = Completed.ContinueWith(_ => _channel.Channel.ChannelShutdownAsync -= HandleChannelShutdown, CancellationToken.None);
+
             TrySetManualConsumeTask();
         }
 
@@ -46,9 +49,6 @@ namespace MassTransit.RabbitMqTransport
             LogContext.Current = _context.LogContext;
 
             LogContext.Debug?.Log("Consumer Ok: {InputAddress} - {ConsumerTag}", _context.InputAddress, consumerTag);
-
-            _channel.Channel.ChannelShutdownAsync += HandleChannelShutdown;
-            _ = Completed.ContinueWith(_ => _channel.Channel.ChannelShutdownAsync -= HandleChannelShutdown, CancellationToken.None);
 
             _consumerTag = consumerTag;
 
@@ -85,6 +85,7 @@ namespace MassTransit.RabbitMqTransport
                 "Consumer Channel Shutdown: {InputAddress} - {ConsumerTag}, Concurrent Peak: {MaxConcurrentDeliveryCount}, {ReplyCode}-{ReplyText}",
                 _context.InputAddress, _consumerTag, ConcurrentDeliveryCount, reason.ReplyCode, reason.ReplyText);
 
+            SetNotReady(new OperationInterruptedException(reason));
             TrySetConsumeCanceled();
 
             return Task.CompletedTask;
@@ -170,6 +171,7 @@ namespace MassTransit.RabbitMqTransport
                 "Channel Shutdown: {InputAddress} - {ConsumerTag}, Concurrent Peak: {MaxConcurrentDeliveryCount}, {ReplyCode}-{ReplyText}",
                 _context.InputAddress, _consumerTag, ConcurrentDeliveryCount, reason.ReplyCode, reason.ReplyText);
 
+            SetNotReady(new OperationInterruptedException(reason));
             TrySetConsumeCanceled();
 
             return Task.CompletedTask;

@@ -61,6 +61,15 @@
                     {
                         throw new RabbitMqConnectionException("BasicPublishAsync failed", exception);
                     }
+                    catch (ObjectDisposedException exception)
+                    {
+                        throw new RabbitMqConnectionException("BasicPublishAsync failed", exception);
+                    }
+                    catch (OperationCanceledException exception) when (_channel.IsClosed || !ConnectionContext.Connection.IsOpen
+                                                                       || !cancellationToken.IsCancellationRequested)
+                    {
+                        throw new RabbitMqConnectionException("BasicPublishAsync failed", exception);
+                    }
                 }
 
                 return awaitAck ? WaitAck() : Task.CompletedTask;

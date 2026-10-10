@@ -46,6 +46,11 @@ public class ConnectionContextFactory :
 
             connectionContext.Connection.ConnectionShutdownAsync += HandleShutdown;
 
+            // A connection can close after CreateConnectionAsync completes but before this continuation subscribes.
+            // The client will not replay its shutdown event, so detect that missed transition explicitly.
+            if (!connectionContext.Connection.IsOpen)
+                _ = HandleShutdown(connectionContext.Connection, connectionContext.Connection.CloseReason);
+
             void RemoveHandler(Task _)
             {
                 try

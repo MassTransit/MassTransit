@@ -43,6 +43,11 @@ public class ChannelContextFactory :
             channelContext.Channel.ChannelShutdownAsync += HandleShutdown;
             channelContext.ConnectionContext.Connection.ConnectionShutdownAsync += HandleShutdown;
 
+            // A channel can close after it is created but before its shutdown handler is subscribed.
+            // Check its state after subscribing so that the supervisor does not retain a dead channel.
+            if (channelContext.Channel.IsClosed)
+                _ = HandleShutdown(channelContext.Channel, channelContext.Channel.CloseReason);
+
             void RemoveHandlers()
             {
                 try
