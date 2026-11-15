@@ -68,10 +68,17 @@ namespace MassTransit.Transports
             {
                 try
                 {
-                    var lockContext = _lockContext.Value;
+                    Lock lockContext;
 
-                    if (clearLockContext)
-                        _lockContext = null;
+                    // under the lock held by Cancel, so Cancel never reads a partially cleared lock context or cancels a receive
+                    // context after its lock was released (the transport may have disposed of it by then)
+                    lock (this)
+                    {
+                        lockContext = _lockContext.Value;
+
+                        if (clearLockContext)
+                            _lockContext = null;
+                    }
 
                     await action(lockContext.ReceiveLockContext).ConfigureAwait(false);
 
